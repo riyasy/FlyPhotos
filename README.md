@@ -5,7 +5,7 @@ Fly Photos is one of the fastest photoviewer for Windows. It tries to mimic many
 
 ![](https://github.com/riyasy/FlyPhotos/blob/main/Misc/ImagesForDocumentation/03FullScreen.png?raw=true)
 
-###Features
+### Features
 1. **Full Screen mode with transparent background like in Picasa Photo Viewer.**
 2. Fast startup even for raw files with image size greater than 100 MB.
 3. Full Screen exit on pressing anywhere outside the image.
@@ -18,12 +18,12 @@ Fly Photos is one of the fastest photoviewer for Windows. It tries to mimic many
 10. Rounded image borders.
 11. Cache size - Tries to cache 300 low quality previews in both direction. Tries to cache 2 HQ previews in both direction. This figure can be made editable in future versions.
 
-###Limitations
+### Limitations
 1. Has a max path length limit of 256 characters. If image is present in a path with more than 256 characters, the nearby images will not be listed. Will be fixed in later revisions.
 2. Supports image formats supported by Windows Imaging Component only. For Windows 11, the format list is exhaustive. (Same as formats which can be opened by Windows Photos App). For Windows 7, this list of formats is small. But if any WIC compliant codec is already installed in the PC, then Fly can automatically detect and load the photo. Check *Settings>Show Codecs* button to know the detected OS supported formats.
 
 
-###Installation
+### Installation
 Currently only 64 bit versions of Windows 7, 8, 10 and 11 are supported. There are two installers for each release.
 
 1. *FlyInstaller_IncludingDotNetRuntime_version_x64*  - .Net runtime is also inlcuded with installer and is installed in the application folder.  App has no other dependencies and can be directly run after installation.(size around 76 MB)
