@@ -24,7 +24,7 @@ Fly Photos is one of the fastest photoviewer for Windows. It tries to mimic many
 
 
 ### Installation
-Currently only 64 bit versions of Windows 7, 8, 10 and 11 are supported. There are two installers for each release.
+Currently only 64 bit versions of Windows 7, 8, 10 and 11 are supported. There are two installers. Choose based on your preference. 
 
 1. *FlyInstaller_IncludingDotNetRuntime_version_x64*  - .Net runtime is also inlcuded with installer and is installed in the application folder.  App has no other dependencies and can be directly run after installation.(size around 76 MB)
 2. *FlyInstaller_version_x64.msi*  - Bare installer without .Net Runtime. If .Net Runtime is already installed on your machine OR if you wish to use the latest installer from Microsoft, please use the bare installer which is small in size (<10 MB). In this case, if the App is started in a PC without .Net runtime, an error box comes like this. The .Net runtime can be installed from the error box itself.
