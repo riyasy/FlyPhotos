@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<ApplicationIcon>Resources\app-icon.ico</ApplicationIcon>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Remove="PhotoDisplayWindow" />
+		<None Remove="Resources\FileNotFound.png" />
+		<None Remove="Resources\HQImageFailed.png" />
+		<None Remove="Resources\Loading.png" />
+		<None Remove="Resources\app-icon.ico" />
+		<None Remove="Resources\PreviewFailed.png" />
+		<None Remove="Resources\Segoe Fluent Icons.ttf" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="LibHeif.Native.win-x64" Version="1.15.1" />
+		<PackageReference Include="LibHeifSharp" Version="3.1.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
+		<PackageReference Include="NLog.Extensions.Logging" Version="5.3.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\CLIWrapper\CLIWrapper.vcxproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="NLog.config">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Resource Include="Resources\FileNotFound.png" />
+		<Resource Include="Resources\HQImageFailed.png" />
+		<Resource Include="Resources\Loading.png" />
+		<Resource Include="Resources\app-icon.ico" />
+		<Resource Include="Resources\PreviewFailed.png" />
+		<Resource Include="Resources\Segoe Fluent Icons.ttf" />
+	</ItemGroup>
+
+</Project>

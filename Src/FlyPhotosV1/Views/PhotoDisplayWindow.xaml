@@ -1,0 +1,250 @@
+﻿<Window
+    x:Class="FlyPhotos.Views.PhotoDisplayWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:FlyPhotos.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Fly - Photos"
+    Width="800"
+    Height="450"
+    MinWidth="400"
+    MinHeight="400"
+    AllowsTransparency="True"
+    Background="{StaticResource TransparentBgBrush}"
+    StateChanged="MainWindowStateChangeRaised"
+    WindowState="Maximized"
+    WindowStyle="None"
+    mc:Ignorable="d">
+    <Window.Resources />
+    <!--  Add the WindowChrome object  -->
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="34" />
+    </WindowChrome.WindowChrome>
+    <!--  Title bar button commands  -->
+    <Window.CommandBindings>
+        <CommandBinding
+            CanExecute="CommandBinding_CanExecute"
+            Command="{x:Static SystemCommands.CloseWindowCommand}"
+            Executed="CommandBinding_Executed_Close" />
+        <CommandBinding
+            CanExecute="CommandBinding_CanExecute"
+            Command="{x:Static SystemCommands.MaximizeWindowCommand}"
+            Executed="CommandBinding_Executed_Maximize" />
+        <CommandBinding
+            CanExecute="CommandBinding_CanExecute"
+            Command="{x:Static SystemCommands.MinimizeWindowCommand}"
+            Executed="CommandBinding_Executed_Minimize" />
+        <CommandBinding
+            CanExecute="CommandBinding_CanExecute"
+            Command="{x:Static SystemCommands.RestoreWindowCommand}"
+            Executed="CommandBinding_Executed_Restore" />
+    </Window.CommandBindings>
+    <Border
+        x:Name="MainWindowBorder"
+        BorderBrush="Transparent"
+        BorderThickness="8">
+        <Grid x:Name="ParentContainer">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <!--  App content  -->
+            <Grid Grid.Row="1">
+                <controls:ZoomBorder x:Name="Zoomster" ClipToBounds="True">
+                    <controls:ZoomBorder.Background>
+                        <SolidColorBrush Opacity="0" Color="Black" />
+                    </controls:ZoomBorder.Background>
+                    <Border BorderBrush="Transparent" BorderThickness="0">
+                        <Image x:Name="ImgDsp" RenderOptions.BitmapScalingMode="HighQuality">
+                            <Image.OpacityMask>
+                                <VisualBrush>
+                                    <VisualBrush.Visual>
+                                        <Border
+                                            Width="{Binding ElementName=ImgDsp, Path=ActualWidth}"
+                                            Height="{Binding ElementName=ImgDsp, Path=ActualHeight}"
+                                            Background="White"
+                                            CornerRadius="15" />
+                                    </VisualBrush.Visual>
+                                </VisualBrush>
+                            </Image.OpacityMask>
+                        </Image>
+                    </Border>
+                </controls:ZoomBorder>
+                <TextBlock
+                    x:Name="TxtFileName"
+                    Width="Auto"
+                    Height="Auto"
+                    Margin="0,0,0,20"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    FontSize="18"
+                    Foreground="White"
+                    Style="{StaticResource SemiTransparentControlStyle}">
+                    <TextBlock.Effect>
+                        <DropShadowEffect
+                            BlurRadius="0.0"
+                            Direction="135"
+                            Opacity="1"
+                            ShadowDepth="2"
+                            Color="Black" />
+                    </TextBlock.Effect>
+                </TextBlock>
+
+                <StackPanel
+                    Width="Auto"
+                    Height="Auto"
+                    Margin="0,0,0,50"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Orientation="Horizontal">
+
+                    <RepeatButton
+                        x:Name="ButtonBack"
+                        Width="25"
+                        Click="ButtonBack_Click"
+                        Content="&#xE96f;"
+                        Focusable="False"
+                        FontFamily="{StaticResource FluentIcons}"
+                        FontSize="16"
+                        PreviewMouseUp="ButtonBack_OnPreviewMouseUp"
+                        Style="{StaticResource SemiTransparentControlStyle}"
+                        ToolTip="Back" />
+                    <Button
+                        x:Name="ButtonRotate"
+                        Width="25"
+                        Click="ButtonRotate_Click"
+                        Content="&#xE89E;"
+                        Focusable="False"
+                        FontFamily="{StaticResource FluentIcons}"
+                        FontSize="16"
+                        Style="{StaticResource SemiTransparentControlStyle}"
+                        ToolTip="Rotate" />
+                    <RepeatButton
+                        x:Name="ButtonNext"
+                        Width="25"
+                        Margin="0,0,10,0"
+                        Click="ButtonNext_Click"
+                        Content="&#xE970;"
+                        Focusable="False"
+                        FontFamily="{StaticResource FluentIcons}"
+                        FontSize="16"
+                        PreviewMouseUp="ButtonNext_OnPreviewMouseUp"
+                        Style="{StaticResource SemiTransparentControlStyle}"
+                        ToolTip="Next" />
+                    <Button
+                        x:Name="ButtonHelp"
+                        Width="30"
+                        Click="ButtonHelp_Click"
+                        Content="🆘"
+                        Focusable="False"
+                        FontSize="16"
+                        Style="{StaticResource SemiTransparentControlStyle}"
+                        ToolTip="Help" />
+                    <Button
+                        x:Name="ButtonSettings"
+                        Width="25"
+                        Click="ButtonSettings_Click"
+                        Content="&#xE713;"
+                        Focusable="False"
+                        FontFamily="{StaticResource FluentIcons}"
+                        FontSize="16"
+                        Style="{StaticResource SemiTransparentControlStyle}"
+                        ToolTip="Settings" />
+                    <Button
+                        x:Name="ButtonCoffee"
+                        Width="25"
+                        Click="ButtonCoffee_Click"
+                        Content="&#xEC32;"
+                        Focusable="False"
+                        FontFamily="{StaticResource FluentIcons}"
+                        FontSize="16"
+                        Style="{StaticResource SemiTransparentControlStyle}"
+                        ToolTip="Buy a coffee"
+                        Visibility="Collapsed" />
+                    <Expander
+                        Width="Auto"
+                        Height="Auto"
+                        Margin="10,0,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalContentAlignment="Center"
+                        ExpandDirection="Right"
+                        Focusable="False"
+                        IsExpanded="False"
+                        Style="{StaticResource SemiTransparentControlStyle}"
+                        ToolTip="Show Cache status">
+                        <TextBlock
+                            x:Name="CacheStatusProgress"
+                            Width="Auto"
+                            Margin="5,0,0,0"
+                            FontSize="14"
+                            Foreground="White">
+                            <TextBlock.Effect>
+                                <DropShadowEffect
+                                    BlurRadius="0.0"
+                                    Direction="135"
+                                    Opacity="1"
+                                    ShadowDepth="2"
+                                    Color="Black" />
+                            </TextBlock.Effect>
+                        </TextBlock>
+                    </Expander>
+                </StackPanel>
+            </Grid>
+            <!--  Window chrome  -->
+            <Grid
+                x:Name="ControlButtonGrid"
+                Grid.Row="0"
+                Height="30"
+                Background="#F2F3F8"
+                Visibility="Collapsed">
+                <StackPanel
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal">
+                    <!--  App icon  -->
+                    <Image
+                        Width="18"
+                        Margin="10,2,2,2"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Source="pack://application:,,,/Resources/app-icon.ico" />
+                    <TextBlock
+                        Margin="4,3,0,0"
+                        FontFamily="Cascadia Code"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Text="{Binding Title, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" />
+                </StackPanel>
+
+                <!--  Caption buttons  -->
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                    <Button
+                        Command="{x:Static SystemCommands.MinimizeWindowCommand}"
+                        Style="{StaticResource MinimizeButtonStyle}"
+                        ToolTip="Minimize"
+                        WindowChrome.IsHitTestVisibleInChrome="True" />
+                    <Button
+                        x:Name="RestoreButton"
+                        Command="{x:Static SystemCommands.RestoreWindowCommand}"
+                        Style="{StaticResource RestoreButtonStyle}"
+                        ToolTip="Restore"
+                        Visibility="Collapsed"
+                        WindowChrome.IsHitTestVisibleInChrome="True" />
+                    <Button
+                        x:Name="MaximizeButton"
+                        Command="{x:Static SystemCommands.MaximizeWindowCommand}"
+                        Style="{StaticResource MaximizeButtonStyle}"
+                        ToolTip="Maximize"
+                        Visibility="Visible"
+                        WindowChrome.IsHitTestVisibleInChrome="True" />
+                    <Button
+                        Command="{x:Static SystemCommands.CloseWindowCommand}"
+                        Style="{StaticResource CloseButtonStyle}"
+                        ToolTip="Close"
+                        WindowChrome.IsHitTestVisibleInChrome="True" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

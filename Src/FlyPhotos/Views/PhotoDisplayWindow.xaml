@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Window
+    x:Class="FlyPhotos.Views.PhotoDisplayWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:win2d="using:Microsoft.Graphics.Canvas.UI.Xaml"
+    mc:Ignorable="d">
+
+    <Grid
+        x:Name="MainLayout"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch">
+        <Grid
+            x:Name="AppTitlebar"
+            Height="28"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Background="Transparent">
+            <Rectangle
+                x:Name="TitlebarBackground"
+                Fill="{ThemeResource SystemControlBackgroundAltHighBrush}"
+                Opacity="0" />
+        </Grid>
+        <Image x:Name="ImgDspBg" Stretch="None" />
+        <Rectangle x:Name="DarkBg" Fill="#AA000000" />
+        <win2d:CanvasControl x:Name="D2dCanvas" />
+        <TextBlock
+            x:Name="TxtFileName"
+            Width="Auto"
+            Height="Auto"
+            Margin="0,0,0,20"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            FontSize="12"
+            Foreground="White" />
+        <StackPanel
+            Width="Auto"
+            Height="Auto"
+            Margin="0,0,0,50"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Orientation="Horizontal">
+            <RepeatButton
+                x:Name="ButtonBack"
+                Width="Auto"
+                Click="ButtonBack_OnClick"
+                Content="&#xE96f;"
+                FontFamily="{StaticResource FluentIcons}"
+                FontSize="16">
+                <ToolTipService.ToolTip>
+                    <ToolTip
+                        AutomationProperties.FullDescription="Non-occluding tooltip"
+                        Content="Back"
+                        Placement="Right" />
+                </ToolTipService.ToolTip>
+            </RepeatButton>
+            <RepeatButton
+                x:Name="ButtonRotate"
+                Width="Auto"
+                Click="ButtonRotate_OnClick"
+                Content="&#xE89E;"
+                FontFamily="{StaticResource FluentIcons}"
+                FontSize="16">
+                <ToolTipService.ToolTip>
+                    <ToolTip
+                        AutomationProperties.FullDescription="Non-occluding tooltip"
+                        Content="Rotate"
+                        Placement="Right" />
+                </ToolTipService.ToolTip>
+            </RepeatButton>
+            <RepeatButton
+                x:Name="ButtonNext"
+                Width="Auto"
+                Margin="0,0,10,0"
+                Click="ButtonNext_OnClick"
+                Content="&#xE970;"
+                FontFamily="{StaticResource FluentIcons}"
+                FontSize="16">
+                <ToolTipService.ToolTip>
+                    <ToolTip
+                        AutomationProperties.FullDescription="Non-occluding tooltip"
+                        Content="Next"
+                        Placement="Right" />
+                </ToolTipService.ToolTip>
+            </RepeatButton>
+            <Button
+                x:Name="ButtonHelp"
+                Width="Auto"
+                Click="ButtonHelp_OnClick"
+                Content="🆘"
+                FontSize="16"
+                Visibility="Collapsed">
+                <ToolTipService.ToolTip>
+                    <ToolTip
+                        AutomationProperties.FullDescription="Non-occluding tooltip"
+                        Content="Help"
+                        Placement="Right" />
+                </ToolTipService.ToolTip>
+            </Button>
+            <Button
+                x:Name="ButtonSettings"
+                Width="Auto"
+                Click="ButtonSettings_OnClick"
+                Content="&#xE713;"
+                FontFamily="{StaticResource FluentIcons}"
+                FontSize="16">
+                <ToolTipService.ToolTip>
+                    <ToolTip
+                        AutomationProperties.FullDescription="Non-occluding tooltip"
+                        Content="Settings"
+                        Placement="Right" />
+                </ToolTipService.ToolTip>
+            </Button>
+            <Button
+                x:Name="ButtonScaleSet"
+                Width="Auto"
+                Click="ButtonScaleSet_Click"
+                Content="&#xE73F;"
+                FontFamily="{StaticResource FluentIcons}"
+                FontSize="16">
+                <ToolTipService.ToolTip>
+                    <ToolTip
+                        AutomationProperties.FullDescription="Non-occluding tooltip"
+                        Content="Fit"
+                        Placement="Right" />
+                </ToolTipService.ToolTip>
+            </Button>
+            <Button
+                x:Name="ButtonCoffee"
+                Width="Auto"
+                Click="ButtonCoffee_OnClick"
+                Content="&#xEC32;"
+                FontFamily="{StaticResource FluentIcons}"
+                FontSize="16"
+                Visibility="Collapsed">
+                <ToolTipService.ToolTip>
+                    <ToolTip
+                        AutomationProperties.FullDescription="Non-occluding tooltip"
+                        Content="Buy a coffee"
+                        Placement="Right" />
+                </ToolTipService.ToolTip>
+            </Button>
+            <Button
+                x:Name="ButtonTheme"
+                Width="Auto"
+                Click="ButtonCoffee_OnClick"
+                Content="&#xf354;"
+                FontFamily="{StaticResource FluentIcons}"
+                FontSize="16">
+                <Button.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem
+                            Click="MenuFlyoutItem_Click"
+                            Tag="rating"
+                            Text="Transparent" />
+                        <MenuFlyoutItem
+                            Click="MenuFlyoutItem_Click"
+                            Tag="match"
+                            Text="Acrylic" />
+                        <MenuFlyoutItem
+                            Click="MenuFlyoutItem_Click"
+                            Tag="distance"
+                            Text="Mica" />
+                        <MenuFlyoutItem
+                            Click="MenuFlyoutItem_Click"
+                            Tag="distance"
+                            Text="Mica Alt" />
+                    </MenuFlyout>
+                </Button.Flyout>
+
+                <ToolTipService.ToolTip>
+                    <ToolTip
+                        AutomationProperties.FullDescription="Non-occluding tooltip"
+                        Content="Select Theme"
+                        Placement="Right" />
+                </ToolTipService.ToolTip>
+            </Button>
+            <Button
+                x:Name="ButtonExpander"
+                Width="Auto"
+                Click="ButtonExpander_Click">
+                <ToolTipService.ToolTip>
+                    <ToolTip
+                        AutomationProperties.FullDescription="Non-occluding tooltip"
+                        Content="View Cache Status"
+                        Placement="Right" />
+                </ToolTipService.ToolTip>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        x:Name="IconExpander"
+                        Width="Auto"
+                        Margin="3,0,0,0"
+                        FontFamily="{StaticResource FluentIcons}"
+                        FontSize="16"
+                        Text="&#xE761;" />
+                    <TextBlock
+                        x:Name="CacheStatusProgress"
+                        Width="Auto"
+                        Margin="10,0,0,0"
+                        FontSize="12"
+                        Visibility="Collapsed" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>
