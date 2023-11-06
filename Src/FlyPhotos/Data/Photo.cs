@@ -1,5 +1,4 @@
 ﻿using Microsoft.Graphics.Canvas;
-using System.IO;
 using Windows.Graphics.Imaging;
 
 namespace FlyPhotos.Data;
@@ -8,7 +7,7 @@ internal class Photo
 {
     public CanvasBitmap Bitmap { get; set; }
     public SoftwareBitmap SoftwareBitmap { get; set; }
-    public int Rotation { get; set; }    
+    public int Rotation { get; set; }
 
     public Photo(CanvasBitmap bitmap)
     {

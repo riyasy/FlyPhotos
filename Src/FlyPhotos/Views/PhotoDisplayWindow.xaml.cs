@@ -36,6 +36,7 @@ public sealed partial class PhotoDisplayWindow
         Mica,
         MicaAlt
     }
+
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     private readonly Win2dCanvasController _canvasController;
@@ -73,11 +74,9 @@ public sealed partial class PhotoDisplayWindow
         _repeatButtonReleaseCheckTimer.Tick += RepeatButtonReleaseCheckTimer_Tick;
 
         var overLappedPresenter = _appWindow.Presenter as OverlappedPresenter;
-        if (overLappedPresenter != null)
-        {
-            overLappedPresenter.Maximize();
-            overLappedPresenter.SetBorderAndTitleBar(false, false);
-        }
+        if (overLappedPresenter == null) return;
+        overLappedPresenter.Maximize();
+        overLappedPresenter.SetBorderAndTitleBar(false, false);
     }
 
     public void UpdateStatus(string currentFileName, string currentCacheStatus)
@@ -89,37 +88,33 @@ public sealed partial class PhotoDisplayWindow
     private void AppWindow_Changed(AppWindow sender, AppWindowChangedEventArgs args)
     {
         if (_screenResizingInProgress) return;
-        if (args.DidSizeChange)
+        if (!args.DidSizeChange) return;
+        var overLappedPresenter = _appWindow.Presenter as OverlappedPresenter;
+        if (!_currentlyFullScreen && overLappedPresenter != null &&
+            overLappedPresenter.State == OverlappedPresenterState.Maximized)
         {
-            var overLappedPresenter = _appWindow.Presenter as OverlappedPresenter;
-            if (!_currentlyFullScreen && overLappedPresenter != null &&
-                overLappedPresenter.State == OverlappedPresenterState.Maximized)
-            {
-                _screenResizingInProgress = true;
-                overLappedPresenter.SetBorderAndTitleBar(false, false);
-                _currentlyFullScreen = true;
-                _screenResizingInProgress = false;
-            }
+            _screenResizingInProgress = true;
+            overLappedPresenter.SetBorderAndTitleBar(false, false);
+            _currentlyFullScreen = true;
+            _screenResizingInProgress = false;
         }
     }
 
     private void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
         if (_screenResizingInProgress) return;
-        if (!_canvasController.IsPressedOnImage(e.GetCurrentPoint(D2dCanvas).Position))
-            if (_currentlyFullScreen)
-            {
-                _screenResizingInProgress = true;
-                var overLappedPresenter = _appWindow.Presenter as OverlappedPresenter;
-                if (overLappedPresenter != null)
-                {
-                    overLappedPresenter.SetBorderAndTitleBar(true, true);
-                    overLappedPresenter.Restore();
-                }
+        if (_canvasController.IsPressedOnImage(e.GetCurrentPoint(D2dCanvas).Position)) return;
+        if (!_currentlyFullScreen) return;
+        _screenResizingInProgress = true;
+        var overLappedPresenter = _appWindow.Presenter as OverlappedPresenter;
+        if (overLappedPresenter != null)
+        {
+            overLappedPresenter.SetBorderAndTitleBar(true, true);
+            overLappedPresenter.Restore();
+        }
 
-                _currentlyFullScreen = false;
-                _screenResizingInProgress = false;
-            }
+        _currentlyFullScreen = false;
+        _screenResizingInProgress = false;
     }
 
     private void SetupRealTransparency()
@@ -151,7 +146,7 @@ public sealed partial class PhotoDisplayWindow
         return AppWindow.GetFromWindowId(myWndId);
     }
 
-    private IntPtr WndProc(HWND hWnd, uint uMsg, IntPtr wParam, IntPtr lParam, nuint uIdSubclass,
+    private static IntPtr WndProc(HWND hWnd, uint uMsg, IntPtr wParam, IntPtr lParam, nuint uIdSubclass,
         IntPtr dwRefData)
     {
         if (uMsg == (uint)WindowMessage.WM_ERASEBKGND)
@@ -181,9 +176,9 @@ public sealed partial class PhotoDisplayWindow
 
     private void SetUnpackagedAppIcon()
     {
-        IntPtr hWnd = WindowNative.GetWindowHandle(this);
-        string sExe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
-        System.Drawing.Icon ico = System.Drawing.Icon.ExtractAssociatedIcon(sExe);
+        var hWnd = WindowNative.GetWindowHandle(this);
+        var sExe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+        var ico = System.Drawing.Icon.ExtractAssociatedIcon(sExe);
         SendMessage(hWnd, WindowMessage.WM_SETICON, 1, ico.Handle);
     }
 
@@ -279,57 +274,48 @@ public sealed partial class PhotoDisplayWindow
         switch (flyOut.Text)
         {
             case "Transparent":
-                {
-                    _currentWindowStyle = WindowStyle.Transparent;
-                    break;
-                }
+            {
+                _currentWindowStyle = WindowStyle.Transparent;
+                break;
+            }
             case "Acrylic":
-                {
-                    _currentWindowStyle = WindowStyle.Acrylic;
-                    TrySetDesktopAcrylicBackdrop();
-                    break;
-                }
+            {
+                _currentWindowStyle = WindowStyle.Acrylic;
+                TrySetDesktopAcrylicBackdrop();
+                break;
+            }
             case "Mica":
-                {
-                    _currentWindowStyle = WindowStyle.Mica;
-                    TrySetMicaBackdrop(false);
-                    break;
-                }
+            {
+                _currentWindowStyle = WindowStyle.Mica;
+                TrySetMicaBackdrop(false);
+                break;
+            }
             case "Mica Alt":
-                {
-                    _currentWindowStyle = WindowStyle.MicaAlt;
-                    TrySetMicaBackdrop(true);
-                    break;
-                }
+            {
+                _currentWindowStyle = WindowStyle.MicaAlt;
+                TrySetMicaBackdrop(true);
+                break;
+            }
         }
     }
 
-    bool TrySetMicaBackdrop(bool useMicaAlt)
+    private bool TrySetMicaBackdrop(bool useMicaAlt)
     {
-        if (MicaController.IsSupported())
+        if (!MicaController.IsSupported()) return false; // Mica is not supported on this system.
+        MicaBackdrop micaBackdrop = new()
         {
-            MicaBackdrop micaBackdrop = new()
-            {
-                Kind = useMicaAlt ? MicaKind.BaseAlt : MicaKind.Base
-            };
-            this.SystemBackdrop = micaBackdrop;
-
-            return true; // Succeeded.
-        }
-
-        return false; // Mica is not supported on this system.
+            Kind = useMicaAlt ? MicaKind.BaseAlt : MicaKind.Base
+        };
+        SystemBackdrop = micaBackdrop;
+        return true; // Succeeded.
     }
 
     private bool TrySetDesktopAcrylicBackdrop()
     {
-        if (DesktopAcrylicController.IsSupported())
-        {
-            var desktopAcrylicBackdrop = new DesktopAcrylicBackdrop();
-            SystemBackdrop = desktopAcrylicBackdrop;
-            return true; // Succeeded.
-        }
-
-        return false; // DesktopAcrylic is not supported on this system.
+        if (!DesktopAcrylicController.IsSupported()) return false; // DesktopAcrylic is not supported on this system.
+        var desktopAcrylicBackdrop = new DesktopAcrylicBackdrop();
+        SystemBackdrop = desktopAcrylicBackdrop;
+        return true; // Succeeded.
     }
 
     private void ButtonExpander_Click(object sender, RoutedEventArgs e)

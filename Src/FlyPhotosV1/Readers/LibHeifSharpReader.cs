@@ -1,13 +1,13 @@
-﻿using FlyPhotos.Data;
-using LibHeifSharp;
-using NLog;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using FlyPhotosV1.Data;
+using LibHeifSharp;
+using NLog;
 
-namespace FlyPhotos.Readers;
+namespace FlyPhotosV1.Readers;
 
 internal class LibHeifSharpReader
 {

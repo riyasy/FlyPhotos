@@ -1,7 +1,4 @@
-﻿using FlyPhotos.Data;
-using FlyPhotos.Utils;
-using NLog;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -11,8 +8,11 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using FlyPhotosV1.Data;
+using FlyPhotosV1.Utils;
+using NLog;
 
-namespace FlyPhotos.Readers;
+namespace FlyPhotosV1.Readers;
 
 internal class WpfWicReader
 {

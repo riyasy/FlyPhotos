@@ -1,12 +1,12 @@
-﻿using FlyPhotos.Data;
-using FlyPhotos.Readers;
-using NLog;
-using System;
+﻿using System;
 using System.IO;
 using System.Windows.Media.Imaging;
+using FlyPhotosV1.Data;
+using FlyPhotosV1.Readers;
+using NLog;
 using Path = System.IO.Path;
 
-namespace FlyPhotos.Utils;
+namespace FlyPhotosV1.Utils;
 
 internal class ImageUtil
 {

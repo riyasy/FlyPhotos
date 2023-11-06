@@ -1,10 +1,10 @@
-﻿using FlyPhotos.Utils;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using FlyPhotosV1.Utils;
 
-namespace FlyPhotos.Views;
+namespace FlyPhotosV1.Views;
 
 /// <summary>
 /// Interaction logic for ConfigurationWindow.xaml

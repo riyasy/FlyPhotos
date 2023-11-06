@@ -1,8 +1,9 @@
-﻿using System;
+﻿using LibHeifSharp;
+using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace FlyPhotos.Readers;
+namespace FlyPhotosV1.Readers;
 
 internal static class LibHeifSharpDllImportResolver
 {
@@ -16,28 +17,21 @@ internal static class LibHeifSharpDllImportResolver
     {
         // The runtime will execute the specified callback when it needs to resolve a native library
         // import for the LibHeifSharp assembly.
-        NativeLibrary.SetDllImportResolver(typeof(LibHeifSharp.LibHeifInfo).Assembly, Resolver);
+        NativeLibrary.SetDllImportResolver(typeof(LibHeifInfo).Assembly, Resolver);
     }
 
     private static IntPtr Resolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
     {
         // We only care about a native library named libheif, the runtime will use
         // its default behavior for any other native library.
-        if (string.Equals(libraryName, "libheif", StringComparison.Ordinal))
-        {
-            // Because the DllImportResolver will be called multiple times we load libheif once
-            // and cache the module handle for future requests.
-            if (_firstRequestForLibHeif)
-            {
-                _firstRequestForLibHeif = false;
-                _cachedLibHeifModule = LoadNativeLibrary(libraryName, assembly, searchPath);
-            }
-
-            return _cachedLibHeifModule;
-        }
-
+        if (!string.Equals(libraryName, "libheif", StringComparison.Ordinal)) return IntPtr.Zero;
+        // Because the DllImportResolver will be called multiple times we load libheif once
+        // and cache the module handle for future requests.
+        if (!_firstRequestForLibHeif) return _cachedLibHeifModule;
+        _firstRequestForLibHeif = false;
+        _cachedLibHeifModule = LoadNativeLibrary(libraryName, assembly, searchPath);
+        return _cachedLibHeifModule;
         // Fall back to default import resolver.
-        return IntPtr.Zero;
     }
 
     private static nint LoadNativeLibrary(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
@@ -53,16 +47,15 @@ internal static class LibHeifSharpDllImportResolver
             {
                 if (NativeLibrary.TryLoad("heif.dll", assembly, searchPath, out var handle))
                     return handle;
-                else
-                    throw;
+                throw;
             }
         //else if (OperatingSystem.IsIOS() || OperatingSystem.IsTvOS() || OperatingSystem.IsWatchOS())
         //{
         //    // The Apple mobile/embedded platforms statically link libheif into the AOT compiled main program binary.
         //    return NativeLibrary.GetMainProgramHandle();
         //}
-        else
-            // Use the default runtime behavior for all other platforms.
-            return NativeLibrary.Load(libraryName, assembly, searchPath);
+
+        // Use the default runtime behavior for all other platforms.
+        return NativeLibrary.Load(libraryName, assembly, searchPath);
     }
 }

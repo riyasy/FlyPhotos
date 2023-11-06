@@ -70,16 +70,11 @@ internal class Win2dCanvasController
         {
             DestroyOffScreen();
             var firstPhoto = _currentPhoto == null;
-            if (_currentPhoto != null && _currentPhoto.SoftwareBitmap != null)
-            {
-                _currentPhoto.Bitmap = null;
-            }
+            if (_currentPhoto != null && _currentPhoto.SoftwareBitmap != null) _currentPhoto.Bitmap = null;
             _currentPhoto = value;
             if (_currentPhoto.SoftwareBitmap != null)
-            {
                 _currentPhoto.Bitmap = CanvasBitmap.CreateFromSoftwareBitmap(_d2dCanvas, _currentPhoto.SoftwareBitmap);
-            }
-            var vertical = _currentPhoto.Rotation == 270 || _currentPhoto.Rotation == 90;
+            var vertical = _currentPhoto.Rotation is 270 or 90;
             var horScale = _mainLayout.ActualWidth /
                            (vertical ? _currentPhoto.Bitmap.Bounds.Height : _currentPhoto.Bitmap.Bounds.Width);
             var vertScale = _mainLayout.ActualHeight /
@@ -104,17 +99,15 @@ internal class Win2dCanvasController
 
     public void SetHundredPercent()
     {
-        if (_currentPhoto.Bitmap != null)
-        {
-            _scale = 1f;
-            _lastScaleTo = 1f;
-            _imagePos.X = _mainLayout.ActualWidth / 2;
-            _imagePos.Y = _mainLayout.ActualHeight / 2;
-            _offScreenDrawTimer.Stop();
-            _offScreenDrawTimer.Start();
-            UpdateTransform();
-            _d2dCanvas.Invalidate();
-        }
+        if (_currentPhoto.Bitmap == null) return;
+        _scale = 1f;
+        _lastScaleTo = 1f;
+        _imagePos.X = _mainLayout.ActualWidth / 2;
+        _imagePos.Y = _mainLayout.ActualHeight / 2;
+        _offScreenDrawTimer.Stop();
+        _offScreenDrawTimer.Start();
+        UpdateTransform();
+        _d2dCanvas.Invalidate();
     }
 
     private void OffScreenDrawTimer_Tick(object sender, object e)
@@ -128,11 +121,9 @@ internal class Win2dCanvasController
     private void D2dCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
         _lastPoint = e.GetCurrentPoint(_d2dCanvas).Position;
-        if (IsPressedOnImage(_lastPoint))
-        {
-            _d2dCanvas.CapturePointer(e.Pointer);
-            _isDragging = true;
-        }
+        if (!IsPressedOnImage(_lastPoint)) return;
+        _d2dCanvas.CapturePointer(e.Pointer);
+        _isDragging = true;
     }
 
     private void CreateOffScreen()
@@ -155,11 +146,9 @@ internal class Win2dCanvasController
 
     private void DestroyOffScreen()
     {
-        if (_offscreen != null)
-        {
-            _offscreen.Dispose();
-            _offscreen = null;
-        }
+        if (_offscreen == null) return;
+        _offscreen.Dispose();
+        _offscreen = null;
     }
 
     private void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
@@ -177,6 +166,7 @@ internal class Win2dCanvasController
             UpdateTransform();
             _d2dCanvas.Invalidate();
         }
+
         _lastPoint = e.GetCurrentPoint(_d2dCanvas).Position;
     }
 
@@ -188,7 +178,7 @@ internal class Win2dCanvasController
 
         var scaleTo = _lastScaleTo * scalePercentage;
 
-        if (scaleTo < 0.05) { return; }
+        if (scaleTo < 0.05) return;
 
         _lastScaleTo = scaleTo;
         var adjustedScalePercentage = scaleTo / _scale;
@@ -208,17 +198,19 @@ internal class Win2dCanvasController
     {
         _zoomAnimationTimer.Stop();
         _zoomAnimationInfos.Clear();
-        int noOfFrames = 5;
+        const int noOfFrames = 5;
         var incrementalScale = (scalePercentage - 1f) / noOfFrames;
-        for (int i = 0; i < noOfFrames; i++)
+        for (var i = 0; i < noOfFrames; i++)
         {
             var animScale = _scale * (1f + incrementalScale * i);
             var animXPos = mousePosition.X - (1f + incrementalScale * i) * (mousePosition.X - _imagePos.X);
             var animYPos = mousePosition.Y - (1f + incrementalScale * i) * (mousePosition.Y - _imagePos.Y);
             _zoomAnimationInfos.Enqueue(new ZoomAnimationInfo(animScale, animXPos, animYPos, incrementalScale));
         }
+
         _zoomAnimationTimer.Start();
     }
+
     private void ZoomAnimationTimer_Tick(object sender, object e)
     {
         if (_zoomAnimationInfos.Count > 0)
@@ -234,7 +226,6 @@ internal class Win2dCanvasController
         {
             _zoomAnimationTimer.Stop();
         }
-
     }
 
     private void UpdateTransform()
@@ -251,32 +242,28 @@ internal class Win2dCanvasController
     {
         args.DrawingSession.Transform = _mat;
         if (_offscreen != null)
-        {
-            args.DrawingSession.DrawImage(_offscreen, _imageRect, _offscreen.Bounds, 1f, CanvasImageInterpolation.HighQualityCubic);
-            //args.DrawingSession.DrawRectangle(_imageRect, Colors.Green, 10f);
-        }
+            args.DrawingSession.DrawImage(_offscreen, _imageRect, _offscreen.Bounds, 1f,
+                CanvasImageInterpolation.HighQualityCubic);
 
+        //args.DrawingSession.DrawRectangle(_imageRect, Colors.Green, 10f);
         else if (_currentPhoto != null)
-        {
-            args.DrawingSession.DrawImage(_currentPhoto.Bitmap, _imageRect, _currentPhoto.Bitmap.Bounds, 1, CanvasImageInterpolation.HighQualityCubic);
-            //args.DrawingSession.DrawRectangle(_imageRect, Colors.Red, 10f);
-        }
+            args.DrawingSession.DrawImage(_currentPhoto.Bitmap, _imageRect, _currentPhoto.Bitmap.Bounds, 1,
+                CanvasImageInterpolation.HighQualityCubic);
+        //args.DrawingSession.DrawRectangle(_imageRect, Colors.Red, 10f);
     }
 
     private void Win2dTest_SizeChanged(object sender, SizeChangedEventArgs args)
     {
-        if (_currentPhoto != null)
-        {
-            var scaleFactor = Math.Min(args.NewSize.Width / _currentPhoto.Bitmap.Bounds.Width,
-                args.NewSize.Height / _currentPhoto.Bitmap.Bounds.Height);
-            _imageRect = new Rect(0, 0, _currentPhoto.Bitmap.Bounds.Width * scaleFactor,
-                _currentPhoto.Bitmap.Bounds.Height * scaleFactor);
-            var xChangeRatio = args.NewSize.Width / args.PreviousSize.Width;
-            var yChangeRatio = args.NewSize.Height / args.PreviousSize.Height;
-            _imagePos.X *= xChangeRatio;
-            _imagePos.Y *= yChangeRatio;
-            UpdateTransform();
-        }
+        if (_currentPhoto == null) return;
+        var scaleFactor = Math.Min(args.NewSize.Width / _currentPhoto.Bitmap.Bounds.Width,
+            args.NewSize.Height / _currentPhoto.Bitmap.Bounds.Height);
+        _imageRect = new Rect(0, 0, _currentPhoto.Bitmap.Bounds.Width * scaleFactor,
+            _currentPhoto.Bitmap.Bounds.Height * scaleFactor);
+        var xChangeRatio = args.NewSize.Width / args.PreviousSize.Width;
+        var yChangeRatio = args.NewSize.Height / args.PreviousSize.Height;
+        _imagePos.X *= xChangeRatio;
+        _imagePos.Y *= yChangeRatio;
+        UpdateTransform();
     }
 
     public bool IsPressedOnImage(Point position)
@@ -299,17 +286,10 @@ internal class Win2dCanvasController
     }
 }
 
-public class ZoomAnimationInfo
+public class ZoomAnimationInfo(float animScale, double animXPos, double animYPos, float incrementalScale)
 {
-    public float Scale;
-    public double X;
-    public double Y;
-    public float IncrementalScale;
-    public ZoomAnimationInfo(float animScale, double animXPos, double animYPos, float incrementalScale)
-    {
-        this.Scale = animScale;
-        this.X = animXPos;
-        this.Y = animYPos;
-        IncrementalScale = incrementalScale;
-    }
+    public float Scale = animScale;
+    public double X = animXPos;
+    public double Y = animYPos;
+    public float IncrementalScale = incrementalScale;
 }

@@ -18,17 +18,14 @@ public static class WindowsCompositionHelper
 
     private static WinCompositor EnsureCompositor()
     {
-        if (_compositor == null)
-            lock (Locker)
-            {
-                if (_compositor == null)
-                {
-                    _dispatcherQueue = WinDispatcherQueue.GetForCurrentThread()
-                                       ?? (_dispatcherQueueController = InitializeCoreDispatcher()).DispatcherQueue;
-
-                    _compositor = new WinCompositor();
-                }
-            }
+        if (_compositor != null) return _compositor;
+        lock (Locker)
+        {
+            if (_compositor != null) return _compositor;
+            _dispatcherQueue = WinDispatcherQueue.GetForCurrentThread()
+                               ?? (_dispatcherQueueController = InitializeCoreDispatcher()).DispatcherQueue;
+            _compositor = new WinCompositor();
+        }
 
         return _compositor;
     }
@@ -52,7 +49,7 @@ public static class WindowsCompositionHelper
     private interface IInspectable
     {
         void GetIids();
-        int GetRuntimeClassName([Out][MarshalAs(UnmanagedType.HString)] out string name);
+        int GetRuntimeClassName([Out] [MarshalAs(UnmanagedType.HString)] out string name);
         void GetTrustLevel();
     }
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FlyPhotos.Views;
+namespace FlyPhotosV1.Views;
 
 /// <summary>
 /// Interaction logic for HelpWindow.xaml

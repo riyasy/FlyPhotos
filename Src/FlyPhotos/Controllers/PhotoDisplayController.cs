@@ -74,11 +74,13 @@ internal class PhotoDisplayController
 
         Photo? preview = null;
         var continueLoadingHq = false;
+
         async Task GetInitialPreview()
         {
             (preview, continueLoadingHq) =
                 await ImageUtil.GetFirstPreviewSpecialHandlingAsync(_d2dCanvas, App.SelectedFileName);
         }
+
         Task.Run(GetInitialPreview).GetAwaiter().GetResult();
 
         _canvasController.Source = preview;
@@ -101,6 +103,7 @@ internal class PhotoDisplayController
                 _firstPhotoLoadEvent.Set();
             });
         }
+
         _ = Task.Run(GetHqImage);
     }
 
@@ -126,7 +129,8 @@ internal class PhotoDisplayController
 
             var previewCachingThread = new Thread(PreviewCacheBuilderDoWork) { IsBackground = true };
             previewCachingThread.Start();
-            var hqCachingThread = new Thread(HqImageCacheBuilderDoWork) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+            var hqCachingThread = new Thread(HqImageCacheBuilderDoWork)
+                { IsBackground = true, Priority = ThreadPriority.AboveNormal };
             hqCachingThread.Start();
         }
         catch (Exception ex)
@@ -162,13 +166,12 @@ internal class PhotoDisplayController
                 _previewsBeingCached[index] = true;
                 var image = ImageUtil.GetPreview(_d2dCanvas, _files[index]).GetAwaiter().GetResult();
                 _cachedPreviews[index] = image;
-                _previewsBeingCached.Remove(index, out bool temp);
+                _previewsBeingCached.Remove(index, out var temp);
                 if (_currentIndex == index)
                     UpgradeImageIfNeeded(image, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
                 UpdateProgressStatusDebug();
                 _previewCacheTasksCount--;
                 if (_previewCacheTasksCount == MaxConcurrentTasksPreviews - 1) waitForSomeGap.Set();
-
             });
             _previewCacheTasksCount++;
         }
@@ -195,7 +198,7 @@ internal class PhotoDisplayController
                 _hqsBeingCached[index] = true;
                 var image = ImageUtil.GetHqImage(_d2dCanvas, _files[index]).GetAwaiter().GetResult();
                 _cachedHqImages[index] = image;
-                _hqsBeingCached.Remove(index, out bool temp);
+                _hqsBeingCached.Remove(index, out var temp);
                 if (_currentIndex == index)
                     UpgradeImageIfNeeded(image, DisplayLevel.Preview, DisplayLevel.Hq);
                 _hqCacheTasksCount--;
@@ -240,8 +243,9 @@ internal class PhotoDisplayController
 
         _toBeCachedHqImages.Clear();
         var tempArray = (from cacheIdx in cacheIndexesHqImages
-                         where !_cachedHqImages.ContainsKey(cacheIdx) && !_hqsBeingCached.ContainsKey(cacheIdx) && cacheIdx >= 0 && cacheIdx < _files.Count
-                         select cacheIdx).ToArray();
+            where !_cachedHqImages.ContainsKey(cacheIdx) && !_hqsBeingCached.ContainsKey(cacheIdx) && cacheIdx >= 0 &&
+                  cacheIdx < _files.Count
+            select cacheIdx).ToArray();
         if (tempArray.Length > 0) _toBeCachedHqImages.PushRange(tempArray);
 
         // Create new list of to be cached Previews.
@@ -257,8 +261,9 @@ internal class PhotoDisplayController
         _toBeCachedPreviews.Clear();
 
         tempArray = (from cacheIdx in cacheIndexesPreviews
-                     where !_cachedPreviews.ContainsKey(cacheIdx) && !_previewsBeingCached.ContainsKey(cacheIdx) && cacheIdx >= 0 && cacheIdx < _files.Count
-                     select cacheIdx).ToArray();
+            where !_cachedPreviews.ContainsKey(cacheIdx) && !_previewsBeingCached.ContainsKey(cacheIdx) &&
+                  cacheIdx >= 0 && cacheIdx < _files.Count
+            select cacheIdx).ToArray();
         if (tempArray.Length > 0) _toBeCachedPreviews.PushRange(tempArray);
     }
 

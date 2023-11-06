@@ -1,6 +1,6 @@
 ﻿using System.Windows.Media.Imaging;
 
-namespace FlyPhotos.Data;
+namespace FlyPhotosV1.Data;
 
 internal class Photo
 {

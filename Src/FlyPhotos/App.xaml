@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 
 <Application
     x:Class="FlyPhotos.App"
@@ -15,11 +15,13 @@
                     <ResourceDictionary.ThemeDictionaries>
                         <ResourceDictionary x:Key="Default">
                             <StaticResource x:Key="WindowCaptionBackground" ResourceKey="SystemControlTransparentBrush" />
-                            <StaticResource x:Key="WindowCaptionBackgroundDisabled" ResourceKey="SystemControlTransparentBrush" />
+                            <StaticResource x:Key="WindowCaptionBackgroundDisabled"
+                                            ResourceKey="SystemControlTransparentBrush" />
                         </ResourceDictionary>
                         <ResourceDictionary x:Key="Light">
                             <StaticResource x:Key="WindowCaptionBackground" ResourceKey="SystemControlTransparentBrush" />
-                            <StaticResource x:Key="WindowCaptionBackgroundDisabled" ResourceKey="SystemControlTransparentBrush" />
+                            <StaticResource x:Key="WindowCaptionBackgroundDisabled"
+                                            ResourceKey="SystemControlTransparentBrush" />
                         </ResourceDictionary>
                     </ResourceDictionary.ThemeDictionaries>
                 </ResourceDictionary>

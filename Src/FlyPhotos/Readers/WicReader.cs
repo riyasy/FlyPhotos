@@ -27,7 +27,7 @@ internal class WicReader
     {
         try
         {
-            var canvasBitmap = await CanvasBitmap.LoadAsync(CanvasDevice.GetSharedDevice(), inputPath);
+            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);
             return (true, new Photo(canvasBitmap));
         }
         catch (Exception ex)
@@ -50,7 +50,7 @@ internal class WicReader
             if (!CreateMemoryMapAndGetDataFromExternalProcess(inputPath, w, h, out var rgbAArray))
                 return (false, Photo.Empty());
             var canvasBitmap =
-                CanvasBitmap.CreateFromBytes(CanvasDevice.GetSharedDevice(), rgbAArray, w, h,
+                CanvasBitmap.CreateFromBytes(ctrl, rgbAArray, w, h,
                     Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized);
             return (true, new Photo(canvasBitmap, rotation));
         }
@@ -114,7 +114,7 @@ internal class WicReader
             using var stream = await file.OpenReadAsync();
             var decoder = await BitmapDecoder.CreateAsync(stream);
             using var preview = await decoder.GetThumbnailAsync();
-            var canvasBitmap = await CanvasBitmap.LoadAsync(CanvasDevice.GetSharedDevice(), preview);
+            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
             return (true, new Photo(canvasBitmap));
         }
         catch (Exception ex)

@@ -1,7 +1,4 @@
-﻿using FlyPhotos.Data;
-using FlyPhotos.Utils;
-using NLog;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -9,8 +6,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using FlyPhotosV1.Data;
+using FlyPhotosV1.Utils;
+using NLog;
 
-namespace FlyPhotos.Controllers;
+namespace FlyPhotosV1.Controllers;
 
 internal class PhotoDisplayController
 {
@@ -92,6 +92,7 @@ internal class PhotoDisplayController
                     _firstPhotoLoadEvent.Set();
                 }));
         }
+
         _ = Task.Run(GetHqImage);
     }
 
@@ -117,7 +118,8 @@ internal class PhotoDisplayController
 
             var previewCachingThread = new Thread(PreviewCacheBuilderDoWork) { IsBackground = true };
             previewCachingThread.Start();
-            var hqCachingThread = new Thread(HqImageCacheBuilderDoWork) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+            var hqCachingThread = new Thread(HqImageCacheBuilderDoWork)
+                { IsBackground = true, Priority = ThreadPriority.AboveNormal };
             hqCachingThread.Start();
         }
         catch (Exception ex)
@@ -153,7 +155,7 @@ internal class PhotoDisplayController
                 _previewsBeingCached[index] = true;
                 var image = ImageUtil.GetPreview(_files[index]);
                 _cachedPreviews[index] = image;
-                _previewsBeingCached.Remove(index, out bool temp);
+                _previewsBeingCached.Remove(index, out var temp);
                 if (_currentIndex == index)
                     UpgradeImageIfNeeded(image, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
                 UpdateProgressStatusDebug();
@@ -185,7 +187,7 @@ internal class PhotoDisplayController
                 _hqsBeingCached[index] = true;
                 var image = ImageUtil.GetHqImage(_files[index]);
                 _cachedHqImages[index] = image;
-                _hqsBeingCached.Remove(index, out bool temp);
+                _hqsBeingCached.Remove(index, out var temp);
                 if (_currentIndex == index)
                     UpgradeImageIfNeeded(image, DisplayLevel.Preview, DisplayLevel.Hq);
                 _hqCacheTasksCount--;
@@ -231,8 +233,9 @@ internal class PhotoDisplayController
 
         _toBeCachedHqImages.Clear();
         var tempArray = (from cacheIdx in cacheIndexesHqImages
-                         where !_cachedHqImages.ContainsKey(cacheIdx) && !_hqsBeingCached.ContainsKey(cacheIdx) && cacheIdx >= 0 && cacheIdx < _files.Count
-                         select cacheIdx).ToArray();
+            where !_cachedHqImages.ContainsKey(cacheIdx) && !_hqsBeingCached.ContainsKey(cacheIdx) && cacheIdx >= 0 &&
+                  cacheIdx < _files.Count
+            select cacheIdx).ToArray();
         if (tempArray.Length > 0) _toBeCachedHqImages.PushRange(tempArray);
 
         // Create new list of to be cached Previews.
@@ -248,8 +251,9 @@ internal class PhotoDisplayController
         _toBeCachedPreviews.Clear();
 
         tempArray = (from cacheIdx in cacheIndexesPreviews
-                     where !_cachedPreviews.ContainsKey(cacheIdx) && !_previewsBeingCached.ContainsKey(cacheIdx) && cacheIdx >= 0 && cacheIdx < _files.Count
-                     select cacheIdx).ToArray();
+            where !_cachedPreviews.ContainsKey(cacheIdx) && !_previewsBeingCached.ContainsKey(cacheIdx) &&
+                  cacheIdx >= 0 && cacheIdx < _files.Count
+            select cacheIdx).ToArray();
         if (tempArray.Length > 0) _toBeCachedPreviews.PushRange(tempArray);
     }
 

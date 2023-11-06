@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace FlyPhotos.Controls;
+namespace FlyPhotosV1.Controls;
 
 public class ZoomBorder : Border
 {
@@ -38,63 +38,57 @@ public class ZoomBorder : Border
     public void Initialize(UIElement element)
     {
         _child = element;
-        if (_child != null)
-        {
-            var group = new TransformGroup();
-            var st = new ScaleTransform();
-            group.Children.Add(st);
-            var tt = new TranslateTransform();
-            group.Children.Add(tt);
-            _child.RenderTransform = group;
-            _child.RenderTransformOrigin = new Point(0.0, 0.0);
-            MouseWheel += child_MouseWheel;
-            MouseLeftButtonDown += child_MouseLeftButtonDown;
-            MouseLeftButtonUp += child_MouseLeftButtonUp;
-            MouseMove += child_MouseMove;
-            PreviewMouseRightButtonDown += child_PreviewMouseRightButtonDown;
-        }
+        if (_child == null) return;
+        var group = new TransformGroup();
+        var st = new ScaleTransform();
+        group.Children.Add(st);
+        var tt = new TranslateTransform();
+        group.Children.Add(tt);
+        _child.RenderTransform = group;
+        _child.RenderTransformOrigin = new Point(0.0, 0.0);
+        MouseWheel += child_MouseWheel;
+        MouseLeftButtonDown += child_MouseLeftButtonDown;
+        MouseLeftButtonUp += child_MouseLeftButtonUp;
+        MouseMove += child_MouseMove;
+        PreviewMouseRightButtonDown += child_PreviewMouseRightButtonDown;
     }
 
     public void Reset()
     {
-        if (_child != null)
-        {
-            // reset zoom
-            var st = GetScaleTransform(_child);
-            st.ScaleX = 1.0;
-            st.ScaleY = 1.0;
+        if (_child == null) return;
+        // reset zoom
+        var st = GetScaleTransform(_child);
+        st.ScaleX = 1.0;
+        st.ScaleY = 1.0;
 
-            // reset pan
-            var tt = GetTranslateTransform(_child);
-            tt.X = 0.0;
-            tt.Y = 0.0;
-        }
+        // reset pan
+        var tt = GetTranslateTransform(_child);
+        tt.X = 0.0;
+        tt.Y = 0.0;
     }
 
     #region Child Events
 
     private void child_MouseWheel(object sender, MouseWheelEventArgs e)
     {
-        if (_child != null)
-        {
-            var st = GetScaleTransform(_child);
-            var tt = GetTranslateTransform(_child);
+        if (_child == null) return;
+        var st = GetScaleTransform(_child);
+        var tt = GetTranslateTransform(_child);
 
-            var zoom = e.Delta > 0 ? .2 : -.2;
-            if (!(e.Delta > 0) && (st.ScaleX < .4 || st.ScaleY < .4))
-                return;
+        var zoom = e.Delta > 0 ? .2 : -.2;
+        if (!(e.Delta > 0) && (st.ScaleX < .4 || st.ScaleY < .4))
+            return;
 
-            var relative = e.GetPosition(_child);
+        var relative = e.GetPosition(_child);
 
-            var absoluteX = relative.X * st.ScaleX + tt.X;
-            var absoluteY = relative.Y * st.ScaleY + tt.Y;
+        var absoluteX = relative.X * st.ScaleX + tt.X;
+        var absoluteY = relative.Y * st.ScaleY + tt.Y;
 
-            st.ScaleX += zoom;
-            st.ScaleY += zoom;
+        st.ScaleX += zoom;
+        st.ScaleY += zoom;
 
-            tt.X = absoluteX - relative.X * st.ScaleX;
-            tt.Y = absoluteY - relative.Y * st.ScaleY;
-        }
+        tt.X = absoluteX - relative.X * st.ScaleX;
+        tt.Y = absoluteY - relative.Y * st.ScaleY;
     }
 
     private void child_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -129,11 +123,9 @@ public class ZoomBorder : Border
 
     private void child_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
-        if (_child != null)
-        {
-            _child.ReleaseMouseCapture();
-            Cursor = Cursors.Arrow;
-        }
+        if (_child == null) return;
+        _child.ReleaseMouseCapture();
+        Cursor = Cursors.Arrow;
     }
 
     private void child_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -143,13 +135,11 @@ public class ZoomBorder : Border
 
     private void child_MouseMove(object sender, MouseEventArgs e)
     {
-        if (_child is { IsMouseCaptured: true })
-        {
-            var tt = GetTranslateTransform(_child);
-            var v = _start - e.GetPosition(this);
-            tt.X = _origin.X - v.X;
-            tt.Y = _origin.Y - v.Y;
-        }
+        if (_child is not { IsMouseCaptured: true }) return;
+        var tt = GetTranslateTransform(_child);
+        var v = _start - e.GetPosition(this);
+        tt.X = _origin.X - v.X;
+        tt.Y = _origin.Y - v.Y;
     }
 
     #endregion

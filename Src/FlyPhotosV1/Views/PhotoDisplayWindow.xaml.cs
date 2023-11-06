@@ -1,13 +1,13 @@
-﻿using FlyPhotos.Controllers;
-using FlyPhotos.Utils;
-using NLog;
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using static FlyPhotos.Controllers.PhotoDisplayController;
+using FlyPhotosV1.Controllers;
+using FlyPhotosV1.Utils;
+using NLog;
+using static FlyPhotosV1.Controllers.PhotoDisplayController;
 
-namespace FlyPhotos.Views;
+namespace FlyPhotosV1.Views;
 
 public partial class PhotoDisplayWindow
 {

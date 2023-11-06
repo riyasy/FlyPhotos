@@ -24,21 +24,14 @@ internal static class LibHeifSharpDllImportResolver
     {
         // We only care about a native library named libheif, the runtime will use
         // its default behavior for any other native library.
-        if (string.Equals(libraryName, "libheif", StringComparison.Ordinal))
-        {
-            // Because the DllImportResolver will be called multiple times we load libheif once
-            // and cache the module handle for future requests.
-            if (_firstRequestForLibHeif)
-            {
-                _firstRequestForLibHeif = false;
-                _cachedLibHeifModule = LoadNativeLibrary(libraryName, assembly, searchPath);
-            }
-
-            return _cachedLibHeifModule;
-        }
-
+        if (!string.Equals(libraryName, "libheif", StringComparison.Ordinal)) return IntPtr.Zero;
+        // Because the DllImportResolver will be called multiple times we load libheif once
+        // and cache the module handle for future requests.
+        if (!_firstRequestForLibHeif) return _cachedLibHeifModule;
+        _firstRequestForLibHeif = false;
+        _cachedLibHeifModule = LoadNativeLibrary(libraryName, assembly, searchPath);
+        return _cachedLibHeifModule;
         // Fall back to default import resolver.
-        return IntPtr.Zero;
     }
 
     private static nint LoadNativeLibrary(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)

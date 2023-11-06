@@ -63,12 +63,10 @@ public partial class App
     {
         const string appName = "FlyPhotosFlyPhotosWinUI";
         _mutex = new Mutex(true, appName, out var createdNew);
-        if (!createdNew)
-        {
-            var current = Process.GetCurrentProcess();
-            foreach (var process in Process.GetProcessesByName(current.ProcessName))
-                if (process.Id != current.Id)
-                    process.Kill();
-        }
+        if (createdNew) return;
+        var current = Process.GetCurrentProcess();
+        foreach (var process in Process.GetProcessesByName(current.ProcessName))
+            if (process.Id != current.Id)
+                process.Kill();
     }
 }

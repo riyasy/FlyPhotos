@@ -1,6 +1,4 @@
-﻿using FlyPhotos.Data;
-using FlyPhotos.Utils;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,8 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using FlyPhotosV1.Data;
+using FlyPhotosV1.Utils;
 
-namespace FlyPhotos.Views;
+namespace FlyPhotosV1.Views;
 
 /// <summary>
 /// Interaction logic for TestPerformance.xaml

@@ -1,5 +1,5 @@
 ﻿<Application
-    x:Class="FlyPhotos.App"
+    x:Class="FlyPhotosV1.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Startup="Application_Startup">

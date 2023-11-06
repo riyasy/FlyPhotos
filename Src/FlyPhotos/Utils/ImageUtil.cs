@@ -23,11 +23,14 @@ internal class ImageUtil
         if (App.Packaged)
         {
             FileNotFoundIndicator =
-                new Photo(await CanvasBitmap.LoadAsync(d2dCanvas, new Uri("ms-appx:///Assets/Images/FileNotFound.png")));
+                new Photo(await CanvasBitmap.LoadAsync(d2dCanvas,
+                    new Uri("ms-appx:///Assets/Images/FileNotFound.png")));
             PreviewFailedIndicator =
-                new Photo(await CanvasBitmap.LoadAsync(d2dCanvas, new Uri("ms-appx:///Assets/Images/PreviewFailed.png")));
+                new Photo(
+                    await CanvasBitmap.LoadAsync(d2dCanvas, new Uri("ms-appx:///Assets/Images/PreviewFailed.png")));
             HqImageFailedIndicator =
-                new Photo(await CanvasBitmap.LoadAsync(d2dCanvas, new Uri("ms-appx:///Assets/Images/HQImageFailed.png")));
+                new Photo(
+                    await CanvasBitmap.LoadAsync(d2dCanvas, new Uri("ms-appx:///Assets/Images/HQImageFailed.png")));
             LoadingIndicator =
                 new Photo(await CanvasBitmap.LoadAsync(d2dCanvas, new Uri("ms-appx:///Assets/Images/Loading.png")));
         }
