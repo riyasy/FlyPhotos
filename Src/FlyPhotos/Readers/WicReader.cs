@@ -180,7 +180,18 @@ internal class WicReader
 
     private static bool AskExternalWicReaderExeToCopyPixelsToMemoryMap(string path, string mmfName)
     {
-        var command = $"\"{Util.ExternalWicReaderPath}\" \"{path}\" {mmfName} bgra";
+        var exePath = "";
+        if (App.Packaged)
+        {
+            CopyWicReaderExeToLocalStorage().GetAwaiter().GetResult();
+            string directory = Windows.Storage.ApplicationData.Current.LocalFolder.Path;
+            exePath = $@"{directory}\WicImageFileReaderNative.exe";
+        }
+        else
+        {
+            exePath = Util.ExternalWicReaderPath;
+        }
+        var command = $"\"{exePath}\" \"{path}\" {mmfName} bgra";
         var p = new Process
         {
             StartInfo = new ProcessStartInfo("cmd", $"/c \"{command}\"")
@@ -192,5 +203,20 @@ internal class WicReader
         p.Start();
         p.WaitForExit();
         return p.ExitCode == 0;
+    }
+
+    private static async Task CopyWicReaderExeToLocalStorage()
+    {
+        try
+        {
+            await ApplicationData.Current.LocalFolder.GetFileAsync("WicImageFileReaderNative.exe");
+            return;
+        }
+        catch (System.IO.FileNotFoundException)
+        {
+        }
+        StorageFile stopfile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///WicImageFileReaderNative.exe"));
+        await stopfile.CopyAsync(ApplicationData.Current.LocalFolder);
+        Logger.Trace("Copied WicImageFileReaderNative.exe to local storage");
     }
 }
