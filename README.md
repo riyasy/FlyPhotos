@@ -5,6 +5,15 @@ Fly Photos is one of the fastest photoviewer for Windows. It tries to mimic many
 
 ![](https://github.com/riyasy/FlyPhotos/blob/main/Misc/ImagesForDocumentation/03FullScreen.png?raw=true)
 
+| Version        	| 1.x                      	| 2.x             	|
+|----------------	|--------------------------	|-----------------	|
+| UI Technology     	| WPF                      	| WinUI, Win2D    	|
+| OS             	| Windows 7,8,10,11        	| Windows 10,11   	|
+| Release        	| Stable                   	| RC              	|
+| Caching        	| Slightly Faster than 2.x 	|                 	|
+| Pan/Zoom       	|                          	| Faster than 1.x 	|
+| Zoom Animation 	| No                       	| Yes             	|
+
 ### Features
 1. **Full Screen mode with transparent background like in Picasa Photo Viewer.**
 2. Fast startup even for raw files with image size greater than 100 MB.
