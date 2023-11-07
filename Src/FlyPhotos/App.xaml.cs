@@ -56,6 +56,7 @@ public partial class App
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         _mWindow = new PhotoDisplayWindow();
+        //_mWindow = new Settings();
         _mWindow.Activate();
     }
 

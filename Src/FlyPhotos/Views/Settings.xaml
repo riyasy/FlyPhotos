@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Window
+    x:Class="FlyPhotos.Views.Settings"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:FlyPhotos.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="using:CommunityToolkit.WinUI"
+    mc:Ignorable="d">
+
+    <Grid>
+        <Pivot Title="Settings" FontSize="20">
+            <PivotItem Header="General">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Options" />
+                    <controls:SettingsCard
+                        x:Name="SettingsCardTheme"
+                        Description="Choose theme."
+                        Header="Window Theme"
+                        HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
+                        <ComboBox SelectedIndex="0">
+                            <ComboBoxItem>Auto</ComboBoxItem>
+                            <ComboBoxItem>Dark</ComboBoxItem>
+                            <ComboBoxItem>Light</ComboBoxItem>
+                        </ComboBox>
+                    </controls:SettingsCard>
+                    <controls:SettingsCard
+                        x:Name="SettingsCardWindowBackground"
+                        Description="Choose the background for the photo viewer window."
+                        Header="Window Background"
+                        HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
+                        <ComboBox SelectedIndex="0">
+                            <ComboBoxItem>Transparent</ComboBoxItem>
+                            <ComboBoxItem>Acrylic</ComboBoxItem>
+                            <ComboBoxItem>Mica</ComboBoxItem>
+                            <ComboBoxItem>Mica Alt</ComboBoxItem>
+                        </ComboBox>
+                    </controls:SettingsCard>
+                    <controls:SettingsCard
+                        x:Name="SettingsCardPanZoomReset"
+                        Description="Reset Pan and Zoom on displaying next photo"
+                        Header="Pan Zoom Reset"
+                        HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
+                        <ToggleSwitch />
+                    </controls:SettingsCard>
+                    <controls:SettingsCard
+                        x:Name="SettingsCardPanHideRaw"
+                        Description="Hide Raw files if a similar named JPG/JPEG already exists"
+                        Header="RAW Hiding"
+                        HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
+                        <ToggleSwitch />
+                    </controls:SettingsCard>
+                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Caching" />
+                    <controls:SettingsCard
+                        x:Name="SettingsCardCacheSize"
+                        Description="Set the amount of low resolution and high resolution photos to be cached on each side"
+                        Header="Cache Size"
+                        HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="Low Res Cache" />
+                            <Slider
+                                Width="200"
+                                Maximum="300"
+                                Minimum="50"
+                                SmallChange="10"
+                                StepFrequency="10"
+                                Value="300" />
+                            <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="High Res Cache" />
+                            <Slider
+                                Width="200"
+                                Maximum="3"
+                                Minimum="1"
+                                SmallChange="1"
+                                StepFrequency="1"
+                                Value="2" />
+                        </StackPanel>
+                    </controls:SettingsCard>
+                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Log" />
+                    <controls:SettingsCard
+                        x:Name="SettingsCardLog"
+                        Description="Open to see the log file"
+                        Header="Log File"
+                        HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
+                        <StackPanel Orientation="Vertical">
+                            <Button>Open Log</Button>
+                        </StackPanel>
+                    </controls:SettingsCard>
+                </StackPanel>
+            </PivotItem>
+            <PivotItem Header="Codecs">
+                <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="unread emails go here." />
+            </PivotItem>
+            <PivotItem Header="About">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Current Version" />
+                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Source Code" />
+                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Report Issues" />
+                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Credits" />
+                </StackPanel>
+            </PivotItem>
+        </Pivot>
+    </Grid>
+</Window>
