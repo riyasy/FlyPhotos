@@ -1,9 +1,11 @@
-﻿using FlyPhotos.Utils;
-using FlyPhotos.Views;
-using Microsoft.UI.Xaml;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using FlyPhotos.Controllers;
+using FlyPhotos.Data;
+using FlyPhotos.Utils;
+using FlyPhotos.Views;
+using Microsoft.UI.Xaml;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -24,12 +26,16 @@ public partial class App
     private static Mutex _mutex;
     private Window _mWindow;
 
+    public static SettingsData Settings { get; set; }
+
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
     /// </summary>
     public App()
     {
+        Settings = LoadSettings();
+
         if (Debug)
         {
             //selectedFileName = @"C:\Test\20211004_160211 (ILCE-6400).ARW";
@@ -49,6 +55,19 @@ public partial class App
         InitializeComponent();
     }
 
+    private static SettingsData LoadSettings()
+    {
+        return new SettingsData
+        {
+            Theme = Properties.UserSettings.Default.Theme,
+            WindowBackGround = Properties.UserSettings.Default.WindowBackGround,
+            ResetPanZoomOnNextPhoto = Properties.UserSettings.Default.ResetPanZoomOnNextPhoto,
+            CacheSizeOneSideHqImages = Properties.UserSettings.Default.CacheSizeOneSideHqImages,
+            CacheSizeOneSidePreviews = Properties.UserSettings.Default.CacheSizeOneSidePreviews
+        };
+
+    }
+
     /// <summary>
     /// Invoked when the application is launched.
     /// </summary>
@@ -57,6 +76,7 @@ public partial class App
     {
         _mWindow = new PhotoDisplayWindow();
         //_mWindow = new Settings();
+        ThemeController.Instance.AddWindow(_mWindow);
         _mWindow.Activate();
     }
 

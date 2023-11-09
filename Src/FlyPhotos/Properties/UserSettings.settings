@@ -1,0 +1,21 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="FlyPhotos.Properties" GeneratedClassName="UserSettings">
+  <Profiles />
+  <Settings>
+    <Setting Name="Theme" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Default</Value>
+    </Setting>
+    <Setting Name="WindowBackGround" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Transparent</Value>
+    </Setting>
+    <Setting Name="ResetPanZoomOnNextPhoto" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="CacheSizeOneSideHqImages" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="CacheSizeOneSidePreviews" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">300</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

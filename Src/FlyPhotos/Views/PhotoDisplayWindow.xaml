@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-
+<?xml version="1.0" encoding="utf-8" ?>
 <Window
     x:Class="FlyPhotos.Views.PhotoDisplayWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -7,8 +6,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:win2d="using:Microsoft.Graphics.Canvas.UI.Xaml"
+    xmlns:winuiex="using:WinUIEx"
     mc:Ignorable="d">
-
+    <Window.SystemBackdrop>
+        <winuiex:TransparentTintBackdrop TintColor="#554444ff" />
+    </Window.SystemBackdrop>
     <Grid
         x:Name="MainLayout"
         HorizontalAlignment="Stretch"
@@ -25,7 +27,10 @@
                 Opacity="0" />
         </Grid>
         <Image x:Name="ImgDspBg" Stretch="None" />
-        <Rectangle x:Name="DarkBg" Fill="#AA000000" />
+        <Rectangle
+            x:Name="DarkBg"
+            Fill="#AA000000"
+            Visibility="Collapsed" />
         <win2d:CanvasControl x:Name="D2dCanvas" />
         <TextBlock
             x:Name="TxtFileName"
@@ -87,16 +92,16 @@
                 </ToolTipService.ToolTip>
             </RepeatButton>
             <Button
-                x:Name="ButtonHelp"
+                x:Name="ButtonScaleSet"
                 Width="Auto"
-                Click="ButtonHelp_OnClick"
-                Content="🆘"
-                FontSize="16"
-                Visibility="Collapsed">
+                Click="ButtonScaleSet_Click"
+                Content="&#xE73F;"
+                FontFamily="{StaticResource FluentIcons}"
+                FontSize="16">
                 <ToolTipService.ToolTip>
                     <ToolTip
                         AutomationProperties.FullDescription="Non-occluding tooltip"
-                        Content="Help"
+                        Content="Fit"
                         Placement="Right" />
                 </ToolTipService.ToolTip>
             </Button>
@@ -115,16 +120,16 @@
                 </ToolTipService.ToolTip>
             </Button>
             <Button
-                x:Name="ButtonScaleSet"
+                x:Name="ButtonHelp"
                 Width="Auto"
-                Click="ButtonScaleSet_Click"
-                Content="&#xE73F;"
-                FontFamily="{StaticResource FluentIcons}"
-                FontSize="16">
+                Click="ButtonHelp_OnClick"
+                Content="🆘"
+                FontSize="16"
+                Visibility="Collapsed">
                 <ToolTipService.ToolTip>
                     <ToolTip
                         AutomationProperties.FullDescription="Non-occluding tooltip"
-                        Content="Fit"
+                        Content="Help"
                         Placement="Right" />
                 </ToolTipService.ToolTip>
             </Button>
@@ -140,41 +145,6 @@
                     <ToolTip
                         AutomationProperties.FullDescription="Non-occluding tooltip"
                         Content="Buy a coffee"
-                        Placement="Right" />
-                </ToolTipService.ToolTip>
-            </Button>
-            <Button
-                x:Name="ButtonTheme"
-                Width="Auto"
-                Click="ButtonCoffee_OnClick"
-                Content="&#xf354;"
-                FontFamily="{StaticResource FluentIcons}"
-                FontSize="16">
-                <Button.Flyout>
-                    <MenuFlyout>
-                        <MenuFlyoutItem
-                            Click="MenuFlyoutItem_Click"
-                            Tag="rating"
-                            Text="Transparent" />
-                        <MenuFlyoutItem
-                            Click="MenuFlyoutItem_Click"
-                            Tag="match"
-                            Text="Acrylic" />
-                        <MenuFlyoutItem
-                            Click="MenuFlyoutItem_Click"
-                            Tag="distance"
-                            Text="Mica" />
-                        <MenuFlyoutItem
-                            Click="MenuFlyoutItem_Click"
-                            Tag="distance"
-                            Text="Mica Alt" />
-                    </MenuFlyout>
-                </Button.Flyout>
-
-                <ToolTipService.ToolTip>
-                    <ToolTip
-                        AutomationProperties.FullDescription="Non-occluding tooltip"
-                        Content="Select Theme"
                         Placement="Right" />
                 </ToolTipService.ToolTip>
             </Button>

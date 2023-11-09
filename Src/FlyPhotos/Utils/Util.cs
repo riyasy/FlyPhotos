@@ -3,11 +3,9 @@ using CliWrapper;
 using NLog;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace FlyPhotos.Utils;
@@ -119,32 +117,32 @@ internal static class Util
         return Uri.UnescapeDataString(directoryInfo.FullName);
     }
 
-    public static void OpenUrl(string url)
-    {
-        try
-        {
-            Process.Start(url);
-        }
-        catch
-        {
-            // hack because of this: https://github.com/dotnet/corefx/issues/10361
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                url = url.Replace("&", "^&");
-                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                Process.Start("xdg-open", url);
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                Process.Start("open", url);
-            }
-            else
-            {
-                throw;
-            }
-        }
-    }
+    //public static void OpenUrl(string url)
+    //{
+    //    try
+    //    {
+    //        Process.Start(url);
+    //    }
+    //    catch
+    //    {
+    //        // hack because of this: https://github.com/dotnet/corefx/issues/10361
+    //        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+    //        {
+    //            url = url.Replace("&", "^&");
+    //            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+    //        }
+    //        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+    //        {
+    //            Process.Start("xdg-open", url);
+    //        }
+    //        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+    //        {
+    //            Process.Start("open", url);
+    //        }
+    //        else
+    //        {
+    //            throw;
+    //        }
+    //    }
+    //}
 }

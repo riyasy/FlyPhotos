@@ -18,7 +18,7 @@ namespace FlyPhotos.Views;
 /// <summary>
 /// An empty window that can be used on its own or navigated to within a Frame.
 /// </summary>
-public sealed partial class TestWindow : Window
+public sealed partial class TestWindow
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private readonly List<Photo> _photos = new();

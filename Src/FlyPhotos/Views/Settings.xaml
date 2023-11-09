@@ -1,103 +1,156 @@
 <?xml version="1.0" encoding="utf-8" ?>
+
 <Window
     x:Class="FlyPhotos.Views.Settings"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="using:FlyPhotos.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:CommunityToolkit.WinUI"
     mc:Ignorable="d">
-
-    <Grid>
-        <Pivot Title="Settings" FontSize="20">
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Pivot Title="Fly Photos - Settings">
             <PivotItem Header="General">
-                <StackPanel Orientation="Vertical">
-                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Options" />
-                    <controls:SettingsCard
-                        x:Name="SettingsCardTheme"
-                        Description="Choose theme."
-                        Header="Window Theme"
-                        HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
-                        <ComboBox SelectedIndex="0">
-                            <ComboBoxItem>Auto</ComboBoxItem>
-                            <ComboBoxItem>Dark</ComboBoxItem>
-                            <ComboBoxItem>Light</ComboBoxItem>
-                        </ComboBox>
-                    </controls:SettingsCard>
-                    <controls:SettingsCard
-                        x:Name="SettingsCardWindowBackground"
-                        Description="Choose the background for the photo viewer window."
-                        Header="Window Background"
-                        HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
-                        <ComboBox SelectedIndex="0">
-                            <ComboBoxItem>Transparent</ComboBoxItem>
-                            <ComboBoxItem>Acrylic</ComboBoxItem>
-                            <ComboBoxItem>Mica</ComboBoxItem>
-                            <ComboBoxItem>Mica Alt</ComboBoxItem>
-                        </ComboBox>
-                    </controls:SettingsCard>
-                    <controls:SettingsCard
-                        x:Name="SettingsCardPanZoomReset"
-                        Description="Reset Pan and Zoom on displaying next photo"
-                        Header="Pan Zoom Reset"
-                        HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
-                        <ToggleSwitch />
-                    </controls:SettingsCard>
-                    <controls:SettingsCard
-                        x:Name="SettingsCardPanHideRaw"
-                        Description="Hide Raw files if a similar named JPG/JPEG already exists"
-                        Header="RAW Hiding"
-                        HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
-                        <ToggleSwitch />
-                    </controls:SettingsCard>
-                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Caching" />
-                    <controls:SettingsCard
-                        x:Name="SettingsCardCacheSize"
-                        Description="Set the amount of low resolution and high resolution photos to be cached on each side"
-                        Header="Cache Size"
-                        HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="Low Res Cache" />
-                            <Slider
-                                Width="200"
-                                Maximum="300"
-                                Minimum="50"
-                                SmallChange="10"
-                                StepFrequency="10"
-                                Value="300" />
-                            <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="High Res Cache" />
-                            <Slider
-                                Width="200"
-                                Maximum="3"
-                                Minimum="1"
-                                SmallChange="1"
-                                StepFrequency="1"
-                                Value="2" />
-                        </StackPanel>
-                    </controls:SettingsCard>
-                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Log" />
-                    <controls:SettingsCard
-                        x:Name="SettingsCardLog"
-                        Description="Open to see the log file"
-                        Header="Log File"
-                        HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
-                        <StackPanel Orientation="Vertical">
-                            <Button>Open Log</Button>
-                        </StackPanel>
-                    </controls:SettingsCard>
-                </StackPanel>
+                <ScrollViewer>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock
+                            Margin="0,5,0,0"
+                            Style="{StaticResource SubtitleTextBlockStyle}"
+                            Text="Options" />
+                        <controls:SettingsCard
+                            x:Name="SettingsCardTheme"
+                            Margin="0,5,0,0"
+                            Description="Choose theme."
+                            Header="Window Theme"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE790;}">
+                            <ComboBox x:Name="ComboTheme" SelectedIndex="0">
+                                <ComboBoxItem>Default</ComboBoxItem>
+                                <ComboBoxItem>Dark</ComboBoxItem>
+                                <ComboBoxItem>Light</ComboBoxItem>
+                            </ComboBox>
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardWindowBackground"
+                            Margin="0,5,0,0"
+                            Description="Choose the background for the photo viewer window."
+                            Header="Window Background"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE70A;}">
+                            <ComboBox x:Name="ComboBackGround" SelectedIndex="0">
+                                <ComboBoxItem>Transparent</ComboBoxItem>
+                                <ComboBoxItem>Acrylic</ComboBoxItem>
+                                <ComboBoxItem>Mica</ComboBoxItem>
+                                <ComboBoxItem>Mica Alt</ComboBoxItem>
+                                <ComboBoxItem>Frozen</ComboBoxItem>
+                            </ComboBox>
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardPanZoomReset"
+                            Margin="0,5,0,0"
+                            Description="Reset Pan and Zoom on displaying next photo"
+                            Header="Pan Zoom Reset"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE71E;}">
+                            <ToggleSwitch x:Name="ButtonResetPanZoom" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardPanHideRaw"
+                            Margin="0,5,0,0"
+                            Description="Hide Raw files if a similar named JPG/JPEG already exists"
+                            Header="RAW Hiding"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xF19D;}"
+                            Visibility="Collapsed">
+                            <ToggleSwitch />
+                        </controls:SettingsCard>
+                        <TextBlock
+                            Margin="0,5,0,0"
+                            Style="{StaticResource SubtitleTextBlockStyle}"
+                            Text="Caching" />
+                        <controls:SettingsCard
+                            x:Name="SettingsCardCacheSize"
+                            Margin="0,5,0,0"
+                            Description="Set the amount of low resolution and high resolution photos to be cached on each side"
+                            Header="Cache Size"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xF16A;}">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="Low Res Cache" />
+                                <Slider
+                                    x:Name="SliderLowResCacheSize"
+                                    Width="200"
+                                    Maximum="300"
+                                    Minimum="50"
+                                    SmallChange="10"
+                                    StepFrequency="10"
+                                    Value="300" />
+                                <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="High Res Cache" />
+                                <Slider
+                                    x:Name="SliderHighResCacheSize"
+                                    Width="200"
+                                    Maximum="3"
+                                    Minimum="1"
+                                    SmallChange="1"
+                                    StepFrequency="1"
+                                    Value="2" />
+                            </StackPanel>
+                        </controls:SettingsCard>
+                        <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Log" />
+                        <controls:SettingsCard
+                            x:Name="SettingsCardLog"
+                            Margin="0,5,0,0"
+                            Description="Open to see the log file"
+                            Header="Log File"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE81C;}">
+                            <StackPanel Orientation="Vertical">
+                                <Button x:Name="ButtonOpenLog" Click="ButtonOpenLog_OnClick">Open Log</Button>
+                            </StackPanel>
+                        </controls:SettingsCard>
+                    </StackPanel>
+                </ScrollViewer>
             </PivotItem>
             <PivotItem Header="Codecs">
-                <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="unread emails go here." />
+                <ScrollViewer>
+                    <TextBlock
+                        x:Name="TextBoxCodecs"
+                        Margin="0,5,0,0"
+                        Style="{StaticResource BodyTextBlockStyle}"
+                        TextWrapping="Wrap" />
+                </ScrollViewer>
             </PivotItem>
             <PivotItem Header="About">
                 <StackPanel Orientation="Vertical">
-                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Current Version" />
-                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Source Code" />
-                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Report Issues" />
-                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Credits" />
+                    <controls:SettingsCard
+                        x:Name="SettingsCardVersion"
+                        Margin="0,5,0,0"
+                        Description="Current version is 2.1.0"
+                        Header="Current Version"
+                        HeaderIcon="{ui:FontIcon Glyph=&#xF133;}">
+                        <HyperlinkButton Content="Check latest version" NavigateUri="https://github.com/riyasy/FlyPhotos/releases" />
+                    </controls:SettingsCard>
+                    <controls:SettingsCard
+                        x:Name="SettingsCardSourceCode"
+                        Margin="0,5,0,0"
+                        Description="Fly Photos is open source and hosted in Github"
+                        Header="Github Repository"
+                        HeaderIcon="{ui:BitmapIcon Source=/Assets/Images/github-mark.png}">
+                        <HyperlinkButton Content="Go to Github repository" NavigateUri="https://github.com/riyasy/FlyPhotos" />
+                    </controls:SettingsCard>
+                    <controls:SettingsCard
+                        x:Name="SettingsCardReportBugs"
+                        Margin="0,5,0,0"
+                        Description="Report issues in Github or mail to ryftools@outlook.com"
+                        Header="Bugs and issues"
+                        HeaderIcon="{ui:FontIcon Glyph=&#xE730;}">
+                        <HyperlinkButton Content="Go to bug page in repo" NavigateUri="https://github.com/riyasy/FlyPhotos/issues" />
+                    </controls:SettingsCard>
+                    <TextBlock
+                        Margin="0,5,0,0"
+                        Style="{StaticResource SubtitleTextBlockStyle}"
+                        Text="Credits" />
+                    <controls:SettingsCard
+                        x:Name="SettingsCardCredits"
+                        Margin="0,5,0,0"
+                        Description=""
+                        Header="Credits"
+                        HeaderIcon="{ui:FontIcon Glyph=&#xE728;}" />
                 </StackPanel>
             </PivotItem>
         </Pivot>

@@ -95,7 +95,7 @@ internal class LibHeifSharpReader
         return retBs;
     }
 
-    private static CanvasBitmap CreateEightBitImageWithoutAlpha(CanvasControl ctrl, HeifImage heifImage)
+    private static CanvasBitmap CreateEightBitImageWithoutAlpha(ICanvasResourceCreator ctrl, HeifImage heifImage)
     {
         var w = heifImage.Width;
         var h = heifImage.Height;

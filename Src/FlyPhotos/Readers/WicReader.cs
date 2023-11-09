@@ -117,7 +117,7 @@ internal class WicReader
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
             return (true, new Photo(canvasBitmap));
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             //Logger.Error(ex);
             return (false, Photo.Empty());
@@ -180,17 +180,18 @@ internal class WicReader
 
     private static bool AskExternalWicReaderExeToCopyPixelsToMemoryMap(string path, string mmfName)
     {
-        var exePath = "";
+        string exePath;
         if (App.Packaged)
         {
             CopyWicReaderExeToLocalStorage().GetAwaiter().GetResult();
-            string directory = Windows.Storage.ApplicationData.Current.LocalFolder.Path;
+            var directory = ApplicationData.Current.LocalFolder.Path;
             exePath = $@"{directory}\WicImageFileReaderNative.exe";
         }
         else
         {
             exePath = Util.ExternalWicReaderPath;
         }
+
         var command = $"\"{exePath}\" \"{path}\" {mmfName} bgra";
         var p = new Process
         {
@@ -212,10 +213,12 @@ internal class WicReader
             await ApplicationData.Current.LocalFolder.GetFileAsync("WicImageFileReaderNative.exe");
             return;
         }
-        catch (System.IO.FileNotFoundException)
+        catch (FileNotFoundException)
         {
         }
-        StorageFile stopfile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///WicImageFileReaderNative.exe"));
+
+        var stopfile =
+            await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///WicImageFileReaderNative.exe"));
         await stopfile.CopyAsync(ApplicationData.Current.LocalFolder);
         Logger.Trace("Copied WicImageFileReaderNative.exe to local storage");
     }

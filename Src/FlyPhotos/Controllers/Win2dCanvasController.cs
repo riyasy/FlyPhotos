@@ -97,17 +97,20 @@ internal class Win2dCanvasController
         }
     }
 
-    public void SetHundredPercent()
+    public void SetHundredPercent(bool redraw)
     {
         if (_currentPhoto.Bitmap == null) return;
         _scale = 1f;
         _lastScaleTo = 1f;
         _imagePos.X = _mainLayout.ActualWidth / 2;
         _imagePos.Y = _mainLayout.ActualHeight / 2;
-        _offScreenDrawTimer.Stop();
-        _offScreenDrawTimer.Start();
-        UpdateTransform();
-        _d2dCanvas.Invalidate();
+        if (redraw)
+        {
+            _offScreenDrawTimer.Stop();
+            _offScreenDrawTimer.Start();
+            UpdateTransform();
+            _d2dCanvas.Invalidate();
+        }
     }
 
     private void OffScreenDrawTimer_Tick(object sender, object e)

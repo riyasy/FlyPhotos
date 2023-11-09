@@ -25,8 +25,8 @@ internal class PhotoDisplayController
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    private const int CacheSizeOneSideHqImages = 2;
-    private const int CacheSizeOneSidePreviews = 300;
+    //private const int CacheSizeOneSideHqImages = 2;
+    //private const int CacheSizeOneSidePreviews = 300;
     private readonly int MaxConcurrentTasksHqImages = Environment.ProcessorCount;
     private readonly int MaxConcurrentTasksPreviews = Environment.ProcessorCount;
 
@@ -53,8 +53,8 @@ internal class PhotoDisplayController
     private readonly Win2dCanvasController _canvasController;
     private readonly Action<string, string> _progressUpdateCallback;
 
-    private int _hqCacheTasksCount = 0;
-    private int _previewCacheTasksCount = 0;
+    private int _hqCacheTasksCount;
+    private int _previewCacheTasksCount;
 
     public PhotoDisplayController(Win2dCanvasController canvasController, CanvasControl d2dCanvas,
         Action<string, string> statusCallback)
@@ -166,7 +166,7 @@ internal class PhotoDisplayController
                 _previewsBeingCached[index] = true;
                 var image = ImageUtil.GetPreview(_d2dCanvas, _files[index]).GetAwaiter().GetResult();
                 _cachedPreviews[index] = image;
-                _previewsBeingCached.Remove(index, out var temp);
+                _previewsBeingCached.Remove(index, out _);
                 if (_currentIndex == index)
                     UpgradeImageIfNeeded(image, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
                 UpdateProgressStatusDebug();
@@ -198,7 +198,7 @@ internal class PhotoDisplayController
                 _hqsBeingCached[index] = true;
                 var image = ImageUtil.GetHqImage(_d2dCanvas, _files[index]).GetAwaiter().GetResult();
                 _cachedHqImages[index] = image;
-                _hqsBeingCached.Remove(index, out var temp);
+                _hqsBeingCached.Remove(index, out _);
                 if (_currentIndex == index)
                     UpgradeImageIfNeeded(image, DisplayLevel.Preview, DisplayLevel.Hq);
                 _hqCacheTasksCount--;
@@ -224,16 +224,18 @@ internal class PhotoDisplayController
         var curIdx = _currentIndex;
 
         var keysToRemove = _cachedHqImages.Keys.Where(key =>
-            key > curIdx + CacheSizeOneSideHqImages || key < curIdx - CacheSizeOneSideHqImages).ToList();
+            key > curIdx + App.Settings.CacheSizeOneSideHqImages ||
+            key < curIdx - App.Settings.CacheSizeOneSideHqImages).ToList();
         keysToRemove.ForEach(key => _cachedHqImages.TryRemove(key, out _));
 
         keysToRemove = _cachedPreviews.Keys.Where(key =>
-            key > curIdx + CacheSizeOneSidePreviews || key < curIdx - CacheSizeOneSidePreviews).ToList();
+            key > curIdx + App.Settings.CacheSizeOneSidePreviews ||
+            key < curIdx - App.Settings.CacheSizeOneSidePreviews).ToList();
         keysToRemove.ForEach(key => _cachedPreviews.TryRemove(key, out _));
 
         // Create new list of to be cached HQ Images.
         var cacheIndexesHqImages = new List<int>();
-        for (var i = CacheSizeOneSideHqImages; i >= 1; i--)
+        for (var i = App.Settings.CacheSizeOneSideHqImages; i >= 1; i--)
         {
             cacheIndexesHqImages.Add(curIdx + i);
             cacheIndexesHqImages.Add(curIdx - i);
@@ -250,7 +252,7 @@ internal class PhotoDisplayController
 
         // Create new list of to be cached Previews.
         var cacheIndexesPreviews = new List<int>();
-        for (var i = CacheSizeOneSidePreviews; i >= 1; i--)
+        for (var i = App.Settings.CacheSizeOneSidePreviews; i >= 1; i--)
         {
             cacheIndexesPreviews.Add(curIdx + i);
             cacheIndexesPreviews.Add(curIdx - i);
@@ -328,6 +330,8 @@ internal class PhotoDisplayController
                 _currentIndex--;
                 break;
         }
+
+        if (App.Settings.ResetPanZoomOnNextPhoto) _canvasController.SetHundredPercent(false);
 
         if (!IsContinuousKeyPress() && _cachedHqImages.TryGetValue(_currentIndex, out var hqImage))
         {

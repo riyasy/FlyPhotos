@@ -52,6 +52,7 @@
 		<PackageReference Include="Vanara.PInvoke.User32" Version="3.4.17" />
 		<PackageReference Include="Vanara.PInvoke.DwmApi" Version="3.4.17" />
 		<PackageReference Include="Vanara.PInvoke.Comctl32" Version="3.4.17" />
+		<PackageReference Include="WinUIEx" Version="2.3.3" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 
@@ -65,6 +66,13 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\CLIWrapper\CLIWrapper.vcxproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Update="Properties\UserSettings.Designer.cs">
+	    <DesignTimeSharedInput>True</DesignTimeSharedInput>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>UserSettings.settings</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 	<ItemGroup>
 		<Content Update="Assets\Images\FileNotFound.png">
@@ -83,6 +91,10 @@
 	<ItemGroup>
 		<None Update="NLog.config">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="Properties\UserSettings.settings">
+		  <Generator>SettingsSingleFileGenerator</Generator>
+		  <LastGenOutput>UserSettings.Designer.cs</LastGenOutput>
 		</None>
 		<Page Update="Views\Settings.xaml">
 		  <Generator>MSBuild:Compile</Generator>
