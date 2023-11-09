@@ -27,10 +27,6 @@
                 Opacity="0" />
         </Grid>
         <Image x:Name="ImgDspBg" Stretch="None" />
-        <Rectangle
-            x:Name="DarkBg"
-            Fill="#AA000000"
-            Visibility="Collapsed" />
         <win2d:CanvasControl x:Name="D2dCanvas" />
         <TextBlock
             x:Name="TxtFileName"

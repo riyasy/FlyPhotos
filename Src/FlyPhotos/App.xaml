@@ -9,20 +9,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
                 <!--  Other merged dictionaries here  -->
-                <!--<ResourceDictionary>
-                    <ResourceDictionary.ThemeDictionaries>
-                        <ResourceDictionary x:Key="Default">
-                            <StaticResource x:Key="WindowCaptionBackground" ResourceKey="SystemControlTransparentBrush" />
-                            <StaticResource x:Key="WindowCaptionBackgroundDisabled"
-                                            ResourceKey="SystemControlTransparentBrush" />
-                        </ResourceDictionary>
-                        <ResourceDictionary x:Key="Light">
-                            <StaticResource x:Key="WindowCaptionBackground" ResourceKey="SystemControlTransparentBrush" />
-                            <StaticResource x:Key="WindowCaptionBackgroundDisabled"
-                                            ResourceKey="SystemControlTransparentBrush" />
-                        </ResourceDictionary>
-                    </ResourceDictionary.ThemeDictionaries>
-                </ResourceDictionary>-->
             </ResourceDictionary.MergedDictionaries>
             <!--  Other app resources here  -->
             <FontFamily x:Key="FluentIcons">/Assets/Fonts/Segoe Fluent Icons.ttf#Segoe Fluent Icons</FontFamily>

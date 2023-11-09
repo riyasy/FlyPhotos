@@ -19,6 +19,7 @@ using WinUIEx;
 using static FlyPhotos.Controllers.PhotoDisplayController;
 using static Vanara.PInvoke.User32;
 using Icon = System.Drawing.Icon;
+using Window = Microsoft.UI.Xaml.Window;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -207,6 +208,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         if (_settingWindow == null)
         {
             _settingWindow = new Settings();
+            _settingWindow.SetWindowSize(1024, 768);
             ThemeController.Instance.AddWindow(_settingWindow);
             _settingWindow.Closed += _settingWindow_Closed;
         }
