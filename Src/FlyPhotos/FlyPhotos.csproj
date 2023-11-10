@@ -50,8 +50,6 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
 		<PackageReference Include="NLog.Extensions.Logging" Version="5.3.5" />
 		<PackageReference Include="Vanara.PInvoke.User32" Version="3.4.17" />
-		<PackageReference Include="Vanara.PInvoke.DwmApi" Version="3.4.17" />
-		<PackageReference Include="Vanara.PInvoke.Comctl32" Version="3.4.17" />
 		<PackageReference Include="WinUIEx" Version="2.3.3" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
