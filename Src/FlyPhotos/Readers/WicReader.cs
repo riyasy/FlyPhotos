@@ -23,6 +23,15 @@ internal class WicReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    static WicReader()
+    {
+        CodecManager.Configure(codecs =>
+        {
+            codecs.Clear();
+            codecs.UseWicCodecs(WicCodecPolicy.All);
+        });
+    }
+
     public static async Task<(bool, Photo)> GetHq(CanvasControl ctrl, string inputPath)
     {
         try
@@ -70,11 +79,6 @@ internal class WicReader
         {
             try
             {
-                CodecManager.Configure(codecs =>
-                {
-                    codecs.Clear();
-                    codecs.UseWicCodecs(WicCodecPolicy.All);
-                });
                 using var ms = new MemoryStream();
                 MagicImageProcessor.ProcessImage(inputPath, ms, new ProcessImageSettings { Width = 200 });
                 var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());

@@ -63,6 +63,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         TxtFileName.Text = Path.GetFileName(App.SelectedFileName);
 
         _appWindow.Changed += AppWindow_Changed;
+        Closed += PhotoDisplayWindow_Closed;
         D2dCanvas.CreateResources += D2dCanvas_CreateResources;
         D2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
         MainLayout.KeyDown += HandleKeyDown;
@@ -210,17 +211,25 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
             _settingWindow = new Settings();
             _settingWindow.SetWindowSize(1024, 768);
             ThemeController.Instance.AddWindow(_settingWindow);
-            _settingWindow.Closed += _settingWindow_Closed;
+            _settingWindow.Closed += SettingWindow_Closed;
         }
 
         _settingWindow.Activate();
     }
 
-    private void _settingWindow_Closed(object sender, WindowEventArgs args)
+    private void SettingWindow_Closed(object sender, WindowEventArgs args)
     {
         if (_settingWindow != null)
-            _settingWindow.Closed -= _settingWindow_Closed;
+            _settingWindow.Closed -= SettingWindow_Closed;
         _settingWindow = null;
+    }
+
+    private void PhotoDisplayWindow_Closed(object sender, WindowEventArgs args)
+    {
+        if (_settingWindow != null)
+        {
+            _settingWindow.Close();
+        }
     }
 
     private void ButtonCoffee_OnClick(object sender, RoutedEventArgs e)
