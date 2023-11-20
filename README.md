@@ -7,7 +7,7 @@ Fly Photos is one of the fastest photoviewer for Windows. It tries to mimic many
 
 Watch Fly Photos in action
 
-[![Fly Photos](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DQkL2-WYY2Ic%26t%3D12s)](https://www.youtube.com/watch?v=QkL2-WYY2Ic&t=12s)
+[![Fly Photos](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DQkL2-WYY2Ic%26t)](https://www.youtube.com/watch?v=QkL2-WYY2Ic&t)
 
 | Version        	| 1.x                      	| 2.x             	|
 |----------------	|--------------------------	|-----------------	|
