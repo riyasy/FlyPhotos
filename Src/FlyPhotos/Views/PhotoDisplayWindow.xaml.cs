@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using FlyPhotos.Controllers;
+using FlyPhotos.Ext;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
@@ -9,7 +10,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using NLog;
-using Peter;
 using System;
 using System.Diagnostics;
 using System.IO;
