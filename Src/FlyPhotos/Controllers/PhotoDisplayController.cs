@@ -357,6 +357,11 @@ internal class PhotoDisplayController
         return _cachedPreviews.Count <= 1;
     }
 
+    public string GetFullPathCurrentFile()
+    {
+        return _files[_currentIndex];
+    }
+
     public enum NavDirection
     {
         Next,

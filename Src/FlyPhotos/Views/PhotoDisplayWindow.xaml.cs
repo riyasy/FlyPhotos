@@ -9,9 +9,11 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using NLog;
+using Peter;
 using System;
 using System.Diagnostics;
 using System.IO;
+using Vanara.PInvoke;
 using Windows.System;
 using Windows.UI;
 using WinRT.Interop;
@@ -100,7 +102,18 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     private void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
         if (_screenResizingInProgress) return;
-        if (_canvasController.IsPressedOnImage(e.GetCurrentPoint(D2dCanvas).Position)) return;
+        if (_canvasController.IsPressedOnImage(e.GetCurrentPoint(D2dCanvas).Position))
+        {
+            var properties = e.GetCurrentPoint(D2dCanvas).Properties;
+            if (properties.PointerUpdateKind == Microsoft.UI.Input.PointerUpdateKind.RightButtonReleased)
+            {
+                ShellContextMenu ctxMnu = new ShellContextMenu();
+                FileInfo[] arrFI = [new FileInfo(_photoController.GetFullPathCurrentFile())];
+                User32.GetCursorPos(out POINT mousePosScreen);
+                ctxMnu.ShowContextMenu(arrFI, new System.Drawing.Point(mousePosScreen.X, mousePosScreen.Y));
+            }
+            return;
+        }
         if (!_currentlyFullScreen) return;
         _screenResizingInProgress = true;
         var overLappedPresenter = _appWindow.Presenter as OverlappedPresenter;
