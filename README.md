@@ -5,6 +5,10 @@ Fly Photos is one of the fastest photoviewer for Windows. It tries to mimic many
 
 ![](https://github.com/riyasy/FlyPhotos/blob/main/Misc/ImagesForDocumentation/03FullScreen.png?raw=true)
 
+Watch Fly Photos in action
+
+[![Fly Photos](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DQkL2-WYY2Ic%26t)](https://www.youtube.com/watch?v=QkL2-WYY2Ic&t)
+
 | Version        	| 1.x                      	| 2.x             	|
 |----------------	|--------------------------	|-----------------	|
 | UI Technology     	| WPF                      	| WinUI, Win2D    	|
