@@ -118,6 +118,11 @@ internal class PhotoDisplayController
             _files = _files.Where(s =>
                 supportedExtensions.Contains(Path.GetExtension(s).ToUpperInvariant())).ToList();
 
+            if (!_files.Any())
+            {
+                _files.Add(selectedFileName);
+            }
+
             if (!_firstPhotoLoaded) _firstPhotoLoadEvent.WaitOne();
 
             if (_files.Count <= 0) return;

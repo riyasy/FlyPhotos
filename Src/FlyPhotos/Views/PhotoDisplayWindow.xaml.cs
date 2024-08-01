@@ -107,10 +107,19 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
             var properties = e.GetCurrentPoint(D2dCanvas).Properties;
             if (properties.PointerUpdateKind == Microsoft.UI.Input.PointerUpdateKind.RightButtonReleased)
             {
-                ShellContextMenu ctxMnu = new ShellContextMenu();
-                FileInfo[] arrFI = [new FileInfo(_photoController.GetFullPathCurrentFile())];
-                User32.GetCursorPos(out POINT mousePosScreen);
-                ctxMnu.ShowContextMenu(arrFI, new System.Drawing.Point(mousePosScreen.X, mousePosScreen.Y));
+                try
+                {
+                    ShellContextMenu ctxMnu = new ShellContextMenu();
+                    FileInfo[] arrFI = [new FileInfo(_photoController.GetFullPathCurrentFile())];
+                    User32.GetCursorPos(out POINT mousePosScreen);
+                    ctxMnu.ShowContextMenu(arrFI, new System.Drawing.Point(mousePosScreen.X, mousePosScreen.Y));
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("Showing context menu failed");
+                    Logger.Error(ex);
+                }
+
             }
             return;
         }
