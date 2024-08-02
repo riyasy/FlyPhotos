@@ -1,9 +1,9 @@
+#include "ExplorerContextMenu.h"
 #include "CliWrapper.h"
 #include "marshal.h"
 
-using namespace System::Collections::Generic;
+
 using namespace CliWrapper;
-using namespace System;
 
 ManagedShellUtility::ManagedShellUtility(): shellUtil(new ShellUtility())
 {
@@ -33,6 +33,13 @@ List<String^>^ ManagedShellUtility::GetFileListFromExplorerWindow()
 		}
 	}
 	return fileListManaged;
+}
+
+bool ManagedShellUtility::ShowContextMenu(String^ fileName, int posX, int posY)
+{
+	ExplorerContextMenu ctxMenu;
+	return ctxMenu.ShowContextMenu(NULL, marshal::to<wchar_t*>(fileName), posX, posY);
+	return true;
 }
 
 List<CodecInfo^>^ ManagedShellUtility::GetWicCodecList()

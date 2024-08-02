@@ -50,7 +50,8 @@
                 Click="ButtonBack_OnClick"
                 Content="&#xE96f;"
                 FontFamily="{StaticResource FluentIcons}"
-                FontSize="16">
+                FontSize="16"
+                PointerWheelChanged="ButtonBackNext_PointerWheelChanged">
                 <ToolTipService.ToolTip>
                     <ToolTip
                         AutomationProperties.FullDescription="Non-occluding tooltip"
@@ -64,7 +65,8 @@
                 Click="ButtonRotate_OnClick"
                 Content="&#xE89E;"
                 FontFamily="{StaticResource FluentIcons}"
-                FontSize="16">
+                FontSize="16"
+                PointerWheelChanged="ButtonRotate_PointerWheelChanged">
                 <ToolTipService.ToolTip>
                     <ToolTip
                         AutomationProperties.FullDescription="Non-occluding tooltip"
@@ -79,7 +81,8 @@
                 Click="ButtonNext_OnClick"
                 Content="&#xE970;"
                 FontFamily="{StaticResource FluentIcons}"
-                FontSize="16">
+                FontSize="16"
+                PointerWheelChanged="ButtonBackNext_PointerWheelChanged">
                 <ToolTipService.ToolTip>
                     <ToolTip
                         AutomationProperties.FullDescription="Non-occluding tooltip"

@@ -117,12 +117,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CliWrapper.h" />
+    <ClInclude Include="ExplorerContextMenu.h" />
     <ClInclude Include="WicUtility.h" />
     <ClInclude Include="ShellUtility.h" />
     <ClInclude Include="marshal.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CliWrapper.cpp" />
+    <ClCompile Include="ExplorerContextMenu.cpp" />
     <ClCompile Include="WicUtility.cpp" />
     <ClCompile Include="ShellUtility.cpp" />
   </ItemGroup>

@@ -26,6 +26,7 @@ namespace CliWrapper
 		~ManagedShellUtility();
 		void SayThis(String^ phrase);
 		List<String^>^ GetFileListFromExplorerWindow();
+		bool ShowContextMenu(String^ fileName, int posX, int posY);
 		List<CodecInfo^>^ GetWicCodecList();
 		bool CopyImagePixelsToMemoryMap(String^ fileName, String^ mmfName, bool destAlphaNeeded);
 	};

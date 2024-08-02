@@ -120,7 +120,7 @@
                     <controls:SettingsCard
                         x:Name="SettingsCardVersion"
                         Margin="0,5,0,0"
-                        Description="Current version is 2.2.1"
+                        Description="Current version is 2.2.2"
                         Header="Current Version"
                         HeaderIcon="{ui:FontIcon Glyph=&#xF133;}">
                         <HyperlinkButton Content="Check latest version" NavigateUri="https://github.com/riyasy/FlyPhotos/releases" />

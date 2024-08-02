@@ -281,9 +281,9 @@ internal class Win2dCanvasController
                              && p.X <= rect.Right && p.Y <= rect.Bottom;
     }
 
-    internal void RotateCurrentPhotoBy90()
+    internal void RotateCurrentPhotoBy90(bool clockWise)
     {
-        _currentPhoto.Rotation += 90;
+        _currentPhoto.Rotation += (clockWise ? 90:-90);
         UpdateTransform();
         _d2dCanvas.Invalidate();
     }

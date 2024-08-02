@@ -1,6 +1,6 @@
 ﻿#nullable enable
+using CliWrapper;
 using FlyPhotos.Controllers;
-using FlyPhotos.Ext;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
@@ -13,6 +13,7 @@ using NLog;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using Vanara.PInvoke;
 using Windows.System;
 using Windows.UI;
@@ -78,6 +79,36 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         overLappedPresenter.SetBorderAndTitleBar(false, false);
     }
 
+    private void ButtonBackNext_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+    {
+        if (_photoController.IsSinglePhoto()) return;
+        var delta = e.GetCurrentPoint(ButtonBack).Properties.MouseWheelDelta;
+        if (delta > 0)
+        {            
+            _photoController.Fly(NavDirection.Next);
+            _repeatButtonReleaseCheckTimer.Start();
+        }
+        else
+        {
+            _photoController.Fly(NavDirection.Prev);
+            _repeatButtonReleaseCheckTimer.Start();
+        }
+    }
+
+    private void ButtonRotate_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+    {
+        if (_photoController.IsSinglePhoto()) return;
+        var delta = e.GetCurrentPoint(ButtonBack).Properties.MouseWheelDelta;
+        if (delta > 0)
+        {
+            _canvasController.RotateCurrentPhotoBy90(true);
+        }
+        else
+        {
+            _canvasController.RotateCurrentPhotoBy90(false);
+        }
+    }
+
     public void UpdateStatus(string currentFileName, string currentCacheStatus)
     {
         TxtFileName.Text = currentFileName;
@@ -109,10 +140,14 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
             {
                 try
                 {
-                    ShellContextMenu ctxMnu = new ShellContextMenu();
-                    FileInfo[] arrFI = [new FileInfo(_photoController.GetFullPathCurrentFile())];
-                    User32.GetCursorPos(out POINT mousePosScreen);
-                    ctxMnu.ShowContextMenu(arrFI, new System.Drawing.Point(mousePosScreen.X, mousePosScreen.Y));
+                    var filePath = _photoController.GetFullPathCurrentFile();
+                    if (File.Exists(filePath))
+                    {
+                        var msu = new ManagedShellUtility();
+                        User32.GetCursorPos(out POINT mousePosScreen);
+                        var hwnd = WindowNative.GetWindowHandle(this);
+                        msu.ShowContextMenu(filePath, mousePosScreen.X, mousePosScreen.Y);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -219,7 +254,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
 
     private void ButtonRotate_OnClick(object sender, RoutedEventArgs e)
     {
-        _canvasController.RotateCurrentPhotoBy90();
+        _canvasController.RotateCurrentPhotoBy90(true);
     }
 
     private void ButtonHelp_OnClick(object sender, RoutedEventArgs e)
