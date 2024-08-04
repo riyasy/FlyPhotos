@@ -27,6 +27,7 @@ internal static class Util
         var msu = new ManagedShellUtility();
         _codecInfoList = msu.GetWicCodecList();
         foreach (var codecInfo in _codecInfoList) SupportedExtensions.AddRange(codecInfo.fileExtensions);
+        //SupportedExtensions.Add(".PSD");
 
         var memoryLeakingCodecs = _codecInfoList.Where(x => x.friendlyName.Contains("Raw Image"));
         foreach (var leakingCodec in memoryLeakingCodecs) MemoryLeakingExtensions.AddRange(leakingCodec.fileExtensions);
