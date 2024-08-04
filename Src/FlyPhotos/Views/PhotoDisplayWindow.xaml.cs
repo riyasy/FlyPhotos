@@ -17,6 +17,7 @@ using System.Runtime.InteropServices;
 using Vanara.PInvoke;
 using Windows.System;
 using Windows.UI;
+using Windows.UI.Core;
 using WinRT.Interop;
 using WinUIEx;
 using static FlyPhotos.Controllers.PhotoDisplayController;
@@ -69,6 +70,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         Closed += PhotoDisplayWindow_Closed;
         D2dCanvas.CreateResources += D2dCanvas_CreateResources;
         D2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
+        D2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;
         MainLayout.KeyDown += HandleKeyDown;
         MainLayout.KeyUp += HandleKeyUp;
         _repeatButtonReleaseCheckTimer.Tick += RepeatButtonReleaseCheckTimer_Tick;
@@ -169,6 +171,28 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
 
         _currentlyFullScreen = false;
         _screenResizingInProgress = false;
+    }
+
+    private void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+    {
+        var coreWindow = Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
+        bool isControlPressed = coreWindow.HasFlag(CoreVirtualKeyStates.Down);
+        if (isControlPressed)
+        {
+            if (_photoController.IsSinglePhoto()) return;
+            var delta = e.GetCurrentPoint(D2dCanvas).Properties.MouseWheelDelta;
+            if (delta > 0)
+            {
+                _photoController.Fly(NavDirection.Next);
+                _repeatButtonReleaseCheckTimer.Start();
+            }
+            else
+            {
+                _photoController.Fly(NavDirection.Prev);
+                _repeatButtonReleaseCheckTimer.Start();
+            }
+        }
+
     }
 
     private void SetupTransparentTitleBar()

@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Windows.Foundation;
+using Windows.System;
+using Windows.UI.Core;
 
 namespace FlyPhotos.Controllers;
 
@@ -175,6 +177,12 @@ internal class Win2dCanvasController
 
     private void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
+        var coreWindow = Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
+        bool isControlPressed = coreWindow.HasFlag(CoreVirtualKeyStates.Down);
+        if (isControlPressed)
+        {
+            return;
+        }
         var delta = e.GetCurrentPoint(_d2dCanvas).Properties.MouseWheelDelta;
 
         var scalePercentage = delta > 0 ? 1.25f : 0.8f;
