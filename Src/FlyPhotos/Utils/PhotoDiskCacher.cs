@@ -15,7 +15,7 @@ public sealed class PhotoDiskCacher : IDisposable
     private readonly LiteDatabase _db;
     private bool _disposed = false;
 
-    private const int MaxItemCount = 10000; // Maximum number of items in the cache
+    private const int MaxItemCount = 20000; // Maximum number of items in the cache
 
     private PhotoDiskCacher()
     {
@@ -35,7 +35,7 @@ public sealed class PhotoDiskCacher : IDisposable
         if (cachedImage != null)
         {
             // Check if the last modified date of the file has changed
-            var lastModified = File.GetLastWriteTimeUtc(filePath);
+            var lastModified = File.GetLastWriteTimeUtc(filePath).ToString("yyyyMMddHHmmss"); ;
             if (cachedImage.LastModified == lastModified)
             {
                 cachedImage.LastAccessed = DateTime.UtcNow;
@@ -61,7 +61,7 @@ public sealed class PhotoDiskCacher : IDisposable
         var col = _db.GetCollection<CachedImage>("images");
 
         // Get the last modified time of the file
-        var lastModified = File.GetLastWriteTimeUtc(filePath);
+        var lastModified = File.GetLastWriteTimeUtc(filePath).ToString("yyyyMMddHHmmss"); ;
 
         // Check if the image is already cached and if the last modified time is the same
         var cachedImage = col.FindOne(x => x.FilePath == filePath);
@@ -178,6 +178,6 @@ public sealed class PhotoDiskCacher : IDisposable
         public string FilePath { get; set; }
         public byte[] ImageData { get; set; }
         public DateTime LastAccessed { get; set; }
-        public DateTime LastModified { get; set; } // New field for last modified date
+        public string LastModified { get; set; } // New field for last modified date
     }
 }
