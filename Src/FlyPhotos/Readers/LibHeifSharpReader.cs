@@ -38,7 +38,7 @@ internal class LibHeifSharpReader
 
             using var previewImageHandle = primaryImage.GetThumbnailImage(previewImageIds[0]);
             var retBmp = CreateBitmapSource(ctrl, previewImageHandle, decodingOptions);
-            return (retBmp.Bounds.Width >= 1, new Photo(retBmp));
+            return (retBmp.Bounds.Width >= 1, new Photo(retBmp, Photo.PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {

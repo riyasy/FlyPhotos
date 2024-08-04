@@ -38,13 +38,16 @@ internal class PhotoDisplayController
 
     private readonly ConcurrentStack<int> _toBeCachedHqImages = new();
     private readonly ConcurrentDictionary<int, Photo> _cachedHqImages = new();
-    private readonly AutoResetEvent _waitForHqImagesToBeCached = new(false);
+    private readonly AutoResetEvent _hqCachingCanStart = new(false);
     private readonly ConcurrentDictionary<int, bool> _hqsBeingCached = new();
 
     private readonly ConcurrentStack<int> _toBeCachedPreviews = new();
     private readonly ConcurrentDictionary<int, Photo> _cachedPreviews = new();
-    private readonly AutoResetEvent _waitForPreviewsToBeCached = new(false);
+    private readonly AutoResetEvent _previewCachingCanStart = new(false);
     private readonly ConcurrentDictionary<int, bool> _previewsBeingCached = new();
+
+    private readonly ConcurrentStack<int> _toBeDiskCachedPreviews = new();
+    private readonly ManualResetEvent _diskCachingCanStart = new (false);
 
     private int _keyPressCounter;
     private DisplayLevel _currentDisplayLevel;
@@ -137,6 +140,8 @@ internal class PhotoDisplayController
             var hqCachingThread = new Thread(HqImageCacheBuilderDoWork)
                 { IsBackground = true, Priority = ThreadPriority.AboveNormal };
             hqCachingThread.Start();
+            var previewDiskCachingThread = new Thread(PreviewDiskCacherDoWork) { IsBackground = true };
+            previewDiskCachingThread.Start();
         }
         catch (Exception ex)
         {
@@ -155,7 +160,10 @@ internal class PhotoDisplayController
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
-                _waitForPreviewsToBeCached.WaitOne();
+
+                _diskCachingCanStart.Set();
+                _previewCachingCanStart.WaitOne();
+                _diskCachingCanStart.Reset();
             }
 
             if (_toBeCachedPreviews.IsEmpty) continue;
@@ -170,6 +178,7 @@ internal class PhotoDisplayController
                 var index = item;
                 _previewsBeingCached[index] = true;
                 var image = ImageUtil.GetPreview(_d2dCanvas, _files[index]).GetAwaiter().GetResult();
+                if (image.PreviewFrom == Photo.PreviewSource.FromDisk) { _toBeDiskCachedPreviews.Push(item); }
                 _cachedPreviews[index] = image;
                 _previewsBeingCached.Remove(index, out _);
                 if (_currentIndex == index)
@@ -188,7 +197,7 @@ internal class PhotoDisplayController
 
         while (true)
         {
-            if (_toBeCachedHqImages.IsEmpty || IsContinuousKeyPress()) _waitForHqImagesToBeCached.WaitOne();
+            if (_toBeCachedHqImages.IsEmpty || IsContinuousKeyPress()) _hqCachingCanStart.WaitOne();
 
             if (_toBeCachedHqImages.IsEmpty) continue;
 
@@ -211,6 +220,30 @@ internal class PhotoDisplayController
             });
             _hqCacheTasksCount++;
         }
+    }
+
+    private void PreviewDiskCacherDoWork()
+    {
+        while (true)
+        {
+            _diskCachingCanStart.WaitOne();
+
+            if (_toBeDiskCachedPreviews.IsEmpty)
+            {
+                _diskCachingCanStart.Reset();
+                continue;
+            }
+
+            if (!_toBeDiskCachedPreviews.TryPop(out var index)) continue;
+
+            if (_cachedPreviews.TryGetValue(index, out var image))
+            {
+                if (image != null && image.PreviewFrom == Photo.PreviewSource.FromDisk)
+                {
+                    PhotoDiskCacher.Instance.PutInCache(_files[index], image.Bitmap);
+                }
+            }
+        }            
     }
 
     private void UpgradeImageIfNeeded(Photo image, DisplayLevel fromDisplayState,
@@ -301,7 +334,7 @@ internal class PhotoDisplayController
 
         DisplayNextPhoto(direction);
         UpdateProgressStatusDebug();
-        _waitForPreviewsToBeCached.Set();
+        _previewCachingCanStart.Set();
     }
 
     public void Brake()
@@ -312,7 +345,7 @@ internal class PhotoDisplayController
             _currentDisplayLevel = DisplayLevel.Hq;
         }
 
-        _waitForHqImagesToBeCached.Set();
+        _hqCachingCanStart.Set();
         _keyPressCounter = 0;
     }
 

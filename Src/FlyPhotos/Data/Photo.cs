@@ -5,28 +5,43 @@ namespace FlyPhotos.Data;
 
 internal class Photo
 {
+    public enum PreviewSource
+    {
+        FromDiskCache,
+        FromDisk,
+        ErrorScreen, 
+        Undefined
+    }
+
     public CanvasBitmap Bitmap { get; set; }
     public SoftwareBitmap SoftwareBitmap { get; set; }
     public int Rotation { get; set; }
 
-    public Photo(CanvasBitmap bitmap)
+    public PreviewSource PreviewFrom { get; set; }
+
+    public Photo(CanvasBitmap bitmap, PreviewSource previewFrom, int rotation = 0)
     {
         Bitmap = bitmap;
-    }
-
-    public Photo(SoftwareBitmap softwareBitmap)
-    {
-        SoftwareBitmap = softwareBitmap;
-    }
-
-    public Photo(CanvasBitmap bitmap, int rotation)
-    {
-        Bitmap = bitmap;
+        PreviewFrom = previewFrom;
         Rotation = rotation;
     }
 
+    public Photo(SoftwareBitmap softwareBitmap, PreviewSource previewFrom, int rotation = 0)
+    {
+        SoftwareBitmap = softwareBitmap;
+        PreviewFrom = previewFrom;
+        Rotation = rotation;
+    }
+
+    //public Photo(CanvasBitmap bitmap, int rotation)
+    //{
+    //    Bitmap = bitmap;
+    //    Rotation = rotation;
+    //}
+
     public static Photo Empty()
     {
-        return new Photo(null, 0);
+        CanvasBitmap bitmap = null;
+        return new Photo(bitmap, PreviewSource.Undefined, 0);
     }
 }

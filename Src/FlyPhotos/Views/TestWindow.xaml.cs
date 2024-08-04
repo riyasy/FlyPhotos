@@ -1,5 +1,6 @@
 using FlyPhotos.Data;
 using FlyPhotos.Utils;
+using Microsoft.Graphics.Canvas;
 using Microsoft.UI.Xaml;
 using NLog;
 using System;
@@ -21,7 +22,7 @@ namespace FlyPhotos.Views;
 public sealed partial class TestWindow
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-    private readonly List<Photo> _photos = new();
+    private readonly Dictionary<string, Photo> _photos = new();
     private List<string> _files;
 
     public TestWindow()
@@ -35,15 +36,8 @@ public sealed partial class TestWindow
         _photos.Clear();
 
         var stopwatch = new Stopwatch();
-        stopwatch.Start();
 
-        //foreach (var file in _files)
-        //{
-        //    var k = await ImageUtil.GetHqImage(D2dCanvas, file);
-        //    _photos.Add(k);
-        //}
-
-        for (var index = 0; index < Math.Min(_files.Count, 20); index++)
+        for (var index = 0; index < Math.Min(_files.Count, 100); index++)
         {
             var file = _files[index];
 
@@ -54,9 +48,31 @@ public sealed partial class TestWindow
             async Task GetInitialPreview(string fileName)
             {
                 var k = await ImageUtil.GetPreview(D2dCanvas, fileName);
-                _photos.Add(k);
+                _photos.Add(fileName, k);
             }
         }
+
+        stopwatch.Start();
+
+        foreach (var photo in _photos)
+        {
+            var res = Task.Run(() => GetInitialPreview(photo.Key, photo.Value.Bitmap));
+            res.Wait();
+            continue;
+
+            async Task GetInitialPreview(string fileName, CanvasBitmap bitmap)
+            {
+                PhotoDiskCacher.Instance.PutInCache(fileName, bitmap);
+            }
+        }
+
+        //foreach (var file in _files)
+        //{
+        //    var k = await ImageUtil.GetHqImage(D2dCanvas, file);
+        //    _photos.Add(k);
+        //}
+
+
 
         stopwatch.Stop();
 
