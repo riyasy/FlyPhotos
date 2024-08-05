@@ -7,7 +7,7 @@ namespace FlyPhotos.Controllers;
 internal class ThemeController
 {
     public static ThemeController Instance { get; } = new();
-    public List<Window> Windows = new();
+    public List<Window> Windows = [];
     private ElementTheme _currentTheme;
 
     private ThemeController()

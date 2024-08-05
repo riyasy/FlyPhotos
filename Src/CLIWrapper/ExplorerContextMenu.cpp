@@ -83,7 +83,7 @@ bool ExplorerContextMenu::ShowContextMenu(HINSTANCE appInstance, LPCWSTR filePat
         {
             POINT pt = { posX, posY };
 
-            CMINVOKECOMMANDINFOEX info = { 0 };
+            CMINVOKECOMMANDINFOEX info = {};
             info.cbSize = sizeof(info);
             info.fMask = CMIC_MASK_UNICODE | CMIC_MASK_PTINVOKE; // remember the point for "properties"
             if (GetKeyState(VK_CONTROL) < 0)

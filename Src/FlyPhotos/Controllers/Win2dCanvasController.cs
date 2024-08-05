@@ -4,7 +4,6 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using NLog;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -16,7 +15,7 @@ namespace FlyPhotos.Controllers;
 
 internal class Win2dCanvasController
 {
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+    // private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     private readonly CanvasDevice _device = CanvasDevice.GetSharedDevice();
     private CanvasRenderTarget _offscreen;

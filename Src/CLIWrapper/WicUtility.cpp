@@ -9,7 +9,7 @@ HRESULT WicUtility::EnumCodecs(IWICImagingFactory* pImagingFactory,
 	listCodecInfo.RemoveAll();
 
 	CComPtr<IEnumUnknown> pEnum;
-	const DWORD dwOptions = WICComponentEnumerateDefault;
+	constexpr DWORD dwOptions = WICComponentEnumerateDefault;
 	const HRESULT hr = pImagingFactory->CreateComponentEnumerator(type,
 	                                                              dwOptions, &pEnum);
 	if (SUCCEEDED(hr))
@@ -18,7 +18,7 @@ HRESULT WicUtility::EnumCodecs(IWICImagingFactory* pImagingFactory,
 		CComPtr<IUnknown> pElement = nullptr;
 		while (S_OK == pEnum->Next(1, &pElement, &cbActual))
 		{
-			const UINT cbBuffer = 256;
+			constexpr UINT cbBuffer = 256;
 			CCodecInfo codecInfo;
 			UINT cbActual2 = 0;
 			const CComQIPtr<IWICBitmapCodecInfo> pCodecInfo = pElement;

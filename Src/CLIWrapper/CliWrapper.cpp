@@ -39,7 +39,6 @@ bool ManagedShellUtility::ShowContextMenu(String^ fileName, int posX, int posY)
 {
 	ExplorerContextMenu ctxMenu;
 	return ctxMenu.ShowContextMenu(NULL, marshal::to<wchar_t*>(fileName), posX, posY);
-	return true;
 }
 
 List<CodecInfo^>^ ManagedShellUtility::GetWicCodecList()

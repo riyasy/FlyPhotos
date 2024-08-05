@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+
+<doc>
+	<assembly>
+		<name>Magick.NET.SystemDrawing</name>
+	</assembly>
+	<members>
+		<member name="T:ImageMagick.IMagickColorExtensions">
+			<summary>
+				Extension methods for the <see cref="T:ImageMagick.IMagickColor`1" /> interface.
+			</summary>
+		</member>
+		<member
+			name="M:ImageMagick.IMagickColorExtensions.SetFromColor``1(ImageMagick.IMagickColor{``0},System.Drawing.Color)">
+			<summary>
+				Converts the specified <see cref="T:System.Drawing.Color" /> to a <see cref="T:ImageMagick.IMagickColor`1" />
+				instance.
+			</summary>
+			<param name="self">The color.</param>
+			<param name="color">The <see cref="T:System.Drawing.Color" /> to convert.</param>
+			<typeparam name="TQuantumType">The quantum type.</typeparam>
+		</member>
+		<member name="M:ImageMagick.IMagickColorExtensions.ToColor``1(ImageMagick.IMagickColor{``0})">
+			<summary>
+				Converts the value of this instance to an equivalent Color.
+			</summary>
+			<param name="self">The color.</param>
+			<returns>A <see cref="T:System.Drawing.Color" /> instance.</returns>
+			<typeparam name="TQuantumType">The quantum type.</typeparam>
+		</member>
+		<member name="T:ImageMagick.IMagickGeometryExtensions">
+			<summary>
+				Extension methods for the <see cref="T:ImageMagick.IMagickGeometry" /> interface.
+			</summary>
+		</member>
+		<member
+			name="M:ImageMagick.IMagickGeometryExtensions.SetFromRectangle(ImageMagick.IMagickGeometry,System.Drawing.Rectangle)">
+			<summary>
+				Sets the values of this class using the specified <see cref="T:System.Drawing.Rectangle" />.
+			</summary>
+			/// <param name="self">The geometry.</param>
+			<param name="rectangle">The <see cref="T:System.Drawing.Rectangle" /> to convert.</param>
+		</member>
+		<member name="M:ImageMagick.IMagickGeometryExtensions.ToRectangle(ImageMagick.IMagickGeometry)">
+			<summary>
+				Converts the value of this instance to an equivalent <see cref="T:System.Drawing.Rectangle" />.
+			</summary>
+			<param name="self">The geometry.</param>
+			<returns>A <see cref="T:System.Drawing.Color" /> instance.</returns>
+		</member>
+		<member name="T:ImageMagick.IMagickImageCollectionExtensions">
+			<summary>
+				Extension methods for the <see cref="T:ImageMagick.IMagickImageCollection`1" /> interface.
+			</summary>
+		</member>
+		<member name="M:ImageMagick.IMagickImageCollectionExtensions.ToBitmap``1(ImageMagick.IMagickImageCollection{``0})">
+			<summary>
+				Converts this instance to a <see cref="T:System.Drawing.Bitmap" /> using
+				<see cref="P:System.Drawing.Imaging.ImageFormat.Tiff" />.
+			</summary>
+			<param name="self">The image collection.</param>
+			<typeparam name="TQuantumType">The quantum type.</typeparam>
+			<returns>
+				A <see cref="T:System.Drawing.Bitmap" /> that has the format
+				<see cref="P:System.Drawing.Imaging.ImageFormat.Tiff" />.
+			</returns>
+		</member>
+		<member
+			name="M:ImageMagick.IMagickImageCollectionExtensions.ToBitmap``1(ImageMagick.IMagickImageCollection{``0},System.Drawing.Imaging.ImageFormat)">
+			<summary>
+				Converts this instance to a <see cref="T:System.Drawing.Bitmap" /> using the specified
+				<see cref="T:System.Drawing.Imaging.ImageFormat" />.
+				Supported formats are: Gif, Icon, Tiff.
+			</summary>
+			<param name="self">The image collection.</param>
+			<param name="imageFormat">The image format.</param>
+			<typeparam name="TQuantumType">The quantum type.</typeparam>
+			<returns>
+				A <see cref="T:System.Drawing.Bitmap" /> that has the specified
+				<see cref="T:System.Drawing.Imaging.ImageFormat" />.
+			</returns>
+		</member>
+		<member name="T:ImageMagick.IMagickImageExtentions">
+			<content>
+				Contains code that is not compatible with .NET Core.
+			</content>
+		</member>
+		<member name="M:ImageMagick.IMagickImageExtentions.Read``1(ImageMagick.IMagickImage{``0},System.Drawing.Bitmap)">
+			<summary>
+				Read single image frame.
+			</summary>
+			<param name="self">The image.</param>
+			<param name="bitmap">The bitmap to read the image from.</param>
+			<typeparam name="TQuantumType">The quantum type.</typeparam>
+			<exception cref="T:ImageMagick.MagickException">Thrown when an error is raised by ImageMagick.</exception>
+		</member>
+		<member name="M:ImageMagick.IMagickImageExtentions.ToBitmap``1(ImageMagick.IMagickImage{``0})">
+			<summary>
+				Converts this instance to a <see cref="T:System.Drawing.Bitmap" /> using
+				<see cref="P:System.Drawing.Imaging.ImageFormat.Bmp" />.
+			</summary>
+			<param name="self">The image.</param>
+			<typeparam name="TQuantumType">The quantum type.</typeparam>
+			<returns>
+				A <see cref="T:System.Drawing.Bitmap" /> that has the format
+				<see cref="P:System.Drawing.Imaging.ImageFormat.Bmp" />.
+			</returns>
+		</member>
+		<member name="M:ImageMagick.IMagickImageExtentions.ToBitmapWithDensity``1(ImageMagick.IMagickImage{``0})">
+			<summary>
+				Converts this instance to a <see cref="T:System.Drawing.Bitmap" /> using
+				<see cref="P:System.Drawing.Imaging.ImageFormat.Bmp" />.
+			</summary>
+			<param name="self">The image.</param>
+			<typeparam name="TQuantumType">The quantum type.</typeparam>
+			<returns>
+				A <see cref="T:System.Drawing.Bitmap" /> that has the format
+				<see cref="P:System.Drawing.Imaging.ImageFormat.Bmp" />.
+			</returns>
+		</member>
+		<member
+			name="M:ImageMagick.IMagickImageExtentions.ToBitmap``1(ImageMagick.IMagickImage{``0},System.Drawing.Imaging.ImageFormat)">
+			<summary>
+				Converts this instance to a <see cref="T:System.Drawing.Bitmap" /> using the specified
+				<see cref="T:System.Drawing.Imaging.ImageFormat" />.
+				Supported formats are: Bmp, Gif, Icon, Jpeg, Png, Tiff.
+			</summary>
+			<param name="self">The image.</param>
+			<param name="imageFormat">The image format.</param>
+			<typeparam name="TQuantumType">The quantum type.</typeparam>
+			<returns>
+				A <see cref="T:System.Drawing.Bitmap" /> that has the specified
+				<see cref="T:System.Drawing.Imaging.ImageFormat" />.
+			</returns>
+		</member>
+		<member
+			name="M:ImageMagick.IMagickImageExtentions.ToBitmapWithDensity``1(ImageMagick.IMagickImage{``0},System.Drawing.Imaging.ImageFormat)">
+			<summary>
+				Converts this instance to a <see cref="T:System.Drawing.Bitmap" /> using the specified
+				<see cref="T:System.Drawing.Imaging.ImageFormat" />.
+				Supported formats are: Bmp, Gif, Icon, Jpeg, Png, Tiff.
+			</summary>
+			<param name="self">The image.</param>
+			<param name="imageFormat">The image format.</param>
+			<typeparam name="TQuantumType">The quantum type.</typeparam>
+			<returns>
+				A <see cref="T:System.Drawing.Bitmap" /> that has the specified
+				<see cref="T:System.Drawing.Imaging.ImageFormat" />.
+			</returns>
+		</member>
+		<member name="T:ImageMagick.IMagickImageFactoryExtensions">
+			<summary>
+				Extension methods for the <see cref="T:ImageMagick.IMagickImageFactory`1" /> interface.
+			</summary>
+		</member>
+		<member
+			name="M:ImageMagick.IMagickImageFactoryExtensions.Create``1(ImageMagick.IMagickImageFactory{``0},System.Drawing.Bitmap)">
+			<summary>
+				Initializes a new instance that implements <see cref="T:ImageMagick.IMagickImageFactory`1" />.
+			</summary>
+			<param name="self">The image factory.</param>
+			<param name="bitmap">The bitmap to use.</param>
+			<typeparam name="TQuantumType">The quantum type.</typeparam>
+			<exception cref="T:ImageMagick.MagickException">Thrown when an error is raised by ImageMagick.</exception>
+			<returns>A new <see cref="T:ImageMagick.IMagickImage`1" /> instance.</returns>
+		</member>
+	</members>
+</doc>

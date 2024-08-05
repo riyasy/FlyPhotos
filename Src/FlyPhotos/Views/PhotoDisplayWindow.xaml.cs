@@ -13,7 +13,6 @@ using NLog;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using Vanara.PInvoke;
 using Windows.System;
 using Windows.UI;
@@ -101,14 +100,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     {
         if (_photoController.IsSinglePhoto()) return;
         var delta = e.GetCurrentPoint(ButtonBack).Properties.MouseWheelDelta;
-        if (delta > 0)
-        {
-            _canvasController.RotateCurrentPhotoBy90(true);
-        }
-        else
-        {
-            _canvasController.RotateCurrentPhotoBy90(false);
-        }
+        _canvasController.RotateCurrentPhotoBy90(delta > 0);
     }
 
     public void UpdateStatus(string currentFileName, string currentCacheStatus)
@@ -145,10 +137,8 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
                     var filePath = _photoController.GetFullPathCurrentFile();
                     if (File.Exists(filePath))
                     {
-                        var msu = new ManagedShellUtility();
                         User32.GetCursorPos(out POINT mousePosScreen);
-                        var hwnd = WindowNative.GetWindowHandle(this);
-                        msu.ShowContextMenu(filePath, mousePosScreen.X, mousePosScreen.Y);
+                        ManagedShellUtility.ShowContextMenu(filePath, mousePosScreen.X, mousePosScreen.Y);
                     }
                 }
                 catch (Exception ex)

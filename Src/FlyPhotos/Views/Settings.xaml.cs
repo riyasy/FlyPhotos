@@ -51,8 +51,9 @@ public sealed partial class Settings
 
 
         SettingsCardCredits.Description = $"Uses packages from " +
-                                          $"{Environment.NewLine}libheif - https://github.com/strukturag/libheif " +
-                                          $"{Environment.NewLine}libheif-sharp - https://github.com/0xC0000054/libheif-sharp " +
+                                          $"{Environment.NewLine}libheif (For HEIC) - https://github.com/strukturag/libheif " +
+                                          $"{Environment.NewLine}libheif-sharp (For HEIC) - https://github.com/0xC0000054/libheif-sharp " +
+                                          $"{Environment.NewLine}Magick.NET (For PSD) - https://github.com/dlemstra/Magick.NET" +
                                           $"{Environment.NewLine}nlog - https://github.com/NLog" +
                                           $"{Environment.NewLine}Vanara - https://github.com/dahall/Vanara";
         TextBoxCodecs.Text =

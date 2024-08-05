@@ -31,7 +31,7 @@ internal class PhotoDisplayController
     private readonly int MaxConcurrentTasksPreviews = Environment.ProcessorCount;
 
     private int _currentIndex;
-    private List<string> _files = new();
+    private List<string> _files = [];
 
     private bool _firstPhotoLoaded;
     private readonly AutoResetEvent _firstPhotoLoadEvent = new(false);

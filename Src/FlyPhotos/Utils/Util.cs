@@ -16,8 +16,8 @@ internal static class Util
     private static List<CodecInfo>? _codecInfoList;
     public static string ExternalWicReaderPath;
 
-    public static List<string> SupportedExtensions { get; } = new();
-    public static List<string> MemoryLeakingExtensions { get; } = new();
+    public static List<string> SupportedExtensions { get; } = [];
+    public static List<string> MemoryLeakingExtensions { get; } = [];
 
     static Util()
     {
@@ -27,7 +27,7 @@ internal static class Util
         var msu = new ManagedShellUtility();
         _codecInfoList = msu.GetWicCodecList();
         foreach (var codecInfo in _codecInfoList) SupportedExtensions.AddRange(codecInfo.fileExtensions);
-        //SupportedExtensions.Add(".PSD");
+        SupportedExtensions.Add(".PSD");
 
         var memoryLeakingCodecs = _codecInfoList.Where(x => x.friendlyName.Contains("Raw Image"));
         foreach (var leakingCodec in memoryLeakingCodecs) MemoryLeakingExtensions.AddRange(leakingCodec.fileExtensions);

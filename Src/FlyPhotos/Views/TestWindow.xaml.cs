@@ -2,7 +2,6 @@ using FlyPhotos.Data;
 using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas;
 using Microsoft.UI.Xaml;
-using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,7 +20,6 @@ namespace FlyPhotos.Views;
 /// </summary>
 public sealed partial class TestWindow
 {
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private readonly Dictionary<string, Photo> _photos = new();
     private List<string> _files;
 

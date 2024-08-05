@@ -4,16 +4,15 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 using PhotoSauce.MagicScaler;
 using System;
 using System.IO;
-using System.Linq;
 
 namespace FlyPhotos.Utils;
 public sealed class PhotoDiskCacher : IDisposable
 {
-    private static readonly Lazy<PhotoDiskCacher> _instance = new Lazy<PhotoDiskCacher>(() => new PhotoDiskCacher());
+    private static readonly Lazy<PhotoDiskCacher> _instance = new(() => new PhotoDiskCacher());
 
     private readonly string _dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlyPhotosCache.db");
     private readonly LiteDatabase _db;
-    private bool _disposed = false;
+    private bool _disposed;
 
     private const int MaxItemCount = 20000; // Maximum number of items in the cache
 
@@ -35,16 +34,14 @@ public sealed class PhotoDiskCacher : IDisposable
         if (cachedImage != null)
         {
             // Check if the last modified date of the file has changed
-            var lastModified = File.GetLastWriteTimeUtc(filePath).ToString("yyyyMMddHHmmss"); ;
+            var lastModified = File.GetLastWriteTimeUtc(filePath).ToString("yyyyMMddHHmmss");
             if (cachedImage.LastModified == lastModified)
             {
                 cachedImage.LastAccessed = DateTime.UtcNow;
                 col.Update(cachedImage);
 
-                using (var ms = new MemoryStream(cachedImage.ImageData))
-                {
-                    return CanvasBitmap.LoadAsync(canvasControl, ms.AsRandomAccessStream()).GetAwaiter().GetResult();
-                }
+                using var ms = new MemoryStream(cachedImage.ImageData);
+                return CanvasBitmap.LoadAsync(canvasControl, ms.AsRandomAccessStream()).GetAwaiter().GetResult();
             }
             else
             {
@@ -61,7 +58,7 @@ public sealed class PhotoDiskCacher : IDisposable
         var col = _db.GetCollection<CachedImage>("images");
 
         // Get the last modified time of the file
-        var lastModified = File.GetLastWriteTimeUtc(filePath).ToString("yyyyMMddHHmmss"); ;
+        var lastModified = File.GetLastWriteTimeUtc(filePath).ToString("yyyyMMddHHmmss");
 
         // Check if the image is already cached and if the last modified time is the same
         var cachedImage = col.FindOne(x => x.FilePath == filePath);
@@ -127,26 +124,24 @@ public sealed class PhotoDiskCacher : IDisposable
 
     private byte[] ResizeImageWithPhotoSauce(CanvasBitmap bitmap, int maxSize)
     {
-        using (var ms = new MemoryStream())
-        using (var msOutput = new MemoryStream())
+        using var ms = new MemoryStream();
+        using var msOutput = new MemoryStream();
+        // Save CanvasBitmap as PNG to memory stream
+        bitmap.SaveAsync(ms.AsRandomAccessStream(), CanvasBitmapFileFormat.Jpeg).GetAwaiter().GetResult();
+        ms.Seek(0, SeekOrigin.Begin);
+
+        var settings = new ProcessImageSettings
         {
-            // Save CanvasBitmap as PNG to memory stream
-            bitmap.SaveAsync(ms.AsRandomAccessStream(), CanvasBitmapFileFormat.Jpeg).GetAwaiter().GetResult();
-            ms.Seek(0, SeekOrigin.Begin);
+            Width = maxSize,
+            Height = maxSize,
+            ResizeMode = CropScaleMode.Max
+        };
 
-            var settings = new ProcessImageSettings
-            {
-                Width = maxSize,
-                Height = maxSize,
-                ResizeMode = CropScaleMode.Max
-            };
+        // Process the image using MagicScaler and save as JPEG
+        MagicImageProcessor.ProcessImage(ms, msOutput, settings);
 
-            // Process the image using MagicScaler and save as JPEG
-            MagicImageProcessor.ProcessImage(ms, msOutput, settings);
-
-            // Convert the processed image to JPEG with quality setting
-            return msOutput.ToArray();
-        }
+        // Convert the processed image to JPEG with quality setting
+        return msOutput.ToArray();
     }
 
     public void Dispose()

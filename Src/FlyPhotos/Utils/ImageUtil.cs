@@ -66,6 +66,12 @@ internal class ImageUtil
                 if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
                 return (PreviewFailedIndicator, false);
             }
+            else if (extension == ".PSD")
+            {
+                if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
+                if (await PsdReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
+                return (PreviewFailedIndicator, false);
+            }
             else
             {
                 if (await WicReader.GetThumbnail(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
@@ -97,11 +103,11 @@ internal class ImageUtil
                 if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
                 return PreviewFailedIndicator;
             }
-            //else if (extension == ".PSD")
-            //{
-                //if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                //return PreviewFailedIndicator;
-            //}
+            else if (extension == ".PSD")
+            {
+                if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                return PreviewFailedIndicator;
+            }
             else
             {
                 if (await WicReader.GetThumbnail(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
@@ -126,11 +132,11 @@ internal class ImageUtil
                 if (await WicReader.GetHqThruExternalProcess(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                 return HqImageFailedIndicator;
             }
-            //else if (Path.GetExtension(path).ToUpper() == ".PSD")
-            //{
-                //if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                //return PreviewFailedIndicator;
-            //}
+            else if (Path.GetExtension(path).ToUpper() == ".PSD")
+            {
+                if (await PsdReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                return HqImageFailedIndicator;
+            }
             else
             {
                 if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
