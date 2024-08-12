@@ -115,20 +115,24 @@ internal class PhotoDisplayController
         try
         {
             var supportedExtensions = Util.SupportedExtensions;
-            _files = App.Debug
-                ? Util.FindAllFilesFromDirectory(App.DebugTestFolder)
-                : Util.FindAllFilesFromExplorerWindowNative();
+            if (!App.Debug)
+            {
+                _files = Util.FindAllFilesFromExplorerWindowNative();
+            }
+            if (_files.Count == 0)
+            {
+                _files = Util.FindAllFilesFromDirectory(Path.GetDirectoryName(selectedFileName));
+            }
             _files = _files.Where(s =>
-                supportedExtensions.Contains(Path.GetExtension(s).ToUpperInvariant())).ToList();
-
-            if (!_files.Any())
+                supportedExtensions.Contains(Path.GetExtension(s).ToUpperInvariant()) || s == selectedFileName).ToList();
+            if (_files.Count == 0)
             {
                 _files.Add(selectedFileName);
             }
 
             if (!_firstPhotoLoaded) _firstPhotoLoadEvent.WaitOne();
 
-            if (_files.Count <= 0) return;
+            //if (_files.Count <= 0) return;
 
             _currentIndex = Util.FindSelectedFileIndex(selectedFileName, _files);
 
@@ -238,7 +242,7 @@ internal class PhotoDisplayController
 
             if (_cachedPreviews.TryGetValue(index, out var image))
             {
-                if (image != null && image.PreviewFrom == Photo.PreviewSource.FromDisk)
+                if (image.PreviewFrom == Photo.PreviewSource.FromDisk)
                 {
                     PhotoDiskCacher.Instance.PutInCache(_files[index], image.Bitmap);
                 }

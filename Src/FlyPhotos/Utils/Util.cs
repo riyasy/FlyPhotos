@@ -41,10 +41,13 @@ internal static class Util
         return fileList;
     }
 
-    public static List<string> FindAllFilesFromDirectory(string dirPath)
+    public static List<string> FindAllFilesFromDirectory(string? dirPath)
     {
-        var myFiles = Directory.EnumerateFiles(dirPath, "*.*", SearchOption.AllDirectories).ToList();
-        return myFiles;
+        if (dirPath == null || !Directory.Exists(dirPath))
+        {
+            return [];
+        }
+        return Directory.EnumerateFiles(dirPath, "*.*", SearchOption.TopDirectoryOnly).ToList();
     }
 
     public static string GetFileNameFromCommandLine()

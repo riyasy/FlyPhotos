@@ -134,7 +134,8 @@ public sealed class PhotoDiskCacher : IDisposable
         {
             Width = maxSize,
             Height = maxSize,
-            ResizeMode = CropScaleMode.Max
+            ResizeMode = CropScaleMode.Max,
+            HybridMode = HybridScaleMode.Turbo
         };
 
         // Process the image using MagicScaler and save as JPEG

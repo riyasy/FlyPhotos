@@ -21,7 +21,6 @@ public partial class App
 
     public static bool Packaged = false;
     public static bool Debug = false;
-    public static string DebugTestFolder = string.Empty;
 
     private static Mutex _mutex;
     private Window _mWindow;
@@ -41,10 +40,9 @@ public partial class App
             //selectedFileName = @"C:\Test\20211004_160211 (ILCE-6400).ARW";
             //selectedFileName = @"C:\Test2\20211004_171521 (ILCE-6400).JPG";
             //selectedFileName = @"M:\Photos\Photos\Digicam\D7000\2023\20230121_105835 (D7000).NEF";
-            SelectedFileName = @"C:\Users\Riyas\Desktop\PSD\2.psd";
+            SelectedFileName = @"M:\Photos\Photos\Digicam\A6400\2023\20230101_225733 (ILCE-6400).ARW";
             //SelectedFileName = @"C:\SampleImages\TestFailCase\20130313_124412 (Galaxy.Ace).JPG";
             //SelectedFileName = @"C:\SampleImages\TestJpegOnly\1.JPG";
-            DebugTestFolder = Path.GetDirectoryName(SelectedFileName);
         }
         else
         {

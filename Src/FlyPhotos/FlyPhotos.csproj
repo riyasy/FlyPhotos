@@ -25,6 +25,10 @@
 	</Target>
 
 	<ItemGroup>
+	  <Compile Remove="Controllers\PhotoControllerUnUsed.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <None Remove="Views\Settings.xaml" />
 	</ItemGroup>
 

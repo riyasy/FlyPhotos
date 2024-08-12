@@ -4,6 +4,7 @@ using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 using System;
+using System.Buffers;
 using System.Runtime.InteropServices;
 using Windows.Graphics.DirectX;
 
@@ -105,16 +106,28 @@ internal class LibHeifSharpReader
 
         var rgbSize = w * h * 3;
         var rgbaSize = w * h * 4;
-        var rgbArray = new byte[rgbSize];
-        var rgbAArray = new byte[rgbaSize];
-        Marshal.Copy(srcScan0, rgbArray, 0, rgbSize);
-        FastConvert(w * h, rgbArray, rgbAArray);
-        var canvasBitmap =
-            CanvasBitmap.CreateFromBytes(ctrl, rgbAArray, w, h, DirectXPixelFormat.R8G8B8A8UIntNormalized);
+
+        //var rgbArray = new byte[rgbSize];
+        //var rgbAArray = new byte[rgbaSize];
+        var rgbArray = ArrayPool<byte>.Shared.Rent(rgbSize);
+        var rgbAArray = ArrayPool<byte>.Shared.Rent(rgbaSize);
+
+        CanvasBitmap canvasBitmap;
+        try
+        {
+            Marshal.Copy(srcScan0, rgbArray, 0, rgbSize);
+            FastConvert(w * h, rgbArray, rgbAArray);
+            canvasBitmap = CanvasBitmap.CreateFromBytes(ctrl, rgbAArray, w, h, DirectXPixelFormat.R8G8B8A8UIntNormalized);
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(rgbArray, clearArray: false);
+            ArrayPool<byte>.Shared.Return(rgbAArray, clearArray: false);
+        }
         return canvasBitmap;
     }
 
-    // TODO move to CLI Wrappter
+    // TODO move to CLI Wrapper
     private static unsafe void FastConvert(int pixelCount, byte[] rgbData, byte[] rgbaData)
     {
         fixed (byte* rgbP = &rgbData[0], rgbaP = &rgbaData[0])

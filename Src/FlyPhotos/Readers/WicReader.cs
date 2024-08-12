@@ -6,6 +6,7 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 using PhotoSauce.MagicScaler;
 using System;
+using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
@@ -80,7 +81,7 @@ internal class WicReader
             try
             {
                 using var ms = new MemoryStream();
-                MagicImageProcessor.ProcessImage(inputPath, ms, new ProcessImageSettings { Width = 200 });
+                MagicImageProcessor.ProcessImage(inputPath, ms, new ProcessImageSettings { Width = 200, HybridMode = HybridScaleMode.Turbo});
                 var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());
                 return (true, new Photo(canvasBitmap, Photo.PreviewSource.FromDisk));
             }
