@@ -13,42 +13,42 @@ internal class ImageUtil
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public static Photo FileNotFoundIndicator;
-    public static Photo PreviewFailedIndicator;
-    public static Photo HqImageFailedIndicator;
-    public static Photo LoadingIndicator;
+    private static DisplayItem FileNotFoundIndicator;
+    private static DisplayItem PreviewFailedIndicator;
+    private static DisplayItem HqImageFailedIndicator;
+    private static DisplayItem LoadingIndicator;
 
     public static async Task Initialize(CanvasControl d2dCanvas)
     {
         if (App.Packaged)
         {
             FileNotFoundIndicator =
-                new Photo(await CanvasBitmap.LoadAsync(d2dCanvas,
-                    new Uri("ms-appx:///Assets/Images/FileNotFound.png")), Photo.PreviewSource.ErrorScreen);
+                new DisplayItem(await CanvasBitmap.LoadAsync(d2dCanvas,
+                    new Uri("ms-appx:///Assets/Images/FileNotFound.png")), DisplayItem.PreviewSource.ErrorScreen);
             PreviewFailedIndicator =
-                new Photo(
-                    await CanvasBitmap.LoadAsync(d2dCanvas, new Uri("ms-appx:///Assets/Images/PreviewFailed.png")), Photo.PreviewSource.ErrorScreen);
+                new DisplayItem(
+                    await CanvasBitmap.LoadAsync(d2dCanvas, new Uri("ms-appx:///Assets/Images/PreviewFailed.png")), DisplayItem.PreviewSource.ErrorScreen);
             HqImageFailedIndicator =
-                new Photo(
-                    await CanvasBitmap.LoadAsync(d2dCanvas, new Uri("ms-appx:///Assets/Images/HQImageFailed.png")), Photo.PreviewSource.ErrorScreen);
+                new DisplayItem(
+                    await CanvasBitmap.LoadAsync(d2dCanvas, new Uri("ms-appx:///Assets/Images/HQImageFailed.png")), DisplayItem.PreviewSource.ErrorScreen);
             LoadingIndicator =
-                new Photo(await CanvasBitmap.LoadAsync(d2dCanvas, new Uri("ms-appx:///Assets/Images/Loading.png")), Photo.PreviewSource.ErrorScreen);
+                new DisplayItem(await CanvasBitmap.LoadAsync(d2dCanvas, new Uri("ms-appx:///Assets/Images/Loading.png")), DisplayItem.PreviewSource.ErrorScreen);
         }
         else
         {
             var folderName = Path.Combine(Path.GetDirectoryName(typeof(App).Assembly.Location), "Assets\\Images");
             FileNotFoundIndicator =
-                new Photo(await CanvasBitmap.LoadAsync(d2dCanvas, $"{folderName}\\FileNotFound.png"), Photo.PreviewSource.ErrorScreen);
+                new DisplayItem(await CanvasBitmap.LoadAsync(d2dCanvas, $"{folderName}\\FileNotFound.png"), DisplayItem.PreviewSource.ErrorScreen);
             PreviewFailedIndicator =
-                new Photo(await CanvasBitmap.LoadAsync(d2dCanvas, $"{folderName}\\PreviewFailed.png"), Photo.PreviewSource.ErrorScreen);
+                new DisplayItem(await CanvasBitmap.LoadAsync(d2dCanvas, $"{folderName}\\PreviewFailed.png"), DisplayItem.PreviewSource.ErrorScreen);
             HqImageFailedIndicator =
-                new Photo(await CanvasBitmap.LoadAsync(d2dCanvas, $"{folderName}\\HQImageFailed.png"), Photo.PreviewSource.ErrorScreen);
+                new DisplayItem(await CanvasBitmap.LoadAsync(d2dCanvas, $"{folderName}\\HQImageFailed.png"), DisplayItem.PreviewSource.ErrorScreen);
             LoadingIndicator =
-                new Photo(await CanvasBitmap.LoadAsync(d2dCanvas, $"{folderName}\\Loading.png"), Photo.PreviewSource.ErrorScreen);
+                new DisplayItem(await CanvasBitmap.LoadAsync(d2dCanvas, $"{folderName}\\Loading.png"), DisplayItem.PreviewSource.ErrorScreen);
         }
     }
 
-    public static async Task<(Photo, bool)> GetFirstPreviewSpecialHandlingAsync(CanvasControl d2dCanvas,
+    public static async Task<(DisplayItem, bool)> GetFirstPreviewSpecialHandlingAsync(CanvasControl d2dCanvas,
         string path)
     {
         try
@@ -57,7 +57,7 @@ internal class ImageUtil
             var cachedBmp = PhotoDiskCacher.Instance.ReturnFromCache(d2dCanvas, path);
             if (null != cachedBmp)
             {
-                return (new Photo(cachedBmp, Photo.PreviewSource.FromDiskCache), true);
+                return (new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache), true);
             }
             var extension = Path.GetExtension(path).ToUpper();
             if (extension == ".HEIC")
@@ -86,7 +86,7 @@ internal class ImageUtil
         }
     }
 
-    public static async Task<Photo> GetPreview(CanvasControl d2dCanvas, string path)
+    public static async Task<DisplayItem> GetPreview(CanvasControl d2dCanvas, string path)
     {
         if (!File.Exists(path)) return FileNotFoundIndicator;
         try
@@ -94,7 +94,7 @@ internal class ImageUtil
             var cachedBmp = PhotoDiskCacher.Instance.ReturnFromCache(d2dCanvas, path);
             if (null != cachedBmp)
             {
-                return new Photo(cachedBmp, Photo.PreviewSource.FromDiskCache);
+                return new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache);
             }
             var extension = Path.GetExtension(path).ToUpper();
             if (extension == ".HEIC")
@@ -122,7 +122,7 @@ internal class ImageUtil
         }
     }
 
-    public static async Task<Photo> GetHqImage(CanvasControl d2dCanvas, string path)
+    public static async Task<DisplayItem> GetHqImage(CanvasControl d2dCanvas, string path)
     {
         if (!File.Exists(path)) return FileNotFoundIndicator;
         try
@@ -154,5 +154,10 @@ internal class ImageUtil
     {
         var fileExt = Path.GetExtension(path).ToUpperInvariant();
         return Util.MemoryLeakingExtensions.Contains(fileExt);
+    }
+
+    public static DisplayItem GetLoadingIndicator()
+    {
+        return LoadingIndicator;
     }
 }

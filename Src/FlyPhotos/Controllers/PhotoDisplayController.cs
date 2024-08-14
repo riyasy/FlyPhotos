@@ -6,10 +6,12 @@ using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Devices.Display.Core;
 
 namespace FlyPhotos.Controllers;
 
@@ -25,13 +27,13 @@ internal class PhotoDisplayController
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    //private const int CacheSizeOneSideHqImages = 2;
-    //private const int CacheSizeOneSidePreviews = 300;
     private readonly int MaxConcurrentTasksHqImages = Environment.ProcessorCount;
     private readonly int MaxConcurrentTasksPreviews = Environment.ProcessorCount;
 
-    private int _currentIndex;
-    private List<string> _files = [];
+
+
+
+    private List<Photo> _photos = [];
 
     private bool _firstPhotoLoaded;
     private readonly AutoResetEvent _firstPhotoLoadEvent = new(false);
@@ -50,7 +52,7 @@ internal class PhotoDisplayController
     private readonly ManualResetEvent _diskCachingCanStart = new (false);
 
     private int _keyPressCounter;
-    private DisplayLevel _currentDisplayLevel;
+    
 
     private readonly CanvasControl _d2dCanvas;
     private readonly Win2dCanvasController _canvasController;
@@ -58,13 +60,16 @@ internal class PhotoDisplayController
 
     private int _hqCacheTasksCount;
     private int _previewCacheTasksCount;
+    private Photo _firstPhoto;
 
     public PhotoDisplayController(Win2dCanvasController canvasController, CanvasControl d2dCanvas,
         Action<string, string> statusCallback)
     {
         _d2dCanvas = d2dCanvas;
+        Photo.D2dCanvas = d2dCanvas;
         _canvasController = canvasController;
         _progressUpdateCallback = statusCallback;
+        _canvasController.SetPreviewCacheReference(_cachedPreviews);
 
         var thread = new Thread(() => { GetFileListFromExplorer(App.SelectedFileName); });
         thread.SetApartmentState(ApartmentState.STA); // This is needed for COM interaction.
@@ -75,68 +80,58 @@ internal class PhotoDisplayController
     {
         await ImageUtil.Initialize(_d2dCanvas);
 
-        Photo? preview = null;
-        var continueLoadingHq = false;
-
-        async Task GetInitialPreview()
-        {
-            (preview, continueLoadingHq) =
-                await ImageUtil.GetFirstPreviewSpecialHandlingAsync(_d2dCanvas, App.SelectedFileName);
-        }
-
-        Task.Run(GetInitialPreview).GetAwaiter().GetResult();
-
-        _canvasController.Source = preview;
-        _currentDisplayLevel = DisplayLevel.Hq;
+        _firstPhoto = new Photo(App.SelectedFileName);
+        //bool continueLoadingHq = firstPhoto.LoadPreviewFirstPhoto().GetAwaiter().GetResult();
+        bool continueLoadingHq = await _firstPhoto.LoadPreviewFirstPhoto();
 
         if (!continueLoadingHq)
         {
+            _canvasController.SetSource(_firstPhoto, DisplayLevel.Hq);
             _firstPhotoLoaded = true;
             _firstPhotoLoadEvent.Set();
-            return;
         }
-
-        async Task GetHqImage()
+        else
         {
-            var hqImage = await ImageUtil.GetHqImage(_d2dCanvas, App.SelectedFileName);
-            _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
-            {
-                _canvasController.Source = hqImage;
-                _firstPhotoLoaded = true;
-                _firstPhotoLoadEvent.Set();
-            });
+            _canvasController.SetSource(_firstPhoto, DisplayLevel.Preview);
+            await _firstPhoto.LoadHqFirstPhoto();
+            _canvasController.SetSource(_firstPhoto, DisplayLevel.Hq);
+            _firstPhotoLoaded = true;
+            _firstPhotoLoadEvent.Set();
         }
-
-        _ = Task.Run(GetHqImage);
     }
 
     private void GetFileListFromExplorer(string selectedFileName)
     {
         try
         {
+            List<string> files = [];
             var supportedExtensions = Util.SupportedExtensions;
             if (!App.Debug)
             {
-                _files = Util.FindAllFilesFromExplorerWindowNative();
+                files = Util.FindAllFilesFromExplorerWindowNative();
             }
-            if (_files.Count == 0)
+            if (files.Count == 0)
             {
-                _files = Util.FindAllFilesFromDirectory(Path.GetDirectoryName(selectedFileName));
+                files = Util.FindAllFilesFromDirectory(Path.GetDirectoryName(selectedFileName));
             }
-            _files = _files.Where(s =>
+            files = files.Where(s =>
                 supportedExtensions.Contains(Path.GetExtension(s).ToUpperInvariant()) || s == selectedFileName).ToList();
-            if (_files.Count == 0)
+            if (files.Count == 0)
             {
-                _files.Add(selectedFileName);
+                files.Add(selectedFileName);
             }
+            Photo.PhotosCount = files.Count;
+
+            foreach (var s in files) 
+                _photos.Add(new Photo(s));
+
 
             if (!_firstPhotoLoaded) _firstPhotoLoadEvent.WaitOne();
 
-            //if (_files.Count <= 0) return;
+            Photo.CurrentDisplayIndex = Util.FindSelectedFileIndex(selectedFileName, files);
+            _photos[Photo.CurrentDisplayIndex] = _firstPhoto;
+            _cachedHqImages[Photo.CurrentDisplayIndex] = _firstPhoto;
 
-            _currentIndex = Util.FindSelectedFileIndex(selectedFileName, _files);
-
-            _cachedHqImages[_currentIndex] = _canvasController.Source;
             UpdateCacheLists();
 
             var previewCachingThread = new Thread(PreviewCacheBuilderDoWork) { IsBackground = true };
@@ -181,12 +176,18 @@ internal class PhotoDisplayController
             {
                 var index = item;
                 _previewsBeingCached[index] = true;
-                var image = ImageUtil.GetPreview(_d2dCanvas, _files[index]).GetAwaiter().GetResult();
-                if (image.PreviewFrom == Photo.PreviewSource.FromDisk) { _toBeDiskCachedPreviews.Push(item); }
-                _cachedPreviews[index] = image;
+                var photo = _photos[index];
+                photo.LoadPreview();
+                _cachedPreviews[index] = photo;
                 _previewsBeingCached.Remove(index, out _);
-                if (_currentIndex == index)
-                    UpgradeImageIfNeeded(image, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
+
+                if (photo.Preview.PreviewFrom == DisplayItem.PreviewSource.FromDisk) { _toBeDiskCachedPreviews.Push(item); }
+                
+                if (Photo.CurrentDisplayIndex == index)
+                    UpgradeImageIfNeeded(photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
+
+                _canvasController.RedrawThumbNailsIfNeeded(index);
+
                 UpdateProgressStatusDebug();
                 _previewCacheTasksCount--;
                 if (_previewCacheTasksCount == MaxConcurrentTasksPreviews - 1) waitForSomeGap.Set();
@@ -214,11 +215,13 @@ internal class PhotoDisplayController
             {
                 var index = item;
                 _hqsBeingCached[index] = true;
-                var image = ImageUtil.GetHqImage(_d2dCanvas, _files[index]).GetAwaiter().GetResult();
-                _cachedHqImages[index] = image;
+                var photo = _photos[index];
+                photo.LoadHq();
+                _cachedHqImages[index] = photo;
                 _hqsBeingCached.Remove(index, out _);
-                if (_currentIndex == index)
-                    UpgradeImageIfNeeded(image, DisplayLevel.Preview, DisplayLevel.Hq);
+
+                if (Photo.CurrentDisplayIndex == index)
+                    UpgradeImageIfNeeded(photo, DisplayLevel.Preview, DisplayLevel.Hq);
                 _hqCacheTasksCount--;
                 if (_hqCacheTasksCount == MaxConcurrentTasksHqImages - 1) waitForSomeGap.Set();
             });
@@ -228,52 +231,70 @@ internal class PhotoDisplayController
 
     private void PreviewDiskCacherDoWork()
     {
+        // Limit concurrency to 4 tasks
+        SemaphoreSlim semaphore = new SemaphoreSlim(Environment.ProcessorCount);
         while (true)
         {
             _diskCachingCanStart.WaitOne();
-
             if (_toBeDiskCachedPreviews.IsEmpty)
             {
                 _diskCachingCanStart.Reset();
                 continue;
             }
 
-            if (!_toBeDiskCachedPreviews.TryPop(out var index)) continue;
-
-            if (_cachedPreviews.TryGetValue(index, out var image))
+            if (_toBeDiskCachedPreviews.TryPop(out var index))
             {
-                if (image.PreviewFrom == Photo.PreviewSource.FromDisk)
+                semaphore.Wait();
+
+                Task.Run(() =>
                 {
-                    PhotoDiskCacher.Instance.PutInCache(_files[index], image.Bitmap);
-                }
+                    try
+                    {
+                        if (_cachedPreviews.TryGetValue(index, out var image) && 
+                            image.Preview != null && 
+                            image.Preview.PreviewFrom == DisplayItem.PreviewSource.FromDisk)
+                        {
+                            PhotoDiskCacher.Instance.PutInCache(image.FileName, image.Preview.Bitmap);
+                        }
+                    }
+                    finally { semaphore.Release(); }
+                });
             }
-        }            
+        }
     }
 
-    private void UpgradeImageIfNeeded(Photo image, DisplayLevel fromDisplayState,
+    private void UpgradeImageIfNeeded(Photo photo, DisplayLevel fromDisplayState,
         DisplayLevel toDisplayState)
     {
-        if (_currentDisplayLevel == fromDisplayState)
+        if (Photo.CurrentDisplayLevel == fromDisplayState)
             _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
             {
-                _canvasController.Source = image;
-                _currentDisplayLevel = toDisplayState;
+                _canvasController.SetSource(photo, toDisplayState);
+                Debug.WriteLine(toDisplayState.ToString() + " : " + photo.FileName);
             });
     }
 
     private void UpdateCacheLists()
     {
-        var curIdx = _currentIndex;
+        var curIdx = Photo.CurrentDisplayIndex;
 
         var keysToRemove = _cachedHqImages.Keys.Where(key =>
             key > curIdx + App.Settings.CacheSizeOneSideHqImages ||
             key < curIdx - App.Settings.CacheSizeOneSideHqImages).ToList();
-        keysToRemove.ForEach(key => _cachedHqImages.TryRemove(key, out _));
+        keysToRemove.ForEach(delegate(int key)
+        {
+            _photos[key].Hq = null;
+            _cachedHqImages.TryRemove(key, out _);
+        });
 
         keysToRemove = _cachedPreviews.Keys.Where(key =>
             key > curIdx + App.Settings.CacheSizeOneSidePreviews ||
             key < curIdx - App.Settings.CacheSizeOneSidePreviews).ToList();
-        keysToRemove.ForEach(key => _cachedPreviews.TryRemove(key, out _));
+        keysToRemove.ForEach(delegate(int key)
+        {
+            _photos[key].Preview = null;
+            _cachedPreviews.TryRemove(key, out _);
+        });
 
         // Create new list of to be cached HQ Images.
         var cacheIndexesHqImages = new List<int>();
@@ -288,7 +309,7 @@ internal class PhotoDisplayController
         _toBeCachedHqImages.Clear();
         var tempArray = (from cacheIdx in cacheIndexesHqImages
             where !_cachedHqImages.ContainsKey(cacheIdx) && !_hqsBeingCached.ContainsKey(cacheIdx) && cacheIdx >= 0 &&
-                  cacheIdx < _files.Count
+                  cacheIdx < _photos.Count
             select cacheIdx).ToArray();
         if (tempArray.Length > 0) _toBeCachedHqImages.PushRange(tempArray);
 
@@ -306,7 +327,7 @@ internal class PhotoDisplayController
 
         tempArray = (from cacheIdx in cacheIndexesPreviews
             where !_cachedPreviews.ContainsKey(cacheIdx) && !_previewsBeingCached.ContainsKey(cacheIdx) &&
-                  cacheIdx >= 0 && cacheIdx < _files.Count
+                  cacheIdx >= 0 && cacheIdx < _photos.Count
             select cacheIdx).ToArray();
         if (tempArray.Length > 0) _toBeCachedPreviews.PushRange(tempArray);
     }
@@ -314,16 +335,16 @@ internal class PhotoDisplayController
     private void UpdateProgressStatusDebug()
     {
         // Debug code
-        var totalFileCount = _files.Count;
-        var noOfFilesOnLeft = _currentIndex;
-        var noOfFilesOnRight = totalFileCount - 1 - _currentIndex;
-        var noOfCachedItemsOnLeft = _cachedPreviews.Keys.Count(i => i < _currentIndex);
-        var noOfCachedItemsOnRight = _cachedPreviews.Keys.Count(i => i > _currentIndex);
+        var totalFileCount = _photos.Count;
+        var noOfFilesOnLeft = Photo.CurrentDisplayIndex;
+        var noOfFilesOnRight = totalFileCount - 1 - Photo.CurrentDisplayIndex;
+        var noOfCachedItemsOnLeft = _cachedPreviews.Keys.Count(i => i < Photo.CurrentDisplayIndex);
+        var noOfCachedItemsOnRight = _cachedPreviews.Keys.Count(i => i > Photo.CurrentDisplayIndex);
         var cacheProgressStatus =
             $"{noOfCachedItemsOnLeft}/{noOfFilesOnLeft} < Cache > {noOfCachedItemsOnRight}/{noOfFilesOnRight}";
 
-        var fileName = Path.GetFileName(_files[_currentIndex]);
-        var indexAndFileName = $"[{_currentIndex + 1}/{_files.Count}] {fileName}";
+        var fileName = Path.GetFileName(_photos[Photo.CurrentDisplayIndex].FileName);
+        var indexAndFileName = $"[{Photo.CurrentDisplayIndex + 1}/{_photos.Count}] {fileName}";
 
         _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
         {
@@ -343,10 +364,9 @@ internal class PhotoDisplayController
 
     public void Brake()
     {
-        if (_cachedHqImages.TryGetValue(_currentIndex, out var hqImage))
+        if (_cachedHqImages.TryGetValue(Photo.CurrentDisplayIndex, out var hqImage))
         {
-            _canvasController.Source = hqImage;
-            _currentDisplayLevel = DisplayLevel.Hq;
+            _canvasController.SetSource(hqImage, DisplayLevel.Hq);
         }
 
         _hqCachingCanStart.Set();
@@ -362,35 +382,33 @@ internal class PhotoDisplayController
     {
         switch (direction)
         {
-            case NavDirection.Next when _currentIndex >= _files.Count - 1:
-            case NavDirection.Prev when _currentIndex <= 0:
+            case NavDirection.Next when Photo.CurrentDisplayIndex >= _photos.Count - 1:
+            case NavDirection.Prev when Photo.CurrentDisplayIndex <= 0:
                 return;
             case NavDirection.Next:
-                _currentIndex++;
+                Photo.CurrentDisplayIndex++;
                 break;
             case NavDirection.Prev:
-                _currentIndex--;
+                Photo.CurrentDisplayIndex--;
                 break;
         }
 
         if (App.Settings.ResetPanZoomOnNextPhoto) _canvasController.SetHundredPercent(false);
 
-        if (!IsContinuousKeyPress() && _cachedHqImages.TryGetValue(_currentIndex, out var hqImage))
+        var photo = _photos[Photo.CurrentDisplayIndex];
+
+        if (!IsContinuousKeyPress() && _cachedHqImages.ContainsKey(Photo.CurrentDisplayIndex))
         {
-            _canvasController.Source = hqImage;
-            _currentDisplayLevel = DisplayLevel.Hq;
+            _canvasController.SetSource(photo, DisplayLevel.Hq);
         }
-        else if (_cachedPreviews.TryGetValue(_currentIndex, out var preview))
+        else if (_cachedPreviews.ContainsKey(Photo.CurrentDisplayIndex))
         {
-            _canvasController.Source = preview;
-            _currentDisplayLevel = DisplayLevel.Preview;
+            _canvasController.SetSource(photo, DisplayLevel.Preview);
         }
         else
         {
-            _canvasController.Source = ImageUtil.LoadingIndicator;
-            _currentDisplayLevel = DisplayLevel.PlaceHolder;
+            _canvasController.SetSource(photo, DisplayLevel.PlaceHolder);
         }
-
         UpdateCacheLists();
     }
 
@@ -401,7 +419,7 @@ internal class PhotoDisplayController
 
     public string GetFullPathCurrentFile()
     {
-        return _files[_currentIndex];
+        return _photos[Photo.CurrentDisplayIndex].FileName;
     }
 
     public enum NavDirection

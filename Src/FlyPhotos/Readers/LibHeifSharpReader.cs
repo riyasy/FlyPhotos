@@ -19,7 +19,7 @@ internal class LibHeifSharpReader
         LibHeifSharpDllImportResolver.Register();
     }
 
-    public static (bool, Photo) GetPreview(CanvasControl ctrl, string inputPath)
+    public static (bool, DisplayItem) GetPreview(CanvasControl ctrl, string inputPath)
     {
         var decodingOptions = new HeifDecodingOptions
         {
@@ -39,7 +39,7 @@ internal class LibHeifSharpReader
 
             using var previewImageHandle = primaryImage.GetThumbnailImage(previewImageIds[0]);
             var retBmp = CreateBitmapSource(ctrl, previewImageHandle, decodingOptions);
-            return (retBmp.Bounds.Width >= 1, new Photo(retBmp, Photo.PreviewSource.FromDisk));
+            return (retBmp.Bounds.Width >= 1, new DisplayItem(retBmp, DisplayItem.PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {

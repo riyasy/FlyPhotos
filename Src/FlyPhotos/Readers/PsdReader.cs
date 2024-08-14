@@ -117,7 +117,7 @@ internal class PsdReader
 
 
     // Get preview as a CanvasBitmap for WinUI
-    public static async Task<(bool, Photo)> GetPreview(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, DisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
     {
         if (GetThumbNailByteArray(inputPath, out byte[] thumbnailData))
         {
@@ -125,7 +125,7 @@ internal class PsdReader
             {
                 using var stream = new MemoryStream(thumbnailData);
                 CanvasBitmap bitmap = await CanvasBitmap.LoadAsync(ctrl, stream.AsRandomAccessStream());
-                return (true, new Photo(bitmap, Photo.PreviewSource.FromDisk));
+                return (true, new DisplayItem(bitmap, DisplayItem.PreviewSource.FromDisk));
             }
             catch (Exception ex)
             {
@@ -136,7 +136,7 @@ internal class PsdReader
         return (false, null);
     }
 
-    public static async Task<(bool, Photo)> GetHq(CanvasControl d2dCanvas, string path)
+    public static async Task<(bool, DisplayItem)> GetHq(CanvasControl d2dCanvas, string path)
     {
         try
         {
@@ -153,7 +153,7 @@ internal class PsdReader
             var device = CanvasDevice.GetSharedDevice();
             var bitmap = await CanvasBitmap.LoadAsync(device, stream.AsRandomAccessStream());
 
-            return (true, new Photo(bitmap, Photo.PreviewSource.FromDisk));
+            return (true, new DisplayItem(bitmap, DisplayItem.PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {

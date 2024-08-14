@@ -33,21 +33,21 @@ internal class WicReader
         });
     }
 
-    public static async Task<(bool, Photo)> GetHq(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, DisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
     {
         try
         {
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);
-            return (true, new Photo(canvasBitmap, Photo.PreviewSource.FromDisk));
+            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
-            return (false, Photo.Empty());
+            return (false, DisplayItem.Empty());
         }
     }
 
-    public static async Task<(bool, Photo)> GetHqThruExternalProcess(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, DisplayItem)> GetHqThruExternalProcess(CanvasControl ctrl, string inputPath)
     {
         try
         {
@@ -58,42 +58,42 @@ internal class WicReader
             var w = (int)decoder.PixelWidth;
             var h = (int)decoder.PixelHeight;
             if (!CreateMemoryMapAndGetDataFromExternalProcess(inputPath, w, h, out var rgbAArray))
-                return (false, Photo.Empty());
+                return (false, DisplayItem.Empty());
             var canvasBitmap =
                 CanvasBitmap.CreateFromBytes(ctrl, rgbAArray, w, h,
                     Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized);
-            return (true, new Photo(canvasBitmap, Photo.PreviewSource.FromDisk, rotation));
+            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk, rotation));
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
-            return (false, Photo.Empty());
+            return (false, DisplayItem.Empty());
         }
     }
 
-    public static async Task<(bool, Photo)> GetHqDownScaled(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, DisplayItem)> GetHqDownScaled(CanvasControl ctrl, string inputPath)
     {
         if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA) return await Task.Run(Action);
         return await Action();
 
-        async Task<(bool, Photo)> Action()
+        async Task<(bool, DisplayItem)> Action()
         {
             try
             {
                 using var ms = new MemoryStream();
-                MagicImageProcessor.ProcessImage(inputPath, ms, new ProcessImageSettings { Width = 200, HybridMode = HybridScaleMode.Turbo});
+                MagicImageProcessor.ProcessImage(inputPath, ms, new ProcessImageSettings { Width = 800, HybridMode = HybridScaleMode.Turbo});
                 var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());
-                return (true, new Photo(canvasBitmap, Photo.PreviewSource.FromDisk));
+                return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
             }
             catch (Exception ex)
             {
                 Logger.Error(ex);
-                return (false, Photo.Empty());
+                return (false, DisplayItem.Empty());
             }
         }
     }
 
-    public static async Task<(bool, Photo)> GetPreview(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, DisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
     {
         try
         {
@@ -102,16 +102,16 @@ internal class WicReader
             var decoder = await BitmapDecoder.CreateAsync(stream);
             using var preview = await decoder.GetPreviewAsync();
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
-            return (true, new Photo(canvasBitmap, Photo.PreviewSource.FromDisk));
+            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
-            return (false, Photo.Empty());
+            return (false, DisplayItem.Empty());
         }
     }
 
-    public static async Task<(bool, Photo)> GetThumbnail(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, DisplayItem)> GetThumbnail(CanvasControl ctrl, string inputPath)
     {
         try
         {
@@ -120,28 +120,28 @@ internal class WicReader
             var decoder = await BitmapDecoder.CreateAsync(stream);
             using var preview = await decoder.GetThumbnailAsync();
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
-            return (true, new Photo(canvasBitmap, Photo.PreviewSource.FromDisk));
+            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
         }
         catch (Exception)
         {
             //Logger.Error(ex);
-            return (false, Photo.Empty());
+            return (false, DisplayItem.Empty());
         }
     }
 
-    public static async Task<(bool, Photo)> GetFileThumbnail(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, DisplayItem)> GetFileThumbnail(CanvasControl ctrl, string inputPath)
     {
         try
         {
             var file = await StorageFile.GetFileFromPathAsync(inputPath);
             using var thumbnail = await file.GetThumbnailAsync(ThumbnailMode.PicturesView);
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, thumbnail);
-            return (true, new Photo(canvasBitmap, Photo.PreviewSource.FromDisk));
+            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
-            return (false, Photo.Empty());
+            return (false, DisplayItem.Empty());
         }
     }
 

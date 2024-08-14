@@ -1,47 +1,85 @@
-﻿using Microsoft.Graphics.Canvas;
-using Windows.Graphics.Imaging;
+﻿#nullable enable
+using System.Threading;
+using System.Threading.Tasks;
+using FlyPhotos.Utils;
+using Microsoft.Graphics.Canvas.UI.Xaml;
+using static FlyPhotos.Controllers.PhotoDisplayController;
 
 namespace FlyPhotos.Data;
 
 internal class Photo
 {
-    public enum PreviewSource
+    public static int CurrentDisplayIndex;
+    public static DisplayLevel CurrentDisplayLevel;
+    public static int PhotosCount;
+    public readonly string FileName;
+    public DisplayItem? Hq;
+    public DisplayItem? Preview;
+
+    public Photo(string selectedFileName)
     {
-        FromDiskCache,
-        FromDisk,
-        ErrorScreen, 
-        Undefined
+        FileName = selectedFileName;
     }
 
-    public CanvasBitmap Bitmap { get; set; }
-    public SoftwareBitmap SoftwareBitmap { get; set; }
-    public int Rotation { get; set; }
+    public static CanvasControl D2dCanvas { get; set; }
 
-    public PreviewSource PreviewFrom { get; set; }
-
-    public Photo(CanvasBitmap bitmap, PreviewSource previewFrom, int rotation = 0)
+    public async Task<bool> LoadPreviewFirstPhoto()
     {
-        Bitmap = bitmap;
-        PreviewFrom = previewFrom;
-        Rotation = rotation;
+        var continueLoadingHq = true;
+        DisplayItem? preview = null;
+
+        async Task GetInitialPreview()
+        {
+            (preview, continueLoadingHq) =
+                await ImageUtil.GetFirstPreviewSpecialHandlingAsync(D2dCanvas, App.SelectedFileName);
+        }
+
+        await Task.Run(GetInitialPreview);
+
+        if (continueLoadingHq)
+            Preview = preview;
+        else
+            Hq = preview;
+        return continueLoadingHq;
     }
 
-    public Photo(SoftwareBitmap softwareBitmap, PreviewSource previewFrom, int rotation = 0)
+    public async Task LoadHqFirstPhoto()
     {
-        SoftwareBitmap = softwareBitmap;
-        PreviewFrom = previewFrom;
-        Rotation = rotation;
+        async Task GetHqImage()
+        {
+            Hq = await ImageUtil.GetHqImage(D2dCanvas, App.SelectedFileName);
+        }
+        await Task.Run(GetHqImage);
     }
 
-    //public Photo(CanvasBitmap bitmap, int rotation)
-    //{
-    //    Bitmap = bitmap;
-    //    Rotation = rotation;
-    //}
-
-    public static Photo Empty()
+    public void LoadHq()
     {
-        CanvasBitmap bitmap = null;
-        return new Photo(bitmap, PreviewSource.Undefined, 0);
+        Hq = ImageUtil.GetHqImage(D2dCanvas, FileName).GetAwaiter().GetResult();
+    }
+
+    public void LoadPreview()
+    {
+        Preview = ImageUtil.GetPreview(D2dCanvas, FileName).GetAwaiter().GetResult();
+    }
+
+    public DisplayItem GetDisplayItemBasedOn(DisplayLevel displayLevel)
+    {
+        switch (displayLevel)
+        {
+            case DisplayLevel.Preview:
+                return Preview;
+            case DisplayLevel.Hq:
+                return Hq;
+            case DisplayLevel.PlaceHolder:
+                return ImageUtil.GetLoadingIndicator();
+            case DisplayLevel.None:
+            default:
+                return DisplayItem.Empty();
+        }
+    }
+
+    public static DisplayItem GetLoadingIndicator()
+    {
+        return ImageUtil.GetLoadingIndicator();
     }
 }

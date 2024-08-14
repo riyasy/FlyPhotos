@@ -20,7 +20,7 @@ namespace FlyPhotos.Views;
 /// </summary>
 public sealed partial class TestWindow
 {
-    private readonly Dictionary<string, Photo> _photos = new();
+    private readonly Dictionary<string, DisplayItem> _photos = new();
     private List<string> _files;
 
     public TestWindow()
@@ -82,11 +82,11 @@ public sealed partial class TestWindow
 
     private void GetFileListFromExplorer()
     {
-        var supportedExtensions = Util.SupportedExtensions;
-        _files = App.Debug
-            ? Util.FindAllFilesFromDirectory(App.DebugTestFolder)
-            : Util.FindAllFilesFromExplorerWindowNative();
-        _files = _files.Where(s =>
-            supportedExtensions.Contains(Path.GetExtension(s).ToUpperInvariant())).ToList();
+        //var supportedExtensions = Util.SupportedExtensions;
+        //_files = App.Debug
+        //    ? Util.FindAllFilesFromDirectory(App.DebugTestFolder)
+        //    : Util.FindAllFilesFromExplorerWindowNative();
+        //_files = _files.Where(s =>
+        //    supportedExtensions.Contains(Path.GetExtension(s).ToUpperInvariant())).ToList();
     }
 }
