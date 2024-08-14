@@ -39,9 +39,6 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     private readonly Win2dCanvasController _canvasController;
     private readonly PhotoDisplayController _photoController;
 
-    private bool _currentlyFullScreen = true;
-    private bool _screenResizingInProgress;
-    private readonly AppWindow _appWindow;
     private Window? _settingWindow;
 
     private readonly DispatcherTimer _repeatButtonReleaseCheckTimer = new()
@@ -52,20 +49,23 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     private readonly TransparentTintBackdrop _transparentTintBackdrop = new() { TintColor = Color.FromArgb(0xAA, 0, 0, 0) };
     private readonly BlurredBackdrop _frozenBackdrop = new();
 
+    private OverlappedPresenterState _lastWindowState;
+
     public PhotoDisplayWindow()
     {
         InitializeComponent();
+
         Title = "Fly Photos";
         SetUnpackagedAppIcon();
-        _appWindow = GetAppWindowForCurrentWindow();
         SetupTransparentTitleBar();
         SetWindowBackground(App.Settings.WindowBackGround);
+        (AppWindow.Presenter as OverlappedPresenter)?.SetBorderAndTitleBar(false, false);
 
         _canvasController = new Win2dCanvasController(MainLayout, D2dCanvas);
         _photoController = new PhotoDisplayController(_canvasController, D2dCanvas, UpdateStatus);
         TxtFileName.Text = Path.GetFileName(App.SelectedFileName);
 
-        _appWindow.Changed += AppWindow_Changed;
+        this.SizeChanged += PhotoDisplayWindow_SizeChanged;
         Closed += PhotoDisplayWindow_Closed;
         D2dCanvas.CreateResources += D2dCanvas_CreateResources;
         D2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
@@ -74,10 +74,8 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         MainLayout.KeyUp += HandleKeyUp;
         _repeatButtonReleaseCheckTimer.Tick += RepeatButtonReleaseCheckTimer_Tick;
 
-        var overLappedPresenter = _appWindow.Presenter as OverlappedPresenter;
-        if (overLappedPresenter == null) return;
-        overLappedPresenter.Maximize();
-        overLappedPresenter.SetBorderAndTitleBar(false, false);
+        this.Maximize();
+        _lastWindowState = OverlappedPresenterState.Maximized;
     }
 
     private void ButtonBackNext_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
@@ -109,24 +107,32 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         CacheStatusProgress.Text = currentCacheStatus;
     }
 
-    private void AppWindow_Changed(AppWindow sender, AppWindowChangedEventArgs args)
+    private void PhotoDisplayWindow_SizeChanged(object sender, Microsoft.UI.Xaml.WindowSizeChangedEventArgs args)
     {
-        if (_screenResizingInProgress) return;
-        if (!args.DidSizeChange) return;
-        var overLappedPresenter = _appWindow.Presenter as OverlappedPresenter;
-        if (!_currentlyFullScreen && overLappedPresenter != null &&
-            overLappedPresenter.State == OverlappedPresenterState.Maximized)
+        var presenter = (AppWindow.Presenter as OverlappedPresenter);
+        if (presenter != null && _lastWindowState != presenter?.State)
         {
-            _screenResizingInProgress = true;
-            overLappedPresenter.SetBorderAndTitleBar(false, false);
-            _currentlyFullScreen = true;
-            _screenResizingInProgress = false;
+            _lastWindowState = presenter.State;
+            var timer = DispatcherQueue.CreateTimer();
+            timer.Interval = TimeSpan.FromMilliseconds(500);
+            timer.Tick += (_, _) =>
+            {
+                if (presenter?.State == OverlappedPresenterState.Maximized)
+                {
+                    presenter?.SetBorderAndTitleBar(false, false);
+                }
+                else if (presenter?.State == OverlappedPresenterState.Restored)
+                {
+                    presenter?.SetBorderAndTitleBar(true, true);
+                }
+                timer.Stop();
+            };
+            timer.Start();
         }
     }
 
     private void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
-        if (_screenResizingInProgress) return;
         if (_canvasController.IsPressedOnImage(e.GetCurrentPoint(D2dCanvas).Position))
         {
             var properties = e.GetCurrentPoint(D2dCanvas).Properties;
@@ -146,21 +152,16 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
                     Logger.Error("Showing context menu failed");
                     Logger.Error(ex);
                 }
-
             }
-            return;
         }
-        if (!_currentlyFullScreen) return;
-        _screenResizingInProgress = true;
-        var overLappedPresenter = _appWindow.Presenter as OverlappedPresenter;
-        if (overLappedPresenter != null)
+        else
         {
-            overLappedPresenter.SetBorderAndTitleBar(true, true);
-            overLappedPresenter.Restore();
+            if (_lastWindowState == OverlappedPresenterState.Maximized)
+            {
+                (AppWindow.Presenter as OverlappedPresenter)?.SetBorderAndTitleBar(true, true);
+                this.Restore();
+            }
         }
-
-        _currentlyFullScreen = false;
-        _screenResizingInProgress = false;
     }
 
     private void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
@@ -182,24 +183,16 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
                 _repeatButtonReleaseCheckTimer.Start();
             }
         }
-
     }
 
     private void SetupTransparentTitleBar()
     {
         SetTitleBar(AppTitlebar);
-        var titleBar = _appWindow.TitleBar;
+        var titleBar = AppWindow.TitleBar;
         titleBar.ExtendsContentIntoTitleBar = true;
         titleBar.ButtonBackgroundColor = Colors.Transparent;
         titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
         titleBar.ButtonForegroundColor = Colors.Gray;
-    }
-
-    private AppWindow GetAppWindowForCurrentWindow()
-    {
-        var hWnd = WindowNative.GetWindowHandle(this);
-        var myWndId = Win32Interop.GetWindowIdFromWindow(hWnd);
-        return AppWindow.GetFromWindowId(myWndId);
     }
 
     private void SetUnpackagedAppIcon()
