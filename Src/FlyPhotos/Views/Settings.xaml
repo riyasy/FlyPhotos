@@ -19,6 +19,14 @@
                             Style="{StaticResource SubtitleTextBlockStyle}"
                             Text="Options" />
                         <controls:SettingsCard
+                            x:Name="SettingsCardDeveloperSupport"
+                            Margin="0,5,0,0"
+                            Description="I wish to make FlyPhotos more awesome."
+                            Header="Support Flyphotos"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xEC32;}">
+                            <HyperlinkButton Content="Buy me a coffee" NavigateUri="https://buymeacoffee.com/ryftools" />                         
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
                             x:Name="SettingsCardTheme"
                             Margin="0,5,0,0"
                             Description="Choose theme."
@@ -51,6 +59,14 @@
                             Header="Pan Zoom Reset"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE71E;}">
                             <ToggleSwitch x:Name="ButtonResetPanZoom" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardShowThumbnail"
+                            Margin="0,5,0,0"
+                            Description="Show thumbnail strip at the bottom of window"
+                            Header="Show thumbnail strip"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xF597;}">
+                            <ToggleSwitch x:Name="ButtonShowThumbnail" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardPanHideRaw"

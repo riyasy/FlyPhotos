@@ -19,10 +19,13 @@ namespace FlyPhotos.Views;
 /// <summary>
 /// An empty window that can be used on its own or navigated to within a Frame.
 /// </summary>
-public sealed partial class Settings
+internal sealed partial class Settings
 {
-    public Settings()
+    private IThumbnailDisplayChangeable _thumbnailDisplayChanger;
+
+    internal Settings(IThumbnailDisplayChangeable thumbnailDisplayChanger)
     {
+        _thumbnailDisplayChanger = thumbnailDisplayChanger;
         InitializeComponent();
         Title = "Fly Photos - Settings";
 
@@ -42,12 +45,14 @@ public sealed partial class Settings
         ButtonResetPanZoom.IsOn = App.Settings.ResetPanZoomOnNextPhoto;
         ComboTheme.SelectedIndex = FindIndexOfItemInComboBox(ComboTheme, App.Settings.Theme);
         ComboBackGround.SelectedIndex = FindIndexOfItemInComboBox(ComboBackGround, App.Settings.WindowBackGround);
+        ButtonShowThumbnail.IsOn = App.Settings.ShowThumbNails;
 
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
         SliderLowResCacheSize.ValueChanged += SliderLowResCacheSize_OnValueChanged;
         ButtonResetPanZoom.Toggled += ButtonResetPanZoom_OnToggled;
         ComboTheme.SelectionChanged += ComboTheme_OnSelectionChanged;
         ComboBackGround.SelectionChanged += ComboBackGround_OnSelectionChanged;
+        ButtonShowThumbnail.Toggled += ButtonShowThumbnail_OnToggled;
 
 
         SettingsCardCredits.Description = $"Uses packages from " +
@@ -91,6 +96,14 @@ public sealed partial class Settings
         App.Settings.ResetPanZoomOnNextPhoto = ButtonResetPanZoom.IsOn;
         Properties.UserSettings.Default.ResetPanZoomOnNextPhoto = ButtonResetPanZoom.IsOn;
         Properties.UserSettings.Default.Save();
+    }
+
+    private void ButtonShowThumbnail_OnToggled(object sender, RoutedEventArgs e)
+    {
+        App.Settings.ShowThumbNails = ButtonShowThumbnail.IsOn;
+        Properties.UserSettings.Default.ShowThumbnails = ButtonShowThumbnail.IsOn;
+        Properties.UserSettings.Default.Save();
+        _thumbnailDisplayChanger.ShowThumbnailBasedOnSettings();
     }
 
     private void SliderLowResCacheSize_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)

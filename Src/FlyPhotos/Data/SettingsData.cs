@@ -7,6 +7,7 @@ public class SettingsData
     public bool ResetPanZoomOnNextPhoto { get; set; }
     public int CacheSizeOneSideHqImages { get; set; }
     public int CacheSizeOneSidePreviews { get; set; }
+    public bool ShowThumbNails { get; set; }
 
     public static SettingsData Default()
     {
@@ -16,7 +17,8 @@ public class SettingsData
             WindowBackGround = "Transparent",
             ResetPanZoomOnNextPhoto = false,
             CacheSizeOneSideHqImages = 2,
-            CacheSizeOneSidePreviews = 300
+            CacheSizeOneSidePreviews = 300,
+            ShowThumbNails = true,
         };
         return defaultSettings;
     }

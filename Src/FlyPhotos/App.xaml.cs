@@ -40,7 +40,7 @@ public partial class App
             //selectedFileName = @"C:\Test\20211004_160211 (ILCE-6400).ARW";
             //selectedFileName = @"C:\Test2\20211004_171521 (ILCE-6400).JPG";
             //selectedFileName = @"M:\Photos\Photos\Digicam\D7000\2023\20230121_105835 (D7000).NEF";
-            SelectedFileName = @"C:\Users\Riyas\Desktop\ImageTest\PSD\2.psd";
+            SelectedFileName = @"C:\Users\Riyas\Documents\TestImages\Image_1.jpg";
             //SelectedFileName = @"C:\SampleImages\TestFailCase\20130313_124412 (Galaxy.Ace).JPG";
             //SelectedFileName = @"C:\SampleImages\TestJpegOnly\1.JPG";
         }
@@ -61,7 +61,8 @@ public partial class App
             WindowBackGround = Properties.UserSettings.Default.WindowBackGround,
             ResetPanZoomOnNextPhoto = Properties.UserSettings.Default.ResetPanZoomOnNextPhoto,
             CacheSizeOneSideHqImages = Properties.UserSettings.Default.CacheSizeOneSideHqImages,
-            CacheSizeOneSidePreviews = Properties.UserSettings.Default.CacheSizeOneSidePreviews
+            CacheSizeOneSidePreviews = Properties.UserSettings.Default.CacheSizeOneSidePreviews,
+            ShowThumbNails = Properties.UserSettings.Default.ShowThumbnails
         };
 
     }

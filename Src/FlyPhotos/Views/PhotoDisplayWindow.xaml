@@ -140,7 +140,7 @@
                         Placement="Right" />
                 </ToolTipService.ToolTip>
             </Button>
-            <Button
+            <!--<Button
                 x:Name="ButtonCoffee"
                 Width="Auto"
                 Click="ButtonCoffee_OnClick"
@@ -154,7 +154,7 @@
                         Content="Buy a coffee"
                         Placement="Right" />
                 </ToolTipService.ToolTip>
-            </Button>
+            </Button>-->
             <Button
                 x:Name="ButtonExpander"
                 Width="Auto"

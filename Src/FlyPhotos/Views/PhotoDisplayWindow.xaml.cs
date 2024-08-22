@@ -59,7 +59,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         SetUnpackagedAppIcon();
         SetupTransparentTitleBar();
         SetWindowBackground(App.Settings.WindowBackGround);
-        (AppWindow.Presenter as OverlappedPresenter)?.SetBorderAndTitleBar(false, false);
+        //(AppWindow.Presenter as OverlappedPresenter)?.SetBorderAndTitleBar(false, false);
 
         _canvasController = new Win2dCanvasController(MainLayout, D2dCanvas);
         _photoController = new PhotoDisplayController(_canvasController, D2dCanvas, UpdateStatus);
@@ -113,21 +113,21 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         if (presenter != null && _lastWindowState != presenter?.State)
         {
             _lastWindowState = presenter.State;
-            var timer = DispatcherQueue.CreateTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(500);
-            timer.Tick += (_, _) =>
-            {
-                if (presenter?.State == OverlappedPresenterState.Maximized)
-                {
-                    presenter?.SetBorderAndTitleBar(false, false);
-                }
-                else if (presenter?.State == OverlappedPresenterState.Restored)
-                {
-                    presenter?.SetBorderAndTitleBar(true, true);
-                }
-                timer.Stop();
-            };
-            timer.Start();
+            //var timer = DispatcherQueue.CreateTimer();
+            //timer.Interval = TimeSpan.FromMilliseconds(500);
+            //timer.Tick += (_, _) =>
+            //{
+            //    if (presenter?.State == OverlappedPresenterState.Maximized)
+            //    {
+            //        presenter?.SetBorderAndTitleBar(false, false);
+            //    }
+            //    else if (presenter?.State == OverlappedPresenterState.Restored)
+            //    {
+            //        presenter?.SetBorderAndTitleBar(true, true);
+            //    }
+            //    timer.Stop();
+            //};
+            //timer.Start();
         }
     }
 
@@ -158,7 +158,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         {
             if (_lastWindowState == OverlappedPresenterState.Maximized)
             {
-                (AppWindow.Presenter as OverlappedPresenter)?.SetBorderAndTitleBar(true, true);
+                //(AppWindow.Presenter as OverlappedPresenter)?.SetBorderAndTitleBar(true, true);
                 this.Restore();
             }
         }
@@ -273,7 +273,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     {
         if (_settingWindow == null)
         {
-            _settingWindow = new Settings();
+            _settingWindow = new Settings(_canvasController);
             _settingWindow.SetWindowSize(1024, 768);
             ThemeController.Instance.AddWindow(_settingWindow);
             _settingWindow.Closed += SettingWindow_Closed;
@@ -297,9 +297,9 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         }
     }
 
-    private void ButtonCoffee_OnClick(object sender, RoutedEventArgs e)
-    {
-    }
+    //private void ButtonCoffee_OnClick(object sender, RoutedEventArgs e)
+    //{
+    //}
 
     public void SetWindowBackground(string backGround)
     {

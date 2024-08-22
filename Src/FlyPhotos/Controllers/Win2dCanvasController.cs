@@ -12,10 +12,12 @@ using Windows.Foundation;
 using Windows.System;
 using Windows.UI.Core;
 using Microsoft.UI;
+using FlyPhotos.Utils;
+using Microsoft.UI.Input;
 
 namespace FlyPhotos.Controllers;
 
-internal class Win2dCanvasController
+internal class Win2dCanvasController : IThumbnailDisplayChangeable
 {
     // private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -188,7 +190,7 @@ internal class Win2dCanvasController
     private void CreateThumbnailRibbonOffScreen()
     {
         _redrawThumbnailTimer.Stop();
-        if (Photo.PhotosCount <= 1 || !_canDrawThumbnails)
+        if (Photo.PhotosCount <= 1 || !_canDrawThumbnails || !App.Settings.ShowThumbNails)
             return;
 
         if (_thumbnailOffscreen == null)
@@ -363,7 +365,7 @@ internal class Win2dCanvasController
             args.DrawingSession.DrawImage(_currentDisplayItem.Bitmap, _imageRect, _currentDisplayItem.Bitmap.Bounds, 1f,
                 drawingQuality);
         
-        if (_thumbnailOffscreen != null)
+        if (_thumbnailOffscreen != null && App.Settings.ShowThumbNails)
         {
             var drawRect = _thumbnailOffscreen.Bounds;
             drawRect._y = (float)(_d2dCanvas.ActualHeight - BoxSize);
@@ -415,8 +417,25 @@ internal class Win2dCanvasController
     {
         _cachedPreviews = cachedPreviews;
     }
+
+    public void ShowThumbnailBasedOnSettings()
+    {
+        if (App.Settings.ShowThumbNails)
+        {
+            CreateThumbnailRibbonOffScreen();
+            _d2dCanvas.Invalidate();
+        }
+        else
+        {
+            _d2dCanvas.Invalidate();
+        }
+    }
 }
 
+public interface IThumbnailDisplayChangeable
+{
+    void ShowThumbnailBasedOnSettings();
+}
 public class ZoomAnimationInfo(float animScale, double animXPos, double animYPos, float incrementalScale)
 {
     public float Scale = animScale;

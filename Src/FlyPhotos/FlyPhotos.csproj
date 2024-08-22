@@ -53,8 +53,8 @@
 		<PackageReference Include="LibHeifSharp" Version="3.2.0" />
 		<PackageReference Include="PhotoSauce.MagicScaler" Version="0.14.2" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
-		<PackageReference Include="NLog.Extensions.Logging" Version="5.3.11" />
-		<PackageReference Include="Vanara.PInvoke.User32" Version="4.0.2" />
+		<PackageReference Include="NLog.Extensions.Logging" Version="5.3.12" />
+		<PackageReference Include="Vanara.PInvoke.User32" Version="4.0.3" />
 		<PackageReference Include="WinUIEx" Version="2.3.4" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>

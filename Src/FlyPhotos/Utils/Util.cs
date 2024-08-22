@@ -1,5 +1,7 @@
 ﻿#nullable enable
 using CliWrapper;
+using Microsoft.UI.Input;
+using Microsoft.UI.Xaml;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -119,6 +121,12 @@ internal static class Util
         var directoryInfo = new FileInfo(location.AbsolutePath).Directory;
         if (directoryInfo == null) return string.Empty;
         return Uri.UnescapeDataString(directoryInfo.FullName);
+    }
+
+    public static void ChangeCursor(this UIElement uiElement, InputCursor cursor)
+    {
+        Type type = typeof(UIElement);
+        type.InvokeMember("ProtectedCursor", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SetProperty | BindingFlags.Instance, null, uiElement, new object[] { cursor });
     }
 
     //public static void OpenUrl(string url)
