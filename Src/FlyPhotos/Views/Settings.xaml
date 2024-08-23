@@ -18,14 +18,14 @@
                             Margin="0,5,0,0"
                             Style="{StaticResource SubtitleTextBlockStyle}"
                             Text="Options" />
-                        <controls:SettingsCard
+                        <!--<controls:SettingsCard
                             x:Name="SettingsCardDeveloperSupport"
                             Margin="0,5,0,0"
                             Description="I wish to make FlyPhotos more awesome."
                             Header="Support Flyphotos"
                             HeaderIcon="{ui:FontIcon Glyph=&#xEC32;}">
                             <HyperlinkButton Content="Buy me a coffee" NavigateUri="https://buymeacoffee.com/ryftools" />                         
-                        </controls:SettingsCard>
+                        </controls:SettingsCard>-->
                         <controls:SettingsCard
                             x:Name="SettingsCardTheme"
                             Margin="0,5,0,0"

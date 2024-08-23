@@ -44,16 +44,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.0.240109" />
+		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.1.240821" />
 		<PackageReference Include="LiteDB" Version="5.0.21" />
 		<PackageReference Include="Microsoft.Graphics.Win2D" Version="1.2.0" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240627000" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240802000" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1" />
 		<PackageReference Include="LibHeif.Native.win-x64" Version="1.15.1" />
 		<PackageReference Include="LibHeifSharp" Version="3.2.0" />
 		<PackageReference Include="PhotoSauce.MagicScaler" Version="0.14.2" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
 		<PackageReference Include="NLog.Extensions.Logging" Version="5.3.12" />
+		<PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+		<PackageReference Include="System.Drawing.Common" Version="8.0.8" />
 		<PackageReference Include="Vanara.PInvoke.User32" Version="4.0.3" />
 		<PackageReference Include="WinUIEx" Version="2.3.4" />
 		<Manifest Include="$(ApplicationManifest)" />

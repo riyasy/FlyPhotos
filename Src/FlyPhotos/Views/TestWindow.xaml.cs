@@ -10,11 +10,23 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.UI.Popups;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace FlyPhotos.Views;
 
+public sealed partial class TestWindow
+{
+    public TestWindow()
+    {
+        InitializeComponent();
+    }
+    private async void ButtonTest_OnClick(object sender, RoutedEventArgs e)
+    {
+    }
+}
+
+/*
+
+// To learn more about WinUI, the WinUI project structure,
+// and more about our project templates, see: http://aka.ms/winui-project-info.
 /// <summary>
 /// An empty window that can be used on its own or navigated to within a Frame.
 /// </summary>
@@ -90,3 +102,5 @@ public sealed partial class TestWindow
         //    supportedExtensions.Contains(Path.GetExtension(s).ToUpperInvariant())).ToList();
     }
 }
+
+*/
