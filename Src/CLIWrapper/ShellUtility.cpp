@@ -26,126 +26,147 @@ void ShellUtility::SayThis(const wchar_t* phrase)
 
 HRESULT ShellUtility::GetFileListFromExplorerWindow(vector<wstring>& arr)
 {
-	TCHAR g_szItem[MAX_PATH];
-	g_szItem[0] = TEXT('\0');
+    TCHAR g_szItem[MAX_PATH];
+    g_szItem[0] = TEXT('\0');
 
-	HWND hwndFind = GetForegroundWindow();
+    // Get the handle to the foreground window (the currently active window).
+    HWND hwndFind = GetForegroundWindow();
 
-	IShellWindows* psw;
-	HRESULT hr;
-	hr = CoCreateInstance(CLSID_ShellWindows, nullptr, CLSCTX_ALL, IID_IShellWindows, (void**)&psw);
-	if (SUCCEEDED(hr))
-	{
-		VARIANT v;
-		V_VT(&v) = VT_I4;
-		IDispatch* pdisp;
-		BOOL fFound = FALSE;
-		for (V_I4(&v) = 0; !fFound && psw->Item(v, &pdisp) == S_OK;
-		     V_I4(&v)++)
-		{
-			IWebBrowserApp* pwba;
-			hr = pdisp->QueryInterface(IID_IWebBrowserApp, (void**)&pwba);
-			if (SUCCEEDED(hr))
-			{
-				HWND hwndWBA;
-				hr = pwba->get_HWND((LONG_PTR*)&hwndWBA);
-				if (SUCCEEDED(hr) && hwndWBA == hwndFind)
-				{
-					fFound = TRUE;
-					IServiceProvider* psp;
-					hr = pwba->QueryInterface(IID_IServiceProvider, (void**)&psp);
-					if (SUCCEEDED(hr))
-					{
-						IShellBrowser* psb;
-						hr = psp->QueryService(SID_STopLevelBrowser, IID_IShellBrowser, (void**)&psb);
-						if (SUCCEEDED(hr))
-						{
-							IShellView* psv;
-							hr = psb->QueryActiveShellView(&psv);
-							if (SUCCEEDED(hr))
-							{
-								IFolderView* pfv;
-								hr = psv->QueryInterface(IID_IFolderView, (void**)&pfv);
-								if (SUCCEEDED(hr))
-								{
-									IPersistFolder2* ppf2;
-									hr = pfv->GetFolder(IID_IPersistFolder2, (void**)&ppf2);
-									if (SUCCEEDED(hr))
-									{
-										LPITEMIDLIST pidlFolder;
-										hr = ppf2->GetCurFolder(&pidlFolder);
-										if (SUCCEEDED(hr))
-										{
-											//if (!SHGetPathFromIDList(pidlFolder, g_szPath)) {
-											//    lstrcpyn(g_szPath, TEXT("<not a directory>"), MAX_PATH);
-											//}
-											int iFocus;
-											hr = pfv->GetFocusedItem(&iFocus);
-											if (SUCCEEDED(hr))
-											{
-												LPITEMIDLIST pidlItem;
-												hr = pfv->Item(iFocus, &pidlItem);
-												if (SUCCEEDED(hr))
-												{
-													IShellFolder* psf;
-													hr = ppf2->QueryInterface(IID_IShellFolder, (void**)&psf);
-													if (SUCCEEDED(hr))
-													{
-														STRRET str;
+    // Try to find the active tab window in the foreground window.
+    // First, look for "ShellTabWindowClass", then "TabWindowClass".
+    HWND hwndActiveTab = FindWindowEx(hwndFind, nullptr, L"ShellTabWindowClass", nullptr);
+    if (hwndActiveTab == nullptr)
+    {
+        hwndActiveTab = FindWindowEx(hwndFind, nullptr, L"TabWindowClass", nullptr);
+    }
 
-														IEnumIDList* pEnum;
-														hr = pfv->Items(SVGIO_FLAG_VIEWORDER, IID_IEnumIDList,
-														                (LPVOID*)&pEnum);
-														if (SUCCEEDED(hr))
-														{
-															LPITEMIDLIST pidl;
-															ULONG fetched = 0;
+    // If no active tab was found, return an error code.
+    if (hwndActiveTab == nullptr)
+    {
+        return E_FAIL; // No active tab found
+    }
 
-															do
-															{
-																pidl = nullptr;
-																hr = pEnum->Next(1, &pidl, &fetched);
-																if (SUCCEEDED(hr))
-																{
-																	if (fetched)
-																	{
-																		hr = psf->GetDisplayNameOf(
-																			pidl, SHGDN_FORPARSING, &str);
-																		if (SUCCEEDED(hr))
-																		{
-																			StrRetToBuf(&str, pidl, g_szItem, MAX_PATH);
-																			arr.push_back(g_szItem);
-																		}
-																	}
-																	CoTaskMemFree(pidl);
-																}
-															}
-															while (fetched);
-															pEnum->Release();
-														}
-														psf->Release();
-													}
-													CoTaskMemFree(pidlItem);
-												}
-											}
-											CoTaskMemFree(pidlFolder);
-										}
-										ppf2->Release();
-									}
-									pfv->Release();
-								}
-								psv->Release();
-							}
-							psb->Release();
-						}
-						psp->Release();
-					}
-				}
-				pwba->Release();
-			}
-			pdisp->Release();
-		}
-		psw->Release();
-	}
-	return hr;
+    // Create an instance of IShellWindows to enumerate all open shell windows.
+    IShellWindows* psw = nullptr;
+    HRESULT hr = CoCreateInstance(CLSID_ShellWindows, nullptr, CLSCTX_ALL, IID_IShellWindows, (void**)&psw);
+    if (FAILED(hr))
+    {
+        return hr; // Failed to create ShellWindows instance
+    }
+
+    VARIANT v;
+    V_VT(&v) = VT_I4;
+    IDispatch* pdisp = nullptr;
+
+    // Iterate through all shell windows to find the one matching the foreground window.
+    for (V_I4(&v) = 0; psw->Item(v, &pdisp) == S_OK; V_I4(&v)++)
+    {
+        IWebBrowserApp* pwba = nullptr;
+        hr = pdisp->QueryInterface(IID_IWebBrowserApp, (void**)&pwba);
+        pdisp->Release(); // Release IDispatch as it's no longer needed.
+        if (FAILED(hr))
+        {
+            continue; // Skip to the next shell window if QueryInterface fails.
+        }
+
+        // Get the window handle of the current IWebBrowserApp.
+        HWND hwndWBA;
+        hr = pwba->get_HWND((LONG_PTR*)&hwndWBA);
+        if (FAILED(hr) || hwndWBA != hwndFind)
+        {
+            pwba->Release(); // Release IWebBrowserApp if not the target window.
+            continue; // Skip to the next shell window.
+        }
+
+        // Query for the IServiceProvider interface.
+        IServiceProvider* psp = nullptr;
+        hr = pwba->QueryInterface(IID_IServiceProvider, (void**)&psp);
+        pwba->Release(); // Release IWebBrowserApp as it's no longer needed.
+        if (FAILED(hr))
+        {
+            continue; // Skip to the next shell window if IServiceProvider query fails.
+        }
+
+        // Use IServiceProvider to get the IShellBrowser interface.
+        IShellBrowser* psb = nullptr;
+        hr = psp->QueryService(SID_STopLevelBrowser, IID_IShellBrowser, (void**)&psb);
+        psp->Release(); // Release IServiceProvider as it's no longer needed.
+        if (FAILED(hr))
+        {
+            continue; // Skip to the next shell window if IShellBrowser query fails.
+        }
+
+        // Get the window handle of the shell browser.
+        HWND hwndShellBrowser;
+        hr = psb->GetWindow(&hwndShellBrowser);
+        if (FAILED(hr) || hwndShellBrowser != hwndActiveTab)
+        {
+            psb->Release(); // Release IShellBrowser if not the active tab.
+            continue; // Skip to the next shell window.
+        }
+
+        // Retrieve the active shell view from the shell browser.
+        IShellView* psv = nullptr;
+        hr = psb->QueryActiveShellView(&psv);
+        psb->Release(); // Release IShellBrowser as it's no longer needed.
+        if (FAILED(hr))
+        {
+            continue; // Skip to the next shell window if IShellView query fails.
+        }
+
+        // Query for the IFolderView interface from the active shell view.
+        IFolderView* pfv = nullptr;
+        hr = psv->QueryInterface(IID_IFolderView, (void**)&pfv);
+        psv->Release(); // Release IShellView as it's no longer needed.
+        if (FAILED(hr))
+        {
+            continue; // Skip to the next shell window if IFolderView query fails.
+        }
+
+        // Get the IShellFolder interface from the folder view.
+        IShellFolder* psf = nullptr;
+        hr = pfv->GetFolder(IID_IShellFolder, (void**)&psf);
+        if (FAILED(hr))
+        {
+            pfv->Release(); // Release IFolderView if IShellFolder query fails.
+            continue; // Skip to the next shell window.
+        }
+
+        // Enumerate the items in the folder view.
+        IEnumIDList* pEnum = nullptr;
+        hr = pfv->Items(SVGIO_FLAG_VIEWORDER, IID_IEnumIDList, (LPVOID*)&pEnum);
+        pfv->Release(); // Release IFolderView as it's no longer needed.
+        if (FAILED(hr))
+        {
+            psf->Release(); // Release IShellFolder if enumeration fails.
+            continue; // Skip to the next shell window.
+        }
+
+        LPITEMIDLIST pidl;
+        ULONG fetched = 0;
+        STRRET str;
+
+        // Iterate through the items and get their display names.
+        while (pEnum->Next(1, &pidl, &fetched) == S_OK && fetched)
+        {
+            hr = psf->GetDisplayNameOf(pidl, SHGDN_FORPARSING, &str);
+            if (SUCCEEDED(hr))
+            {
+                // Convert STRRET to a string and add it to the output array.
+                StrRetToBuf(&str, pidl, g_szItem, MAX_PATH);
+                arr.push_back(g_szItem);
+            }
+            CoTaskMemFree(pidl); // Free the PIDL after processing.
+        }
+
+        pEnum->Release(); // Release the item enumerator.
+        psf->Release(); // Release IShellFolder.
+        break; // Exit the loop since we've found the active tab.
+    }
+
+    psw->Release(); // Release IShellWindows.
+    return hr; // Return the result.
 }
+
+
+

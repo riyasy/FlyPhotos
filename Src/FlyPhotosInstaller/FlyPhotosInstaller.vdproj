@@ -653,15 +653,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Fly"
-        "ProductCode" = "8:{4D1556CC-1B0A-4B4D-A05F-1D85333F29EF}"
-        "PackageCode" = "8:{B611DC43-064F-4A43-91F0-CCE34064492A}"
+        "ProductCode" = "8:{A3A26934-EDEB-4D7E-BB2E-A4C75F68D9C8}"
+        "PackageCode" = "8:{4A8EDDF2-3DA4-41E1-A695-28ACED385165}"
         "UpgradeCode" = "8:{5565DCCD-EEED-45A0-93FF-4BABC468C2A7}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:2.3.0"
+        "ProductVersion" = "8:2.3.1"
         "Manufacturer" = "8:RYFTools"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://github.com/riyasy/FlyPhotos"
@@ -1239,7 +1239,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_09545E601968474C8570943A828095CA"
             {
-            "SourcePath" = "8:..\\FlyPhotos\\obj\\x64\\Debug\\net8.0-windows10.0.22621.0\\win-x64\\apphost.exe"
+            "SourcePath" = "8:..\\FlyPhotos\\obj\\x64\\Release\\net8.0-windows10.0.22621.0\\win-x64\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
@@ -1267,7 +1267,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_4562C8CC1BE8467281D2666DF32D149F"
             {
-            "SourcePath" = "8:..\\x64\\Debug\\WicImageFileReaderNative.exe"
+            "SourcePath" = "8:..\\x64\\Release\\WicImageFileReaderNative.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
