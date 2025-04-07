@@ -23,6 +23,10 @@ using static FlyPhotos.Controllers.PhotoDisplayController;
 using static Vanara.PInvoke.User32;
 using Icon = System.Drawing.Icon;
 using Window = Microsoft.UI.Xaml.Window;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
+using Windows.Storage.Streams;
+using System.Threading.Tasks;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -83,7 +87,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         if (_photoController.IsSinglePhoto()) return;
         var delta = e.GetCurrentPoint(ButtonBack).Properties.MouseWheelDelta;
         if (delta > 0)
-        {            
+        {
             _photoController.Fly(NavDirection.Next);
             _repeatButtonReleaseCheckTimer.Start();
         }
@@ -210,10 +214,19 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         _photoController.LoadFirstPhoto();
     }
 
-    private void HandleKeyDown(object sender, KeyRoutedEventArgs e)
+    private async void HandleKeyDown(object sender, KeyRoutedEventArgs e)
     {
         try
         {
+            var ctrlState = Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
+
+            if (ctrlState.HasFlag(CoreVirtualKeyStates.Down) && e.Key == VirtualKey.C)
+            {
+                await _photoController.Copy();
+                e.Handled = true;
+                return;
+            }
+
             switch (e.Key)
             {
                 case VirtualKey.Escape:
@@ -306,33 +319,33 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         switch (backGround)
         {
             case "Transparent":
-            {
-                SystemBackdrop = _transparentTintBackdrop;
-                break;
-            }
+                {
+                    SystemBackdrop = _transparentTintBackdrop;
+                    break;
+                }
             case "Acrylic":
-            {
-                SystemBackdrop = null;
-                TrySetDesktopAcrylicBackdrop();
-                break;
-            }
+                {
+                    SystemBackdrop = null;
+                    TrySetDesktopAcrylicBackdrop();
+                    break;
+                }
             case "Mica":
-            {
-                SystemBackdrop = null;
-                TrySetMicaBackdrop(false);
-                break;
-            }
+                {
+                    SystemBackdrop = null;
+                    TrySetMicaBackdrop(false);
+                    break;
+                }
             case "Mica Alt":
-            {
-                SystemBackdrop = null;
-                TrySetMicaBackdrop(true);
-                break;
-            }
+                {
+                    SystemBackdrop = null;
+                    TrySetMicaBackdrop(true);
+                    break;
+                }
             case "Frozen":
-            {
-                SystemBackdrop = _frozenBackdrop;
-                break;
-            }
+                {
+                    SystemBackdrop = _frozenBackdrop;
+                    break;
+                }
         }
     }
 
