@@ -360,11 +360,11 @@ internal class PhotoDisplayController
         string filePath = GetFullPathCurrentFile();
 
         StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
-
         IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
 
         DataPackage dataPackage = new DataPackage();
         dataPackage.SetBitmap(RandomAccessStreamReference.CreateFromStream(stream));
+        dataPackage.SetStorageItems(new List<IStorageItem> { file });
 
         Clipboard.SetContent(dataPackage);
     }
