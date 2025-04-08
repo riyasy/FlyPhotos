@@ -156,7 +156,8 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         }
         else
         {
-            if (_lastWindowState == OverlappedPresenterState.Maximized)
+            var pointerY = e.GetCurrentPoint(D2dCanvas).Position.Y;
+            if (_lastWindowState == OverlappedPresenterState.Maximized && pointerY >= AppTitlebar.ActualHeight)
             {
                 //(AppWindow.Presenter as OverlappedPresenter)?.SetBorderAndTitleBar(true, true);
                 this.Restore();
