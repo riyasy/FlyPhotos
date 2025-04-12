@@ -23,6 +23,10 @@ using static FlyPhotos.Controllers.PhotoDisplayController;
 using static Vanara.PInvoke.User32;
 using Icon = System.Drawing.Icon;
 using Window = Microsoft.UI.Xaml.Window;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
+using Windows.Storage.Streams;
+using System.Threading.Tasks;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -83,7 +87,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         if (_photoController.IsSinglePhoto()) return;
         var delta = e.GetCurrentPoint(ButtonBack).Properties.MouseWheelDelta;
         if (delta > 0)
-        {            
+        {
             _photoController.Fly(NavDirection.Next);
             _repeatButtonReleaseCheckTimer.Start();
         }
@@ -210,12 +214,16 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         _photoController.LoadFirstPhoto();
     }
 
-    private void HandleKeyDown(object sender, KeyRoutedEventArgs e)
+    private async void HandleKeyDown(object sender, KeyRoutedEventArgs e)
     {
         try
         {
             switch (e.Key)
             {
+                case VirtualKey.C when Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control).HasFlag(CoreVirtualKeyStates.Down):
+                    await _photoController.CopyFileToClipboardAsync();
+                    e.Handled = true;
+                    break;
                 case VirtualKey.Escape:
                     Close();
                     break;

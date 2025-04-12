@@ -12,6 +12,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Display.Core;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
+using Windows.Storage.Streams;
 
 namespace FlyPhotos.Controllers;
 
@@ -350,6 +353,24 @@ internal class PhotoDisplayController
         {
             _progressUpdateCallback(indexAndFileName, cacheProgressStatus);
         });
+    }
+
+    public async Task CopyFileToClipboardAsync()
+    {
+        try
+        {
+            string filePath = GetFullPathCurrentFile();
+            StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
+            IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
+            DataPackage dataPackage = new DataPackage();
+            dataPackage.SetBitmap(RandomAccessStreamReference.CreateFromStream(stream));
+            dataPackage.SetStorageItems(new List<IStorageItem> { file });
+            Clipboard.SetContent(dataPackage);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
     }
 
     public void Fly(NavDirection direction)
