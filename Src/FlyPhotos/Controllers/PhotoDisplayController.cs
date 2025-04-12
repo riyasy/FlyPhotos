@@ -52,10 +52,10 @@ internal class PhotoDisplayController
     private readonly ConcurrentDictionary<int, bool> _previewsBeingCached = new();
 
     private readonly ConcurrentStack<int> _toBeDiskCachedPreviews = new();
-    private readonly ManualResetEvent _diskCachingCanStart = new(false);
+    private readonly ManualResetEvent _diskCachingCanStart = new (false);
 
     private int _keyPressCounter;
-
+    
 
     private readonly CanvasControl _d2dCanvas;
     private readonly Win2dCanvasController _canvasController;
@@ -125,7 +125,7 @@ internal class PhotoDisplayController
             }
             Photo.PhotosCount = files.Count;
 
-            foreach (var s in files)
+            foreach (var s in files) 
                 _photos.Add(new Photo(s));
 
 
@@ -140,7 +140,7 @@ internal class PhotoDisplayController
             var previewCachingThread = new Thread(PreviewCacheBuilderDoWork) { IsBackground = true };
             previewCachingThread.Start();
             var hqCachingThread = new Thread(HqImageCacheBuilderDoWork)
-            { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+                { IsBackground = true, Priority = ThreadPriority.AboveNormal };
             hqCachingThread.Start();
             var previewDiskCachingThread = new Thread(PreviewDiskCacherDoWork) { IsBackground = true };
             previewDiskCachingThread.Start();
@@ -185,7 +185,7 @@ internal class PhotoDisplayController
                 _previewsBeingCached.Remove(index, out _);
 
                 if (photo.Preview.PreviewFrom == DisplayItem.PreviewSource.FromDisk) { _toBeDiskCachedPreviews.Push(item); }
-
+                
                 if (Photo.CurrentDisplayIndex == index)
                     UpgradeImageIfNeeded(photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
 
@@ -253,8 +253,8 @@ internal class PhotoDisplayController
                 {
                     try
                     {
-                        if (_cachedPreviews.TryGetValue(index, out var image) &&
-                            image.Preview != null &&
+                        if (_cachedPreviews.TryGetValue(index, out var image) && 
+                            image.Preview != null && 
                             image.Preview.PreviewFrom == DisplayItem.PreviewSource.FromDisk)
                         {
                             PhotoDiskCacher.Instance.PutInCache(image.FileName, image.Preview.Bitmap);
@@ -284,7 +284,7 @@ internal class PhotoDisplayController
         var keysToRemove = _cachedHqImages.Keys.Where(key =>
             key > curIdx + App.Settings.CacheSizeOneSideHqImages ||
             key < curIdx - App.Settings.CacheSizeOneSideHqImages).ToList();
-        keysToRemove.ForEach(delegate (int key)
+        keysToRemove.ForEach(delegate(int key)
         {
             _photos[key].Hq = null;
             _cachedHqImages.TryRemove(key, out _);
@@ -293,7 +293,7 @@ internal class PhotoDisplayController
         keysToRemove = _cachedPreviews.Keys.Where(key =>
             key > curIdx + App.Settings.CacheSizeOneSidePreviews ||
             key < curIdx - App.Settings.CacheSizeOneSidePreviews).ToList();
-        keysToRemove.ForEach(delegate (int key)
+        keysToRemove.ForEach(delegate(int key)
         {
             _photos[key].Preview = null;
             _cachedPreviews.TryRemove(key, out _);
@@ -311,9 +311,9 @@ internal class PhotoDisplayController
 
         _toBeCachedHqImages.Clear();
         var tempArray = (from cacheIdx in cacheIndexesHqImages
-                         where !_cachedHqImages.ContainsKey(cacheIdx) && !_hqsBeingCached.ContainsKey(cacheIdx) && cacheIdx >= 0 &&
-                               cacheIdx < _photos.Count
-                         select cacheIdx).ToArray();
+            where !_cachedHqImages.ContainsKey(cacheIdx) && !_hqsBeingCached.ContainsKey(cacheIdx) && cacheIdx >= 0 &&
+                  cacheIdx < _photos.Count
+            select cacheIdx).ToArray();
         if (tempArray.Length > 0) _toBeCachedHqImages.PushRange(tempArray);
 
         // Create new list of to be cached Previews.
@@ -329,9 +329,9 @@ internal class PhotoDisplayController
         _toBeCachedPreviews.Clear();
 
         tempArray = (from cacheIdx in cacheIndexesPreviews
-                     where !_cachedPreviews.ContainsKey(cacheIdx) && !_previewsBeingCached.ContainsKey(cacheIdx) &&
-                           cacheIdx >= 0 && cacheIdx < _photos.Count
-                     select cacheIdx).ToArray();
+            where !_cachedPreviews.ContainsKey(cacheIdx) && !_previewsBeingCached.ContainsKey(cacheIdx) &&
+                  cacheIdx >= 0 && cacheIdx < _photos.Count
+            select cacheIdx).ToArray();
         if (tempArray.Length > 0) _toBeCachedPreviews.PushRange(tempArray);
     }
 
@@ -355,18 +355,22 @@ internal class PhotoDisplayController
         });
     }
 
-    public async Task Copy()
+    public async Task CopyFileToClipboardAsync()
     {
-        string filePath = GetFullPathCurrentFile();
-
-        StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
-        IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
-
-        DataPackage dataPackage = new DataPackage();
-        dataPackage.SetBitmap(RandomAccessStreamReference.CreateFromStream(stream));
-        dataPackage.SetStorageItems(new List<IStorageItem> { file });
-
-        Clipboard.SetContent(dataPackage);
+        try
+        {
+            string filePath = GetFullPathCurrentFile();
+            StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
+            IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
+            DataPackage dataPackage = new DataPackage();
+            dataPackage.SetBitmap(RandomAccessStreamReference.CreateFromStream(stream));
+            dataPackage.SetStorageItems(new List<IStorageItem> { file });
+            Clipboard.SetContent(dataPackage);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
     }
 
     public void Fly(NavDirection direction)

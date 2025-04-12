@@ -218,17 +218,12 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     {
         try
         {
-            var ctrlState = Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
-
-            if (ctrlState.HasFlag(CoreVirtualKeyStates.Down) && e.Key == VirtualKey.C)
-            {
-                await _photoController.Copy();
-                e.Handled = true;
-                return;
-            }
-
             switch (e.Key)
             {
+                case VirtualKey.C when Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control).HasFlag(CoreVirtualKeyStates.Down):
+                    await _photoController.CopyFileToClipboardAsync();
+                    e.Handled = true;
+                    break;
                 case VirtualKey.Escape:
                     Close();
                     break;
@@ -319,33 +314,33 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         switch (backGround)
         {
             case "Transparent":
-                {
-                    SystemBackdrop = _transparentTintBackdrop;
-                    break;
-                }
+            {
+                SystemBackdrop = _transparentTintBackdrop;
+                break;
+            }
             case "Acrylic":
-                {
-                    SystemBackdrop = null;
-                    TrySetDesktopAcrylicBackdrop();
-                    break;
-                }
+            {
+                SystemBackdrop = null;
+                TrySetDesktopAcrylicBackdrop();
+                break;
+            }
             case "Mica":
-                {
-                    SystemBackdrop = null;
-                    TrySetMicaBackdrop(false);
-                    break;
-                }
+            {
+                SystemBackdrop = null;
+                TrySetMicaBackdrop(false);
+                break;
+            }
             case "Mica Alt":
-                {
-                    SystemBackdrop = null;
-                    TrySetMicaBackdrop(true);
-                    break;
-                }
+            {
+                SystemBackdrop = null;
+                TrySetMicaBackdrop(true);
+                break;
+            }
             case "Frozen":
-                {
-                    SystemBackdrop = _frozenBackdrop;
-                    break;
-                }
+            {
+                SystemBackdrop = _frozenBackdrop;
+                break;
+            }
         }
     }
 
