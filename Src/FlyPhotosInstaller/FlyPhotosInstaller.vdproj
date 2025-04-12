@@ -145,6 +145,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -161,6 +169,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
@@ -621,15 +637,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Fly"
-        "ProductCode" = "8:{28241474-7E74-4C9C-97B0-59C2EC262B64}"
-        "PackageCode" = "8:{5E8D421A-B2DB-4B4A-8057-92035EED6CE3}"
+        "ProductCode" = "8:{8BD1A9DC-A30C-4097-9006-A51EC494011C}"
+        "PackageCode" = "8:{41127475-323D-414D-9A00-EF1447F90ABE}"
         "UpgradeCode" = "8:{5565DCCD-EEED-45A0-93FF-4BABC468C2A7}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:2.3.2"
+        "ProductVersion" = "8:2.3.3"
         "Manufacturer" = "8:RYFTools"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://github.com/riyasy/FlyPhotos"
@@ -1207,7 +1223,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_09545E601968474C8570943A828095CA"
             {
-            "SourcePath" = "8:..\\FlyPhotos\\obj\\x64\\Release\\net9.0-windows10.0.22621.0\\apphost.exe"
+            "SourcePath" = "8:..\\FlyPhotos\\obj\\x64\\Release\\net9.0-windows10.0.22621.0\\win-x64\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
