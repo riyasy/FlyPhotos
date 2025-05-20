@@ -72,6 +72,11 @@ internal class ImageUtil
                 if (await PsdReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
                 return (PreviewFailedIndicator, false);
             }
+            else if (extension == ".SVG")
+            {
+                if (await SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
+                return (PreviewFailedIndicator, false);
+            }
             else
             {
                 if (await WicReader.GetThumbnail(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
@@ -108,6 +113,11 @@ internal class ImageUtil
                 if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                 return PreviewFailedIndicator;
             }
+            else if (extension == ".SVG")
+            {
+                if (await SvgReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                return PreviewFailedIndicator;
+            }
             else
             {
                 if (await WicReader.GetThumbnail(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
@@ -135,6 +145,11 @@ internal class ImageUtil
             else if (Path.GetExtension(path).ToUpper() == ".PSD")
             {
                 if (await PsdReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                return HqImageFailedIndicator;
+            }
+            else if (Path.GetExtension(path).ToUpper() == ".SVG")
+            {
+                if (await SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                 return HqImageFailedIndicator;
             }
             else

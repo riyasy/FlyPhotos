@@ -30,6 +30,7 @@ internal static class Util
         _codecInfoList = msu.GetWicCodecList();
         foreach (var codecInfo in _codecInfoList) SupportedExtensions.AddRange(codecInfo.fileExtensions);
         SupportedExtensions.Add(".PSD");
+        SupportedExtensions.Add(".SVG");
 
         var memoryLeakingCodecs = _codecInfoList.Where(x => x.friendlyName.Contains("Raw Image"));
         foreach (var leakingCodec in memoryLeakingCodecs) MemoryLeakingExtensions.AddRange(leakingCodec.fileExtensions);
