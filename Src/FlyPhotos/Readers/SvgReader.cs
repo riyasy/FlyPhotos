@@ -1,13 +1,17 @@
 ﻿using FlyPhotos.Data;
-using ImageMagick;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
+using Microsoft.UI;
 using NLog;
+using SkiaSharp;
+using Svg.Skia;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Windows.Storage.Streams;
 
 namespace FlyPhotos.Readers;
+
 internal class SvgReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -18,26 +22,41 @@ internal class SvgReader
     public static Task<(bool, DisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
         => LoadSvg(ctrl, inputPath, 2000, 2000);
 
-    // Load preview as a rasterized CanvasBitmap
     private static async Task<(bool, DisplayItem)> LoadSvg(CanvasControl ctrl, string inputPath, int width, int height)
     {
         try
         {
-            var settings = new MagickReadSettings
-            {
-                Width = width,
-                Height = height,
-            };
+            // Load and parse SVG file
+            var svg = new SKSvg();
+            svg.Load(inputPath);
 
-            using var image = new MagickImage(inputPath, settings);
-            using var stream = new MemoryStream();
-            image.Format = MagickFormat.Jpeg;
-            image.Quality = 80;
-            await image.WriteAsync(stream);
-            stream.Position = 0;
+            // Create a SkiaSharp bitmap to render into
+            using var surface = SKSurface.Create(new SKImageInfo(width, height));
+            var canvas = surface.Canvas;
 
-            var bitmap = await CanvasBitmap.LoadAsync(ctrl, stream.AsRandomAccessStream());
-            return (true, new DisplayItem(bitmap, DisplayItem.PreviewSource.FromDisk));
+            canvas.Clear(SKColors.Transparent);
+
+            // Calculate scaling
+            var scaleX = width / svg.Picture.CullRect.Width;
+            var scaleY = height / svg.Picture.CullRect.Height;
+            var scale = Math.Min(scaleX, scaleY);
+
+            canvas.Scale(scale);
+            canvas.DrawPicture(svg.Picture);
+            canvas.Flush();
+
+            // Get image as PNG stream
+            using var image = surface.Snapshot();
+            using var data = image.Encode(SKEncodedImageFormat.Png, 90);
+            using var ms = new MemoryStream();
+            data.SaveTo(ms);
+            ms.Position = 0;
+
+            // Load into CanvasBitmap
+            var rasStream = ms.AsRandomAccessStream();
+            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, rasStream);
+
+            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {
@@ -45,5 +64,4 @@ internal class SvgReader
             return (false, null);
         }
     }
-
 }

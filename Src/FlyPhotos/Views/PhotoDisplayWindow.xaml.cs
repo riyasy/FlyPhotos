@@ -55,6 +55,9 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
 
     private OverlappedPresenterState _lastWindowState;
 
+    private readonly VirtualKey PlusVK = Utils.Util.GetKeyThatProduces('+');
+    private readonly VirtualKey MinusVK = Utils.Util.GetKeyThatProduces('-');
+
     public PhotoDisplayWindow()
     {
         InitializeComponent();
@@ -219,22 +222,53 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     {
         try
         {
+            bool ctrlPressed = Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control).HasFlag(CoreVirtualKeyStates.Down);
             switch (e.Key)
             {
-                case VirtualKey.C when Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control).HasFlag(CoreVirtualKeyStates.Down):
+                case VirtualKey.C when ctrlPressed:
                     await _photoController.CopyFileToClipboardAsync();
                     e.Handled = true;
                     break;
                 case VirtualKey.Escape:
                     Close();
                     break;
-                case VirtualKey.Right:
+
+                // File Navigation
+                case VirtualKey.Right when !ctrlPressed:
                     _photoController.Fly(NavDirection.Next);
                     break;
-                case VirtualKey.Left:
+                case VirtualKey.Left when !ctrlPressed:
                     _photoController.Fly(NavDirection.Prev);
                     break;
+
+                // ZOOM
+                case VirtualKey.Add when ctrlPressed:
+                    _canvasController.ZoomByKeyboard(1.25f);
+                    break;
+                case VirtualKey.Subtract when ctrlPressed:
+                    _canvasController.ZoomByKeyboard(0.8f);
+                    break;
+
+                // PAN
+                case VirtualKey.Up when ctrlPressed:
+                    _canvasController.PanByKeyboard(0, -20);
+                    break;
+                case VirtualKey.Down when ctrlPressed:
+                    _canvasController.PanByKeyboard(0, 20);
+                    break;
+                case VirtualKey.Left when ctrlPressed:
+                    _canvasController.PanByKeyboard(-20, 0);
+                    break;
+                case VirtualKey.Right when ctrlPressed:
+                    _canvasController.PanByKeyboard(20, 0);
+                    break;
             }
+
+            // Layout-aware override
+            if (e.Key == PlusVK)
+                _canvasController.ZoomByKeyboard(1.25f);
+            else if (e.Key == MinusVK)
+                _canvasController.ZoomByKeyboard(0.8f);
         }
         catch (Exception ex)
         {

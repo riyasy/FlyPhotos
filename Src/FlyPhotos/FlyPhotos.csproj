@@ -53,6 +53,8 @@
 		<PackageReference Include="PhotoSauce.MagicScaler" Version="0.15.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.4" />
 		<PackageReference Include="NLog.Extensions.Logging" Version="5.4.0" />
+		<PackageReference Include="SkiaSharp" Version="3.119.0" />
+		<PackageReference Include="Svg.Skia" Version="3.0.4" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.4" />
 		<PackageReference Include="System.Drawing.Common" Version="9.0.4" />
 		<PackageReference Include="Vanara.PInvoke.User32" Version="4.1.1" />

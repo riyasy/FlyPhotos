@@ -9,6 +9,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Windows.System;
+using Vanara.PInvoke;
+using static Vanara.PInvoke.User32;
 
 namespace FlyPhotos.Utils;
 
@@ -128,6 +131,14 @@ internal static class Util
     {
         Type type = typeof(UIElement);
         type.InvokeMember("ProtectedCursor", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SetProperty | BindingFlags.Instance, null, uiElement, new object[] { cursor });
+    }
+
+    public static VirtualKey GetKeyThatProduces(char character)
+    {
+        HKL layout = User32.GetKeyboardLayout(0); // Current thread
+        short vk = User32.VkKeyScanExA((byte)character, layout);
+        int vkey = vk & 0xff;
+        return (VirtualKey)vkey;
     }
 
     //public static void OpenUrl(string url)
