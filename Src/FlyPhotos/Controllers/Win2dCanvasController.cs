@@ -51,6 +51,8 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
     private const double ZoomAnimationDurationMs = 300;
     private bool zoomAnimationOnGoing = false;
 
+    private bool _invalidatePending = false;
+
 
     private readonly DispatcherTimer _redrawThumbnailTimer = new()
     {
@@ -115,7 +117,7 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
         _offScreenDrawTimer.Start();
 
         UpdateTransform();
-        _d2dCanvas.Invalidate();
+        RequestInvalidate();
     }
 
 
@@ -131,7 +133,7 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
             _offScreenDrawTimer.Stop();
             _offScreenDrawTimer.Start();
             UpdateTransform();
-            _d2dCanvas.Invalidate();
+            RequestInvalidate();
         }
     }
 
@@ -140,7 +142,7 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
         _offScreenDrawTimer.Stop();
         CreateOffScreen();
         UpdateTransform();
-        _d2dCanvas.Invalidate();
+        RequestInvalidate();
     }
 
     private void D2dCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
@@ -155,17 +157,21 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
     {
         var imageWidth = _imageRect.Width * _scale;
         var imageHeight = _imageRect.Height * _scale;
-        if (imageWidth < _mainLayout.ActualWidth * 1.5)
+
+        if (_offscreen != null &&
+            (_offscreen.SizeInPixels.Width != (int)imageWidth || 
+            _offscreen.SizeInPixels.Height != (int)imageHeight))
+        {
+            DestroyOffScreen();
+        }
+
+        if (_offscreen == null && imageWidth < _mainLayout.ActualWidth * 1.5)
         {
             var tempOffScreen = new CanvasRenderTarget(_d2dCanvas, (float)imageWidth, (float)imageHeight);
             using var ds = tempOffScreen.CreateDrawingSession();
             ds.DrawImage(_currentDisplayItem.Bitmap, new Rect(0, 0, imageWidth, imageHeight),
                 _currentDisplayItem.Bitmap.Bounds, 1, CanvasImageInterpolation.HighQualityCubic);
             _offscreen = tempOffScreen;
-        }
-        else
-        {
-            DestroyOffScreen();
         }
     }
 
@@ -186,7 +192,7 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
     private void RedrawThumbnailTimer_Tick(object sender, object e)
     {
         CreateThumbnailRibbonOffScreen();
-        _d2dCanvas.Invalidate();
+        RequestInvalidate();
     }
 
     private void CreateThumbnailRibbonOffScreen()
@@ -271,7 +277,7 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
             _imagePos.X += e.GetCurrentPoint(_d2dCanvas).Position.X - _lastPoint.X;
             _imagePos.Y += e.GetCurrentPoint(_d2dCanvas).Position.Y - _lastPoint.Y;
             UpdateTransform();
-            _d2dCanvas.Invalidate();
+            RequestInvalidate();
         }
 
         _lastPoint = e.GetCurrentPoint(_d2dCanvas).Position;
@@ -291,20 +297,25 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
 
         var scaleTo = _lastScaleTo * scalePercentage;
 
+        // Lower limit of zoom
         if (scaleTo < 0.05) return;
 
-        _lastScaleTo = scaleTo;
         var adjustedScalePercentage = scaleTo / _scale;
         var newImageWidth = (float)_imageRect.Width * scaleTo;
         var newImageHeight = (float)_imageRect.Height * scaleTo;
 
-        if (newImageWidth <= _device.MaximumBitmapSizeInPixels && newImageHeight <= _device.MaximumBitmapSizeInPixels)
+        // Upper limit of zoom
+        if (newImageWidth > _device.MaximumBitmapSizeInPixels || 
+            newImageHeight > _device.MaximumBitmapSizeInPixels)
         {
-            var mousePosition = e.GetCurrentPoint(_d2dCanvas).Position;
-            StartZoomAnimation(scaleTo, mousePosition);
-            _offScreenDrawTimer.Stop();
-            _offScreenDrawTimer.Start();
+            return;
         }
+
+        _lastScaleTo = scaleTo;
+        var mousePosition = e.GetCurrentPoint(_d2dCanvas).Position;
+        StartZoomAnimation(scaleTo, mousePosition);
+        _offScreenDrawTimer.Stop();
+        _offScreenDrawTimer.Start();
     }
 
     public void ZoomByKeyboard(float scaleFactor)
@@ -323,7 +334,7 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
         _imagePos.X += dx;
         _imagePos.Y += dy;
         UpdateTransform();
-        _d2dCanvas.Invalidate();
+        RequestInvalidate();
     }
 
 
@@ -359,7 +370,7 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
 
         _scale = newScale;
         UpdateTransform();
-        _d2dCanvas.Invalidate();
+        RequestInvalidate();
 
         if (t >= 1.0)
         {
@@ -393,7 +404,7 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
         else if (_currentDisplayItem != null)
             args.DrawingSession.DrawImage(_currentDisplayItem.Bitmap, _imageRect, _currentDisplayItem.Bitmap.Bounds, 1f,
                 drawingQuality);
-        
+
         if (_thumbnailOffscreen != null && App.Settings.ShowThumbNails)
         {
             var drawRect = _thumbnailOffscreen.Bounds;
@@ -439,7 +450,7 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
     {
         _currentDisplayItem.Rotation += (clockWise ? 90 : -90);
         UpdateTransform();
-        _d2dCanvas.Invalidate();
+        RequestInvalidate();
     }
 
     public void SetPreviewCacheReference(ConcurrentDictionary<int, Photo> cachedPreviews)
@@ -452,23 +463,28 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
         if (App.Settings.ShowThumbNails)
         {
             CreateThumbnailRibbonOffScreen();
-            _d2dCanvas.Invalidate();
+            RequestInvalidate();
         }
         else
         {
-            _d2dCanvas.Invalidate();
+            RequestInvalidate();
         }
+    }
+
+    private void RequestInvalidate()
+    {
+        if (_invalidatePending) return;
+        _invalidatePending = true;
+
+        _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
+        {
+            _invalidatePending = false;
+            _d2dCanvas.Invalidate();
+        });
     }
 }
 
 public interface IThumbnailDisplayChangeable
 {
     void ShowThumbnailBasedOnSettings();
-}
-public class ZoomAnimationInfo(float animScale, double animXPos, double animYPos, float incrementalScale)
-{
-    public float Scale = animScale;
-    public double X = animXPos;
-    public double Y = animYPos;
-    public float IncrementalScale = incrementalScale;
 }
