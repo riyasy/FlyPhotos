@@ -1,19 +1,26 @@
 ﻿#nullable enable
 using CliWrapper;
 using FlyPhotos.Controllers;
+using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using NLog;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using Vanara.PInvoke;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
+using Windows.Storage.Streams;
 using Windows.System;
 using Windows.UI;
 using Windows.UI.Core;
@@ -23,10 +30,6 @@ using static FlyPhotos.Controllers.PhotoDisplayController;
 using static Vanara.PInvoke.User32;
 using Icon = System.Drawing.Icon;
 using Window = Microsoft.UI.Xaml.Window;
-using Windows.ApplicationModel.DataTransfer;
-using Windows.Storage;
-using Windows.Storage.Streams;
-using System.Threading.Tasks;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -59,6 +62,9 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     private readonly VirtualKey PlusVK = Utils.Util.GetKeyThatProduces('+');
     private readonly VirtualKey MinusVK = Utils.Util.GetKeyThatProduces('-');
 
+    private OpacityFader _opacityFader;
+    private bool _pointerInBottom = false;
+
     public PhotoDisplayWindow()
     {
         InitializeComponent();
@@ -79,6 +85,8 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         SizeChanged += PhotoDisplayWindow_SizeChanged;
         Closed += PhotoDisplayWindow_Closed;
 
+        MainLayout.PointerMoved += MainLayout_PointerMoved;
+
         D2dCanvas.CreateResources += D2dCanvas_CreateResources;
         D2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
         D2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;
@@ -90,7 +98,27 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         _repeatButtonReleaseCheckTimer.Tick += RepeatButtonReleaseCheckTimer_Tick;
 
         this.Maximize();
-        _lastWindowState = OverlappedPresenterState.Maximized;        
+        _lastWindowState = OverlappedPresenterState.Maximized;
+
+        _opacityFader = new OpacityFader(new FrameworkElement[] { ButtonPanel, D2dCanvasThumbNail, TxtFileName }); 
+    }
+
+    private void MainLayout_PointerMoved(object sender, PointerRoutedEventArgs e)
+    {
+        var pos = e.GetCurrentPoint(MainLayout).Position;
+        double windowHeight = this.Bounds.Height;
+
+        double bottomThreshold = Math.Max(100, windowHeight * 0.40);
+        bool pointerInBottom = pos.Y >= windowHeight - bottomThreshold;
+
+        if (pointerInBottom != _pointerInBottom)
+        {
+            _pointerInBottom = pointerInBottom;
+            if (pointerInBottom)
+                _opacityFader.FadeTo(1.0f);    // Fully visible
+            else
+                _opacityFader.FadeTo(0.3f);    // Mostly transparent
+        }
     }
 
     private void ButtonBackNext_PointerWheelChanged(object sender, PointerRoutedEventArgs e)

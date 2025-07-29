@@ -53,6 +53,7 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Bottom"/>-->
         <StackPanel
+            x:Name="ButtonPanel"
             Width="Auto"
             Height="Auto"
             Margin="0,0,0,50"
