@@ -1,0 +1,185 @@
+﻿using FlyPhotos.Data;
+using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.UI.Xaml;
+using Microsoft.UI;
+using Microsoft.UI.Xaml;
+using System;
+using System.Collections.Concurrent;
+using Windows.Foundation;
+using static FlyPhotos.Controllers.PhotoDisplayController;
+
+namespace FlyPhotos.Controllers;
+
+internal class ThumbNailController : IThumbnailController
+{
+    private const int BoxSize = 40;
+    private int NumOfThumbNailsInOneDirection = 20;
+    private bool _canDrawThumbnails;
+    private bool _invalidatePending = false;
+
+    private CanvasControl _d2dCanvasThumbNail;
+    private CanvasRenderTarget _thumbnailOffscreen;
+    private ConcurrentDictionary<int, Photo> _cachedPreviews;
+
+    private readonly DispatcherTimer _redrawThumbnailTimer = new()
+    {
+        Interval = new TimeSpan(0, 0, 0, 0, 500)
+    };
+
+    public ThumbNailController(CanvasControl d2dCanvasThumbNail)
+    {
+        _d2dCanvasThumbNail = d2dCanvasThumbNail;
+        _d2dCanvasThumbNail.Draw += _d2dCanvasThumbNail_Draw;
+        _d2dCanvasThumbNail.SizeChanged += _d2dCanvasThumbNail_SizeChanged;
+        _d2dCanvasThumbNail.Loaded += _d2dCanvasThumbNail_Loaded;
+        _redrawThumbnailTimer.Tick += RedrawThumbnailTimer_Tick;
+    }
+
+    private void _d2dCanvasThumbNail_Loaded(object sender, RoutedEventArgs e)
+    {
+        _d2dCanvasThumbNail.Visibility = App.Settings.ShowThumbNails ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void _d2dCanvasThumbNail_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        NumOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * BoxSize)) + 1;
+        CreateThumbnailRibbonOffScreen();
+        RequestInvalidate();
+    }
+
+    public void SetPreviewCacheReference(ConcurrentDictionary<int, Photo> cachedPreviews)
+    {
+        _cachedPreviews = cachedPreviews;
+    }
+
+    private void _d2dCanvasThumbNail_Draw(CanvasControl sender, CanvasDrawEventArgs args)
+    {
+        if (_thumbnailOffscreen != null && App.Settings.ShowThumbNails)
+        {
+            var drawRect = _thumbnailOffscreen.Bounds;
+            args.DrawingSession.Transform = System.Numerics.Matrix3x2.Identity;
+            args.DrawingSession.DrawImage(_thumbnailOffscreen, drawRect, _thumbnailOffscreen.Bounds, 1.0f,
+                CanvasImageInterpolation.NearestNeighbor);
+        }
+    }
+
+    public void ShowThumbnailBasedOnSettings()
+    {
+        if (App.Settings.ShowThumbNails)
+        {
+            _d2dCanvasThumbNail.Visibility = Visibility.Visible;
+            CreateThumbnailRibbonOffScreen();
+            RequestInvalidate();
+        }
+        else
+        {
+            _d2dCanvasThumbNail.Visibility = Visibility.Collapsed;
+            RequestInvalidate();
+        }
+    }
+
+    public void RedrawThumbNailsIfNeeded(int index)
+    {
+        if (index >= Photo.CurrentDisplayIndex - NumOfThumbNailsInOneDirection &&
+            index <= Photo.CurrentDisplayIndex + NumOfThumbNailsInOneDirection)
+        {
+            _d2dCanvasThumbNail.DispatcherQueue.TryEnqueue(() =>
+            {
+                _canDrawThumbnails = true;
+                _redrawThumbnailTimer.Stop();
+                _redrawThumbnailTimer.Start();
+            });
+        }
+    }
+
+    private void RedrawThumbnailTimer_Tick(object sender, object e)
+    {
+        CreateThumbnailRibbonOffScreen();
+        RequestInvalidate();
+    }
+
+    public void CreateThumbnailRibbonOffScreen()
+    {
+        _redrawThumbnailTimer.Stop();
+        if (Photo.PhotosCount <= 1 || !_canDrawThumbnails || !App.Settings.ShowThumbNails)
+            return;
+
+        if (_thumbnailOffscreen == null)
+        {
+            NumOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * BoxSize)) + 1;
+            _thumbnailOffscreen = new CanvasRenderTarget(_d2dCanvasThumbNail, (float)_d2dCanvasThumbNail.ActualWidth, BoxSize);
+        }
+
+        using var dsThumbNail = _thumbnailOffscreen.CreateDrawingSession();
+        dsThumbNail.Clear(Colors.Transparent);
+
+        if (_cachedPreviews != null)
+        {
+            var startX = (int)_d2dCanvasThumbNail.ActualWidth / 2 - BoxSize / 2;
+            var startY = 0;
+
+            for (var i = -NumOfThumbNailsInOneDirection; i <= NumOfThumbNailsInOneDirection; i++)
+            {
+                var index = Photo.CurrentDisplayIndex + i;
+
+                if (index < 0 || index >= (Photo.PhotosCount)) continue;
+
+                CanvasBitmap bitmap;
+
+                if (_cachedPreviews.TryGetValue(index, out var photo) && photo.Preview != null && photo.Preview.Bitmap != null)
+                {
+                    bitmap = photo.Preview.Bitmap;
+                }
+                else
+                {
+                    bitmap = Photo.GetLoadingIndicator().Bitmap;
+                }
+
+                // Calculate the center square crop
+                float bitmapWidth = bitmap.SizeInPixels.Width;
+                float bitmapHeight = bitmap.SizeInPixels.Height;
+                var cropSize = Math.Min(bitmapWidth, bitmapHeight);
+
+                var cropX = (bitmapWidth - cropSize) / 2;
+                var cropY = (bitmapHeight - cropSize) / 2;
+
+                var destX = startX + i * BoxSize;
+
+                // Draw the cropped center of the image
+                dsThumbNail.DrawImage(
+                    bitmap,
+                    new Windows.Foundation.Rect(destX, startY, BoxSize, BoxSize),
+                    new Windows.Foundation.Rect(cropX, cropY, cropSize, cropSize), 1f,
+                    CanvasImageInterpolation.NearestNeighbor // Source rectangle for the crop
+                );
+                if (index == Photo.CurrentDisplayIndex)
+                {
+                    dsThumbNail.DrawRectangle(new Rect(destX, startY, BoxSize, BoxSize),
+                        Colors.GreenYellow, 3f);
+                }
+            }
+            RequestInvalidate();
+        }
+    }
+    private void RequestInvalidate()
+    {
+        if (_invalidatePending) return;
+        _invalidatePending = true;
+
+        _d2dCanvasThumbNail.DispatcherQueue.TryEnqueue(() =>
+        {
+            _invalidatePending = false;
+            _d2dCanvasThumbNail.Invalidate();
+        });
+    }
+}
+
+internal interface IThumbnailController
+{
+    void CreateThumbnailRibbonOffScreen();
+    void RedrawThumbNailsIfNeeded(int index);
+    void SetPreviewCacheReference(ConcurrentDictionary<int, Photo> cachedPreviews);
+    void ShowThumbnailBasedOnSettings();
+}
+
+

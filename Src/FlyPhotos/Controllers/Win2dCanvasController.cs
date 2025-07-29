@@ -18,16 +18,13 @@ using Windows.UI.Core;
 
 namespace FlyPhotos.Controllers;
 
-internal class Win2dCanvasController : IThumbnailDisplayChangeable
+internal class Win2dCanvasController : ICanvasController
 {
     // private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    private const int BoxSize = 40;
-    private int NumOfThumbNailsInOneDirection = 20;
-
     private readonly CanvasDevice _device = CanvasDevice.GetSharedDevice();
     private CanvasRenderTarget _offscreen;
-    private CanvasRenderTarget _thumbnailOffscreen;
+    
     private DisplayItem _currentDisplayItem;
 
     private Rect _imageRect;
@@ -40,7 +37,6 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
     private float _lastScaleTo = 1.0f;
     private bool _isDragging;
 
-    private readonly Grid _mainLayout;
     private readonly CanvasControl _d2dCanvas;
 
     private EventHandler<object> _renderingHandler;
@@ -53,37 +49,30 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
 
     private bool _invalidatePending = false;
 
-
-    private readonly DispatcherTimer _redrawThumbnailTimer = new()
-    {
-        Interval = new TimeSpan(0, 0, 0, 0, 500)
-    };
-
     private readonly DispatcherTimer _offScreenDrawTimer = new()
     {
         Interval = new TimeSpan(0, 0, 0, 0, 350)
-    };
+    };    
+    
+    private IThumbnailController _thumbNailController;
 
-    private ConcurrentDictionary<int, Photo> _cachedPreviews;
-    private bool _canDrawThumbnails;
-
-    public Win2dCanvasController(Grid mainLayout, CanvasControl d2dCanvas)
+    public Win2dCanvasController(CanvasControl d2dCanvas, IThumbnailController thumbNailController)
     {
         _d2dCanvas = d2dCanvas;
-        _mainLayout = mainLayout;
+        _thumbNailController = thumbNailController;        
 
         _d2dCanvas.Draw += CanvasControl_OnDraw;
+        _d2dCanvas.SizeChanged += D2dCanvas_SizeChanged;
 
         _d2dCanvas.PointerMoved += D2dCanvas_PointerMoved;
         _d2dCanvas.PointerPressed += D2dCanvas_PointerPressed;
         _d2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
-        _d2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;
+        _d2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;        
 
-        _mainLayout.SizeChanged += Win2dTest_SizeChanged;
-
-        _offScreenDrawTimer.Tick += OffScreenDrawTimer_Tick;
-        _redrawThumbnailTimer.Tick += RedrawThumbnailTimer_Tick;
+        _offScreenDrawTimer.Tick += OffScreenDrawTimer_Tick;        
     }
+
+
 
     public void SetSource(Photo value, PhotoDisplayController.DisplayLevel displayLevel)
     {
@@ -97,9 +86,9 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
         if (_currentDisplayItem.SoftwareBitmap != null)
             _currentDisplayItem.Bitmap = CanvasBitmap.CreateFromSoftwareBitmap(_d2dCanvas, _currentDisplayItem.SoftwareBitmap);
         var vertical = _currentDisplayItem.Rotation is 270 or 90;
-        var horScale = _mainLayout.ActualWidth /
+        var horScale = _d2dCanvas.ActualWidth /
                        (vertical ? _currentDisplayItem.Bitmap.Bounds.Height : _currentDisplayItem.Bitmap.Bounds.Width);
-        var vertScale = _mainLayout.ActualHeight /
+        var vertScale = _d2dCanvas.ActualHeight /
                         (vertical ? _currentDisplayItem.Bitmap.Bounds.Width : _currentDisplayItem.Bitmap.Bounds.Height);
         var scaleFactor = Math.Min(horScale, vertScale);
 
@@ -107,11 +96,11 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
             _currentDisplayItem.Bitmap.Bounds.Height * scaleFactor);
         if (firstPhoto)
         {
-            _imagePos.X = _mainLayout.ActualWidth / 2;
-            _imagePos.Y = _mainLayout.ActualHeight / 2;
+            _imagePos.X = _d2dCanvas.ActualWidth / 2;
+            _imagePos.Y = _d2dCanvas.ActualHeight / 2;
         }
 
-        CreateThumbnailRibbonOffScreen();
+        _thumbNailController.CreateThumbnailRibbonOffScreen();
 
         _offScreenDrawTimer.Stop();
         _offScreenDrawTimer.Start();
@@ -126,8 +115,8 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
         if (_currentDisplayItem.Bitmap == null) return;
         _scale = 1f;
         _lastScaleTo = 1f;
-        _imagePos.X = _mainLayout.ActualWidth / 2;
-        _imagePos.Y = _mainLayout.ActualHeight / 2;
+        _imagePos.X = _d2dCanvas.ActualWidth / 2;
+        _imagePos.Y = _d2dCanvas.ActualHeight / 2;
         if (redraw)
         {
             _offScreenDrawTimer.Stop();
@@ -165,7 +154,7 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
             DestroyOffScreen();
         }
 
-        if (_offscreen == null && imageWidth < _mainLayout.ActualWidth * 1.5)
+        if (_offscreen == null && imageWidth < _d2dCanvas.ActualWidth * 1.5)
         {
             var tempOffScreen = new CanvasRenderTarget(_d2dCanvas, (float)imageWidth, (float)imageHeight);
             using var ds = tempOffScreen.CreateDrawingSession();
@@ -175,87 +164,7 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
         }
     }
 
-    public void RedrawThumbNailsIfNeeded(int index)
-    {
-        if (index >= Photo.CurrentDisplayIndex - NumOfThumbNailsInOneDirection &&
-            index <= Photo.CurrentDisplayIndex + NumOfThumbNailsInOneDirection)
-        {
-            _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
-            {
-                _canDrawThumbnails = true;
-                _redrawThumbnailTimer.Stop();
-                _redrawThumbnailTimer.Start();
-            });
-        }
-    }
-
-    private void RedrawThumbnailTimer_Tick(object sender, object e)
-    {
-        CreateThumbnailRibbonOffScreen();
-        RequestInvalidate();
-    }
-
-    private void CreateThumbnailRibbonOffScreen()
-    {
-        _redrawThumbnailTimer.Stop();
-        if (Photo.PhotosCount <= 1 || !_canDrawThumbnails || !App.Settings.ShowThumbNails)
-            return;
-
-        if (_thumbnailOffscreen == null)
-        {
-            NumOfThumbNailsInOneDirection = (int)(_d2dCanvas.ActualWidth / (2 * BoxSize)) + 1;
-            _thumbnailOffscreen = new CanvasRenderTarget(_d2dCanvas, (float)_d2dCanvas.ActualWidth, BoxSize);
-        }
-
-        using var dsThumbNail = _thumbnailOffscreen.CreateDrawingSession();
-        dsThumbNail.Clear(Colors.Transparent);
-
-
-        if (_cachedPreviews != null)
-        {
-            var startX = (int)_d2dCanvas.ActualWidth / 2 - BoxSize / 2;
-            var startY = 0;
-
-            for (var i = -NumOfThumbNailsInOneDirection; i <= NumOfThumbNailsInOneDirection; i++)
-            {
-                var index = Photo.CurrentDisplayIndex + i;
-
-                if (index < 0 || index >= (Photo.PhotosCount)) continue;
-
-                CanvasBitmap bitmap;
-
-                if (_cachedPreviews.TryGetValue(index, out var photo) && photo.Preview != null && photo.Preview.Bitmap != null)
-                {
-                    bitmap = photo.Preview.Bitmap;
-                }
-                else
-                {
-                    bitmap = Photo.GetLoadingIndicator().Bitmap;
-                }
-
-                // Calculate the center square crop
-                float bitmapWidth = bitmap.SizeInPixels.Width;
-                float bitmapHeight = bitmap.SizeInPixels.Height;
-                var cropSize = Math.Min(bitmapWidth, bitmapHeight);
-
-                var cropX = (bitmapWidth - cropSize) / 2;
-                var cropY = (bitmapHeight - cropSize) / 2;
-
-                // Draw the cropped center of the image
-                dsThumbNail.DrawImage(
-                    bitmap,
-                    new Windows.Foundation.Rect(startX + i * BoxSize, startY, BoxSize, BoxSize),
-                    new Windows.Foundation.Rect(cropX, cropY, cropSize, cropSize), 0.5f,
-                    CanvasImageInterpolation.NearestNeighbor // Source rectangle for the crop
-                );
-                if (index == Photo.CurrentDisplayIndex)
-                {
-                    dsThumbNail.DrawRectangle(new Rect(startX + i * BoxSize, startY, BoxSize, BoxSize),
-                        Colors.GreenYellow, 3f);
-                }
-            }
-        }
-    }
+    
 
     private void DestroyOffScreen()
     {
@@ -323,7 +232,7 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
         var scaleTo = _lastScaleTo * scaleFactor;
         if (scaleTo < 0.05) return;
         _lastScaleTo = scaleTo;
-        var center = new Point(_mainLayout.ActualWidth / 2, _mainLayout.ActualHeight / 2);
+        var center = new Point(_d2dCanvas.ActualWidth / 2, _d2dCanvas.ActualHeight / 2);
         StartZoomAnimation(scaleTo, center);
         _offScreenDrawTimer.Stop();
         _offScreenDrawTimer.Start();
@@ -336,8 +245,6 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
         UpdateTransform();
         RequestInvalidate();
     }
-
-
 
     private void StartZoomAnimation(float targetScale, Point zoomCenter)
     {
@@ -405,18 +312,9 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
             args.DrawingSession.DrawImage(_currentDisplayItem.Bitmap, _imageRect, _currentDisplayItem.Bitmap.Bounds, 1f,
                 drawingQuality);
 
-        if (_thumbnailOffscreen != null && App.Settings.ShowThumbNails)
-        {
-            var drawRect = _thumbnailOffscreen.Bounds;
-            drawRect._y = (float)(_d2dCanvas.ActualHeight - BoxSize);
-            args.DrawingSession.Transform = System.Numerics.Matrix3x2.Identity;
-            args.DrawingSession.DrawImage(_thumbnailOffscreen, drawRect, _thumbnailOffscreen.Bounds, 1.0f,
-                CanvasImageInterpolation.NearestNeighbor);
-        }
-
     }
 
-    private void Win2dTest_SizeChanged(object sender, SizeChangedEventArgs args)
+    private void D2dCanvas_SizeChanged(object sender, SizeChangedEventArgs args)
     {
         if (_currentDisplayItem == null) return;
         var scaleFactor = Math.Min(args.NewSize.Width / _currentDisplayItem.Bitmap.Bounds.Width,
@@ -428,9 +326,6 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
         _imagePos.X *= xChangeRatio;
         _imagePos.Y *= yChangeRatio;
 
-        NumOfThumbNailsInOneDirection = (int)(_d2dCanvas.ActualWidth / (2 * BoxSize)) + 1;
-
-        CreateThumbnailRibbonOffScreen();
         UpdateTransform();
     }
 
@@ -453,23 +348,9 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
         RequestInvalidate();
     }
 
-    public void SetPreviewCacheReference(ConcurrentDictionary<int, Photo> cachedPreviews)
-    {
-        _cachedPreviews = cachedPreviews;
-    }
 
-    public void ShowThumbnailBasedOnSettings()
-    {
-        if (App.Settings.ShowThumbNails)
-        {
-            CreateThumbnailRibbonOffScreen();
-            RequestInvalidate();
-        }
-        else
-        {
-            RequestInvalidate();
-        }
-    }
+
+
 
     private void RequestInvalidate()
     {
@@ -484,7 +365,8 @@ internal class Win2dCanvasController : IThumbnailDisplayChangeable
     }
 }
 
-public interface IThumbnailDisplayChangeable
-{
-    void ShowThumbnailBasedOnSettings();
+internal interface ICanvasController
+{    
+    void SetSource(Photo firstPhoto, PhotoDisplayController.DisplayLevel hq);
+    void SetHundredPercent(bool redraw);
 }

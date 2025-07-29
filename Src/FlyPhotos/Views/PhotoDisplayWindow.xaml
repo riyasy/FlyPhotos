@@ -26,8 +26,15 @@
                 Fill="{ThemeResource SystemControlBackgroundAltHighBrush}"
                 Opacity="0" />
         </Grid>
-        <Image x:Name="ImgDspBg" Stretch="None" />
+        <!--<Image x:Name="ImgDspBg" Stretch="None" />-->
         <win2d:CanvasControl x:Name="D2dCanvas" />
+        <win2d:CanvasControl
+            x:Name="D2dCanvasThumbNail"
+            Width="Auto"
+            Height="40"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Bottom"
+            Opacity="0.5" />
         <TextBlock
             x:Name="TxtFileName"
             Width="Auto"

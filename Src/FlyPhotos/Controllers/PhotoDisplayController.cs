@@ -33,9 +33,6 @@ internal class PhotoDisplayController
     private readonly int MaxConcurrentTasksHqImages = Environment.ProcessorCount;
     private readonly int MaxConcurrentTasksPreviews = Environment.ProcessorCount;
 
-
-
-
     private List<Photo> _photos = [];
 
     private bool _firstPhotoLoaded;
@@ -58,21 +55,22 @@ internal class PhotoDisplayController
 
 
     private readonly CanvasControl _d2dCanvas;
-    private readonly Win2dCanvasController _canvasController;
+    private readonly ICanvasController _canvasController;
     private readonly Action<string, string> _progressUpdateCallback;
-
+    private readonly IThumbnailController _thumbNailController;
     private int _hqCacheTasksCount;
     private int _previewCacheTasksCount;
     private Photo _firstPhoto;
 
-    public PhotoDisplayController(Win2dCanvasController canvasController, CanvasControl d2dCanvas,
-        Action<string, string> statusCallback)
+    public PhotoDisplayController(CanvasControl d2dCanvas, Action<string, string> statusCallback,
+        ICanvasController canvasController, IThumbnailController thumbNailController)
     {
         _d2dCanvas = d2dCanvas;
         Photo.D2dCanvas = d2dCanvas;
         _canvasController = canvasController;
         _progressUpdateCallback = statusCallback;
-        _canvasController.SetPreviewCacheReference(_cachedPreviews);
+        _thumbNailController = thumbNailController;
+        _thumbNailController.SetPreviewCacheReference(_cachedPreviews);
 
         var thread = new Thread(() => { GetFileListFromExplorer(App.SelectedFileName); });
         thread.SetApartmentState(ApartmentState.STA); // This is needed for COM interaction.
@@ -189,7 +187,7 @@ internal class PhotoDisplayController
                 if (Photo.CurrentDisplayIndex == index)
                     UpgradeImageIfNeeded(photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
 
-                _canvasController.RedrawThumbNailsIfNeeded(index);
+                _thumbNailController.RedrawThumbNailsIfNeeded(index);
 
                 UpdateProgressStatusDebug();
                 _previewCacheTasksCount--;

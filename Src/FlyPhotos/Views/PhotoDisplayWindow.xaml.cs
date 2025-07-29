@@ -41,6 +41,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     private readonly Win2dCanvasController _canvasController;
+    private readonly ThumbNailController _thumbNailController;
     private readonly PhotoDisplayController _photoController;
 
     private Window? _settingWindow;
@@ -68,21 +69,28 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         SetWindowBackground(App.Settings.WindowBackGround);
         //(AppWindow.Presenter as OverlappedPresenter)?.SetBorderAndTitleBar(false, false);
 
-        _canvasController = new Win2dCanvasController(MainLayout, D2dCanvas);
-        _photoController = new PhotoDisplayController(_canvasController, D2dCanvas, UpdateStatus);
+        _thumbNailController = new ThumbNailController(D2dCanvasThumbNail);
+        _canvasController = new Win2dCanvasController(D2dCanvas, _thumbNailController);
+        _photoController = new PhotoDisplayController(D2dCanvas, UpdateStatus, _canvasController, _thumbNailController);
+        
+
         TxtFileName.Text = Path.GetFileName(App.SelectedFileName);
 
-        this.SizeChanged += PhotoDisplayWindow_SizeChanged;
+        SizeChanged += PhotoDisplayWindow_SizeChanged;
         Closed += PhotoDisplayWindow_Closed;
+
         D2dCanvas.CreateResources += D2dCanvas_CreateResources;
         D2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
         D2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;
+        D2dCanvasThumbNail.PointerWheelChanged += D2dCanvasThumbNail_PointerWheelChanged;               
+
         MainLayout.KeyDown += HandleKeyDown;
         MainLayout.KeyUp += HandleKeyUp;
+
         _repeatButtonReleaseCheckTimer.Tick += RepeatButtonReleaseCheckTimer_Tick;
 
         this.Maximize();
-        _lastWindowState = OverlappedPresenterState.Maximized;
+        _lastWindowState = OverlappedPresenterState.Maximized;        
     }
 
     private void ButtonBackNext_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
@@ -190,6 +198,23 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
                 _photoController.Fly(NavDirection.Prev);
                 _repeatButtonReleaseCheckTimer.Start();
             }
+        }
+    }
+
+    private void D2dCanvasThumbNail_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+    {
+        if (_photoController.IsSinglePhoto()) return;
+
+        var delta = e.GetCurrentPoint(D2dCanvasThumbNail).Properties.MouseWheelDelta;
+        if (delta > 0)
+        {
+            _photoController.Fly(NavDirection.Next);
+            _repeatButtonReleaseCheckTimer.Start();
+        }
+        else
+        {
+            _photoController.Fly(NavDirection.Prev);
+            _repeatButtonReleaseCheckTimer.Start();
         }
     }
 
@@ -316,7 +341,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     {
         if (_settingWindow == null)
         {
-            _settingWindow = new Settings(_canvasController);
+            _settingWindow = new Settings(_thumbNailController);
             _settingWindow.SetWindowSize(1024, 768);
             ThemeController.Instance.AddWindow(_settingWindow);
             _settingWindow.Closed += SettingWindow_Closed;
