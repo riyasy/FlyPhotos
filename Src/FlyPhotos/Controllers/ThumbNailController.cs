@@ -58,7 +58,7 @@ internal class ThumbNailController : IThumbnailController
         {
             var drawRect = _thumbnailOffscreen.Bounds;
             args.DrawingSession.Transform = System.Numerics.Matrix3x2.Identity;
-            args.DrawingSession.DrawImage(_thumbnailOffscreen, drawRect, _thumbnailOffscreen.Bounds, 1.0f,
+            args.DrawingSession.DrawImage(_thumbnailOffscreen, drawRect, _thumbnailOffscreen.Bounds, 0.8f,
                 CanvasImageInterpolation.NearestNeighbor);
         }
     }
