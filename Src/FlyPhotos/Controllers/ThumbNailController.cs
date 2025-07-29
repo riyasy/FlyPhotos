@@ -26,6 +26,8 @@ internal class ThumbNailController : IThumbnailController
         Interval = new TimeSpan(0, 0, 0, 0, 500)
     };
 
+    public event Action<int> ThumbnailClicked;
+
     public ThumbNailController(CanvasControl d2dCanvasThumbNail)
     {
         _d2dCanvasThumbNail = d2dCanvasThumbNail;
@@ -33,6 +35,24 @@ internal class ThumbNailController : IThumbnailController
         _d2dCanvasThumbNail.SizeChanged += _d2dCanvasThumbNail_SizeChanged;
         _d2dCanvasThumbNail.Loaded += _d2dCanvasThumbNail_Loaded;
         _redrawThumbnailTimer.Tick += RedrawThumbnailTimer_Tick;
+        _d2dCanvasThumbNail.PointerPressed += _d2dCanvasThumbNail_PointerPressed;
+    }
+
+    private void _d2dCanvasThumbNail_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        var pos = e.GetCurrentPoint(_d2dCanvasThumbNail).Position;
+        double canvasCenterX = _d2dCanvasThumbNail.ActualWidth / 2;
+        double clickedX = pos.X;
+
+        int offset = (int)Math.Round((clickedX - canvasCenterX) / BoxSize);
+        if (offset != 0 && Photo.PhotosCount > 1)
+        {
+            int newIndex = Photo.CurrentDisplayIndex + offset;
+            if (newIndex >= 0 && newIndex < Photo.PhotosCount)
+            {
+                ThumbnailClicked?.Invoke(offset);
+            }
+        }
     }
 
     private void _d2dCanvasThumbNail_Loaded(object sender, RoutedEventArgs e)
@@ -180,6 +200,8 @@ internal interface IThumbnailController
     void RedrawThumbNailsIfNeeded(int index);
     void SetPreviewCacheReference(ConcurrentDictionary<int, Photo> cachedPreviews);
     void ShowThumbnailBasedOnSettings();
+
+    event Action<int> ThumbnailClicked;
 }
 
 

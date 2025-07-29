@@ -79,24 +79,22 @@
                             Margin="0,5,0,0"
                             Description="Fade UI controls when mouse moves away"
                             Header="Control Fade Settings"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE945;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE754;}">
                             <StackPanel Orientation="Vertical" Spacing="10">
                                 <CheckBox
                                     x:Name="CheckBoxEnableAutoFade"
-                                    HorizontalAlignment="Right"
+                                    HorizontalAlignment="Left"
                                     Content="Enable Auto Fade" />
-                                <StackPanel Orientation="Horizontal" Spacing="10">
-                                    <TextBlock VerticalAlignment="Center" Text="Fade Intensity:" />
-                                    <Slider
-                                        x:Name="SliderFadeIntensity"
-                                        Width="200"
-                                        IsEnabled="{Binding IsChecked, ElementName=CheckBoxEnableAutoFade}"
-                                        Maximum="100"
-                                        Minimum="30"
-                                        SmallChange="10"
-                                        StepFrequency="10"
-                                        Value="50" />
-                                </StackPanel>
+                                <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="Fade Intesity" />
+                                <Slider
+                                    x:Name="SliderFadeIntensity"
+                                    Width="200"
+                                    IsEnabled="{Binding IsChecked, ElementName=CheckBoxEnableAutoFade}"
+                                    Maximum="100"
+                                    Minimum="30"
+                                    SmallChange="10"
+                                    StepFrequency="10"
+                                    Value="50" />
                             </StackPanel>
                         </controls:SettingsCard>
                         <controls:SettingsCard
@@ -167,7 +165,7 @@
                     <controls:SettingsCard
                         x:Name="SettingsCardVersion"
                         Margin="0,5,0,0"
-                        Description="Current version is 2.3.5"
+                        Description="Current version is 2.3.6"
                         Header="Current Version"
                         HeaderIcon="{ui:FontIcon Glyph=&#xF133;}">
                         <HyperlinkButton Content="Check latest version" NavigateUri="https://github.com/riyasy/FlyPhotos/releases" />

@@ -5,22 +5,16 @@ using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
-using Microsoft.UI.Composition;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using NLog;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 using Vanara.PInvoke;
-using Windows.ApplicationModel.DataTransfer;
-using Windows.Storage;
-using Windows.Storage.Streams;
 using Windows.System;
 using Windows.UI;
 using Windows.UI.Core;
@@ -52,6 +46,11 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     private readonly DispatcherTimer _repeatButtonReleaseCheckTimer = new()
     {
         Interval = new TimeSpan(0, 0, 0, 0, 100)
+    };
+
+    private readonly DispatcherTimer _wheelScrollBrakeTimer = new()
+    {
+        Interval = TimeSpan.FromMilliseconds(400)
     };
 
     private readonly TransparentTintBackdrop _transparentTintBackdrop = new() { TintColor = Color.FromArgb(0xAA, 0, 0, 0) };
@@ -90,17 +89,28 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         D2dCanvas.CreateResources += D2dCanvas_CreateResources;
         D2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
         D2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;
-        D2dCanvasThumbNail.PointerWheelChanged += D2dCanvasThumbNail_PointerWheelChanged;               
+        D2dCanvasThumbNail.PointerWheelChanged += D2dCanvasThumbNail_PointerWheelChanged;
+        _thumbNailController.ThumbnailClicked += _thumbNailController_ThumbnailClicked;
 
         MainLayout.KeyDown += HandleKeyDown;
         MainLayout.KeyUp += HandleKeyUp;
 
         _repeatButtonReleaseCheckTimer.Tick += RepeatButtonReleaseCheckTimer_Tick;
+        _wheelScrollBrakeTimer.Tick += _wheelScrollBrakeTimer_Tick;
 
         this.Maximize();
         _lastWindowState = OverlappedPresenterState.Maximized;
 
         _opacityFader = new OpacityFader(new FrameworkElement[] { ButtonPanel, D2dCanvasThumbNail, TxtFileName }); 
+    }
+
+    private void _thumbNailController_ThumbnailClicked(int shiftIndex)
+    {
+        for(int i = 0;  i <  Math.Abs(shiftIndex); i ++)
+        {
+            _photoController.Fly(shiftIndex > 0 ? NavDirection.Next : NavDirection.Prev);
+        }
+        _photoController.Brake();
     }
 
     private void MainLayout_PointerMoved(object sender, PointerRoutedEventArgs e)
@@ -139,16 +149,9 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     {
         if (_photoController.IsSinglePhoto()) return;
         var delta = e.GetCurrentPoint(ButtonBack).Properties.MouseWheelDelta;
-        if (delta > 0)
-        {
-            _photoController.Fly(NavDirection.Next);
-            _repeatButtonReleaseCheckTimer.Start();
-        }
-        else
-        {
-            _photoController.Fly(NavDirection.Prev);
-            _repeatButtonReleaseCheckTimer.Start();
-        }
+        _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
+        _wheelScrollBrakeTimer.Stop();
+        _wheelScrollBrakeTimer.Start();
     }
 
     private void ButtonRotate_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
@@ -170,21 +173,6 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         if (presenter != null && _lastWindowState != presenter?.State)
         {
             _lastWindowState = presenter.State;
-            //var timer = DispatcherQueue.CreateTimer();
-            //timer.Interval = TimeSpan.FromMilliseconds(500);
-            //timer.Tick += (_, _) =>
-            //{
-            //    if (presenter?.State == OverlappedPresenterState.Maximized)
-            //    {
-            //        presenter?.SetBorderAndTitleBar(false, false);
-            //    }
-            //    else if (presenter?.State == OverlappedPresenterState.Restored)
-            //    {
-            //        presenter?.SetBorderAndTitleBar(true, true);
-            //    }
-            //    timer.Stop();
-            //};
-            //timer.Start();
         }
     }
 
@@ -216,7 +204,6 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
             var pointerY = e.GetCurrentPoint(D2dCanvas).Position.Y;
             if (_lastWindowState == OverlappedPresenterState.Maximized && pointerY >= AppTitlebar.ActualHeight)
             {
-                //(AppWindow.Presenter as OverlappedPresenter)?.SetBorderAndTitleBar(true, true);
                 this.Restore();
             }
         }
@@ -230,16 +217,9 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         {
             if (_photoController.IsSinglePhoto()) return;
             var delta = e.GetCurrentPoint(D2dCanvas).Properties.MouseWheelDelta;
-            if (delta > 0)
-            {
-                _photoController.Fly(NavDirection.Next);
-                _repeatButtonReleaseCheckTimer.Start();
-            }
-            else
-            {
-                _photoController.Fly(NavDirection.Prev);
-                _repeatButtonReleaseCheckTimer.Start();
-            }
+            _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
+            _wheelScrollBrakeTimer.Stop();
+            _wheelScrollBrakeTimer.Start();
         }
     }
 
@@ -248,16 +228,9 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         if (_photoController.IsSinglePhoto()) return;
 
         var delta = e.GetCurrentPoint(D2dCanvasThumbNail).Properties.MouseWheelDelta;
-        if (delta > 0)
-        {
-            _photoController.Fly(NavDirection.Next);
-            _repeatButtonReleaseCheckTimer.Start();
-        }
-        else
-        {
-            _photoController.Fly(NavDirection.Prev);
-            _repeatButtonReleaseCheckTimer.Start();
-        }
+        _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
+        _wheelScrollBrakeTimer.Stop();
+        _wheelScrollBrakeTimer.Start();
     }
 
     private void SetupTransparentTitleBar()
@@ -353,6 +326,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     {
         if (_photoController.IsSinglePhoto()) return;
         _photoController.Fly(NavDirection.Prev);
+        _repeatButtonReleaseCheckTimer.Stop();
         _repeatButtonReleaseCheckTimer.Start();
     }
 
@@ -360,6 +334,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     {
         if (_photoController.IsSinglePhoto()) return;
         _photoController.Fly(NavDirection.Next);
+        _repeatButtonReleaseCheckTimer.Stop();
         _repeatButtonReleaseCheckTimer.Start();
     }
 
@@ -367,6 +342,12 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     {
         if (ButtonBack.IsPressed || ButtonNext.IsPressed) return;
         _repeatButtonReleaseCheckTimer.Stop();
+        _photoController.Brake();
+    }
+
+    private void _wheelScrollBrakeTimer_Tick(object? sender, object e)
+    {
+        _wheelScrollBrakeTimer.Stop();
         _photoController.Brake();
     }
 
@@ -406,10 +387,6 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
             _settingWindow.Close();
         }
     }
-
-    //private void ButtonCoffee_OnClick(object sender, RoutedEventArgs e)
-    //{
-    //}
 
     public void SetWindowBackground(string backGround)
     {
