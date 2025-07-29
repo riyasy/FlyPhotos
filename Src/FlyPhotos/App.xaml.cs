@@ -62,7 +62,9 @@ public partial class App
             ResetPanZoomOnNextPhoto = Properties.UserSettings.Default.ResetPanZoomOnNextPhoto,
             CacheSizeOneSideHqImages = Properties.UserSettings.Default.CacheSizeOneSideHqImages,
             CacheSizeOneSidePreviews = Properties.UserSettings.Default.CacheSizeOneSidePreviews,
-            ShowThumbNails = Properties.UserSettings.Default.ShowThumbnails
+            ShowThumbNails = Properties.UserSettings.Default.ShowThumbnails,
+            AutoFade =  Properties.UserSettings.Default.AutoFade,
+            FadeIntensity = Properties.UserSettings.Default.FadeIntensity,
         };
 
     }

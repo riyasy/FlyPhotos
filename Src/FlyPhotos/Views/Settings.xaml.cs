@@ -46,6 +46,8 @@ internal sealed partial class Settings
         ComboTheme.SelectedIndex = FindIndexOfItemInComboBox(ComboTheme, App.Settings.Theme);
         ComboBackGround.SelectedIndex = FindIndexOfItemInComboBox(ComboBackGround, App.Settings.WindowBackGround);
         ButtonShowThumbnail.IsOn = App.Settings.ShowThumbNails;
+        CheckBoxEnableAutoFade.IsChecked = App.Settings.AutoFade;
+        SliderFadeIntensity.Value = App.Settings.FadeIntensity;
 
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
         SliderLowResCacheSize.ValueChanged += SliderLowResCacheSize_OnValueChanged;
@@ -53,6 +55,9 @@ internal sealed partial class Settings
         ComboTheme.SelectionChanged += ComboTheme_OnSelectionChanged;
         ComboBackGround.SelectionChanged += ComboBackGround_OnSelectionChanged;
         ButtonShowThumbnail.Toggled += ButtonShowThumbnail_OnToggled;
+        CheckBoxEnableAutoFade.Checked += CheckBoxEnableAutoFade_Checked;
+        CheckBoxEnableAutoFade.Unchecked += CheckBoxEnableAutoFade_Checked;
+        SliderFadeIntensity.ValueChanged += SliderFadeIntensity_ValueChanged;
 
         SettingsCardKeyboardShortCuts.Description = $"{Environment.NewLine}Left/Right Arrow Keys : Navigate Photos" +
                                                     $"{Environment.NewLine}Mouse Wheel : Zoom In/Out" +
@@ -74,6 +79,20 @@ internal sealed partial class Settings
         TextBoxCodecs.Text =
             $"This program doesn't install any codecs and uses codecs already present in the system.{Environment.NewLine}" +
             $"{Environment.NewLine}{Util.GetExtensionsDisplayString()}";
+    }
+
+    private void CheckBoxEnableAutoFade_Checked(object sender, RoutedEventArgs e)
+    {
+        App.Settings.AutoFade = (CheckBoxEnableAutoFade.IsChecked == true);
+        Properties.UserSettings.Default.AutoFade = (CheckBoxEnableAutoFade.IsChecked == true);
+        Properties.UserSettings.Default.Save();
+    }
+
+    private void SliderFadeIntensity_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    {
+        App.Settings.FadeIntensity = (int)SliderFadeIntensity.Value;
+        Properties.UserSettings.Default.FadeIntensity = (int)SliderFadeIntensity.Value;
+        Properties.UserSettings.Default.Save();
     }
 
     private static int FindIndexOfItemInComboBox(Selector comboBox, string value)

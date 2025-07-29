@@ -63,7 +63,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     private readonly VirtualKey MinusVK = Utils.Util.GetKeyThatProduces('-');
 
     private OpacityFader _opacityFader;
-    private bool _pointerInBottom = false;
+    private bool _controlsFaded = false;
 
     public PhotoDisplayWindow()
     {
@@ -105,19 +105,33 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
 
     private void MainLayout_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
+        if (!App.Settings.AutoFade) 
+        { 
+            // When somebody disables autofade while controls are faded
+            if (_controlsFaded)
+            {
+                _opacityFader.FadeTo(1.0f);
+                _controlsFaded = false;
+            }
+            return; 
+        }
+
         var pos = e.GetCurrentPoint(MainLayout).Position;
         double windowHeight = this.Bounds.Height;
 
-        double bottomThreshold = Math.Max(100, windowHeight * 0.40);
+        double bottomThreshold = Math.Max(100, windowHeight * 0.30);
         bool pointerInBottom = pos.Y >= windowHeight - bottomThreshold;
 
-        if (pointerInBottom != _pointerInBottom)
+        if (_controlsFaded && pointerInBottom)
         {
-            _pointerInBottom = pointerInBottom;
-            if (pointerInBottom)
-                _opacityFader.FadeTo(1.0f);    // Fully visible
-            else
-                _opacityFader.FadeTo(0.3f);    // Mostly transparent
+            _opacityFader.FadeTo(1.0f);
+            _controlsFaded = false;
+        } 
+        else if (!_controlsFaded && !pointerInBottom)
+        {
+            float opacity = (100 - App.Settings.FadeIntensity) / 100f;
+            _opacityFader.FadeTo(opacity);
+            _controlsFaded = true;
         }
     }
 

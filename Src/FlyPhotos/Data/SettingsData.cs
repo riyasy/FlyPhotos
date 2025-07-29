@@ -9,6 +9,9 @@ public class SettingsData
     public int CacheSizeOneSidePreviews { get; set; }
     public bool ShowThumbNails { get; set; }
 
+    public bool AutoFade { get; set; }
+    public int FadeIntensity { get; set; }
+
     public static SettingsData Default()
     {
         var defaultSettings = new SettingsData
@@ -19,6 +22,8 @@ public class SettingsData
             CacheSizeOneSideHqImages = 2,
             CacheSizeOneSidePreviews = 300,
             ShowThumbNails = true,
+            AutoFade = true,
+            FadeIntensity = 60,
         };
         return defaultSettings;
     }
