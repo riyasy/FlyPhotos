@@ -33,8 +33,7 @@
             Width="Auto"
             Height="40"
             HorizontalAlignment="Stretch"
-            VerticalAlignment="Bottom"
-             />
+            VerticalAlignment="Bottom" />
         <TextBlock
             x:Name="TxtFileName"
             Width="Auto"

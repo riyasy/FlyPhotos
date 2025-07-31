@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 
 <Window
     x:Class="FlyPhotos.Views.TestWindow"
@@ -9,7 +9,7 @@
     xmlns:xaml="using:Microsoft.Graphics.Canvas.UI.Xaml"
     mc:Ignorable="d">
 
-    <Grid>
+    <Grid x:Name="MainLayout">
         <xaml:CanvasControl x:Name="D2dCanvas" />
         <Button
             x:Name="ButtonTest"

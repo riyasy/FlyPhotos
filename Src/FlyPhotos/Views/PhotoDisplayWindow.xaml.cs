@@ -14,6 +14,7 @@ using NLog;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using Vanara.PInvoke;
 using Windows.System;
 using Windows.UI;
@@ -58,10 +59,10 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
 
     private OverlappedPresenterState _lastWindowState;
 
-    private readonly VirtualKey PlusVK = Utils.Util.GetKeyThatProduces('+');
-    private readonly VirtualKey MinusVK = Utils.Util.GetKeyThatProduces('-');
+    private readonly VirtualKey _plusVk = Utils.Util.GetKeyThatProduces('+');
+    private readonly VirtualKey _minusVk = Utils.Util.GetKeyThatProduces('-');
 
-    private OpacityFader _opacityFader;
+    private readonly OpacityFader _opacityFader;
     private bool _controlsFaded = false;
 
     public PhotoDisplayWindow()
@@ -101,14 +102,14 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         this.Maximize();
         _lastWindowState = OverlappedPresenterState.Maximized;
 
-        _opacityFader = new OpacityFader(new FrameworkElement[] { ButtonPanel, D2dCanvasThumbNail, TxtFileName }); 
+        _opacityFader = new OpacityFader([ButtonPanel, D2dCanvasThumbNail, TxtFileName]); 
     }
 
-    private void _thumbNailController_ThumbnailClicked(int shiftIndex)
+    private async void _thumbNailController_ThumbnailClicked(int shiftIndex)
     {
         for(int i = 0;  i <  Math.Abs(shiftIndex); i ++)
         {
-            _photoController.Fly(shiftIndex > 0 ? NavDirection.Next : NavDirection.Prev);
+            await _photoController.Fly(shiftIndex > 0 ? NavDirection.Next : NavDirection.Prev);
         }
         _photoController.Brake();
     }
@@ -145,11 +146,11 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         }
     }
 
-    private void ButtonBackNext_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+    private async void ButtonBackNext_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
         var delta = e.GetCurrentPoint(ButtonBack).Properties.MouseWheelDelta;
-        _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
+        await _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
         _wheelScrollBrakeTimer.Stop();
         _wheelScrollBrakeTimer.Start();
     }
@@ -209,7 +210,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         }
     }
 
-    private void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+    private async void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         var coreWindow = Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
         bool isControlPressed = coreWindow.HasFlag(CoreVirtualKeyStates.Down);
@@ -217,18 +218,18 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         {
             if (_photoController.IsSinglePhoto()) return;
             var delta = e.GetCurrentPoint(D2dCanvas).Properties.MouseWheelDelta;
-            _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
+            await _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
             _wheelScrollBrakeTimer.Stop();
             _wheelScrollBrakeTimer.Start();
         }
     }
 
-    private void D2dCanvasThumbNail_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+    private async void D2dCanvasThumbNail_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
 
         var delta = e.GetCurrentPoint(D2dCanvasThumbNail).Properties.MouseWheelDelta;
-        _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
+        await _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
         _wheelScrollBrakeTimer.Stop();
         _wheelScrollBrakeTimer.Start();
     }
@@ -275,10 +276,10 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
 
                 // File Navigation
                 case VirtualKey.Right when !ctrlPressed:
-                    _photoController.Fly(NavDirection.Next);
+                    await _photoController.Fly(NavDirection.Next);
                     break;
                 case VirtualKey.Left when !ctrlPressed:
-                    _photoController.Fly(NavDirection.Prev);
+                    await _photoController.Fly(NavDirection.Prev);
                     break;
 
                 // ZOOM
@@ -305,9 +306,9 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
             }
 
             // Layout-aware override
-            if (e.Key == PlusVK)
+            if (e.Key == _plusVk)
                 _canvasController.ZoomByKeyboard(1.25f);
-            else if (e.Key == MinusVK)
+            else if (e.Key == _minusVk)
                 _canvasController.ZoomByKeyboard(0.8f);
         }
         catch (Exception ex)
@@ -316,39 +317,39 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         }
     }
 
-    private void HandleKeyUp(object sender, KeyRoutedEventArgs e)
+    private async void HandleKeyUp(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key is not (VirtualKey.Right or VirtualKey.Left)) return;
-        _photoController.Brake();
+        await _photoController.Brake();
     }
 
-    private void ButtonBack_OnClick(object sender, RoutedEventArgs e)
+    private async void ButtonBack_OnClick(object sender, RoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
-        _photoController.Fly(NavDirection.Prev);
+        await _photoController.Fly(NavDirection.Prev);
         _repeatButtonReleaseCheckTimer.Stop();
         _repeatButtonReleaseCheckTimer.Start();
     }
 
-    private void ButtonNext_OnClick(object sender, RoutedEventArgs e)
+    private async void ButtonNext_OnClick(object sender, RoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
-        _photoController.Fly(NavDirection.Next);
+        await _photoController.Fly(NavDirection.Next);
         _repeatButtonReleaseCheckTimer.Stop();
         _repeatButtonReleaseCheckTimer.Start();
     }
 
-    private void RepeatButtonReleaseCheckTimer_Tick(object? sender, object e)
+    private async void RepeatButtonReleaseCheckTimer_Tick(object? sender, object e)
     {
         if (ButtonBack.IsPressed || ButtonNext.IsPressed) return;
         _repeatButtonReleaseCheckTimer.Stop();
-        _photoController.Brake();
+        await _photoController.Brake();
     }
 
-    private void _wheelScrollBrakeTimer_Tick(object? sender, object e)
+    private async void _wheelScrollBrakeTimer_Tick(object? sender, object e)
     {
         _wheelScrollBrakeTimer.Stop();
-        _photoController.Brake();
+        await _photoController.Brake();
     }
 
     private void ButtonRotate_OnClick(object sender, RoutedEventArgs e)

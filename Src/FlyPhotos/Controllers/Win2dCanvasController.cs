@@ -1,20 +1,22 @@
 ﻿using FlyPhotos.Data;
+using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
+using Microsoft.UI;
+using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.System;
-using Microsoft.UI;
-using FlyPhotos.Utils;
-using Microsoft.UI.Input;
-using Microsoft.UI.Xaml.Media;
 using Windows.UI.Core;
+using static FlyPhotos.Controllers.PhotoDisplayController;
 
 namespace FlyPhotos.Controllers;
 
@@ -74,7 +76,7 @@ internal class Win2dCanvasController : ICanvasController
 
 
 
-    public void SetSource(Photo value, PhotoDisplayController.DisplayLevel displayLevel)
+    public async Task SetSource(Photo value, PhotoDisplayController.DisplayLevel displayLevel)
     {
         Photo.CurrentDisplayLevel = displayLevel;
         DestroyOffScreen();
@@ -106,7 +108,6 @@ internal class Win2dCanvasController : ICanvasController
         _offScreenDrawTimer.Start();
 
         UpdateTransform();
-        RequestInvalidate();
     }
 
 
@@ -367,6 +368,6 @@ internal class Win2dCanvasController : ICanvasController
 
 internal interface ICanvasController
 {    
-    void SetSource(Photo firstPhoto, PhotoDisplayController.DisplayLevel hq);
+    Task SetSource(Photo firstPhoto, PhotoDisplayController.DisplayLevel hq);
     void SetHundredPercent(bool redraw);
 }
