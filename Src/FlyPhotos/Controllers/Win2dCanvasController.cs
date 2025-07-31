@@ -108,6 +108,7 @@ internal class Win2dCanvasController : ICanvasController
         _offScreenDrawTimer.Start();
 
         UpdateTransform();
+        RequestInvalidate();
     }
 
 
