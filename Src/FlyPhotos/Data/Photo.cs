@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas.UI.Xaml;

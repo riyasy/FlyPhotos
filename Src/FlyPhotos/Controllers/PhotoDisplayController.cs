@@ -11,7 +11,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Devices.Display.Core;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -33,7 +32,7 @@ internal class PhotoDisplayController
     private readonly int MaxConcurrentTasksHqImages = Environment.ProcessorCount;
     private readonly int MaxConcurrentTasksPreviews = Environment.ProcessorCount;
 
-    private List<Photo> _photos = [];
+    private readonly List<Photo> _photos = [];
 
     private bool _firstPhotoLoaded;
     private readonly AutoResetEvent _firstPhotoLoadEvent = new(false);

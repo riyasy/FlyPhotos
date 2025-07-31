@@ -183,7 +183,7 @@ public class GifOnTheFlyAnimator : IDisposable
             }
 
             // 3. Draw the CURRENT frame.
-            ds.DrawImage(frameBitmap, (float)(float)metadata.Bounds.X, (float)metadata.Bounds.Y);
+            ds.DrawImage(frameBitmap, (float)metadata.Bounds.X, (float)metadata.Bounds.Y);
         }
 
         // 4. Update state for the next iteration.

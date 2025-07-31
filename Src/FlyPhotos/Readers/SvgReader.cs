@@ -1,14 +1,12 @@
 ﻿using FlyPhotos.Data;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
-using Microsoft.UI;
 using NLog;
 using SkiaSharp;
 using Svg.Skia;
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Windows.Storage.Streams;
 
 namespace FlyPhotos.Readers;
 

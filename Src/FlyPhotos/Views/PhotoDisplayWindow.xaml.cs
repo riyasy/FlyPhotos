@@ -14,7 +14,6 @@ using NLog;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 using Vanara.PInvoke;
 using Windows.System;
 using Windows.UI;
@@ -111,7 +110,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         {
             await _photoController.Fly(shiftIndex > 0 ? NavDirection.Next : NavDirection.Prev);
         }
-        _photoController.Brake();
+        await _photoController.Brake();
     }
 
     private void MainLayout_PointerMoved(object sender, PointerRoutedEventArgs e)
@@ -255,8 +254,8 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     private void D2dCanvas_CreateResources(CanvasControl sender,
         CanvasCreateResourcesEventArgs args)
     {
-        //args.TrackAsyncAction(_photoController.LoadFirstPhoto().AsAsyncAction());
-        _photoController.LoadFirstPhoto();
+        args.TrackAsyncAction(_photoController.LoadFirstPhoto().AsAsyncAction());
+        //_photoController.LoadFirstPhoto();
     }
 
     private async void HandleKeyDown(object sender, KeyRoutedEventArgs e)

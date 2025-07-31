@@ -6,7 +6,6 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 using PhotoSauce.MagicScaler;
 using System;
-using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
