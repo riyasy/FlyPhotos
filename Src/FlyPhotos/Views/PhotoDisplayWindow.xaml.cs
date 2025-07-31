@@ -387,6 +387,8 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         {
             _settingWindow.Close();
         }
+
+        _canvasController.CleanupOnClose();
     }
 
     public void SetWindowBackground(string backGround)

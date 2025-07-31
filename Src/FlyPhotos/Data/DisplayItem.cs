@@ -1,10 +1,14 @@
 ﻿using Microsoft.Graphics.Canvas;
+using System;
+using System.Collections.Generic;
 using Windows.Graphics.Imaging;
 
 namespace FlyPhotos.Data;
 
 internal class DisplayItem
 {
+    public byte[] GifAsByteArray { get; set; }
+
     public enum PreviewSource
     {
         FromDiskCache,
@@ -18,6 +22,10 @@ internal class DisplayItem
     public int Rotation { get; set; }
 
     public PreviewSource PreviewFrom { get; set; }
+
+    // Animated image support
+    public List<CanvasBitmap> AnimationFrames { get; set; }
+    public List<TimeSpan> FrameDurations { get; set; }
 
     public DisplayItem(CanvasBitmap bitmap, PreviewSource previewFrom, int rotation = 0)
     {
@@ -33,15 +41,29 @@ internal class DisplayItem
         Rotation = rotation;
     }
 
-    //public Photo(CanvasBitmap bitmap, int rotation)
-    //{
-    //    Bitmap = bitmap;
-    //    Rotation = rotation;
-    //}
+    public DisplayItem(List<CanvasBitmap> animationFrames, List<TimeSpan> frameDurations, PreviewSource previewFrom, int rotation = 0)
+    {
+        AnimationFrames = animationFrames;
+        FrameDurations = frameDurations;
+        PreviewFrom = previewFrom;
+        Rotation = rotation;
+        Bitmap = AnimationFrames[0];
+    }
+
+    public DisplayItem(byte[] gifFileBytes, PreviewSource previewFrom)
+    {
+        GifAsByteArray = gifFileBytes;
+        PreviewFrom = previewFrom;
+    }
 
     public static DisplayItem Empty()
     {
         CanvasBitmap bitmap = null;
         return new DisplayItem(bitmap, PreviewSource.Undefined, 0);
+    }
+
+    public bool IsGif()
+    {
+        return GifAsByteArray != null;
     }
 }

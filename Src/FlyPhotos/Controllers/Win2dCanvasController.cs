@@ -11,6 +11,7 @@ using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -47,7 +48,7 @@ internal class Win2dCanvasController : ICanvasController
     private float _zoomTargetScale;
     private Point _zoomCenter;
     private const double ZoomAnimationDurationMs = 300;
-    private bool zoomAnimationOnGoing = false;
+    private bool _zoomAnimationOnGoing = false;
 
     private bool _invalidatePending = false;
 
@@ -56,7 +57,12 @@ internal class Win2dCanvasController : ICanvasController
         Interval = new TimeSpan(0, 0, 0, 0, 350)
     };    
     
-    private IThumbnailController _thumbNailController;
+    private readonly IThumbnailController _thumbNailController;
+
+    // For GIF File handling
+    private GifOnTheFlyAnimator _gifAnimator;
+    private readonly Stopwatch _gifStopwatch = new();
+    private bool _isGifAnimationLoopRunning = false;
 
     public Win2dCanvasController(CanvasControl d2dCanvas, IThumbnailController thumbNailController)
     {
@@ -74,63 +80,126 @@ internal class Win2dCanvasController : ICanvasController
         _offScreenDrawTimer.Tick += OffScreenDrawTimer_Tick;        
     }
 
-
-
     public async Task SetSource(Photo value, PhotoDisplayController.DisplayLevel displayLevel)
     {
-        Photo.CurrentDisplayLevel = displayLevel;
+        // Cleanup
         DestroyOffScreen();
-        var firstPhoto = _currentDisplayItem == null;
         if (_currentDisplayItem != null && _currentDisplayItem.SoftwareBitmap != null) _currentDisplayItem.Bitmap = null;
+
+        Photo.CurrentDisplayLevel = displayLevel;
+        var firstPhoto = _currentDisplayItem == null;
 
         _currentDisplayItem = value.GetDisplayItemBasedOn(displayLevel);
 
-        if (_currentDisplayItem.SoftwareBitmap != null)
-            _currentDisplayItem.Bitmap = CanvasBitmap.CreateFromSoftwareBitmap(_d2dCanvas, _currentDisplayItem.SoftwareBitmap);
-        var vertical = _currentDisplayItem.Rotation is 270 or 90;
-        var horScale = _d2dCanvas.ActualWidth /
-                       (vertical ? _currentDisplayItem.Bitmap.Bounds.Height : _currentDisplayItem.Bitmap.Bounds.Width);
-        var vertScale = _d2dCanvas.ActualHeight /
-                        (vertical ? _currentDisplayItem.Bitmap.Bounds.Width : _currentDisplayItem.Bitmap.Bounds.Height);
-        var scaleFactor = Math.Min(horScale, vertScale);
-
-        _imageRect = new Rect(0, 0, _currentDisplayItem.Bitmap.Bounds.Width * scaleFactor,
-            _currentDisplayItem.Bitmap.Bounds.Height * scaleFactor);
-        if (firstPhoto)
+        if (_currentDisplayItem.IsGif())
         {
-            _imagePos.X = _d2dCanvas.ActualWidth / 2;
-            _imagePos.Y = _d2dCanvas.ActualHeight / 2;
+            try
+            {
+                // Clean up previous animation
+                _gifAnimator?.Dispose();
+                _gifAnimator = null;
+                _gifStopwatch.Stop();
+
+
+                // Use the new byte[] overload
+                _gifAnimator = await GifOnTheFlyAnimator.CreateAsync(_currentDisplayItem.GifAsByteArray);
+
+                var vertical = _currentDisplayItem.Rotation is 270 or 90;
+                var horScale = _d2dCanvas.ActualWidth /
+                               (vertical ? _gifAnimator.PixelHeight : _gifAnimator.PixelWidth);
+                var vertScale = _d2dCanvas.ActualHeight /
+                                (vertical ? _gifAnimator.PixelWidth : _gifAnimator.PixelHeight);
+                var scaleFactor = Math.Min(horScale, vertScale);
+
+                _imageRect = new Rect(0, 0, _gifAnimator.PixelWidth * scaleFactor,
+                    _gifAnimator.PixelHeight * scaleFactor);
+                if (firstPhoto)
+                {
+                    _imagePos.X = _d2dCanvas.ActualWidth / 2;
+                    _imagePos.Y = _d2dCanvas.ActualHeight / 2;
+                }
+
+                _thumbNailController.CreateThumbnailRibbonOffScreen();
+                UpdateTransform();
+                RequestInvalidate();
+
+                _gifStopwatch.Restart();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to display GIF: {ex.Message}");
+            }
         }
-
-        _thumbNailController.CreateThumbnailRibbonOffScreen();
-
-        _offScreenDrawTimer.Stop();
-        _offScreenDrawTimer.Start();
-
-        UpdateTransform();
-        RequestInvalidate();
-    }
-
-
-    public void SetHundredPercent(bool redraw)
-    {
-        if (_currentDisplayItem.Bitmap == null) return;
-        _scale = 1f;
-        _lastScaleTo = 1f;
-        _imagePos.X = _d2dCanvas.ActualWidth / 2;
-        _imagePos.Y = _d2dCanvas.ActualHeight / 2;
-        if (redraw)
+        else
         {
-            _offScreenDrawTimer.Stop();
-            _offScreenDrawTimer.Start();
+            if (_currentDisplayItem.SoftwareBitmap != null)
+                _currentDisplayItem.Bitmap = CanvasBitmap.CreateFromSoftwareBitmap(_d2dCanvas, _currentDisplayItem.SoftwareBitmap);
+            var vertical = _currentDisplayItem.Rotation is 270 or 90;
+            var horScale = _d2dCanvas.ActualWidth /
+                           (vertical ? _currentDisplayItem.Bitmap.Bounds.Height : _currentDisplayItem.Bitmap.Bounds.Width);
+            var vertScale = _d2dCanvas.ActualHeight /
+                            (vertical ? _currentDisplayItem.Bitmap.Bounds.Width : _currentDisplayItem.Bitmap.Bounds.Height);
+            var scaleFactor = Math.Min(horScale, vertScale);
+
+            _imageRect = new Rect(0, 0, _currentDisplayItem.Bitmap.Bounds.Width * scaleFactor,
+                _currentDisplayItem.Bitmap.Bounds.Height * scaleFactor);
+            if (firstPhoto)
+            {
+                _imagePos.X = _d2dCanvas.ActualWidth / 2;
+                _imagePos.Y = _d2dCanvas.ActualHeight / 2;
+            }
+
+            _thumbNailController.CreateThumbnailRibbonOffScreen();
+            RestartOffScreenDrawTimer();
             UpdateTransform();
             RequestInvalidate();
         }
     }
 
+    private async void RunGifAnimationLoop()
+    {
+        _isGifAnimationLoopRunning = true;
+        try
+        {
+            if (_gifAnimator == null) return;
+            await _gifAnimator.UpdateAsync(_gifStopwatch.Elapsed);
+            RequestInvalidate();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error in GIF update loop: {ex}");
+            _gifStopwatch.Stop();
+        }
+        finally
+        {
+            _isGifAnimationLoopRunning = false;
+        }
+    }
+
+    private void RestartOffScreenDrawTimer()
+    {
+        if (_currentDisplayItem.IsGif()) return;
+        _offScreenDrawTimer.Stop();
+        _offScreenDrawTimer.Start();
+    }
+
+    public void SetHundredPercent(bool redraw)
+    {
+        _scale = 1f;
+        _lastScaleTo = 1f;
+        _imagePos.X = _d2dCanvas.ActualWidth / 2;
+        _imagePos.Y = _d2dCanvas.ActualHeight / 2;
+        if (!redraw) return;
+        RestartOffScreenDrawTimer();
+        UpdateTransform();
+        RequestInvalidate();
+    }
+
     private void OffScreenDrawTimer_Tick(object sender, object e)
     {
         _offScreenDrawTimer.Stop();
+
+        if (_currentDisplayItem.IsGif()) return;
         CreateOffScreen();
         UpdateTransform();
         RequestInvalidate();
@@ -165,8 +234,6 @@ internal class Win2dCanvasController : ICanvasController
             _offscreen = tempOffScreen;
         }
     }
-
-    
 
     private void DestroyOffScreen()
     {
@@ -225,8 +292,7 @@ internal class Win2dCanvasController : ICanvasController
         _lastScaleTo = scaleTo;
         var mousePosition = e.GetCurrentPoint(_d2dCanvas).Position;
         StartZoomAnimation(scaleTo, mousePosition);
-        _offScreenDrawTimer.Stop();
-        _offScreenDrawTimer.Start();
+        RestartOffScreenDrawTimer();
     }
 
     public void ZoomByKeyboard(float scaleFactor)
@@ -236,8 +302,7 @@ internal class Win2dCanvasController : ICanvasController
         _lastScaleTo = scaleTo;
         var center = new Point(_d2dCanvas.ActualWidth / 2, _d2dCanvas.ActualHeight / 2);
         StartZoomAnimation(scaleTo, center);
-        _offScreenDrawTimer.Stop();
-        _offScreenDrawTimer.Start();
+        RestartOffScreenDrawTimer();
     }
 
     public void PanByKeyboard(double dx, double dy)
@@ -260,7 +325,7 @@ internal class Win2dCanvasController : ICanvasController
 
         _renderingHandler = (_, _) => AnimateZoom();
         CompositionTarget.Rendering += _renderingHandler;
-        zoomAnimationOnGoing = true;
+        _zoomAnimationOnGoing = true;
     }
 
     private void AnimateZoom()
@@ -284,10 +349,9 @@ internal class Win2dCanvasController : ICanvasController
         if (t >= 1.0)
         {
             CompositionTarget.Rendering -= _renderingHandler;
-            zoomAnimationOnGoing = false;
+            _zoomAnimationOnGoing = false;
         }
     }
-
 
     private void UpdateTransform()
     {
@@ -301,28 +365,50 @@ internal class Win2dCanvasController : ICanvasController
 
     private void CanvasControl_OnDraw(CanvasControl sender, CanvasDrawEventArgs args)
     {
-        var drawingQuality = zoomAnimationOnGoing
+        if (_currentDisplayItem == null) return;
+
+        var drawingQuality = _zoomAnimationOnGoing
             ? CanvasImageInterpolation.NearestNeighbor
             : CanvasImageInterpolation.HighQualityCubic;
 
-        args.DrawingSession.Transform = _mat;
-        if (_offscreen != null)
-            args.DrawingSession.DrawImage(_offscreen, _imageRect, _offscreen.Bounds, 1f,
-                drawingQuality);
-        //args.DrawingSession.DrawRectangle(_imageRect, Colors.Green, 10f);
-        else if (_currentDisplayItem != null)
-            args.DrawingSession.DrawImage(_currentDisplayItem.Bitmap, _imageRect, _currentDisplayItem.Bitmap.Bounds, 1f,
+        if (_currentDisplayItem.IsGif())
+        {
+            if (_gifAnimator?.Surface == null) return;
+            args.DrawingSession.Transform = _mat;
+
+            args.DrawingSession.DrawImage(
+                _gifAnimator.Surface,
+                _imageRect,
+                _gifAnimator.Surface.GetBounds(_d2dCanvas),
+                1.0f,
                 drawingQuality);
 
+            if (!_isGifAnimationLoopRunning) RunGifAnimationLoop();
+        }
+        else
+        { 
+            args.DrawingSession.Transform = _mat;
+            if (_offscreen != null)
+                args.DrawingSession.DrawImage(_offscreen, _imageRect, _offscreen.Bounds, 1f,
+                    drawingQuality);
+            //args.DrawingSession.DrawRectangle(_imageRect, Colors.Green, 10f);
+            else if (_currentDisplayItem != null)
+                args.DrawingSession.DrawImage(_currentDisplayItem.Bitmap, _imageRect, _currentDisplayItem.Bitmap.Bounds, 1f,
+                    drawingQuality);
+        }
     }
 
     private void D2dCanvas_SizeChanged(object sender, SizeChangedEventArgs args)
     {
         if (_currentDisplayItem == null) return;
-        var scaleFactor = Math.Min(args.NewSize.Width / _currentDisplayItem.Bitmap.Bounds.Width,
-            args.NewSize.Height / _currentDisplayItem.Bitmap.Bounds.Height);
-        _imageRect = new Rect(0, 0, _currentDisplayItem.Bitmap.Bounds.Width * scaleFactor,
-            _currentDisplayItem.Bitmap.Bounds.Height * scaleFactor);
+
+        var imageBounds = _currentDisplayItem.IsGif() ? _gifAnimator.Surface.GetBounds(_d2dCanvas) : _currentDisplayItem.Bitmap.Bounds;
+
+        var scaleFactor = Math.Min(args.NewSize.Width / imageBounds.Width,
+            args.NewSize.Height / imageBounds.Height);
+        _imageRect = new Rect(0, 0, imageBounds.Width * scaleFactor,
+            imageBounds.Height * scaleFactor);
+
         var xChangeRatio = args.NewSize.Width / args.PreviousSize.Width;
         var yChangeRatio = args.NewSize.Height / args.PreviousSize.Height;
         _imagePos.X *= xChangeRatio;
@@ -349,11 +435,6 @@ internal class Win2dCanvasController : ICanvasController
         UpdateTransform();
         RequestInvalidate();
     }
-
-
-
-
-
     private void RequestInvalidate()
     {
         if (_invalidatePending) return;
@@ -364,6 +445,15 @@ internal class Win2dCanvasController : ICanvasController
             _invalidatePending = false;
             _d2dCanvas.Invalidate();
         });
+    }
+
+    public void CleanupOnClose()
+    {
+        _gifStopwatch.Stop();
+        if (_d2dCanvas != null) _d2dCanvas.Draw -= CanvasControl_OnDraw;
+        _d2dCanvas?.RemoveFromVisualTree();
+        _gifAnimator?.Dispose();
+        _gifAnimator = null;
     }
 }
 
