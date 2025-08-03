@@ -82,7 +82,7 @@ internal class Win2dCanvasController : ICanvasController
         if (_currentDisplayItem != null && _currentDisplayItem.SoftwareBitmap != null) _currentDisplayItem.Bitmap = null;
 
         Photo.CurrentDisplayLevel = displayLevel;
-        var firstPhoto = _currentDisplayItem == null;
+        var isFirstPhoto = _currentDisplayItem == null;
 
         _currentDisplayItem = value.GetDisplayItemBasedOn(displayLevel);
 
@@ -96,29 +96,28 @@ internal class Win2dCanvasController : ICanvasController
                 _gifStopwatch.Stop();
 
 
-                // Use the new byte[] overload
-                _gifAnimator = await GifOnTheFlyAnimator.CreateAsync(_currentDisplayItem.GifAsByteArray);
-
-                var vertical = _currentDisplayItem.Rotation is 270 or 90;
-                var horScale = _d2dCanvas.ActualWidth /
-                               (vertical ? _gifAnimator.PixelHeight : _gifAnimator.PixelWidth);
-                var vertScale = _d2dCanvas.ActualHeight /
-                                (vertical ? _gifAnimator.PixelWidth : _gifAnimator.PixelHeight);
-                var scaleFactor = Math.Min(horScale, vertScale);
-
-                _imageRect = new Rect(0, 0, _gifAnimator.PixelWidth * scaleFactor,
-                    _gifAnimator.PixelHeight * scaleFactor);
-                if (firstPhoto)
+                var preview = value.GetDisplayItemBasedOn(DisplayLevel.Preview);
+                bool previewDrawnAsFirstFrame = false;
+                if (preview != null)
                 {
-                    _imagePos.X = _d2dCanvas.ActualWidth / 2;
-                    _imagePos.Y = _d2dCanvas.ActualHeight / 2;
+                    previewDrawnAsFirstFrame = true;
+                    _currentDisplayItem.Bitmap = preview.Bitmap;
+                    SetScaleAndPositionForStaticImage(isFirstPhoto);
+                    _thumbNailController.CreateThumbnailRibbonOffScreen();
+                    UpdateTransform();
+                    RequestInvalidate();
                 }
 
-                _thumbNailController.CreateThumbnailRibbonOffScreen();
+                // Use the new byte[] overload
+                _gifAnimator = await GifOnTheFlyAnimator.CreateAsync(_currentDisplayItem.GifAsByteArray);
+                _gifStopwatch.Restart();
+                await _gifAnimator.UpdateAsync(TimeSpan.Zero);
+                SetScaleAndPositionForGif(!previewDrawnAsFirstFrame);
+                if (!previewDrawnAsFirstFrame)
+                    _thumbNailController.CreateThumbnailRibbonOffScreen();
                 UpdateTransform();
                 RequestInvalidate();
-
-                _gifStopwatch.Restart();
+               
             }
             catch (Exception ex)
             {
@@ -129,25 +128,53 @@ internal class Win2dCanvasController : ICanvasController
         {
             if (_currentDisplayItem.SoftwareBitmap != null)
                 _currentDisplayItem.Bitmap = CanvasBitmap.CreateFromSoftwareBitmap(_d2dCanvas, _currentDisplayItem.SoftwareBitmap);
-            var vertical = _currentDisplayItem.Rotation is 270 or 90;
-            var horScale = _d2dCanvas.ActualWidth /
-                           (vertical ? _currentDisplayItem.Bitmap.Bounds.Height : _currentDisplayItem.Bitmap.Bounds.Width);
-            var vertScale = _d2dCanvas.ActualHeight /
-                            (vertical ? _currentDisplayItem.Bitmap.Bounds.Width : _currentDisplayItem.Bitmap.Bounds.Height);
-            var scaleFactor = Math.Min(horScale, vertScale);
-
-            _imageRect = new Rect(0, 0, _currentDisplayItem.Bitmap.Bounds.Width * scaleFactor,
-                _currentDisplayItem.Bitmap.Bounds.Height * scaleFactor);
-            if (firstPhoto)
-            {
-                _imagePos.X = _d2dCanvas.ActualWidth / 2;
-                _imagePos.Y = _d2dCanvas.ActualHeight / 2;
-            }
-
+            
+            SetScaleAndPositionForStaticImage(isFirstPhoto);
             _thumbNailController.CreateThumbnailRibbonOffScreen();
             RestartOffScreenDrawTimer();
             UpdateTransform();
             RequestInvalidate();
+        }
+    }
+
+    private void SetScaleAndPositionForGif(bool isFirstPhoto)
+    {
+        var vertical = _currentDisplayItem.Rotation is 270 or 90;
+        var horScale = _d2dCanvas.ActualWidth /
+                       (vertical ? _gifAnimator.PixelHeight : _gifAnimator.PixelWidth);
+        var vertScale = _d2dCanvas.ActualHeight /
+                        (vertical ? _gifAnimator.PixelWidth : _gifAnimator.PixelHeight);
+        var scaleFactor = Math.Min(horScale, vertScale);
+
+        _imageRect = new Rect(0, 0, _gifAnimator.PixelWidth * scaleFactor,
+            _gifAnimator.PixelHeight * scaleFactor);
+        if (isFirstPhoto)
+        {
+            _imagePos.X = _d2dCanvas.ActualWidth / 2;
+            _imagePos.Y = _d2dCanvas.ActualHeight / 2;
+        }
+    }
+
+    private void SetScaleAndPositionForStaticImage(bool isFirstPhoto)
+    {
+        var vertical = _currentDisplayItem.Rotation is 270 or 90;
+        var horScale = _d2dCanvas.ActualWidth /
+                       (vertical
+                           ? _currentDisplayItem.Bitmap.Bounds.Height
+                           : _currentDisplayItem.Bitmap.Bounds.Width);
+        var vertScale = _d2dCanvas.ActualHeight /
+                        (vertical
+                            ? _currentDisplayItem.Bitmap.Bounds.Width
+                            : _currentDisplayItem.Bitmap.Bounds.Height);
+        var scaleFactor = Math.Min(horScale, vertScale);
+
+        _imageRect = new Rect(0, 0, _currentDisplayItem.Bitmap.Bounds.Width * scaleFactor,
+            _currentDisplayItem.Bitmap.Bounds.Height * scaleFactor);
+
+        if (isFirstPhoto)
+        {
+            _imagePos.X = _d2dCanvas.ActualWidth / 2;
+            _imagePos.Y = _d2dCanvas.ActualHeight / 2;
         }
     }
 
@@ -366,7 +393,7 @@ internal class Win2dCanvasController : ICanvasController
             ? CanvasImageInterpolation.NearestNeighbor
             : CanvasImageInterpolation.HighQualityCubic;
 
-        if (_currentDisplayItem.IsGif())
+        if (_currentDisplayItem.IsGif() && _gifAnimator != null)
         {
             if (_gifAnimator?.Surface == null) return;
             args.DrawingSession.Transform = _mat;

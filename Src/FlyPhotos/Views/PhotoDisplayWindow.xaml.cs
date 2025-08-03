@@ -106,11 +106,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
 
     private async void _thumbNailController_ThumbnailClicked(int shiftIndex)
     {
-        for(int i = 0;  i <  Math.Abs(shiftIndex); i ++)
-        {
-            await _photoController.Fly(shiftIndex > 0 ? NavDirection.Next : NavDirection.Prev);
-        }
-        await _photoController.Brake();
+        await _photoController.FlyBy(shiftIndex);
     }
 
     private void MainLayout_PointerMoved(object sender, PointerRoutedEventArgs e)

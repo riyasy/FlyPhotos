@@ -61,7 +61,7 @@ internal class Photo
         Preview = ImageUtil.GetPreview(D2dCanvas, FileName).GetAwaiter().GetResult();
     }
 
-    public DisplayItem GetDisplayItemBasedOn(DisplayLevel displayLevel)
+    public DisplayItem? GetDisplayItemBasedOn(DisplayLevel displayLevel)
     {
         switch (displayLevel)
         {

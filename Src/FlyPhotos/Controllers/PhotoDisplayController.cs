@@ -382,13 +382,41 @@ internal class PhotoDisplayController
 
     public async Task Brake()
     {
-        if (_cachedHqImages.TryGetValue(Photo.CurrentDisplayIndex, out var hqImage))
+        if (Photo.CurrentDisplayLevel != DisplayLevel.Hq && _cachedHqImages.TryGetValue(Photo.CurrentDisplayIndex, out var hqImage))
         {
             await _canvasController.SetSource(hqImage, DisplayLevel.Hq);
         }
 
         _hqCachingCanStart.Set();
         _keyPressCounter = 0;
+    }
+
+    public async Task FlyBy(int shiftBy)
+    {
+        if (_cachedPreviews.Count <= 1) return;
+
+        Photo.CurrentDisplayIndex += shiftBy;
+
+        if (App.Settings.ResetPanZoomOnNextPhoto) _canvasController.SetHundredPercent(false);
+
+        var photo = _photos[Photo.CurrentDisplayIndex];
+
+        if (!IsContinuousKeyPress() && _cachedHqImages.ContainsKey(Photo.CurrentDisplayIndex))
+        {
+            await _canvasController.SetSource(photo, DisplayLevel.Hq);
+        }
+        else if (_cachedPreviews.ContainsKey(Photo.CurrentDisplayIndex))
+        {
+            await _canvasController.SetSource(photo, DisplayLevel.Preview);
+        }
+        else
+        {
+            await _canvasController.SetSource(photo, DisplayLevel.PlaceHolder);
+        }
+        UpdateCacheLists();
+        UpdateProgressStatusDebug();
+        _previewCachingCanStart.Set();
+        _hqCachingCanStart.Set();
     }
 
     private bool IsContinuousKeyPress()
