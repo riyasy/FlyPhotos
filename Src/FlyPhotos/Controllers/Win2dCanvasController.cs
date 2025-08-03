@@ -47,6 +47,8 @@ internal class Win2dCanvasController : ICanvasController
 
     private bool _invalidatePending = false;
 
+    private int _latestSetSourceOperationId;
+
     private readonly DispatcherTimer _offScreenDrawTimer = new()
     {
         Interval = new TimeSpan(0, 0, 0, 0, 350)
@@ -77,6 +79,8 @@ internal class Win2dCanvasController : ICanvasController
 
     public async Task SetSource(Photo value, DisplayLevel displayLevel)
     {
+        var currentOperationId = ++_latestSetSourceOperationId;
+
         // Cleanup
         DestroyOffScreen();
         if (_currentDisplayItem != null && _currentDisplayItem.SoftwareBitmap != null) _currentDisplayItem.Bitmap = null;
@@ -108,16 +112,24 @@ internal class Win2dCanvasController : ICanvasController
                     RequestInvalidate();
                 }
 
-                // Use the new byte[] overload
-                _gifAnimator = await GifOnTheFlyAnimator.CreateAsync(_currentDisplayItem.GifAsByteArray);
-                _gifStopwatch.Restart();
-                await _gifAnimator.UpdateAsync(TimeSpan.Zero);
-                SetScaleAndPositionForGif(!previewDrawnAsFirstFrame);
-                if (!previewDrawnAsFirstFrame)
-                    _thumbNailController.CreateThumbnailRibbonOffScreen();
-                UpdateTransform();
-                RequestInvalidate();
-               
+                var newGifAnimator = await GifOnTheFlyAnimator.CreateAsync(_currentDisplayItem.GifAsByteArray);
+
+                // If SetSource had already been called a next time before returning from CreateAsync
+                if (currentOperationId == _latestSetSourceOperationId)
+                {
+                    _gifAnimator = newGifAnimator;
+                    _gifStopwatch.Restart();
+                    await _gifAnimator.UpdateAsync(TimeSpan.Zero);
+                    SetScaleAndPositionForGif(!previewDrawnAsFirstFrame);
+                    if (!previewDrawnAsFirstFrame)
+                        _thumbNailController.CreateThumbnailRibbonOffScreen();
+                    UpdateTransform();
+                    RequestInvalidate();
+                }
+                else
+                {
+                    newGifAnimator.Dispose();
+                }
             }
             catch (Exception ex)
             {

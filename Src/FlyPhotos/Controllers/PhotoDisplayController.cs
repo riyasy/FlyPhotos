@@ -84,20 +84,15 @@ internal class PhotoDisplayController
         //bool continueLoadingHq = firstPhoto.LoadPreviewFirstPhoto().GetAwaiter().GetResult();
         bool continueLoadingHq = await _firstPhoto.LoadPreviewFirstPhoto();
 
-        if (!continueLoadingHq)
-        {
-            await _canvasController.SetSource(_firstPhoto, DisplayLevel.Hq);
-            _firstPhotoLoaded = true;
-            _firstPhotoLoadEvent.Set();
-        }
-        else
+        if (continueLoadingHq)
         {
             await _canvasController.SetSource(_firstPhoto, DisplayLevel.Preview);
             await _firstPhoto.LoadHqFirstPhoto();
-            await _canvasController.SetSource(_firstPhoto, DisplayLevel.Hq);
-            _firstPhotoLoaded = true;
-            _firstPhotoLoadEvent.Set();
         }
+
+        await _canvasController.SetSource(_firstPhoto, DisplayLevel.Hq);
+        _firstPhotoLoaded = true;
+        _firstPhotoLoadEvent.Set();
     }
 
     private void GetFileListFromExplorer(string selectedFileName)
