@@ -250,8 +250,8 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     private void D2dCanvas_CreateResources(CanvasControl sender,
         CanvasCreateResourcesEventArgs args)
     {
-        args.TrackAsyncAction(_photoController.LoadFirstPhoto().AsAsyncAction());
-        //_photoController.LoadFirstPhoto();
+        //args.TrackAsyncAction(_photoController.LoadFirstPhoto().AsAsyncAction());
+        _photoController.LoadFirstPhoto();
     }
 
     private async void HandleKeyDown(object sender, KeyRoutedEventArgs e)

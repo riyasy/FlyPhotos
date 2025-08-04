@@ -53,12 +53,20 @@ internal class Photo
 
     public void LoadHq()
     {
-        Hq = ImageUtil.GetHqImage(D2dCanvas, FileName).GetAwaiter().GetResult();
+        if (Hq == null || Hq.PreviewFrom == DisplayItem.PreviewSource.ErrorScreen ||
+            Hq.PreviewFrom == DisplayItem.PreviewSource.Undefined)
+        {
+            Hq = ImageUtil.GetHqImage(D2dCanvas, FileName).GetAwaiter().GetResult();
+        }
     }
 
     public void LoadPreview()
     {
-        Preview = ImageUtil.GetPreview(D2dCanvas, FileName).GetAwaiter().GetResult();
+        if (Preview == null || Preview.PreviewFrom == DisplayItem.PreviewSource.ErrorScreen ||
+            Preview.PreviewFrom == DisplayItem.PreviewSource.Undefined)
+        {
+            Preview = ImageUtil.GetPreview(D2dCanvas, FileName).GetAwaiter().GetResult();
+        }
     }
 
     public DisplayItem? GetDisplayItemBasedOn(DisplayLevel displayLevel)

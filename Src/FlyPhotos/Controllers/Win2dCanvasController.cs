@@ -90,6 +90,8 @@ internal class Win2dCanvasController : ICanvasController
 
         _currentDisplayItem = value.GetDisplayItemBasedOn(displayLevel);
 
+        if (_currentDisplayItem == null) return;
+
         if (_currentDisplayItem.IsGif())
         {
             try
@@ -133,7 +135,7 @@ internal class Win2dCanvasController : ICanvasController
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Failed to display GIF: {ex.Message}");
+                //Debug.WriteLine($"Failed to display GIF: {ex.Message}");
             }
         }
         else
@@ -201,7 +203,7 @@ internal class Win2dCanvasController : ICanvasController
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error in GIF update loop: {ex}");
+            //Debug.WriteLine($"Error in GIF update loop: {ex}");
             _gifStopwatch.Stop();
         }
         finally

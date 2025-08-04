@@ -54,7 +54,7 @@ internal class ImageUtil
         try
         {
             if (!File.Exists(path)) return (FileNotFoundIndicator, false);
-            var cachedBmp = PhotoDiskCacher.Instance.ReturnFromCache(d2dCanvas, path);
+            var cachedBmp = await PhotoDiskCacher.Instance.ReturnFromCache(d2dCanvas, path);
             if (null != cachedBmp)
             {
                 return (new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache), true);
@@ -79,7 +79,7 @@ internal class ImageUtil
             }
             else if (extension == ".GIF")
             {
-                if (await GifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
+                if (await GifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
                 return (PreviewFailedIndicator, false);
             }
             else
@@ -101,7 +101,7 @@ internal class ImageUtil
         if (!File.Exists(path)) return FileNotFoundIndicator;
         try
         {
-            var cachedBmp = PhotoDiskCacher.Instance.ReturnFromCache(d2dCanvas, path);
+            var cachedBmp = await PhotoDiskCacher.Instance.ReturnFromCache(d2dCanvas, path);
             if (null != cachedBmp)
             {
                 return new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache);
@@ -121,6 +121,11 @@ internal class ImageUtil
             else if (extension == ".SVG")
             {
                 if (await SvgReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                return PreviewFailedIndicator;
+            }
+            else if (extension == ".GIF")
+            {
+                if (await GifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                 return PreviewFailedIndicator;
             }
             else

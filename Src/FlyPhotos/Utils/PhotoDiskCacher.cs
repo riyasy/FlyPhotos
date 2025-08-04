@@ -3,7 +3,9 @@ using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using PhotoSauce.MagicScaler;
 using System;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace FlyPhotos.Utils;
 public sealed class PhotoDiskCacher : IDisposable
@@ -26,34 +28,29 @@ public sealed class PhotoDiskCacher : IDisposable
 
     public static PhotoDiskCacher Instance => _instance.Value;
 
-    public CanvasBitmap ReturnFromCache(CanvasControl canvasControl, string filePath)
+    public async Task<CanvasBitmap> ReturnFromCache(CanvasControl canvasControl, string filePath)
     {
         var col = _db.GetCollection<CachedImage>("images");
         var cachedImage = col.FindOne(x => x.FilePath == filePath);
 
-        if (cachedImage != null)
+        if (cachedImage == null) return null; // Not found or outdated in cache
+        // Check if the last modified date of the file has changed
+        var lastModified = File.GetLastWriteTimeUtc(filePath).ToString("yyyyMMddHHmmss");
+        if (cachedImage.LastModified == lastModified)
         {
-            // Check if the last modified date of the file has changed
-            var lastModified = File.GetLastWriteTimeUtc(filePath).ToString("yyyyMMddHHmmss");
-            if (cachedImage.LastModified == lastModified)
-            {
-                cachedImage.LastAccessed = DateTime.UtcNow;
-                col.Update(cachedImage);
+            cachedImage.LastAccessed = DateTime.UtcNow;
+            col.Update(cachedImage);
 
-                using var ms = new MemoryStream(cachedImage.ImageData);
-                return CanvasBitmap.LoadAsync(canvasControl, ms.AsRandomAccessStream()).GetAwaiter().GetResult();
-            }
-            else
-            {
-                // File has been modified, remove the outdated cache entry
-                col.Delete(cachedImage.Id);
-            }
+            using var ms = new MemoryStream(cachedImage.ImageData);
+            return await CanvasBitmap.LoadAsync(canvasControl, ms.AsRandomAccessStream());
         }
 
+        // File has been modified, remove the outdated cache entry
+        col.Delete(cachedImage.Id);
         return null; // Not found or outdated in cache
     }
 
-    public void PutInCache(string filePath, CanvasBitmap bitmap)
+    public async Task PutInCache(string filePath, CanvasBitmap bitmap)
     {
         var col = _db.GetCollection<CachedImage>("images");
 
@@ -83,7 +80,7 @@ public sealed class PhotoDiskCacher : IDisposable
         }
 
         // Resize and convert image to JPEG using PhotoSauce
-        var resizedImage = ResizeImageWithPhotoSauce(bitmap, 800);
+        var resizedImage = await ResizeImageWithPhotoSauce(bitmap, 800);
 
         // Create a new cache entry
         var newCachedImage = new CachedImage
@@ -122,12 +119,12 @@ public sealed class PhotoDiskCacher : IDisposable
         Console.WriteLine($"Removed {rarelyUsedImages.Count} rarely used cached images.");
     }
 
-    private byte[] ResizeImageWithPhotoSauce(CanvasBitmap bitmap, int maxSize)
+    private async Task<byte[]> ResizeImageWithPhotoSauce(CanvasBitmap bitmap, int maxSize)
     {
         using var ms = new MemoryStream();
         using var msOutput = new MemoryStream();
         // Save CanvasBitmap as PNG to memory stream
-        bitmap.SaveAsync(ms.AsRandomAccessStream(), CanvasBitmapFileFormat.Jpeg).GetAwaiter().GetResult();
+        await bitmap.SaveAsync(ms.AsRandomAccessStream(), CanvasBitmapFileFormat.Jpeg);
         ms.Seek(0, SeekOrigin.Begin);
 
         var settings = new ProcessImageSettings

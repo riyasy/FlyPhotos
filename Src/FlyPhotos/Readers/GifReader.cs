@@ -5,10 +5,13 @@ using Microsoft.UI;
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Graphics.Imaging;
+using Windows.Storage;
+using Windows.Storage.Streams;
 
 namespace FlyPhotos.Readers;
 
@@ -26,13 +29,71 @@ internal class GifReader
     private const int MinimumGifDelayMs = 20;  // Treat delays under 20ms as invalid/too fast.
     private const int DefaultGifDelayMs = 100; // Use 100ms for invalid or zero-delay frames.
 
-    public static Task<(bool, DisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
-        => LoadGif(inputPath); // The 'ctrl' parameter is not needed with CanvasDevice.GetSharedDevice()
+    public static async Task<(bool, DisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
+    {
+        try
+        {
+            //Debug.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] GifReader::GetPreview Start {inputPath}");
+            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);
+            
+            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+            return (false, DisplayItem.Empty());
+        }
+        finally
+        {
+            //Debug.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] GifReader::GetPreview End {inputPath}");
+        }
+    }
 
-    public static Task<(bool, DisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
-        => LoadGifAsFile(inputPath); // Currently no resolution scaling
 
-    public static async Task<(bool, DisplayItem)> LoadGif(string inputPath)
+    public static async Task<(bool, DisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
+    {
+        try
+        {
+            //Debug.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] GifReader::GetHq Start {inputPath}");
+
+            // --- Use BitmapDecoder to check frame count ---
+            // We must open the file as a stream for the decoder to read.
+            var storageFile = await StorageFile.GetFileFromPathAsync(inputPath);
+            using IRandomAccessStream stream = await storageFile.OpenAsync(FileAccessMode.Read);
+            var decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.GifDecoderId, stream);
+
+            // --- Decide loading strategy based on frame count ---
+            if (decoder.FrameCount > 1)
+            {
+                // More than one frame: It's an animated GIF.
+                // Load the raw bytes using your helper method.
+                //Debug.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] GIF has {decoder.FrameCount} frames. Loading as byte array.");
+                return await LoadGifAsFile(inputPath);
+            }
+            else
+            {
+                // Single frame: Load as a static image (CanvasBitmap).
+                //Debug.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Image has 1 frame. Loading as CanvasBitmap.");
+                var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);
+                return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
+            }
+        }
+        catch (Exception ex)
+        {
+            // This will catch errors from GetFileFromPathAsync, BitmapDecoder, or CanvasBitmap.LoadAsync
+            // Logger.Error(ex, "Failed to process image file at {0}", inputPath);
+            //Debug.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] ERROR in GetHq: {ex.Message}");
+            return (false, DisplayItem.Empty());
+        }
+        finally
+        {
+            //Debug.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] GifReader::GetHq End {inputPath}");
+        }
+    }
+
+
+
+    private static async Task<(bool, DisplayItem)> LoadGifAsFrames(string inputPath)
     {
         // These are the primary off-screen surfaces that must be disposed.
         CanvasRenderTarget compositedSurface = null;
@@ -158,7 +219,7 @@ internal class GifReader
         }
     }
 
-    public static async Task<(bool, DisplayItem)> LoadGifAsFile(string inputPath)
+    private static async Task<(bool, DisplayItem)> LoadGifAsFile(string inputPath)
     {
         // Basic validation to prevent unnecessary exceptions.
         if (string.IsNullOrEmpty(inputPath) || !File.Exists(inputPath))

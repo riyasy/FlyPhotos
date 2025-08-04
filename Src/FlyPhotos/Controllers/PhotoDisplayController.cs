@@ -80,8 +80,7 @@ internal class PhotoDisplayController
     {
         await ImageUtil.Initialize(_d2dCanvas);
 
-        _firstPhoto = new Photo(App.SelectedFileName);
-        //bool continueLoadingHq = firstPhoto.LoadPreviewFirstPhoto().GetAwaiter().GetResult();
+        _firstPhoto = new Photo(App.SelectedFileName);        
         bool continueLoadingHq = await _firstPhoto.LoadPreviewFirstPhoto();
 
         if (continueLoadingHq)
@@ -226,7 +225,6 @@ internal class PhotoDisplayController
 
     private void PreviewDiskCacherDoWork()
     {
-        // Limit concurrency to 4 tasks
         SemaphoreSlim semaphore = new SemaphoreSlim(Environment.ProcessorCount);
         while (true)
         {
@@ -237,24 +235,24 @@ internal class PhotoDisplayController
                 continue;
             }
 
-            if (_toBeDiskCachedPreviews.TryPop(out var index))
-            {
-                semaphore.Wait();
+            if (!_toBeDiskCachedPreviews.TryPop(out var index)) 
+                continue;
 
-                Task.Run(() =>
+            semaphore.Wait();
+
+            Task.Run(async () =>
+            {
+                try
                 {
-                    try
+                    if (_cachedPreviews.TryGetValue(index, out var image) &&
+                        image.Preview != null &&
+                        image.Preview.PreviewFrom == DisplayItem.PreviewSource.FromDisk)
                     {
-                        if (_cachedPreviews.TryGetValue(index, out var image) &&
-                            image.Preview != null &&
-                            image.Preview.PreviewFrom == DisplayItem.PreviewSource.FromDisk)
-                        {
-                            PhotoDiskCacher.Instance.PutInCache(image.FileName, image.Preview.Bitmap);
-                        }
+                        await PhotoDiskCacher.Instance.PutInCache(image.FileName, image.Preview.Bitmap);
                     }
-                    finally { semaphore.Release(); }
-                });
-            }
+                }
+                finally { semaphore.Release(); }
+            });
         }
     }
 
@@ -265,7 +263,7 @@ internal class PhotoDisplayController
             _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
             {
                 _canvasController.SetSource(photo, toDisplayState);
-                Debug.WriteLine(toDisplayState.ToString() + " : " + photo.FileName);
+                //Debug.WriteLine(toDisplayState.ToString() + " : " + photo.FileName);
             });
     }
 
