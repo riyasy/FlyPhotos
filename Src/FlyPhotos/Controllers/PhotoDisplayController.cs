@@ -263,7 +263,6 @@ internal class PhotoDisplayController
             _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
             {
                 _canvasController.SetSource(photo, toDisplayState);
-                //Debug.WriteLine(toDisplayState.ToString() + " : " + photo.FileName);
             });
     }
 

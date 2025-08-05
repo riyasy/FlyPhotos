@@ -1,4 +1,5 @@
-﻿using FlyPhotos.Data;
+﻿using FlyPhotos.Controllers.Animators;
+using FlyPhotos.Data;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI.Input;
@@ -7,7 +8,9 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.System;
@@ -19,6 +22,7 @@ namespace FlyPhotos.Controllers;
 internal class Win2dCanvasController : ICanvasController
 {
     // private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+    private readonly SemaphoreSlim _animatorLock = new SemaphoreSlim(1, 1);
 
     private readonly CanvasDevice _device = CanvasDevice.GetSharedDevice();
     private CanvasRenderTarget _offscreen;
@@ -57,9 +61,9 @@ internal class Win2dCanvasController : ICanvasController
     private readonly IThumbnailController _thumbNailController;
 
     // For GIF File handling
-    private GifOnTheFlyAnimator _gifAnimator;
-    private readonly Stopwatch _gifStopwatch = new();
-    private bool _isGifAnimationLoopRunning = false;
+    private IAnimator _animator;
+    private readonly Stopwatch _animationStopwatch = new();
+    private bool _isAnimationLoopRunning = false;
 
     public Win2dCanvasController(CanvasControl d2dCanvas, IThumbnailController thumbNailController)
     {
@@ -79,8 +83,10 @@ internal class Win2dCanvasController : ICanvasController
 
     public async Task SetSource(Photo value, DisplayLevel displayLevel)
     {
-        var currentOperationId = ++_latestSetSourceOperationId;
+        await _animatorLock.WaitAsync();
+        _animatorLock.Release();
 
+        var currentOperationId = ++_latestSetSourceOperationId;
         // Cleanup
         DestroyOffScreen();
         if (_currentDisplayItem != null && _currentDisplayItem.SoftwareBitmap != null) _currentDisplayItem.Bitmap = null;
@@ -92,14 +98,14 @@ internal class Win2dCanvasController : ICanvasController
 
         if (_currentDisplayItem == null) return;
 
-        if (_currentDisplayItem.IsGif())
+        if (_currentDisplayItem.IsGifOrAnimatedPng())
         {
             try
             {
                 // Clean up previous animation
-                _gifAnimator?.Dispose();
-                _gifAnimator = null;
-                _gifStopwatch.Stop();
+                _animator?.Dispose();
+                _animator = null;
+                _animationStopwatch.Stop();
 
 
                 var preview = value.GetDisplayItemBasedOn(DisplayLevel.Preview);
@@ -114,14 +120,18 @@ internal class Win2dCanvasController : ICanvasController
                     RequestInvalidate();
                 }
 
-                var newGifAnimator = await GifOnTheFlyAnimator.CreateAsync(_currentDisplayItem.GifAsByteArray);
+                IAnimator newAnimator = Path.GetExtension(value.FileName).ToUpper() switch
+                {
+                    ".GIF" => await GifAnimator.CreateAsync(_currentDisplayItem.FileAsByteArray),
+                    _ => await PngAnimator.CreateAsync(_currentDisplayItem.FileAsByteArray)
+                };
 
                 // If SetSource had already been called a next time before returning from CreateAsync
                 if (currentOperationId == _latestSetSourceOperationId)
                 {
-                    _gifAnimator = newGifAnimator;
-                    _gifStopwatch.Restart();
-                    await _gifAnimator.UpdateAsync(TimeSpan.Zero);
+                    _animator = newAnimator;
+                    _animationStopwatch.Restart();
+                    await _animator.UpdateAsync(TimeSpan.Zero);
                     SetScaleAndPositionForGif(!previewDrawnAsFirstFrame);
                     if (!previewDrawnAsFirstFrame)
                         _thumbNailController.CreateThumbnailRibbonOffScreen();
@@ -130,12 +140,12 @@ internal class Win2dCanvasController : ICanvasController
                 }
                 else
                 {
-                    newGifAnimator.Dispose();
+                    newAnimator.Dispose();
                 }
             }
             catch (Exception ex)
             {
-                //Debug.WriteLine($"Failed to display GIF: {ex.Message}");
+                Debug.WriteLine($"Failed to display GIF: {ex.Message}");
             }
         }
         else
@@ -155,13 +165,13 @@ internal class Win2dCanvasController : ICanvasController
     {
         var vertical = _currentDisplayItem.Rotation is 270 or 90;
         var horScale = _d2dCanvas.ActualWidth /
-                       (vertical ? _gifAnimator.PixelHeight : _gifAnimator.PixelWidth);
+                       (vertical ? _animator.PixelHeight : _animator.PixelWidth);
         var vertScale = _d2dCanvas.ActualHeight /
-                        (vertical ? _gifAnimator.PixelWidth : _gifAnimator.PixelHeight);
+                        (vertical ? _animator.PixelWidth : _animator.PixelHeight);
         var scaleFactor = Math.Min(horScale, vertScale);
 
-        _imageRect = new Rect(0, 0, _gifAnimator.PixelWidth * scaleFactor,
-            _gifAnimator.PixelHeight * scaleFactor);
+        _imageRect = new Rect(0, 0, _animator.PixelWidth * scaleFactor,
+            _animator.PixelHeight * scaleFactor);
         if (isFirstPhoto)
         {
             _imagePos.X = _d2dCanvas.ActualWidth / 2;
@@ -192,29 +202,31 @@ internal class Win2dCanvasController : ICanvasController
         }
     }
 
-    private async void RunGifAnimationLoop()
+    private async Task RunGifAnimationLoop()
     {
-        _isGifAnimationLoopRunning = true;
+        if (!_animatorLock.Wait(0)) return;
+
         try
         {
-            if (_gifAnimator == null) return;
-            await _gifAnimator.UpdateAsync(_gifStopwatch.Elapsed);
+            if (_animator == null) return;
+            _isAnimationLoopRunning = true;
+            await _animator.UpdateAsync(_animationStopwatch.Elapsed);
             RequestInvalidate();
         }
         catch (Exception ex)
         {
-            //Debug.WriteLine($"Error in GIF update loop: {ex}");
-            _gifStopwatch.Stop();
+            _animationStopwatch.Stop();
         }
         finally
         {
-            _isGifAnimationLoopRunning = false;
+            _isAnimationLoopRunning = false;
+            _animatorLock.Release();
         }
     }
 
     private void RestartOffScreenDrawTimer()
     {
-        if (_currentDisplayItem.IsGif()) return;
+        if (_currentDisplayItem.IsGifOrAnimatedPng()) return;
         _offScreenDrawTimer.Stop();
         _offScreenDrawTimer.Start();
     }
@@ -235,7 +247,7 @@ internal class Win2dCanvasController : ICanvasController
     {
         _offScreenDrawTimer.Stop();
 
-        if (_currentDisplayItem.IsGif()) return;
+        if (_currentDisplayItem.IsGifOrAnimatedPng()) return;
         CreateOffScreen();
         UpdateTransform();
         RequestInvalidate();
@@ -407,19 +419,19 @@ internal class Win2dCanvasController : ICanvasController
             ? CanvasImageInterpolation.NearestNeighbor
             : CanvasImageInterpolation.HighQualityCubic;
 
-        if (_currentDisplayItem.IsGif() && _gifAnimator != null)
+        if (_currentDisplayItem.IsGifOrAnimatedPng() && _animator != null)
         {
-            if (_gifAnimator?.Surface == null) return;
+            if (_animator?.Surface == null) return;
             args.DrawingSession.Transform = _mat;
 
             args.DrawingSession.DrawImage(
-                _gifAnimator.Surface,
+                _animator.Surface,
                 _imageRect,
-                _gifAnimator.Surface.GetBounds(_d2dCanvas),
+                _animator.Surface.GetBounds(_d2dCanvas),
                 1.0f,
                 drawingQuality);
 
-            if (!_isGifAnimationLoopRunning) RunGifAnimationLoop();
+            if (!_isAnimationLoopRunning) RunGifAnimationLoop();
         }
         else
         { 
@@ -438,7 +450,7 @@ internal class Win2dCanvasController : ICanvasController
     {
         if (_currentDisplayItem == null) return;
 
-        var imageBounds = _currentDisplayItem.IsGif() ? _gifAnimator.Surface.GetBounds(_d2dCanvas) : _currentDisplayItem.Bitmap.Bounds;
+        var imageBounds = _currentDisplayItem.IsGifOrAnimatedPng() ? _animator.Surface.GetBounds(_d2dCanvas) : _currentDisplayItem.Bitmap.Bounds;
 
         var scaleFactor = Math.Min(args.NewSize.Width / imageBounds.Width,
             args.NewSize.Height / imageBounds.Height);
@@ -483,13 +495,21 @@ internal class Win2dCanvasController : ICanvasController
         });
     }
 
-    public void CleanupOnClose()
+    public async Task CleanupOnClose()
     {
-        _gifStopwatch.Stop();
-        if (_d2dCanvas != null) _d2dCanvas.Draw -= CanvasControl_OnDraw;
-        _d2dCanvas?.RemoveFromVisualTree();
-        _gifAnimator?.Dispose();
-        _gifAnimator = null;
+        await _animatorLock.WaitAsync();
+        try
+        {
+            _animationStopwatch.Stop();
+            if (_d2dCanvas != null) _d2dCanvas.Draw -= CanvasControl_OnDraw;
+            _d2dCanvas?.RemoveFromVisualTree();
+            _animator?.Dispose();
+            _animator = null;
+        }
+        finally
+        {
+            _animatorLock.Release();
+        }
     }
 }
 

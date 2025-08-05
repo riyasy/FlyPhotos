@@ -21,7 +21,7 @@ namespace FlyPhotos.Views;
 /// </summary>
 internal sealed partial class Settings
 {
-    private IThumbnailController _thumbnailDisplayChanger;
+    private readonly IThumbnailController _thumbnailDisplayChanger;
 
     internal Settings(IThumbnailController thumbnailDisplayChanger)
     {

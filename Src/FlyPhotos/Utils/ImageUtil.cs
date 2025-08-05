@@ -62,7 +62,7 @@ internal class ImageUtil
             var extension = Path.GetExtension(path).ToUpper();
             if (extension == ".HEIC")
             {
-                if (LibHeifSharpReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
+                if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
                 if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
                 return (PreviewFailedIndicator, false);
             }
@@ -80,6 +80,11 @@ internal class ImageUtil
             else if (extension == ".GIF")
             {
                 if (await GifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
+                return (PreviewFailedIndicator, false);
+            }
+            else if (extension == ".PNG")
+            {
+                if (await PngReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
                 return (PreviewFailedIndicator, false);
             }
             else
@@ -109,7 +114,7 @@ internal class ImageUtil
             var extension = Path.GetExtension(path).ToUpper();
             if (extension == ".HEIC")
             {
-                if (LibHeifSharpReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                 if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
                 return PreviewFailedIndicator;
             }
@@ -126,6 +131,11 @@ internal class ImageUtil
             else if (extension == ".GIF")
             {
                 if (await GifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                return PreviewFailedIndicator;
+            }
+            else if (extension == ".PNG")
+            {
+                if (await PngReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                 return PreviewFailedIndicator;
             }
             else
@@ -165,6 +175,11 @@ internal class ImageUtil
             else if (Path.GetExtension(path).ToUpper() == ".GIF")
             {
                 if (await GifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                return HqImageFailedIndicator;
+            }
+            else if (Path.GetExtension(path).ToUpper() == ".PNG")
+            {
+                if (await PngReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                 return HqImageFailedIndicator;
             }
             else

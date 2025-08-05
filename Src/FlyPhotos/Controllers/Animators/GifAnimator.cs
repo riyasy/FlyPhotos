@@ -2,16 +2,20 @@
 using Microsoft.UI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Graphics.Imaging;
 using Windows.Storage.Streams;
+using Windows.UI.ViewManagement;
+using FlyPhotos.Data;
 
-namespace FlyPhotos.Controllers;
+namespace FlyPhotos.Controllers.Animators;
 
-public class GifOnTheFlyAnimator : IDisposable
+
+public class GifAnimator : IAnimator
 {
     // Frame metadata that we pre-load.
     private class FrameMetadata
@@ -20,6 +24,7 @@ public class GifOnTheFlyAnimator : IDisposable
         public Rect Bounds { get; init; }
         public byte Disposal { get; init; }
     }
+    public string ID { get; set; }
 
     public uint PixelWidth { get; }
     public uint PixelHeight { get; }
@@ -43,7 +48,7 @@ public class GifOnTheFlyAnimator : IDisposable
 
     public ICanvasImage Surface => _compositedSurface;
 
-    private GifOnTheFlyAnimator(
+    private GifAnimator(
         CanvasDevice device,
         BitmapDecoder decoder,
         IRandomAccessStream stream,
@@ -63,7 +68,7 @@ public class GifOnTheFlyAnimator : IDisposable
     }
 
 
-    public static async Task<GifOnTheFlyAnimator> CreateAsync(byte[] gifData)
+    public static async Task<GifAnimator> CreateAsync(byte[] gifData)
     {
         var memoryStream = new MemoryStream(gifData);
         var randomAccessStream = memoryStream.AsRandomAccessStream();
@@ -72,14 +77,14 @@ public class GifOnTheFlyAnimator : IDisposable
         return await CreateAsyncInternal(randomAccessStream);
     }
 
-    public static async Task<GifOnTheFlyAnimator> CreateAsync(string filePath)
+    public static async Task<GifAnimator> CreateAsync(string filePath)
     {
         var stream = File.OpenRead(filePath).AsRandomAccessStream();
         // The new private internal method does the rest of the work.
         return await CreateAsyncInternal(stream);
     }
 
-    private static async Task<GifOnTheFlyAnimator> CreateAsyncInternal(IRandomAccessStream stream)
+    private static async Task<GifAnimator> CreateAsyncInternal(IRandomAccessStream stream)
     {
         var device = CanvasDevice.GetSharedDevice();
         try
@@ -93,7 +98,7 @@ public class GifOnTheFlyAnimator : IDisposable
             var metadata = await ReadAllFrameMetadataAsync(decoder);
 
             // Pass the stream to the constructor so it can be disposed later.
-            return new GifOnTheFlyAnimator(device, decoder, stream, metadata);
+            return new GifAnimator(device, decoder, stream, metadata);
         }
         catch (Exception)
         {

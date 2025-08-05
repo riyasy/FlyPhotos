@@ -33,19 +33,13 @@ internal class GifReader
     {
         try
         {
-            //Debug.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] GifReader::GetPreview Start {inputPath}");
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);
-            
             return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
             return (false, DisplayItem.Empty());
-        }
-        finally
-        {
-            //Debug.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] GifReader::GetPreview End {inputPath}");
         }
     }
 
@@ -54,8 +48,6 @@ internal class GifReader
     {
         try
         {
-            //Debug.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] GifReader::GetHq Start {inputPath}");
-
             // --- Use BitmapDecoder to check frame count ---
             // We must open the file as a stream for the decoder to read.
             var storageFile = await StorageFile.GetFileFromPathAsync(inputPath);
@@ -84,10 +76,6 @@ internal class GifReader
             // Logger.Error(ex, "Failed to process image file at {0}", inputPath);
             //Debug.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] ERROR in GetHq: {ex.Message}");
             return (false, DisplayItem.Empty());
-        }
-        finally
-        {
-            //Debug.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] GifReader::GetHq End {inputPath}");
         }
     }
 
@@ -233,7 +221,7 @@ internal class GifReader
             // File.ReadAllBytesAsync is the most efficient way to asynchronously 
             // read an entire file into a byte array. It avoids blocking threads.
             byte[] fileBytes = await File.ReadAllBytesAsync(inputPath);
-            return (true, new DisplayItem(fileBytes, DisplayItem.PreviewSource.FromDisk)); ;
+            return (true, new DisplayItem(fileBytes, DisplayItem.PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {

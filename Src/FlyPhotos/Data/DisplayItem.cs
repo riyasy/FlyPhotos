@@ -7,7 +7,7 @@ namespace FlyPhotos.Data;
 
 internal class DisplayItem
 {
-    public byte[] GifAsByteArray { get; set; }
+    public byte[] FileAsByteArray { get; set; }
 
     public enum PreviewSource
     {
@@ -50,9 +50,9 @@ internal class DisplayItem
         Bitmap = AnimationFrames[0];
     }
 
-    public DisplayItem(byte[] gifFileBytes, PreviewSource previewFrom)
+    public DisplayItem(byte[] fileFileBytes, PreviewSource previewFrom)
     {
-        GifAsByteArray = gifFileBytes;
+        FileAsByteArray = fileFileBytes;
         PreviewFrom = previewFrom;
     }
 
@@ -62,8 +62,8 @@ internal class DisplayItem
         return new DisplayItem(bitmap, PreviewSource.Undefined, 0);
     }
 
-    public bool IsGif()
+    public bool IsGifOrAnimatedPng()
     {
-        return GifAsByteArray != null;
+        return FileAsByteArray != null;
     }
 }

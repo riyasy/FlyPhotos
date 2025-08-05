@@ -10,11 +10,11 @@ using Windows.Graphics.DirectX;
 
 namespace FlyPhotos.Readers;
 
-internal class LibHeifSharpReader
+internal class HeifReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    static LibHeifSharpReader()
+    static HeifReader()
     {
         LibHeifSharpDllImportResolver.Register();
     }
