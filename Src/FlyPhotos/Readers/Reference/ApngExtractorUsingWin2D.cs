@@ -205,31 +205,41 @@
 
 //            using (var ds = compositedCanvas.CreateDrawingSession())
 //            {
-//                if (defaultFrameControl.BlendOp == APNG_BLEND_OP_SOURCE)
+//                switch (defaultFrameControl.BlendOp)
 //                {
-//                    // SOURCE blend: Clear the area, then overwrite pixels.
-//                    ds.FillRectangle(patchRect, Colors.Transparent);
-//                    ds.DrawImage(defaultFrame, (float)patchRect.X, (float)patchRect.Y, defaultFrame.Bounds, 1.0f, CanvasImageInterpolation.NearestNeighbor, CanvasComposite.Copy);
-//                }
-//                else // APNG_BLEND_OP_OVER
-//                {
-//                    ds.DrawImage(defaultFrame);
+//                    case APNG_BLEND_OP_SOURCE:
+//                        // SOURCE blend: Clear the area, then overwrite pixels.
+//                        ds.Blend = CanvasBlend.Copy;
+//                        ds.FillRectangle(patchRect, Colors.Transparent);
+//                        ds.Blend = CanvasBlend.SourceOver;
+//                        ds.DrawImage(defaultFrame);
+//                        break;
+//                    case APNG_BLEND_OP_OVER:
+//                        ds.DrawImage(defaultFrame);
+//                        break;
 //                }
 //            }
 
 //            history.Add(CloneRenderTarget(resourceCreator, compositedCanvas));
 
-//            // Apply disposal op
-//            if (defaultFrameControl.DisposeOp == APNG_DISPOSE_OP_BACKGROUND || defaultFrameControl.DisposeOp == APNG_DISPOSE_OP_PREVIOUS)
+//            switch (defaultFrameControl.DisposeOp)
 //            {
-//                using var ds = compositedCanvas.CreateDrawingSession();
-//                ds.FillRectangle(patchRect, Colors.Transparent);
+//                case APNG_DISPOSE_OP_BACKGROUND:
+//                case APNG_DISPOSE_OP_PREVIOUS:
+//                {
+//                    using var ds = compositedCanvas.CreateDrawingSession();
+//                    ds.Blend = CanvasBlend.Copy;
+//                    ds.FillRectangle(patchRect, Colors.Transparent);
+//                    ds.Blend = CanvasBlend.SourceOver;
+//                    break;
+//                }
 //            }
 //        }
 
 //        // Process each subsequent frame.
 //        foreach (var fc in frameControls.Where(fc => !defaultImageIdatChunks.Any() || fc.SequenceNumber > 0))
 //        {
+
 //            if (fc.XOffset + fc.Width > canvasWidth || fc.YOffset + fc.Height > canvasHeight)
 //                throw new InvalidDataException($"Frame {fc.SequenceNumber} region exceeds canvas dimensions.");
 
@@ -244,16 +254,19 @@
 //            // Draw onto the main canvas.
 //            using (var ds = compositedCanvas.CreateDrawingSession())
 //            {
-//                if (fc.BlendOp == APNG_BLEND_OP_SOURCE)
+//                switch (fc.BlendOp)
 //                {
-//                    // SOURCE blend: clear the area, then overwrite with a 'Copy' composite mode.
-//                    ds.FillRectangle(patchRect, Colors.Transparent);
-//                    ds.DrawImage(patch, (float)patchRect.X, (float)patchRect.Y, patch.Bounds, 1.0f, CanvasImageInterpolation.NearestNeighbor, CanvasComposite.Copy);
-//                }
-//                else // APNG_BLEND_OP_OVER
-//                {
-//                    // OVER blend: standard alpha blending.
-//                    ds.DrawImage(patch, (float)patchRect.X, (float)patchRect.Y);
+//                    case APNG_BLEND_OP_SOURCE:
+//                        // SOURCE blend: clear the area, then overwrite
+//                        ds.Blend = CanvasBlend.Copy;
+//                        ds.FillRectangle(patchRect, Colors.Transparent);
+//                        ds.Blend = CanvasBlend.SourceOver;
+//                        ds.DrawImage(patch, (float)patchRect.X, (float)patchRect.Y);
+//                        break;
+//                    case APNG_BLEND_OP_OVER:
+//                        // OVER blend: standard alpha blending.
+//                        ds.DrawImage(patch, (float)patchRect.X, (float)patchRect.Y);
+//                        break;
 //                }
 //            }
 
@@ -267,13 +280,16 @@
 //                {
 //                    case APNG_DISPOSE_OP_BACKGROUND:
 //                        // Clear the patch region to fully transparent.
+//                        ds.Blend = CanvasBlend.Copy;
 //                        ds.FillRectangle(patchRect, Colors.Transparent);
+//                        ds.Blend = CanvasBlend.SourceOver;
 //                        break;
 //                    case APNG_DISPOSE_OP_PREVIOUS:
 //                        // Revert by blitting the previous canvas state back over the patch region.
-//                        ds.DrawImage(previousCanvas, (float)patchRect.X, (float)patchRect.Y, patchRect, 1.0f, CanvasImageInterpolation.NearestNeighbor, CanvasComposite.Copy);
+//                        ds.DrawImage(previousCanvas, patchRect, patchRect);
 //                        break;
-//                        // case APNG_DISPOSE_OP_NONE: do nothing.
+//                     case APNG_DISPOSE_OP_NONE: 
+//                        break;
 //                }
 //            }
 //        }

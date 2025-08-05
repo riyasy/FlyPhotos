@@ -216,35 +216,38 @@ public class PngAnimator : IAnimator
         // If the CURRENT frame's disposal is PREVIOUS, we back up the canvas's current state.
         if (metadata.DisposeOp == APNG_DISPOSE_OP_PREVIOUS)
         {
+            var backupRegion = new Rect(0, 0, _compositedSurface.Size.Width, _compositedSurface.Size.Height);
             using var backupDs = _previousFrameBackup.CreateDrawingSession();
-            backupDs.DrawImage(_compositedSurface);
+            backupDs.DrawImage(_compositedSurface, backupRegion, backupRegion);
         }
 
         // Now, perform all drawing for the current frame in a single, atomic session.
         using (var ds = _compositedSurface.CreateDrawingSession())
         {
-            // 1. Handle disposal of the PREVIOUS frame.
-            if (_previousFrameDisposal == APNG_DISPOSE_OP_BACKGROUND)
+            switch (_previousFrameDisposal)
             {
-                ds.FillRectangle(_previousFrameRect, Colors.Transparent);
-            }
-            else if (_previousFrameDisposal == APNG_DISPOSE_OP_PREVIOUS)
-            {
-                // We use DrawImage with Copy composite mode to "blit" the backup
-                // over the specified region, effectively restoring it.
-                ds.DrawImage(_previousFrameBackup, _previousFrameRect, _previousFrameRect, 1.0f, CanvasImageInterpolation.NearestNeighbor, CanvasComposite.Copy);
+                case APNG_DISPOSE_OP_BACKGROUND:
+                    ds.Blend = CanvasBlend.Copy;
+                    ds.FillRectangle(_previousFrameRect, Colors.Transparent);
+                    ds.Blend = CanvasBlend.SourceOver;
+                    break;
+                case APNG_DISPOSE_OP_PREVIOUS:
+                    ds.DrawImage(_previousFrameBackup, _previousFrameRect, _previousFrameRect);
+                    break;
             }
 
-            // 3. Draw the CURRENT frame. This is where APNG's BlendOp matters.
-            if (metadata.BlendOp == APNG_BLEND_OP_SOURCE)
+            switch (metadata.BlendOp)
             {
-                // Clear the target area first, then overwrite with the patch.
-                ds.FillRectangle(metadata.Bounds, Colors.Transparent);
-                ds.DrawImage(patchBitmap, (float)metadata.Bounds.X, (float)metadata.Bounds.Y, patchBitmap.Bounds, 1.0f, CanvasImageInterpolation.NearestNeighbor, CanvasComposite.Copy);
-            }
-            else // APNG_BLEND_OP_OVER
-            {
-                ds.DrawImage(patchBitmap, (float)metadata.Bounds.X, (float)metadata.Bounds.Y);
+                // 3. Draw the CURRENT frame. This is where APNG's BlendOp matters.
+                case APNG_BLEND_OP_SOURCE:
+                    ds.Blend = CanvasBlend.Copy;
+                    ds.FillRectangle(metadata.Bounds, Colors.Transparent);
+                    ds.Blend = CanvasBlend.SourceOver;
+                    ds.DrawImage(patchBitmap, (float)metadata.Bounds.X, (float)metadata.Bounds.Y);
+                    break;
+                case APNG_BLEND_OP_OVER:
+                    ds.DrawImage(patchBitmap, (float)metadata.Bounds.X, (float)metadata.Bounds.Y);
+                    break;
             }
         }
 
