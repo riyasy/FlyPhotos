@@ -197,7 +197,7 @@ internal class Win2dCanvasController : ICanvasController
         }
 
         // Define the target state
-        var targetScale = 1.0f;
+        const float targetScale = 1.0f;
         var targetPosition = new Point(_d2dCanvas.ActualWidth / 2, _d2dCanvas.ActualHeight / 2);
 
         // This is important for subsequent mouse-wheel zooms to work correctly
@@ -210,6 +210,7 @@ internal class Win2dCanvasController : ICanvasController
 
     public void ZoomByKeyboard(float scaleFactor)
     {
+        if (IsScreenEmpty()) return;
         var scaleTo = _lastScaleTo * scaleFactor;
         if (scaleTo < 0.05) return;
         _lastScaleTo = scaleTo;
@@ -220,6 +221,7 @@ internal class Win2dCanvasController : ICanvasController
 
     public void PanByKeyboard(double dx, double dy)
     {
+        if (IsScreenEmpty()) return;
         _imagePos.X += dx;
         _imagePos.Y += dy;
         UpdateTransform();
@@ -228,6 +230,7 @@ internal class Win2dCanvasController : ICanvasController
 
     public void RotateCurrentPhotoBy90(bool clockWise)
     {
+        if (IsScreenEmpty()) return;
         _currentDisplayItem.Rotation += (clockWise ? 90 : -90);
         UpdateTransform();
         RequestInvalidate();
@@ -274,7 +277,7 @@ internal class Win2dCanvasController : ICanvasController
 
     private void D2dCanvas_SizeChanged(object sender, SizeChangedEventArgs args)
     {
-        if (_currentDisplayItem == null) return;
+        if (IsScreenEmpty()) return;
 
         var imageBounds = _currentDisplayItem.IsGifOrAnimatedPng() ? _animator.Surface.GetBounds(_d2dCanvas) : _currentDisplayItem.Bitmap.Bounds;
 
@@ -293,6 +296,7 @@ internal class Win2dCanvasController : ICanvasController
 
     private void D2dCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
+        if (IsScreenEmpty()) return;
         _lastPoint = e.GetCurrentPoint(_d2dCanvas).Position;
         if (!IsPressedOnImage(_lastPoint)) return;
         _d2dCanvas.CapturePointer(e.Pointer);
@@ -320,6 +324,7 @@ internal class Win2dCanvasController : ICanvasController
 
     private void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
+        if (IsScreenEmpty()) return;
         var coreWindow = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
         var isControlPressed = coreWindow.HasFlag(CoreVirtualKeyStates.Down);
         if (isControlPressed)
@@ -530,6 +535,11 @@ internal class Win2dCanvasController : ICanvasController
         if (_offscreen == null) return;
         _offscreen.Dispose();
         _offscreen = null;
+    }
+
+    public bool IsScreenEmpty()
+    {
+        return _currentDisplayItem == null;
     }
 
     public bool IsPressedOnImage(Point position)
