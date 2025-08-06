@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace FlyPhotos.Utils;
 public sealed class PhotoDiskCacher : IDisposable
 {
-    private static readonly Lazy<PhotoDiskCacher> _instance = new(() => new PhotoDiskCacher());
+    private static readonly Lazy<PhotoDiskCacher> instance = new(() => new PhotoDiskCacher());
 
     private readonly string _dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlyPhotosCache.db");
     private readonly LiteDatabase _db;
@@ -26,7 +26,7 @@ public sealed class PhotoDiskCacher : IDisposable
         col.EnsureIndex(x => x.LastAccessed);
     }
 
-    public static PhotoDiskCacher Instance => _instance.Value;
+    public static PhotoDiskCacher Instance => instance.Value;
 
     public async Task<CanvasBitmap> ReturnFromCache(CanvasControl canvasControl, string filePath)
     {

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Graphics.Imaging;
 using Windows.Storage.Streams;
+using FlyPhotos.Utils;
 using Buffer = System.Buffer;
 
 namespace FlyPhotos.Controllers.Animators;

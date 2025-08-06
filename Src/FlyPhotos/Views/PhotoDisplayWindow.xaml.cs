@@ -14,6 +14,7 @@ using NLog;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using Vanara.PInvoke;
 using Windows.System;
 using Windows.UI;
@@ -251,7 +252,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         CanvasCreateResourcesEventArgs args)
     {
         //args.TrackAsyncAction(_photoController.LoadFirstPhoto().AsAsyncAction());
-        _photoController.LoadFirstPhoto();
+        _ = _photoController.LoadFirstPhoto();
     }
 
     private async void HandleKeyDown(object sender, KeyRoutedEventArgs e)
@@ -376,14 +377,14 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         _settingWindow = null;
     }
 
-    private void PhotoDisplayWindow_Closed(object sender, WindowEventArgs args)
+    private async void PhotoDisplayWindow_Closed(object sender, WindowEventArgs args)
     {
         if (_settingWindow != null)
         {
             _settingWindow.Close();
         }
 
-        _canvasController.CleanupOnClose();
+        await _canvasController.CleanupOnClose();
     }
 
     public void SetWindowBackground(string backGround)

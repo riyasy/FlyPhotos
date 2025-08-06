@@ -1,4 +1,6 @@
-﻿public static class Crc32
+﻿namespace FlyPhotos.Utils;
+
+public static class Crc32
 {
     private static readonly uint[] Table;
     static Crc32()
@@ -19,4 +21,3 @@
         return ~c;
     }
 }
-

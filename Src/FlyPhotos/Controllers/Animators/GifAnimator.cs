@@ -24,8 +24,6 @@ public class GifAnimator : IAnimator
         public Rect Bounds { get; init; }
         public byte Disposal { get; init; }
     }
-    public string ID { get; set; }
-
     public uint PixelWidth { get; }
     public uint PixelHeight { get; }
 
@@ -206,10 +204,10 @@ public class GifAnimator : IAnimator
         for (uint i = 0; i < decoder.FrameCount; i++)
         {
             var frame = await decoder.GetFrameAsync(i);
-            var props = await frame.BitmapProperties.GetPropertiesAsync(new[] {
+            var props = await frame.BitmapProperties.GetPropertiesAsync([
                 "System.Animation.FrameDelay", "/imgdesc/Left", "/imgdesc/Top",
                 "/imgdesc/Width", "/imgdesc/Height", "/grctlext/Disposal"
-            });
+            ]);
 
             // Frame Delay
             double delayMs = defaultGifDelayMs;

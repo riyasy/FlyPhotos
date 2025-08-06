@@ -130,7 +130,8 @@ internal static class Util
     public static void ChangeCursor(this UIElement uiElement, InputCursor cursor)
     {
         Type type = typeof(UIElement);
-        type.InvokeMember("ProtectedCursor", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SetProperty | BindingFlags.Instance, null, uiElement, new object[] { cursor });
+        type.InvokeMember("ProtectedCursor", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SetProperty | BindingFlags.Instance, null, uiElement,
+            [cursor]);
     }
 
     public static VirtualKey GetKeyThatProduces(char character)

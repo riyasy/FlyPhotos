@@ -17,7 +17,7 @@ public class OpacityFader
         if (elements == null)
             throw new ArgumentNullException(nameof(elements));
 
-        _visuals = new List<Visual>();
+        _visuals = [];
         foreach (var element in elements)
         {
             if (element != null)
