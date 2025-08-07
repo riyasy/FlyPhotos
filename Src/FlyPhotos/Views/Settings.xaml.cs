@@ -47,6 +47,7 @@ internal sealed partial class Settings
         ComboBackGround.SelectedIndex = FindIndexOfItemInComboBox(ComboBackGround, App.Settings.WindowBackGround);
         ButtonShowThumbnail.IsOn = App.Settings.ShowThumbNails;
         CheckBoxEnableAutoFade.IsChecked = App.Settings.AutoFade;
+        ButtonOpenExitZoom.IsOn = App.Settings.OpenExitZoom;
         SliderFadeIntensity.Value = App.Settings.FadeIntensity;
 
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
@@ -55,6 +56,7 @@ internal sealed partial class Settings
         ComboTheme.SelectionChanged += ComboTheme_OnSelectionChanged;
         ComboBackGround.SelectionChanged += ComboBackGround_OnSelectionChanged;
         ButtonShowThumbnail.Toggled += ButtonShowThumbnail_OnToggled;
+        ButtonOpenExitZoom.Toggled += ButtonOpenExitZoom_OnToggled;
         CheckBoxEnableAutoFade.Checked += CheckBoxEnableAutoFade_Checked;
         CheckBoxEnableAutoFade.Unchecked += CheckBoxEnableAutoFade_Checked;
         SliderFadeIntensity.ValueChanged += SliderFadeIntensity_ValueChanged;
@@ -65,7 +67,9 @@ internal sealed partial class Settings
                                                     $"{Environment.NewLine}Ctrl + Mouse Wheel : Navigate Photos" +
                                                     $"{Environment.NewLine}Ctrl + '+' : Zoom In" +
                                                     $"{Environment.NewLine}Ctrl + '-' : Zoom Out" +
-                                                    $"{Environment.NewLine}Ctrl + 'Arrow Keys' : Pan Photo";
+                                                    $"{Environment.NewLine}Ctrl + 'Arrow Keys' : Pan Photo" +
+                                                    $"{Environment.NewLine}Thumbnail Click : Navigate to specific Photo" +
+                                                    $"{Environment.NewLine}Thumbnail Mouse wheel : Navigate Photos";
 
         SettingsCardCredits.Description = $"Uses packages from " +
                                           $"{Environment.NewLine}libheif (For HEIC) - https://github.com/strukturag/libheif " +
@@ -79,6 +83,13 @@ internal sealed partial class Settings
         TextBoxCodecs.Text =
             $"This program doesn't install any codecs and uses codecs already present in the system.{Environment.NewLine}" +
             $"{Environment.NewLine}{Util.GetExtensionsDisplayString()}";
+    }
+
+    private void ButtonOpenExitZoom_OnToggled(object sender, RoutedEventArgs e)
+    {
+        App.Settings.OpenExitZoom = ButtonOpenExitZoom.IsOn;
+        Properties.UserSettings.Default.OpenExitZoom = ButtonOpenExitZoom.IsOn;
+        Properties.UserSettings.Default.Save();
     }
 
     private void CheckBoxEnableAutoFade_Checked(object sender, RoutedEventArgs e)

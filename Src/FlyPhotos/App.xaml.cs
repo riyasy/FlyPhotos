@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using System.Threading;
 using FlyPhotos.Controllers;
 using FlyPhotos.Data;
@@ -37,12 +36,9 @@ public partial class App
 
         if (Debug)
         {
-            //selectedFileName = @"C:\Test\20211004_160211 (ILCE-6400).ARW";
-            //selectedFileName = @"C:\Test2\20211004_171521 (ILCE-6400).JPG";
-            //selectedFileName = @"M:\Photos\Photos\Digicam\D7000\2023\20230121_105835 (D7000).NEF";
-            SelectedFileName = @"C:\Users\Riyas\Documents\TestImages\Image_1.jpg";
-            //SelectedFileName = @"C:\SampleImages\TestFailCase\20130313_124412 (Galaxy.Ace).JPG";
-            //SelectedFileName = @"C:\SampleImages\TestJpegOnly\1.JPG";
+            //SelectedFileName = @"C:\Users\Riyas\Desktop\SingleGIF\output.gif";
+            SelectedFileName = @"C:\Users\Riyas\Desktop\TestImages\JPEGS\20250703_070510 (ILCE-6400).JPG";
+            //SelectedFileName = @"C:\Users\Riyas\Desktop\APNG\dancing-fruits.png";
         }
         else
         {
@@ -65,6 +61,7 @@ public partial class App
             ShowThumbNails = Properties.UserSettings.Default.ShowThumbnails,
             AutoFade =  Properties.UserSettings.Default.AutoFade,
             FadeIntensity = Properties.UserSettings.Default.FadeIntensity,
+            OpenExitZoom = Properties.UserSettings.Default.OpenExitZoom,
         };
 
     }

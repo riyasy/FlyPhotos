@@ -83,6 +83,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         TxtFileName.Text = Path.GetFileName(App.SelectedFileName);
 
         SizeChanged += PhotoDisplayWindow_SizeChanged;
+        AppWindow.Closing += AppWindow_Closing;
         Closed += PhotoDisplayWindow_Closed;
 
         MainLayout.PointerMoved += MainLayout_PointerMoved;
@@ -267,7 +268,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
                     e.Handled = true;
                     break;
                 case VirtualKey.Escape:
-                    Close();
+                    await AnimateClose();
                     break;
 
                 // File Navigation
@@ -368,6 +369,22 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         }
 
         _settingWindow.Activate();
+    }
+
+    private async void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
+    {
+        args.Cancel = true;
+        await AnimateClose();
+    }
+
+    private async Task AnimateClose()
+    {
+        if (App.Settings.OpenExitZoom)
+        {
+            _canvasController.ZoomOutOnExit();
+            await Task.Delay(300);
+        }
+        this.Close();
     }
 
     private void SettingWindow_Closed(object sender, WindowEventArgs args)

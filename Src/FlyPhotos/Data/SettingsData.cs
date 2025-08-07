@@ -11,6 +11,7 @@ public class SettingsData
 
     public bool AutoFade { get; set; }
     public int FadeIntensity { get; set; }
+    public bool OpenExitZoom { get; set; }
 
     public static SettingsData Default()
     {
@@ -24,6 +25,7 @@ public class SettingsData
             ShowThumbNails = true,
             AutoFade = true,
             FadeIntensity = 60,
+            OpenExitZoom = false,
         };
         return defaultSettings;
     }

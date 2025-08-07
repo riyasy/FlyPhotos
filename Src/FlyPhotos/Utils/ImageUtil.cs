@@ -54,15 +54,19 @@ internal class ImageUtil
         try
         {
             if (!File.Exists(path)) return (FileNotFoundIndicator, false);
-            var cachedBmp = await PhotoDiskCacher.Instance.ReturnFromCache(d2dCanvas, path);
-            if (null != cachedBmp)
+            if (!App.Settings.OpenExitZoom)
             {
-                return (new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache), true);
+                var cachedBmp = await PhotoDiskCacher.Instance.ReturnFromCache(d2dCanvas, path);
+                if (null != cachedBmp)
+                {
+                    return (new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache), true);
+                }
             }
+
             var extension = Path.GetExtension(path).ToUpper();
             if (extension == ".HEIC")
             {
-                if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
+                if (!App.Settings.OpenExitZoom && HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
                 if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
                 return (PreviewFailedIndicator, false);
             }
@@ -89,7 +93,7 @@ internal class ImageUtil
             }
             else
             {
-                if (await WicReader.GetThumbnail(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
+                if (!App.Settings.OpenExitZoom && await WicReader.GetThumbnail(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
                 if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
                 return (PreviewFailedIndicator, false);
             }

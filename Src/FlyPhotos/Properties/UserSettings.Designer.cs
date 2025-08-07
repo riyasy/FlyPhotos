@@ -118,5 +118,17 @@ namespace FlyPhotos.Properties {
                 this["FadeIntensity"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool OpenExitZoom {
+            get {
+                return ((bool)(this["OpenExitZoom"]));
+            }
+            set {
+                this["OpenExitZoom"] = value;
+            }
+        }
     }
 }

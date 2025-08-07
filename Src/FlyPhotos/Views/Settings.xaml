@@ -13,13 +13,16 @@
         <Pivot Title="Fly Photos - Settings">
             <PivotItem Header="General">
                 <ScrollViewer>
-                    <StackPanel Orientation="Vertical">
-                        <controls:SettingsCard
-                            x:Name="SettingsCardKeyboardShortCuts"
+                    <StackPanel Margin="0,0,15,0" Orientation="Vertical">
+                        <controls:SettingsExpander
                             Margin="0,5,0,0"
-                            Description=""
                             Header="KeyBoard Shortcuts"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE765;}" />
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE765;}">
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard x:Name="SettingsCardKeyboardShortCuts" Description="" />
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
+
                         <TextBlock
                             Margin="0,5,0,0"
                             Style="{StaticResource SubtitleTextBlockStyle}"
@@ -57,6 +60,14 @@
                                 <ComboBoxItem>Mica Alt</ComboBoxItem>
                                 <ComboBoxItem>Frozen</ComboBoxItem>
                             </ComboBox>
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardOpenExitZoom"
+                            Margin="0,5,0,0"
+                            Description="⚠ Zoom effect can slow file open as it waits for full file read. No zoom startup uses cached or preview images of files"
+                            Header="Zoom in on file Open, Zoom out on exit"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
+                            <ToggleSwitch x:Name="ButtonOpenExitZoom" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardPanZoomReset"
@@ -165,7 +176,7 @@
                     <controls:SettingsCard
                         x:Name="SettingsCardVersion"
                         Margin="0,5,0,0"
-                        Description="Current version is 2.4.0"
+                        Description="Current version is 2.4.1"
                         Header="Current Version"
                         HeaderIcon="{ui:FontIcon Glyph=&#xF133;}">
                         <HyperlinkButton Content="Check latest version" NavigateUri="https://github.com/riyasy/FlyPhotos/releases" />
