@@ -8,9 +8,9 @@
     xmlns:win2d="using:Microsoft.Graphics.Canvas.UI.Xaml"
     xmlns:winuiex="using:WinUIEx"
     mc:Ignorable="d">
-    <Window.SystemBackdrop>
+    <!--<Window.SystemBackdrop>
         <winuiex:TransparentTintBackdrop TintColor="#554444ff" />
-    </Window.SystemBackdrop>
+    </Window.SystemBackdrop>-->
     <Grid
         x:Name="MainLayout"
         HorizontalAlignment="Stretch"
@@ -136,7 +136,6 @@
             <Button
                 x:Name="ButtonHelp"
                 Width="Auto"
-                Click="ButtonHelp_OnClick"
                 Content="🆘"
                 FontSize="16"
                 Visibility="Collapsed">

@@ -13,7 +13,6 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
-using Windows.Graphics.Imaging;
 using Windows.System;
 using Windows.UI.Core;
 using static FlyPhotos.Controllers.PhotoDisplayController;
@@ -28,7 +27,7 @@ internal class Win2dCanvasController : ICanvasController
     private readonly CanvasControl _d2dCanvas;
     private DisplayItem _currentDisplayItem;
 
-    private bool _invalidatePending = false;
+    private bool _invalidatePending;
     private int _latestSetSourceOperationId;
 
     // For Image Positioning and Scaling (Zoom and Pan)
@@ -54,8 +53,8 @@ internal class Win2dCanvasController : ICanvasController
     private EventHandler<object> _renderingHandler;
 
     private DateTime _panZoomAnimationStartTime;
-    private const double PanZoomAnimationDurationMs = 300;
-    private bool _panZoomAnimationOnGoing = false;
+    private const double PanZoomAnimationDurationMs = 400;
+    private bool _panZoomAnimationOnGoing;
 
     private float _zoomStartScale;
     private float _zoomTargetScale;
@@ -92,6 +91,7 @@ internal class Win2dCanvasController : ICanvasController
         await _animatorLock.WaitAsync();
         try
         {
+            _offScreenDrawTimer.Stop();
             _animationStopwatch.Stop();
             if (_d2dCanvas != null) _d2dCanvas.Draw -= D2dCanvas_Draw;
             _d2dCanvas?.RemoveFromVisualTree();
@@ -590,7 +590,6 @@ internal class Win2dCanvasController : ICanvasController
             _d2dCanvas.Invalidate();
         });
     }
-
     #endregion
 }
 

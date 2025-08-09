@@ -38,12 +38,12 @@ namespace FlyPhotos.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Transparent")]
-        public string WindowBackGround {
+        public string WindowBackGroundType {
             get {
-                return ((string)(this["WindowBackGround"]));
+                return ((string)(this["WindowBackGroundType"]));
             }
             set {
-                this["WindowBackGround"] = value;
+                this["WindowBackGroundType"] = value;
             }
         }
         

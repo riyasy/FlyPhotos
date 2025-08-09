@@ -9,12 +9,12 @@ using Windows.Foundation;
 
 namespace FlyPhotos.Controllers;
 
-internal class ThumbNailController : IThumbnailController
+internal class ThumbNailController : IThumbnailController, IDisposable
 {
     private const int BoxSize = 40;
     private int _numOfThumbNailsInOneDirection = 20;
     private bool _canDrawThumbnails;
-    private bool _invalidatePending = false;
+    private bool _invalidatePending;
 
     private readonly CanvasControl _d2dCanvasThumbNail;
     private CanvasRenderTarget _thumbnailOffscreen;
@@ -191,6 +191,27 @@ internal class ThumbNailController : IThumbnailController
             _d2dCanvasThumbNail.Invalidate();
         });
     }
+
+    public void Dispose()
+    {
+        _redrawThumbnailTimer.Stop();
+        _redrawThumbnailTimer.Tick -= RedrawThumbnailTimer_Tick;
+
+        if (_d2dCanvasThumbNail != null)
+        {
+            _d2dCanvasThumbNail.Draw -= _d2dCanvasThumbNail_Draw;
+            _d2dCanvasThumbNail.SizeChanged -= _d2dCanvasThumbNail_SizeChanged;
+            _d2dCanvasThumbNail.Loaded -= _d2dCanvasThumbNail_Loaded;
+            _d2dCanvasThumbNail.PointerPressed -= _d2dCanvasThumbNail_PointerPressed;
+        }
+
+        _thumbnailOffscreen?.Dispose();
+        _thumbnailOffscreen = null;
+
+        ThumbnailClicked = null;
+
+        _cachedPreviews = null;
+    }
 }
 
 internal interface IThumbnailController
@@ -199,7 +220,6 @@ internal interface IThumbnailController
     void RedrawThumbNailsIfNeeded(int index);
     void SetPreviewCacheReference(ConcurrentDictionary<int, Photo> cachedPreviews);
     void ShowThumbnailBasedOnSettings();
-
     event Action<int> ThumbnailClicked;
 }
 

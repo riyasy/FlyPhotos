@@ -5,7 +5,7 @@
     <Setting Name="Theme" Type="System.String" Scope="User">
       <Value Profile="(Default)">Default</Value>
     </Setting>
-    <Setting Name="WindowBackGround" Type="System.String" Scope="User">
+    <Setting Name="WindowBackGroundType" Type="System.String" Scope="User">
       <Value Profile="(Default)">Transparent</Value>
     </Setting>
     <Setting Name="ResetPanZoomOnNextPhoto" Type="System.Boolean" Scope="User">

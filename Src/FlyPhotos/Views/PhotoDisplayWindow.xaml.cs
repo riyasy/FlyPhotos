@@ -5,9 +5,12 @@ using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Composition.SystemBackdrops;
+using Microsoft.UI.System;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using NLog;
@@ -19,6 +22,8 @@ using Vanara.PInvoke;
 using Windows.System;
 using Windows.UI;
 using Windows.UI.Core;
+using FlyPhotos.Data;
+using WinRT;
 using WinRT.Interop;
 using WinUIEx;
 using static FlyPhotos.Controllers.PhotoDisplayController;
@@ -31,10 +36,11 @@ using Window = Microsoft.UI.Xaml.Window;
 
 namespace FlyPhotos.Views;
 
+
 /// <summary>
 /// An empty window that can be used on its own or navigated to within a Frame.
 /// </summary>
-public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
+public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeChangeable
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -63,7 +69,11 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     private readonly VirtualKey _minusVk = Utils.Util.GetKeyThatProduces('-');
 
     private readonly OpacityFader _opacityFader;
-    private bool _controlsFaded = false;
+    private bool _controlsFaded;
+
+    private WindowBackdropType _currentBackdropType;
+    private ISystemBackdropControllerWithTargets? _backdropController;
+    private readonly SystemBackdropConfiguration _configurationSource;
 
     public PhotoDisplayWindow()
     {
@@ -72,18 +82,30 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         Title = "Fly Photos";
         SetUnpackagedAppIcon();
         SetupTransparentTitleBar();
-        SetWindowBackground(App.Settings.WindowBackGround);
+
         //(AppWindow.Presenter as OverlappedPresenter)?.SetBorderAndTitleBar(false, false);
+
+        _configurationSource = new SystemBackdropConfiguration
+        {
+            IsHighContrast = ThemeSettings.CreateForWindowId(this.AppWindow.Id).HighContrast,
+            IsInputActive = true
+        };
+
+        this.Activated += PhotoDisplayWindow_Activated;
+        ((FrameworkElement)Content).ActualThemeChanged += PhotoDisplayWindow_ActualThemeChanged;
+        SetConfigurationSourceTheme();
+        SetWindowBackground(App.Settings.WindowBackGround);
+        SetWindowTheme(App.Settings.Theme);
+        DispatcherQueue.EnsureSystemDispatcherQueue();
 
         _thumbNailController = new ThumbNailController(D2dCanvasThumbNail);
         _canvasController = new Win2dCanvasController(D2dCanvas, _thumbNailController);
         _photoController = new PhotoDisplayController(D2dCanvas, UpdateStatus, _canvasController, _thumbNailController);
-        
 
         TxtFileName.Text = Path.GetFileName(App.SelectedFileName);
 
         SizeChanged += PhotoDisplayWindow_SizeChanged;
-        AppWindow.Closing += AppWindow_Closing;
+        AppWindow.Closing += PhotoDisplayWindow_Closing;
         Closed += PhotoDisplayWindow_Closed;
 
         MainLayout.PointerMoved += MainLayout_PointerMoved;
@@ -211,20 +233,17 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     {
         var coreWindow = Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
         bool isControlPressed = coreWindow.HasFlag(CoreVirtualKeyStates.Down);
-        if (isControlPressed)
-        {
-            if (_photoController.IsSinglePhoto()) return;
-            var delta = e.GetCurrentPoint(D2dCanvas).Properties.MouseWheelDelta;
-            await _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
-            _wheelScrollBrakeTimer.Stop();
-            _wheelScrollBrakeTimer.Start();
-        }
+        if (!isControlPressed) return;
+        if (_photoController.IsSinglePhoto()) return;
+        var delta = e.GetCurrentPoint(D2dCanvas).Properties.MouseWheelDelta;
+        await _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
+        _wheelScrollBrakeTimer.Stop();
+        _wheelScrollBrakeTimer.Start();
     }
 
     private async void D2dCanvasThumbNail_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
-
         var delta = e.GetCurrentPoint(D2dCanvasThumbNail).Properties.MouseWheelDelta;
         await _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
         _wheelScrollBrakeTimer.Stop();
@@ -268,7 +287,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
                     e.Handled = true;
                     break;
                 case VirtualKey.Escape:
-                    await AnimateClose();
+                    await AnimatePhotoDisplayWindowClose();
                     break;
 
                 // File Navigation
@@ -352,11 +371,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     private void ButtonRotate_OnClick(object sender, RoutedEventArgs e)
     {
         _canvasController.RotateCurrentPhotoBy90(true);
-    }
-
-    private void ButtonHelp_OnClick(object sender, RoutedEventArgs e)
-    {
-    }
+    } 
 
     private void ButtonSettings_OnClick(object sender, RoutedEventArgs e)
     {
@@ -367,24 +382,42 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
             ThemeController.Instance.AddWindow(_settingWindow);
             _settingWindow.Closed += SettingWindow_Closed;
         }
-
         _settingWindow.Activate();
     }
 
-    private async void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
+    private async void PhotoDisplayWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {
         args.Cancel = true;
-        await AnimateClose();
+        await AnimatePhotoDisplayWindowClose();
     }
 
-    private async Task AnimateClose()
+    private async Task AnimatePhotoDisplayWindowClose()
     {
+        _settingWindow?.Close();
+
         if (App.Settings.OpenExitZoom)
         {
             _canvasController.ZoomOutOnExit();
-            await Task.Delay(300);
+            await Task.Delay(350);
         }
+        this.Hide();
         this.Close();
+    }
+
+    private async void PhotoDisplayWindow_Closed(object sender, WindowEventArgs args)
+    {
+        _repeatButtonReleaseCheckTimer.Stop();
+        _wheelScrollBrakeTimer.Stop();
+        _thumbNailController.ThumbnailClicked -= _thumbNailController_ThumbnailClicked;
+
+        await _canvasController.CleanupOnClose();
+        _photoController.Dispose();
+        _thumbNailController.Dispose();
+        ThemeController.Instance.Dispose();
+        
+        _backdropController?.RemoveSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
+        _backdropController?.Dispose();
+        _backdropController = null;
     }
 
     private void SettingWindow_Closed(object sender, WindowEventArgs args)
@@ -392,70 +425,6 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
         if (_settingWindow != null)
             _settingWindow.Closed -= SettingWindow_Closed;
         _settingWindow = null;
-    }
-
-    private async void PhotoDisplayWindow_Closed(object sender, WindowEventArgs args)
-    {
-        if (_settingWindow != null)
-        {
-            _settingWindow.Close();
-        }
-
-        await _canvasController.CleanupOnClose();
-    }
-
-    public void SetWindowBackground(string backGround)
-    {
-        switch (backGround)
-        {
-            case "Transparent":
-            {
-                SystemBackdrop = _transparentTintBackdrop;
-                break;
-            }
-            case "Acrylic":
-            {
-                SystemBackdrop = null;
-                TrySetDesktopAcrylicBackdrop();
-                break;
-            }
-            case "Mica":
-            {
-                SystemBackdrop = null;
-                TrySetMicaBackdrop(false);
-                break;
-            }
-            case "Mica Alt":
-            {
-                SystemBackdrop = null;
-                TrySetMicaBackdrop(true);
-                break;
-            }
-            case "Frozen":
-            {
-                SystemBackdrop = _frozenBackdrop;
-                break;
-            }
-        }
-    }
-
-    private bool TrySetMicaBackdrop(bool useMicaAlt)
-    {
-        if (!MicaController.IsSupported()) return false;
-        MicaBackdrop micaBackdrop = new()
-        {
-            Kind = useMicaAlt ? MicaKind.BaseAlt : MicaKind.Base
-        };
-        SystemBackdrop = micaBackdrop;
-        return true;
-    }
-
-    private bool TrySetDesktopAcrylicBackdrop()
-    {
-        if (!DesktopAcrylicController.IsSupported()) return false;
-        var desktopAcrylicBackdrop = new DesktopAcrylicBackdrop();
-        SystemBackdrop = desktopAcrylicBackdrop;
-        return true;
     }
 
     private void ButtonExpander_Click(object sender, RoutedEventArgs e)
@@ -475,6 +444,111 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable
     private void ButtonScaleSet_Click(object sender, RoutedEventArgs e)
     {
         _canvasController.SetHundredPercent(true);
+    }
+
+    public void SetWindowBackground(WindowBackdropType backdropType)
+    {
+        _currentBackdropType = backdropType;
+        if (_backdropController != null)
+        {
+            _backdropController.RemoveSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
+            _backdropController = null;
+        }
+        this.SystemBackdrop = null;
+
+        switch (backdropType)
+        {
+            case WindowBackdropType.Transparent:
+                SystemBackdrop = _transparentTintBackdrop;
+                break;
+
+            case WindowBackdropType.Acrylic:
+                TrySetAcrylicBackdrop(false);
+                break;
+
+            case WindowBackdropType.AcrylicThin:
+                TrySetAcrylicBackdrop(true);
+                break;
+
+            case WindowBackdropType.Mica:
+                TrySetMicaBackdrop(false);
+                break;
+
+            case WindowBackdropType.MicaAlt:
+                TrySetMicaBackdrop(true);
+                break;
+
+            case WindowBackdropType.Frozen:
+                SystemBackdrop = _frozenBackdrop;
+                break;
+
+            case WindowBackdropType.None:
+            default:
+                break;
+        }
+        SetBackColorAsPerThemeAndBackdrop();
+    }
+
+    bool TrySetMicaBackdrop(bool useMicaAlt)
+    {
+        if (!MicaController.IsSupported()) return false;
+        var micaController = new MicaController { Kind = useMicaAlt ? MicaKind.BaseAlt : MicaKind.Base };
+        micaController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
+        micaController.SetSystemBackdropConfiguration(_configurationSource);
+        _backdropController = micaController;
+        return true;
+    }
+
+    bool TrySetAcrylicBackdrop(bool useAcrylicThin)
+    {
+        if (!DesktopAcrylicController.IsSupported()) return false;
+        var acrylicController = new DesktopAcrylicController
+            { Kind = useAcrylicThin ? DesktopAcrylicKind.Thin : DesktopAcrylicKind.Base };
+        acrylicController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
+        acrylicController.SetSystemBackdropConfiguration(_configurationSource);
+        _backdropController = acrylicController;
+        return true;
+    }
+
+    private void PhotoDisplayWindow_ActualThemeChanged(FrameworkElement sender, object args)
+    {
+        SetConfigurationSourceTheme();
+        SetBackColorAsPerThemeAndBackdrop();
+    }
+
+    private void PhotoDisplayWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
+    {
+        _configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
+    }
+
+    private void SetConfigurationSourceTheme()
+    {
+        _configurationSource.IsHighContrast = ThemeSettings.CreateForWindowId(this.AppWindow.Id).HighContrast;
+        _configurationSource.Theme = (SystemBackdropTheme)((FrameworkElement)Content).ActualTheme;
+    }
+
+    public void SetWindowTheme(ElementTheme theme)
+    {
+        ((FrameworkElement)Content).RequestedTheme = theme;
+    }
+
+    void SetBackColorAsPerThemeAndBackdrop()
+    {
+        if (_currentBackdropType == WindowBackdropType.None)
+        {
+            if (((FrameworkElement)Content).ActualTheme == ElementTheme.Light)
+            {
+                ((Grid)Content).Background = new SolidColorBrush(Colors.White);
+            }
+            else if (((FrameworkElement)Content).ActualTheme == ElementTheme.Dark)
+            {
+                ((Grid)Content).Background = new SolidColorBrush(Colors.Black);
+            }
+        }
+        else
+        {
+            ((Grid)Content).Background = new SolidColorBrush(Colors.Transparent);
+        }
     }
 }
 

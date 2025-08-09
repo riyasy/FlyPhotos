@@ -1,10 +1,11 @@
-﻿using System.Diagnostics;
-using System.Threading;
-using FlyPhotos.Controllers;
+﻿using FlyPhotos.Controllers;
 using FlyPhotos.Data;
 using FlyPhotos.Utils;
 using FlyPhotos.Views;
 using Microsoft.UI.Xaml;
+using System;
+using System.Diagnostics;
+using System.Threading;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -53,8 +54,8 @@ public partial class App
     {
         return new SettingsData
         {
-            Theme = Properties.UserSettings.Default.Theme,
-            WindowBackGround = Properties.UserSettings.Default.WindowBackGround,
+            Theme = (ElementTheme)Enum.Parse(typeof(ElementTheme), Properties.UserSettings.Default.Theme),
+            WindowBackGround = (WindowBackdropType)Enum.Parse(typeof(WindowBackdropType), Properties.UserSettings.Default.WindowBackGroundType),
             ResetPanZoomOnNextPhoto = Properties.UserSettings.Default.ResetPanZoomOnNextPhoto,
             CacheSizeOneSideHqImages = Properties.UserSettings.Default.CacheSizeOneSideHqImages,
             CacheSizeOneSidePreviews = Properties.UserSettings.Default.CacheSizeOneSidePreviews,

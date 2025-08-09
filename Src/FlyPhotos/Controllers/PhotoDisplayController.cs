@@ -6,7 +6,6 @@ using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -17,7 +16,7 @@ using Windows.Storage.Streams;
 
 namespace FlyPhotos.Controllers;
 
-internal class PhotoDisplayController
+internal class PhotoDisplayController : IDisposable
 {
     public enum DisplayLevel
     {
@@ -464,5 +463,10 @@ internal class PhotoDisplayController
     {
         Next,
         Prev
+    }
+
+    public void Dispose()
+    {
+        
     }
 }

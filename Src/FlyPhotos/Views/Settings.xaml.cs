@@ -1,14 +1,18 @@
-using System;
-using System.Diagnostics;
-using System.IO;
 using FlyPhotos.Controllers;
+using FlyPhotos.Utils;
 using Microsoft.UI;
+using Microsoft.UI.Composition.SystemBackdrops;
+using Microsoft.UI.System;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using FlyPhotos.Utils;
+using FlyPhotos.Data;
 using WinRT.Interop;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -19,9 +23,34 @@ namespace FlyPhotos.Views;
 /// <summary>
 /// An empty window that can be used on its own or navigated to within a Frame.
 /// </summary>
-internal sealed partial class Settings
+internal sealed partial class Settings : IThemeChangeable
 {
     private readonly IThumbnailController _thumbnailDisplayChanger;
+    private readonly SystemBackdropConfiguration _configurationSource;
+
+    // Backdrop translator
+    private readonly EnumStringTranslator<WindowBackdropType> _backdropTranslator = new(
+        new Dictionary<WindowBackdropType, string>
+        {
+            { WindowBackdropType.Transparent, "Transparent" },
+            { WindowBackdropType.Frozen, "Frozen" },
+            { WindowBackdropType.Acrylic, "Acrylic" },
+            { WindowBackdropType.AcrylicThin, "Acrylic Thin" },
+            { WindowBackdropType.Mica, "Mica" },
+            { WindowBackdropType.MicaAlt, "Mica Alt" },
+            { WindowBackdropType.None, "None" }
+        }
+    );
+
+    // Theme translator
+    private readonly EnumStringTranslator<ElementTheme> _themeTranslator = new(
+        new Dictionary<ElementTheme, string>
+        {
+            { ElementTheme.Default, "Default" },
+            { ElementTheme.Dark, "Dark" },
+            { ElementTheme.Light, "Light" }
+        }
+    );
 
     internal Settings(IThumbnailController thumbnailDisplayChanger)
     {
@@ -40,11 +69,23 @@ internal sealed partial class Settings
         titleBar.ButtonForegroundColor = Colors.Gray;
 
 
+        _configurationSource = new SystemBackdropConfiguration
+        {
+            IsHighContrast = ThemeSettings.CreateForWindowId(this.AppWindow.Id).HighContrast,
+            IsInputActive = true
+        };
+        this.Activated += Settings_Activated;
+        ((FrameworkElement)Content).ActualThemeChanged += Settings_ActualThemeChanged;
+        SetConfigurationSourceTheme();
+        SetWindowTheme(App.Settings.Theme); 
+        DispatcherQueue.EnsureSystemDispatcherQueue();
+
+
         SliderHighResCacheSize.Value = App.Settings.CacheSizeOneSideHqImages;
         SliderLowResCacheSize.Value = App.Settings.CacheSizeOneSidePreviews;
         ButtonResetPanZoom.IsOn = App.Settings.ResetPanZoomOnNextPhoto;
-        ComboTheme.SelectedIndex = FindIndexOfItemInComboBox(ComboTheme, App.Settings.Theme);
-        ComboBackGround.SelectedIndex = FindIndexOfItemInComboBox(ComboBackGround, App.Settings.WindowBackGround);
+        ComboTheme.SelectedIndex = FindIndexOfItemInComboBox(ComboTheme, _themeTranslator.ToString(App.Settings.Theme));
+        ComboBackGround.SelectedIndex = FindIndexOfItemInComboBox(ComboBackGround, _backdropTranslator.ToString(App.Settings.WindowBackGround));
         ButtonShowThumbnail.IsOn = App.Settings.ShowThumbNails;
         CheckBoxEnableAutoFade.IsChecked = App.Settings.AutoFade;
         ButtonOpenExitZoom.IsOn = App.Settings.OpenExitZoom;
@@ -85,6 +126,8 @@ internal sealed partial class Settings
             $"{Environment.NewLine}{Util.GetExtensionsDisplayString()}";
     }
 
+
+
     private void ButtonOpenExitZoom_OnToggled(object sender, RoutedEventArgs e)
     {
         App.Settings.OpenExitZoom = ButtonOpenExitZoom.IsOn;
@@ -115,20 +158,22 @@ internal sealed partial class Settings
 
     private void ComboTheme_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        var themeName = (ComboTheme.SelectedItem as ComboBoxItem)?.Content as string;
-        App.Settings.Theme = themeName;
-        Properties.UserSettings.Default.Theme = themeName;
+        var themeDisplayName = (ComboTheme.SelectedItem as ComboBoxItem)?.Content as string;
+        var themeEnum = _themeTranslator.ToEnum(themeDisplayName);
+        App.Settings.Theme = themeEnum;
+        Properties.UserSettings.Default.Theme = themeEnum.ToString();
         Properties.UserSettings.Default.Save();
-        ThemeController.Instance.SetTheme(themeName);
+        ThemeController.Instance.SetTheme(themeEnum);
     }
 
     private void ComboBackGround_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        var backGround = (ComboBackGround.SelectedItem as ComboBoxItem)?.Content as string;
-        App.Settings.WindowBackGround = backGround;
-        Properties.UserSettings.Default.WindowBackGround = backGround;
+        var backGroundDisplayName = (ComboBackGround.SelectedItem as ComboBoxItem)?.Content as string;
+        var backGroundEnum = _backdropTranslator.ToEnum(backGroundDisplayName);
+        App.Settings.WindowBackGround = backGroundEnum;
+        Properties.UserSettings.Default.WindowBackGroundType = backGroundEnum.ToString();
         Properties.UserSettings.Default.Save();
-        ThemeController.Instance.SetBackGround(backGround);
+        ThemeController.Instance.SetBackGround(backGroundEnum);
     }
 
     private void ButtonResetPanZoom_OnToggled(object sender, RoutedEventArgs e)
@@ -165,5 +210,26 @@ internal sealed partial class Settings
         var logPath = $"{Path.GetTempPath()}FlyPhotos{Path.DirectorySeparatorChar}FlyPhotos.log";
         if (File.Exists(logPath))
             Process.Start("notepad.exe", logPath);
+    }
+
+    public void SetWindowTheme(ElementTheme theme)
+    {
+        ((FrameworkElement)Content).RequestedTheme = theme;
+    }
+
+    private void Settings_ActualThemeChanged(FrameworkElement sender, object args)
+    {
+        SetConfigurationSourceTheme();
+    }
+
+    private void Settings_Activated(object sender, WindowActivatedEventArgs args)
+    {
+        _configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
+    }
+
+    private void SetConfigurationSourceTheme()
+    {
+        _configurationSource.IsHighContrast = ThemeSettings.CreateForWindowId(this.AppWindow.Id).HighContrast;
+        _configurationSource.Theme = (SystemBackdropTheme)((FrameworkElement)Content).ActualTheme;
     }
 }

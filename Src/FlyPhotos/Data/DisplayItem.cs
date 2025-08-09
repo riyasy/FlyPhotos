@@ -1,7 +1,4 @@
 ﻿using Microsoft.Graphics.Canvas;
-using System;
-using System.Collections.Generic;
-using Windows.Graphics.Imaging;
 
 namespace FlyPhotos.Data;
 

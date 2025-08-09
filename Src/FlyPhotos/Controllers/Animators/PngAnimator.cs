@@ -1,16 +1,14 @@
-﻿using Microsoft.Graphics.Canvas;
+﻿using FlyPhotos.Utils;
+using Microsoft.Graphics.Canvas;
 using Microsoft.UI;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
-using Windows.Graphics.Imaging;
 using Windows.Storage.Streams;
-using FlyPhotos.Utils;
 using Buffer = System.Buffer;
 
 namespace FlyPhotos.Controllers.Animators;

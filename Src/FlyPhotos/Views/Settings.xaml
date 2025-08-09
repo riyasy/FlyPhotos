@@ -55,10 +55,12 @@
                             HeaderIcon="{ui:FontIcon Glyph=&#xE70A;}">
                             <ComboBox x:Name="ComboBackGround" SelectedIndex="0">
                                 <ComboBoxItem>Transparent</ComboBoxItem>
+                                <ComboBoxItem>Frozen</ComboBoxItem>
                                 <ComboBoxItem>Acrylic</ComboBoxItem>
+                                <ComboBoxItem>Acrylic Thin</ComboBoxItem>
                                 <ComboBoxItem>Mica</ComboBoxItem>
                                 <ComboBoxItem>Mica Alt</ComboBoxItem>
-                                <ComboBoxItem>Frozen</ComboBoxItem>
+                                <ComboBoxItem>None</ComboBoxItem>
                             </ComboBox>
                         </controls:SettingsCard>
                         <controls:SettingsCard
