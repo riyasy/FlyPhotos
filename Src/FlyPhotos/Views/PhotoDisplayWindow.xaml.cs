@@ -397,8 +397,8 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
 
         if (App.Settings.OpenExitZoom)
         {
-            _canvasController.ZoomOutOnExit();
-            await Task.Delay(350);
+            _canvasController.ZoomOutOnExit(200);
+            await Task.Delay(200);
         }
         this.Hide();
         this.Close();

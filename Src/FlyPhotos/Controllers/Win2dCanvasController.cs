@@ -53,7 +53,7 @@ internal class Win2dCanvasController : ICanvasController
     private EventHandler<object> _renderingHandler;
 
     private DateTime _panZoomAnimationStartTime;
-    private const double PanZoomAnimationDurationMs = 400;
+    private double PanZoomAnimationDurationMs = 400;
     private bool _panZoomAnimationOnGoing;
 
     private float _zoomStartScale;
@@ -207,10 +207,11 @@ internal class Win2dCanvasController : ICanvasController
         StartPanAndZoomAnimation(targetScale, targetPosition);
         RestartOffScreenDrawTimer();
     }
-    public void ZoomOutOnExit()
+    public void ZoomOutOnExit(double exitAnimationDuration)
     {
+        PanZoomAnimationDurationMs = exitAnimationDuration;
         var targetPosition = new Point(_d2dCanvas.ActualWidth / 2, _d2dCanvas.ActualHeight / 2);
-        StartPanAndZoomAnimation(0.01f, targetPosition);
+        StartPanAndZoomAnimation(0.001f, targetPosition);
     }
 
     public void ZoomByKeyboard(float scaleFactor)
