@@ -3,6 +3,7 @@ using FlyPhotos.Data;
 using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
+using Microsoft.UI.Xaml.Shapes;
 using NLog;
 using PhotoSauce.MagicScaler;
 using System;
@@ -16,6 +17,7 @@ using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
+using Path = System.IO.Path;
 
 namespace FlyPhotos.Readers;
 
@@ -32,8 +34,16 @@ internal class WicReader
         });
     }
 
+    public static async Task<(bool, DisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
+    {
+        return await GetThumbnail(ctrl, inputPath);
+    }
+
     public static async Task<(bool, DisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
     {
+        if (IsMemoryLeakingFormat(inputPath))
+            return await GetHqThruExternalProcess(ctrl, inputPath);
+
         try
         {
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);
@@ -46,7 +56,29 @@ internal class WicReader
         }
     }
 
-    public static async Task<(bool, DisplayItem)> GetHqThruExternalProcess(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, DisplayItem)> GetHqDownScaled(CanvasControl ctrl, string inputPath)
+    {
+        if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA) return await Task.Run(Action);
+        return await Action();
+
+        async Task<(bool, DisplayItem)> Action()
+        {
+            try
+            {
+                using var ms = new MemoryStream();
+                MagicImageProcessor.ProcessImage(inputPath, ms, new ProcessImageSettings { Width = 800, HybridMode = HybridScaleMode.Turbo });
+                var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());
+                return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+                return (false, DisplayItem.Empty());
+            }
+        }
+    }
+
+    private static async Task<(bool, DisplayItem)> GetHqThruExternalProcess(CanvasControl ctrl, string inputPath)
     {
         try
         {
@@ -70,47 +102,7 @@ internal class WicReader
         }
     }
 
-    public static async Task<(bool, DisplayItem)> GetHqDownScaled(CanvasControl ctrl, string inputPath)
-    {
-        if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA) return await Task.Run(Action);
-        return await Action();
-
-        async Task<(bool, DisplayItem)> Action()
-        {
-            try
-            {
-                using var ms = new MemoryStream();
-                MagicImageProcessor.ProcessImage(inputPath, ms, new ProcessImageSettings { Width = 800, HybridMode = HybridScaleMode.Turbo});
-                var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());
-                return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex);
-                return (false, DisplayItem.Empty());
-            }
-        }
-    }
-
-    public static async Task<(bool, DisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
-    {
-        try
-        {
-            var file = await StorageFile.GetFileFromPathAsync(inputPath);
-            using var stream = await file.OpenReadAsync();
-            var decoder = await BitmapDecoder.CreateAsync(stream);
-            using var preview = await decoder.GetPreviewAsync();
-            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
-            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-            return (false, DisplayItem.Empty());
-        }
-    }
-
-    public static async Task<(bool, DisplayItem)> GetThumbnail(CanvasControl ctrl, string inputPath)
+    private static async Task<(bool, DisplayItem)> GetThumbnail(CanvasControl ctrl, string inputPath)
     {
         try
         {
@@ -128,7 +120,25 @@ internal class WicReader
         }
     }
 
-    public static async Task<(bool, DisplayItem)> GetFileThumbnail(CanvasControl ctrl, string inputPath)
+    private static async Task<(bool, DisplayItem)> GetFilePreview(CanvasControl ctrl, string inputPath)
+    {
+        try
+        {
+            var file = await StorageFile.GetFileFromPathAsync(inputPath);
+            using var stream = await file.OpenReadAsync();
+            var decoder = await BitmapDecoder.CreateAsync(stream);
+            using var preview = await decoder.GetPreviewAsync();
+            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
+            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+            return (false, DisplayItem.Empty());
+        }
+    }
+
+    private static async Task<(bool, DisplayItem)> GetFileThumbnail(CanvasControl ctrl, string inputPath)
     {
         try
         {
@@ -196,17 +206,18 @@ internal class WicReader
             exePath = Util.ExternalWicReaderPath;
         }
 
-        var command = $"\"{exePath}\" \"{path}\" {mmfName} bgra";
-        var p = new Process
+        // A better way to create a Process object
+        var processStartInfo = new ProcessStartInfo
         {
-            StartInfo = new ProcessStartInfo("cmd", $"/c \"{command}\"")
-            {
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
+            FileName = exePath,
+            Arguments = $"\"{path}\" {mmfName} bgra",
+            UseShellExecute = false,
+            CreateNoWindow = true
         };
+
+        using var p = new Process { StartInfo = processStartInfo };
         p.Start();
-        p.WaitForExit();
+        p.WaitForExit(); // You might want to add a timeout here for robustness
         return p.ExitCode == 0;
     }
 
@@ -225,5 +236,11 @@ internal class WicReader
             await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///WicImageFileReaderNative.exe"));
         await stopfile.CopyAsync(ApplicationData.Current.LocalFolder);
         Logger.Trace("Copied WicImageFileReaderNative.exe to local storage");
+    }
+
+    private static bool IsMemoryLeakingFormat(string path)
+    {
+        var fileExt = Path.GetExtension(path).ToUpperInvariant();
+        return Util.MemoryLeakingExtensions.Contains(fileExt);
     }
 }

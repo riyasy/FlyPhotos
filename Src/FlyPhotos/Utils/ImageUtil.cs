@@ -4,15 +4,14 @@ using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-
 namespace FlyPhotos.Utils;
 
 internal class ImageUtil
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
     private static DisplayItem FileNotFoundIndicator;
     private static DisplayItem PreviewFailedIndicator;
     private static DisplayItem HqImageFailedIndicator;
@@ -20,35 +19,28 @@ internal class ImageUtil
 
     public static async Task Initialize(CanvasControl d2dCanvas)
     {
+        Func<string, string> pathBuilder;
         if (App.Packaged)
-        {
-            FileNotFoundIndicator =
-                new DisplayItem(await CanvasBitmap.LoadAsync(d2dCanvas,
-                    new Uri("ms-appx:///Assets/Images/FileNotFound.png")), DisplayItem.PreviewSource.ErrorScreen);
-            PreviewFailedIndicator =
-                new DisplayItem(
-                    await CanvasBitmap.LoadAsync(d2dCanvas, new Uri("ms-appx:///Assets/Images/PreviewFailed.png")), DisplayItem.PreviewSource.ErrorScreen);
-            HqImageFailedIndicator =
-                new DisplayItem(
-                    await CanvasBitmap.LoadAsync(d2dCanvas, new Uri("ms-appx:///Assets/Images/HQImageFailed.png")), DisplayItem.PreviewSource.ErrorScreen);
-            LoadingIndicator =
-                new DisplayItem(await CanvasBitmap.LoadAsync(d2dCanvas, new Uri("ms-appx:///Assets/Images/Loading.png")), DisplayItem.PreviewSource.ErrorScreen);
-        }
+            pathBuilder = (fileName) => $"ms-appx:///Assets/Images/{fileName}";
         else
+            pathBuilder = (fileName) =>
+                Path.Combine(Path.GetDirectoryName(typeof(App).Assembly.Location), "Assets", "Images", fileName);
+
+        FileNotFoundIndicator = await LoadIndicatorAsync(pathBuilder("FileNotFound.png"));
+        PreviewFailedIndicator = await LoadIndicatorAsync(pathBuilder("PreviewFailed.png"));
+        HqImageFailedIndicator = await LoadIndicatorAsync(pathBuilder("HQImageFailed.png"));
+        LoadingIndicator = await LoadIndicatorAsync(pathBuilder("Loading.png"));
+        return;
+
+        async Task<DisplayItem> LoadIndicatorAsync(string path)
         {
-            var folderName = Path.Combine(Path.GetDirectoryName(typeof(App).Assembly.Location), "Assets\\Images");
-            FileNotFoundIndicator =
-                new DisplayItem(await CanvasBitmap.LoadAsync(d2dCanvas, $"{folderName}\\FileNotFound.png"), DisplayItem.PreviewSource.ErrorScreen);
-            PreviewFailedIndicator =
-                new DisplayItem(await CanvasBitmap.LoadAsync(d2dCanvas, $"{folderName}\\PreviewFailed.png"), DisplayItem.PreviewSource.ErrorScreen);
-            HqImageFailedIndicator =
-                new DisplayItem(await CanvasBitmap.LoadAsync(d2dCanvas, $"{folderName}\\HQImageFailed.png"), DisplayItem.PreviewSource.ErrorScreen);
-            LoadingIndicator =
-                new DisplayItem(await CanvasBitmap.LoadAsync(d2dCanvas, $"{folderName}\\Loading.png"), DisplayItem.PreviewSource.ErrorScreen);
+            var bitmap = await CanvasBitmap.LoadAsync(d2dCanvas, path);
+            return new DisplayItem(bitmap, DisplayItem.PreviewSource.ErrorScreen);
         }
     }
 
-    public static async Task<(DisplayItem, bool)> GetFirstPreviewSpecialHandlingAsync(CanvasControl d2dCanvas,
+    public static async Task<(DisplayItem displayItem, bool continueLoadingHq)> GetFirstPreviewSpecialHandlingAsync(
+        CanvasControl d2dCanvas,
         string path)
     {
         try
@@ -64,38 +56,55 @@ internal class ImageUtil
             }
 
             var extension = Path.GetExtension(path).ToUpper();
-            if (extension == ".HEIC")
+            switch (extension)
             {
-                if (!App.Settings.OpenExitZoom && HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
-                if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
-                return (PreviewFailedIndicator, false);
-            }
-            else if (extension == ".PSD")
-            {
-                if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
-                if (await PsdReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
-                return (PreviewFailedIndicator, false);
-            }
-            else if (extension == ".SVG")
-            {
-                if (await SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
-                return (PreviewFailedIndicator, false);
-            }
-            else if (extension == ".GIF")
-            {
-                if (await GifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
-                return (PreviewFailedIndicator, false);
-            }
-            else if (extension == ".PNG")
-            {
-                if (await PngReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
-                return (PreviewFailedIndicator, false);
-            }
-            else
-            {
-                if (!App.Settings.OpenExitZoom && await WicReader.GetThumbnail(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
-                if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
-                return (PreviewFailedIndicator, false);
+                case ".HEIC":
+                {
+                    if (!App.Settings.OpenExitZoom)
+                    {
+                        if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp))
+                            return (retBmp, true);
+                    }
+                    else
+                    {
+                        if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2))
+                            return (retBmp2, false);
+                    }
+                    return (PreviewFailedIndicator, false);
+                }
+                case ".PSD":
+                {
+                    if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
+                    if (await PsdReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
+                    return (PreviewFailedIndicator, false);
+                }
+                case ".SVG":
+                {
+                    if (await SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
+                    return (PreviewFailedIndicator, false);
+                }
+                case ".GIF":
+                {
+                    if (await GifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
+                    return (PreviewFailedIndicator, false);
+                }
+                case ".PNG":
+                {
+                    if (await PngReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
+                    return (PreviewFailedIndicator, false);
+                }
+                default:
+                {
+                    if (!App.Settings.OpenExitZoom)
+                    {
+                        if (await WicReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
+                    }
+                    else
+                    {
+                        if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
+                    }
+                    return (PreviewFailedIndicator, false);
+                }
             }
         }
         catch (Exception ex)
@@ -115,38 +124,42 @@ internal class ImageUtil
             {
                 return new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache);
             }
+
             var extension = Path.GetExtension(path).ToUpper();
-            if (extension == ".HEIC")
+            switch (extension)
             {
-                if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                return PreviewFailedIndicator;
-            }
-            else if (extension == ".PSD")
-            {
-                if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                return PreviewFailedIndicator;
-            }
-            else if (extension == ".SVG")
-            {
-                if (await SvgReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                return PreviewFailedIndicator;
-            }
-            else if (extension == ".GIF")
-            {
-                if (await GifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                return PreviewFailedIndicator;
-            }
-            else if (extension == ".PNG")
-            {
-                if (await PngReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                return PreviewFailedIndicator;
-            }
-            else
-            {
-                if (await WicReader.GetThumbnail(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                return PreviewFailedIndicator;
+                case ".HEIC":
+                {
+                    if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                    return PreviewFailedIndicator;
+                }
+                case ".PSD":
+                {
+                    if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    return PreviewFailedIndicator;
+                }
+                case ".SVG":
+                {
+                    if (await SvgReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    return PreviewFailedIndicator;
+                }
+                case ".GIF":
+                {
+                    if (await GifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    return PreviewFailedIndicator;
+                }
+                case ".PNG":
+                {
+                    if (await PngReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    return PreviewFailedIndicator;
+                }
+                default:
+                {
+                    if (await WicReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                    return PreviewFailedIndicator;
+                }
             }
         }
         catch (Exception ex)
@@ -161,35 +174,36 @@ internal class ImageUtil
         if (!File.Exists(path)) return FileNotFoundIndicator;
         try
         {
-            if (IsMemoryLeakingFormat(path))
+
+            var extension = Path.GetExtension(path).ToUpper();
+
+            switch (extension)
             {
-                if (await WicReader.GetHqThruExternalProcess(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                return HqImageFailedIndicator;
-            }
-            else if (Path.GetExtension(path).ToUpper() == ".PSD")
-            {
-                if (await PsdReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                return HqImageFailedIndicator;
-            }
-            else if (Path.GetExtension(path).ToUpper() == ".SVG")
-            {
-                if (await SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                return HqImageFailedIndicator;
-            }
-            else if (Path.GetExtension(path).ToUpper() == ".GIF")
-            {
-                if (await GifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                return HqImageFailedIndicator;
-            }
-            else if (Path.GetExtension(path).ToUpper() == ".PNG")
-            {
-                if (await PngReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                return HqImageFailedIndicator;
-            }
-            else
-            {
-                if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                return HqImageFailedIndicator;
+                case ".PSD":
+                {
+                    if (await PsdReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    return HqImageFailedIndicator;
+                }
+                case ".SVG":
+                {
+                    if (await SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    return HqImageFailedIndicator;
+                }
+                case ".GIF":
+                {
+                    if (await GifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    return HqImageFailedIndicator;
+                }
+                case ".PNG":
+                {
+                    if (await PngReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    return HqImageFailedIndicator;
+                }
+                default:
+                {
+                    if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    return HqImageFailedIndicator;
+                }
             }
         }
         catch (Exception ex)
@@ -197,12 +211,6 @@ internal class ImageUtil
             Logger.Error(ex);
             return HqImageFailedIndicator;
         }
-    }
-
-    public static bool IsMemoryLeakingFormat(string path)
-    {
-        var fileExt = Path.GetExtension(path).ToUpperInvariant();
-        return Util.MemoryLeakingExtensions.Contains(fileExt);
     }
 
     public static DisplayItem GetLoadingIndicator()

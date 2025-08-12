@@ -12,8 +12,54 @@ internal class PsdReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    // Get preview as a CanvasBitmap for WinUI
+    public static async Task<(bool, DisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
+    {
+        if (GetThumbNailByteArray(inputPath, out byte[] thumbnailData))
+        {
+            try
+            {
+                using var stream = new MemoryStream(thumbnailData);
+                CanvasBitmap bitmap = await CanvasBitmap.LoadAsync(ctrl, stream.AsRandomAccessStream());
+                return (true, new DisplayItem(bitmap, DisplayItem.PreviewSource.FromDisk));
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+                return (false, null);
+            }
+        }
+        return (false, null);
+    }
+
+    public static async Task<(bool, DisplayItem)> GetHq(CanvasControl d2dCanvas, string path)
+    {
+        try
+        {
+            // Load the PSD file using ImageMagick
+            using var image = new MagickImage(path);
+            // Convert the image to a format compatible with CanvasBitmap
+            using var stream = new MemoryStream();
+            image.Format = MagickFormat.Jpeg;
+            image.Quality = 80;
+            await image.WriteAsync(stream);
+            stream.Position = 0;
+
+            // Create a CanvasBitmap from the MemoryStream
+            var device = CanvasDevice.GetSharedDevice();
+            var bitmap = await CanvasBitmap.LoadAsync(device, stream.AsRandomAccessStream());
+
+            return (true, new DisplayItem(bitmap, DisplayItem.PreviewSource.FromDisk));
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+            return (false, null);
+        }
+    }
+
     // Save thumbnail to a file
-    public static bool SaveThumbNail(string inputFilePath, string outputFilePath)
+    private static bool SaveThumbNail(string inputFilePath, string outputFilePath)
     {
         if (GetThumbNailByteArray(inputFilePath, out byte[] thumbnailData))
         {
@@ -32,7 +78,7 @@ internal class PsdReader
     }
 
     // Get thumbnail as a byte array
-    public static bool GetThumbNailByteArray(string inputFilePath, out byte[] thumbnailData)
+    private static bool GetThumbNailByteArray(string inputFilePath, out byte[] thumbnailData)
     {
         thumbnailData = null;
 
@@ -112,53 +158,6 @@ internal class PsdReader
         {
             Logger.Error(ex);
             return false;
-        }
-    }
-
-
-    // Get preview as a CanvasBitmap for WinUI
-    public static async Task<(bool, DisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
-    {
-        if (GetThumbNailByteArray(inputPath, out byte[] thumbnailData))
-        {
-            try
-            {
-                using var stream = new MemoryStream(thumbnailData);
-                CanvasBitmap bitmap = await CanvasBitmap.LoadAsync(ctrl, stream.AsRandomAccessStream());
-                return (true, new DisplayItem(bitmap, DisplayItem.PreviewSource.FromDisk));
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex);
-                return (false, null);
-            }
-        }
-        return (false, null);
-    }
-
-    public static async Task<(bool, DisplayItem)> GetHq(CanvasControl d2dCanvas, string path)
-    {
-        try
-        {
-            // Load the PSD file using ImageMagick
-            using var image = new MagickImage(path);
-            // Convert the image to a format compatible with CanvasBitmap
-            using var stream = new MemoryStream();
-            image.Format = MagickFormat.Jpeg;
-            image.Quality = 80;
-            await image.WriteAsync(stream);
-            stream.Position = 0;
-
-            // Create a CanvasBitmap from the MemoryStream
-            var device = CanvasDevice.GetSharedDevice();
-            var bitmap = await CanvasBitmap.LoadAsync(device, stream.AsRandomAccessStream());
-
-            return (true, new DisplayItem(bitmap, DisplayItem.PreviewSource.FromDisk));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-            return (false, null);
         }
     }
 }
