@@ -48,34 +48,33 @@ internal class ImageUtil
         try
         {
             if (!File.Exists(path)) return (FileNotFoundIndicator, false);
-// TODO REVERSE AOT
-            //if (!AppConfig.Settings.OpenExitZoom)
-            //{
-            //    var cachedBmp = await PhotoDiskCacher.Instance.ReturnFromCache(d2dCanvas, path);
-            //    if (null != cachedBmp)
-            //    {
-            //        return (new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache), true);
-            //    }
-            //}
+
+            if (!AppConfig.Settings.OpenExitZoom)
+            {
+                var cachedBmp = await DiskCacherWithSqlite.Instance.ReturnFromCache(d2dCanvas, path);
+                if (null != cachedBmp)
+                {
+                    return (new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache), true);
+                }
+            }
 
             var extension = Path.GetExtension(path).ToUpper();
             switch (extension)
             {
-// TODO REVERSE AOT
-                //case ".HEIC":
-                //{
-                //    if (!AppConfig.Settings.OpenExitZoom)
-                //    {
-                //        if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp))
-                //            return (retBmp, true);
-                //    }
-                //    else
-                //    {
-                //        if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2))
-                //            return (retBmp2, false);
-                //    }
-                //    return (PreviewFailedIndicator, false);
-                //}
+                case ".HEIC":
+                    {
+                        if (!AppConfig.Settings.OpenExitZoom)
+                        {
+                            if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp))
+                                return (retBmp, true);
+                        }
+                        else
+                        {
+                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2))
+                                return (retBmp2, false);
+                        }
+                        return (PreviewFailedIndicator, false);
+                    }
                 case ".PSD":
                 {
                     if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
@@ -102,12 +101,14 @@ internal class ImageUtil
                     if (!AppConfig.Settings.OpenExitZoom)
                     {
                         if (await WicReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
+                        return (PreviewFailedIndicator, true);
                     }
                     else
                     {
                         if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2, false);
+                        return (PreviewFailedIndicator, false);
                     }
-                    return (PreviewFailedIndicator, false);
+                    
                 }
             }
         }
@@ -123,23 +124,21 @@ internal class ImageUtil
         if (!File.Exists(path)) return FileNotFoundIndicator;
         try
         {
-// TODO REVERSE AOT
-            //var cachedBmp = await PhotoDiskCacher.Instance.ReturnFromCache(d2dCanvas, path);
-            //if (null != cachedBmp)
-            //{
-            //    return new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache);
-            //}
+            var cachedBmp = await DiskCacherWithSqlite.Instance.ReturnFromCache(d2dCanvas, path);
+            if (null != cachedBmp)
+            {
+                return new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache);
+            }
 
             var extension = Path.GetExtension(path).ToUpper();
             switch (extension)
             {
-// TODO REVERSE AOT
-                //case ".HEIC":
-                //{
-                //    if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                //    if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                //    return PreviewFailedIndicator;
-                //}
+                case ".HEIC":
+                    {
+                        if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                        return PreviewFailedIndicator;
+                    }
                 case ".PSD":
                 {
                     if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;

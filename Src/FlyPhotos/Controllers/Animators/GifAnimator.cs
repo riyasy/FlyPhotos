@@ -201,10 +201,21 @@ public class GifAnimator : IAnimator
         for (uint i = 0; i < decoder.FrameCount; i++)
         {
             var frame = await decoder.GetFrameAsync(i);
-            var props = await frame.BitmapProperties.GetPropertiesAsync([
-                "System.Animation.FrameDelay", "/imgdesc/Left", "/imgdesc/Top",
-                "/imgdesc/Width", "/imgdesc/Height", "/grctlext/Disposal"
-            ]);
+            var propertyKeys = new string[] {
+                "System.Animation.FrameDelay",
+                "/imgdesc/Left",
+                "/imgdesc/Top",
+                "/imgdesc/Width",
+                "/imgdesc/Height",
+                "/grctlext/Disposal"
+            };
+            var props = await frame.BitmapProperties.GetPropertiesAsync(propertyKeys);
+
+            // CALLING LIKE THIS IS NOT AOT SAFE
+            //var props = await frame.BitmapProperties.GetPropertiesAsync([
+            //    "System.Animation.FrameDelay", "/imgdesc/Left", "/imgdesc/Top",
+            //    "/imgdesc/Width", "/imgdesc/Height", "/grctlext/Disposal"
+            //]);
 
             // Frame Delay
             double delayMs = defaultGifDelayMs;

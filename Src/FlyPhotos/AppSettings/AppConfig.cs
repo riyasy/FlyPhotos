@@ -1,17 +1,16 @@
-﻿// In AppConfig.cs
-
-using System;
+﻿using System;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Windows.Storage;
-using Microsoft.Extensions.Configuration;
+
 
 namespace FlyPhotos.AppSettings;
 
 public class SettingsWrapper
 {
+    [System.Text.Json.Serialization.JsonPropertyName("Settings")]
     public AppSettings Settings { get; set; }
 }
 
@@ -39,14 +38,53 @@ public static class AppConfig
         }
 
         _userSettingsPath = Path.Combine(userSettingsFolder, "usersettings.json");
+        var defaultSettingsPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
 
-        IConfiguration configuration = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", false)
-            .AddJsonFile(_userSettingsPath, true, true)
-            .Build();
+        // AOT-Safe Loading Logic:
+        // 1. Try to load user settings first.
+        // 2. If they don't exist or fail to load, fall back to default settings.
 
-        Settings = configuration.GetSection("Settings").Get<AppSettings>();
+        // Try loading the user's settings
+        if (File.Exists(_userSettingsPath))
+        {
+            try
+            {
+                var json = File.ReadAllText(_userSettingsPath);
+                var settingsWrapper = JsonSerializer.Deserialize(
+                    json,
+                    JsonSourceGenerationContext.Default.SettingsWrapper
+                );
+                Settings = settingsWrapper?.Settings;
+            }
+            catch (Exception ex)
+            {
+                // Log error if user settings are corrupt
+                Console.WriteLine($"Error loading user settings, falling back to default: {ex.Message}");
+                Settings = null; // Ensure we fall back
+            }
+        }
+
+        // If user settings were not loaded, load the defaults from appsettings.json
+        if (Settings == null && File.Exists(defaultSettingsPath))
+        {
+            try
+            {
+                var json = File.ReadAllText(defaultSettingsPath);
+                var settingsWrapper = JsonSerializer.Deserialize(
+                    json,
+                    JsonSourceGenerationContext.Default.SettingsWrapper
+                );
+                Settings = settingsWrapper?.Settings;
+            }
+            catch (Exception ex)
+            {
+                // Log error if default settings are corrupt
+                Console.WriteLine($"FATAL: Could not load default settings: {ex.Message}");
+            }
+        }
+
+        // If all loading fails, create a new default instance to prevent null references
+        Settings ??= new AppSettings();
     }
 
     // This method saves the user's changes to their private settings file.

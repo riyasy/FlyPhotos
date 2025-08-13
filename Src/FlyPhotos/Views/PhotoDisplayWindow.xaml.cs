@@ -28,6 +28,7 @@ using static FlyPhotos.Controllers.PhotoDisplayController;
 using Icon = System.Drawing.Icon;
 using Window = Microsoft.UI.Xaml.Window;
 using FlyPhotos.AppSettings;
+using FlyPhotos.FlyNativeLibWrapper;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -207,8 +208,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
                     if (File.Exists(filePath))
                     {
                         NativeMethods.GetCursorPos(out NativeMethods.POINT mousePosScreen);
-						// TODO REVERSE AOT
-                        //ManagedShellUtility.ShowContextMenu(filePath, mousePosScreen.X, mousePosScreen.Y);
+                        CliWrapper.ShowContextMenu(filePath, mousePosScreen.X, mousePosScreen.Y);
                     }
                 }
                 catch (Exception ex)

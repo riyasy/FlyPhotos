@@ -248,8 +248,7 @@ internal class PhotoDisplayController : IDisposable
                         image.Preview != null &&
                         image.Preview.PreviewFrom == DisplayItem.PreviewSource.FromDisk)
                     {
-// TODO REVERSE AOT
-                        //await PhotoDiskCacher.Instance.PutInCache(image.FileName, image.Preview.Bitmap);
+                        await DiskCacherWithSqlite.Instance.PutInCache(image.FileName, image.Preview.Bitmap);
                     }
                 }
                 finally { semaphore.Release(); }

@@ -7,9 +7,9 @@
 //using System.Threading.Tasks;
 
 //namespace FlyPhotos.Utils;
-//public sealed class PhotoDiskCacher : IDisposable
+//public sealed class DiskCacherWithLiteDB : IDisposable
 //{
-//    private static readonly Lazy<PhotoDiskCacher> _instance = new(() => new PhotoDiskCacher());
+//    private static readonly Lazy<DiskCacherWithLiteDB> _instance = new(() => new DiskCacherWithLiteDB());
 
 //    private readonly string _dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlyPhotosCache.db");
 //    private readonly LiteDatabase _db;
@@ -17,7 +17,7 @@
 
 //    private const int MaxItemCount = 20000; // Maximum number of items in the cache
 
-//    private PhotoDiskCacher()
+//    private DiskCacherWithLiteDB()
 //    {
 //        _db = new LiteDatabase(_dbPath);
 //        var col = _db.GetCollection<CachedImage>("images");
@@ -25,7 +25,7 @@
 //        col.EnsureIndex(x => x.LastAccessed);
 //    }
 
-//    public static PhotoDiskCacher Instance => _instance.Value;
+//    public static DiskCacherWithLiteDB Instance => _instance.Value;
 
 //    public async Task<CanvasBitmap> ReturnFromCache(CanvasControl canvasControl, string filePath)
 //    {
@@ -159,7 +159,7 @@
 //        }
 //    }
 
-//    ~PhotoDiskCacher()
+//    ~DiskCacherWithLiteDB()
 //    {
 //        Dispose(false);
 //    }

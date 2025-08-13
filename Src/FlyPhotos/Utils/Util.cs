@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Windows.System;
+using FlyPhotos.FlyNativeLibWrapper;
 
 
 namespace FlyPhotos.Utils;
@@ -16,39 +17,32 @@ namespace FlyPhotos.Utils;
 internal static class Util
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-// TODO REVERSE AOT
-    //private static List<CodecInfo>? _codecInfoList;
+    private static List<CodecInfo>? _codecInfoList;
     public static string ExternalWicReaderPath;
 
     public static List<string> SupportedExtensions { get; } = [];
     public static List<string> MemoryLeakingExtensions { get; } = [];
 
-// TODO REVERSE AOT
     static Util()
     {
         var executingDir = GetExecutingDirectoryName();
         ExternalWicReaderPath = Path.Combine(executingDir, "WicImageFileReaderNative.exe");
 
-        //var msu = new ManagedShellUtility();
-        //_codecInfoList = msu.GetWicCodecList();
-        //foreach (var codecInfo in _codecInfoList) SupportedExtensions.AddRange(codecInfo.fileExtensions);
+        _codecInfoList = CliWrapper.GetWicDecoders();
+        foreach (var codecInfo in _codecInfoList) SupportedExtensions.AddRange(codecInfo.FileExtensions);
         SupportedExtensions.Add(".PSD");
         SupportedExtensions.Add(".SVG");
-        SupportedExtensions.Add(".JPG");
 
-        //var memoryLeakingCodecs = _codecInfoList.Where(x => x.friendlyName.Contains("Raw Image"));
-        //foreach (var leakingCodec in memoryLeakingCodecs) MemoryLeakingExtensions.AddRange(leakingCodec.fileExtensions);
+        var memoryLeakingCodecs = _codecInfoList.Where(x => x.FriendlyName.Contains("Raw Image"));
+        foreach (var leakingCodec in memoryLeakingCodecs) MemoryLeakingExtensions.AddRange(leakingCodec.FileExtensions);
         MemoryLeakingExtensions.AddRange([".ARW", ".CR2"]);
     }
 
-// TODO REVERSE AOT
     public static List<string> FindAllFilesFromExplorerWindowNative()
     {
-        //var msu = new ManagedShellUtility();
-        //var fileList = msu.GetFileListFromExplorerWindow();
-        //Logger.Trace($"{fileList.Count} files listed from Explorer");
-        //return fileList;
-        return new List<string>();
+        var fileList = CliWrapper.GetFileListFromExplorerWindow();
+        Logger.Trace($"{fileList.Count} files listed from Explorer");
+        return fileList;
     }
 
     public static List<string> FindAllFilesFromDirectory(string? dirPath)
@@ -94,24 +88,20 @@ internal static class Util
         return curIdx;
     }
 
-// TODO REVERSE AOT
     public static string GetExtensionsDisplayString()
     {
-        return "";
-        //var sb = new StringBuilder();
-        //if (_codecInfoList == null)
-        //{
-        //    var msu = new ManagedShellUtility();
-        //    _codecInfoList = msu.GetWicCodecList();
-        //}
+        var sb = new StringBuilder();
+        if (_codecInfoList == null)
+        {
+            _codecInfoList = CliWrapper.GetWicDecoders();
+        }
 
-        //foreach (var codec in _codecInfoList)
-        //{
-        //    sb.Append(Environment.NewLine + codec.friendlyName + Environment.NewLine);
-        //    sb.Append("    " + string.Join(", ", codec.fileExtensions) + Environment.NewLine);
-        //}
-
-        //return sb.ToString();
+        foreach (var codec in _codecInfoList)
+        {
+            sb.Append(Environment.NewLine + codec.FriendlyName + Environment.NewLine);
+            sb.Append("    " + string.Join(", ", codec.FileExtensions) + Environment.NewLine);
+        }
+        return sb.ToString();
     }
 
     private static readonly Random Random = new();
