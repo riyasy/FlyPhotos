@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using FlyPhotos.Data;
 using WinRT.Interop;
+using FlyPhotos.AppSettings;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -77,19 +78,21 @@ internal sealed partial class Settings : IThemeChangeable
         this.Activated += Settings_Activated;
         ((FrameworkElement)Content).ActualThemeChanged += Settings_ActualThemeChanged;
         SetConfigurationSourceTheme();
-        SetWindowTheme(App.Settings.Theme); 
+        SetWindowTheme(AppConfig.Settings.Theme); 
         DispatcherQueue.EnsureSystemDispatcherQueue();
 
 
-        SliderHighResCacheSize.Value = App.Settings.CacheSizeOneSideHqImages;
-        SliderLowResCacheSize.Value = App.Settings.CacheSizeOneSidePreviews;
-        ButtonResetPanZoom.IsOn = App.Settings.ResetPanZoomOnNextPhoto;
-        ComboTheme.SelectedIndex = FindIndexOfItemInComboBox(ComboTheme, _themeTranslator.ToString(App.Settings.Theme));
-        ComboBackGround.SelectedIndex = FindIndexOfItemInComboBox(ComboBackGround, _backdropTranslator.ToString(App.Settings.WindowBackGround));
-        ButtonShowThumbnail.IsOn = App.Settings.ShowThumbNails;
-        CheckBoxEnableAutoFade.IsChecked = App.Settings.AutoFade;
-        ButtonOpenExitZoom.IsOn = App.Settings.OpenExitZoom;
-        SliderFadeIntensity.Value = App.Settings.FadeIntensity;
+        SliderHighResCacheSize.Value = AppConfig.Settings.CacheSizeOneSideHqImages;
+        SliderLowResCacheSize.Value = AppConfig.Settings.CacheSizeOneSidePreviews;
+        ButtonResetPanZoom.IsOn = AppConfig.Settings.ResetPanZoomOnNextPhoto;
+        ComboTheme.SelectedIndex = FindIndexOfItemInComboBox(ComboTheme, _themeTranslator.ToString(AppConfig.Settings.Theme));
+        ComboBackGround.SelectedIndex = FindIndexOfItemInComboBox(ComboBackGround, _backdropTranslator.ToString(AppConfig.Settings.WindowBackdrop));
+        ButtonShowThumbnail.IsOn = AppConfig.Settings.ShowThumbnails;
+        CheckBoxEnableAutoFade.IsChecked = AppConfig.Settings.AutoFade;
+        ButtonOpenExitZoom.IsOn = AppConfig.Settings.OpenExitZoom;
+        SliderFadeIntensity.Value = AppConfig.Settings.FadeIntensity;
+
+
 
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
         SliderLowResCacheSize.ValueChanged += SliderLowResCacheSize_OnValueChanged;
@@ -128,25 +131,22 @@ internal sealed partial class Settings : IThemeChangeable
 
 
 
-    private void ButtonOpenExitZoom_OnToggled(object sender, RoutedEventArgs e)
+    private async void ButtonOpenExitZoom_OnToggled(object sender, RoutedEventArgs e)
     {
-        App.Settings.OpenExitZoom = ButtonOpenExitZoom.IsOn;
-        Properties.UserSettings.Default.OpenExitZoom = ButtonOpenExitZoom.IsOn;
-        Properties.UserSettings.Default.Save();
+        AppConfig.Settings.OpenExitZoom = ButtonOpenExitZoom.IsOn;
+        await AppConfig.SaveAsync();
     }
 
-    private void CheckBoxEnableAutoFade_Checked(object sender, RoutedEventArgs e)
+    private async void CheckBoxEnableAutoFade_Checked(object sender, RoutedEventArgs e)
     {
-        App.Settings.AutoFade = (CheckBoxEnableAutoFade.IsChecked == true);
-        Properties.UserSettings.Default.AutoFade = (CheckBoxEnableAutoFade.IsChecked == true);
-        Properties.UserSettings.Default.Save();
+        AppConfig.Settings.AutoFade = (CheckBoxEnableAutoFade.IsChecked == true);
+        await AppConfig.SaveAsync();
     }
 
-    private void SliderFadeIntensity_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    private async void SliderFadeIntensity_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
-        App.Settings.FadeIntensity = (int)SliderFadeIntensity.Value;
-        Properties.UserSettings.Default.FadeIntensity = (int)SliderFadeIntensity.Value;
-        Properties.UserSettings.Default.Save();
+        AppConfig.Settings.FadeIntensity = (int)SliderFadeIntensity.Value;
+        await AppConfig.SaveAsync();
     }
 
     private static int FindIndexOfItemInComboBox(Selector comboBox, string value)
@@ -156,53 +156,47 @@ internal sealed partial class Settings : IThemeChangeable
         return comboBox.SelectedIndex = comboBox.Items.IndexOf(comboBoxItem);
     }
 
-    private void ComboTheme_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private async void ComboTheme_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         var themeDisplayName = (ComboTheme.SelectedItem as ComboBoxItem)?.Content as string;
         var themeEnum = _themeTranslator.ToEnum(themeDisplayName);
-        App.Settings.Theme = themeEnum;
-        Properties.UserSettings.Default.Theme = themeEnum.ToString();
-        Properties.UserSettings.Default.Save();
+        AppConfig.Settings.Theme = themeEnum;
         ThemeController.Instance.SetTheme(themeEnum);
+        await AppConfig.SaveAsync();
     }
 
-    private void ComboBackGround_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private async void ComboBackGround_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         var backGroundDisplayName = (ComboBackGround.SelectedItem as ComboBoxItem)?.Content as string;
         var backGroundEnum = _backdropTranslator.ToEnum(backGroundDisplayName);
-        App.Settings.WindowBackGround = backGroundEnum;
-        Properties.UserSettings.Default.WindowBackGroundType = backGroundEnum.ToString();
-        Properties.UserSettings.Default.Save();
+        AppConfig.Settings.WindowBackdrop = backGroundEnum;
         ThemeController.Instance.SetBackGround(backGroundEnum);
+        await AppConfig.SaveAsync();
     }
 
-    private void ButtonResetPanZoom_OnToggled(object sender, RoutedEventArgs e)
+    private async void ButtonResetPanZoom_OnToggled(object sender, RoutedEventArgs e)
     {
-        App.Settings.ResetPanZoomOnNextPhoto = ButtonResetPanZoom.IsOn;
-        Properties.UserSettings.Default.ResetPanZoomOnNextPhoto = ButtonResetPanZoom.IsOn;
-        Properties.UserSettings.Default.Save();
+        AppConfig.Settings.ResetPanZoomOnNextPhoto = ButtonResetPanZoom.IsOn;
+        await AppConfig.SaveAsync();
     }
 
-    private void ButtonShowThumbnail_OnToggled(object sender, RoutedEventArgs e)
+    private async void ButtonShowThumbnail_OnToggled(object sender, RoutedEventArgs e)
     {
-        App.Settings.ShowThumbNails = ButtonShowThumbnail.IsOn;
-        Properties.UserSettings.Default.ShowThumbnails = ButtonShowThumbnail.IsOn;
-        Properties.UserSettings.Default.Save();
+        AppConfig.Settings.ShowThumbnails = ButtonShowThumbnail.IsOn;
+        await AppConfig.SaveAsync();
         _thumbnailDisplayChanger.ShowThumbnailBasedOnSettings();
     }
 
-    private void SliderLowResCacheSize_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    private async void SliderLowResCacheSize_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
-        App.Settings.CacheSizeOneSidePreviews = (int)SliderLowResCacheSize.Value;
-        Properties.UserSettings.Default.CacheSizeOneSidePreviews = (int)SliderLowResCacheSize.Value;
-        Properties.UserSettings.Default.Save();
+        AppConfig.Settings.CacheSizeOneSidePreviews = (int)SliderLowResCacheSize.Value;
+        await AppConfig.SaveAsync();
     }
 
-    private void SliderHighResCacheSize_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    private async void SliderHighResCacheSize_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
-        App.Settings.CacheSizeOneSideHqImages = (int)SliderHighResCacheSize.Value;
-        Properties.UserSettings.Default.CacheSizeOneSideHqImages = (int)SliderHighResCacheSize.Value;
-        Properties.UserSettings.Default.Save();
+        AppConfig.Settings.CacheSizeOneSideHqImages = (int)SliderHighResCacheSize.Value;
+        await AppConfig.SaveAsync();
     }
 
     private void ButtonOpenLog_OnClick(object sender, RoutedEventArgs e)
@@ -231,5 +225,10 @@ internal sealed partial class Settings : IThemeChangeable
     {
         _configurationSource.IsHighContrast = ThemeSettings.CreateForWindowId(this.AppWindow.Id).HighContrast;
         _configurationSource.Theme = (SystemBackdropTheme)((FrameworkElement)Content).ActualTheme;
+    }
+
+    public bool ConvertNullableBoolToBool(bool? value)
+    {
+        return value ?? false;
     }
 }

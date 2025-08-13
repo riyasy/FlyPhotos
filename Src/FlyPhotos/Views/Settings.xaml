@@ -102,7 +102,7 @@
                                 <Slider
                                     x:Name="SliderFadeIntensity"
                                     Width="200"
-                                    IsEnabled="{Binding IsChecked, ElementName=CheckBoxEnableAutoFade}"
+                                    IsEnabled="{x:Bind ConvertNullableBoolToBool(CheckBoxEnableAutoFade.IsChecked), Mode=OneWay}"
                                     Maximum="100"
                                     Minimum="30"
                                     SmallChange="10"

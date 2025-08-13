@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Streams;
+using FlyPhotos.AppSettings;
 
 namespace FlyPhotos.Controllers;
 
@@ -247,7 +248,8 @@ internal class PhotoDisplayController : IDisposable
                         image.Preview != null &&
                         image.Preview.PreviewFrom == DisplayItem.PreviewSource.FromDisk)
                     {
-                        await PhotoDiskCacher.Instance.PutInCache(image.FileName, image.Preview.Bitmap);
+// TODO REVERSE AOT
+                        //await PhotoDiskCacher.Instance.PutInCache(image.FileName, image.Preview.Bitmap);
                     }
                 }
                 finally { semaphore.Release(); }
@@ -270,8 +272,8 @@ internal class PhotoDisplayController : IDisposable
         var curIdx = Photo.CurrentDisplayIndex;
 
         var keysToRemove = _cachedHqImages.Keys.Where(key =>
-            key > curIdx + App.Settings.CacheSizeOneSideHqImages ||
-            key < curIdx - App.Settings.CacheSizeOneSideHqImages).ToList();
+            key > curIdx + AppConfig.Settings.CacheSizeOneSideHqImages ||
+            key < curIdx - AppConfig.Settings.CacheSizeOneSideHqImages).ToList();
         keysToRemove.ForEach(delegate (int key)
         {
             _photos[key].Hq = null;
@@ -279,8 +281,8 @@ internal class PhotoDisplayController : IDisposable
         });
 
         keysToRemove = _cachedPreviews.Keys.Where(key =>
-            key > curIdx + App.Settings.CacheSizeOneSidePreviews ||
-            key < curIdx - App.Settings.CacheSizeOneSidePreviews).ToList();
+            key > curIdx + AppConfig.Settings.CacheSizeOneSidePreviews ||
+            key < curIdx - AppConfig.Settings.CacheSizeOneSidePreviews).ToList();
         keysToRemove.ForEach(delegate (int key)
         {
             _photos[key].Preview = null;
@@ -289,7 +291,7 @@ internal class PhotoDisplayController : IDisposable
 
         // Create new list of to be cached HQ Images.
         var cacheIndexesHqImages = new List<int>();
-        for (var i = App.Settings.CacheSizeOneSideHqImages; i >= 1; i--)
+        for (var i = AppConfig.Settings.CacheSizeOneSideHqImages; i >= 1; i--)
         {
             cacheIndexesHqImages.Add(curIdx + i);
             cacheIndexesHqImages.Add(curIdx - i);
@@ -306,7 +308,7 @@ internal class PhotoDisplayController : IDisposable
 
         // Create new list of to be cached Previews.
         var cacheIndexesPreviews = new List<int>();
-        for (var i = App.Settings.CacheSizeOneSidePreviews; i >= 1; i--)
+        for (var i = AppConfig.Settings.CacheSizeOneSidePreviews; i >= 1; i--)
         {
             cacheIndexesPreviews.Add(curIdx + i);
             cacheIndexesPreviews.Add(curIdx - i);
@@ -388,7 +390,7 @@ internal class PhotoDisplayController : IDisposable
 
         Photo.CurrentDisplayIndex += shiftBy;
 
-        if (App.Settings.ResetPanZoomOnNextPhoto) _canvasController.SetHundredPercent(false);
+        if (AppConfig.Settings.ResetPanZoomOnNextPhoto) _canvasController.SetHundredPercent(false);
 
         var photo = _photos[Photo.CurrentDisplayIndex];
 
@@ -430,7 +432,7 @@ internal class PhotoDisplayController : IDisposable
                 break;
         }
 
-        if (App.Settings.ResetPanZoomOnNextPhoto) _canvasController.SetHundredPercent(false);
+        if (AppConfig.Settings.ResetPanZoomOnNextPhoto) _canvasController.SetHundredPercent(false);
 
         var photo = _photos[Photo.CurrentDisplayIndex];
 

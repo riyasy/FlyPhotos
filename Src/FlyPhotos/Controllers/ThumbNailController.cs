@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Concurrent;
 using Windows.Foundation;
+using FlyPhotos.AppSettings;
 
 namespace FlyPhotos.Controllers;
 
@@ -56,7 +57,7 @@ internal class ThumbNailController : IThumbnailController, IDisposable
 
     private void _d2dCanvasThumbNail_Loaded(object sender, RoutedEventArgs e)
     {
-        _d2dCanvasThumbNail.Visibility = App.Settings.ShowThumbNails ? Visibility.Visible : Visibility.Collapsed;
+        _d2dCanvasThumbNail.Visibility = AppConfig.Settings.ShowThumbnails ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void _d2dCanvasThumbNail_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -73,7 +74,7 @@ internal class ThumbNailController : IThumbnailController, IDisposable
 
     private void _d2dCanvasThumbNail_Draw(CanvasControl sender, CanvasDrawEventArgs args)
     {
-        if (_thumbnailOffscreen != null && App.Settings.ShowThumbNails)
+        if (_thumbnailOffscreen != null && AppConfig.Settings.ShowThumbnails)
         {
             var drawRect = _thumbnailOffscreen.Bounds;
             args.DrawingSession.Transform = System.Numerics.Matrix3x2.Identity;
@@ -84,7 +85,7 @@ internal class ThumbNailController : IThumbnailController, IDisposable
 
     public void ShowThumbnailBasedOnSettings()
     {
-        if (App.Settings.ShowThumbNails)
+        if (AppConfig.Settings.ShowThumbnails)
         {
             _d2dCanvasThumbNail.Visibility = Visibility.Visible;
             CreateThumbnailRibbonOffScreen();
@@ -120,7 +121,7 @@ internal class ThumbNailController : IThumbnailController, IDisposable
     public void CreateThumbnailRibbonOffScreen()
     {
         _redrawThumbnailTimer.Stop();
-        if (Photo.PhotosCount <= 1 || !_canDrawThumbnails || !App.Settings.ShowThumbNails)
+        if (Photo.PhotosCount <= 1 || !_canDrawThumbnails || !AppConfig.Settings.ShowThumbnails)
             return;
 
         if (_thumbnailOffscreen == null)

@@ -18,7 +18,7 @@ public sealed partial class TestWindow
     {
         InitializeComponent();
     }
-    private async void ButtonTest_OnClick(object sender, RoutedEventArgs e)
+    private void ButtonTest_OnClick(object sender, RoutedEventArgs e)
     {
     }
 }

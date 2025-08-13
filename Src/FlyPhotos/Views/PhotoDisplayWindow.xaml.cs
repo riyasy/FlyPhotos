@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using CliWrapper;
 using FlyPhotos.Controllers;
 using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas.UI;
@@ -18,7 +17,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using Vanara.PInvoke;
 using Windows.System;
 using Windows.UI;
 using Windows.UI.Core;
@@ -27,9 +25,9 @@ using WinRT;
 using WinRT.Interop;
 using WinUIEx;
 using static FlyPhotos.Controllers.PhotoDisplayController;
-using static Vanara.PInvoke.User32;
 using Icon = System.Drawing.Icon;
 using Window = Microsoft.UI.Xaml.Window;
+using FlyPhotos.AppSettings;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -94,8 +92,8 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         this.Activated += PhotoDisplayWindow_Activated;
         ((FrameworkElement)Content).ActualThemeChanged += PhotoDisplayWindow_ActualThemeChanged;
         SetConfigurationSourceTheme();
-        SetWindowBackground(App.Settings.WindowBackGround);
-        SetWindowTheme(App.Settings.Theme);
+        SetWindowBackground(AppConfig.Settings.WindowBackdrop);
+        SetWindowTheme(AppConfig.Settings.Theme);
         DispatcherQueue.EnsureSystemDispatcherQueue();
 
         _thumbNailController = new ThumbNailController(D2dCanvasThumbNail);
@@ -135,7 +133,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
 
     private void MainLayout_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
-        if (!App.Settings.AutoFade) 
+        if (!AppConfig.Settings.AutoFade) 
         { 
             // When somebody disables autofade while controls are faded
             if (_controlsFaded)
@@ -159,7 +157,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         } 
         else if (!_controlsFaded && !pointerInBottom)
         {
-            float opacity = (100 - App.Settings.FadeIntensity) / 100f;
+            float opacity = (100 - AppConfig.Settings.FadeIntensity) / 100f;
             _opacityFader.FadeTo(opacity);
             _controlsFaded = true;
         }
@@ -208,8 +206,9 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
                     var filePath = _photoController.GetFullPathCurrentFile();
                     if (File.Exists(filePath))
                     {
-                        User32.GetCursorPos(out POINT mousePosScreen);
-                        ManagedShellUtility.ShowContextMenu(filePath, mousePosScreen.X, mousePosScreen.Y);
+                        NativeMethods.GetCursorPos(out NativeMethods.POINT mousePosScreen);
+						// TODO REVERSE AOT
+                        //ManagedShellUtility.ShowContextMenu(filePath, mousePosScreen.X, mousePosScreen.Y);
                     }
                 }
                 catch (Exception ex)
@@ -265,7 +264,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         var hWnd = WindowNative.GetWindowHandle(this);
         var sExe = Process.GetCurrentProcess().MainModule.FileName;
         var ico = Icon.ExtractAssociatedIcon(sExe);
-        SendMessage(hWnd, WindowMessage.WM_SETICON, 1, ico.Handle);
+        NativeMethods.SendMessage(hWnd, NativeMethods.WM_SETICON, new IntPtr(1), ico.Handle);
     }
 
     private void D2dCanvas_CreateResources(CanvasControl sender,
@@ -395,7 +394,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
     {
         _settingWindow?.Close();
 
-        if (App.Settings.OpenExitZoom)
+        if (AppConfig.Settings.OpenExitZoom)
         {
             _canvasController.ZoomOutOnExit(200);
             await Task.Delay(200);

@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using CliWrapper;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using NLog;
@@ -10,41 +9,46 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Windows.System;
-using Vanara.PInvoke;
-using static Vanara.PInvoke.User32;
+
 
 namespace FlyPhotos.Utils;
 
 internal static class Util
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-    private static List<CodecInfo>? _codecInfoList;
+// TODO REVERSE AOT
+    //private static List<CodecInfo>? _codecInfoList;
     public static string ExternalWicReaderPath;
 
     public static List<string> SupportedExtensions { get; } = [];
     public static List<string> MemoryLeakingExtensions { get; } = [];
 
+// TODO REVERSE AOT
     static Util()
     {
         var executingDir = GetExecutingDirectoryName();
         ExternalWicReaderPath = Path.Combine(executingDir, "WicImageFileReaderNative.exe");
 
-        var msu = new ManagedShellUtility();
-        _codecInfoList = msu.GetWicCodecList();
-        foreach (var codecInfo in _codecInfoList) SupportedExtensions.AddRange(codecInfo.fileExtensions);
+        //var msu = new ManagedShellUtility();
+        //_codecInfoList = msu.GetWicCodecList();
+        //foreach (var codecInfo in _codecInfoList) SupportedExtensions.AddRange(codecInfo.fileExtensions);
         SupportedExtensions.Add(".PSD");
         SupportedExtensions.Add(".SVG");
+        SupportedExtensions.Add(".JPG");
 
-        var memoryLeakingCodecs = _codecInfoList.Where(x => x.friendlyName.Contains("Raw Image"));
-        foreach (var leakingCodec in memoryLeakingCodecs) MemoryLeakingExtensions.AddRange(leakingCodec.fileExtensions);
+        //var memoryLeakingCodecs = _codecInfoList.Where(x => x.friendlyName.Contains("Raw Image"));
+        //foreach (var leakingCodec in memoryLeakingCodecs) MemoryLeakingExtensions.AddRange(leakingCodec.fileExtensions);
+        MemoryLeakingExtensions.AddRange([".ARW", ".CR2"]);
     }
 
+// TODO REVERSE AOT
     public static List<string> FindAllFilesFromExplorerWindowNative()
     {
-        var msu = new ManagedShellUtility();
-        var fileList = msu.GetFileListFromExplorerWindow();
-        Logger.Trace($"{fileList.Count} files listed from Explorer");
-        return fileList;
+        //var msu = new ManagedShellUtility();
+        //var fileList = msu.GetFileListFromExplorerWindow();
+        //Logger.Trace($"{fileList.Count} files listed from Explorer");
+        //return fileList;
+        return new List<string>();
     }
 
     public static List<string> FindAllFilesFromDirectory(string? dirPath)
@@ -90,22 +94,24 @@ internal static class Util
         return curIdx;
     }
 
+// TODO REVERSE AOT
     public static string GetExtensionsDisplayString()
     {
-        var sb = new StringBuilder();
-        if (_codecInfoList == null)
-        {
-            var msu = new ManagedShellUtility();
-            _codecInfoList = msu.GetWicCodecList();
-        }
+        return "";
+        //var sb = new StringBuilder();
+        //if (_codecInfoList == null)
+        //{
+        //    var msu = new ManagedShellUtility();
+        //    _codecInfoList = msu.GetWicCodecList();
+        //}
 
-        foreach (var codec in _codecInfoList)
-        {
-            sb.Append(Environment.NewLine + codec.friendlyName + Environment.NewLine);
-            sb.Append("    " + string.Join(", ", codec.fileExtensions) + Environment.NewLine);
-        }
+        //foreach (var codec in _codecInfoList)
+        //{
+        //    sb.Append(Environment.NewLine + codec.friendlyName + Environment.NewLine);
+        //    sb.Append("    " + string.Join(", ", codec.fileExtensions) + Environment.NewLine);
+        //}
 
-        return sb.ToString();
+        //return sb.ToString();
     }
 
     private static readonly Random Random = new();
@@ -119,12 +125,7 @@ internal static class Util
 
     public static string GetExecutingDirectoryName()
     {
-        var uriString = Assembly.GetEntryAssembly()?.GetName().CodeBase;
-        if (uriString == null) return string.Empty;
-        var location = new Uri(uriString);
-        var directoryInfo = new FileInfo(location.AbsolutePath).Directory;
-        if (directoryInfo == null) return string.Empty;
-        return Uri.UnescapeDataString(directoryInfo.FullName);
+        return Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory);
     }
 
     public static void ChangeCursor(this UIElement uiElement, InputCursor cursor)
@@ -136,38 +137,10 @@ internal static class Util
 
     public static VirtualKey GetKeyThatProduces(char character)
     {
-        HKL layout = User32.GetKeyboardLayout(0); // Current thread
-        short vk = User32.VkKeyScanExA((byte)character, layout);
-        int vkey = vk & 0xff;
-        return (VirtualKey)vkey;
+        IntPtr layout = NativeMethods.GetKeyboardLayout(0);
+        short vkScanResult = NativeMethods.VkKeyScanExA((byte)character, layout);
+        int virtualKeyCode = vkScanResult & 0xff;
+        return (VirtualKey)virtualKeyCode;
     }
 
-    //public static void OpenUrl(string url)
-    //{
-    //    try
-    //    {
-    //        Process.Start(url);
-    //    }
-    //    catch
-    //    {
-    //        // hack because of this: https://github.com/dotnet/corefx/issues/10361
-    //        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-    //        {
-    //            url = url.Replace("&", "^&");
-    //            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-    //        }
-    //        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-    //        {
-    //            Process.Start("xdg-open", url);
-    //        }
-    //        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-    //        {
-    //            Process.Start("open", url);
-    //        }
-    //        else
-    //        {
-    //            throw;
-    //        }
-    //    }
-    //}
 }

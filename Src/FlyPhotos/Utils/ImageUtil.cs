@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using FlyPhotos.AppSettings;
+
 namespace FlyPhotos.Utils;
 
 internal class ImageUtil
@@ -24,7 +26,7 @@ internal class ImageUtil
             pathBuilder = (fileName) => $"ms-appx:///Assets/Images/{fileName}";
         else
             pathBuilder = (fileName) =>
-                Path.Combine(Path.GetDirectoryName(typeof(App).Assembly.Location), "Assets", "Images", fileName);
+                Path.Combine(AppContext.BaseDirectory, "Assets", "Images", fileName);
 
         FileNotFoundIndicator = await LoadIndicatorAsync(pathBuilder("FileNotFound.png"));
         PreviewFailedIndicator = await LoadIndicatorAsync(pathBuilder("PreviewFailed.png"));
@@ -46,32 +48,34 @@ internal class ImageUtil
         try
         {
             if (!File.Exists(path)) return (FileNotFoundIndicator, false);
-            if (!App.Settings.OpenExitZoom)
-            {
-                var cachedBmp = await PhotoDiskCacher.Instance.ReturnFromCache(d2dCanvas, path);
-                if (null != cachedBmp)
-                {
-                    return (new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache), true);
-                }
-            }
+// TODO REVERSE AOT
+            //if (!AppConfig.Settings.OpenExitZoom)
+            //{
+            //    var cachedBmp = await PhotoDiskCacher.Instance.ReturnFromCache(d2dCanvas, path);
+            //    if (null != cachedBmp)
+            //    {
+            //        return (new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache), true);
+            //    }
+            //}
 
             var extension = Path.GetExtension(path).ToUpper();
             switch (extension)
             {
-                case ".HEIC":
-                {
-                    if (!App.Settings.OpenExitZoom)
-                    {
-                        if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp))
-                            return (retBmp, true);
-                    }
-                    else
-                    {
-                        if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2))
-                            return (retBmp2, false);
-                    }
-                    return (PreviewFailedIndicator, false);
-                }
+// TODO REVERSE AOT
+                //case ".HEIC":
+                //{
+                //    if (!AppConfig.Settings.OpenExitZoom)
+                //    {
+                //        if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp))
+                //            return (retBmp, true);
+                //    }
+                //    else
+                //    {
+                //        if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2))
+                //            return (retBmp2, false);
+                //    }
+                //    return (PreviewFailedIndicator, false);
+                //}
                 case ".PSD":
                 {
                     if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
@@ -95,7 +99,7 @@ internal class ImageUtil
                 }
                 default:
                 {
-                    if (!App.Settings.OpenExitZoom)
+                    if (!AppConfig.Settings.OpenExitZoom)
                     {
                         if (await WicReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp, true);
                     }
@@ -119,21 +123,23 @@ internal class ImageUtil
         if (!File.Exists(path)) return FileNotFoundIndicator;
         try
         {
-            var cachedBmp = await PhotoDiskCacher.Instance.ReturnFromCache(d2dCanvas, path);
-            if (null != cachedBmp)
-            {
-                return new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache);
-            }
+// TODO REVERSE AOT
+            //var cachedBmp = await PhotoDiskCacher.Instance.ReturnFromCache(d2dCanvas, path);
+            //if (null != cachedBmp)
+            //{
+            //    return new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache);
+            //}
 
             var extension = Path.GetExtension(path).ToUpper();
             switch (extension)
             {
-                case ".HEIC":
-                {
-                    if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                    return PreviewFailedIndicator;
-                }
+// TODO REVERSE AOT
+                //case ".HEIC":
+                //{
+                //    if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                //    if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                //    return PreviewFailedIndicator;
+                //}
                 case ".PSD":
                 {
                     if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;

@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.System;
 using Windows.UI.Core;
+using FlyPhotos.AppSettings;
 using static FlyPhotos.Controllers.PhotoDisplayController;
 
 namespace FlyPhotos.Controllers;
@@ -393,7 +394,7 @@ internal class Win2dCanvasController : ICanvasController
             _imagePos.X = canvasWidth / 2;
             _imagePos.Y = canvasHeight / 2;
 
-            if (App.Settings.OpenExitZoom)
+            if (AppConfig.Settings.OpenExitZoom)
             {
                 var targetPosition = new Point(_d2dCanvas.ActualWidth / 2, _d2dCanvas.ActualHeight / 2);
                 _scale = 0.1f;
