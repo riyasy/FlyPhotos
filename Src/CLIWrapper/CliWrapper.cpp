@@ -74,10 +74,3 @@ List<CodecInfo^>^ ManagedShellUtility::GetWicCodecList()
 	}
 	return listCodecInfoManaged;
 }
-
-bool ManagedShellUtility::CopyImagePixelsToMemoryMap(String^ fileName, String^ mmfName,
-                                                     bool destAlphaNeeded)
-{
-	return wicUtil->CopyImagePixelsToMemoryMap(marshal::to<wchar_t*>(fileName), marshal::to<wchar_t*>(mmfName),
-	                                           destAlphaNeeded);
-}

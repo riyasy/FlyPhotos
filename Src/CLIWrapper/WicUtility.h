@@ -17,8 +17,7 @@ struct CCodecInfo
 class WicUtility
 {
 public:
-	static HRESULT GetWicCodecList(CAtlList<CCodecInfo>& listCodecInfo);
-	static bool CopyImagePixelsToMemoryMap(const wchar_t* fileName, const wchar_t* mmfName, bool dest_alpha_needed);
+	static HRESULT GetWicCodecList(CAtlList<CCodecInfo>& listCodecInfo);	
 
 private:
 	static HRESULT EnumDecoders(IWICImagingFactory* pImagingFactory,
