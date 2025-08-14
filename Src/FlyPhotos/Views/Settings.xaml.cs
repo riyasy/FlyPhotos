@@ -1,4 +1,6 @@
+using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers;
+using FlyPhotos.Data;
 using FlyPhotos.Utils;
 using Microsoft.UI;
 using Microsoft.UI.Composition.SystemBackdrops;
@@ -12,9 +14,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using FlyPhotos.Data;
+using Windows.System;
 using WinRT.Interop;
-using FlyPhotos.AppSettings;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -69,7 +70,6 @@ internal sealed partial class Settings : IThemeChangeable
         titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
         titleBar.ButtonForegroundColor = Colors.Gray;
 
-
         _configurationSource = new SystemBackdropConfiguration
         {
             IsHighContrast = ThemeSettings.CreateForWindowId(this.AppWindow.Id).HighContrast,
@@ -80,8 +80,7 @@ internal sealed partial class Settings : IThemeChangeable
         SetConfigurationSourceTheme();
         SetWindowTheme(AppConfig.Settings.Theme); 
         DispatcherQueue.EnsureSystemDispatcherQueue();
-
-
+        
         SliderHighResCacheSize.Value = AppConfig.Settings.CacheSizeOneSideHqImages;
         SliderLowResCacheSize.Value = AppConfig.Settings.CacheSizeOneSidePreviews;
         ButtonResetPanZoom.IsOn = AppConfig.Settings.ResetPanZoomOnNextPhoto;
@@ -93,7 +92,7 @@ internal sealed partial class Settings : IThemeChangeable
         SliderFadeIntensity.Value = AppConfig.Settings.FadeIntensity;
         ButtonHighQualityInterpolation.IsOn = AppConfig.Settings.HighQualityInterpolation;
 
-
+        MainLayout.KeyDown += MainLayout_OnKeyDown;
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
         SliderLowResCacheSize.ValueChanged += SliderLowResCacheSize_OnValueChanged;
         ButtonResetPanZoom.Toggled += ButtonResetPanZoom_OnToggled;
@@ -209,6 +208,11 @@ internal sealed partial class Settings : IThemeChangeable
         var logPath = $"{Path.GetTempPath()}FlyPhotos{Path.DirectorySeparatorChar}FlyPhotos.log";
         if (File.Exists(logPath))
             Process.Start("notepad.exe", logPath);
+    }
+
+    private void MainLayout_OnKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (e.Key == VirtualKey.Escape) this.Close();
     }
 
     public void SetWindowTheme(ElementTheme theme)

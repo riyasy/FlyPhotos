@@ -9,7 +9,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:CommunityToolkit.WinUI"
     mc:Ignorable="d">
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid x:Name="MainLayout" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Pivot Title="Fly Photos - Settings">
             <PivotItem Header="General">
                 <ScrollViewer>
