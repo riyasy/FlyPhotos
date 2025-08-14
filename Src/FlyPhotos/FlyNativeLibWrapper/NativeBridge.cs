@@ -85,6 +85,6 @@ public static class CliWrapper
 
     public static void ShowContextMenu(string filePath, int lpPointX, int lpPointY)
     {
-
+        NativeBridge.ShowExplorerContextMenu(filePath, lpPointX, lpPointY);
     }
 }

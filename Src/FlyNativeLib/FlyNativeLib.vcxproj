@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DllGlobals.h" />
     <ClInclude Include="ExplorerContextMenu.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="NativeExports.h" />

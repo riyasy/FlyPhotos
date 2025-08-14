@@ -9,6 +9,7 @@
 #include <string>
 #include <atlstr.h>
 #include <atlcoll.h>
+#include "DllGlobals.h"
 
 // Implementation for getting the file list
 HRESULT GetFileListFromExplorer(FileListCallback callback)
@@ -31,13 +32,10 @@ HRESULT GetFileListFromExplorer(FileListCallback callback)
 }
 
 // Implementation for showing the context menu
-bool ShowExplorerContextMenu(HINSTANCE appInstance, const wchar_t* filePath, int x, int y)
+bool ShowExplorerContextMenu(const wchar_t* filePath, int x, int y)
 {
     ExplorerContextMenu ctxMenu;
-    // The ExplorerContextMenu class needs to be modified to take HWND
-    // A better approach is to pass the main window handle from C#
-    // For now, let's assume NULL works or you adapt it to get the foreground window handle.
-    return ctxMenu.ShowContextMenu(appInstance, filePath, x, y);
+    return ctxMenu.ShowContextMenu(g_hInst, filePath, x, y);
 }
 
 // Implementation for getting WIC codecs
