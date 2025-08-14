@@ -70,8 +70,7 @@ bool ExplorerContextMenu::ShowContextMenu(HINSTANCE appInstance, LPCWSTR filePat
 
         if (idCmd != 0 && idCmd >= SCRATCH_QCM_FIRST) {
             CMINVOKECOMMANDINFOEX info = { sizeof(info) };
-            // info.fMask = CMIC_MASK_UNICODE | CMIC_MASK_PTINVOKE;
-            info.fMask = CMIC_MASK_PTINVOKE;
+            info.fMask = CMIC_MASK_UNICODE | CMIC_MASK_PTINVOKE;
             if (GetKeyState(VK_CONTROL) < 0) info.fMask |= CMIC_MASK_CONTROL_DOWN;
             if (GetKeyState(VK_SHIFT) < 0)   info.fMask |= CMIC_MASK_SHIFT_DOWN;
             info.hwnd = hWnd;

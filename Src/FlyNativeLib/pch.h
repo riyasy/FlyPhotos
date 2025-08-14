@@ -7,15 +7,6 @@
 #ifndef PCH_H
 #define PCH_H
 
-// Define the minimum required platform.
-// This must be done BEFORE including windows.h or any other system header.
-// 0x0601 = Windows 7 and later
-// 0x0A00 = Windows 10 and later
-// Choose a value appropriate for your minimum target OS.
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0601 
-#endif
-
 // add headers that you want to pre-compile here
 #include "framework.h"
 

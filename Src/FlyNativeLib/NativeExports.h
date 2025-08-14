@@ -1,6 +1,4 @@
 #pragma once
-// --- NativeExports.h ---
-#pragma once
 
 #include <Windows.h>
 
