@@ -91,7 +91,7 @@ internal sealed partial class Settings : IThemeChangeable
         CheckBoxEnableAutoFade.IsChecked = AppConfig.Settings.AutoFade;
         ButtonOpenExitZoom.IsOn = AppConfig.Settings.OpenExitZoom;
         SliderFadeIntensity.Value = AppConfig.Settings.FadeIntensity;
-
+        ButtonHighQualityInterpolation.IsOn = AppConfig.Settings.HighQualityInterpolation;
 
 
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
@@ -104,6 +104,7 @@ internal sealed partial class Settings : IThemeChangeable
         CheckBoxEnableAutoFade.Checked += CheckBoxEnableAutoFade_Checked;
         CheckBoxEnableAutoFade.Unchecked += CheckBoxEnableAutoFade_Checked;
         SliderFadeIntensity.ValueChanged += SliderFadeIntensity_ValueChanged;
+        ButtonHighQualityInterpolation.Toggled += ButtonHighQualityInterpolation_OnToggled;
 
         SettingsCardKeyboardShortCuts.Description = $"{Environment.NewLine}Left/Right Arrow Keys : Navigate Photos" +
                                                     $"{Environment.NewLine}Mouse Wheel : Zoom In/Out" +
@@ -129,7 +130,11 @@ internal sealed partial class Settings : IThemeChangeable
             $"{Environment.NewLine}{Util.GetExtensionsDisplayString()}";
     }
 
-
+    private async void ButtonHighQualityInterpolation_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.HighQualityInterpolation = ButtonHighQualityInterpolation.IsOn;
+        await AppConfig.SaveAsync();
+    }
 
     private async void ButtonOpenExitZoom_OnToggled(object sender, RoutedEventArgs e)
     {

@@ -32,6 +32,7 @@ public class AppSettings
     public bool AutoFade { get; set; }
     public int FadeIntensity { get; set; }
     public bool OpenExitZoom { get; set; }
+    public bool HighQualityInterpolation { get; set; }
 }
 
 public enum WindowBackdropType

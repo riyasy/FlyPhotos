@@ -80,6 +80,14 @@
                             <ToggleSwitch x:Name="ButtonResetPanZoom" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
+                            x:Name="SettingsCardHighQualityInterpolation"
+                            Margin="0,5,0,0"
+                            Description="Disable for viewing Pixel Art"
+                            Header="Smoothen images when zooming"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE71E;}">
+                            <ToggleSwitch x:Name="ButtonHighQualityInterpolation" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
                             x:Name="SettingsCardShowThumbnail"
                             Margin="0,5,0,0"
                             Description="Show thumbnail strip at the bottom of window"
@@ -178,7 +186,7 @@
                     <controls:SettingsCard
                         x:Name="SettingsCardVersion"
                         Margin="0,5,0,0"
-                        Description="Current version is 2.4.1"
+                        Description="Current version is 2.5.0 RC"
                         Header="Current Version"
                         HeaderIcon="{ui:FontIcon Glyph=&#xF133;}">
                         <HyperlinkButton Content="Check latest version" NavigateUri="https://github.com/riyasy/FlyPhotos/releases" />

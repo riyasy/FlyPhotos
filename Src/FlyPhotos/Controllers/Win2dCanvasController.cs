@@ -251,9 +251,11 @@ internal class Win2dCanvasController : ICanvasController
     {
         if (_currentDisplayItem == null) return;
 
-        var drawingQuality = _panZoomAnimationOnGoing
-            ? CanvasImageInterpolation.NearestNeighbor
-            : CanvasImageInterpolation.HighQualityCubic;
+        CanvasImageInterpolation drawingQuality;
+        if (!AppConfig.Settings.HighQualityInterpolation || _panZoomAnimationOnGoing)
+            drawingQuality = CanvasImageInterpolation.NearestNeighbor;
+        else
+            drawingQuality = CanvasImageInterpolation.HighQualityCubic;
 
         if (_currentDisplayItem.IsGifOrAnimatedPng() && _animator != null)
         {
@@ -534,12 +536,15 @@ internal class Win2dCanvasController : ICanvasController
             DestroyOffScreen();
         }
 
+        var drawingQuality = AppConfig.Settings.HighQualityInterpolation ? 
+            CanvasImageInterpolation.HighQualityCubic : CanvasImageInterpolation.NearestNeighbor;
+
         if (_offscreen == null && imageWidth < _d2dCanvas.ActualWidth * 1.5)
         {
             var tempOffScreen = new CanvasRenderTarget(_d2dCanvas, (float)imageWidth, (float)imageHeight);
             using var ds = tempOffScreen.CreateDrawingSession();
             ds.DrawImage(_currentDisplayItem.Bitmap, new Rect(0, 0, imageWidth, imageHeight),
-                _currentDisplayItem.Bitmap.Bounds, 1, CanvasImageInterpolation.HighQualityCubic);
+                _currentDisplayItem.Bitmap.Bounds, 1, drawingQuality);
             _offscreen = tempOffScreen;
         }
     }
