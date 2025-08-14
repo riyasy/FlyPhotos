@@ -553,7 +553,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
     }
 }
 
-public class BlurredBackdrop : CompositionBrushBackdrop
+public partial class BlurredBackdrop : CompositionBrushBackdrop
 {
     protected override Windows.UI.Composition.CompositionBrush CreateBrush(Windows.UI.Composition.Compositor compositor)
     {
