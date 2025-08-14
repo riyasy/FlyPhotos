@@ -417,6 +417,8 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         _backdropController?.RemoveSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
         _backdropController?.Dispose();
         _backdropController = null;
+
+        DiskCacherWithSqlite.Instance.Dispose();
     }
 
     private void SettingWindow_Closed(object sender, WindowEventArgs args)

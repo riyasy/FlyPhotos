@@ -3,6 +3,7 @@ using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using PhotoSauce.MagicScaler;
 using System;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,27 +12,26 @@ namespace FlyPhotos.Utils;
 
 public sealed class DiskCacherWithSqlite : IDisposable
 {
+    private const int MaxItemCount = 20_000;
+    private const int ThumbMaxSize = 800;
+    private const double EvictionFactor = 0.25; // Evict 25% of items when full
     private static readonly Lazy<DiskCacherWithSqlite> _instance = new(() => new DiskCacherWithSqlite());
-    public static DiskCacherWithSqlite Instance => _instance.Value;
+    private readonly SqliteCommand _cmdCount;
+    private readonly SqliteCommand _cmdDeleteByPath;
+    private readonly SqliteCommand _cmdEvictBatch;
+
+    // Prepared commands
+    private readonly SqliteCommand _cmdSelectByPath;
+    private readonly SqliteCommand _cmdTouch;
+    private readonly SqliteCommand _cmdUpsert;
+
+    private readonly SqliteConnection _conn;
 
     private readonly string _dbPath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlyPhotosCache.db");
 
-    private readonly SqliteConnection _conn;
     private readonly SemaphoreSlim _gate = new(1, 1);
     private bool _disposed;
-
-    private const int MaxItemCount = 20_000;
-    private const int ThumbMaxSize = 800;
-    private const double EvictionFactor = 0.25; // Evict 25% of items when full
-
-    // Prepared commands
-    private readonly SqliteCommand _cmdSelectByPath;
-    private readonly SqliteCommand _cmdUpsert;
-    private readonly SqliteCommand _cmdCount;
-    private readonly SqliteCommand _cmdTouch;
-    private readonly SqliteCommand _cmdDeleteByPath;
-    private readonly SqliteCommand _cmdEvictBatch;
 
     private DiskCacherWithSqlite()
     {
@@ -87,9 +87,42 @@ public sealed class DiskCacherWithSqlite : IDisposable
         _cmdEvictBatch.Parameters.Add("$limit", SqliteType.Integer);
     }
 
-    private static long NowUnix() => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-    private static string FileMtimeString(string path) =>
-        File.GetLastWriteTimeUtc(path).ToString("yyyyMMddHHmmss");
+    public static DiskCacherWithSqlite Instance => _instance.Value;
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+
+        _gate.Wait(); // Wait for any ongoing operation to complete
+        try
+        {
+            // Dispose all managed resources
+            _cmdSelectByPath?.Dispose();
+            _cmdUpsert?.Dispose();
+            _cmdCount?.Dispose();
+            _cmdTouch?.Dispose();
+            _cmdDeleteByPath?.Dispose();
+            _cmdEvictBatch?.Dispose();
+            _conn?.Close(); // Close explicitly before disposing
+            _conn?.Dispose();
+        }
+        finally
+        {
+            _gate.Release();
+            _gate.Dispose();
+        }
+    }
+
+    private static long NowUnix()
+    {
+        return DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+    }
+
+    private static string FileMtimeString(string path)
+    {
+        return File.GetLastWriteTimeUtc(path).ToString("yyyyMMddHHmmss");
+    }
 
     private void InitializeDatabase()
     {
@@ -154,7 +187,7 @@ public sealed class DiskCacherWithSqlite : IDisposable
             // Decode the image outside the lock
             if (imageData != null)
             {
-                using var ms = new MemoryStream(imageData, writable: false);
+                using var ms = new MemoryStream(imageData, false);
                 return await CanvasBitmap.LoadAsync(canvasControl, ms.AsRandomAccessStream());
             }
 
@@ -208,6 +241,9 @@ public sealed class DiskCacherWithSqlite : IDisposable
         }
     }
 
+    // TODO - Check if copying to double encoding is necessary to convert canvas bitmap pixels.
+    // currently we are saving canvas to memory stream as jpeg and again scaling to another memory stream
+    // check if we can use canvas pixels directly to be given to magic scaler.
     private static async Task<byte[]> ResizeImageWithPhotoSauce(CanvasBitmap bitmap, int maxSize)
     {
         using var input = new MemoryStream();
@@ -227,30 +263,5 @@ public sealed class DiskCacherWithSqlite : IDisposable
 
         MagicImageProcessor.ProcessImage(input, output, settings);
         return output.ToArray();
-    }
-
-    public void Dispose()
-    {
-        if (_disposed) return;
-        _disposed = true;
-
-        _gate.Wait(); // Wait for any ongoing operation to complete
-        try
-        {
-            // Dispose all managed resources
-            _cmdSelectByPath?.Dispose();
-            _cmdUpsert?.Dispose();
-            _cmdCount?.Dispose();
-            _cmdTouch?.Dispose();
-            _cmdDeleteByPath?.Dispose();
-            _cmdEvictBatch?.Dispose();
-            _conn?.Close(); // Close explicitly before disposing
-            _conn?.Dispose();
-        }
-        finally
-        {
-            _gate.Release();
-            _gate.Dispose();
-        }
     }
 }

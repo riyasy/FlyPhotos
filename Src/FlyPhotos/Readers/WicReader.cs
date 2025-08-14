@@ -156,7 +156,9 @@ internal class WicReader
 
     private static async Task<int> GetRotationFromMetaData(BitmapPropertiesView bmpProps)
     {
-        var result = await bmpProps.GetPropertiesAsync(["System.Photo.Orientation"]);
+        var propertiesToRetrieve = new[] { "System.Photo.Orientation" };
+        var result = await bmpProps.GetPropertiesAsync(propertiesToRetrieve);
+
         if (result.Count <= 0) return 0;
         var orientation = result.Values.First();
         var rotation = (ushort)orientation.Value switch
