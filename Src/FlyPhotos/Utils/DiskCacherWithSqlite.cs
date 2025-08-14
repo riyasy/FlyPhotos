@@ -4,6 +4,7 @@
 //using PhotoSauce.MagicScaler;
 //using System;
 //using System.IO;
+//using System.Reflection;
 //using System.Threading.Tasks;
 
 //namespace FlyPhotos.Utils
@@ -11,8 +12,6 @@
 //    public sealed class DiskCacherWithSqlite : IDisposable
 //    {
 //        private static readonly Lazy<DiskCacherWithSqlite> _instance = new(() => new DiskCacherWithSqlite());
-
-//        private readonly string _dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlyPhotosCache.db");
 //        private readonly SqliteConnection _connection;
 //        private bool _disposed;
 
@@ -20,7 +19,9 @@
 
 //        private DiskCacherWithSqlite()
 //        {
-//            _connection = new SqliteConnection($"Data Source={_dbPath}");
+//            var appName = Assembly.GetEntryAssembly()?.GetName().Name ?? "FlyPhotos";
+//            var dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appName, "FlyPhotosCache_sqlite.db");
+//            _connection = new SqliteConnection($"Data Source={dbPath}");
 //            _connection.Open();
 //            InitializeDatabase();
 //        }
@@ -94,7 +95,6 @@
 //                var count = Convert.ToInt32(countCmd.ExecuteScalar());
 //                if (count >= MaxItemCount)
 //                {
-//                    Console.WriteLine("Cache item limit reached. Removing rarely used files.");
 //                    RemoveRarelyUsed();
 //                }
 //            }
@@ -142,8 +142,6 @@
 //                deleteCmd.Parameters.AddWithValue("@filePath", filePath);
 //                deleteCmd.ExecuteNonQuery();
 //            }
-
-//            Console.WriteLine($"Removed {toDelete.Count} rarely used cached images.");
 //        }
 
 //        private async Task<byte[]> ResizeImageWithPhotoSauce(CanvasBitmap bitmap, int maxSize)

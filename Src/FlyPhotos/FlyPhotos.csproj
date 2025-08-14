@@ -18,6 +18,7 @@
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
 		<PublishAot>true</PublishAot>
+		<SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
 	</PropertyGroup>
 
 	<Target Name="CopyYourFolderAfterPublish" AfterTargets="Publish">
@@ -47,10 +48,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.250402" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		  <PrivateAssets>all</PrivateAssets>
-		</PackageReference>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.8" />
@@ -66,7 +63,6 @@
 		<PackageReference Include="NLog.Extensions.Logging" Version="6.0.2" />
 		<PackageReference Include="SkiaSharp" Version="3.119.0" />
 		<PackageReference Include="Svg.Skia" Version="3.0.5" />
-		<PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.8" />
 		<PackageReference Include="System.Drawing.Common" Version="9.0.8" />
 		<PackageReference Include="WinUIEx" Version="2.6.0" />
 		<Manifest Include="$(ApplicationManifest)" />

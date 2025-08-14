@@ -11,7 +11,7 @@
 //{
 //    private static readonly Lazy<DiskCacherWithLiteDB> _instance = new(() => new DiskCacherWithLiteDB());
 
-//    private readonly string _dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlyPhotosCache.db");
+//    private readonly string _dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlyPhotosCache_liteDB.db");
 //    private readonly LiteDatabase _db;
 //    private bool _disposed;
 
@@ -74,7 +74,6 @@
 //        // Check item count and clean up if necessary
 //        if (col.Count() >= MaxItemCount)
 //        {
-//            Console.WriteLine("Cache item limit reached. Removing rarely used files.");
 //            RemoveRarelyUsed();
 //        }
 
@@ -114,8 +113,6 @@
 //        {
 //            col.Delete(image.Id);
 //        }
-
-//        Console.WriteLine($"Removed {rarelyUsedImages.Count} rarely used cached images.");
 //    }
 
 //    private async Task<byte[]> ResizeImageWithPhotoSauce(CanvasBitmap bitmap, int maxSize)

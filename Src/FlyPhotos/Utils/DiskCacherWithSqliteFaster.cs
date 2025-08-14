@@ -5,6 +5,7 @@ using PhotoSauce.MagicScaler;
 using System;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,23 +25,22 @@ public sealed class DiskCacherWithSqlite : IDisposable
     private readonly SqliteCommand _cmdSelectByPath;
     private readonly SqliteCommand _cmdTouch;
     private readonly SqliteCommand _cmdUpsert;
-
     private readonly SqliteConnection _conn;
-
-    private readonly string _dbPath =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlyPhotosCache.db");
 
     private readonly SemaphoreSlim _gate = new(1, 1);
     private bool _disposed;
 
     private DiskCacherWithSqlite()
     {
+        var appName = Assembly.GetEntryAssembly()?.GetName().Name ?? "FlyPhotos";
+        var dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appName, "FlyPhotosCache_sqlite.db");
+
         // Ensure folder exists
-        Directory.CreateDirectory(Path.GetDirectoryName(_dbPath)!);
+        Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
 
         var csb = new SqliteConnectionStringBuilder
         {
-            DataSource = _dbPath,
+            DataSource = dbPath,
             Mode = SqliteOpenMode.ReadWriteCreate,
             Cache = SqliteCacheMode.Shared
         };
@@ -196,7 +196,7 @@ public sealed class DiskCacherWithSqlite : IDisposable
         catch (Exception ex)
         {
             // Cache failures should not crash the app. Log and return null.
-            Console.WriteLine($"[CACHE-ERROR] Failed to read '{filePath}' from cache: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[CACHE-ERROR] Failed to read '{filePath}' from cache: {ex.Message}");
             return null;
         }
     }
@@ -237,7 +237,7 @@ public sealed class DiskCacherWithSqlite : IDisposable
         catch (Exception ex)
         {
             // Cache failures should not crash the app. Log and continue.
-            Console.WriteLine($"[CACHE-ERROR] Failed to put '{filePath}' in cache: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[CACHE-ERROR] Failed to put '{filePath}' in cache: {ex.Message}");
         }
     }
 

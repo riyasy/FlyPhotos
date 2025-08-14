@@ -249,8 +249,6 @@ internal class Win2dCanvasController : ICanvasController
 
     private void D2dCanvas_Draw(CanvasControl sender, CanvasDrawEventArgs args)
     {
-        System.Diagnostics.Debug.WriteLine($"D2dCanvas_Draw called.");
-
         if (_currentDisplayItem == null) return;
 
         var drawingQuality = _panZoomAnimationOnGoing
@@ -273,8 +271,6 @@ internal class Win2dCanvasController : ICanvasController
         }
         else
         {
-            System.Diagnostics.Debug.WriteLine($"D2dCanvas_Draw Actually Drew.");
-
             args.DrawingSession.Transform = _mat;
             if (_offscreen != null)
                 args.DrawingSession.DrawImage(_offscreen, _imageRect, _offscreen.Bounds, 1f,
@@ -493,8 +489,6 @@ internal class Win2dCanvasController : ICanvasController
         // Interpolate scale
         _scale = _zoomStartScale + (_zoomTargetScale - _zoomStartScale) * easedT;
 
-        System.Diagnostics.Debug.WriteLine($"AnimatePanAndZoom called. {_scale}");
-
         // Interpolate position (a simple linear interpolation)
         var newX = _panStartPosition.X + (_panTargetPosition.X - _panStartPosition.X) * easedT;
         var newY = _panStartPosition.Y + (_panTargetPosition.Y - _panStartPosition.Y) * easedT;
@@ -571,7 +565,6 @@ internal class Win2dCanvasController : ICanvasController
 
     private void UpdateTransform()
     {
-        System.Diagnostics.Debug.WriteLine($"UpdateTransform called. {_scale}");
         _mat = Matrix3x2.Identity;
         _mat *= Matrix3x2.CreateTranslation((float)(-_imageRect.Width * 0.5f), (float)(-_imageRect.Height * 0.5f));
         _mat *= Matrix3x2.CreateScale(_scale, _scale);
@@ -582,7 +575,6 @@ internal class Win2dCanvasController : ICanvasController
 
     private void RequestInvalidate()
     {
-        System.Diagnostics.Debug.WriteLine($"RequestInvalidate called. {_invalidatePending}");
         if (_invalidatePending) return;
         _invalidatePending = true;
 

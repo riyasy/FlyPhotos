@@ -59,7 +59,7 @@ public static class AppConfig
             catch (Exception ex)
             {
                 // Log error if user settings are corrupt
-                Console.WriteLine($"Error loading user settings, falling back to default: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error loading user settings, falling back to default: {ex.Message}");
                 Settings = null; // Ensure we fall back
             }
         }
@@ -79,7 +79,7 @@ public static class AppConfig
             catch (Exception ex)
             {
                 // Log error if default settings are corrupt
-                Console.WriteLine($"FATAL: Could not load default settings: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"FATAL: Could not load default settings: {ex.Message}");
             }
         }
 
@@ -101,7 +101,7 @@ public static class AppConfig
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error saving settings: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error saving settings: {ex.Message}");
         }
     }
 }

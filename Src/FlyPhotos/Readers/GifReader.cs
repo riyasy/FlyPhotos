@@ -55,13 +55,11 @@ internal class GifReader
             {
                 // More than one frame: It's an animated GIF.
                 // Load the raw bytes using your helper method.
-                //Debug.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] GIF has {decoder.FrameCount} frames. Loading as byte array.");
                 return await LoadGifAsFile(inputPath);
             }
             else
             {
                 // Single frame: Load as a static image (CanvasBitmap).
-                //Debug.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Image has 1 frame. Loading as CanvasBitmap.");
                 var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);
                 return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
             }
@@ -70,7 +68,6 @@ internal class GifReader
         {
             // This will catch errors from GetFileFromPathAsync, BitmapDecoder, or CanvasBitmap.LoadAsync
             // Logger.Error(ex, "Failed to process image file at {0}", inputPath);
-            //Debug.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] ERROR in GetHq: {ex.Message}");
             return (false, DisplayItem.Empty());
         }
     }
