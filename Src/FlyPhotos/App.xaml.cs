@@ -4,7 +4,9 @@ using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers;
 using FlyPhotos.Utils;
 using FlyPhotos.Views;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using WinUIEx;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -33,7 +35,7 @@ public partial class App
     {
         if (Debug)
             //SelectedFileName = @"C:\Users\Riyas\Desktop\SingleGIF\output.gif";
-            SelectedFileName = @"C:\Users\Riyas\Desktop\TestImages\JPEGS\20250628_071637 (ILCE-6400).JPG";
+            SelectedFileName = @"C:\Users\Riyas\Desktop\TestImages\JPEGS\20250703_065917 (ILCE-6400).JPG";
         //SelectedFileName = @"C:\Users\Riyas\Desktop\APNG\dancing-fruits.png";
         else
             SelectedFileName = Util.GetFileNameFromCommandLine();
@@ -51,6 +53,7 @@ public partial class App
         AppConfig.Initialize();
         _mWindow = new PhotoDisplayWindow();
         ThemeController.Instance.AddWindow(_mWindow);
+        _mWindow.Maximize();
         _mWindow.Activate();
     }
 

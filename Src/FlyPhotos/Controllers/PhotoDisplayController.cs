@@ -80,7 +80,7 @@ internal class PhotoDisplayController : IDisposable
     {
         await ImageUtil.Initialize(_d2dCanvas);
 
-        _firstPhoto = new Photo(App.SelectedFileName);        
+        _firstPhoto = new Photo(App.SelectedFileName);
         bool continueLoadingHq = await _firstPhoto.LoadPreviewFirstPhoto();
 
         if (continueLoadingHq)
@@ -90,6 +90,8 @@ internal class PhotoDisplayController : IDisposable
         }
 
         await _canvasController.SetSource(_firstPhoto, DisplayLevel.Hq);
+        if (AppConfig.Settings.OpenExitZoom)
+            await Task.Delay(Win2dCanvasController.PanZoomAnimationDurationNormal);
         _firstPhotoLoaded = true;
         _firstPhotoLoadEvent.Set();
     }

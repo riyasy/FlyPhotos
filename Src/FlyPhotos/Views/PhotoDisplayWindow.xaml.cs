@@ -90,7 +90,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
             IsInputActive = true
         };
 
-        this.Activated += PhotoDisplayWindow_Activated;
+        
         ((FrameworkElement)Content).ActualThemeChanged += PhotoDisplayWindow_ActualThemeChanged;
         SetConfigurationSourceTheme();
         SetWindowBackground(AppConfig.Settings.WindowBackdrop);
@@ -103,6 +103,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
 
         TxtFileName.Text = Path.GetFileName(App.SelectedFileName);
 
+        Activated += PhotoDisplayWindow_Activated;
         SizeChanged += PhotoDisplayWindow_SizeChanged;
         AppWindow.Closing += PhotoDisplayWindow_Closing;
         Closed += PhotoDisplayWindow_Closed;
@@ -121,7 +122,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         _repeatButtonReleaseCheckTimer.Tick += RepeatButtonReleaseCheckTimer_Tick;
         _wheelScrollBrakeTimer.Tick += _wheelScrollBrakeTimer_Tick;
 
-        this.Maximize();
+        //this.Maximize(); // Maximise will be called from App.xaml.cs
         _lastWindowState = OverlappedPresenterState.Maximized;
 
         _opacityFader = new OpacityFader([ButtonPanel, D2dCanvasThumbNail, TxtFileName]); 
@@ -396,8 +397,8 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
 
         if (AppConfig.Settings.OpenExitZoom)
         {
-            _canvasController.ZoomOutOnExit(200);
-            await Task.Delay(200);
+            _canvasController.ZoomOutOnExit(Win2dCanvasController.PanZoomAnimationDurationForExit);
+            await Task.Delay(Win2dCanvasController.PanZoomAnimationDurationForExit);
         }
         this.Hide();
         this.Close();

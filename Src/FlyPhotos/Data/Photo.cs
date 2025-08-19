@@ -108,7 +108,8 @@ internal class Photo
         ".heic", // High Efficiency Image Format (Apple)
         ".heif", // High Efficiency Image Format
         ".avif", // Modern high-compression format
-        ".jxl"   // JPEG XL, a newer format that supports transparency
+        ".jxl",  // JPEG XL, a newer format that supports transparency
+        ".psd"   // Photoshop document
     };
 
     public bool SupportsTransparency()

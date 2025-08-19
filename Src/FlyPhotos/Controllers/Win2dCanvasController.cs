@@ -26,6 +26,8 @@ namespace FlyPhotos.Controllers;
 internal class Win2dCanvasController : ICanvasController
 {
     // private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+    public const int PanZoomAnimationDurationForExit = 200;
+    public const int PanZoomAnimationDurationNormal = 400;
 
     private readonly IThumbnailController _thumbNailController;
     private readonly CanvasControl _d2dCanvas;
@@ -57,7 +59,7 @@ internal class Win2dCanvasController : ICanvasController
     private EventHandler<object> _renderingHandler;
 
     private DateTime _panZoomAnimationStartTime;
-    private double PanZoomAnimationDurationMs = 400;
+    private double _panZoomAnimationDurationMs = PanZoomAnimationDurationNormal;
     private bool _panZoomAnimationOnGoing;
 
     private float _zoomStartScale;
@@ -221,7 +223,7 @@ internal class Win2dCanvasController : ICanvasController
     }
     public void ZoomOutOnExit(double exitAnimationDuration)
     {
-        PanZoomAnimationDurationMs = exitAnimationDuration;
+        _panZoomAnimationDurationMs = exitAnimationDuration;
         var targetPosition = new Point(_d2dCanvas.ActualWidth / 2, _d2dCanvas.ActualHeight / 2);
         StartPanAndZoomAnimation(0.001f, targetPosition);
     }
@@ -415,7 +417,7 @@ internal class Win2dCanvasController : ICanvasController
             if (AppConfig.Settings.OpenExitZoom)
             {
                 var targetPosition = new Point(_d2dCanvas.ActualWidth / 2, _d2dCanvas.ActualHeight / 2);
-                _scale = 0.1f;
+                _scale = 0.01f;
                 StartPanAndZoomAnimation(1.0f, targetPosition);
             }
         }
@@ -478,7 +480,7 @@ internal class Win2dCanvasController : ICanvasController
     private void AnimateZoom()
     {
         var elapsed = (DateTime.UtcNow - _panZoomAnimationStartTime).TotalMilliseconds;
-        var t = Math.Clamp(elapsed / PanZoomAnimationDurationMs, 0.0, 1.0);
+        var t = Math.Clamp(elapsed / _panZoomAnimationDurationMs, 0.0, 1.0);
 
         // Ease-out cubic: f(t) = 1 - (1 - t)^3
         float easedT = 1f - (float)Math.Pow(1 - t, 3);
@@ -503,7 +505,7 @@ internal class Win2dCanvasController : ICanvasController
     private void AnimatePanAndZoom()
     {
         var elapsed = (DateTime.UtcNow - _panZoomAnimationStartTime).TotalMilliseconds;
-        var t = Math.Clamp(elapsed / PanZoomAnimationDurationMs, 0.0, 1.0);
+        var t = Math.Clamp(elapsed / _panZoomAnimationDurationMs, 0.0, 1.0);
 
         // Ease-out cubic: f(t) = 1 - (1 - t)^3
         float easedT = 1f - (float)Math.Pow(1 - t, 3);
