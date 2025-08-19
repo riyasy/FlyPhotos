@@ -38,7 +38,7 @@
                         <controls:SettingsCard
                             x:Name="SettingsCardTheme"
                             Margin="0,5,0,0"
-                            Description="Choose theme."
+                            Description="Select the app theme."
                             Header="Window Theme"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE790;}">
                             <ComboBox x:Name="ComboTheme" SelectedIndex="0">
@@ -50,7 +50,7 @@
                         <controls:SettingsCard
                             x:Name="SettingsCardWindowBackground"
                             Margin="0,5,0,0"
-                            Description="Choose the background for the photo viewer window."
+                            Description="Set the window background."
                             Header="Window Background"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE70A;}">
                             <ComboBox x:Name="ComboBackGround" SelectedIndex="0">
@@ -66,7 +66,7 @@
                         <controls:SettingsCard
                             x:Name="SettingsCardOpenExitZoom"
                             Margin="0,5,0,0"
-                            Description="⚠ Zoom effect can slow file open as it waits for full file read. No zoom startup uses cached or preview images of files"
+                            Description="⚠ May slowdown startup: Fly waits to load full image instead of preview during startup."
                             Header="Zoom in on file Open, Zoom out on exit"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE9A6;}">
                             <ToggleSwitch x:Name="ButtonOpenExitZoom" />
@@ -74,7 +74,7 @@
                         <controls:SettingsCard
                             x:Name="SettingsCardPanZoomReset"
                             Margin="0,5,0,0"
-                            Description="Reset Pan and Zoom on displaying next photo"
+                            Description="Reset pan and zoom when switching photos."
                             Header="Pan Zoom Reset"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
                             <ToggleSwitch x:Name="ButtonResetPanZoom" />
@@ -82,7 +82,7 @@
                         <controls:SettingsCard
                             x:Name="SettingsCardHighQualityInterpolation"
                             Margin="0,5,0,0"
-                            Description="Disable this for pixel peeping and for viewing Pixel Art"
+                            Description="Disable for sharper pixel edges (useful for pixel art)."
                             Header="Use high quality interpolation when zooming"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE71E;}">
                             <ToggleSwitch x:Name="ButtonHighQualityInterpolation" />
@@ -90,7 +90,7 @@
                         <controls:SettingsCard
                             x:Name="SettingsCardShowCheckeredBackground"
                             Margin="0,5,0,0"
-                            Description="Display checkered background below transparent images. ⚠ May decrease Fly performance"
+                            Description="Show checkered background for transparent images. ⚠ May reduce Fly performance."
                             Header="Show Checkered Background"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE80A;}">
                             <ToggleSwitch x:Name="ButtonShowCheckeredBackground" />
