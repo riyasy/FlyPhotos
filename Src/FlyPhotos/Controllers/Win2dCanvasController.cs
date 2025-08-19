@@ -167,9 +167,9 @@ internal class Win2dCanvasController : ICanvasController
                 // If SetSource had already been called a next time before returning from CreateAsync
                 if (currentOperationId == _latestSetSourceOperationId)
                 {
+                    await newAnimator.UpdateAsync(TimeSpan.Zero);
                     _animator = newAnimator;
                     _animationStopwatch.Restart();
-                    await _animator.UpdateAsync(TimeSpan.Zero);
                     SetScaleAndPosition(new Size(_animator.PixelWidth, _animator.PixelHeight), !previewDrawnAsFirstFrame);
                     if (!previewDrawnAsFirstFrame)
                         _thumbNailController.CreateThumbnailRibbonOffScreen();

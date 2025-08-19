@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CLIWrapper", "CLIWrapper\CLIWrapper.vcxproj", "{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlyPhotos", "FlyPhotos\FlyPhotos.csproj", "{3F86C6F6-07B3-4B5E-BB58-02833D040E93}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WicImageFileReaderNative", "WicImageFileReaderNative\WicImageFileReaderNative.vcxproj", "{D523CC70-7742-47BA-8CCC-E3760BD3CC94}"
@@ -25,22 +23,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Debug|Any CPU.Build.0 = Debug|x64
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Debug|ARM64.ActiveCfg = Debug|x64
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Debug|ARM64.Build.0 = Debug|x64
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Debug|x64.ActiveCfg = Debug|x64
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Debug|x64.Build.0 = Debug|x64
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Debug|x86.ActiveCfg = Debug|Win32
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Debug|x86.Build.0 = Debug|Win32
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Release|Any CPU.ActiveCfg = Release|x64
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Release|Any CPU.Build.0 = Release|x64
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Release|ARM64.ActiveCfg = Release|x64
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Release|ARM64.Build.0 = Release|x64
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Release|x64.ActiveCfg = Release|x64
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Release|x64.Build.0 = Release|x64
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Release|x86.ActiveCfg = Release|Win32
-		{AFA15D08-AE3C-47EC-87BA-7BADF0F08987}.Release|x86.Build.0 = Release|Win32
 		{3F86C6F6-07B3-4B5E-BB58-02833D040E93}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{3F86C6F6-07B3-4B5E-BB58-02833D040E93}.Debug|Any CPU.Build.0 = Debug|x64
 		{3F86C6F6-07B3-4B5E-BB58-02833D040E93}.Debug|Any CPU.Deploy.0 = Debug|x64
