@@ -1,7 +1,10 @@
 ﻿#nullable enable
-using System.Threading.Tasks;
 using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas.UI.Xaml;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using static FlyPhotos.Controllers.PhotoDisplayController;
 
 namespace FlyPhotos.Data;
@@ -11,6 +14,7 @@ internal class Photo
     public static int CurrentDisplayIndex;
     public static DisplayLevel CurrentDisplayLevel;
     public static int PhotosCount;
+
     public readonly string FileName;
     public DisplayItem? Hq;
     public DisplayItem? Preview;
@@ -88,5 +92,28 @@ internal class Photo
     public static DisplayItem GetLoadingIndicator()
     {
         return ImageUtil.GetLoadingIndicator();
+    }
+
+    private static readonly HashSet<string> FormatsSupportingTransparency =
+        new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".png",  // Standard for lossless transparency
+        ".gif",  // Supports indexed transparency
+        ".webp", // Modern format with excellent transparency support
+        ".tiff", // Can contain an alpha channel
+        ".tif",  // Alternate extension for TIFF
+        ".svg",  // Vector format, fully supports transparency
+        ".apng", // Animated PNG, supports transparency
+        ".ico",  // Icon format, requires transparency
+        ".heic", // High Efficiency Image Format (Apple)
+        ".heif", // High Efficiency Image Format
+        ".avif", // Modern high-compression format
+        ".jxl"   // JPEG XL, a newer format that supports transparency
+    };
+
+    public bool SupportsTransparency()
+    {
+        string extension = Path.GetExtension(FileName);
+        return !string.IsNullOrEmpty(extension) && FormatsSupportingTransparency.Contains(extension.ToLower());
     }
 }

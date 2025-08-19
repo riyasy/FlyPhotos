@@ -91,6 +91,7 @@ internal sealed partial class Settings : IThemeChangeable
         ButtonOpenExitZoom.IsOn = AppConfig.Settings.OpenExitZoom;
         SliderFadeIntensity.Value = AppConfig.Settings.FadeIntensity;
         ButtonHighQualityInterpolation.IsOn = AppConfig.Settings.HighQualityInterpolation;
+        ButtonShowCheckeredBackground.IsOn = AppConfig.Settings.CheckeredBackground;
 
         MainLayout.KeyDown += MainLayout_OnKeyDown;
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
@@ -104,6 +105,7 @@ internal sealed partial class Settings : IThemeChangeable
         CheckBoxEnableAutoFade.Unchecked += CheckBoxEnableAutoFade_Checked;
         SliderFadeIntensity.ValueChanged += SliderFadeIntensity_ValueChanged;
         ButtonHighQualityInterpolation.Toggled += ButtonHighQualityInterpolation_OnToggled;
+        ButtonShowCheckeredBackground.Toggled += ButtonShowCheckeredBackground_OnToggled;
 
         SettingsCardKeyboardShortCuts.Description = $"{Environment.NewLine}Left/Right Arrow Keys : Navigate Photos" +
                                                     $"{Environment.NewLine}Mouse Wheel : Zoom In/Out" +
@@ -127,6 +129,12 @@ internal sealed partial class Settings : IThemeChangeable
         TextBoxCodecs.Text =
             $"This program doesn't install any codecs and uses codecs already present in the system.{Environment.NewLine}" +
             $"{Environment.NewLine}{Util.GetExtensionsDisplayString()}";
+    }
+
+    private async void ButtonShowCheckeredBackground_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.CheckeredBackground = ButtonShowCheckeredBackground.IsOn;
+        await AppConfig.SaveAsync();
     }
 
     private async void ButtonHighQualityInterpolation_OnToggled(object sender, RoutedEventArgs e)

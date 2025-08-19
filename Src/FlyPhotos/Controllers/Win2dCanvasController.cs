@@ -1,7 +1,10 @@
-﻿using FlyPhotos.Controllers.Animators;
+﻿using FlyPhotos.AppSettings;
+using FlyPhotos.Controllers.Animators;
 using FlyPhotos.Data;
 using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
+using Microsoft.UI;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
@@ -14,8 +17,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.System;
+using Windows.UI;
 using Windows.UI.Core;
-using FlyPhotos.AppSettings;
 using static FlyPhotos.Controllers.PhotoDisplayController;
 
 namespace FlyPhotos.Controllers;
@@ -70,11 +73,16 @@ internal class Win2dCanvasController : ICanvasController
     private readonly Stopwatch _animationStopwatch = new();
     private readonly SemaphoreSlim _animatorLock = new(1, 1);
 
+    // For Checkered Background
+    private CanvasImageBrush _checkeredBrush;
+    private const int CheckerSize = 10;
+    private bool _currentPhotoSupportsTransparency = false;
+
     #region Construction and Destruction
     public Win2dCanvasController(CanvasControl d2dCanvas, IThumbnailController thumbNailController)
     {
         _d2dCanvas = d2dCanvas;
-        _thumbNailController = thumbNailController;        
+        _thumbNailController = thumbNailController;
 
         _d2dCanvas.Draw += D2dCanvas_Draw;
         _d2dCanvas.SizeChanged += D2dCanvas_SizeChanged;
@@ -82,9 +90,9 @@ internal class Win2dCanvasController : ICanvasController
         _d2dCanvas.PointerMoved += D2dCanvas_PointerMoved;
         _d2dCanvas.PointerPressed += D2dCanvas_PointerPressed;
         _d2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
-        _d2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;        
+        _d2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;
 
-        _offScreenDrawTimer.Tick += OffScreenDrawTimer_Tick;        
+        _offScreenDrawTimer.Tick += OffScreenDrawTimer_Tick;
     }
 
     public async Task CleanupOnClose()
@@ -98,6 +106,8 @@ internal class Win2dCanvasController : ICanvasController
             _d2dCanvas?.RemoveFromVisualTree();
             _animator?.Dispose();
             _animator = null;
+            _checkeredBrush?.Dispose();
+            _checkeredBrush = null;
         }
         finally
         {
@@ -109,7 +119,7 @@ internal class Win2dCanvasController : ICanvasController
 
     #region Public API
 
-    public async Task SetSource(Photo value, DisplayLevel displayLevel)
+    public async Task SetSource(Photo photo, DisplayLevel displayLevel)
     {
         await _animatorLock.WaitAsync();
         _animatorLock.Release();
@@ -121,7 +131,8 @@ internal class Win2dCanvasController : ICanvasController
         Photo.CurrentDisplayLevel = displayLevel;
         var isFirstPhoto = _currentDisplayItem == null;
 
-        _currentDisplayItem = value.GetDisplayItemBasedOn(displayLevel);
+        _currentDisplayItem = photo.GetDisplayItemBasedOn(displayLevel);
+        _currentPhotoSupportsTransparency = photo.SupportsTransparency();
 
         if (_currentDisplayItem == null) return;
 
@@ -135,7 +146,7 @@ internal class Win2dCanvasController : ICanvasController
                 _animationStopwatch.Stop();
 
 
-                var preview = value.GetDisplayItemBasedOn(DisplayLevel.Preview);
+                var preview = photo.GetDisplayItemBasedOn(DisplayLevel.Preview);
                 bool previewDrawnAsFirstFrame = false;
                 if (preview != null)
                 {
@@ -147,7 +158,7 @@ internal class Win2dCanvasController : ICanvasController
                     RequestInvalidate();
                 }
 
-                IAnimator newAnimator = Path.GetExtension(value.FileName).ToUpper() switch
+                IAnimator newAnimator = Path.GetExtension(photo.FileName).ToUpper() switch
                 {
                     ".GIF" => await GifAnimator.CreateAsync(_currentDisplayItem.FileAsByteArray),
                     _ => await PngAnimator.CreateAsync(_currentDisplayItem.FileAsByteArray)
@@ -249,6 +260,8 @@ internal class Win2dCanvasController : ICanvasController
 
     private void D2dCanvas_Draw(CanvasControl sender, CanvasDrawEventArgs args)
     {
+        if (_checkeredBrush == null) CreateCheckeredBrush(sender);
+
         if (_currentDisplayItem == null) return;
 
         CanvasImageInterpolation drawingQuality;
@@ -262,6 +275,9 @@ internal class Win2dCanvasController : ICanvasController
             if (_animator?.Surface == null) return;
             args.DrawingSession.Transform = _mat;
 
+            if (AppConfig.Settings.CheckeredBackground && _currentPhotoSupportsTransparency)
+                args.DrawingSession.FillRectangle(_imageRect, _checkeredBrush);
+
             args.DrawingSession.DrawImage(
                 _animator.Surface,
                 _imageRect,
@@ -274,6 +290,10 @@ internal class Win2dCanvasController : ICanvasController
         else
         {
             args.DrawingSession.Transform = _mat;
+
+            if (AppConfig.Settings.CheckeredBackground && _currentPhotoSupportsTransparency)
+                args.DrawingSession.FillRectangle(_imageRect, _checkeredBrush);
+
             if (_offscreen != null)
                 args.DrawingSession.DrawImage(_offscreen, _imageRect, _offscreen.Bounds, 1f,
                     drawingQuality);
@@ -507,6 +527,31 @@ internal class Win2dCanvasController : ICanvasController
         }
     }
 
+    private void CreateCheckeredBrush(ICanvasResourceCreator resourceCreator)
+    {
+        _checkeredBrush?.Dispose();
+
+        // Create a render target for the small 2x2 chekcer pattern
+        using var patternRenderTarget = new CanvasRenderTarget(resourceCreator, CheckerSize * 2, CheckerSize * 2, 96);
+
+        using (var ds = patternRenderTarget.CreateDrawingSession())
+        {
+            // The pattern is two white and two grey squares, forming a checkerboard
+            var grey = Color.FromArgb(255, 204, 204, 204);
+            ds.Clear(grey);
+            ds.FillRectangle(0, 0, CheckerSize, CheckerSize, Colors.White);
+            ds.FillRectangle(CheckerSize, CheckerSize, CheckerSize, CheckerSize, Colors.White);
+        }
+
+        // Create a brush from this pattern that can be tiled
+        _checkeredBrush = new CanvasImageBrush(resourceCreator, patternRenderTarget)
+        {
+            ExtendX = CanvasEdgeBehavior.Wrap,
+            ExtendY = CanvasEdgeBehavior.Wrap,
+            Interpolation = CanvasImageInterpolation.NearestNeighbor
+        };
+    }
+
     private void RestartOffScreenDrawTimer()
     {
         if (_currentDisplayItem != null && _currentDisplayItem.IsGifOrAnimatedPng()) return;
@@ -530,13 +575,13 @@ internal class Win2dCanvasController : ICanvasController
         var imageHeight = _imageRect.Height * _scale;
 
         if (_offscreen != null &&
-            (_offscreen.SizeInPixels.Width != (int)imageWidth || 
+            (_offscreen.SizeInPixels.Width != (int)imageWidth ||
             _offscreen.SizeInPixels.Height != (int)imageHeight))
         {
             DestroyOffScreen();
         }
 
-        var drawingQuality = AppConfig.Settings.HighQualityInterpolation ? 
+        var drawingQuality = AppConfig.Settings.HighQualityInterpolation ?
             CanvasImageInterpolation.HighQualityCubic : CanvasImageInterpolation.NearestNeighbor;
 
         if (_offscreen == null && imageWidth < _d2dCanvas.ActualWidth * 1.5)
@@ -593,7 +638,7 @@ internal class Win2dCanvasController : ICanvasController
 }
 
 internal interface ICanvasController
-{    
-    Task SetSource(Photo firstPhoto, DisplayLevel hq);
+{
+    Task SetSource(Photo photo, DisplayLevel hq);
     void SetHundredPercent(bool redraw);
 }

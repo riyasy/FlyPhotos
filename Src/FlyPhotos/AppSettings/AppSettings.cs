@@ -33,6 +33,7 @@ public class AppSettings
     public int FadeIntensity { get; set; }
     public bool OpenExitZoom { get; set; }
     public bool HighQualityInterpolation { get; set; }
+    public bool CheckeredBackground { get; set; }
 }
 
 public enum WindowBackdropType

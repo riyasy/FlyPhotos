@@ -68,7 +68,7 @@
                             Margin="0,5,0,0"
                             Description="⚠ Zoom effect can slow file open as it waits for full file read. No zoom startup uses cached or preview images of files"
                             Header="Zoom in on file Open, Zoom out on exit"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE9A6;}">
                             <ToggleSwitch x:Name="ButtonOpenExitZoom" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
@@ -76,16 +76,24 @@
                             Margin="0,5,0,0"
                             Description="Reset Pan and Zoom on displaying next photo"
                             Header="Pan Zoom Reset"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE71E;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
                             <ToggleSwitch x:Name="ButtonResetPanZoom" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardHighQualityInterpolation"
                             Margin="0,5,0,0"
-                            Description="Disable for viewing Pixel Art"
-                            Header="Smoothen images when zooming"
+                            Description="Disable this for pixel peeping and for viewing Pixel Art"
+                            Header="Use high quality interpolation when zooming"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE71E;}">
                             <ToggleSwitch x:Name="ButtonHighQualityInterpolation" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardShowCheckeredBackground"
+                            Margin="0,5,0,0"
+                            Description="Display checkered background below transparent images. ⚠ May decrease Fly performance"
+                            Header="Show Checkered Background"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE80A;}">
+                            <ToggleSwitch x:Name="ButtonShowCheckeredBackground" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardShowThumbnail"
