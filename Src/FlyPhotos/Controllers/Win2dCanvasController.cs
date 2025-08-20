@@ -52,7 +52,7 @@ internal class Win2dCanvasController : ICanvasController
     private CanvasRenderTarget _offscreen;
     private readonly DispatcherTimer _offScreenDrawTimer = new()
     {
-        Interval = new TimeSpan(0, 0, 0, 0, 350)
+        Interval = new TimeSpan(0, 0, 0, 0, 410)
     };
 
     // FOR ZOOM
@@ -265,6 +265,8 @@ internal class Win2dCanvasController : ICanvasController
         if (_checkeredBrush == null) CreateCheckeredBrush(sender);
 
         if (_currentDisplayItem == null) return;
+
+        args.DrawingSession.Clear(Colors.Transparent);
 
         CanvasImageInterpolation drawingQuality;
         if (!AppConfig.Settings.HighQualityInterpolation || _panZoomAnimationOnGoing)
@@ -590,6 +592,7 @@ internal class Win2dCanvasController : ICanvasController
         {
             var tempOffScreen = new CanvasRenderTarget(_d2dCanvas, (float)imageWidth, (float)imageHeight);
             using var ds = tempOffScreen.CreateDrawingSession();
+            ds.Clear(Colors.Transparent);
             ds.DrawImage(_currentDisplayItem.Bitmap, new Rect(0, 0, imageWidth, imageHeight),
                 _currentDisplayItem.Bitmap.Bounds, 1, drawingQuality);
             _offscreen = tempOffScreen;
