@@ -1,4 +1,11 @@
-﻿using FlyPhotos.AppSettings;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
+using System.Numerics;
+using System.Threading;
+using System.Threading.Tasks;
+using Windows.Foundation;
+using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers.Animators;
 using FlyPhotos.Controllers.Renderers;
 using FlyPhotos.Data;
@@ -9,13 +16,6 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Numerics;
-using System.Threading;
-using System.Threading.Tasks;
-using Windows.Foundation;
 using static FlyPhotos.Controllers.PhotoDisplayController;
 
 namespace FlyPhotos.Controllers;
@@ -168,10 +168,10 @@ internal class CanvasController : ICanvasController
         _canvasViewManager.ZoomOutOnExit(exitAnimationDuration, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight);
     }
 
-    public void ZoomByKeyboard(bool zoomingIn)
+    public void ZoomByKeyboard(ZoomDirection zoomDirection)
     {
         if (IsScreenEmpty()) return;
-        _canvasViewManager.ZoomAtCenter(zoomingIn, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight);
+        _canvasViewManager.ZoomAtCenter(zoomDirection, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight);
         _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
@@ -243,8 +243,8 @@ internal class CanvasController : ICanvasController
     private void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         if (IsScreenEmpty() || Util.IsControlPressed()) return;
-        bool zoomingIn = e.GetCurrentPoint(_d2dCanvas).Properties.MouseWheelDelta > 0;
-        _canvasViewManager.ZoomAtPoint(zoomingIn, e.GetCurrentPoint(_d2dCanvas).Position,
+        var zoomDirection = (e.GetCurrentPoint(_d2dCanvas).Properties.MouseWheelDelta > 0) ? ZoomDirection.In : ZoomDirection.Out;
+        _canvasViewManager.ZoomAtPoint(zoomDirection, e.GetCurrentPoint(_d2dCanvas).Position,
             _d2dCanvas.Device.MaximumBitmapSizeInPixels);
         _currentRenderer.RestartOffScreenDrawTimer();
     }

@@ -1,13 +1,13 @@
-﻿using FlyPhotos.Data;
-using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
-using NLog;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Streams;
+using FlyPhotos.Data;
+using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.UI.Xaml;
+using NLog;
 
 namespace FlyPhotos.Readers;
 
@@ -30,7 +30,7 @@ internal class GifReader
         try
         {
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);
-            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
+            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {
@@ -61,7 +61,7 @@ internal class GifReader
             {
                 // Single frame: Load as a static image (CanvasBitmap).
                 var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);
-                return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
+                return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
             }
         }
         catch (Exception ex)
@@ -86,7 +86,7 @@ internal class GifReader
             // File.ReadAllBytesAsync is the most efficient way to asynchronously 
             // read an entire file into a byte array. It avoids blocking threads.
             byte[] fileBytes = await File.ReadAllBytesAsync(inputPath);
-            return (true, new DisplayItem(fileBytes, DisplayItem.PreviewSource.FromDisk));
+            return (true, new DisplayItem(fileBytes, PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {

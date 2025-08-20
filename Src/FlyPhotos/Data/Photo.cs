@@ -1,10 +1,10 @@
 ﻿#nullable enable
-using FlyPhotos.Utils;
-using Microsoft.Graphics.Canvas.UI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using FlyPhotos.Utils;
+using Microsoft.Graphics.Canvas.UI.Xaml;
 using static FlyPhotos.Controllers.PhotoDisplayController;
 
 namespace FlyPhotos.Data;
@@ -57,8 +57,8 @@ internal class Photo
 
     public void LoadHq()
     {
-        if (Hq == null || Hq.PreviewFrom == DisplayItem.PreviewSource.ErrorScreen ||
-            Hq.PreviewFrom == DisplayItem.PreviewSource.Undefined)
+        if (Hq == null || Hq.PreviewFrom == PreviewSource.ErrorScreen ||
+            Hq.PreviewFrom == PreviewSource.Undefined)
         {
             Hq = ImageUtil.GetHqImage(D2dCanvas, FileName).GetAwaiter().GetResult();
         }
@@ -66,8 +66,8 @@ internal class Photo
 
     public void LoadPreview()
     {
-        if (Preview == null || Preview.PreviewFrom == DisplayItem.PreviewSource.ErrorScreen ||
-            Preview.PreviewFrom == DisplayItem.PreviewSource.Undefined)
+        if (Preview == null || Preview.PreviewFrom == PreviewSource.ErrorScreen ||
+            Preview.PreviewFrom == PreviewSource.Undefined)
         {
             Preview = ImageUtil.GetPreview(D2dCanvas, FileName).GetAwaiter().GetResult();
         }

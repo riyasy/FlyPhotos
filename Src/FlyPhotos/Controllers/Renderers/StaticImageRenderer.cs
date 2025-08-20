@@ -1,11 +1,11 @@
-﻿using FlyPhotos.AppSettings;
+﻿using System;
+using Windows.Foundation;
+using FlyPhotos.AppSettings;
+using FlyPhotos.Data;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
-using System;
-using Windows.Foundation;
-using FlyPhotos.Data;
 
 namespace FlyPhotos.Controllers.Renderers
 {

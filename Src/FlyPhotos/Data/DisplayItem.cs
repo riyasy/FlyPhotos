@@ -5,15 +5,6 @@ namespace FlyPhotos.Data;
 internal class DisplayItem
 {
     public byte[] FileAsByteArray { get; set; }
-
-    public enum PreviewSource
-    {
-        FromDiskCache,
-        FromDisk,
-        ErrorScreen, 
-        Undefined
-    }
-
     public CanvasBitmap Bitmap { get; set; }
     public int Rotation { get; set; }
     public PreviewSource PreviewFrom { get; set; }

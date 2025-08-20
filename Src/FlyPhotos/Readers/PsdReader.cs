@@ -21,7 +21,7 @@ internal class PsdReader
             {
                 using var stream = new MemoryStream(thumbnailData);
                 CanvasBitmap bitmap = await CanvasBitmap.LoadAsync(ctrl, stream.AsRandomAccessStream());
-                return (true, new DisplayItem(bitmap, DisplayItem.PreviewSource.FromDisk));
+                return (true, new DisplayItem(bitmap, PreviewSource.FromDisk));
             }
             catch (Exception ex)
             {
@@ -49,7 +49,7 @@ internal class PsdReader
             var device = CanvasDevice.GetSharedDevice();
             var bitmap = await CanvasBitmap.LoadAsync(device, stream.AsRandomAccessStream());
 
-            return (true, new DisplayItem(bitmap, DisplayItem.PreviewSource.FromDisk));
+            return (true, new DisplayItem(bitmap, PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {

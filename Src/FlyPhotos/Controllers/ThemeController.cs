@@ -1,7 +1,8 @@
-﻿using Microsoft.UI.Xaml;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using FlyPhotos.AppSettings;
+using FlyPhotos.Data;
+using Microsoft.UI.Xaml;
 
 namespace FlyPhotos.Controllers;
 

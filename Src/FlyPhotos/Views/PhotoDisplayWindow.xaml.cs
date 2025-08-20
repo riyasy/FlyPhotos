@@ -1,5 +1,14 @@
 ﻿#nullable enable
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
+using Windows.System;
+using Windows.UI;
+using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers;
+using FlyPhotos.Data;
+using FlyPhotos.FlyNativeLibWrapper;
 using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
@@ -13,20 +22,12 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using NLog;
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
-using Windows.System;
-using Windows.UI;
 using WinRT;
 using WinRT.Interop;
 using WinUIEx;
 using static FlyPhotos.Controllers.PhotoDisplayController;
 using Icon = System.Drawing.Icon;
 using Window = Microsoft.UI.Xaml.Window;
-using FlyPhotos.AppSettings;
-using FlyPhotos.FlyNativeLibWrapper;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -296,10 +297,10 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
 
                 // ZOOM
                 case VirtualKey.Add when ctrlPressed:
-                    _canvasController.ZoomByKeyboard(true);
+                    _canvasController.ZoomByKeyboard(ZoomDirection.In);
                     break;
                 case VirtualKey.Subtract when ctrlPressed:
-                    _canvasController.ZoomByKeyboard(false);
+                    _canvasController.ZoomByKeyboard(ZoomDirection.Out);
                     break;
 
                 // PAN
@@ -319,9 +320,9 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
 
             // Layout-aware override
             if (e.Key == _plusVk)
-                _canvasController.ZoomByKeyboard(true);
+                _canvasController.ZoomByKeyboard(ZoomDirection.In);
             else if (e.Key == _minusVk)
-                _canvasController.ZoomByKeyboard(false);
+                _canvasController.ZoomByKeyboard(ZoomDirection.Out);
         }
         catch (Exception ex)
         {

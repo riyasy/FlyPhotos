@@ -1,8 +1,4 @@
 ﻿#nullable enable
-using FlyPhotos.Data;
-using FlyPhotos.Utils;
-using Microsoft.Graphics.Canvas.UI.Xaml;
-using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -14,19 +10,15 @@ using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using FlyPhotos.AppSettings;
+using FlyPhotos.Data;
+using FlyPhotos.Utils;
+using Microsoft.Graphics.Canvas.UI.Xaml;
+using NLog;
 
 namespace FlyPhotos.Controllers;
 
 internal class PhotoDisplayController : IDisposable
 {
-    public enum DisplayLevel
-    {
-        None,
-        PlaceHolder,
-        Preview,
-        Hq
-    }
-
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     private readonly int MaxConcurrentTasksHqImages = Environment.ProcessorCount;
@@ -177,7 +169,7 @@ internal class PhotoDisplayController : IDisposable
                 _cachedPreviews[index] = photo;
                 _previewsBeingCached.Remove(index, out _);
 
-                if (photo.Preview.PreviewFrom == DisplayItem.PreviewSource.FromDisk) { _toBeDiskCachedPreviews.Push(item); }
+                if (photo.Preview.PreviewFrom == PreviewSource.FromDisk) { _toBeDiskCachedPreviews.Push(item); }
 
                 if (Photo.CurrentDisplayIndex == index)
                     UpgradeImageIfNeeded(photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
@@ -248,7 +240,7 @@ internal class PhotoDisplayController : IDisposable
                 {
                     if (_cachedPreviews.TryGetValue(index, out var image) &&
                         image.Preview != null &&
-                        image.Preview.PreviewFrom == DisplayItem.PreviewSource.FromDisk)
+                        image.Preview.PreviewFrom == PreviewSource.FromDisk)
                     {
                         await DiskCacherWithSqlite.Instance.PutInCache(image.FileName, image.Preview.Bitmap);
                     }
@@ -462,11 +454,7 @@ internal class PhotoDisplayController : IDisposable
         return _photos[Photo.CurrentDisplayIndex].FileName;
     }
 
-    public enum NavDirection
-    {
-        Next,
-        Prev
-    }
+
 
     public void Dispose()
     {

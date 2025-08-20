@@ -1,10 +1,4 @@
 ﻿#nullable enable
-using FlyPhotos.Data;
-using FlyPhotos.Utils;
-using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
-using NLog;
-using PhotoSauce.MagicScaler;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -16,6 +10,12 @@ using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
+using FlyPhotos.Data;
+using FlyPhotos.Utils;
+using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.UI.Xaml;
+using NLog;
+using PhotoSauce.MagicScaler;
 using Path = System.IO.Path;
 
 namespace FlyPhotos.Readers;
@@ -46,7 +46,7 @@ internal class WicReader
         try
         {
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);
-            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
+            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {
@@ -67,7 +67,7 @@ internal class WicReader
                 using var ms = new MemoryStream();
                 MagicImageProcessor.ProcessImage(inputPath, ms, new ProcessImageSettings { Width = 800, HybridMode = HybridScaleMode.Turbo });
                 var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());
-                return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
+                return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
             }
             catch (Exception ex)
             {
@@ -92,7 +92,7 @@ internal class WicReader
             var canvasBitmap =
                 CanvasBitmap.CreateFromBytes(ctrl, rgbAArray, w, h,
                     Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized);
-            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk, rotation));
+            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk, rotation));
         }
         catch (Exception ex)
         {
@@ -110,7 +110,7 @@ internal class WicReader
             var decoder = await BitmapDecoder.CreateAsync(stream);
             using var preview = await decoder.GetThumbnailAsync();
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
-            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
+            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
         }
         catch (Exception)
         {
@@ -128,7 +128,7 @@ internal class WicReader
             var decoder = await BitmapDecoder.CreateAsync(stream);
             using var preview = await decoder.GetPreviewAsync();
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
-            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
+            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {
@@ -144,7 +144,7 @@ internal class WicReader
             var file = await StorageFile.GetFileFromPathAsync(inputPath);
             using var thumbnail = await file.GetThumbnailAsync(ThumbnailMode.PicturesView);
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, thumbnail);
-            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
+            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {

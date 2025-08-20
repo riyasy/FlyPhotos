@@ -1,13 +1,13 @@
-﻿using FlyPhotos.AppSettings;
-using FlyPhotos.Controllers.Animators;
-using FlyPhotos.Data;
-using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.Brushes;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using FlyPhotos.AppSettings;
+using FlyPhotos.Controllers.Animators;
+using FlyPhotos.Data;
+using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.Brushes;
 
 namespace FlyPhotos.Controllers.Renderers
 {

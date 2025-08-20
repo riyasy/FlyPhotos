@@ -1,5 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using Windows.System;
 using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers;
+using FlyPhotos.Data;
 using FlyPhotos.Utils;
 using Microsoft.UI;
 using Microsoft.UI.Composition.SystemBackdrops;
@@ -8,12 +15,6 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using Windows.System;
 using WinRT.Interop;
 
 // To learn more about WinUI, the WinUI project structure,

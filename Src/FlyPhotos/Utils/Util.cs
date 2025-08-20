@@ -1,10 +1,4 @@
 ﻿#nullable enable
-using FlyPhotos.FlyNativeLibWrapper;
-using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.Brushes;
-using Microsoft.UI.Input;
-using Microsoft.UI.Xaml;
-using NLog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,7 +9,13 @@ using Windows.System;
 using Windows.UI;
 using Windows.UI.Core;
 using FlyPhotos.Data;
+using FlyPhotos.FlyNativeLibWrapper;
+using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.UI;
+using Microsoft.UI.Input;
+using Microsoft.UI.Xaml;
+using NLog;
 
 
 namespace FlyPhotos.Utils;

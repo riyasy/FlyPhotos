@@ -1,7 +1,7 @@
-﻿using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.Brushes;
-using System;
+﻿using System;
 using Windows.Foundation;
+using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.Brushes;
 
 namespace FlyPhotos.Controllers.Renderers
 {

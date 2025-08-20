@@ -1,13 +1,13 @@
 ﻿#nullable enable
-using Microsoft.Data.Sqlite;
-using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
-using PhotoSauce.MagicScaler;
 using System;
 using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Data.Sqlite;
+using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.UI.Xaml;
+using PhotoSauce.MagicScaler;
 
 namespace FlyPhotos.Utils;
 

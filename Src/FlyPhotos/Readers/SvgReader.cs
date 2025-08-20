@@ -1,12 +1,12 @@
-﻿using FlyPhotos.Data;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
+using FlyPhotos.Data;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 using SkiaSharp;
 using Svg.Skia;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace FlyPhotos.Readers;
 
@@ -54,7 +54,7 @@ internal class SvgReader
             var rasStream = ms.AsRandomAccessStream();
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, rasStream);
 
-            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
+            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {

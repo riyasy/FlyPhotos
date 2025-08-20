@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json.Serialization;
+using FlyPhotos.Data;
 using Microsoft.UI.Xaml;
 
 namespace FlyPhotos.AppSettings;
@@ -36,13 +37,3 @@ public class AppSettings
     public bool CheckeredBackground { get; set; }
 }
 
-public enum WindowBackdropType
-{
-    None,
-    Mica,
-    MicaAlt,
-    Acrylic,
-    AcrylicThin,
-    Transparent,
-    Frozen
-}

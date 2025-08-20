@@ -1,7 +1,8 @@
-﻿using FlyPhotos.AppSettings;
-using Microsoft.UI.Xaml.Media;
-using System;
+﻿using System;
 using Windows.Foundation;
+using FlyPhotos.AppSettings;
+using FlyPhotos.Data;
+using Microsoft.UI.Xaml.Media;
 
 namespace FlyPhotos.Controllers;
 
@@ -74,9 +75,9 @@ internal class CanvasViewManager
         _canvasViewState.UpdateTransform();
     }
 
-    public void ZoomAtCenter(bool zoomingIn, double canvasWidth, double canvasHeight)
+    public void ZoomAtCenter(ZoomDirection zoomDirection, double canvasWidth, double canvasHeight)
     {
-        var scalePercentage = zoomingIn ? 1.25f : 0.8f;
+        var scalePercentage = (zoomDirection == ZoomDirection.In) ? 1.25f : 0.8f;
         var scaleTo = _canvasViewState.LastScaleTo * scalePercentage;
         if (scaleTo < 0.05) return;
         _canvasViewState.LastScaleTo = scaleTo;
@@ -84,9 +85,9 @@ internal class CanvasViewManager
         StartZoomAnimation(scaleTo, center);
     }
 
-    public void ZoomAtPoint(bool zoomingIn, Point mousePosition, int deviceMaximumBitmapSizeInPixels)
+    public void ZoomAtPoint(ZoomDirection zoomDirection, Point mousePosition, int deviceMaximumBitmapSizeInPixels)
     {
-        var scalePercentage = zoomingIn ? 1.25f : 0.8f;
+        var scalePercentage = (zoomDirection == ZoomDirection.In) ? 1.25f : 0.8f;
         var scaleTo = _canvasViewState.LastScaleTo * scalePercentage;
         // Lower limit of zoom
         if (scaleTo < 0.05) return;

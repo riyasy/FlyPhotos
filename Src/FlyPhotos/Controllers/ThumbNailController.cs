@@ -1,12 +1,12 @@
-﻿using FlyPhotos.Data;
+﻿using System;
+using System.Collections.Concurrent;
+using Windows.Foundation;
+using FlyPhotos.AppSettings;
+using FlyPhotos.Data;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
-using System;
-using System.Collections.Concurrent;
-using Windows.Foundation;
-using FlyPhotos.AppSettings;
 
 namespace FlyPhotos.Controllers;
 

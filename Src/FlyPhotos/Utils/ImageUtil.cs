@@ -1,12 +1,12 @@
-﻿using FlyPhotos.Data;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
+using FlyPhotos.AppSettings;
+using FlyPhotos.Data;
 using FlyPhotos.Readers;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using FlyPhotos.AppSettings;
 
 namespace FlyPhotos.Utils;
 
@@ -36,7 +36,7 @@ internal class ImageUtil
         async Task<DisplayItem> LoadIndicatorAsync(string path)
         {
             var bitmap = await CanvasBitmap.LoadAsync(d2dCanvas, path);
-            return new DisplayItem(bitmap, DisplayItem.PreviewSource.ErrorScreen);
+            return new DisplayItem(bitmap, PreviewSource.ErrorScreen);
         }
     }
 
@@ -53,7 +53,7 @@ internal class ImageUtil
                 var cachedBmp = await DiskCacherWithSqlite.Instance.ReturnFromCache(d2dCanvas, path);
                 if (null != cachedBmp)
                 {
-                    return (new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache), true);
+                    return (new DisplayItem(cachedBmp, PreviewSource.FromDiskCache), true);
                 }
             }
 
@@ -126,7 +126,7 @@ internal class ImageUtil
             var cachedBmp = await DiskCacherWithSqlite.Instance.ReturnFromCache(d2dCanvas, path);
             if (null != cachedBmp)
             {
-                return new DisplayItem(cachedBmp, DisplayItem.PreviewSource.FromDiskCache);
+                return new DisplayItem(cachedBmp, PreviewSource.FromDiskCache);
             }
 
             var extension = Path.GetExtension(path).ToUpper();

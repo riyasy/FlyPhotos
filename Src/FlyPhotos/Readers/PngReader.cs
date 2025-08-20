@@ -1,14 +1,14 @@
-﻿using FlyPhotos.Data;
-using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
-using NLog;
-using System;
+﻿using System;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Streams;
+using FlyPhotos.Data;
+using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.UI.Xaml;
+using NLog;
 
 namespace FlyPhotos.Readers;
 
@@ -67,7 +67,7 @@ internal class PngReader
         try
         {
             var canvasBitmap = await CanvasBitmap.LoadAsync(resourceCreator, stream);
-            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
+            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {
@@ -82,7 +82,7 @@ internal class PngReader
         try
         {
             var canvasBitmap = await CanvasBitmap.LoadAsync(resourceCreator, path);
-            return (true, new DisplayItem(canvasBitmap, DisplayItem.PreviewSource.FromDisk));
+            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {
@@ -103,7 +103,7 @@ internal class PngReader
             var bytes = new byte[stream.Size];
             await stream.ReadAsync(bytes.AsBuffer(), (uint)stream.Size, InputStreamOptions.None);
 
-            return (true, new DisplayItem(bytes, DisplayItem.PreviewSource.FromDisk));
+            return (true, new DisplayItem(bytes, PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {

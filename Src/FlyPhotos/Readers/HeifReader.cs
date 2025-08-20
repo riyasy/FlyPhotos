@@ -1,12 +1,12 @@
-﻿using FlyPhotos.Data;
+﻿using System;
+using System.Buffers;
+using System.Runtime.InteropServices;
+using Windows.Graphics.DirectX;
+using FlyPhotos.Data;
 using LibHeifSharp;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
-using System;
-using System.Buffers;
-using System.Runtime.InteropServices;
-using Windows.Graphics.DirectX;
 
 namespace FlyPhotos.Readers;
 
@@ -39,7 +39,7 @@ internal class HeifReader
 
             using var previewImageHandle = primaryImage.GetThumbnailImage(previewImageIds[0]);
             var retBmp = CreateBitmapSource(ctrl, previewImageHandle, decodingOptions);
-            return (retBmp.Bounds.Width >= 1, new DisplayItem(retBmp, DisplayItem.PreviewSource.FromDisk));
+            return (retBmp.Bounds.Width >= 1, new DisplayItem(retBmp, PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {
