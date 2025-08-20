@@ -168,7 +168,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
     {
         if (_photoController.IsSinglePhoto()) return;
         var delta = e.GetCurrentPoint(ButtonBack).Properties.MouseWheelDelta;
-        await _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
+        await _photoController.Fly(delta > 0 ? NavDirection.Prev : NavDirection.Next);
         _wheelScrollBrakeTimer.Stop();
         _wheelScrollBrakeTimer.Start();
     }
@@ -233,7 +233,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         if (!Util.IsControlPressed()) return;
         if (_photoController.IsSinglePhoto()) return;
         var delta = e.GetCurrentPoint(D2dCanvas).Properties.MouseWheelDelta;
-        await _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
+        await _photoController.Fly(delta > 0 ? NavDirection.Prev : NavDirection.Next);
         _wheelScrollBrakeTimer.Stop();
         _wheelScrollBrakeTimer.Start();
     }
@@ -242,7 +242,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
     {
         if (_photoController.IsSinglePhoto()) return;
         var delta = e.GetCurrentPoint(D2dCanvasThumbNail).Properties.MouseWheelDelta;
-        await _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
+        await _photoController.Fly(delta > 0 ? NavDirection.Prev : NavDirection.Next);
         _wheelScrollBrakeTimer.Stop();
         _wheelScrollBrakeTimer.Start();
     }
