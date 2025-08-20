@@ -231,9 +231,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
 
     private async void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
-        var coreWindow = Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
-        bool isControlPressed = coreWindow.HasFlag(CoreVirtualKeyStates.Down);
-        if (!isControlPressed) return;
+        if (!Util.IsControlPressed()) return;
         if (_photoController.IsSinglePhoto()) return;
         var delta = e.GetCurrentPoint(D2dCanvas).Properties.MouseWheelDelta;
         await _photoController.Fly(delta > 0 ? NavDirection.Next : NavDirection.Prev);
@@ -279,7 +277,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
     {
         try
         {
-            bool ctrlPressed = Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control).HasFlag(CoreVirtualKeyStates.Down);
+            bool ctrlPressed = Util.IsControlPressed();
             switch (e.Key)
             {
                 case VirtualKey.C when ctrlPressed:
@@ -300,10 +298,10 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
 
                 // ZOOM
                 case VirtualKey.Add when ctrlPressed:
-                    _canvasController.ZoomByKeyboard(1.25f);
+                    _canvasController.ZoomByKeyboard(true);
                     break;
                 case VirtualKey.Subtract when ctrlPressed:
-                    _canvasController.ZoomByKeyboard(0.8f);
+                    _canvasController.ZoomByKeyboard(false);
                     break;
 
                 // PAN
@@ -323,9 +321,9 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
 
             // Layout-aware override
             if (e.Key == _plusVk)
-                _canvasController.ZoomByKeyboard(1.25f);
+                _canvasController.ZoomByKeyboard(true);
             else if (e.Key == _minusVk)
-                _canvasController.ZoomByKeyboard(0.8f);
+                _canvasController.ZoomByKeyboard(false);
         }
         catch (Exception ex)
         {

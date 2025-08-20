@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using FlyPhotos.FlyNativeLibWrapper;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using NLog;
@@ -9,7 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Windows.System;
-using FlyPhotos.FlyNativeLibWrapper;
+using Windows.UI.Core;
 
 
 namespace FlyPhotos.Utils;
@@ -131,6 +132,13 @@ internal static class Util
         short vkScanResult = NativeMethods.VkKeyScanExA((byte)character, layout);
         int virtualKeyCode = vkScanResult & 0xff;
         return (VirtualKey)virtualKeyCode;
+    }
+
+    public static bool IsControlPressed()
+    {
+        var coreWindow = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
+        var isControlPressed = coreWindow.HasFlag(CoreVirtualKeyStates.Down);
+        return isControlPressed;
     }
 
 }
