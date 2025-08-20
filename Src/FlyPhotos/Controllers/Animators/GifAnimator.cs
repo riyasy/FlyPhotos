@@ -72,13 +72,6 @@ public class GifAnimator : IAnimator
         return await CreateAsyncInternal(randomAccessStream);
     }
 
-    public static async Task<GifAnimator> CreateAsync(string filePath)
-    {
-        var stream = File.OpenRead(filePath).AsRandomAccessStream();
-        // The new private internal method does the rest of the work.
-        return await CreateAsyncInternal(stream);
-    }
-
     private static async Task<GifAnimator> CreateAsyncInternal(IRandomAccessStream stream)
     {
         var device = CanvasDevice.GetSharedDevice();
@@ -201,7 +194,7 @@ public class GifAnimator : IAnimator
         for (uint i = 0; i < decoder.FrameCount; i++)
         {
             var frame = await decoder.GetFrameAsync(i);
-            var propertyKeys = new string[] {
+            var propertyKeys = new[] {
                 "System.Animation.FrameDelay",
                 "/imgdesc/Left",
                 "/imgdesc/Top",

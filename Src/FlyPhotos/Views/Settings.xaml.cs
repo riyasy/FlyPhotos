@@ -1,6 +1,5 @@
 using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers;
-using FlyPhotos.Data;
 using FlyPhotos.Utils;
 using Microsoft.UI;
 using Microsoft.UI.Composition.SystemBackdrops;

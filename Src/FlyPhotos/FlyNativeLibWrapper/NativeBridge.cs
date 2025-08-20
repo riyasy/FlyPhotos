@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using FlyPhotos.Data;
 
 namespace FlyPhotos.FlyNativeLibWrapper;
 
@@ -35,18 +36,21 @@ public static class CliWrapper
     {
         var files = new List<string>();
 
-        // The callback function adds each file to our list.
-        NativeBridge.FileListCallback callback = filePath => { files.Add(filePath); };
-
         // Call the native function with our callback.
-        var hr = NativeBridge.GetFileListFromExplorer(callback);
+        var hr = NativeBridge.GetFileListFromExplorer(FileListCallback);
 
         // Optional: Check HRESULT (hr) for success or failure
         if (hr >= 0) // SUCCEEDED
             return files;
 
         // Handle error, maybe return an empty list or throw an exception
-        return new List<string>();
+        return [];
+
+        // The callback function adds each file to our list.
+        void FileListCallback(string filePath)
+        {
+            files.Add(filePath);
+        }
     }
 
     // You can call this directly
@@ -57,10 +61,20 @@ public static class CliWrapper
     {
         var codecs = new List<CodecInfo>();
 
+        // Call the native function
+        var hresult = NativeBridge.GetWicDecoders(CodecInfoCallback);
+
+        // Optional: Check the HRESULT for errors
+        if (hresult < 0)
+            // Throw an exception or handle the error from the native call
+            Marshal.ThrowExceptionForHR(hresult);
+
+        return codecs;
+
         // The delegate instance must be kept alive during the native call,
         // so the garbage collector doesn't clean it up prematurely.
         // Assigning it to a local variable is sufficient.
-        NativeBridge.CodecInfoCallback callback = (friendlyName, extensions) =>
+        void CodecInfoCallback(string friendlyName, string extensions)
         {
             var codec = new CodecInfo
             {
@@ -70,17 +84,7 @@ public static class CliWrapper
                     .Split([','], StringSplitOptions.RemoveEmptyEntries))
             };
             codecs.Add(codec);
-        };
-
-        // Call the native function
-        var hresult = NativeBridge.GetWicDecoders(callback);
-
-        // Optional: Check the HRESULT for errors
-        if (hresult < 0)
-            // Throw an exception or handle the error from the native call
-            Marshal.ThrowExceptionForHR(hresult);
-
-        return codecs;
+        }
     }
 
     public static void ShowContextMenu(string filePath, int lpPointX, int lpPointY)

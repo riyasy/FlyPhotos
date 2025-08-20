@@ -19,8 +19,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Windows.System;
 using Windows.UI;
-using Windows.UI.Core;
-using FlyPhotos.Data;
 using WinRT;
 using WinRT.Interop;
 using WinUIEx;
@@ -43,7 +41,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    private readonly Win2dCanvasController _canvasController;
+    private readonly CanvasController _canvasController;
     private readonly ThumbNailController _thumbNailController;
     private readonly PhotoDisplayController _photoController;
 
@@ -64,8 +62,8 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
 
     private OverlappedPresenterState _lastWindowState;
 
-    private readonly VirtualKey _plusVk = Utils.Util.GetKeyThatProduces('+');
-    private readonly VirtualKey _minusVk = Utils.Util.GetKeyThatProduces('-');
+    private readonly VirtualKey _plusVk = Util.GetKeyThatProduces('+');
+    private readonly VirtualKey _minusVk = Util.GetKeyThatProduces('-');
 
     private readonly OpacityFader _opacityFader;
     private bool _controlsFaded;
@@ -98,7 +96,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         DispatcherQueue.EnsureSystemDispatcherQueue();
 
         _thumbNailController = new ThumbNailController(D2dCanvasThumbNail);
-        _canvasController = new Win2dCanvasController(D2dCanvas, _thumbNailController);
+        _canvasController = new CanvasController(D2dCanvas, _thumbNailController);
         _photoController = new PhotoDisplayController(D2dCanvas, UpdateStatus, _canvasController, _thumbNailController);
 
         TxtFileName.Text = Path.GetFileName(App.SelectedFileName);
@@ -395,8 +393,8 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
 
         if (AppConfig.Settings.OpenExitZoom)
         {
-            _canvasController.ZoomOutOnExit(Win2dCanvasController.PanZoomAnimationDurationForExit);
-            await Task.Delay(Win2dCanvasController.PanZoomAnimationDurationForExit);
+            _canvasController.ZoomOutOnExit(CanvasController.PanZoomAnimationDurationForExit);
+            await Task.Delay(CanvasController.PanZoomAnimationDurationForExit);
         }
         this.Hide();
         this.Close();

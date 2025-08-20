@@ -110,12 +110,6 @@ public class PngAnimator : IAnimator
         return await CreateAsyncInternal(randomAccessStream);
     }
 
-    public static async Task<PngAnimator> CreateAsync(string filePath)
-    {
-        var stream = File.OpenRead(filePath).AsRandomAccessStream();
-        return await CreateAsyncInternal(stream);
-    }
-
     private static async Task<PngAnimator> CreateAsyncInternal(IRandomAccessStream stream)
     {
         var device = CanvasDevice.GetSharedDevice();
@@ -376,7 +370,7 @@ public class PngAnimator : IAnimator
             IEnumerable<PngChunk> dataChunks, uint? frameWidth = null, uint? frameHeight = null)
         {
             using var ms = new InMemoryRandomAccessStream();
-            using var writer = new BinaryWriter(ms.AsStreamForWrite());
+            await using var writer = new BinaryWriter(ms.AsStreamForWrite());
             writer.Write(PngSignature);
             var ihdrData = (byte[])ihdrChunk.Data.Clone();
             if (frameWidth.HasValue && frameHeight.HasValue)

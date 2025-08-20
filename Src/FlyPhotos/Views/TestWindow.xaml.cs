@@ -1,14 +1,4 @@
-using FlyPhotos.Data;
-using FlyPhotos.Utils;
-using Microsoft.Graphics.Canvas;
 using Microsoft.UI.Xaml;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Windows.UI.Popups;
 
 namespace FlyPhotos.Views;
 

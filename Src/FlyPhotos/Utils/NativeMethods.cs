@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
+namespace FlyPhotos.Utils;
+
 internal static class NativeMethods
 {
     // HKL is essentially a handle, so IntPtr is appropriate.

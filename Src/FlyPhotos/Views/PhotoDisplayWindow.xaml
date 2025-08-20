@@ -6,11 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:win2d="using:Microsoft.Graphics.Canvas.UI.Xaml"
-    xmlns:winuiex="using:WinUIEx"
     mc:Ignorable="d">
-    <!--<Window.SystemBackdrop>
-        <winuiex:TransparentTintBackdrop TintColor="#554444ff" />
-    </Window.SystemBackdrop>-->
     <Grid
         x:Name="MainLayout"
         HorizontalAlignment="Stretch"

@@ -3,7 +3,6 @@ using FlyPhotos.Data;
 using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
-using Microsoft.UI.Xaml.Shapes;
 using NLog;
 using PhotoSauce.MagicScaler;
 using System;
@@ -217,7 +216,8 @@ internal class WicReader
             CreateNoWindow = true
         };
 
-        using var p = new Process { StartInfo = processStartInfo };
+        using var p = new Process();
+        p.StartInfo = processStartInfo;
         p.Start();
         p.WaitForExit(); // You might want to add a timeout here for robustness
         return p.ExitCode == 0;

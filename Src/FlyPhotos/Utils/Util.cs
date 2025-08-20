@@ -1,5 +1,7 @@
 ﻿#nullable enable
 using FlyPhotos.FlyNativeLibWrapper;
+using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using NLog;
@@ -10,7 +12,10 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Windows.System;
+using Windows.UI;
 using Windows.UI.Core;
+using FlyPhotos.Data;
+using Microsoft.UI;
 
 
 namespace FlyPhotos.Utils;
@@ -92,10 +97,7 @@ internal static class Util
     public static string GetExtensionsDisplayString()
     {
         var sb = new StringBuilder();
-        if (_codecInfoList == null)
-        {
-            _codecInfoList = CliWrapper.GetWicDecoders();
-        }
+        _codecInfoList ??= CliWrapper.GetWicDecoders();
 
         foreach (var codec in _codecInfoList)
         {
@@ -139,6 +141,30 @@ internal static class Util
         var coreWindow = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
         var isControlPressed = coreWindow.HasFlag(CoreVirtualKeyStates.Down);
         return isControlPressed;
+    }
+
+    public static CanvasImageBrush CreateCheckeredBrush(ICanvasResourceCreator resourceCreator, int checkerSize)
+    {
+        // Create a render target for the small 2x2 checker pattern
+        using var patternRenderTarget = new CanvasRenderTarget(resourceCreator, checkerSize * 2, checkerSize * 2, 96);
+
+        using (var ds = patternRenderTarget.CreateDrawingSession())
+        {
+            // The pattern is two white and two grey squares, forming a checkerboard
+            var grey = Color.FromArgb(255, 204, 204, 204);
+            ds.Clear(grey);
+            ds.FillRectangle(0, 0, checkerSize, checkerSize, Colors.White);
+            ds.FillRectangle(checkerSize, checkerSize, checkerSize, checkerSize, Colors.White);
+        }
+
+        // Create a brush from this pattern that can be tiled
+        var checkeredBrush = new CanvasImageBrush(resourceCreator, patternRenderTarget)
+        {
+            ExtendX = CanvasEdgeBehavior.Wrap,
+            ExtendY = CanvasEdgeBehavior.Wrap,
+            Interpolation = CanvasImageInterpolation.NearestNeighbor
+        };
+        return checkeredBrush;
     }
 
 }

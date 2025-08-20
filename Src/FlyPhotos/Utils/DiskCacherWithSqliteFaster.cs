@@ -1,9 +1,9 @@
-﻿using Microsoft.Data.Sqlite;
+﻿#nullable enable
+using Microsoft.Data.Sqlite;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using PhotoSauce.MagicScaler;
 using System;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -155,7 +155,7 @@ public sealed class DiskCacherWithSqlite : IDisposable
             try
             {
                 _cmdSelectByPath.Parameters["$p"].Value = filePath;
-                using var reader = await _cmdSelectByPath.ExecuteReaderAsync().ConfigureAwait(false);
+                await using var reader = await _cmdSelectByPath.ExecuteReaderAsync().ConfigureAwait(false);
 
                 if (await reader.ReadAsync().ConfigureAwait(false))
                 {

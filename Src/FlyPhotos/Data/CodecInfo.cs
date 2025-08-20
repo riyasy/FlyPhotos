@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+namespace FlyPhotos.Data;
+
 /// <summary>
 /// Represents information about a Windows Imaging Component (WIC) codec.
 /// </summary>
@@ -13,6 +15,6 @@ public class CodecInfo
     /// <summary>
     /// A list of file extensions associated with this codec (e.g., ".JPG", ".JPEG").
     /// </summary>
-    public List<string> FileExtensions { get; set; } = new();
+    public List<string> FileExtensions { get; set; } = [];
 
 }

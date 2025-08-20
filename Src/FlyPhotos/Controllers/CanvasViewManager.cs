@@ -9,13 +9,14 @@ internal class CanvasViewManager
 {
     public EventHandler<object> RenderingHandler;
     public DateTime PanZoomAnimationStartTime;
-    public double PanZoomAnimationDurationMs = Win2dCanvasController.PanZoomAnimationDurationNormal;
+    public double PanZoomAnimationDurationMs = CanvasController.PanZoomAnimationDurationNormal;
     public bool PanZoomAnimationOnGoing;
     public float ZoomStartScale;
     public float ZoomTargetScale;
     public Point ZoomCenter;
     public Point PanStartPosition;
     public Point PanTargetPosition;
+
     private readonly CanvasViewState _canvasViewState;
     private readonly Action _invalidateCanvas; // A callback to trigger a redraw
 
@@ -140,9 +141,9 @@ internal class CanvasViewManager
         _invalidateCanvas();
     }
 
-    public void Rotate(int rotation)
+    public void RotateBy(int rotation)
     {
-        _canvasViewState.Rotation = rotation;
+        _canvasViewState.Rotation += rotation;
         _canvasViewState.UpdateTransform();
         _invalidateCanvas();
     }
@@ -232,5 +233,13 @@ internal class CanvasViewManager
             CompositionTarget.Rendering -= RenderingHandler;
             PanZoomAnimationOnGoing = false;
         }
+    }
+
+    public void Dispose()
+    {
+        if (RenderingHandler == null) return;
+        CompositionTarget.Rendering -= RenderingHandler;
+        RenderingHandler = null;
+        PanZoomAnimationOnGoing = false;
     }
 }

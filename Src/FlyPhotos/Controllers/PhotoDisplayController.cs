@@ -91,7 +91,7 @@ internal class PhotoDisplayController : IDisposable
 
         await _canvasController.SetSource(_firstPhoto, DisplayLevel.Hq);
         if (AppConfig.Settings.OpenExitZoom)
-            await Task.Delay(Win2dCanvasController.PanZoomAnimationDurationNormal);
+            await Task.Delay(CanvasController.PanZoomAnimationDurationNormal);
         _firstPhotoLoaded = true;
         _firstPhotoLoadEvent.Set();
     }

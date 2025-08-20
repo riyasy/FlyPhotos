@@ -4,7 +4,6 @@ using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.AppSettings;
