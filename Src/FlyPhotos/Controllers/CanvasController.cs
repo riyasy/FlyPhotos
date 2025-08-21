@@ -93,6 +93,8 @@ internal class CanvasController : ICanvasController
         await _animatorLock.WaitAsync();
         _animatorLock.Release();
 
+        _checkeredBrush ??= Util.CreateCheckeredBrush(_d2dCanvas, Constants.CheckerSize);
+
         var currentOperationId = ++_latestSetSourceOperationId;
         var isFirstPhoto = _currentRenderer == null;
 
@@ -111,7 +113,7 @@ internal class CanvasController : ICanvasController
                 {
                     previewDrawnAsFirstFrame = true;
                     displayItem.Bitmap = preview.Bitmap;
-                    IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, displayItem.Bitmap, photo.SupportsTransparency(), RequestInvalidate, _canvasViewState);
+                    IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, displayItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
                     SetupNewRenderer(newRenderer, displayItem.Bitmap.Bounds.Width, displayItem.Bitmap.Bounds.Height, displayItem.Rotation, isFirstPhoto, true);
                 }
 
@@ -122,7 +124,7 @@ internal class CanvasController : ICanvasController
                 if (currentOperationId == _latestSetSourceOperationId)
                 {
                     await newAnimator.UpdateAsync(TimeSpan.Zero);
-                    IRenderer newRenderer = new AnimatedImageRenderer(_d2dCanvas, newAnimator, RequestInvalidate, _animatorLock, photo.SupportsTransparency());
+                    IRenderer newRenderer = new AnimatedImageRenderer(_d2dCanvas, _checkeredBrush, newAnimator, _animatorLock, photo.SupportsTransparency(), RequestInvalidate);
                     SetupNewRenderer(newRenderer, newAnimator.PixelWidth, newAnimator.PixelHeight, displayItem.Rotation, !previewDrawnAsFirstFrame, !previewDrawnAsFirstFrame);
                 }
                 else
@@ -137,7 +139,7 @@ internal class CanvasController : ICanvasController
         }
         else
         {
-            IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, displayItem.Bitmap, photo.SupportsTransparency(), RequestInvalidate, _canvasViewState);
+            IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, displayItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
             SetupNewRenderer(newRenderer, displayItem.Bitmap.Bounds.Width, displayItem.Bitmap.Bounds.Height,
                 displayItem.Rotation, isFirstPhoto, true);
         }
@@ -193,9 +195,6 @@ internal class CanvasController : ICanvasController
     {
         args.DrawingSession.Clear(Colors.Transparent);
 
-        if (_checkeredBrush == null)
-            _checkeredBrush = Util.CreateCheckeredBrush(sender, Constants.CheckerSize);
-
         if (_currentRenderer == null) return;
 
         CanvasImageInterpolation drawingQuality;
@@ -206,7 +205,7 @@ internal class CanvasController : ICanvasController
 
         args.DrawingSession.Transform = _canvasViewState.Mat;
 
-        _currentRenderer.Draw(args.DrawingSession, _canvasViewState, drawingQuality, _checkeredBrush);
+        _currentRenderer.Draw(args.DrawingSession, _canvasViewState, drawingQuality);
     }
 
     private void D2dCanvas_SizeChanged(object sender, SizeChangedEventArgs args)

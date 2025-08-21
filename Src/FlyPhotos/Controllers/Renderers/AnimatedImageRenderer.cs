@@ -21,20 +21,23 @@ namespace FlyPhotos.Controllers.Renderers
         private readonly Stopwatch _stopwatch = new();
         private readonly SemaphoreSlim _animatorLock;
         private readonly bool _supportsTransparency;
+        private readonly CanvasImageBrush _checkeredBrush;
 
         public Rect SourceBounds => _animator.Surface.GetBounds(_canvas);
 
-        public AnimatedImageRenderer(CanvasControl canvas, IAnimator animator, Action invalidateCanvas, SemaphoreSlim animatorLock, bool supportsTransparency)
+        public AnimatedImageRenderer(CanvasControl canvas, CanvasImageBrush checkeredBrush, IAnimator animator,
+            SemaphoreSlim animatorLock, bool supportsTransparency, Action invalidateCanvas)
         {
             _canvas = canvas;
             _animator = animator;
             _invalidateCanvas = invalidateCanvas;
             _animatorLock = animatorLock;
             _supportsTransparency = supportsTransparency;
+            _checkeredBrush = checkeredBrush;
             _stopwatch.Start();
         }
 
-        public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, CanvasImageBrush checkeredBrush)
+        public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality)
         {
             if (_animator?.Surface == null) return;
 
@@ -42,7 +45,7 @@ namespace FlyPhotos.Controllers.Renderers
             // Antialiasing can cause fine lines visible at edge of images when drawing checkerboard
             session.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
             if (drawCheckeredBackground)
-                session.FillRectangle(viewState.ImageRect, checkeredBrush);
+                session.FillRectangle(viewState.ImageRect, _checkeredBrush);
             session.DrawImage(_animator.Surface, viewState.ImageRect, _animator.Surface.GetBounds(_canvas), 1.0f, quality);
             _ = RunAnimationLoop();
         }

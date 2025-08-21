@@ -8,6 +8,7 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using System;
 using Windows.Foundation;
+using static System.Collections.Specialized.BitVector32;
 
 namespace FlyPhotos.Controllers.Renderers
 {
@@ -18,17 +19,20 @@ namespace FlyPhotos.Controllers.Renderers
         private readonly DispatcherTimer _offscreenDrawTimer;
         private CanvasRenderTarget _offscreen;
         private readonly CanvasViewState _canvasViewState;
+        private readonly CanvasImageBrush _checkeredBrush;
         private readonly bool _supportsTransparency;
         private readonly CanvasControl _canvas;
 
         public Rect SourceBounds => _sourceBitmap.Bounds;
 
-        public StaticImageRenderer(CanvasControl canvas, CanvasBitmap bitmap, bool supportsTransparency, Action invalidateCanvas, CanvasViewState canvasViewState)
+        public StaticImageRenderer(CanvasControl canvas, CanvasViewState canvasViewState, CanvasBitmap sourceBitmap,
+            CanvasImageBrush checkeredBrush, bool supportsTransparency, Action invalidateCanvas)
         {
-            _sourceBitmap = bitmap;
+            _sourceBitmap = sourceBitmap;
             _supportsTransparency = supportsTransparency;
             _invalidateCanvas = invalidateCanvas;
             _canvasViewState = canvasViewState;
+            _checkeredBrush = checkeredBrush;
             _canvas = canvas;
 
             _offscreenDrawTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(410) };
@@ -36,13 +40,13 @@ namespace FlyPhotos.Controllers.Renderers
         }
 
 
-        public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, CanvasImageBrush checkeredBrush)
+        public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality)
         {
             var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
             // Antialiasing can cause fine lines visible at edge of images when drawing checkerboard
             session.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
             if (drawCheckeredBackground)
-                session.FillRectangle(viewState.ImageRect, checkeredBrush);
+                session.FillRectangle(viewState.ImageRect, _checkeredBrush);
 
             if (_offscreen != null)
                 session.DrawImage(_offscreen, viewState.ImageRect, _offscreen.Bounds, 1f, quality);
@@ -63,6 +67,8 @@ namespace FlyPhotos.Controllers.Renderers
             _invalidateCanvas();
         }
 
+        // TODO : Offscreen still causes light bleeding from the bottom checkered pattern.
+        // If there is no offscreen, there is no light bleeding. Fix THIS
         private void CreateOffscreen()
         {
             var imageWidth = _canvasViewState.ImageRect.Width * _canvasViewState.Scale;
