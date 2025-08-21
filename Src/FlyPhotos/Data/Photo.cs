@@ -104,9 +104,9 @@ internal class Photo
         ".svg",  // Vector format, fully supports transparency
         ".apng", // Animated PNG, supports transparency
         ".ico",  // Icon format, requires transparency
-        ".heic", // High Efficiency Image Format (Apple)
-        ".heif", // High Efficiency Image Format
-        ".avif", // Modern high-compression format
+        //".heic", // High Efficiency Image Format (Apple)
+        //".heif", // High Efficiency Image Format
+        //".avif", // Modern high-compression format
         ".jxl",  // JPEG XL, a newer format that supports transparency
         ".psd"   // Photoshop document
     };

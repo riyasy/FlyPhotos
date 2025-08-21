@@ -35,7 +35,10 @@ namespace FlyPhotos.Controllers.Renderers
 
         public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, CanvasImageBrush checkeredBrush)
         {
-            if (AppConfig.Settings.CheckeredBackground && _supportsTransparency)
+            var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
+            // Antialiasing can cause fine lines visible at edge of images when drawing checkerboard
+            session.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
+            if (drawCheckeredBackground)
                 session.FillRectangle(viewState.ImageRect, checkeredBrush);
 
             if (_offscreen != null)

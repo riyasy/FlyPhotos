@@ -8,6 +8,7 @@ using FlyPhotos.Controllers.Animators;
 using FlyPhotos.Data;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
+using Microsoft.UI;
 
 namespace FlyPhotos.Controllers.Renderers
 {
@@ -30,19 +31,16 @@ namespace FlyPhotos.Controllers.Renderers
             _stopwatch.Start();
         }
 
-
-
         public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, CanvasImageBrush checkeredBrush)
         {
             if (_animator?.Surface == null) return;
 
-            if (AppConfig.Settings.CheckeredBackground && _supportsTransparency)
-            {
+            var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
+            // Antialiasing can cause fine lines visible at edge of images when drawing checkerboard
+            session.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
+            if (drawCheckeredBackground)
                 session.FillRectangle(viewState.ImageRect, checkeredBrush);
-            }
-
             session.DrawImage(_animator.Surface, viewState.ImageRect, _animator.Surface.GetBounds(Photo.D2dCanvas), 1.0f, quality);
-
             _ = RunAnimationLoop();
         }
 
