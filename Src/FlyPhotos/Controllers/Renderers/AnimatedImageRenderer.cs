@@ -1,29 +1,32 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
-using Windows.Foundation;
-using FlyPhotos.AppSettings;
+﻿using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers.Animators;
 using FlyPhotos.Data;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
+using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
+using System;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
+using Windows.Foundation;
 
 namespace FlyPhotos.Controllers.Renderers
 {
     internal class AnimatedImageRenderer : IRenderer
     {
+        private readonly CanvasControl _canvas;
         private readonly IAnimator _animator;
         private readonly Action _invalidateCanvas;
         private readonly Stopwatch _stopwatch = new();
         private readonly SemaphoreSlim _animatorLock;
         private readonly bool _supportsTransparency;
 
-        public Rect SourceBounds => _animator.Surface.GetBounds(Photo.D2dCanvas);
+        public Rect SourceBounds => _animator.Surface.GetBounds(_canvas);
 
-        public AnimatedImageRenderer(IAnimator animator, Action invalidateCanvas, SemaphoreSlim animatorLock, bool supportsTransparency)
+        public AnimatedImageRenderer(CanvasControl canvas, IAnimator animator, Action invalidateCanvas, SemaphoreSlim animatorLock, bool supportsTransparency)
         {
+            _canvas = canvas;
             _animator = animator;
             _invalidateCanvas = invalidateCanvas;
             _animatorLock = animatorLock;
@@ -40,7 +43,7 @@ namespace FlyPhotos.Controllers.Renderers
             session.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
             if (drawCheckeredBackground)
                 session.FillRectangle(viewState.ImageRect, checkeredBrush);
-            session.DrawImage(_animator.Surface, viewState.ImageRect, _animator.Surface.GetBounds(Photo.D2dCanvas), 1.0f, quality);
+            session.DrawImage(_animator.Surface, viewState.ImageRect, _animator.Surface.GetBounds(_canvas), 1.0f, quality);
             _ = RunAnimationLoop();
         }
 

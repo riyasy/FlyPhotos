@@ -29,7 +29,7 @@ public class GifAnimator : IAnimator
     private readonly IRandomAccessStream _stream;
     private readonly IReadOnlyList<FrameMetadata> _frameMetadata;
     private readonly TimeSpan _totalAnimationDuration;
-    private readonly CanvasDevice _device;
+    private readonly ICanvasResourceCreator _device;
 
     // Off-screen surfaces for composing frames
     private readonly CanvasRenderTarget _compositedSurface;
@@ -44,7 +44,7 @@ public class GifAnimator : IAnimator
     public ICanvasImage Surface => _compositedSurface;
 
     private GifAnimator(
-        CanvasDevice device,
+        ICanvasResourceCreator device,
         BitmapDecoder decoder,
         IRandomAccessStream stream,
         List<FrameMetadata> metadata)
@@ -63,18 +63,18 @@ public class GifAnimator : IAnimator
     }
 
 
-    public static async Task<GifAnimator> CreateAsync(byte[] gifData)
+    public static async Task<GifAnimator> CreateAsync(byte[] gifData, ICanvasResourceCreator device)
     {
         var memoryStream = new MemoryStream(gifData);
         var randomAccessStream = memoryStream.AsRandomAccessStream();
         // The new private internal method does the rest of the work.
         // The stream will be owned and disposed by the animator instance.
-        return await CreateAsyncInternal(randomAccessStream);
+        return await CreateAsyncInternal(randomAccessStream, device);
     }
 
-    private static async Task<GifAnimator> CreateAsyncInternal(IRandomAccessStream stream)
+    private static async Task<GifAnimator> CreateAsyncInternal(IRandomAccessStream stream,
+        ICanvasResourceCreator device)
     {
-        var device = CanvasDevice.GetSharedDevice();
         try
         {
             var decoder = await BitmapDecoder.CreateAsync(stream);

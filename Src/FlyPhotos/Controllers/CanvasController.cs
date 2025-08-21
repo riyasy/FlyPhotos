@@ -21,10 +21,8 @@ namespace FlyPhotos.Controllers;
 
 internal class CanvasController : ICanvasController
 {
-    public const int PanZoomAnimationDurationForExit = 200;
-    public const int PanZoomAnimationDurationNormal = 400;
-
     private readonly IThumbnailController _thumbNailController;
+    private readonly PhotoSessionState _photoSessionState;
     private readonly CanvasControl _d2dCanvas;
 
     private IRenderer _currentRenderer; 
@@ -41,7 +39,6 @@ internal class CanvasController : ICanvasController
 
     // For Checkered Background
     private CanvasImageBrush _checkeredBrush;
-    private const int CheckerSize = 10;
 
     // For State management
     private readonly CanvasViewState _canvasViewState;
@@ -49,10 +46,12 @@ internal class CanvasController : ICanvasController
 
     #region Construction and Destruction
 
-    public CanvasController(CanvasControl d2dCanvas, IThumbnailController thumbNailController)
+    public CanvasController(CanvasControl d2dCanvas, IThumbnailController thumbNailController,
+        PhotoSessionState photoSessionState)
     {
         _d2dCanvas = d2dCanvas;
         _thumbNailController = thumbNailController;
+        _photoSessionState = photoSessionState;
 
         _d2dCanvas.Draw += D2dCanvas_Draw;
         _d2dCanvas.SizeChanged += D2dCanvas_SizeChanged;
@@ -65,7 +64,7 @@ internal class CanvasController : ICanvasController
         _canvasViewManager = new CanvasViewManager(_canvasViewState, RequestInvalidate);
     }
 
-    public async Task CleanupOnClose()
+    public async ValueTask DisposeAsync()
     {
         await _animatorLock.WaitAsync();
         try
@@ -97,7 +96,7 @@ internal class CanvasController : ICanvasController
         var currentOperationId = ++_latestSetSourceOperationId;
         var isFirstPhoto = _currentRenderer == null;
 
-        Photo.CurrentDisplayLevel = displayLevel;
+        _photoSessionState.CurrentDisplayLevel = displayLevel;
         var displayItem = photo.GetDisplayItemBasedOn(displayLevel);
 
         if (displayItem == null) return;
@@ -117,13 +116,13 @@ internal class CanvasController : ICanvasController
                 }
 
                 IAnimator newAnimator = Path.GetExtension(photo.FileName).ToUpper() == ".GIF"
-                    ? await GifAnimator.CreateAsync(displayItem.FileAsByteArray)
-                    : await PngAnimator.CreateAsync(displayItem.FileAsByteArray);
+                    ? await GifAnimator.CreateAsync(displayItem.FileAsByteArray, _d2dCanvas)
+                    : await PngAnimator.CreateAsync(displayItem.FileAsByteArray, _d2dCanvas);
 
                 if (currentOperationId == _latestSetSourceOperationId)
                 {
                     await newAnimator.UpdateAsync(TimeSpan.Zero);
-                    IRenderer newRenderer = new AnimatedImageRenderer(newAnimator, RequestInvalidate, _animatorLock, photo.SupportsTransparency());
+                    IRenderer newRenderer = new AnimatedImageRenderer(_d2dCanvas, newAnimator, RequestInvalidate, _animatorLock, photo.SupportsTransparency());
                     SetupNewRenderer(newRenderer, newAnimator.PixelWidth, newAnimator.PixelHeight, displayItem.Rotation, !previewDrawnAsFirstFrame, !previewDrawnAsFirstFrame);
                 }
                 else
@@ -195,7 +194,7 @@ internal class CanvasController : ICanvasController
         args.DrawingSession.Clear(Colors.Transparent);
 
         if (_checkeredBrush == null)
-            _checkeredBrush = Util.CreateCheckeredBrush(sender, CheckerSize);
+            _checkeredBrush = Util.CreateCheckeredBrush(sender, Constants.CheckerSize);
 
         if (_currentRenderer == null) return;
 
@@ -278,10 +277,4 @@ internal class CanvasController : ICanvasController
     }
 
     #endregion
-}
-
-internal interface ICanvasController
-{
-    Task SetSource(Photo photo, DisplayLevel hq);
-    void SetHundredPercent(bool animateChange);
 }

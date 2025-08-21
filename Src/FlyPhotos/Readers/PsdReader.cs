@@ -46,8 +46,7 @@ internal class PsdReader
             stream.Position = 0;
 
             // Create a CanvasBitmap from the MemoryStream
-            var device = CanvasDevice.GetSharedDevice();
-            var bitmap = await CanvasBitmap.LoadAsync(device, stream.AsRandomAccessStream());
+            var bitmap = await CanvasBitmap.LoadAsync(d2dCanvas, stream.AsRandomAccessStream());
 
             return (true, new DisplayItem(bitmap, PreviewSource.FromDisk));
         }

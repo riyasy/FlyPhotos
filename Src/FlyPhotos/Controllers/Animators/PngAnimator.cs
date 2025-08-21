@@ -53,7 +53,7 @@ public class PngAnimator : IAnimator
     private readonly List<Parser.PngChunk> _globalChunks;
     private readonly IReadOnlyList<ApngFrameMetadata> _frameMetadata;
     private readonly TimeSpan _totalAnimationDuration;
-    private readonly CanvasDevice _device;
+    private readonly ICanvasResourceCreator _device;
 
     // Off-screen surfaces for composing frames
     private readonly CanvasRenderTarget _compositedSurface;
@@ -69,7 +69,7 @@ public class PngAnimator : IAnimator
     #region Creation and Initialization
 
     private PngAnimator(
-        CanvasDevice device,
+        ICanvasResourceCreator device,
         IRandomAccessStream stream,
         Parser.ApngData apngData,
         List<ApngFrameMetadata> metadata)
@@ -103,16 +103,16 @@ public class PngAnimator : IAnimator
         }
     }
 
-    public static async Task<PngAnimator> CreateAsync(byte[] apngData)
+    public static async Task<PngAnimator> CreateAsync(byte[] apngData, ICanvasResourceCreator device)
     {
         var memoryStream = new MemoryStream(apngData);
         var randomAccessStream = memoryStream.AsRandomAccessStream();
-        return await CreateAsyncInternal(randomAccessStream);
+        return await CreateAsyncInternal(randomAccessStream, device);
     }
 
-    private static async Task<PngAnimator> CreateAsyncInternal(IRandomAccessStream stream)
+    private static async Task<PngAnimator> CreateAsyncInternal(IRandomAccessStream stream,
+        ICanvasResourceCreator device)
     {
-        var device = CanvasDevice.GetSharedDevice();
         try
         {
             // 1. Parse the entire APNG structure first.

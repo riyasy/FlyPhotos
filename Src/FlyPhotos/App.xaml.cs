@@ -4,7 +4,6 @@ using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers;
 using FlyPhotos.Utils;
 using FlyPhotos.Views;
-using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using WinUIEx;
 
@@ -18,11 +17,10 @@ namespace FlyPhotos;
 /// </summary>
 public partial class App
 {
-    public static string SelectedFileName;
+    public static readonly bool Packaged = false;
+    public static readonly bool Debug = false;
 
-    public static bool Packaged = false;
-    public static bool Debug = false;
-
+    private readonly string _selectedFileName;
     private static Mutex _mutex;
     private Window _mWindow;
 
@@ -35,10 +33,10 @@ public partial class App
     {
         if (Debug)
             //SelectedFileName = @"C:\Users\Riyas\Desktop\SingleGIF\output.gif";
-            SelectedFileName = @"C:\Users\Riyas\Desktop\TestImages\JPEGS\20250703_065917 (ILCE-6400).JPG";
+            _selectedFileName = @"C:\Users\Riyas\Desktop\TestImages\GIF\2.JPG";
         //SelectedFileName = @"C:\Users\Riyas\Desktop\APNG\dancing-fruits.png";
         else
-            SelectedFileName = Util.GetFileNameFromCommandLine();
+            _selectedFileName = Util.GetFileNameFromCommandLine();
 
         KillOtherFlys();
         InitializeComponent();
@@ -51,7 +49,7 @@ public partial class App
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         AppConfig.Initialize();
-        _mWindow = new PhotoDisplayWindow();
+        _mWindow = new PhotoDisplayWindow(_selectedFileName);
         ThemeController.Instance.AddWindow(_mWindow);
         _mWindow.Maximize();
         _mWindow.Activate();

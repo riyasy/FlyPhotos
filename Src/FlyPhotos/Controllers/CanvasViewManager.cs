@@ -12,7 +12,7 @@ internal class CanvasViewManager
 
     private EventHandler<object> _renderingHandler;
     private DateTime _panZoomAnimationStartTime;
-    private double _panZoomAnimationDurationMs = CanvasController.PanZoomAnimationDurationNormal;
+    private double _panZoomAnimationDurationMs = Constants.PanZoomAnimationDurationNormal;
     
     private float _zoomStartScale;
     private float _zoomTargetScale;

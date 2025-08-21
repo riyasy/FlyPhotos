@@ -17,8 +17,10 @@ using NLog;
 
 namespace FlyPhotos.Controllers;
 
-internal class PhotoDisplayController : IDisposable
+internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
 {
+    public event EventHandler<StatusUpdateEventArgs> StatusUpdated;
+
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     private readonly int MaxConcurrentTasksHqImages = Environment.ProcessorCount;
@@ -47,23 +49,22 @@ internal class PhotoDisplayController : IDisposable
 
     private readonly CanvasControl _d2dCanvas;
     private readonly ICanvasController _canvasController;
-    private readonly Action<string, string> _progressUpdateCallback;
     private readonly IThumbnailController _thumbNailController;
+    private readonly PhotoSessionState _photoSessionState;
     private int _hqCacheTasksCount;
     private int _previewCacheTasksCount;
     private Photo _firstPhoto;
 
-    public PhotoDisplayController(CanvasControl d2dCanvas, Action<string, string> statusCallback,
-        ICanvasController canvasController, IThumbnailController thumbNailController)
+    public PhotoDisplayController(CanvasControl d2dCanvas, ICanvasController canvasController, IThumbnailController thumbNailController,
+        PhotoSessionState photoSessionState)
     {
         _d2dCanvas = d2dCanvas;
-        Photo.D2dCanvas = d2dCanvas;
         _canvasController = canvasController;
-        _progressUpdateCallback = statusCallback;
         _thumbNailController = thumbNailController;
+        _photoSessionState = photoSessionState;
         _thumbNailController.SetPreviewCacheReference(_cachedPreviews);
 
-        var thread = new Thread(() => { GetFileListFromExplorer(App.SelectedFileName); });
+        var thread = new Thread(() => { GetFileListFromExplorer(_photoSessionState.FirstPhotoPath); });
         thread.SetApartmentState(ApartmentState.STA); // This is needed for COM interaction.
         thread.Start();
     }
@@ -72,18 +73,18 @@ internal class PhotoDisplayController : IDisposable
     {
         await ImageUtil.Initialize(_d2dCanvas);
 
-        _firstPhoto = new Photo(App.SelectedFileName);
-        bool continueLoadingHq = await _firstPhoto.LoadPreviewFirstPhoto();
+        _firstPhoto = new Photo(_photoSessionState.FirstPhotoPath);
+        bool continueLoadingHq = await _firstPhoto.LoadPreviewFirstPhoto(_d2dCanvas);
 
         if (continueLoadingHq)
         {
             await _canvasController.SetSource(_firstPhoto, DisplayLevel.Preview);
-            await _firstPhoto.LoadHqFirstPhoto();
+            await _firstPhoto.LoadHqFirstPhoto(_d2dCanvas);
         }
 
         await _canvasController.SetSource(_firstPhoto, DisplayLevel.Hq);
         if (AppConfig.Settings.OpenExitZoom)
-            await Task.Delay(CanvasController.PanZoomAnimationDurationNormal);
+            await Task.Delay(Constants.PanZoomAnimationDurationNormal);
         _firstPhotoLoaded = true;
         _firstPhotoLoadEvent.Set();
     }
@@ -108,7 +109,7 @@ internal class PhotoDisplayController : IDisposable
             {
                 files.Add(selectedFileName);
             }
-            Photo.PhotosCount = files.Count;
+            _photoSessionState.PhotosCount = files.Count;
 
             foreach (var s in files)
                 _photos.Add(new Photo(s));
@@ -116,9 +117,9 @@ internal class PhotoDisplayController : IDisposable
 
             if (!_firstPhotoLoaded) _firstPhotoLoadEvent.WaitOne();
 
-            Photo.CurrentDisplayIndex = Util.FindSelectedFileIndex(selectedFileName, files);
-            _photos[Photo.CurrentDisplayIndex] = _firstPhoto;
-            _cachedHqImages[Photo.CurrentDisplayIndex] = _firstPhoto;
+            _photoSessionState.CurrentDisplayIndex = Util.FindSelectedFileIndex(selectedFileName, files);
+            _photos[_photoSessionState.CurrentDisplayIndex] = _firstPhoto;
+            _cachedHqImages[_photoSessionState.CurrentDisplayIndex] = _firstPhoto;
 
             UpdateCacheLists();
 
@@ -165,13 +166,13 @@ internal class PhotoDisplayController : IDisposable
                 var index = item;
                 _previewsBeingCached[index] = true;
                 var photo = _photos[index];
-                photo.LoadPreview();
+                photo.LoadPreview(_d2dCanvas);
                 _cachedPreviews[index] = photo;
                 _previewsBeingCached.Remove(index, out _);
 
                 if (photo.Preview.PreviewFrom == PreviewSource.FromDisk) { _toBeDiskCachedPreviews.Push(item); }
 
-                if (Photo.CurrentDisplayIndex == index)
+                if (_photoSessionState.CurrentDisplayIndex == index)
                     UpgradeImageIfNeeded(photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
 
                 _thumbNailController.RedrawThumbNailsIfNeeded(index);
@@ -204,11 +205,11 @@ internal class PhotoDisplayController : IDisposable
                 var index = item;
                 _hqsBeingCached[index] = true;
                 var photo = _photos[index];
-                photo.LoadHq();
+                photo.LoadHq(_d2dCanvas);
                 _cachedHqImages[index] = photo;
                 _hqsBeingCached.Remove(index, out _);
 
-                if (Photo.CurrentDisplayIndex == index)
+                if (_photoSessionState.CurrentDisplayIndex == index)
                     UpgradeImageIfNeeded(photo, DisplayLevel.Preview, DisplayLevel.Hq);
                 _hqCacheTasksCount--;
                 if (_hqCacheTasksCount == MaxConcurrentTasksHqImages - 1) waitForSomeGap.Set();
@@ -253,7 +254,7 @@ internal class PhotoDisplayController : IDisposable
     private void UpgradeImageIfNeeded(Photo photo, DisplayLevel fromDisplayState,
         DisplayLevel toDisplayState)
     {
-        if (Photo.CurrentDisplayLevel == fromDisplayState)
+        if (_photoSessionState.CurrentDisplayLevel == fromDisplayState)
             _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
             {
                 _canvasController.SetSource(photo, toDisplayState);
@@ -262,7 +263,7 @@ internal class PhotoDisplayController : IDisposable
 
     private void UpdateCacheLists()
     {
-        var curIdx = Photo.CurrentDisplayIndex;
+        var curIdx = _photoSessionState.CurrentDisplayIndex;
 
         var keysToRemove = _cachedHqImages.Keys.Where(key =>
             key > curIdx + AppConfig.Settings.CacheSizeOneSideHqImages ||
@@ -322,20 +323,17 @@ internal class PhotoDisplayController : IDisposable
     {
         // Debug code
         var totalFileCount = _photos.Count;
-        var noOfFilesOnLeft = Photo.CurrentDisplayIndex;
-        var noOfFilesOnRight = totalFileCount - 1 - Photo.CurrentDisplayIndex;
-        var noOfCachedItemsOnLeft = _cachedPreviews.Keys.Count(i => i < Photo.CurrentDisplayIndex);
-        var noOfCachedItemsOnRight = _cachedPreviews.Keys.Count(i => i > Photo.CurrentDisplayIndex);
+        var noOfFilesOnLeft = _photoSessionState.CurrentDisplayIndex;
+        var noOfFilesOnRight = totalFileCount - 1 - _photoSessionState.CurrentDisplayIndex;
+        var noOfCachedItemsOnLeft = _cachedPreviews.Keys.Count(i => i < _photoSessionState.CurrentDisplayIndex);
+        var noOfCachedItemsOnRight = _cachedPreviews.Keys.Count(i => i > _photoSessionState.CurrentDisplayIndex);
         var cacheProgressStatus =
             $"{noOfCachedItemsOnLeft}/{noOfFilesOnLeft} < Cache > {noOfCachedItemsOnRight}/{noOfFilesOnRight}";
 
-        var fileName = Path.GetFileName(_photos[Photo.CurrentDisplayIndex].FileName);
-        var indexAndFileName = $"[{Photo.CurrentDisplayIndex + 1}/{_photos.Count}] {fileName}";
+        var fileName = Path.GetFileName(_photos[_photoSessionState.CurrentDisplayIndex].FileName);
+        var indexAndFileName = $"[{_photoSessionState.CurrentDisplayIndex + 1}/{_photos.Count}] {fileName}";
 
-        _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
-        {
-            _progressUpdateCallback(indexAndFileName, cacheProgressStatus);
-        });
+        StatusUpdated?.Invoke(this, new StatusUpdateEventArgs(indexAndFileName, cacheProgressStatus));
     }
 
     public async Task CopyFileToClipboardAsync()
@@ -368,7 +366,7 @@ internal class PhotoDisplayController : IDisposable
 
     public async Task Brake()
     {
-        if (Photo.CurrentDisplayLevel != DisplayLevel.Hq && _cachedHqImages.TryGetValue(Photo.CurrentDisplayIndex, out var hqImage))
+        if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq && _cachedHqImages.TryGetValue(_photoSessionState.CurrentDisplayIndex, out var hqImage))
         {
             await _canvasController.SetSource(hqImage, DisplayLevel.Hq);
         }
@@ -381,17 +379,17 @@ internal class PhotoDisplayController : IDisposable
     {
         if (_cachedPreviews.Count <= 1) return;
 
-        Photo.CurrentDisplayIndex += shiftBy;
+        _photoSessionState.CurrentDisplayIndex += shiftBy;
 
         if (AppConfig.Settings.ResetPanZoomOnNextPhoto) _canvasController.SetHundredPercent(false);
 
-        var photo = _photos[Photo.CurrentDisplayIndex];
+        var photo = _photos[_photoSessionState.CurrentDisplayIndex];
 
-        if (!IsContinuousKeyPress() && _cachedHqImages.ContainsKey(Photo.CurrentDisplayIndex))
+        if (!IsContinuousKeyPress() && _cachedHqImages.ContainsKey(_photoSessionState.CurrentDisplayIndex))
         {
             await _canvasController.SetSource(photo, DisplayLevel.Hq);
         }
-        else if (_cachedPreviews.ContainsKey(Photo.CurrentDisplayIndex))
+        else if (_cachedPreviews.ContainsKey(_photoSessionState.CurrentDisplayIndex))
         {
             await _canvasController.SetSource(photo, DisplayLevel.Preview);
         }
@@ -414,26 +412,26 @@ internal class PhotoDisplayController : IDisposable
     {
         switch (direction)
         {
-            case NavDirection.Next when Photo.CurrentDisplayIndex >= _photos.Count - 1:
-            case NavDirection.Prev when Photo.CurrentDisplayIndex <= 0:
+            case NavDirection.Next when _photoSessionState.CurrentDisplayIndex >= _photos.Count - 1:
+            case NavDirection.Prev when _photoSessionState.CurrentDisplayIndex <= 0:
                 return;
             case NavDirection.Next:
-                Photo.CurrentDisplayIndex++;
+                _photoSessionState.CurrentDisplayIndex++;
                 break;
             case NavDirection.Prev:
-                Photo.CurrentDisplayIndex--;
+                _photoSessionState.CurrentDisplayIndex--;
                 break;
         }
 
         if (AppConfig.Settings.ResetPanZoomOnNextPhoto) _canvasController.SetHundredPercent(false);
 
-        var photo = _photos[Photo.CurrentDisplayIndex];
+        var photo = _photos[_photoSessionState.CurrentDisplayIndex];
 
-        if (!IsContinuousKeyPress() && _cachedHqImages.ContainsKey(Photo.CurrentDisplayIndex))
+        if (!IsContinuousKeyPress() && _cachedHqImages.ContainsKey(_photoSessionState.CurrentDisplayIndex))
         {
             await _canvasController.SetSource(photo, DisplayLevel.Hq);
         }
-        else if (_cachedPreviews.ContainsKey(Photo.CurrentDisplayIndex))
+        else if (_cachedPreviews.ContainsKey(_photoSessionState.CurrentDisplayIndex))
         {
             await _canvasController.SetSource(photo, DisplayLevel.Preview);
         }
@@ -451,7 +449,7 @@ internal class PhotoDisplayController : IDisposable
 
     public string GetFullPathCurrentFile()
     {
-        return _photos[Photo.CurrentDisplayIndex].FileName;
+        return _photos[_photoSessionState.CurrentDisplayIndex].FileName;
     }
 
 
@@ -460,4 +458,10 @@ internal class PhotoDisplayController : IDisposable
     {
         
     }
+}
+
+internal class StatusUpdateEventArgs(string indexAndFileName, string cacheProgressStatus) : EventArgs
+{
+    public string IndexAndFileName { get; } = indexAndFileName;
+    public string CacheProgressStatus { get; } = cacheProgressStatus;
 }

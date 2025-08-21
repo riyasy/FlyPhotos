@@ -4,16 +4,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Utils;
+using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 
 namespace FlyPhotos.Data;
 
 internal class Photo
 {
-    public static int CurrentDisplayIndex;
-    public static DisplayLevel CurrentDisplayLevel;
-    public static int PhotosCount;
-
     public readonly string FileName;
     public DisplayItem? Hq;
     public DisplayItem? Preview;
@@ -23,9 +20,7 @@ internal class Photo
         FileName = selectedFileName;
     }
 
-    public static CanvasControl D2dCanvas { get; set; }
-
-    public async Task<bool> LoadPreviewFirstPhoto()
+    public async Task<bool> LoadPreviewFirstPhoto(CanvasControl device)
     {
         var continueLoadingHq = true;
         DisplayItem? preview = null;
@@ -33,7 +28,7 @@ internal class Photo
         async Task GetInitialPreview()
         {
             (preview, continueLoadingHq) =
-                await ImageUtil.GetFirstPreviewSpecialHandlingAsync(D2dCanvas, App.SelectedFileName);
+                await ImageUtil.GetFirstPreviewSpecialHandlingAsync(device, FileName);
         }
 
         await Task.Run(GetInitialPreview);
@@ -45,30 +40,30 @@ internal class Photo
         return continueLoadingHq;
     }
 
-    public async Task LoadHqFirstPhoto()
+    public async Task LoadHqFirstPhoto(CanvasControl device)
     {
         async Task GetHqImage()
         {
-            Hq = await ImageUtil.GetHqImage(D2dCanvas, App.SelectedFileName);
+            Hq = await ImageUtil.GetHqImage(device, FileName);
         }
         await Task.Run(GetHqImage);
     }
 
-    public void LoadHq()
+    public void LoadHq(CanvasControl device)
     {
         if (Hq == null || Hq.PreviewFrom == PreviewSource.ErrorScreen ||
             Hq.PreviewFrom == PreviewSource.Undefined)
         {
-            Hq = ImageUtil.GetHqImage(D2dCanvas, FileName).GetAwaiter().GetResult();
+            Hq = ImageUtil.GetHqImage(device, FileName).GetAwaiter().GetResult();
         }
     }
 
-    public void LoadPreview()
+    public void LoadPreview(CanvasControl device)
     {
         if (Preview == null || Preview.PreviewFrom == PreviewSource.ErrorScreen ||
             Preview.PreviewFrom == PreviewSource.Undefined)
         {
-            Preview = ImageUtil.GetPreview(D2dCanvas, FileName).GetAwaiter().GetResult();
+            Preview = ImageUtil.GetPreview(device, FileName).GetAwaiter().GetResult();
         }
     }
 

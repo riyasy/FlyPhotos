@@ -3,6 +3,7 @@ using FlyPhotos.Data;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.Effects;
+using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using System;
@@ -18,15 +19,17 @@ namespace FlyPhotos.Controllers.Renderers
         private CanvasRenderTarget _offscreen;
         private readonly CanvasViewState _canvasViewState;
         private readonly bool _supportsTransparency;
+        private readonly CanvasControl _canvas;
 
         public Rect SourceBounds => _sourceBitmap.Bounds;
 
-        public StaticImageRenderer(ICanvasResourceCreator resourceCreator, CanvasBitmap bitmap, bool supportsTransparency, Action invalidateCanvas, CanvasViewState canvasViewState)
+        public StaticImageRenderer(CanvasControl canvas, CanvasBitmap bitmap, bool supportsTransparency, Action invalidateCanvas, CanvasViewState canvasViewState)
         {
             _sourceBitmap = bitmap;
             _supportsTransparency = supportsTransparency;
             _invalidateCanvas = invalidateCanvas;
             _canvasViewState = canvasViewState;
+            _canvas = canvas;
 
             _offscreenDrawTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(410) };
             _offscreenDrawTimer.Tick += OffScreenDrawTimer_Tick;
@@ -76,9 +79,9 @@ namespace FlyPhotos.Controllers.Renderers
                 ? CanvasImageInterpolation.HighQualityCubic
                 : CanvasImageInterpolation.NearestNeighbor;
 
-            if (_offscreen == null && imageWidth < Photo.D2dCanvas.ActualWidth * 1.5)
+            if (_offscreen == null && imageWidth < _canvas.ActualWidth * 1.5)
             {
-                var tempOffScreen = new CanvasRenderTarget(Photo.D2dCanvas, (float)imageWidth, (float)imageHeight);
+                var tempOffScreen = new CanvasRenderTarget(_canvas, (float)imageWidth, (float)imageHeight);
                 using var ds = tempOffScreen.CreateDrawingSession();
                 ds.Clear(Colors.Transparent);
                 ds.DrawImage(_sourceBitmap, new Rect(0, 0, imageWidth, imageHeight),

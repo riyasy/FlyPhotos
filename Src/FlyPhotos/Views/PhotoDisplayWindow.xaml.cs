@@ -41,9 +41,10 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    private readonly CanvasController _canvasController;
-    private readonly ThumbNailController _thumbNailController;
-    private readonly PhotoDisplayController _photoController;
+    private readonly ICanvasController _canvasController;
+    private readonly IThumbnailController _thumbNailController;
+    private readonly IPhotoDisplayController _photoController;
+    private readonly PhotoSessionState _photoSessionState;
 
     private Window? _settingWindow;
 
@@ -72,7 +73,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
     private ISystemBackdropControllerWithTargets? _backdropController;
     private readonly SystemBackdropConfiguration _configurationSource;
 
-    public PhotoDisplayWindow()
+    public PhotoDisplayWindow(string firstPhotoPath)
     {
         InitializeComponent();
 
@@ -95,11 +96,13 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         SetWindowTheme(AppConfig.Settings.Theme);
         DispatcherQueue.EnsureSystemDispatcherQueue();
 
-        _thumbNailController = new ThumbNailController(D2dCanvasThumbNail);
-        _canvasController = new CanvasController(D2dCanvas, _thumbNailController);
-        _photoController = new PhotoDisplayController(D2dCanvas, UpdateStatus, _canvasController, _thumbNailController);
+        _photoSessionState = new PhotoSessionState(){FirstPhotoPath = firstPhotoPath};
+        _thumbNailController = new ThumbNailController(D2dCanvasThumbNail, _photoSessionState);
+        _canvasController = new CanvasController(D2dCanvas, _thumbNailController, _photoSessionState);
+        _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, _photoSessionState);
+        _photoController.StatusUpdated += PhotoController_StatusUpdated;
 
-        TxtFileName.Text = Path.GetFileName(App.SelectedFileName);
+        TxtFileName.Text = Path.GetFileName(firstPhotoPath);
 
         Activated += PhotoDisplayWindow_Activated;
         SizeChanged += PhotoDisplayWindow_SizeChanged;
@@ -179,10 +182,13 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         _canvasController.RotateCurrentPhotoBy90(delta > 0);
     }
 
-    private void UpdateStatus(string currentFileName, string currentCacheStatus)
+    private void PhotoController_StatusUpdated(object? sender, StatusUpdateEventArgs e)
     {
-        TxtFileName.Text = currentFileName;
-        CacheStatusProgress.Text = currentCacheStatus;
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            TxtFileName.Text = e.IndexAndFileName;
+            CacheStatusProgress.Text = e.CacheProgressStatus;
+        });
     }
 
     private void PhotoDisplayWindow_SizeChanged(object sender, Microsoft.UI.Xaml.WindowSizeChangedEventArgs args)
@@ -393,8 +399,8 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
 
         if (AppConfig.Settings.OpenExitZoom)
         {
-            _canvasController.ZoomOutOnExit(CanvasController.PanZoomAnimationDurationForExit);
-            await Task.Delay(CanvasController.PanZoomAnimationDurationForExit);
+            _canvasController.ZoomOutOnExit(Constants.PanZoomAnimationDurationForExit);
+            await Task.Delay(Constants.PanZoomAnimationDurationForExit);
         }
         this.Hide();
         this.Close();
@@ -406,7 +412,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         _wheelScrollBrakeTimer.Stop();
         _thumbNailController.ThumbnailClicked -= _thumbNailController_ThumbnailClicked;
 
-        await _canvasController.CleanupOnClose();
+        await _canvasController.DisposeAsync();
         _photoController.Dispose();
         _thumbNailController.Dispose();
         ThemeController.Instance.Dispose();

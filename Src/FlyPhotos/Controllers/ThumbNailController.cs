@@ -12,12 +12,11 @@ namespace FlyPhotos.Controllers;
 
 internal class ThumbNailController : IThumbnailController, IDisposable
 {
-    private const int BoxSize = 40;
-    private int _numOfThumbNailsInOneDirection = 20;
     private bool _canDrawThumbnails;
     private bool _invalidatePending;
 
     private readonly CanvasControl _d2dCanvasThumbNail;
+    private readonly PhotoSessionState _photoSessionState;
     private CanvasRenderTarget _thumbnailOffscreen;
     private ConcurrentDictionary<int, Photo> _cachedPreviews;
 
@@ -26,11 +25,14 @@ internal class ThumbNailController : IThumbnailController, IDisposable
         Interval = new TimeSpan(0, 0, 0, 0, 500)
     };
 
+    private int _numOfThumbNailsInOneDirection = 20;
+
     public event Action<int> ThumbnailClicked;
 
-    public ThumbNailController(CanvasControl d2dCanvasThumbNail)
+    public ThumbNailController(CanvasControl d2dCanvasThumbNail, PhotoSessionState photoSessionState)
     {
         _d2dCanvasThumbNail = d2dCanvasThumbNail;
+        _photoSessionState = photoSessionState;
         _d2dCanvasThumbNail.Draw += _d2dCanvasThumbNail_Draw;
         _d2dCanvasThumbNail.SizeChanged += _d2dCanvasThumbNail_SizeChanged;
         _d2dCanvasThumbNail.Loaded += _d2dCanvasThumbNail_Loaded;
@@ -44,11 +46,11 @@ internal class ThumbNailController : IThumbnailController, IDisposable
         double canvasCenterX = _d2dCanvasThumbNail.ActualWidth / 2;
         double clickedX = pos.X;
 
-        int offset = (int)Math.Round((clickedX - canvasCenterX) / BoxSize);
-        if (offset != 0 && Photo.PhotosCount > 1)
+        int offset = (int)Math.Round((clickedX - canvasCenterX) / Constants.ThumbaNailBoxSize);
+        if (offset != 0 && _photoSessionState.PhotosCount > 1)
         {
-            int newIndex = Photo.CurrentDisplayIndex + offset;
-            if (newIndex >= 0 && newIndex < Photo.PhotosCount)
+            int newIndex = _photoSessionState.CurrentDisplayIndex + offset;
+            if (newIndex >= 0 && newIndex < _photoSessionState.PhotosCount)
             {
                 ThumbnailClicked?.Invoke(offset);
             }
@@ -62,7 +64,7 @@ internal class ThumbNailController : IThumbnailController, IDisposable
 
     private void _d2dCanvasThumbNail_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * BoxSize)) + 1;
+        _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * Constants.ThumbaNailBoxSize)) + 1;
         CreateThumbnailRibbonOffScreen();
         RequestInvalidate();
     }
@@ -100,8 +102,8 @@ internal class ThumbNailController : IThumbnailController, IDisposable
 
     public void RedrawThumbNailsIfNeeded(int index)
     {
-        if (index >= Photo.CurrentDisplayIndex - _numOfThumbNailsInOneDirection &&
-            index <= Photo.CurrentDisplayIndex + _numOfThumbNailsInOneDirection)
+        if (index >= _photoSessionState.CurrentDisplayIndex - _numOfThumbNailsInOneDirection &&
+            index <= _photoSessionState.CurrentDisplayIndex + _numOfThumbNailsInOneDirection)
         {
             _d2dCanvasThumbNail.DispatcherQueue.TryEnqueue(() =>
             {
@@ -121,13 +123,13 @@ internal class ThumbNailController : IThumbnailController, IDisposable
     public void CreateThumbnailRibbonOffScreen()
     {
         _redrawThumbnailTimer.Stop();
-        if (Photo.PhotosCount <= 1 || !_canDrawThumbnails || !AppConfig.Settings.ShowThumbnails)
+        if (_photoSessionState.PhotosCount <= 1 || !_canDrawThumbnails || !AppConfig.Settings.ShowThumbnails)
             return;
 
         if (_thumbnailOffscreen == null)
         {
-            _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * BoxSize)) + 1;
-            _thumbnailOffscreen = new CanvasRenderTarget(_d2dCanvasThumbNail, (float)_d2dCanvasThumbNail.ActualWidth, BoxSize);
+            _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * Constants.ThumbaNailBoxSize)) + 1;
+            _thumbnailOffscreen = new CanvasRenderTarget(_d2dCanvasThumbNail, (float)_d2dCanvasThumbNail.ActualWidth, Constants.ThumbaNailBoxSize);
         }
 
         using var dsThumbNail = _thumbnailOffscreen.CreateDrawingSession();
@@ -135,14 +137,14 @@ internal class ThumbNailController : IThumbnailController, IDisposable
 
         if (_cachedPreviews != null)
         {
-            var startX = (int)_d2dCanvasThumbNail.ActualWidth / 2 - BoxSize / 2;
+            var startX = (int)_d2dCanvasThumbNail.ActualWidth / 2 - Constants.ThumbaNailBoxSize / 2;
             var startY = 0;
 
             for (var i = -_numOfThumbNailsInOneDirection; i <= _numOfThumbNailsInOneDirection; i++)
             {
-                var index = Photo.CurrentDisplayIndex + i;
+                var index = _photoSessionState.CurrentDisplayIndex + i;
 
-                if (index < 0 || index >= (Photo.PhotosCount)) continue;
+                if (index < 0 || index >= (_photoSessionState.PhotosCount)) continue;
 
                 CanvasBitmap bitmap;
 
@@ -163,18 +165,18 @@ internal class ThumbNailController : IThumbnailController, IDisposable
                 var cropX = (bitmapWidth - cropSize) / 2;
                 var cropY = (bitmapHeight - cropSize) / 2;
 
-                var destX = startX + i * BoxSize;
+                var destX = startX + i * Constants.ThumbaNailBoxSize;
 
                 // Draw the cropped center of the image
                 dsThumbNail.DrawImage(
                     bitmap,
-                    new Rect(destX, startY, BoxSize, BoxSize),
+                    new Rect(destX, startY, Constants.ThumbaNailBoxSize, Constants.ThumbaNailBoxSize),
                     new Rect(cropX, cropY, cropSize, cropSize), 1f,
                     CanvasImageInterpolation.NearestNeighbor // Source rectangle for the crop
                 );
-                if (index == Photo.CurrentDisplayIndex)
+                if (index == _photoSessionState.CurrentDisplayIndex)
                 {
-                    dsThumbNail.DrawRectangle(new Rect(destX, startY, BoxSize, BoxSize),
+                    dsThumbNail.DrawRectangle(new Rect(destX, startY, Constants.ThumbaNailBoxSize, Constants.ThumbaNailBoxSize),
                         Colors.GreenYellow, 3f);
                 }
             }
@@ -213,15 +215,6 @@ internal class ThumbNailController : IThumbnailController, IDisposable
 
         _cachedPreviews = null;
     }
-}
-
-internal interface IThumbnailController
-{
-    void CreateThumbnailRibbonOffScreen();
-    void RedrawThumbNailsIfNeeded(int index);
-    void SetPreviewCacheReference(ConcurrentDictionary<int, Photo> cachedPreviews);
-    void ShowThumbnailBasedOnSettings();
-    event Action<int> ThumbnailClicked;
 }
 
 
