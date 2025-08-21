@@ -10,11 +10,11 @@ public class CodecInfo
     /// <summary>
     /// The user-friendly name of the codec (e.g., "JPEG Decoder").
     /// </summary>
-    public string FriendlyName { get; set; }
+    public string FriendlyName { get; init; }
 
     /// <summary>
     /// A list of file extensions associated with this codec (e.g., ".JPG", ".JPEG").
     /// </summary>
-    public List<string> FileExtensions { get; set; } = [];
+    public List<string> FileExtensions { get; init; } = [];
 
 }

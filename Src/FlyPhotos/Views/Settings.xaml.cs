@@ -244,7 +244,7 @@ internal sealed partial class Settings : IThemeChangeable
         _configurationSource.Theme = (SystemBackdropTheme)((FrameworkElement)Content).ActualTheme;
     }
 
-    public bool ConvertNullableBoolToBool(bool? value)
+    private bool ConvertNullableBoolToBool(bool? value)
     {
         return value ?? false;
     }

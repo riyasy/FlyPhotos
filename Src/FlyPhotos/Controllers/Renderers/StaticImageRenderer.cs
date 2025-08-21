@@ -1,11 +1,12 @@
-﻿using System;
-using Windows.Foundation;
-using FlyPhotos.AppSettings;
+﻿using FlyPhotos.AppSettings;
 using FlyPhotos.Data;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
+using Microsoft.Graphics.Canvas.Effects;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
+using System;
+using Windows.Foundation;
 
 namespace FlyPhotos.Controllers.Renderers
 {
@@ -16,47 +17,40 @@ namespace FlyPhotos.Controllers.Renderers
         private readonly DispatcherTimer _offscreenDrawTimer;
         private CanvasRenderTarget _offscreen;
         private readonly CanvasViewState _canvasViewState;
+        private readonly bool _supportsTransparency;
 
-        public bool SupportsTransparency { get; }
         public Rect SourceBounds => _sourceBitmap.Bounds;
 
         public StaticImageRenderer(ICanvasResourceCreator resourceCreator, CanvasBitmap bitmap, bool supportsTransparency, Action invalidateCanvas, CanvasViewState canvasViewState)
         {
             _sourceBitmap = bitmap;
-            SupportsTransparency = supportsTransparency;
+            _supportsTransparency = supportsTransparency;
             _invalidateCanvas = invalidateCanvas;
             _canvasViewState = canvasViewState;
 
             _offscreenDrawTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(410) };
-            _offscreenDrawTimer.Tick += OnTimerTick;
+            _offscreenDrawTimer.Tick += OffScreenDrawTimer_Tick;
         }
+
 
         public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, CanvasImageBrush checkeredBrush)
         {
-            if (AppConfig.Settings.CheckeredBackground && SupportsTransparency)
-            {
+            if (AppConfig.Settings.CheckeredBackground && _supportsTransparency)
                 session.FillRectangle(viewState.ImageRect, checkeredBrush);
-            }
 
             if (_offscreen != null)
-            {
                 session.DrawImage(_offscreen, viewState.ImageRect, _offscreen.Bounds, 1f, quality);
-            }
             else
-            {
                 session.DrawImage(_sourceBitmap, viewState.ImageRect, _sourceBitmap.Bounds, 1f, quality);
-            }
         }
 
         public void RestartOffScreenDrawTimer()
         {
-            // Discard the old buffer; the timer will create a new one.
-            DestroyOffscreen();
             _offscreenDrawTimer.Stop();
             _offscreenDrawTimer.Start();
         }
 
-        private void OnTimerTick(object sender, object e)
+        private void OffScreenDrawTimer_Tick(object sender, object e)
         {
             _offscreenDrawTimer.Stop();
             CreateOffscreen();
@@ -99,7 +93,7 @@ namespace FlyPhotos.Controllers.Renderers
 
         public void Dispose()
         {
-            _offscreenDrawTimer.Tick -= OnTimerTick;
+            _offscreenDrawTimer.Tick -= OffScreenDrawTimer_Tick;
             _offscreenDrawTimer.Stop();
             DestroyOffscreen();
         }

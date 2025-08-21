@@ -25,7 +25,6 @@ using NLog;
 using WinRT;
 using WinRT.Interop;
 using WinUIEx;
-using static FlyPhotos.Controllers.PhotoDisplayController;
 using Icon = System.Drawing.Icon;
 using Window = Microsoft.UI.Xaml.Window;
 
@@ -180,7 +179,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         _canvasController.RotateCurrentPhotoBy90(delta > 0);
     }
 
-    public void UpdateStatus(string currentFileName, string currentCacheStatus)
+    private void UpdateStatus(string currentFileName, string currentCacheStatus)
     {
         TxtFileName.Text = currentFileName;
         CacheStatusProgress.Text = currentCacheStatus;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using FlyPhotos.AppSettings;
 using FlyPhotos.Data;
 using Microsoft.UI.Xaml;
 
@@ -9,8 +8,7 @@ namespace FlyPhotos.Controllers;
 internal class ThemeController : IDisposable
 {
     public static ThemeController Instance { get; } = new();
-    public List<Window> Windows = [];
-
+    private List<Window> Windows = [];
 
     private ThemeController()
     {

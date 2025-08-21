@@ -17,15 +17,16 @@ namespace FlyPhotos.Controllers.Renderers
         private readonly Action _invalidateCanvas;
         private readonly Stopwatch _stopwatch = new();
         private readonly SemaphoreSlim _animatorLock;
+        private readonly bool _supportsTransparency;
 
-        public bool SupportsTransparency => true; // Animated formats typically support transparency
         public Rect SourceBounds => _animator.Surface.GetBounds(Photo.D2dCanvas);
 
-        public AnimatedImageRenderer(IAnimator animator, Action invalidateCanvas, SemaphoreSlim animatorLock)
+        public AnimatedImageRenderer(IAnimator animator, Action invalidateCanvas, SemaphoreSlim animatorLock, bool supportsTransparency)
         {
             _animator = animator;
             _invalidateCanvas = invalidateCanvas;
             _animatorLock = animatorLock;
+            _supportsTransparency = supportsTransparency;
             _stopwatch.Start();
         }
 
@@ -35,7 +36,7 @@ namespace FlyPhotos.Controllers.Renderers
         {
             if (_animator?.Surface == null) return;
 
-            if (AppConfig.Settings.CheckeredBackground && SupportsTransparency)
+            if (AppConfig.Settings.CheckeredBackground && _supportsTransparency)
             {
                 session.FillRectangle(viewState.ImageRect, checkeredBrush);
             }

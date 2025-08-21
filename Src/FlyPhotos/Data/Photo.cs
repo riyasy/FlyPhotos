@@ -5,7 +5,6 @@ using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas.UI.Xaml;
-using static FlyPhotos.Controllers.PhotoDisplayController;
 
 namespace FlyPhotos.Data;
 

@@ -24,7 +24,7 @@ internal static class Util
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private static List<CodecInfo>? _codecInfoList;
-    public static string ExternalWicReaderPath;
+    public static readonly string ExternalWicReaderPath;
 
     public static List<string> SupportedExtensions { get; } = [];
     public static List<string> MemoryLeakingExtensions { get; } = [];
@@ -116,7 +116,7 @@ internal static class Util
             .Select(s => s[Random.Next(s.Length)]).ToArray());
     }
 
-    public static string GetExecutingDirectoryName()
+    private static string GetExecutingDirectoryName()
     {
         return Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory);
     }

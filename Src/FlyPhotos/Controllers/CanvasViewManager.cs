@@ -8,15 +8,17 @@ namespace FlyPhotos.Controllers;
 
 internal class CanvasViewManager
 {
-    public EventHandler<object> RenderingHandler;
-    public DateTime PanZoomAnimationStartTime;
-    public double PanZoomAnimationDurationMs = CanvasController.PanZoomAnimationDurationNormal;
-    public bool PanZoomAnimationOnGoing;
-    public float ZoomStartScale;
-    public float ZoomTargetScale;
-    public Point ZoomCenter;
-    public Point PanStartPosition;
-    public Point PanTargetPosition;
+    public bool PanZoomAnimationOnGoing { get; private set; }
+
+    private EventHandler<object> _renderingHandler;
+    private DateTime _panZoomAnimationStartTime;
+    private double _panZoomAnimationDurationMs = CanvasController.PanZoomAnimationDurationNormal;
+    
+    private float _zoomStartScale;
+    private float _zoomTargetScale;
+    private Point _zoomCenter;
+    private Point _panStartPosition;
+    private Point _panTargetPosition;
 
     private readonly CanvasViewState _canvasViewState;
     private readonly Action _invalidateCanvas; // A callback to trigger a redraw
@@ -106,7 +108,7 @@ internal class CanvasViewManager
 
     public void ZoomOutOnExit(double exitAnimationDuration, double d2dCanvasActualWidth, double d2dCanvasActualHeight)
     {
-        PanZoomAnimationDurationMs = exitAnimationDuration;
+        _panZoomAnimationDurationMs = exitAnimationDuration;
         var targetPosition = new Point(d2dCanvasActualWidth / 2, d2dCanvasActualHeight / 2);
         StartPanAndZoomAnimation(0.001f, targetPosition);
     }
@@ -152,51 +154,51 @@ internal class CanvasViewManager
 
     private void StartZoomAnimation(float targetScale, Point zoomCenter)
     {
-        PanZoomAnimationStartTime = DateTime.UtcNow;
-        ZoomStartScale = _canvasViewState.Scale;
-        ZoomTargetScale = targetScale;
-        ZoomCenter = zoomCenter;
+        _panZoomAnimationStartTime = DateTime.UtcNow;
+        _zoomStartScale = _canvasViewState.Scale;
+        _zoomTargetScale = targetScale;
+        _zoomCenter = zoomCenter;
 
-        if (RenderingHandler != null)
-            CompositionTarget.Rendering -= RenderingHandler;
+        if (_renderingHandler != null)
+            CompositionTarget.Rendering -= _renderingHandler;
 
-        RenderingHandler = (_, _) => AnimateZoom();
-        CompositionTarget.Rendering += RenderingHandler;
+        _renderingHandler = (_, _) => AnimateZoom();
+        CompositionTarget.Rendering += _renderingHandler;
         PanZoomAnimationOnGoing = true;
     }
 
     private void StartPanAndZoomAnimation(float targetScale, Point targetPosition)
     {
         // Setup animation state
-        PanZoomAnimationStartTime = DateTime.UtcNow;
-        ZoomStartScale = _canvasViewState.Scale;
-        ZoomTargetScale = targetScale;
-        PanStartPosition = _canvasViewState.ImagePos;
-        PanTargetPosition = targetPosition;
+        _panZoomAnimationStartTime = DateTime.UtcNow;
+        _zoomStartScale = _canvasViewState.Scale;
+        _zoomTargetScale = targetScale;
+        _panStartPosition = _canvasViewState.ImagePos;
+        _panTargetPosition = targetPosition;
 
         // Ensure any previous animation is stopped
-        if (RenderingHandler != null)
-            CompositionTarget.Rendering -= RenderingHandler;
+        if (_renderingHandler != null)
+            CompositionTarget.Rendering -= _renderingHandler;
 
         // Point the handler to the NEW animation method
-        RenderingHandler = (_, _) => AnimatePanAndZoom();
-        CompositionTarget.Rendering += RenderingHandler;
+        _renderingHandler = (_, _) => AnimatePanAndZoom();
+        CompositionTarget.Rendering += _renderingHandler;
         PanZoomAnimationOnGoing = true;
     }
 
     private void AnimateZoom()
     {
-        var elapsed = (DateTime.UtcNow - PanZoomAnimationStartTime).TotalMilliseconds;
-        var t = Math.Clamp(elapsed / PanZoomAnimationDurationMs, 0.0, 1.0);
+        var elapsed = (DateTime.UtcNow - _panZoomAnimationStartTime).TotalMilliseconds;
+        var t = Math.Clamp(elapsed / _panZoomAnimationDurationMs, 0.0, 1.0);
 
         // Ease-out cubic: f(t) = 1 - (1 - t)^3
         float easedT = 1f - (float)Math.Pow(1 - t, 3);
 
-        var newScale = ZoomStartScale + (ZoomTargetScale - ZoomStartScale) * easedT;
+        var newScale = _zoomStartScale + (_zoomTargetScale - _zoomStartScale) * easedT;
 
         // Maintain zoom center relative to the mouse
-        _canvasViewState.ImagePos.X = ZoomCenter.X - (newScale / _canvasViewState.Scale) * (ZoomCenter.X - _canvasViewState.ImagePos.X);
-        _canvasViewState.ImagePos.Y = ZoomCenter.Y - (newScale / _canvasViewState.Scale) * (ZoomCenter.Y - _canvasViewState.ImagePos.Y);
+        _canvasViewState.ImagePos.X = _zoomCenter.X - (newScale / _canvasViewState.Scale) * (_zoomCenter.X - _canvasViewState.ImagePos.X);
+        _canvasViewState.ImagePos.Y = _zoomCenter.Y - (newScale / _canvasViewState.Scale) * (_zoomCenter.Y - _canvasViewState.ImagePos.Y);
 
         _canvasViewState.Scale = newScale;
         _canvasViewState.UpdateTransform();
@@ -204,25 +206,25 @@ internal class CanvasViewManager
 
         if (t >= 1.0)
         {
-            CompositionTarget.Rendering -= RenderingHandler;
+            CompositionTarget.Rendering -= _renderingHandler;
             PanZoomAnimationOnGoing = false;
         }
     }
 
     private void AnimatePanAndZoom()
     {
-        var elapsed = (DateTime.UtcNow - PanZoomAnimationStartTime).TotalMilliseconds;
-        var t = Math.Clamp(elapsed / PanZoomAnimationDurationMs, 0.0, 1.0);
+        var elapsed = (DateTime.UtcNow - _panZoomAnimationStartTime).TotalMilliseconds;
+        var t = Math.Clamp(elapsed / _panZoomAnimationDurationMs, 0.0, 1.0);
 
         // Ease-out cubic: f(t) = 1 - (1 - t)^3
         float easedT = 1f - (float)Math.Pow(1 - t, 3);
 
         // Interpolate scale
-        _canvasViewState.Scale = ZoomStartScale + (ZoomTargetScale - ZoomStartScale) * easedT;
+        _canvasViewState.Scale = _zoomStartScale + (_zoomTargetScale - _zoomStartScale) * easedT;
 
         // Interpolate position (a simple linear interpolation)
-        var newX = PanStartPosition.X + (PanTargetPosition.X - PanStartPosition.X) * easedT;
-        var newY = PanStartPosition.Y + (PanTargetPosition.Y - PanStartPosition.Y) * easedT;
+        var newX = _panStartPosition.X + (_panTargetPosition.X - _panStartPosition.X) * easedT;
+        var newY = _panStartPosition.Y + (_panTargetPosition.Y - _panStartPosition.Y) * easedT;
         _canvasViewState.ImagePos = new Point(newX, newY);
 
         _canvasViewState.UpdateTransform();
@@ -231,16 +233,16 @@ internal class CanvasViewManager
         if (t >= 1.0)
         {
             // Animation finished, stop the handler
-            CompositionTarget.Rendering -= RenderingHandler;
+            CompositionTarget.Rendering -= _renderingHandler;
             PanZoomAnimationOnGoing = false;
         }
     }
 
     public void Dispose()
     {
-        if (RenderingHandler == null) return;
-        CompositionTarget.Rendering -= RenderingHandler;
-        RenderingHandler = null;
+        if (_renderingHandler == null) return;
+        CompositionTarget.Rendering -= _renderingHandler;
+        _renderingHandler = null;
         PanZoomAnimationOnGoing = false;
     }
 }

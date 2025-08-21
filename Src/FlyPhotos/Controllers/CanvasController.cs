@@ -16,7 +16,6 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
-using static FlyPhotos.Controllers.PhotoDisplayController;
 
 namespace FlyPhotos.Controllers;
 
@@ -124,7 +123,7 @@ internal class CanvasController : ICanvasController
                 if (currentOperationId == _latestSetSourceOperationId)
                 {
                     await newAnimator.UpdateAsync(TimeSpan.Zero);
-                    IRenderer newRenderer = new AnimatedImageRenderer(newAnimator, RequestInvalidate, _animatorLock);
+                    IRenderer newRenderer = new AnimatedImageRenderer(newAnimator, RequestInvalidate, _animatorLock, photo.SupportsTransparency());
                     SetupNewRenderer(newRenderer, newAnimator.PixelWidth, newAnimator.PixelHeight, displayItem.Rotation, !previewDrawnAsFirstFrame, !previewDrawnAsFirstFrame);
                 }
                 else

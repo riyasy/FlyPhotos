@@ -4,10 +4,10 @@ namespace FlyPhotos.Data;
 
 internal class DisplayItem
 {
-    public byte[] FileAsByteArray { get; set; }
+    public byte[] FileAsByteArray { get; }
     public CanvasBitmap Bitmap { get; set; }
-    public int Rotation { get; set; }
-    public PreviewSource PreviewFrom { get; set; }
+    public int Rotation { get; }
+    public PreviewSource PreviewFrom { get; }
 
     public DisplayItem(CanvasBitmap bitmap, PreviewSource previewFrom, int rotation = 0)
     {
