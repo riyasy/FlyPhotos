@@ -126,7 +126,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         //this.Maximize(); // Maximise will be called from App.xaml.cs
         _lastWindowState = OverlappedPresenterState.Maximized;
 
-        _opacityFader = new OpacityFader([ButtonPanel, D2dCanvasThumbNail, TxtFileName]); 
+        _opacityFader = new OpacityFader([ButtonPanel, D2dCanvasThumbNail, TxtFileName]);
     }
 
     private async void _thumbNailController_ThumbnailClicked(int shiftIndex)
@@ -412,10 +412,11 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         _wheelScrollBrakeTimer.Stop();
         _thumbNailController.ThumbnailClicked -= _thumbNailController_ThumbnailClicked;
 
-        await _canvasController.DisposeAsync();
-        _photoController.Dispose();
-        _thumbNailController.Dispose();
         ThemeController.Instance.Dispose();
+
+        await _canvasController.DisposeAsync();
+        _thumbNailController.Dispose();
+        _photoController.Dispose();
         
         _backdropController?.RemoveSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
         _backdropController?.Dispose();

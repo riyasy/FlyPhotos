@@ -23,8 +23,11 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    private readonly int MaxConcurrentTasksHqImages = Environment.ProcessorCount;
-    private readonly int MaxConcurrentTasksPreviews = Environment.ProcessorCount;
+    private readonly CancellationTokenSource _cts = new();
+    private readonly SemaphoreSlim _previewTaskThrottler = new(Environment.ProcessorCount);
+    private readonly SemaphoreSlim _hqTaskThrottler = new(Environment.ProcessorCount);
+    private readonly SemaphoreSlim _diskCacheTaskThrottler = new(Environment.ProcessorCount);
+
 
     private readonly List<Photo> _photos = [];
 
@@ -51,8 +54,7 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
     private readonly ICanvasController _canvasController;
     private readonly IThumbnailController _thumbNailController;
     private readonly PhotoSessionState _photoSessionState;
-    private int _hqCacheTasksCount;
-    private int _previewCacheTasksCount;
+
     private Photo _firstPhoto;
 
     public PhotoDisplayController(CanvasControl d2dCanvas, ICanvasController canvasController, IThumbnailController thumbNailController,
@@ -93,6 +95,8 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
     {
         try
         {
+            var token = _cts.Token;
+
             List<string> files = [];
             var supportedExtensions = Util.SupportedExtensions;
             if (!App.Debug)
@@ -115,7 +119,12 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
                 _photos.Add(new Photo(s));
 
 
-            if (!_firstPhotoLoaded) _firstPhotoLoadEvent.WaitOne();
+            if (!_firstPhotoLoaded)
+            {
+                int waitResult = WaitHandle.WaitAny([_firstPhotoLoadEvent, token.WaitHandle]);
+                // 0 is _firstPhotoLoadEvent, 1 is token.WaitHandle
+                if (waitResult == 1) { token.ThrowIfCancellationRequested(); }
+            }
 
             _photoSessionState.CurrentDisplayIndex = Util.FindSelectedFileIndex(selectedFileName, files);
             _photos[_photoSessionState.CurrentDisplayIndex] = _firstPhoto;
@@ -139,116 +148,123 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
 
     private void PreviewCacheBuilderDoWork()
     {
-        var waitForSomeGap = new AutoResetEvent(false);
-
-        while (true)
+        var token = _cts.Token;
+        try
         {
-            if (_toBeCachedPreviews.IsEmpty)
+            while (!token.IsCancellationRequested)
             {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
+                if (_toBeCachedPreviews.IsEmpty)
+                {
+                    GC.Collect(2, GCCollectionMode.Optimized); // Minor optimization
+                    _diskCachingCanStart.Set();
+                    WaitHandle.WaitAny([_previewCachingCanStart, token.WaitHandle]);
+                    if (token.IsCancellationRequested) break;
+                    _diskCachingCanStart.Reset();
+                }
 
-                _diskCachingCanStart.Set();
-                _previewCachingCanStart.WaitOne();
-                _diskCachingCanStart.Reset();
+                if (!_toBeCachedPreviews.TryPop(out var item)) continue;
+
+                _previewTaskThrottler.Wait(token);
+
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        var index = item;
+                        _previewsBeingCached[index] = true;
+                        var photo = _photos[index];
+                        photo.LoadPreview(_d2dCanvas); // TODO In a future refactor, this could accept a token
+                        _cachedPreviews[index] = photo;
+                        _previewsBeingCached.Remove(index, out _);
+                        if (photo.Preview.PreviewFrom == PreviewSource.FromDisk) { _toBeDiskCachedPreviews.Push(item); }
+                        if (_photoSessionState.CurrentDisplayIndex == index)
+                            UpgradeImageIfNeeded(photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
+                        _thumbNailController.RedrawThumbNailsIfNeeded(index);
+                        UpdateProgressStatusDebug();
+                    }
+                    finally { _previewTaskThrottler.Release(); }
+                }, token);
             }
-
-            if (_toBeCachedPreviews.IsEmpty) continue;
-
-            var maxxedOut = _previewCacheTasksCount >= MaxConcurrentTasksPreviews;
-            if (maxxedOut) waitForSomeGap.WaitOne();
-
-            if (!_toBeCachedPreviews.TryPop(out var item)) continue;
-
-            Task.Run(() =>
-            {
-                var index = item;
-                _previewsBeingCached[index] = true;
-                var photo = _photos[index];
-                photo.LoadPreview(_d2dCanvas);
-                _cachedPreviews[index] = photo;
-                _previewsBeingCached.Remove(index, out _);
-
-                if (photo.Preview.PreviewFrom == PreviewSource.FromDisk) { _toBeDiskCachedPreviews.Push(item); }
-
-                if (_photoSessionState.CurrentDisplayIndex == index)
-                    UpgradeImageIfNeeded(photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
-
-                _thumbNailController.RedrawThumbNailsIfNeeded(index);
-
-                UpdateProgressStatusDebug();
-                _previewCacheTasksCount--;
-                if (_previewCacheTasksCount == MaxConcurrentTasksPreviews - 1) waitForSomeGap.Set();
-            });
-            _previewCacheTasksCount++;
         }
+        catch (OperationCanceledException) { } // Expected on shutdown.
+        //Logger.Info("Preview Caching thread has shut down gracefully.");
     }
 
     private void HqImageCacheBuilderDoWork()
     {
-        var waitForSomeGap = new AutoResetEvent(false);
-
-        while (true)
+        var token = _cts.Token;
+        try
         {
-            if (_toBeCachedHqImages.IsEmpty || IsContinuousKeyPress()) _hqCachingCanStart.WaitOne();
-
-            if (_toBeCachedHqImages.IsEmpty) continue;
-
-            var maxxedOut = _hqCacheTasksCount >= MaxConcurrentTasksHqImages;
-            if (maxxedOut) waitForSomeGap.WaitOne();
-
-            if (!_toBeCachedHqImages.TryPop(out var item)) continue;
-
-            Task.Run(() =>
+            while (!token.IsCancellationRequested)
             {
-                var index = item;
-                _hqsBeingCached[index] = true;
-                var photo = _photos[index];
-                photo.LoadHq(_d2dCanvas);
-                _cachedHqImages[index] = photo;
-                _hqsBeingCached.Remove(index, out _);
+                if (_toBeCachedHqImages.IsEmpty || IsContinuousKeyPress())
+                {
+                    WaitHandle.WaitAny([_hqCachingCanStart, token.WaitHandle]);
+                    if (token.IsCancellationRequested) break;
+                }
 
-                if (_photoSessionState.CurrentDisplayIndex == index)
-                    UpgradeImageIfNeeded(photo, DisplayLevel.Preview, DisplayLevel.Hq);
-                _hqCacheTasksCount--;
-                if (_hqCacheTasksCount == MaxConcurrentTasksHqImages - 1) waitForSomeGap.Set();
-            });
-            _hqCacheTasksCount++;
+                if (!_toBeCachedHqImages.TryPop(out var item)) continue;
+
+                _hqTaskThrottler.Wait(token);
+
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        var index = item;
+                        _hqsBeingCached[index] = true;
+                        var photo = _photos[index];
+                        photo.LoadHq(_d2dCanvas); // TODO In a future refactor, this could accept a token
+                        _cachedHqImages[index] = photo;
+                        _hqsBeingCached.Remove(index, out _);
+                        if (_photoSessionState.CurrentDisplayIndex == index)
+                            UpgradeImageIfNeeded(photo, DisplayLevel.Preview, DisplayLevel.Hq);
+                    }
+                    finally { _hqTaskThrottler.Release(); }
+                }, token);
+            }
         }
+        catch (OperationCanceledException) { } // Expected on shutdown.
+        //Logger.Info("HQ Image Caching thread has shut down gracefully.");
     }
 
     private void PreviewDiskCacherDoWork()
     {
-        SemaphoreSlim semaphore = new SemaphoreSlim(Environment.ProcessorCount);
-        while (true)
+        var token = _cts.Token;
+        try
         {
-            _diskCachingCanStart.WaitOne();
-            if (_toBeDiskCachedPreviews.IsEmpty)
+            while (!token.IsCancellationRequested)
             {
-                _diskCachingCanStart.Reset();
-                continue;
-            }
+                WaitHandle.WaitAny([_diskCachingCanStart, token.WaitHandle]);
+                if (token.IsCancellationRequested) break;
 
-            if (!_toBeDiskCachedPreviews.TryPop(out var index)) 
-                continue;
-
-            semaphore.Wait();
-
-            Task.Run(async () =>
-            {
-                try
+                if (_toBeDiskCachedPreviews.IsEmpty)
                 {
-                    if (_cachedPreviews.TryGetValue(index, out var image) &&
-                        image.Preview != null &&
-                        image.Preview.PreviewFrom == PreviewSource.FromDisk)
-                    {
-                        await DiskCacherWithSqlite.Instance.PutInCache(image.FileName, image.Preview.Bitmap);
-                    }
+                    _diskCachingCanStart.Reset();
+                    continue;
                 }
-                finally { semaphore.Release(); }
-            });
+
+                if (!_toBeDiskCachedPreviews.TryPop(out var index)) continue;
+
+                _diskCacheTaskThrottler.Wait(token);
+
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        if (_cachedPreviews.TryGetValue(index, out var image) &&
+                            image.Preview != null &&
+                            image.Preview.PreviewFrom == PreviewSource.FromDisk)
+                        {
+                            await DiskCacherWithSqlite.Instance.PutInCache(image.FileName, image.Preview.Bitmap);
+                        }
+                    }
+                    finally { _diskCacheTaskThrottler.Release(); }
+                }, token);
+            }
         }
+        catch (OperationCanceledException) { } // Expected on shutdown.
+        //Logger.Info("Preview Disk Caching thread has shut down gracefully.");
     }
 
     private void UpgradeImageIfNeeded(Photo photo, DisplayLevel fromDisplayState,
@@ -452,11 +468,27 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
         return _photos[_photoSessionState.CurrentDisplayIndex].FileName;
     }
 
-
-
     public void Dispose()
     {
-        
+        _cts.Cancel();
+        _firstPhotoLoadEvent.Set();
+        _previewCachingCanStart.Set();
+        _hqCachingCanStart.Set();
+        _diskCachingCanStart.Set();
+
+        // TODO, sort of wait for the three workers or the GetFileList thread to exit before
+        // proceeding with disposing everything.
+        _cts.Dispose();
+        _previewTaskThrottler.Dispose();
+        _hqTaskThrottler.Dispose();
+        _diskCacheTaskThrottler.Dispose();
+
+        _firstPhotoLoadEvent.Dispose();
+        _previewCachingCanStart.Dispose();
+        _hqCachingCanStart.Dispose();
+        _diskCachingCanStart.Dispose();
+
+        Logger.Info("PhotoDisplayController disposed.");
     }
 }
 
