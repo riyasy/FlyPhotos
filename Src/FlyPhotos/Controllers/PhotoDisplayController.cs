@@ -19,7 +19,7 @@ namespace FlyPhotos.Controllers;
 
 internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
 {
-    public event EventHandler<StatusUpdateEventArgs> StatusUpdated;
+    public event EventHandler<StatusUpdateEventArgs>? StatusUpdated;
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -28,11 +28,9 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
     private readonly SemaphoreSlim _hqTaskThrottler = new(Environment.ProcessorCount);
     private readonly SemaphoreSlim _diskCacheTaskThrottler = new(Environment.ProcessorCount);
 
-
+    private readonly TaskCompletionSource<bool> _firstPhotoLoadedTcs = new();
+    private Photo? _firstPhoto;
     private readonly List<Photo> _photos = [];
-
-    private bool _firstPhotoLoaded;
-    private readonly AutoResetEvent _firstPhotoLoadEvent = new(false);
 
     private readonly ConcurrentStack<int> _toBeCachedHqImages = new();
     private readonly ConcurrentDictionary<int, Photo> _cachedHqImages = new();
@@ -49,13 +47,10 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
 
     private int _keyPressCounter;
 
-
     private readonly CanvasControl _d2dCanvas;
     private readonly ICanvasController _canvasController;
     private readonly IThumbnailController _thumbNailController;
     private readonly PhotoSessionState _photoSessionState;
-
-    private Photo _firstPhoto;
 
     public PhotoDisplayController(CanvasControl d2dCanvas, ICanvasController canvasController, IThumbnailController thumbNailController,
         PhotoSessionState photoSessionState)
@@ -66,7 +61,7 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
         _photoSessionState = photoSessionState;
         _thumbNailController.SetPreviewCacheReference(_cachedPreviews);
 
-        var thread = new Thread(() => { GetFileListFromExplorer(_photoSessionState.FirstPhotoPath); });
+        var thread = new Thread(() => { DoStartupActivities(_photoSessionState.FirstPhotoPath, _cts.Token); });
         thread.SetApartmentState(ApartmentState.STA); // This is needed for COM interaction.
         thread.Start();
     }
@@ -87,44 +82,21 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
         await _canvasController.SetSource(_firstPhoto, DisplayLevel.Hq);
         if (AppConfig.Settings.OpenExitZoom)
             await Task.Delay(Constants.PanZoomAnimationDurationNormal);
-        _firstPhotoLoaded = true;
-        _firstPhotoLoadEvent.Set();
+        _firstPhotoLoadedTcs.SetResult(true);
     }
 
-    private void GetFileListFromExplorer(string selectedFileName)
+    private void DoStartupActivities(string selectedFileName, CancellationToken token)
     {
         try
         {
-            var token = _cts.Token;
+            var files = FileDiscoveryService.DiscoverFiles(selectedFileName);
 
-            List<string> files = [];
-            var supportedExtensions = Util.SupportedExtensions;
-            if (!App.Debug)
-            {
-                files = Util.FindAllFilesFromExplorerWindowNative();
-            }
-            if (files.Count == 0)
-            {
-                files = Util.FindAllFilesFromDirectory(Path.GetDirectoryName(selectedFileName));
-            }
-            files = files.Where(s =>
-                supportedExtensions.Contains(Path.GetExtension(s).ToUpperInvariant()) || s == selectedFileName).ToList();
-            if (files.Count == 0)
-            {
-                files.Add(selectedFileName);
-            }
             _photoSessionState.PhotosCount = files.Count;
 
             foreach (var s in files)
                 _photos.Add(new Photo(s));
 
-
-            if (!_firstPhotoLoaded)
-            {
-                int waitResult = WaitHandle.WaitAny([_firstPhotoLoadEvent, token.WaitHandle]);
-                // 0 is _firstPhotoLoadEvent, 1 is token.WaitHandle
-                if (waitResult == 1) { token.ThrowIfCancellationRequested(); }
-            }
+            _firstPhotoLoadedTcs.Task.Wait(token);
 
             _photoSessionState.CurrentDisplayIndex = Util.FindSelectedFileIndex(selectedFileName, files);
             _photos[_photoSessionState.CurrentDisplayIndex] = _firstPhoto;
@@ -132,12 +104,12 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
 
             UpdateCacheLists();
 
-            var previewCachingThread = new Thread(PreviewCacheBuilderDoWork) { IsBackground = true };
+            var previewCachingThread = new Thread(() => PreviewCacheBuilderDoWork(_cts.Token)) { IsBackground = true };
             previewCachingThread.Start();
-            var hqCachingThread = new Thread(HqImageCacheBuilderDoWork)
+            var hqCachingThread = new Thread(() => HqImageCacheBuilderDoWork(_cts.Token))
             { IsBackground = true, Priority = ThreadPriority.AboveNormal };
             hqCachingThread.Start();
-            var previewDiskCachingThread = new Thread(PreviewDiskCacherDoWork) { IsBackground = true };
+            var previewDiskCachingThread = new Thread(() => PreviewDiskCacherDoWork(_cts.Token)) { IsBackground = true };
             previewDiskCachingThread.Start();
         }
         catch (Exception ex)
@@ -146,9 +118,8 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
         }
     }
 
-    private void PreviewCacheBuilderDoWork()
+    private void PreviewCacheBuilderDoWork(CancellationToken token)
     {
-        var token = _cts.Token;
         try
         {
             while (!token.IsCancellationRequested)
@@ -190,9 +161,8 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
         //Logger.Info("Preview Caching thread has shut down gracefully.");
     }
 
-    private void HqImageCacheBuilderDoWork()
+    private void HqImageCacheBuilderDoWork(CancellationToken token)
     {
-        var token = _cts.Token;
         try
         {
             while (!token.IsCancellationRequested)
@@ -228,9 +198,8 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
         //Logger.Info("HQ Image Caching thread has shut down gracefully.");
     }
 
-    private void PreviewDiskCacherDoWork()
+    private void PreviewDiskCacherDoWork(CancellationToken token)
     {
-        var token = _cts.Token;
         try
         {
             while (!token.IsCancellationRequested)
@@ -471,7 +440,7 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
     public void Dispose()
     {
         _cts.Cancel();
-        _firstPhotoLoadEvent.Set();
+        _firstPhotoLoadedTcs.TrySetCanceled();
         _previewCachingCanStart.Set();
         _hqCachingCanStart.Set();
         _diskCachingCanStart.Set();
@@ -483,7 +452,6 @@ internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
         _hqTaskThrottler.Dispose();
         _diskCacheTaskThrottler.Dispose();
 
-        _firstPhotoLoadEvent.Dispose();
         _previewCachingCanStart.Dispose();
         _hqCachingCanStart.Dispose();
         _diskCachingCanStart.Dispose();
