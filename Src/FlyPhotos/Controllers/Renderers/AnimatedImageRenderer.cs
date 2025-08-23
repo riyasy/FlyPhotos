@@ -72,6 +72,11 @@ namespace FlyPhotos.Controllers.Renderers
             // This concept does not apply to animated images.
         }
 
+        public void TryRedrawOffScreen()
+        {
+            // This concept does not apply to animated images.
+        }
+
         public void Dispose()
         {
             _stopwatch.Stop();

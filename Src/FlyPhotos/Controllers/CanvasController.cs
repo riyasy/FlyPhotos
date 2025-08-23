@@ -263,6 +263,11 @@ internal class CanvasController : ICanvasController
                                                     tp.Y <= _canvasViewState.ImageRect.Bottom;
     }
 
+    public void HandleCheckeredBackgroundChange(bool showChecker)
+    {
+        _currentRenderer?.TryRedrawOffScreen();
+    }
+
     private void RequestInvalidate()
     {
         if (_invalidatePending) return;

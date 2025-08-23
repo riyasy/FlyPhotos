@@ -27,6 +27,7 @@ namespace FlyPhotos.Controllers
         void PanByKeyboard(double dx, double dy);
         void RotateCurrentPhotoBy90(bool clockWise);
         bool IsPressedOnImage(Point position);
+        void HandleCheckeredBackgroundChange(bool showChecker);
     }
 
     internal interface IThumbnailController : IDisposable

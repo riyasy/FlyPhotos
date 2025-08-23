@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,8 +26,12 @@ namespace FlyPhotos.Views;
 /// <summary>
 /// An empty window that can be used on its own or navigated to within a Frame.
 /// </summary>
-internal sealed partial class Settings : IThemeChangeable
+internal sealed partial class Settings
 {
+    public event Action<ElementTheme>? ThemeChanged;
+    public event Action<WindowBackdropType>? BackdropChanged;
+    public event Action<bool>? ShowCheckeredBackgroundChanged;
+
     private readonly IThumbnailController _thumbnailDisplayChanger;
     private readonly SystemBackdropConfiguration _configurationSource;
 
@@ -134,6 +139,7 @@ internal sealed partial class Settings : IThemeChangeable
     private async void ButtonShowCheckeredBackground_OnToggled(object sender, RoutedEventArgs e)
     {
         AppConfig.Settings.CheckeredBackground = ButtonShowCheckeredBackground.IsOn;
+        ShowCheckeredBackgroundChanged?.Invoke(ButtonShowCheckeredBackground.IsOn);
         await AppConfig.SaveAsync();
     }
 
@@ -173,7 +179,9 @@ internal sealed partial class Settings : IThemeChangeable
         var themeDisplayName = (ComboTheme.SelectedItem as ComboBoxItem)?.Content as string;
         var themeEnum = _themeTranslator.ToEnum(themeDisplayName);
         AppConfig.Settings.Theme = themeEnum;
-        ThemeController.Instance.SetTheme(themeEnum);
+
+        SetWindowTheme(themeEnum);
+        ThemeChanged?.Invoke(themeEnum); 
         await AppConfig.SaveAsync();
     }
 
@@ -182,7 +190,8 @@ internal sealed partial class Settings : IThemeChangeable
         var backGroundDisplayName = (ComboBackGround.SelectedItem as ComboBoxItem)?.Content as string;
         var backGroundEnum = _backdropTranslator.ToEnum(backGroundDisplayName);
         AppConfig.Settings.WindowBackdrop = backGroundEnum;
-        ThemeController.Instance.SetBackGround(backGroundEnum);
+
+        BackdropChanged?.Invoke(backGroundEnum);
         await AppConfig.SaveAsync();
     }
 
@@ -248,4 +257,5 @@ internal sealed partial class Settings : IThemeChangeable
     {
         return value ?? false;
     }
+
 }

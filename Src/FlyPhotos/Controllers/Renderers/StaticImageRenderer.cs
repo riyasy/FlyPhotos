@@ -64,21 +64,30 @@ namespace FlyPhotos.Controllers.Renderers
             _offscreenDrawTimer.Start();
         }
 
-        private void OffScreenDrawTimer_Tick(object sender, object e)
+        public void TryRedrawOffScreen()
         {
-            _offscreenDrawTimer.Stop();
-            CreateOffscreen();
+            CreateOffscreen(true);
             _invalidateCanvas();
         }
 
-        private void CreateOffscreen()
+        private void OffScreenDrawTimer_Tick(object sender, object e)
+        {
+            _offscreenDrawTimer.Stop();
+            CreateOffscreen(false);
+            _invalidateCanvas();
+        }
+
+        private void CreateOffscreen(bool forceCreate)
         {
             var imageWidth = _canvasViewState.ImageRect.Width * _canvasViewState.Scale;
             var imageHeight = _canvasViewState.ImageRect.Height * _canvasViewState.Scale;
 
-            if (_offscreen != null &&
+            var offScreenDimensionsChanged =
+                _offscreen != null &&
                 (_offscreen.SizeInPixels.Width != (int)imageWidth ||
-                 _offscreen.SizeInPixels.Height != (int)imageHeight))
+                 _offscreen.SizeInPixels.Height != (int)imageHeight);
+
+            if (forceCreate || offScreenDimensionsChanged)
             {
                 DestroyOffscreen();
             }

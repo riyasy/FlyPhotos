@@ -17,5 +17,7 @@ namespace FlyPhotos.Controllers.Renderers
         /// Signals the renderer to begin creating its high-quality representation, if applicable.
         /// </summary>
         void RestartOffScreenDrawTimer();
+
+        void TryRedrawOffScreen();
     }
 }

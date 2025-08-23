@@ -37,7 +37,7 @@ namespace FlyPhotos.Views;
 /// <summary>
 /// An empty window that can be used on its own or navigated to within a Frame.
 /// </summary>
-public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeChangeable
+public sealed partial class PhotoDisplayWindow 
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -45,7 +45,7 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
     private readonly IThumbnailController _thumbNailController;
     private readonly IPhotoDisplayController _photoController;
 
-    private Window? _settingWindow;
+    private Settings? _settingWindow;
 
     private readonly DispatcherTimer _repeatButtonReleaseCheckTimer = new()
     {
@@ -380,7 +380,9 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         {
             _settingWindow = new Settings(_thumbNailController);
             _settingWindow.SetWindowSize(1024, 768);
-            ThemeController.Instance.AddWindow(_settingWindow);
+            _settingWindow.ShowCheckeredBackgroundChanged += _settingWindow_ShowCheckeredBackgroundChanged;
+            _settingWindow.ThemeChanged += SetWindowTheme;
+            _settingWindow.BackdropChanged += SetWindowBackground;
             _settingWindow.Closed += SettingWindow_Closed;
         }
         _settingWindow.Activate();
@@ -411,8 +413,6 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         _wheelScrollBrakeTimer.Stop();
         _thumbNailController.ThumbnailClicked -= _thumbNailController_ThumbnailClicked;
 
-        ThemeController.Instance.Dispose();
-
         await _canvasController.DisposeAsync();
         _thumbNailController.Dispose();
         _photoController.Dispose();
@@ -427,8 +427,19 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
     private void SettingWindow_Closed(object sender, WindowEventArgs args)
     {
         if (_settingWindow != null)
+        {
             _settingWindow.Closed -= SettingWindow_Closed;
+            _settingWindow.ThemeChanged -= SetWindowTheme;
+            _settingWindow.BackdropChanged -= SetWindowBackground;
+            _settingWindow.ShowCheckeredBackgroundChanged -= _settingWindow_ShowCheckeredBackgroundChanged;
+        }
+
         _settingWindow = null;
+    }
+
+    private void _settingWindow_ShowCheckeredBackgroundChanged(bool showChecker)
+    {
+        _canvasController.HandleCheckeredBackgroundChange(showChecker);
     }
 
     private void ButtonExpander_Click(object sender, RoutedEventArgs e)
