@@ -11,7 +11,7 @@ namespace FlyPhotos.AppSettings;
 public class SettingsWrapper
 {
     [System.Text.Json.Serialization.JsonPropertyName("Settings")]
-    public AppSettings Settings { get; set; }
+    public AppSettings Settings { get; init; }
 }
 
 

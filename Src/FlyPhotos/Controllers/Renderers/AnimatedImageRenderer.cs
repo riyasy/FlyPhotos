@@ -1,10 +1,8 @@
 ﻿using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers.Animators;
-using FlyPhotos.Data;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
-using Microsoft.UI;
 using System;
 using System.Diagnostics;
 using System.Threading;

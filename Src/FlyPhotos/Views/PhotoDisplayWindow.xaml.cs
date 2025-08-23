@@ -44,7 +44,6 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
     private readonly ICanvasController _canvasController;
     private readonly IThumbnailController _thumbNailController;
     private readonly IPhotoDisplayController _photoController;
-    private readonly PhotoSessionState _photoSessionState;
 
     private Window? _settingWindow;
 
@@ -96,10 +95,10 @@ public sealed partial class PhotoDisplayWindow : IBackGroundChangeable, IThemeCh
         SetWindowTheme(AppConfig.Settings.Theme);
         DispatcherQueue.EnsureSystemDispatcherQueue();
 
-        _photoSessionState = new PhotoSessionState(){FirstPhotoPath = firstPhotoPath};
-        _thumbNailController = new ThumbNailController(D2dCanvasThumbNail, _photoSessionState);
-        _canvasController = new CanvasController(D2dCanvas, _thumbNailController, _photoSessionState);
-        _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, _photoSessionState);
+        var photoSessionState = new PhotoSessionState(){FirstPhotoPath = firstPhotoPath};
+        _thumbNailController = new ThumbNailController(D2dCanvasThumbNail, photoSessionState);
+        _canvasController = new CanvasController(D2dCanvas, _thumbNailController, photoSessionState);
+        _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, photoSessionState);
         _photoController.StatusUpdated += PhotoController_StatusUpdated;
 
         TxtFileName.Text = Path.GetFileName(firstPhotoPath);

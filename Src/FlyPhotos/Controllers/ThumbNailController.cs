@@ -10,7 +10,7 @@ using Microsoft.UI.Xaml;
 
 namespace FlyPhotos.Controllers;
 
-internal class ThumbNailController : IThumbnailController, IDisposable
+internal class ThumbNailController : IThumbnailController
 {
     private bool _canDrawThumbnails;
     private bool _invalidatePending;
@@ -46,7 +46,7 @@ internal class ThumbNailController : IThumbnailController, IDisposable
         double canvasCenterX = _d2dCanvasThumbNail.ActualWidth / 2;
         double clickedX = pos.X;
 
-        int offset = (int)Math.Round((clickedX - canvasCenterX) / Constants.ThumbaNailBoxSize);
+        int offset = (int)Math.Round((clickedX - canvasCenterX) / Constants.ThumbnailBoxSize);
         if (offset != 0 && _photoSessionState.PhotosCount > 1)
         {
             int newIndex = _photoSessionState.CurrentDisplayIndex + offset;
@@ -64,7 +64,7 @@ internal class ThumbNailController : IThumbnailController, IDisposable
 
     private void _d2dCanvasThumbNail_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * Constants.ThumbaNailBoxSize)) + 1;
+        _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * Constants.ThumbnailBoxSize)) + 1;
         CreateThumbnailRibbonOffScreen();
         RequestInvalidate();
     }
@@ -128,8 +128,8 @@ internal class ThumbNailController : IThumbnailController, IDisposable
 
         if (_thumbnailOffscreen == null)
         {
-            _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * Constants.ThumbaNailBoxSize)) + 1;
-            _thumbnailOffscreen = new CanvasRenderTarget(_d2dCanvasThumbNail, (float)_d2dCanvasThumbNail.ActualWidth, Constants.ThumbaNailBoxSize);
+            _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * Constants.ThumbnailBoxSize)) + 1;
+            _thumbnailOffscreen = new CanvasRenderTarget(_d2dCanvasThumbNail, (float)_d2dCanvasThumbNail.ActualWidth, Constants.ThumbnailBoxSize);
         }
 
         using var dsThumbNail = _thumbnailOffscreen.CreateDrawingSession();
@@ -137,7 +137,7 @@ internal class ThumbNailController : IThumbnailController, IDisposable
 
         if (_cachedPreviews != null)
         {
-            var startX = (int)_d2dCanvasThumbNail.ActualWidth / 2 - Constants.ThumbaNailBoxSize / 2;
+            var startX = (int)_d2dCanvasThumbNail.ActualWidth / 2 - Constants.ThumbnailBoxSize / 2;
             var startY = 0;
 
             for (var i = -_numOfThumbNailsInOneDirection; i <= _numOfThumbNailsInOneDirection; i++)
@@ -165,18 +165,18 @@ internal class ThumbNailController : IThumbnailController, IDisposable
                 var cropX = (bitmapWidth - cropSize) / 2;
                 var cropY = (bitmapHeight - cropSize) / 2;
 
-                var destX = startX + i * Constants.ThumbaNailBoxSize;
+                var destX = startX + i * Constants.ThumbnailBoxSize;
 
                 // Draw the cropped center of the image
                 dsThumbNail.DrawImage(
                     bitmap,
-                    new Rect(destX, startY, Constants.ThumbaNailBoxSize, Constants.ThumbaNailBoxSize),
+                    new Rect(destX, startY, Constants.ThumbnailBoxSize, Constants.ThumbnailBoxSize),
                     new Rect(cropX, cropY, cropSize, cropSize), 1f,
                     CanvasImageInterpolation.NearestNeighbor // Source rectangle for the crop
                 );
                 if (index == _photoSessionState.CurrentDisplayIndex)
                 {
-                    dsThumbNail.DrawRectangle(new Rect(destX, startY, Constants.ThumbaNailBoxSize, Constants.ThumbaNailBoxSize),
+                    dsThumbNail.DrawRectangle(new Rect(destX, startY, Constants.ThumbnailBoxSize, Constants.ThumbnailBoxSize),
                         Colors.GreenYellow, 3f);
                 }
             }

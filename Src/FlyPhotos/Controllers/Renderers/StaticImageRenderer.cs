@@ -1,15 +1,12 @@
 ﻿using FlyPhotos.AppSettings;
-using FlyPhotos.Data;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
-using Microsoft.Graphics.Canvas.Effects;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using System;
 using System.Numerics;
 using Windows.Foundation;
-using static System.Collections.Specialized.BitVector32;
 
 namespace FlyPhotos.Controllers.Renderers
 {

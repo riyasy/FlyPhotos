@@ -17,7 +17,7 @@ using NLog;
 
 namespace FlyPhotos.Controllers;
 
-internal class PhotoDisplayController : IPhotoDisplayController, IDisposable
+internal class PhotoDisplayController : IPhotoDisplayController
 {
     public event EventHandler<StatusUpdateEventArgs>? StatusUpdated;
 

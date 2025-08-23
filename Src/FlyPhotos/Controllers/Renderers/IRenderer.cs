@@ -1,7 +1,6 @@
 ﻿using System;
 using Windows.Foundation;
 using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.Brushes;
 
 namespace FlyPhotos.Controllers.Renderers
 {
