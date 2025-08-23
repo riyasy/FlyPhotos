@@ -33,7 +33,7 @@ public partial class App
     {
         if (Debug)
             //SelectedFileName = @"C:\Users\Riyas\Desktop\SingleGIF\output.gif";
-            _selectedFileName = @"C:\Users\Riyas\Desktop\TestImages\GIF\2.JPG";
+            _selectedFileName = @"C:\Users\Riyas\Desktop\TestImages\SVG\NewHomepage_Illustration_oem_dark.svg";
         //SelectedFileName = @"C:\Users\Riyas\Desktop\APNG\dancing-fruits.png";
         else
             _selectedFileName = Util.GetFileNameFromCommandLine();
@@ -50,7 +50,6 @@ public partial class App
     {
         AppConfig.Initialize();
         _mWindow = new PhotoDisplayWindow(_selectedFileName);
-        ThemeController.Instance.AddWindow(_mWindow);
         _mWindow.Maximize();
         _mWindow.Activate();
     }
