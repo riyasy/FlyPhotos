@@ -7,11 +7,14 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using System;
+using System.Numerics;
 using Windows.Foundation;
 using static System.Collections.Specialized.BitVector32;
 
 namespace FlyPhotos.Controllers.Renderers
 {
+	// TODO - 
+	// 1. Now antialiasing is disabled when drawing checkerboard. Find another way
     internal class StaticImageRenderer : IRenderer
     {
         private readonly CanvasBitmap _sourceBitmap;
@@ -43,10 +46,14 @@ namespace FlyPhotos.Controllers.Renderers
         public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality)
         {
             var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
-            // Antialiasing can cause fine lines visible at edge of images when drawing checkerboard
             session.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
             if (drawCheckeredBackground)
+            {
+                var brushScale = _canvasViewState.MatInv.M11;
+                _checkeredBrush.Transform = Matrix3x2.CreateScale(brushScale);
                 session.FillRectangle(viewState.ImageRect, _checkeredBrush);
+            }
+
 
             if (_offscreen != null)
                 session.DrawImage(_offscreen, viewState.ImageRect, _offscreen.Bounds, 1f, quality);
@@ -67,9 +74,50 @@ namespace FlyPhotos.Controllers.Renderers
             _invalidateCanvas();
         }
 
-        // TODO : Offscreen still causes light bleeding from the bottom checkered pattern.
-        // If there is no offscreen, there is no light bleeding. Fix THIS
         private void CreateOffscreen()
+        {
+            var imageWidth = _canvasViewState.ImageRect.Width * _canvasViewState.Scale;
+            var imageHeight = _canvasViewState.ImageRect.Height * _canvasViewState.Scale;
+
+            if (_offscreen != null &&
+                (_offscreen.SizeInPixels.Width != (int)imageWidth ||
+                 _offscreen.SizeInPixels.Height != (int)imageHeight))
+            {
+                DestroyOffscreen();
+            }
+
+            var drawingQuality = AppConfig.Settings.HighQualityInterpolation
+                ? CanvasImageInterpolation.HighQualityCubic
+                : CanvasImageInterpolation.NearestNeighbor;
+
+            if (_offscreen == null && imageWidth > 0 && imageHeight > 0 && imageWidth < _canvas.ActualWidth * 1.5)
+            {
+                var tempOffScreen = new CanvasRenderTarget(_canvas, (float)imageWidth, (float)imageHeight, 96);
+                using (var ds = tempOffScreen.CreateDrawingSession())
+                {
+                    var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
+                    ds.Antialiasing = drawCheckeredBackground
+                        ? CanvasAntialiasing.Aliased
+                        : CanvasAntialiasing.Antialiased;
+                    if (drawCheckeredBackground)
+                    {
+                        _checkeredBrush.Transform = Matrix3x2.Identity;
+                        ds.FillRectangle(new Rect(0, 0, imageWidth, imageHeight), _checkeredBrush);
+                    }
+                    else
+                    {
+                        ds.Clear(Colors.Transparent);
+                    }
+
+                    ds.DrawImage(_sourceBitmap, new Rect(0, 0, imageWidth, imageHeight),
+                        _sourceBitmap.Bounds, 1, drawingQuality);
+                }
+                _offscreen = tempOffScreen;
+            }
+        }
+
+		/// TODO, decide and remove
+        private void CreateOffscreen_OLD()
         {
             var imageWidth = _canvasViewState.ImageRect.Width * _canvasViewState.Scale;
             var imageHeight = _canvasViewState.ImageRect.Height * _canvasViewState.Scale;
