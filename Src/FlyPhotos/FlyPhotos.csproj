@@ -49,6 +49,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.250402" />
+		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.8.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.8" />
@@ -111,10 +112,6 @@
 		</None>
 		<None Update="FlyNativeLib.dll">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="Magick\Magick.Native-Q16-HDRI-OpenMP-x64.dll">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		  <TargetPath>Magick.Native-Q16-HDRI-OpenMP-x64.dll</TargetPath>
 		</None>
 		<None Update="NLog.config">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
