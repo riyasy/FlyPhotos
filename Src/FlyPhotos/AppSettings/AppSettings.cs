@@ -25,15 +25,16 @@ public class AppSettings
         set => WindowBackdropAsString = value.ToString();
     }
 
-
-    public bool ResetPanZoomOnNextPhoto { get; set; }
-    public int CacheSizeOneSideHqImages { get; set; }
-    public int CacheSizeOneSidePreviews { get; set; }
-    public bool ShowThumbnails { get; set; }
-    public bool AutoFade { get; set; }
-    public int FadeIntensity { get; set; }
-    public bool OpenExitZoom { get; set; }
-    public bool HighQualityInterpolation { get; set; }
-    public bool CheckeredBackground { get; set; }
+    public bool ResetPanZoomOnNextPhoto { get; set; } = false;
+    public int CacheSizeOneSideHqImages { get; set; } = 2;
+    public int CacheSizeOneSidePreviews { get; set; } = 300;
+    public bool ShowThumbnails { get; set; } = true;
+    public bool AutoFade { get; set; } = true;
+    public int FadeIntensity { get; set; } = 60;
+    public bool OpenExitZoom { get; set; } = false;
+    public bool HighQualityInterpolation { get; set; } = true;
+    public bool CheckeredBackground { get; set; } = false;
+    public int StartupDisplayPercentage { get; set; } = 100;
+    public int TransparentBackgroundIntensity { get; set; } = 40;
 }
 

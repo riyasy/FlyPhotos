@@ -31,6 +31,8 @@ internal sealed partial class Settings
     public event Action<ElementTheme>? ThemeChanged;
     public event Action<WindowBackdropType>? BackdropChanged;
     public event Action<bool>? ShowCheckeredBackgroundChanged;
+    public event Action<int>? BackDropTransparencyChanged;
+
 
     private readonly IThumbnailController _thumbnailDisplayChanger;
     private readonly SystemBackdropConfiguration _configurationSource;
@@ -97,6 +99,8 @@ internal sealed partial class Settings
         SliderFadeIntensity.Value = AppConfig.Settings.FadeIntensity;
         ButtonHighQualityInterpolation.IsOn = AppConfig.Settings.HighQualityInterpolation;
         ButtonShowCheckeredBackground.IsOn = AppConfig.Settings.CheckeredBackground;
+        SliderStartupDisplayPercentage.Value = AppConfig.Settings.StartupDisplayPercentage;
+        SliderTransparentBackgroundIntensity.Value = AppConfig.Settings.TransparentBackgroundIntensity;
 
         MainLayout.KeyDown += MainLayout_OnKeyDown;
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
@@ -111,6 +115,8 @@ internal sealed partial class Settings
         SliderFadeIntensity.ValueChanged += SliderFadeIntensity_ValueChanged;
         ButtonHighQualityInterpolation.Toggled += ButtonHighQualityInterpolation_OnToggled;
         ButtonShowCheckeredBackground.Toggled += ButtonShowCheckeredBackground_OnToggled;
+        SliderStartupDisplayPercentage.ValueChanged += SliderStartupDisplayPercentage_ValueChanged;
+        SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
 
         SettingsCardKeyboardShortCuts.Description = $"{Environment.NewLine}Left/Right Arrow Keys : Navigate Photos" +
                                                     $"{Environment.NewLine}Mouse Wheel : Zoom In/Out" +
@@ -134,6 +140,19 @@ internal sealed partial class Settings
         TextBoxCodecs.Text =
             $"This program doesn't install any codecs and uses codecs already present in the system.{Environment.NewLine}" +
             $"{Environment.NewLine}{Util.GetExtensionsDisplayString()}";
+    }
+
+    private async void SliderTransparentBackgroundIntensity_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    {
+        AppConfig.Settings.TransparentBackgroundIntensity = (int)SliderTransparentBackgroundIntensity.Value;
+        BackDropTransparencyChanged?.Invoke(AppConfig.Settings.TransparentBackgroundIntensity);
+        await AppConfig.SaveAsync();
+    }
+
+    private async void SliderStartupDisplayPercentage_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    {
+        AppConfig.Settings.StartupDisplayPercentage = (int)SliderStartupDisplayPercentage.Value;
+        await AppConfig.SaveAsync();
     }
 
     private async void ButtonShowCheckeredBackground_OnToggled(object sender, RoutedEventArgs e)
@@ -258,4 +277,8 @@ internal sealed partial class Settings
         return value ?? false;
     }
 
+    private Visibility ShouldDisplayTransparencySlider(int index)
+    {
+        return index == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
 }

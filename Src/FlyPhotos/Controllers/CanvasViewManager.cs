@@ -57,7 +57,8 @@ internal class CanvasViewManager
             {
                 var targetPosition = new Point(canvasWidth / 2, canvasHeight / 2);
                 _canvasViewState.Scale = 0.01f;
-                StartPanAndZoomAnimation(1.0f, targetPosition);
+                float startupScale = AppConfig.Settings.StartupDisplayPercentage / 100.0f;
+                StartPanAndZoomAnimation(startupScale, targetPosition);
             }
         }
 
@@ -244,5 +245,11 @@ internal class CanvasViewManager
         CompositionTarget.Rendering -= _renderingHandler;
         _renderingHandler = null;
         PanZoomAnimationOnGoing = false;
+    }
+
+    public void SetStartupScale()
+    {
+        _canvasViewState.Scale = AppConfig.Settings.StartupDisplayPercentage/100.0f;
+        _canvasViewState.LastScaleTo = AppConfig.Settings.StartupDisplayPercentage/100.0f;
     }
 }

@@ -145,12 +145,16 @@ internal class CanvasController : ICanvasController
         }
     }
 
-    private void SetupNewRenderer(IRenderer newRenderer, double imageWidth, double imageHeight, int imageRotation, bool isFirstTime, bool forceThumbNailRedraw)
+    private void SetupNewRenderer(IRenderer newRenderer, double imageWidth, double imageHeight, int imageRotation, bool isFirstPhoto, bool forceThumbNailRedraw)
     {
+        if (isFirstPhoto)
+        {
+            _canvasViewManager.SetStartupScale();
+        }
         _currentRenderer?.Dispose();
         _currentRenderer = newRenderer;
         _canvasViewManager.SetScaleAndPosition(imageWidth, imageHeight,
-            imageRotation, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight, isFirstTime);
+            imageRotation, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight, isFirstPhoto);
         if (forceThumbNailRedraw)
             _thumbNailController.CreateThumbnailRibbonOffScreen();
         _currentRenderer.RestartOffScreenDrawTimer();

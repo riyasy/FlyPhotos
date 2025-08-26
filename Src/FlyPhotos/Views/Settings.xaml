@@ -53,15 +53,31 @@
                             Description="Set the window background."
                             Header="Window Background"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE70A;}">
-                            <ComboBox x:Name="ComboBackGround" SelectedIndex="0">
-                                <ComboBoxItem>Transparent</ComboBoxItem>
-                                <ComboBoxItem>Frozen</ComboBoxItem>
-                                <ComboBoxItem>Acrylic</ComboBoxItem>
-                                <ComboBoxItem>Acrylic Thin</ComboBoxItem>
-                                <ComboBoxItem>Mica</ComboBoxItem>
-                                <ComboBoxItem>Mica Alt</ComboBoxItem>
-                                <ComboBoxItem>None</ComboBoxItem>
-                            </ComboBox>
+                            <StackPanel Orientation="Vertical" Spacing="10">
+                                <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="Choose Background" />
+                                <ComboBox x:Name="ComboBackGround" SelectedIndex="0">
+                                    <ComboBoxItem>Transparent</ComboBoxItem>
+                                    <ComboBoxItem>Frozen</ComboBoxItem>
+                                    <ComboBoxItem>Acrylic</ComboBoxItem>
+                                    <ComboBoxItem>Acrylic Thin</ComboBoxItem>
+                                    <ComboBoxItem>Mica</ComboBoxItem>
+                                    <ComboBoxItem>Mica Alt</ComboBoxItem>
+                                    <ComboBoxItem>None</ComboBoxItem>
+                                </ComboBox>
+                                <TextBlock
+                                    Padding="0,10,0,0"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    Text="Set Transparency Percentage"
+                                    Visibility="{x:Bind ShouldDisplayTransparencySlider(ComboBackGround.SelectedIndex), Mode=OneWay}" />
+                                <Slider
+                                    x:Name="SliderTransparentBackgroundIntensity"
+                                    Width="200"
+                                    Maximum="90"
+                                    Minimum="30"
+                                    SmallChange="10"
+                                    StepFrequency="10"
+                                    Visibility="{x:Bind ShouldDisplayTransparencySlider(ComboBackGround.SelectedIndex), Mode=OneWay}" />
+                            </StackPanel>
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardOpenExitZoom"
@@ -94,6 +110,20 @@
                             Header="Show Checkered Background"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE80A;}">
                             <ToggleSwitch x:Name="ButtonShowCheckeredBackground" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardStartupStartupDisplayPercentage"
+                            Margin="0,5,0,0"
+                            Description="Choose startup image-window fit percentage"
+                            Header="Startup up image size"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE9A6;}">
+                            <Slider
+                                x:Name="SliderStartupDisplayPercentage"
+                                Width="200"
+                                Maximum="100"
+                                Minimum="50"
+                                SmallChange="10"
+                                StepFrequency="10" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardShowThumbnail"

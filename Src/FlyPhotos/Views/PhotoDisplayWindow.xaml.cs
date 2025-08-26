@@ -57,7 +57,10 @@ public sealed partial class PhotoDisplayWindow
         Interval = TimeSpan.FromMilliseconds(400)
     };
 
-    private readonly TransparentTintBackdrop _transparentTintBackdrop = new() { TintColor = Color.FromArgb(0xAA, 0, 0, 0) };
+    private readonly TransparentTintBackdrop _transparentTintBackdrop = new()
+    {
+        TintColor = Color.FromArgb((byte)(((100 - AppConfig.Settings.TransparentBackgroundIntensity) * 255) / 100), 0, 0, 0)
+    };
     private readonly BlurredBackdrop _frozenBackdrop = new();
 
     private OverlappedPresenterState _lastWindowState;
@@ -380,12 +383,17 @@ public sealed partial class PhotoDisplayWindow
         {
             _settingWindow = new Settings(_thumbNailController);
             _settingWindow.SetWindowSize(1024, 768);
+            _settingWindow.Closed += SettingWindow_Closed;
+            _settingWindow.Activate();
             _settingWindow.ShowCheckeredBackgroundChanged += _settingWindow_ShowCheckeredBackgroundChanged;
+            _settingWindow.BackDropTransparencyChanged += _settingWindow_BackdropTransparencyChanged;
             _settingWindow.ThemeChanged += SetWindowTheme;
             _settingWindow.BackdropChanged += SetWindowBackground;
-            _settingWindow.Closed += SettingWindow_Closed;
         }
-        _settingWindow.Activate();
+        else
+        {
+            _settingWindow.Activate();
+        }
     }
 
     private async void PhotoDisplayWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
@@ -432,6 +440,7 @@ public sealed partial class PhotoDisplayWindow
             _settingWindow.ThemeChanged -= SetWindowTheme;
             _settingWindow.BackdropChanged -= SetWindowBackground;
             _settingWindow.ShowCheckeredBackgroundChanged -= _settingWindow_ShowCheckeredBackgroundChanged;
+            _settingWindow.BackDropTransparencyChanged -= _settingWindow_BackdropTransparencyChanged;
         }
 
         _settingWindow = null;
@@ -440,6 +449,14 @@ public sealed partial class PhotoDisplayWindow
     private void _settingWindow_ShowCheckeredBackgroundChanged(bool showChecker)
     {
         _canvasController.HandleCheckeredBackgroundChange(showChecker);
+    }
+    private void _settingWindow_BackdropTransparencyChanged(int obj)
+    {
+        if (_currentBackdropType == WindowBackdropType.Transparent)
+        {
+            _transparentTintBackdrop.TintColor = Color.FromArgb((byte)(((100 - obj) * 255) / 100), 0, 0, 0);
+            SystemBackdrop = _transparentTintBackdrop;
+        }
     }
 
     private void ButtonExpander_Click(object sender, RoutedEventArgs e)
