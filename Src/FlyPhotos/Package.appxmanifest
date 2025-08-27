@@ -42,6 +42,29 @@
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
+	  <Extensions>
+	  <uap:Extension Category="windows.fileTypeAssociation">
+		<uap:FileTypeAssociation Name="myimageviewer-images">
+		  <!-- Display Name and Logo are shown in the Open With menu -->
+		  <uap:DisplayName>FlyPhotos</uap:DisplayName>
+		  <uap:Logo>Assets\Square44x44Logo.png</uap:Logo>
+		  <!-- Add all the file types you want to support -->
+		  <uap:SupportedFileTypes>
+			<uap:FileType>.png</uap:FileType>
+			<uap:FileType>.jpg</uap:FileType>
+			<uap:FileType>.jpeg</uap:FileType>
+			<uap:FileType>.gif</uap:FileType>
+			<uap:FileType>.bmp</uap:FileType>
+			<uap:FileType>.tif</uap:FileType>
+			<uap:FileType>.tiff</uap:FileType>
+			<uap:FileType>.ico</uap:FileType>
+			<uap:FileType>.nef</uap:FileType>
+			<uap:FileType>.arw</uap:FileType>
+			<uap:FileType>.cr2</uap:FileType>
+		  </uap:SupportedFileTypes>
+		</uap:FileTypeAssociation>
+	  </uap:Extension>
+</Extensions>
     </Application>
   </Applications>
 

@@ -1,4 +1,12 @@
 ﻿#nullable enable
+using FlyPhotos.Data;
+using FlyPhotos.FlyNativeLibWrapper;
+using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.Brushes;
+using Microsoft.UI;
+using Microsoft.UI.Input;
+using Microsoft.UI.Xaml;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,14 +16,6 @@ using System.Text;
 using Windows.System;
 using Windows.UI;
 using Windows.UI.Core;
-using FlyPhotos.Data;
-using FlyPhotos.FlyNativeLibWrapper;
-using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.Brushes;
-using Microsoft.UI;
-using Microsoft.UI.Input;
-using Microsoft.UI.Xaml;
-using NLog;
 
 
 namespace FlyPhotos.Utils;
@@ -24,16 +24,12 @@ internal static class Util
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private static List<CodecInfo>? _codecInfoList;
-    public static readonly string ExternalWicReaderPath;
 
     public static List<string> SupportedExtensions { get; } = [];
     public static List<string> MemoryLeakingExtensions { get; } = [];
 
     static Util()
     {
-        var executingDir = GetExecutingDirectoryName();
-        ExternalWicReaderPath = Path.Combine(executingDir, "WicImageFileReaderNative.exe");
-
         _codecInfoList = CliWrapper.GetWicDecoders();
         foreach (var codecInfo in _codecInfoList) SupportedExtensions.AddRange(codecInfo.FileExtensions);
         SupportedExtensions.Add(".PSD");
@@ -41,7 +37,6 @@ internal static class Util
 
         var memoryLeakingCodecs = _codecInfoList.Where(x => x.FriendlyName.Contains("Raw Image"));
         foreach (var leakingCodec in memoryLeakingCodecs) MemoryLeakingExtensions.AddRange(leakingCodec.FileExtensions);
-        MemoryLeakingExtensions.AddRange([".ARW", ".CR2"]);
     }
 
     public static List<string> FindAllFilesFromExplorerWindowNative()
@@ -58,26 +53,6 @@ internal static class Util
             return [];
         }
         return Directory.EnumerateFiles(dirPath, "*.*", SearchOption.TopDirectoryOnly).ToList();
-    }
-
-    public static string GetFileNameFromCommandLine()
-    {
-        var args = Environment.GetCommandLineArgs();
-        var sb = new StringBuilder();
-        var first = true;
-        foreach (var a in args)
-            if (first)
-            {
-                first = false;
-            }
-            else
-            {
-                sb.Append(a);
-                sb.Append(" ");
-            }
-
-        var fileName = sb.ToString().Trim();
-        return fileName;
     }
 
     public static int FindSelectedFileIndex(string selectedFileName, List<string> files)
@@ -116,10 +91,6 @@ internal static class Util
             .Select(s => s[Random.Next(s.Length)]).ToArray());
     }
 
-    private static string GetExecutingDirectoryName()
-    {
-        return Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory);
-    }
 
     public static void ChangeCursor(this UIElement uiElement, InputCursor cursor)
     {
@@ -165,6 +136,23 @@ internal static class Util
             Interpolation = CanvasImageInterpolation.NearestNeighbor
         };
         return checkeredBrush;
+    }
+
+    private static void PrintLogFilePath()
+    {
+        var config = LogManager.Configuration;
+        foreach (var target in config.AllTargets)
+        {
+            if (target is NLog.Targets.FileTarget fileTarget)
+            {
+                // Resolve NLog variables (like ${tempdir})
+                var logEvent = new LogEventInfo { TimeStamp = DateTime.Now };
+                string resolvedPath = fileTarget.FileName.Render(logEvent);
+
+                Console.WriteLine("Log file path: " + resolvedPath);
+                System.Diagnostics.Debug.WriteLine("Log file path: " + resolvedPath);
+            }
+        }
     }
 
 }

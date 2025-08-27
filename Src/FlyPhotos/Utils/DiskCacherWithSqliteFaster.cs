@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using System;
 using System.IO;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
@@ -32,8 +31,7 @@ public sealed class DiskCacherWithSqlite : IDisposable
 
     private DiskCacherWithSqlite()
     {
-        var appName = Assembly.GetEntryAssembly()?.GetName().Name ?? "FlyPhotos";
-        var dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appName, "FlyPhotosCache_sqlite.db");
+        var dbPath = Path.Combine(PathResolver.GetDbFolderPath(), "FlyPhotosCache_sqlite.db");
 
         // Ensure folder exists
         Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
@@ -89,7 +87,20 @@ public sealed class DiskCacherWithSqlite : IDisposable
 
     public static DiskCacherWithSqlite Instance => _instance.Value;
 
-    public void Dispose()
+    /// <summary>
+    /// Safely disposes of the singleton instance ONLY if it has been created.
+    /// This should be called on application shutdown.
+    /// If we call Dispose directly on the Instance property, it will create the instance if it doesn't exist yet.
+    /// </summary>
+    public static void Shutdown()
+    {
+        if (_instance.IsValueCreated)
+        {
+            ((IDisposable)_instance.Value).Dispose();
+        }
+    }
+
+    void IDisposable.Dispose()
     {
         if (_disposed) return;
         _disposed = true;

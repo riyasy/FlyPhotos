@@ -241,9 +241,9 @@ internal sealed partial class Settings
 
     private void ButtonOpenLog_OnClick(object sender, RoutedEventArgs e)
     {
-        var logPath = $"{Path.GetTempPath()}FlyPhotos{Path.DirectorySeparatorChar}FlyPhotos.log";
-        if (File.Exists(logPath))
-            Process.Start("notepad.exe", logPath);
+        var logFilePath = Path.Combine(PathResolver.GetLogFolderPath(), "FlyPhotos.log");
+        if (File.Exists(logFilePath))
+            Process.Start("notepad.exe", logFilePath);
     }
 
     private void MainLayout_OnKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
@@ -251,7 +251,7 @@ internal sealed partial class Settings
         if (e.Key == VirtualKey.Escape) this.Close();
     }
 
-    public void SetWindowTheme(ElementTheme theme)
+    private void SetWindowTheme(ElementTheme theme)
     {
         ((FrameworkElement)Content).RequestedTheme = theme;
     }

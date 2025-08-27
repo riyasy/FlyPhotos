@@ -1,9 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Windows.Storage;
+using FlyPhotos.Utils;
 
 
 namespace FlyPhotos.AppSettings;
@@ -23,22 +22,8 @@ public static class AppConfig
     // This method reads the config files when the app starts.
     public static void Initialize()
     {
-        string userSettingsFolder;
-
-        if (App.Packaged)
-        {
-            userSettingsFolder = ApplicationData.Current.LocalFolder.Path;
-        }
-        else
-        {
-            var appName = Assembly.GetEntryAssembly()?.GetName().Name ?? "FlyPhotos";
-            userSettingsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                appName);
-            if (!Directory.Exists(userSettingsFolder)) Directory.CreateDirectory(userSettingsFolder);
-        }
-
-        _userSettingsPath = Path.Combine(userSettingsFolder, "usersettings.json");
-        var defaultSettingsPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+        _userSettingsPath = Path.Combine(PathResolver.GetUserSettingsFolder(), "usersettings.json");
+        var defaultSettingsPath = Path.Combine(PathResolver.GetDefaultSettingsFolder(), "appsettings.json");
 
         // AOT-Safe Loading Logic:
         // 1. Try to load user settings first.

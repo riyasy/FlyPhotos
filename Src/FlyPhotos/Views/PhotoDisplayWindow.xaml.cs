@@ -26,7 +26,6 @@ using WinRT;
 using WinRT.Interop;
 using WinUIEx;
 using Icon = System.Drawing.Icon;
-using Window = Microsoft.UI.Xaml.Window;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -424,12 +423,11 @@ public sealed partial class PhotoDisplayWindow
         await _canvasController.DisposeAsync();
         _thumbNailController.Dispose();
         _photoController.Dispose();
-        
+        DiskCacherWithSqlite.Shutdown();
+
         _backdropController?.RemoveSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
         _backdropController?.Dispose();
         _backdropController = null;
-
-        DiskCacherWithSqlite.Instance.Dispose();
     }
 
     private void SettingWindow_Closed(object sender, WindowEventArgs args)
@@ -478,7 +476,7 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.SetHundredPercent(true);
     }
 
-    public void SetWindowBackground(WindowBackdropType backdropType)
+    private void SetWindowBackground(WindowBackdropType backdropType)
     {
         _currentBackdropType = backdropType;
         if (_backdropController != null)
@@ -559,7 +557,7 @@ public sealed partial class PhotoDisplayWindow
         _configurationSource.Theme = (SystemBackdropTheme)((FrameworkElement)Content).ActualTheme;
     }
 
-    public void SetWindowTheme(ElementTheme theme)
+    private void SetWindowTheme(ElementTheme theme)
     {
         ((FrameworkElement)Content).RequestedTheme = theme;
     }

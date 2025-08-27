@@ -20,25 +20,25 @@ internal class ImageUtil
 
     public static async Task Initialize(CanvasControl d2dCanvas)
     {
-        Func<string, string> pathBuilder;
-        if (App.Packaged)
-            pathBuilder = (fileName) => $"ms-appx:///Assets/Images/{fileName}";
-        else
-            pathBuilder = (fileName) =>
-                Path.Combine(AppContext.BaseDirectory, "Assets", "Images", fileName);
-
-        FileNotFoundIndicator = await LoadIndicatorAsync(pathBuilder("FileNotFound.png"));
-        PreviewFailedIndicator = await LoadIndicatorAsync(pathBuilder("PreviewFailed.png"));
-        HqImageFailedIndicator = await LoadIndicatorAsync(pathBuilder("HQImageFailed.png"));
-        LoadingIndicator = await LoadIndicatorAsync(pathBuilder("Loading.png"));
-        return;
-
-        async Task<DisplayItem> LoadIndicatorAsync(string path)
-        {
-            var bitmap = await CanvasBitmap.LoadAsync(d2dCanvas, path);
-            return new DisplayItem(bitmap, PreviewSource.ErrorScreen);
-        }
+        FileNotFoundIndicator = await LoadIndicatorAsync(d2dCanvas, "FileNotFound.png");
+        PreviewFailedIndicator = await LoadIndicatorAsync(d2dCanvas, "PreviewFailed.png");
+        HqImageFailedIndicator = await LoadIndicatorAsync(d2dCanvas, "HQImageFailed.png");
+        LoadingIndicator = await LoadIndicatorAsync(d2dCanvas, "Loading.png");
     }
+
+    private static async Task<DisplayItem> LoadIndicatorAsync(CanvasControl d2dCanvas, string fileName)
+    {
+        var path = App.Packaged
+            ? $"ms-appx:///Assets/Images/{fileName}"
+            : Path.Combine(AppContext.BaseDirectory, "Assets", "Images", fileName);
+
+        var bitmap = App.Packaged
+            ? await CanvasBitmap.LoadAsync(d2dCanvas, new Uri(path))
+            : await CanvasBitmap.LoadAsync(d2dCanvas, path);
+
+        return new DisplayItem(bitmap, PreviewSource.ErrorScreen);
+    }
+
 
     public static async Task<(DisplayItem displayItem, bool continueLoadingHq)> GetFirstPreviewSpecialHandlingAsync(
         CanvasControl d2dCanvas,

@@ -195,16 +195,10 @@ internal class WicReader
 
     private static bool AskExternalWicReaderExeToCopyPixelsToMemoryMap(string path, string mmfName)
     {
-        string exePath;
-        if (App.Packaged)
+        var exePath = PathResolver.GetExternalWicReaderExePath();
+        if (App.Packaged && !File.Exists(exePath))
         {
-            CopyWicReaderExeToLocalStorage().GetAwaiter().GetResult();
-            var directory = ApplicationData.Current.LocalFolder.Path;
-            exePath = $@"{directory}\WicImageFileReaderNative.exe";
-        }
-        else
-        {
-            exePath = Util.ExternalWicReaderPath;
+            CopyWicReaderExeToLocalStorageOnFirstUse().GetAwaiter().GetResult();
         }
 
         // A better way to create a Process object
@@ -223,20 +217,18 @@ internal class WicReader
         return p.ExitCode == 0;
     }
 
-    private static async Task CopyWicReaderExeToLocalStorage()
+    private static async Task CopyWicReaderExeToLocalStorageOnFirstUse()
     {
-        try
-        {
-            await ApplicationData.Current.LocalFolder.GetFileAsync("WicImageFileReaderNative.exe");
-            return;
-        }
-        catch (FileNotFoundException)
-        {
-        }
-
-        var stopfile =
-            await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///WicImageFileReaderNative.exe"));
-        await stopfile.CopyAsync(ApplicationData.Current.LocalFolder);
+        //try
+        //{
+        //    await ApplicationData.Current.LocalFolder.GetFileAsync("WicImageFileReaderNative.exe");
+        //    return;
+        //}
+        //catch (FileNotFoundException)
+        //{
+        //}
+        var file = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///WicImageFileReaderNative.exe"));
+        await file.CopyAsync(PathResolver.GetExternalWicReaderExeCopyFolderForPackagedApp());
         Logger.Trace("Copied WicImageFileReaderNative.exe to local storage");
     }
 
