@@ -8,7 +8,7 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="390b4158-350f-4215-9419-541715ee51b0"
+    Name="FlyPhotos"
     Publisher="CN=Riyas"
     Version="1.0.0.0" />
 
