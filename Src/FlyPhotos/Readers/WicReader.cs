@@ -196,7 +196,7 @@ internal class WicReader
     private static bool AskExternalWicReaderExeToCopyPixelsToMemoryMap(string path, string mmfName)
     {
         var exePath = PathResolver.GetExternalWicReaderExePath();
-        if (App.Packaged && !File.Exists(exePath))
+        if (PathResolver.IsPackagedApp && !File.Exists(exePath))
         {
             CopyWicReaderExeToLocalStorageOnFirstUse().GetAwaiter().GetResult();
         }

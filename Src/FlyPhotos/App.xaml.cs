@@ -22,7 +22,6 @@ namespace FlyPhotos;
 /// </summary>
 public partial class App
 {
-    public static readonly bool Packaged = false;
     public static readonly bool Debug = false;
 
     private string _selectedFileName;
@@ -49,7 +48,7 @@ public partial class App
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        if (Packaged)
+        if (PathResolver.IsPackagedApp)
         {
             var activationArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
             _selectedFileName = GetFileNameFromArgsPackaged(activationArgs.Data as IFileActivatedEventArgs);

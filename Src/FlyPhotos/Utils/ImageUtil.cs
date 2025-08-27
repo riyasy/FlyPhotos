@@ -28,11 +28,11 @@ internal class ImageUtil
 
     private static async Task<DisplayItem> LoadIndicatorAsync(CanvasControl d2dCanvas, string fileName)
     {
-        var path = App.Packaged
+        var path = PathResolver.IsPackagedApp
             ? $"ms-appx:///Assets/Images/{fileName}"
             : Path.Combine(AppContext.BaseDirectory, "Assets", "Images", fileName);
 
-        var bitmap = App.Packaged
+        var bitmap = PathResolver.IsPackagedApp
             ? await CanvasBitmap.LoadAsync(d2dCanvas, new Uri(path))
             : await CanvasBitmap.LoadAsync(d2dCanvas, path);
 
