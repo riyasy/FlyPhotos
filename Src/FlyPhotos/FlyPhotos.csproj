@@ -10,16 +10,23 @@
 		<PublishProfile>Properties\PublishProfiles\win-$(Platform).pubxml</PublishProfile>
 		<UseWinUI>true</UseWinUI>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-		<PackageCertificateThumbprint>896D4FFE3CD03AAFC7D25F9DD20D598FAF0CD30A</PackageCertificateThumbprint>
-		<PackageCertificateKeyFile>FlyPhotosWinUI_TemporaryKey.pfx</PackageCertificateKeyFile>
+		<PackageCertificateThumbprint>16DD4A33999E587FDF9D20E2A50636BE04BD85F7</PackageCertificateThumbprint>
 		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
 		<EnableMsixTooling>true</EnableMsixTooling>
-		<WindowsPackageType>None</WindowsPackageType>
+		<!--WindowsPackageType>None</WindowsPackageType-->
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
 		<PublishAot>true</PublishAot>
 		<SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
 		<InvariantGlobalization>true</InvariantGlobalization>
+		<GenerateAppInstallerFile>True</GenerateAppInstallerFile>
+		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
+		<AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
+		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+		<GenerateTestArtifacts>True</GenerateTestArtifacts>
+		<AppxBundle>Never</AppxBundle>
+		<AppInstallerUri>C:\Users\Riyas\Documents\GitHub\FlyPhotos\Src\FlyPhotos\MSIX_FOLDER</AppInstallerUri>
+		<HoursBetweenUpdateChecks>672</HoursBetweenUpdateChecks>
 	</PropertyGroup>
 
 	<Target Name="CopyYourFolderAfterPublish" AfterTargets="Publish">
@@ -40,7 +47,6 @@
 		<Content Include="Assets\Square150x150Logo.scale-200.png" />
 		<Content Include="Assets\Square44x44Logo.scale-200.png" />
 		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-		<Content Include="Assets\StoreLogo.png" />
 		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
 		<Content Include="WicImageFileReaderNative.exe">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
