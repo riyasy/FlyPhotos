@@ -1,6 +1,6 @@
-MIT License
+MIT License with Commons Clause
 
-Copyright (c) 2023 riyasy
+Copyright (c) 2025 riyasy
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,20 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+Commons Clause Restriction
+
+The Software is provided under the terms of the MIT License above, with the
+following additional restriction:
+
+The Software may not be sold, or offered as part of a paid service, or otherwise
+used for commercial purposes, without explicit written permission from the
+copyright holder.
+
+For clarity, this means you may use, modify, and share the Software freely for
+personal, educational, or non-commercial purposes, but you may not monetize it
+(e.g., by selling it on an app store, bundling it into a paid product, or
+offering it as part of a commercial SaaS) without a separate commercial license
+from the copyright holder.
