@@ -13,7 +13,7 @@
 		<PackageCertificateThumbprint>16DD4A33999E587FDF9D20E2A50636BE04BD85F7</PackageCertificateThumbprint>
 		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
 		<EnableMsixTooling>true</EnableMsixTooling>
-		<!--WindowsPackageType>None</WindowsPackageType-->
+		<WindowsPackageType>None</WindowsPackageType>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
 		<PublishAot>true</PublishAot>
@@ -38,6 +38,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Views\InitWindow.xaml" />
 	  <None Remove="Views\Settings.xaml" />
 	</ItemGroup>
 
@@ -122,6 +123,9 @@
 		<None Update="NLog.config">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<Page Update="Views\InitWindow.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
 		<Page Update="Views\Settings.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</Page>

@@ -1,0 +1,85 @@
+<Window
+    x:Class="FlyPhotos.Views.InitWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="using:CommunityToolkit.WinUI"
+    mc:Ignorable="d">
+    <Grid x:Name="MainLayout" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+        <StackPanel Margin="20,10,20,20" Spacing="15">
+
+            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Fly Photos - Select Photo" />
+
+            <!--  File Interaction Area  -->
+            <Border
+                x:Name="DropArea"
+                Height="150"
+                Margin="0,30,0,0"
+                AllowDrop="True"
+                Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}"
+                DragOver="DropArea_DragOver"
+                Drop="DropArea_Drop">
+                <Grid>
+                    <!--  Dashed outline effect  -->
+                    <Rectangle
+                        RadiusX="8"
+                        RadiusY="8"
+                        Stroke="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+                        StrokeDashArray="4 2"
+                        StrokeThickness="3" />
+
+                    <!--  Content: Text with an inline hyperlink  -->
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource SystemControlPageTextBaseHighBrush}"
+                        TextAlignment="Center">
+                        <Run>Drag and drop an image or</Run>
+                        <Hyperlink Click="OpenFileHyperlink_Click">Open file</Hyperlink>
+                    </TextBlock>
+                </Grid>
+            </Border>
+
+            <TextBlock
+                Margin="0,10,0,0"
+                Text="FlyPhotos is intended to be used by right-clicking an image and then selecting Open With &quot;Fly Photos&quot;."
+                TextWrapping="Wrap" />
+
+            <Border
+                Margin="0,5"
+                BorderBrush="Gray"
+                BorderThickness="0,1,0,0" />
+
+            <TextBlock Text="FlyPhotos can also be set as the default viewer for an extension by right-clicking an image and selecting &quot;Open With&quot; and then &quot;Choose another app&quot; and then select &quot;Fly Photos&quot; and press the &quot;Always&quot; button." TextWrapping="Wrap" />
+
+            <!--  TODO: Replace this with an actual screenshot Image control  -->
+            <!--<Border
+                Margin="0,5"
+                Padding="10"
+                Background="LightGray"
+                CornerRadius="4">
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    Foreground="Gray"
+                    Text="&lt;Image on how to do this&gt;" />
+            </Border>-->
+
+            <Border
+                Margin="0,5"
+                BorderBrush="Gray"
+                BorderThickness="0,1,0,0" />
+
+            <TextBlock Text="FlyPhotos can also be set as the default viewer for an extension in &quot;Apps &gt; Default Apps&quot; page in &quot;Settings&quot; app of Windows 11." TextWrapping="Wrap" />
+
+            <Border
+                Margin="0,5"
+                BorderBrush="Gray"
+                BorderThickness="0,1,0,0" />
+
+
+        </StackPanel>
+    </Grid>
+</Window>

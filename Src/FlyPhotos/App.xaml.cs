@@ -6,6 +6,7 @@ using Microsoft.Windows.AppLifecycle;
 using NLog;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using Windows.ApplicationModel.Activation;
@@ -67,11 +68,33 @@ public partial class App
         }
 
         AppConfig.Initialize();
-        _mWindow = new PhotoDisplayWindow(_selectedFileName);
-        _mWindow.Maximize();
-        _mWindow.Activate();
 
+        if (string.IsNullOrEmpty(_selectedFileName))
+        {
+            var initWindow = new InitWindow();
+            initWindow.SetWindowSize(600, 600);
+            initWindow.CenterOnScreen();
+            initWindow.Activate();
+            initWindow.Closed += delegate(object o, WindowEventArgs eventArgs)
+            {
+                if (File.Exists(initWindow.SelectedFile))
+                {
+                    _mWindow = new PhotoDisplayWindow(initWindow.SelectedFile);
+                    _mWindow.Maximize();
+                    _mWindow.Activate();
+                }
+            };
+
+        }
+        else
+        {
+            _mWindow = new PhotoDisplayWindow(_selectedFileName);
+            _mWindow.Maximize();
+            _mWindow.Activate();
+        }
     }
+
+
 
     private static void KillOtherFlys()
     {
