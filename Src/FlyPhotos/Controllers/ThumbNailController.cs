@@ -12,17 +12,22 @@ namespace FlyPhotos.Controllers;
 
 internal class ThumbNailController : IThumbnailController
 {
+    // A shorter interval for more responsive UI updates.
+    private static readonly TimeSpan ThrottleInterval = TimeSpan.FromMilliseconds(150);
+
     private bool _canDrawThumbnails;
     private bool _invalidatePending;
+    private bool _redrawNeeded; // Flag to track if a redraw is needed.
 
     private readonly CanvasControl _d2dCanvasThumbNail;
     private readonly PhotoSessionState _photoSessionState;
     private CanvasRenderTarget _thumbnailOffscreen;
     private ConcurrentDictionary<int, Photo> _cachedPreviews;
 
-    private readonly DispatcherTimer _redrawThumbnailTimer = new()
+    // Renamed for clarity. This timer will now implement throttling.
+    private readonly DispatcherTimer _throttledRedrawTimer = new()
     {
-        Interval = new TimeSpan(0, 0, 0, 0, 500)
+        Interval = ThrottleInterval
     };
 
     private int _numOfThumbNailsInOneDirection = 20;
@@ -36,9 +41,58 @@ internal class ThumbNailController : IThumbnailController
         _d2dCanvasThumbNail.Draw += _d2dCanvasThumbNail_Draw;
         _d2dCanvasThumbNail.SizeChanged += _d2dCanvasThumbNail_SizeChanged;
         _d2dCanvasThumbNail.Loaded += _d2dCanvasThumbNail_Loaded;
-        _redrawThumbnailTimer.Tick += RedrawThumbnailTimer_Tick;
+        _throttledRedrawTimer.Tick += ThrottledRedrawTimer_Tick;
         _d2dCanvasThumbNail.PointerPressed += _d2dCanvasThumbNail_PointerPressed;
     }
+
+    // --- Public Methods ---
+
+    public void SetPreviewCacheReference(ConcurrentDictionary<int, Photo> cachedPreviews)
+    {
+        _cachedPreviews = cachedPreviews;
+    }
+
+    public void ShowThumbnailBasedOnSettings()
+    {
+        if (AppConfig.Settings.ShowThumbnails)
+        {
+            _d2dCanvasThumbNail.Visibility = Visibility.Visible;
+            _canDrawThumbnails = true; // Enable drawing when shown
+            CreateThumbnailRibbonOffScreen();
+        }
+        else
+        {
+            _d2dCanvasThumbNail.Visibility = Visibility.Collapsed;
+            // Optionally clear the offscreen buffer to save memory
+            _thumbnailOffscreen?.Dispose();
+            _thumbnailOffscreen = null;
+        }
+    }
+
+    /// <summary>
+    /// Called when an external thumbnail has been loaded.
+    /// This method throttles redraw requests to prevent overwhelming the UI thread.
+    /// </summary>
+    public void RedrawThumbNailsIfNeeded(int index)
+    {
+        // Check if the updated thumbnail is actually visible
+        if (index >= _photoSessionState.CurrentDisplayIndex - _numOfThumbNailsInOneDirection &&
+            index <= _photoSessionState.CurrentDisplayIndex + _numOfThumbNailsInOneDirection)
+            _d2dCanvasThumbNail.DispatcherQueue.TryEnqueue(() =>
+            {
+                _canDrawThumbnails = true;
+                _redrawNeeded = true;
+
+                // If the timer is not already running, start it.
+                // This ensures the redraw happens at most once per ThrottleInterval.
+                if (!_throttledRedrawTimer.IsEnabled)
+                {
+                    _throttledRedrawTimer.Start();
+                }
+            });
+    }
+
+    // --- Event Handlers ---
 
     private void _d2dCanvasThumbNail_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
@@ -66,12 +120,6 @@ internal class ThumbNailController : IThumbnailController
     {
         _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * Constants.ThumbnailBoxSize)) + 1;
         CreateThumbnailRibbonOffScreen();
-        RequestInvalidate();
-    }
-
-    public void SetPreviewCacheReference(ConcurrentDictionary<int, Photo> cachedPreviews)
-    {
-        _cachedPreviews = cachedPreviews;
     }
 
     private void _d2dCanvasThumbNail_Draw(CanvasControl sender, CanvasDrawEventArgs args)
@@ -85,49 +133,43 @@ internal class ThumbNailController : IThumbnailController
         }
     }
 
-    public void ShowThumbnailBasedOnSettings()
-    {
-        if (AppConfig.Settings.ShowThumbnails)
-        {
-            _d2dCanvasThumbNail.Visibility = Visibility.Visible;
-            CreateThumbnailRibbonOffScreen();
-            RequestInvalidate();
-        }
-        else
-        {
-            _d2dCanvasThumbNail.Visibility = Visibility.Collapsed;
-            RequestInvalidate();
-        }
-    }
+    // --- Drawing Logic ---
 
-    public void RedrawThumbNailsIfNeeded(int index)
+    /// <summary>
+    /// This now fires once per throttled interval.
+    /// </summary>
+    private void ThrottledRedrawTimer_Tick(object sender, object e)
     {
-        if (index >= _photoSessionState.CurrentDisplayIndex - _numOfThumbNailsInOneDirection &&
-            index <= _photoSessionState.CurrentDisplayIndex + _numOfThumbNailsInOneDirection)
-        {
-            _d2dCanvasThumbNail.DispatcherQueue.TryEnqueue(() =>
-            {
-                _canDrawThumbnails = true;
-                _redrawThumbnailTimer.Stop();
-                _redrawThumbnailTimer.Start();
-            });
-        }
-    }
+        // Stop the timer, making it a one-shot. It will be restarted by the next call
+        // to RedrawThumbNailsIfNeeded if more updates come in.
+        _throttledRedrawTimer.Stop();
 
-    private void RedrawThumbnailTimer_Tick(object sender, object e)
-    {
+        if (!_redrawNeeded) return;
+
+        _redrawNeeded = false; // Reset the flag
+
         CreateThumbnailRibbonOffScreen();
-        RequestInvalidate();
     }
 
+    /// <summary>
+    /// Renders the entire visible thumbnail strip to an off-screen bitmap.
+    /// This is the expensive operation that we are throttling.
+    /// </summary>
     public void CreateThumbnailRibbonOffScreen()
     {
-        _redrawThumbnailTimer.Stop();
+        // This method is now called by the throttled timer or direct UI actions.
+        // We can stop the timer here as a safeguard, but it's primarily stopped in the Tick handler.
+        _throttledRedrawTimer.Stop();
+
         if (_photoSessionState.PhotosCount <= 1 || !_canDrawThumbnails || !AppConfig.Settings.ShowThumbnails)
             return;
 
-        if (_thumbnailOffscreen == null)
+        if (_d2dCanvasThumbNail.ActualWidth <= 0) return; // Guard against drawing with no size
+
+        // Recreate render target if needed (e.g., after size change)
+        if (_thumbnailOffscreen == null || _thumbnailOffscreen.Size.Width != _d2dCanvasThumbNail.ActualWidth)
         {
+            _thumbnailOffscreen?.Dispose();
             _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * Constants.ThumbnailBoxSize)) + 1;
             _thumbnailOffscreen = new CanvasRenderTarget(_d2dCanvasThumbNail, (float)_d2dCanvasThumbNail.ActualWidth, Constants.ThumbnailBoxSize);
         }
@@ -144,45 +186,41 @@ internal class ThumbNailController : IThumbnailController
             {
                 var index = _photoSessionState.CurrentDisplayIndex + i;
 
-                if (index < 0 || index >= (_photoSessionState.PhotosCount)) continue;
+                if (index < 0 || index >= _photoSessionState.PhotosCount) continue;
 
-                CanvasBitmap bitmap;
-
-                if (_cachedPreviews.TryGetValue(index, out var photo) && photo.Preview != null && photo.Preview.Bitmap != null)
-                {
-                    bitmap = photo.Preview.Bitmap;
-                }
-                else
-                {
-                    bitmap = Photo.GetLoadingIndicator().Bitmap;
-                }
+                var bitmap = (_cachedPreviews.TryGetValue(index, out var photo) && photo.Preview?.Bitmap != null)
+                    ? photo.Preview.Bitmap
+                    : Photo.GetLoadingIndicator().Bitmap;
 
                 // Calculate the center square crop
                 float bitmapWidth = bitmap.SizeInPixels.Width;
                 float bitmapHeight = bitmap.SizeInPixels.Height;
                 var cropSize = Math.Min(bitmapWidth, bitmapHeight);
-
                 var cropX = (bitmapWidth - cropSize) / 2;
                 var cropY = (bitmapHeight - cropSize) / 2;
-
                 var destX = startX + i * Constants.ThumbnailBoxSize;
 
-                // Draw the cropped center of the image
                 dsThumbNail.DrawImage(
                     bitmap,
                     new Rect(destX, startY, Constants.ThumbnailBoxSize, Constants.ThumbnailBoxSize),
                     new Rect(cropX, cropY, cropSize, cropSize), 1f,
-                    CanvasImageInterpolation.NearestNeighbor // Source rectangle for the crop
+                    CanvasImageInterpolation.NearestNeighbor
                 );
+
                 if (index == _photoSessionState.CurrentDisplayIndex)
                 {
                     dsThumbNail.DrawRectangle(new Rect(destX, startY, Constants.ThumbnailBoxSize, Constants.ThumbnailBoxSize),
                         Colors.GreenYellow, 3f);
                 }
             }
-            RequestInvalidate();
         }
+
+        RequestInvalidate();
     }
+
+    /// <summary>
+    /// Coalesces multiple Invalidate requests into a single one on the DispatcherQueue.
+    /// </summary>
     private void RequestInvalidate()
     {
         if (_invalidatePending) return;
@@ -195,10 +233,12 @@ internal class ThumbNailController : IThumbnailController
         });
     }
 
+    // --- Cleanup ---
+
     public void Dispose()
     {
-        _redrawThumbnailTimer.Stop();
-        _redrawThumbnailTimer.Tick -= RedrawThumbnailTimer_Tick;
+        _throttledRedrawTimer.Stop();
+        _throttledRedrawTimer.Tick -= ThrottledRedrawTimer_Tick;
 
         if (_d2dCanvasThumbNail != null)
         {
@@ -210,11 +250,7 @@ internal class ThumbNailController : IThumbnailController
 
         _thumbnailOffscreen?.Dispose();
         _thumbnailOffscreen = null;
-
         ThumbnailClicked = null;
-
         _cachedPreviews = null;
     }
 }
-
-
