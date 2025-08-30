@@ -1,10 +1,12 @@
 // InitWindow.xaml.cs
 using FlyPhotos.AppSettings;
+using FlyPhotos.Utils;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents; 
+using Microsoft.UI.Xaml.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +14,7 @@ using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using FlyPhotos.Utils;
+using Windows.System;
 using WinRT.Interop;
 
 namespace FlyPhotos.Views
@@ -39,6 +41,11 @@ namespace FlyPhotos.Views
             titleBar.ButtonForegroundColor = Colors.Gray;
 
             ((FrameworkElement)Content).RequestedTheme = AppConfig.Settings.Theme;
+
+            MainLayout.KeyDown += delegate(object o, KeyRoutedEventArgs args)
+            {
+                if (args.Key == VirtualKey.Escape) this.Close();
+            };
         }
 
         public string SelectedFile { get; private set; }
