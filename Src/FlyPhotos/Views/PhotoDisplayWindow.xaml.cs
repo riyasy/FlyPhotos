@@ -79,7 +79,9 @@ public sealed partial class PhotoDisplayWindow
         InitializeComponent();
 
         Title = "Fly Photos";
-        SetUnpackagedAppIcon();
+        if (!PathResolver.IsPackagedApp)
+            SetUnpackagedAppIcon();
+
         SetupTransparentTitleBar();
 
         //(AppWindow.Presenter as OverlappedPresenter)?.SetBorderAndTitleBar(false, false);
