@@ -29,7 +29,9 @@ internal class GifReader
     {
         try
         {
-            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);
+            var file = await StorageFile.GetFileFromPathAsync(inputPath);
+            using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
+            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
             return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
         }
         catch (Exception ex)
@@ -60,13 +62,13 @@ internal class GifReader
             else
             {
                 // Single frame: Load as a static image (CanvasBitmap).
-                var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);
+                stream.Seek(0);
+                var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
                 return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
             }
         }
         catch (Exception ex)
         {
-            // This will catch errors from GetFileFromPathAsync, BitmapDecoder, or CanvasBitmap.LoadAsync
             // Logger.Error(ex, "Failed to process image file at {0}", inputPath);
             return (false, DisplayItem.Empty());
         }

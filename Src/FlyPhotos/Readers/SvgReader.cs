@@ -52,8 +52,7 @@ internal class SvgReader
             ms.Position = 0;
 
             // Load into CanvasBitmap
-            var rasStream = ms.AsRandomAccessStream();
-            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, rasStream);
+            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());
 
             return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
         }

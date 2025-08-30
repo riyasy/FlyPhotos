@@ -31,8 +31,18 @@ internal class PngReader
 
     public static async Task<(bool, DisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
     {
-        // For a preview, we don't need to parse the file; just load the first frame.
-        return await LoadStaticPngAsync(ctrl, inputPath);
+        try
+        {
+            var file = await StorageFile.GetFileFromPathAsync(inputPath);
+            using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
+            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
+            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+            return (false, DisplayItem.Empty());
+        }
     }
 
     public static async Task<(bool, DisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
@@ -51,42 +61,13 @@ internal class PngReader
             {
                 // It's a static PNG. Load it as a bitmap.
                 stream.Seek(0);
-                return await LoadStaticPngAsync(ctrl, stream);
+                var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
+                return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
             }
         }
         catch (Exception ex)
         {
             Logger.Error(ex, "Failed to process PNG/APNG file at {0}", inputPath);
-            return (false, DisplayItem.Empty());
-        }
-    }
-
-    // Private helper to load a static PNG from a stream
-    private static async Task<(bool, DisplayItem)> LoadStaticPngAsync(ICanvasResourceCreator resourceCreator, IRandomAccessStream stream)
-    {
-        try
-        {
-            var canvasBitmap = await CanvasBitmap.LoadAsync(resourceCreator, stream);
-            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Failed to load static PNG from stream.");
-            return (false, DisplayItem.Empty());
-        }
-    }
-
-    // Overload for convenience to load from a path (used by GetPreview)
-    private static async Task<(bool, DisplayItem)> LoadStaticPngAsync(ICanvasResourceCreator resourceCreator, string path)
-    {
-        try
-        {
-            var canvasBitmap = await CanvasBitmap.LoadAsync(resourceCreator, path);
-            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Failed to load static PNG from path {0}", path);
             return (false, DisplayItem.Empty());
         }
     }

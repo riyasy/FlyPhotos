@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
+using Windows.Storage.Streams;
 using FlyPhotos.Data;
 using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas;
@@ -45,7 +46,9 @@ internal class WicReader
 
         try
         {
-            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);
+            var file = await StorageFile.GetFileFromPathAsync(inputPath);
+            using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
+            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
             return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
         }
         catch (Exception ex)
@@ -219,14 +222,6 @@ internal class WicReader
 
     private static async Task CopyWicReaderExeToLocalStorageOnFirstUse()
     {
-        //try
-        //{
-        //    await ApplicationData.Current.LocalFolder.GetFileAsync("WicImageFileReaderNative.exe");
-        //    return;
-        //}
-        //catch (FileNotFoundException)
-        //{
-        //}
         var file = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///WicImageFileReaderNative.exe"));
         await file.CopyAsync(PathResolver.GetExternalWicReaderExeCopyFolderForPackagedApp());
         Logger.Trace("Copied WicImageFileReaderNative.exe to local storage");

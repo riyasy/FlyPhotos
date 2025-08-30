@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Data;
@@ -26,10 +27,10 @@ internal class PsdReader
             catch (Exception ex)
             {
                 Logger.Error(ex);
-                return (false, null);
+                return (false, DisplayItem.Empty());
             }
         }
-        return (false, null);
+        return (false, DisplayItem.Empty());
     }
 
     public static async Task<(bool, DisplayItem)> GetHq(CanvasControl d2dCanvas, string path)
@@ -47,111 +48,81 @@ internal class PsdReader
 
             // Create a CanvasBitmap from the MemoryStream
             var bitmap = await CanvasBitmap.LoadAsync(d2dCanvas, stream.AsRandomAccessStream());
-
             return (true, new DisplayItem(bitmap, PreviewSource.FromDisk));
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
-            return (false, null);
+            return (false, DisplayItem.Empty());
         }
     }
 
-    // Save thumbnail to a file
-    private static bool SaveThumbNail(string inputFilePath, string outputFilePath)
-    {
-        if (GetThumbNailByteArray(inputFilePath, out byte[] thumbnailData))
-        {
-            try
-            {
-                File.WriteAllBytes(outputFilePath, thumbnailData);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex);
-                return false;
-            }
-        }
-        return false;
-    }
-
-    // Get thumbnail as a byte array
     private static bool GetThumbNailByteArray(string inputFilePath, out byte[] thumbnailData)
     {
         thumbnailData = null;
 
         try
         {
-            using var fileStream = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read);
-            using var binaryReader = new BinaryReader(fileStream);
-            // Read and validate the PSD header
-            byte[] header = binaryReader.ReadBytes(4);
-            // PSD header should be '8BPS'
+            using var fileStream = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+
+            // --- Header Validation ---
+            var header = new byte[4];
+            fileStream.Read(header, 0, header.Length);
+            // PSD header must be '8BPS'
             if (header[0] != '8' || header[1] != 'B' || header[2] != 'P' || header[3] != 'S')
             {
                 return false;
             }
 
-            long fileLength = fileStream.Length;
-            bool found8BIM = false;
+            // --- Efficient Search for Thumbnail Resource ---
+            // The resource marker we are looking for is '8BIM' followed by resource ID 1033 or 1036
+            byte[] searchPatternV5 = { (byte)'8', (byte)'B', (byte)'I', (byte)'M', 0x04, 0x0C }; // 1036 for PS 5.0+
+            byte[] searchPatternV4 = { (byte)'8', (byte)'B', (byte)'I', (byte)'M', 0x04, 0x09 }; // 1033 for PS 4.0
 
-            // Search for the 8BIM resource section
-            while (fileStream.Position < fileLength - 6)
+            long position = FindBytePattern(fileStream, searchPatternV5);
+            if (position == -1)
             {
-                byte[] chunk = binaryReader.ReadBytes(6);
-                fileStream.Seek(-6, SeekOrigin.Current); // Move back to the start of the chunk
-
-                // Check if this chunk is the 8BIM marker
-                if (chunk[0] == '8' && chunk[1] == 'B' && chunk[2] == 'I' && chunk[3] == 'M')
-                {
-                    // Check if the resource type is Thumbnail (4,9) or (4,12)
-                    if ((chunk[4] == 4 && chunk[5] == 9) || (chunk[4] == 4 && chunk[5] == 12))
-                    {
-                        found8BIM = true;
-                        // Skip past the 8BIM marker and resource ID (6 bytes) + 2 bytes for additional length field
-                        fileStream.Seek(6 + 2, SeekOrigin.Current);
-                        break;
-                    }
-                }
-                // Move forward 1 byte and continue searching
-                fileStream.Seek(1, SeekOrigin.Current);
+                position = FindBytePattern(fileStream, searchPatternV4);
             }
 
-            // If the 8BIM marker was not found, return false
-            if (!found8BIM)
+            if (position == -1)
             {
+                return false; // Thumbnail resource not found
+            }
+
+            // We found the marker. Position the stream right after it.
+            fileStream.Position = position + searchPatternV5.Length;
+
+            // The stream is now at the resource name. We can skip it.
+            // A full parser would read this properly, but for just getting the data,
+            // we can read the size of the data block that follows.
+            using var reader = new BinaryReader(fileStream);
+
+            // Skip Pascal string for the name (1 byte length + name + padding)
+            byte nameLength = reader.ReadByte();
+            // Seek past the name string and its padding to make the total length even.
+            // (1 byte for length + nameLength + padding) must be an even number.
+            int nameBlockLength = 1 + nameLength;
+            int namePadding = nameBlockLength % 2 == 0 ? 0 : 1;
+            fileStream.Seek(nameLength + namePadding, SeekOrigin.Current);
+
+            // --- Read Thumbnail Data ---
+            // Read the size of the resource data block (big-endian)
+            uint dataSize = ReadBigEndianUInt32(reader);
+            if (dataSize <= 28)
+            {
+                // The first 28 bytes are thumbnail metadata, not image data.
                 return false;
             }
 
-            // Read the thumbnail size (4 bytes) from the file
-            long thumbnailSize = 0;
-            byte[] sizeBytes = binaryReader.ReadBytes(4);
-
-            // Calculate the size of the thumbnail data
-            for (int i = 0; i < 4; i++)
-            {
-                thumbnailSize += sizeBytes[i] * (long)Math.Pow(256, 3 - i);
-            }
-
-            // Skip 28 bytes 
+            // Skip the 28-byte thumbnail header to get to the raw JPEG data
             fileStream.Seek(28, SeekOrigin.Current);
 
-            // Adjust the size by subtracting the 28 bytes skipped
-            thumbnailSize -= 28;
+            // The actual JPEG data size is the total size minus the header
+            int jpegDataSize = (int)(dataSize - 28);
+            thumbnailData = reader.ReadBytes(jpegDataSize);
 
-            // If the calculated thumbnail size is invalid, return false
-            if (thumbnailSize <= 0)
-            {
-                return false;
-            }
-
-            // Read the thumbnail data from the file
-            thumbnailData = new byte[thumbnailSize];
-            int bytesRead = fileStream.Read(thumbnailData, 0, thumbnailData.Length);
-
-            // Verify that we read the expected number of bytes
-            return bytesRead == thumbnailSize;
+            return thumbnailData.Length == jpegDataSize;
         }
         catch (Exception ex)
         {
@@ -159,4 +130,47 @@ internal class PsdReader
             return false;
         }
     }
+
+    // Helper function to efficiently find a byte pattern in a stream
+    private static long FindBytePattern(Stream stream, byte[] pattern)
+    {
+        stream.Position = 0; // Start search from the beginning
+        const int bufferSize = 4096;
+        var buffer = new byte[bufferSize];
+        int bytesRead;
+
+        while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            for (int i = 0; i <= bytesRead - pattern.Length; i++)
+            {
+                bool found = true;
+                for (int j = 0; j < pattern.Length; j++)
+                {
+                    if (buffer[i + j] != pattern[j])
+                    {
+                        found = false;
+                        break;
+                    }
+                }
+                if (found)
+                {
+                    return stream.Position - bytesRead + i;
+                }
+            }
+            // Important: If the pattern could span across buffer boundaries, more complex logic is needed.
+            // For this specific use case, it's highly unlikely, so we keep it simple.
+            // We reposition the stream back slightly to handle edge cases.
+            stream.Seek(-(pattern.Length - 1), SeekOrigin.Current);
+        }
+        return -1; // Pattern not found
+    }
+
+    // Helper method for reading a Big-Endian 32-bit integer
+    private static uint ReadBigEndianUInt32(BinaryReader reader)
+    {
+        var bytes = reader.ReadBytes(4);
+        if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
+        return BitConverter.ToUInt32(bytes, 0);
+    }
+
 }
