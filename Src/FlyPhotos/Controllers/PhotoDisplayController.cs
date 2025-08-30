@@ -29,7 +29,7 @@ internal class PhotoDisplayController : IPhotoDisplayController
     private readonly SemaphoreSlim _diskCacheTaskThrottler = new(Environment.ProcessorCount);
 
     private readonly TaskCompletionSource<bool> _firstPhotoLoadedTcs = new();
-    private Photo? _firstPhoto;
+    private Photo _firstPhoto;
     private readonly List<Photo> _photos = [];
 
     private readonly ConcurrentStack<int> _toBeCachedHqImages = new();
@@ -60,6 +60,7 @@ internal class PhotoDisplayController : IPhotoDisplayController
         _thumbNailController = thumbNailController;
         _photoSessionState = photoSessionState;
         _thumbNailController.SetPreviewCacheReference(_cachedPreviews);
+        _firstPhoto = Photo.Empty();
 
         var thread = new Thread(() => { DoStartupActivities(_photoSessionState.FirstPhotoPath, _cts.Token); });
         thread.SetApartmentState(ApartmentState.STA); // This is needed for COM interaction.
@@ -147,7 +148,7 @@ internal class PhotoDisplayController : IPhotoDisplayController
                         photo.LoadPreview(_d2dCanvas); // TODO In a future refactor, this could accept a token
                         _cachedPreviews[index] = photo;
                         _previewsBeingCached.Remove(index, out _);
-                        if (photo.Preview.PreviewFrom == PreviewSource.FromDisk) { _toBeDiskCachedPreviews.Push(item); }
+                        if (photo.Preview?.PreviewFrom == PreviewSource.FromDisk) { _toBeDiskCachedPreviews.Push(item); }
                         if (_photoSessionState.CurrentDisplayIndex == index)
                             UpgradeImageIfNeeded(photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
                         _thumbNailController.RedrawThumbNailsIfNeeded(index);

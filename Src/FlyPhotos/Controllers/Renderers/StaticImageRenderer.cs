@@ -122,35 +122,6 @@ namespace FlyPhotos.Controllers.Renderers
             }
         }
 
-		/// TODO, decide and remove
-        private void CreateOffscreen_OLD()
-        {
-            var imageWidth = _canvasViewState.ImageRect.Width * _canvasViewState.Scale;
-            var imageHeight = _canvasViewState.ImageRect.Height * _canvasViewState.Scale;
-
-            if (_offscreen != null &&
-                (_offscreen.SizeInPixels.Width != (int)imageWidth ||
-                 _offscreen.SizeInPixels.Height != (int)imageHeight))
-            {
-                DestroyOffscreen();
-            }
-
-            var drawingQuality = AppConfig.Settings.HighQualityInterpolation
-                ? CanvasImageInterpolation.HighQualityCubic
-                : CanvasImageInterpolation.NearestNeighbor;
-
-            if (_offscreen == null && imageWidth < _canvas.ActualWidth * 1.5)
-            {
-                var tempOffScreen = new CanvasRenderTarget(_canvas, (float)imageWidth, (float)imageHeight);
-                using var ds = tempOffScreen.CreateDrawingSession();
-                ds.Clear(Colors.Transparent);
-                ds.DrawImage(_sourceBitmap, new Rect(0, 0, imageWidth, imageHeight),
-                    _sourceBitmap.Bounds, 1, drawingQuality);
-                _offscreen = tempOffScreen;
-            }
-
-        }
-
         private void DestroyOffscreen()
         {
             _offscreen?.Dispose();

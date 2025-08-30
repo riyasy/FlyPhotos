@@ -8,5 +8,5 @@ internal class PhotoSessionState
     public int CurrentDisplayIndex { get; set; }
     public DisplayLevel CurrentDisplayLevel { get; set; }
     public int PhotosCount { get; set; }
-    public string? FirstPhotoPath { get; init; }
+    public string FirstPhotoPath { get; init; } = string.Empty;
 }

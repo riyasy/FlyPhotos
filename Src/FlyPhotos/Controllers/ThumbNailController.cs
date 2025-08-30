@@ -167,7 +167,8 @@ internal class ThumbNailController : IThumbnailController
         if (_d2dCanvasThumbNail.ActualWidth <= 0) return; // Guard against drawing with no size
 
         // Recreate render target if needed (e.g., after size change)
-        if (_thumbnailOffscreen == null || _thumbnailOffscreen.Size.Width != _d2dCanvasThumbNail.ActualWidth)
+        if (_thumbnailOffscreen == null || 
+            (int)Math.Round(_thumbnailOffscreen.Size.Width) != (int)Math.Round(_d2dCanvasThumbNail.ActualWidth))
         {
             _thumbnailOffscreen?.Dispose();
             _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * Constants.ThumbnailBoxSize)) + 1;

@@ -19,7 +19,7 @@ using WinRT.Interop;
 
 namespace FlyPhotos.Views
 {
-    public sealed partial class InitWindow : Window
+    public sealed partial class InitWindow
     {
         // This is the list of supported file extensions you can modify.
         private readonly List<string> _supportedFileExtensions;

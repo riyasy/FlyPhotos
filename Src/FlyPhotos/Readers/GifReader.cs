@@ -69,7 +69,7 @@ internal class GifReader
         }
         catch (Exception ex)
         {
-            // Logger.Error(ex, "Failed to process image file at {0}", inputPath);
+            Logger.Error(ex, "Failed to process image file at {0}", inputPath);
             return (false, DisplayItem.Empty());
         }
     }

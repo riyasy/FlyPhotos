@@ -197,7 +197,7 @@ public sealed partial class PhotoDisplayWindow
     private void PhotoDisplayWindow_SizeChanged(object sender, Microsoft.UI.Xaml.WindowSizeChangedEventArgs args)
     {
         var presenter = (AppWindow.Presenter as OverlappedPresenter);
-        if (presenter != null && _lastWindowState != presenter?.State)
+        if (presenter != null && presenter.State != _lastWindowState)
         {
             _lastWindowState = presenter.State;
         }
@@ -268,8 +268,11 @@ public sealed partial class PhotoDisplayWindow
     private void SetUnpackagedAppIcon()
     {
         var hWnd = WindowNative.GetWindowHandle(this);
-        var sExe = Process.GetCurrentProcess().MainModule.FileName;
+        var processModule = Process.GetCurrentProcess().MainModule;
+        if (processModule == null) return;
+        var sExe = processModule.FileName;
         var ico = Icon.ExtractAssociatedIcon(sExe);
+        if (ico == null) return;
         NativeMethods.SendMessage(hWnd, NativeMethods.WM_SETICON, new IntPtr(1), ico.Handle);
     }
 

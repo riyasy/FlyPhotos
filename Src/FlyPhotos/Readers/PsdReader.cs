@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Data;
@@ -67,7 +66,7 @@ internal class PsdReader
 
             // --- Header Validation ---
             var header = new byte[4];
-            fileStream.Read(header, 0, header.Length);
+            fileStream.ReadExactly(header, 0, header.Length);
             // PSD header must be '8BPS'
             if (header[0] != '8' || header[1] != 'B' || header[2] != 'P' || header[3] != 'S')
             {
@@ -76,8 +75,8 @@ internal class PsdReader
 
             // --- Efficient Search for Thumbnail Resource ---
             // The resource marker we are looking for is '8BIM' followed by resource ID 1033 or 1036
-            byte[] searchPatternV5 = { (byte)'8', (byte)'B', (byte)'I', (byte)'M', 0x04, 0x0C }; // 1036 for PS 5.0+
-            byte[] searchPatternV4 = { (byte)'8', (byte)'B', (byte)'I', (byte)'M', 0x04, 0x09 }; // 1033 for PS 4.0
+            byte[] searchPatternV5 = [(byte)'8', (byte)'B', (byte)'I', (byte)'M', 0x04, 0x0C]; // 1036 for PS 5.0+
+            byte[] searchPatternV4 = [(byte)'8', (byte)'B', (byte)'I', (byte)'M', 0x04, 0x09]; // 1033 for PS 4.0
 
             long position = FindBytePattern(fileStream, searchPatternV5);
             if (position == -1)

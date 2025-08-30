@@ -138,19 +138,4 @@ internal static class Util
         return checkeredBrush;
     }
 
-    private static void PrintLogFilePath()
-    {
-        var config = LogManager.Configuration;
-        foreach (var target in config.AllTargets)
-        {
-            if (target is NLog.Targets.FileTarget fileTarget)
-            {
-                // Resolve NLog variables (like ${tempdir})
-                var logEvent = new LogEventInfo { TimeStamp = DateTime.Now };
-                string resolvedPath = fileTarget.FileName.Render(logEvent);
-                System.Diagnostics.Debug.WriteLine("Log file path: " + resolvedPath);
-            }
-        }
-    }
-
 }

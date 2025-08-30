@@ -37,9 +37,8 @@ internal static class PathResolver
             ApplicationData.Current.LocalFolder.Path :
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlyPhotos");
 
-        if (!IsPackagedApp && !Directory.Exists(dbFolderPath))
+        if (!IsPackagedApp  && dbFolderPath != null && !Directory.Exists(dbFolderPath)) 
             Directory.CreateDirectory(dbFolderPath);
-
         return dbFolderPath;
     }
 
@@ -49,7 +48,7 @@ internal static class PathResolver
             ApplicationData.Current.LocalFolder.Path :
             Path.Combine(Path.GetTempPath(), "FlyPhotos");
 
-        if (!IsPackagedApp && !Directory.Exists(logFolder))
+        if (!IsPackagedApp && logFolder != null && !Directory.Exists(logFolder)) 
             Directory.CreateDirectory(logFolder);
 
         return logFolder;
@@ -67,7 +66,7 @@ internal static class PathResolver
             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "FlyPhotos");
 
-        if (!IsPackagedApp && !Directory.Exists(userSettingsFolder)) 
+        if (!IsPackagedApp && userSettingsFolder != null && !Directory.Exists(userSettingsFolder)) 
             Directory.CreateDirectory(userSettingsFolder);
 
         return userSettingsFolder;

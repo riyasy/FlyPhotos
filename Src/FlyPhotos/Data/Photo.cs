@@ -110,4 +110,9 @@ internal class Photo
         string extension = Path.GetExtension(FileName);
         return !string.IsNullOrEmpty(extension) && FormatsSupportingTransparency.Contains(extension.ToLower());
     }
+
+    public static Photo Empty()
+    {
+        return new Photo(string.Empty);
+    }
 }

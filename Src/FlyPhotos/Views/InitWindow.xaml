@@ -55,18 +55,6 @@
 
             <TextBlock Text="FlyPhotos can also be set as the default viewer for an extension by right-clicking an image and selecting &quot;Open With&quot; and then &quot;Choose another app&quot; and then select &quot;Fly Photos&quot; and press the &quot;Always&quot; button." TextWrapping="Wrap" />
 
-            <!--  TODO: Replace this with an actual screenshot Image control  -->
-            <!--<Border
-                Margin="0,5"
-                Padding="10"
-                Background="LightGray"
-                CornerRadius="4">
-                <TextBlock
-                    HorizontalAlignment="Center"
-                    Foreground="Gray"
-                    Text="&lt;Image on how to do this&gt;" />
-            </Border>-->
-
             <Border
                 Margin="0,5"
                 BorderBrush="Gray"
