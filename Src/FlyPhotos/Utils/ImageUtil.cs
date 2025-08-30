@@ -133,11 +133,11 @@ internal class ImageUtil
             switch (extension)
             {
                 case ".HEIC":
-                    {
-                        if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                        return PreviewFailedIndicator;
-                    }
+                {
+                    if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                    return PreviewFailedIndicator;
+                }
                 case ".PSD":
                 {
                     if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
@@ -150,12 +150,12 @@ internal class ImageUtil
                 }
                 case ".GIF":
                 {
-                    if (await GifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                     return PreviewFailedIndicator;
                 }
                 case ".PNG":
                 {
-                    if (await PngReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                     return PreviewFailedIndicator;
                 }
                 default:
@@ -178,7 +178,6 @@ internal class ImageUtil
         if (!File.Exists(path)) return FileNotFoundIndicator;
         try
         {
-
             var extension = Path.GetExtension(path).ToUpper();
 
             switch (extension)
