@@ -73,7 +73,7 @@
 		<PackageReference Include="SkiaSharp" Version="3.119.0" />
 		<PackageReference Include="Svg.Skia" Version="3.0.6" />
 		<PackageReference Include="System.Drawing.Common" Version="9.0.8" />
-		<PackageReference Include="WinUIEx" Version="2.6.0" />
+		<PackageReference Include="WinUIEx" Version="2.7.0" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 

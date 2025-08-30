@@ -182,6 +182,12 @@ internal class ImageUtil
 
             switch (extension)
             {
+                case ".HEIC":
+                {
+                    if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (HeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                    return HqImageFailedIndicator;
+                }
                 case ".PSD":
                 {
                     if (await PsdReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;

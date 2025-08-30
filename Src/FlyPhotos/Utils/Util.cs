@@ -148,8 +148,6 @@ internal static class Util
                 // Resolve NLog variables (like ${tempdir})
                 var logEvent = new LogEventInfo { TimeStamp = DateTime.Now };
                 string resolvedPath = fileTarget.FileName.Render(logEvent);
-
-                Console.WriteLine("Log file path: " + resolvedPath);
                 System.Diagnostics.Debug.WriteLine("Log file path: " + resolvedPath);
             }
         }

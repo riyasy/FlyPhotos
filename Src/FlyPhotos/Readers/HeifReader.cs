@@ -32,10 +32,16 @@ internal class HeifReader
             using var context = new HeifContext(inputPath);
             using var primaryImage = context.GetPrimaryImageHandle();
 
+            if (primaryImage == null)
+            {
+                Logger.Warn($"No primary image found to get a preview from in: {inputPath}");
+                return (false, DisplayItem.Empty());
+            }
+
             var previewImageIds = primaryImage.GetThumbnailImageIds();
 
             if (previewImageIds.Count <= 0)
-                return (false, null);
+                return (false, DisplayItem.Empty());
 
             using var previewImageHandle = primaryImage.GetThumbnailImage(previewImageIds[0]);
             var retBmp = CreateBitmapSource(ctrl, previewImageHandle, decodingOptions);
@@ -43,12 +49,45 @@ internal class HeifReader
         }
         catch (Exception ex)
         {
-            Logger.Error(ex);
-            return (false, null);
+            Logger.Error(ex, $"Failed to decode preview from: {inputPath}");
+            return (false, DisplayItem.Empty());
         }
     }
 
-    private static CanvasBitmap CreateBitmapSource(CanvasControl ctrl, HeifImageHandle imageHandle,
+    // New GetHq method
+    public static (bool, DisplayItem) GetHq(CanvasControl ctrl, string inputPath)
+    {
+        var decodingOptions = new HeifDecodingOptions
+        {
+            ConvertHdrToEightBit = false,
+            Strict = false,
+            DecoderId = null
+        };
+        try
+        {
+            using var context = new HeifContext(inputPath);
+            using var primaryImageHandle = context.GetPrimaryImageHandle();
+
+            // Check if a primary image was found.
+            if (primaryImageHandle == null)
+            {
+                Logger.Warn($"No primary image found in HEIF file: {inputPath}");
+                return (false, DisplayItem.Empty());
+            }
+
+            // Directly decode the primary image handle, not a thumbnail.
+            var retBmp = CreateBitmapSource(ctrl, primaryImageHandle, decodingOptions);
+            return (retBmp.Bounds.Width >= 1, new DisplayItem(retBmp, PreviewSource.FromDisk));
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, $"Failed to decode HQ image from: {inputPath}");
+            return (false, DisplayItem.Empty());
+        }
+    }
+
+
+    private static CanvasBitmap CreateBitmapSource(ICanvasResourceCreator ctrl, HeifImageHandle imageHandle,
         HeifDecodingOptions decodingOptions)
     {
         CanvasBitmap retBs;
@@ -70,17 +109,18 @@ internal class HeifReader
         }
 
         using var image = imageHandle.Decode(HeifColorspace.Rgb, chroma, decodingOptions);
-        //var decodingWarnings = image.DecodingWarnings;
-        //foreach (var item in decodingWarnings) Console.WriteLine("Warning: " + item);
 
         switch (chroma)
         {
             case HeifChroma.InterleavedRgb24:
                 retBs = CreateEightBitImageWithoutAlpha(ctrl, image);
                 break;
-            //case HeifChroma.InterleavedRgba32:
-            //    outputImage = CreateEightBitImageWithAlpha(image, imageHandle.IsPremultipliedAlpha);
-            //    break;
+            case HeifChroma.InterleavedRgba32:
+                // Note: The sample file you provided has logic to handle premultiplied alpha.
+                // For simplicity, this implementation assumes non-premultiplied.
+                // You can add the de-multiplication logic if you encounter visual artifacts with transparent HEIFs.
+                retBs = CreateEightBitImageWithAlpha(ctrl, image);
+                break;
             //case HeifChroma.InterleavedRgb48BE:
             //case HeifChroma.InterleavedRgb48LE:
             //    outputImage = CreateSixteenBitImageWithoutAlpha(image);
@@ -90,10 +130,41 @@ internal class HeifReader
             //    outputImage = CreateSixteenBitImageWithAlpha(image, imageHandle.IsPremultipliedAlpha, imageHandle.BitDepth);
             //    break;
             default:
-                throw new InvalidOperationException("Unsupported Heif Chroma value.");
+                throw new InvalidOperationException($"Unsupported Heif Chroma value: {chroma}");
         }
 
         return retBs;
+    }
+
+    // New helper method for RGBA images
+    private static CanvasBitmap CreateEightBitImageWithAlpha(ICanvasResourceCreator ctrl, HeifImage heifImage)
+    {
+        var w = heifImage.Width;
+        var h = heifImage.Height;
+
+        var heifPlaneData = heifImage.GetPlane(HeifChannel.Interleaved);
+        var srcScan0 = heifPlaneData.Scan0;
+        var stride = heifPlaneData.Stride;
+        var size = h * stride;
+
+        var rgbaArray = ArrayPool<byte>.Shared.Rent(size);
+
+        CanvasBitmap canvasBitmap;
+        try
+        {
+            Marshal.Copy(srcScan0, rgbaArray, 0, size);
+
+            // CanvasBitmap expects BGRA, but LibHeifSharp gives RGBA.
+            // We need to swap the R and B channels.
+            SwapRedAndBlue(rgbaArray, w, h, stride);
+
+            canvasBitmap = CanvasBitmap.CreateFromBytes(ctrl, rgbaArray, w, h, DirectXPixelFormat.B8G8R8A8UIntNormalized);
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(rgbaArray, clearArray: false);
+        }
+        return canvasBitmap;
     }
 
     private static CanvasBitmap CreateEightBitImageWithoutAlpha(ICanvasResourceCreator ctrl, HeifImage heifImage)
@@ -107,33 +178,58 @@ internal class HeifReader
         var rgbSize = w * h * 3;
         var rgbaSize = w * h * 4;
 
-        //var rgbArray = new byte[rgbSize];
-        //var rgbAArray = new byte[rgbaSize];
         var rgbArray = ArrayPool<byte>.Shared.Rent(rgbSize);
-        var rgbAArray = ArrayPool<byte>.Shared.Rent(rgbaSize);
+        var bgraArray = ArrayPool<byte>.Shared.Rent(rgbaSize); // Changed name to reflect content
 
         CanvasBitmap canvasBitmap;
         try
         {
+            // LibHeifSharp gives interleaved RGB data.
             Marshal.Copy(srcScan0, rgbArray, 0, rgbSize);
-            FastConvert(w * h, rgbArray, rgbAArray);
-            canvasBitmap = CanvasBitmap.CreateFromBytes(ctrl, rgbAArray, w, h, DirectXPixelFormat.R8G8B8A8UIntNormalized);
+            // Convert to BGRA for CanvasBitmap.
+            FastConvertRgbToBgra(w * h, rgbArray, bgraArray);
+            canvasBitmap = CanvasBitmap.CreateFromBytes(ctrl, bgraArray, w, h, DirectXPixelFormat.B8G8R8A8UIntNormalized);
         }
         finally
         {
             ArrayPool<byte>.Shared.Return(rgbArray, clearArray: false);
-            ArrayPool<byte>.Shared.Return(rgbAArray, clearArray: false);
+            ArrayPool<byte>.Shared.Return(bgraArray, clearArray: false);
         }
         return canvasBitmap;
     }
 
-    // TODO move to CLI Wrapper
-    private static unsafe void FastConvert(int pixelCount, byte[] rgbData, byte[] rgbaData)
+    private static void SwapRedAndBlue(byte[] data, int width, int height, int stride)
     {
-        fixed (byte* rgbP = &rgbData[0], rgbaP = &rgbaData[0])
+        for (int y = 0; y < height; y++)
         {
-            for (long i = 0, offsetRgb = 0; i < pixelCount; i++, offsetRgb += 3)
-                ((uint*)rgbaP)[i] = *(uint*)(rgbP + offsetRgb) | 0xff000000;
+            int rowStart = y * stride;
+            for (int x = 0; x < width; x++)
+            {
+                int colStart = x * 4;
+                int R = rowStart + colStart + 0;
+                int B = rowStart + colStart + 2;
+
+                // Swap R and B
+                (data[R], data[B]) = (data[B], data[R]);
+            }
+        }
+    }
+
+    // Updated to convert from RGB to BGRA for Win2D
+    private static unsafe void FastConvertRgbToBgra(int pixelCount, byte[] rgbData, byte[] bgraData)
+    {
+        fixed (byte* rgbP = &rgbData[0], bgraP = &bgraData[0])
+        {
+            for (int i = 0; i < pixelCount; i++)
+            {
+                int rgbOffset = i * 3;
+                int bgraOffset = i * 4;
+
+                bgraP[bgraOffset + 0] = rgbP[rgbOffset + 2]; // B
+                bgraP[bgraOffset + 1] = rgbP[rgbOffset + 1]; // G
+                bgraP[bgraOffset + 2] = rgbP[rgbOffset + 0]; // R
+                bgraP[bgraOffset + 3] = 255;                 // A
+            }
         }
     }
 }
