@@ -156,6 +156,7 @@ public sealed class DiskCacherWithSqlite : IDisposable
 
     public async Task<CanvasBitmap?> ReturnFromCache(CanvasControl canvasControl, string filePath)
     {
+        return null;
         try
         {
             // Perform file I/O outside the database lock to improve concurrency

@@ -25,24 +25,25 @@ internal class GifReader
     private const int MinimumGifDelayMs = 20;  // Treat delays under 20ms as invalid/too fast.
     private const int DefaultGifDelayMs = 100; // Use 100ms for invalid or zero-delay frames.
 
-    public static async Task<(bool, DisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
     {
         try
         {
             var file = await StorageFile.GetFileFromPathAsync(inputPath);
             using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
-            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
+            var metaData = new ImageMetadata(canvasBitmap.SizeInPixels.Width, canvasBitmap.SizeInPixels.Height);
+            return (true, new PreviewDisplayItem(canvasBitmap, PreviewSource.FromDisk, metaData));
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
-            return (false, DisplayItem.Empty());
+            return (false, PreviewDisplayItem.Empty());
         }
     }
 
 
-    public static async Task<(bool, DisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
     {
         try
         {
@@ -56,45 +57,24 @@ internal class GifReader
             if (decoder.FrameCount > 1)
             {
                 // More than one frame: It's an animated GIF.
-                // Load the raw bytes using your helper method.
-                return await LoadGifAsFile(inputPath);
+
+                // File.ReadAllBytesAsync is the most efficient way to asynchronously 
+                // read an entire file into a byte array. It avoids blocking threads.
+                byte[] fileBytes = await File.ReadAllBytesAsync(inputPath);
+                return (true, new AnimatedHqDisplayItem(fileBytes));
             }
             else
             {
                 // Single frame: Load as a static image (CanvasBitmap).
                 stream.Seek(0);
                 var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
-                return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
+                return (true, new StaticHqDisplayItem(canvasBitmap));
             }
         }
         catch (Exception ex)
         {
             Logger.Error(ex, "Failed to process image file at {0}", inputPath);
-            return (false, DisplayItem.Empty());
-        }
-    }
-
-    private static async Task<(bool, DisplayItem)> LoadGifAsFile(string inputPath)
-    {
-        // Basic validation to prevent unnecessary exceptions.
-        if (string.IsNullOrEmpty(inputPath) || !File.Exists(inputPath))
-        {
-            Logger.Warn("Input path is null, empty, or file does not exist: {0}", inputPath);
-            return (false, null); 
-        }
-
-        try
-        {
-            // File.ReadAllBytesAsync is the most efficient way to asynchronously 
-            // read an entire file into a byte array. It avoids blocking threads.
-            byte[] fileBytes = await File.ReadAllBytesAsync(inputPath);
-            return (true, new DisplayItem(fileBytes, PreviewSource.FromDisk));
-        }
-        catch (Exception ex)
-        {
-            // Catches potential I/O errors, like permission issues.
-            Logger.Error(ex, "Failed to read byte stream from GIF file: {0}", inputPath);
-            return (false, null); 
+            return (false, HqDisplayItem.Empty());
         }
     }
 }

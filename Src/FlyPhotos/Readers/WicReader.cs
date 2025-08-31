@@ -34,12 +34,16 @@ internal class WicReader
         });
     }
 
-    public static async Task<(bool, DisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
     {
-        return await GetThumbnail(ctrl, inputPath);
+        var (bmp, width, height) = await GetThumbnail(ctrl, inputPath);
+        if (bmp == null) return (false, PreviewDisplayItem.Empty());
+
+        var metadata = new ImageMetadata(width, height);
+        return (true, new PreviewDisplayItem(bmp, PreviewSource.FromDisk, metadata));
     }
 
-    public static async Task<(bool, DisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
     {
         if (IsMemoryLeakingFormat(inputPath))
             return await GetHqThruExternalProcess(ctrl, inputPath);
@@ -49,38 +53,46 @@ internal class WicReader
             var file = await StorageFile.GetFileFromPathAsync(inputPath);
             using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
-            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
+            return (true, new StaticHqDisplayItem(canvasBitmap));
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
-            return (false, DisplayItem.Empty());
+            return (false, HqDisplayItem.Empty());
         }
     }
 
-    public static async Task<(bool, DisplayItem)> GetHqDownScaled(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetHqDownScaled(CanvasControl ctrl, string inputPath)
     {
         if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA) return await Task.Run(Action);
         return await Action();
-
-        async Task<(bool, DisplayItem)> Action()
+        async Task<(bool, PreviewDisplayItem)> Action()
         {
             try
             {
+                // Define the resizing settings
+                var settings = new ProcessImageSettings { Width = 800, HybridMode = HybridScaleMode.Turbo };
+
+                // Create a single pipeline for metadata and resizing
+                using var pipeline = MagicImageProcessor.BuildPipeline(inputPath, settings);
+                // Get the original image dimensions from the pipeline's source
+                var imageInfo = pipeline.PixelSource;
+                // Resize the image using the same pipeline
                 using var ms = new MemoryStream();
-                MagicImageProcessor.ProcessImage(inputPath, ms, new ProcessImageSettings { Width = 800, HybridMode = HybridScaleMode.Turbo });
+                pipeline.WriteOutput(ms); // Process the image to the memory stream
+                var metadata = new ImageMetadata(imageInfo.Width, imageInfo.Height);
                 var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());
-                return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
+                return (true, new PreviewDisplayItem(canvasBitmap, PreviewSource.FromDisk, metadata));
             }
             catch (Exception ex)
             {
                 Logger.Error(ex);
-                return (false, DisplayItem.Empty());
+                return (false, PreviewDisplayItem.Empty());
             }
         }
     }
 
-    private static async Task<(bool, DisplayItem)> GetHqThruExternalProcess(CanvasControl ctrl, string inputPath)
+    private static async Task<(bool, HqDisplayItem)> GetHqThruExternalProcess(CanvasControl ctrl, string inputPath)
     {
         try
         {
@@ -91,68 +103,43 @@ internal class WicReader
             var w = (int)decoder.PixelWidth;
             var h = (int)decoder.PixelHeight;
             if (!CreateMemoryMapAndGetDataFromExternalProcess(inputPath, w, h, out var rgbAArray))
-                return (false, DisplayItem.Empty());
+                return (false, HqDisplayItem.Empty());
             var canvasBitmap =
                 CanvasBitmap.CreateFromBytes(ctrl, rgbAArray, w, h,
                     Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized);
-            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk, rotation));
+            return (true, new StaticHqDisplayItem(canvasBitmap, rotation));
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
-            return (false, DisplayItem.Empty());
+            return (false, HqDisplayItem.Empty());
         }
     }
 
-    private static async Task<(bool, DisplayItem)> GetThumbnail(CanvasControl ctrl, string inputPath)
+    private static async Task<(CanvasBitmap? Bitmap, int Width, int Height)> GetThumbnail(CanvasControl ctrl, string inputPath)
     {
         try
         {
             var file = await StorageFile.GetFileFromPathAsync(inputPath);
             using var stream = await file.OpenReadAsync();
             var decoder = await BitmapDecoder.CreateAsync(stream);
+
+            // Get the full, original dimensions from the decoder
+
+            var rotation = await GetRotationFromMetaData(decoder.BitmapProperties);
+            var verticalOrientation = rotation is 90 or 270;
+            var originalWidth = verticalOrientation ? (int)decoder.PixelHeight : (int)decoder.PixelWidth;
+            var originalHeight = verticalOrientation ? (int)decoder.PixelWidth : (int)decoder.PixelHeight;
             using var preview = await decoder.GetThumbnailAsync();
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
-            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
+
+            // Return the raw parts for the caller to assemble
+            return (canvasBitmap, originalWidth, originalHeight);
         }
         catch (Exception)
         {
             //Logger.Error(ex);
-            return (false, DisplayItem.Empty());
-        }
-    }
-
-    private static async Task<(bool, DisplayItem)> GetFilePreview(CanvasControl ctrl, string inputPath)
-    {
-        try
-        {
-            var file = await StorageFile.GetFileFromPathAsync(inputPath);
-            using var stream = await file.OpenReadAsync();
-            var decoder = await BitmapDecoder.CreateAsync(stream);
-            using var preview = await decoder.GetPreviewAsync();
-            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
-            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-            return (false, DisplayItem.Empty());
-        }
-    }
-
-    private static async Task<(bool, DisplayItem)> GetFileThumbnail(CanvasControl ctrl, string inputPath)
-    {
-        try
-        {
-            var file = await StorageFile.GetFileFromPathAsync(inputPath);
-            using var thumbnail = await file.GetThumbnailAsync(ThumbnailMode.PicturesView);
-            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, thumbnail);
-            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-            return (false, DisplayItem.Empty());
+            return (null, 0, 0);
         }
     }
 

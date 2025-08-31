@@ -19,7 +19,7 @@ internal class HeifReader
         LibHeifSharpDllImportResolver.Register();
     }
 
-    public static (bool, DisplayItem) GetPreview(CanvasControl ctrl, string inputPath)
+    public static (bool, PreviewDisplayItem) GetPreview(CanvasControl ctrl, string inputPath)
     {
         var decodingOptions = new HeifDecodingOptions
         {
@@ -35,27 +35,28 @@ internal class HeifReader
             if (primaryImage == null)
             {
                 Logger.Warn($"No primary image found to get a preview from in: {inputPath}");
-                return (false, DisplayItem.Empty());
+                return (false, PreviewDisplayItem.Empty());
             }
 
             var previewImageIds = primaryImage.GetThumbnailImageIds();
 
             if (previewImageIds.Count <= 0)
-                return (false, DisplayItem.Empty());
+                return (false, PreviewDisplayItem.Empty());
 
             using var previewImageHandle = primaryImage.GetThumbnailImage(previewImageIds[0]);
             var retBmp = CreateBitmapSource(ctrl, previewImageHandle, decodingOptions);
-            return (retBmp.Bounds.Width >= 1, new DisplayItem(retBmp, PreviewSource.FromDisk));
+            var metaData = new ImageMetadata(primaryImage.Width, primaryImage.Height);
+            return (retBmp.Bounds.Width >= 1, new PreviewDisplayItem(retBmp, PreviewSource.FromDisk, metaData));
         }
         catch (Exception ex)
         {
             Logger.Error(ex, $"Failed to decode preview from: {inputPath}");
-            return (false, DisplayItem.Empty());
+            return (false, PreviewDisplayItem.Empty());
         }
     }
 
     // New GetHq method
-    public static (bool, DisplayItem) GetHq(CanvasControl ctrl, string inputPath)
+    public static (bool, HqDisplayItem) GetHq(CanvasControl ctrl, string inputPath)
     {
         var decodingOptions = new HeifDecodingOptions
         {
@@ -72,17 +73,17 @@ internal class HeifReader
             if (primaryImageHandle == null)
             {
                 Logger.Warn($"No primary image found in HEIF file: {inputPath}");
-                return (false, DisplayItem.Empty());
+                return (false, HqDisplayItem.Empty());
             }
 
             // Directly decode the primary image handle, not a thumbnail.
             var retBmp = CreateBitmapSource(ctrl, primaryImageHandle, decodingOptions);
-            return (retBmp.Bounds.Width >= 1, new DisplayItem(retBmp, PreviewSource.FromDisk));
+            return (retBmp.Bounds.Width >= 1, new StaticHqDisplayItem(retBmp));
         }
         catch (Exception ex)
         {
             Logger.Error(ex, $"Failed to decode HQ image from: {inputPath}");
-            return (false, DisplayItem.Empty());
+            return (false, HqDisplayItem.Empty());
         }
     }
 

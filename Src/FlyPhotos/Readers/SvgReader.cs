@@ -15,13 +15,23 @@ internal class SvgReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public static Task<(bool, DisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
-        => LoadSvgViaSkia(ctrl, inputPath, 800, 800);
+    public static async Task<(bool, PreviewDisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
+    {
+        var(bmp, width, height) = await LoadSvgViaSkia(ctrl, inputPath, 800);
+        if (bmp == null) return (false, PreviewDisplayItem.Empty());
+        var metadata = new ImageMetadata(width, height);
+        return (true, new PreviewDisplayItem(bmp, PreviewSource.FromDisk, metadata));
+    }
 
-    public static Task<(bool, DisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
-        => LoadSvgViaSkia(ctrl, inputPath, 2000, 2000);
+    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
+    {
+        var (bmp, _, _) = await LoadSvgViaSkia(ctrl, inputPath, 2000);
+        if (bmp == null) return (false, HqDisplayItem.Empty());
+        return (true, new StaticHqDisplayItem(bmp));
+    }
 
-    private static async Task<(bool, DisplayItem)> LoadSvgViaSkia(CanvasControl ctrl, string inputPath, int width, int height)
+    private static async Task<(CanvasBitmap Bitmap, int Width, int Height)> LoadSvgViaSkia(
+        CanvasControl ctrl, string inputPath, int maxDimension)
     {
         try
         {
@@ -29,18 +39,51 @@ internal class SvgReader
             using var svg = new SKSvg();
             svg.Load(inputPath);
 
-            // Create a SkiaSharp bitmap to render into
-            using var surface = SKSurface.Create(new SKImageInfo(width, height));
+            // Get the original dimensions from the SVG's viewbox/content
+            float svgWidth = svg.Picture.CullRect.Width;
+            float svgHeight = svg.Picture.CullRect.Height;
+
+            // Prevent division by zero for invalid or empty SVGs
+            if (svgWidth <= 0 || svgHeight <= 0)
+            {
+                Logger.Warn($"Invalid SVG dimensions for {inputPath}: {svgWidth}x{svgHeight}");
+                return (null, 0, 0);
+            }
+
+            // --- ASPECT RATIO CALCULATION ---
+            // Calculate the dimensions of the output bitmap while preserving aspect ratio.
+            // The longest side (either width or height) will be set to maxDimension.
+            int renderWidth;
+            int renderHeight;
+
+            if (svgWidth >= svgHeight)
+            {
+                // If the SVG is wider or square, the new width is the max dimension.
+                renderWidth = maxDimension;
+                // Calculate the new height to maintain the aspect ratio.
+                renderHeight = (int)Math.Round(maxDimension * (svgHeight / svgWidth));
+            }
+            else
+            {
+                // If the SVG is taller, the new height is the max dimension.
+                renderHeight = maxDimension;
+                // Calculate the new width to maintain the aspect ratio.
+                renderWidth = (int)Math.Round(maxDimension * (svgWidth / svgHeight));
+            }
+
+            // Create a SkiaSharp bitmap with the newly calculated dimensions
+            using var surface = SKSurface.Create(new SKImageInfo(renderWidth, renderHeight));
             var canvas = surface.Canvas;
 
             canvas.Clear(SKColors.Transparent);
 
-            // Calculate scaling
-            var scaleX = width / svg.Picture.CullRect.Width;
-            var scaleY = height / svg.Picture.CullRect.Height;
-            var scale = Math.Min(scaleX, scaleY);
-
+            // --- SCALING CALCULATION ---
+            // The canvas now has the same aspect ratio as the SVG, so we can calculate
+            // a single scale factor to make the SVG fill the canvas perfectly.
+            var scale = renderWidth / svgWidth;
             canvas.Scale(scale);
+
+            // Draw the SVG picture onto the canvas
             canvas.DrawPicture(svg.Picture);
             canvas.Flush();
 
@@ -54,12 +97,13 @@ internal class SvgReader
             // Load into CanvasBitmap
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());
 
-            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
+            // Return the final bitmap and its actual dimensions
+            return (canvasBitmap, renderWidth, renderHeight);
         }
         catch (Exception ex)
         {
-            Logger.Error(ex);
-            return (false, null);
+            Logger.Error(ex, $"Failed to load SVG: {inputPath}"); // Added context to logger
+            return (null, 0, 0);
         }
     }
 }

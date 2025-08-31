@@ -1,35 +1,43 @@
 ﻿using Microsoft.Graphics.Canvas;
+using System;
 
 namespace FlyPhotos.Data;
 
-internal class DisplayItem
+internal record ImageMetadata(double FullWidth, double FullHeight);
+
+internal abstract class DisplayItem(CanvasBitmap bitmap, int rotation = 0) : IDisposable
 {
-    public byte[] FileAsByteArray { get; }
-    public CanvasBitmap Bitmap { get; set; }
-    public int Rotation { get; }
-    public PreviewSource PreviewFrom { get; }
+    public CanvasBitmap Bitmap { get; } = bitmap;
+    public int Rotation { get; } = rotation;
 
-    public DisplayItem(CanvasBitmap bitmap, PreviewSource previewFrom, int rotation = 0)
+    public void Dispose()
     {
-        Bitmap = bitmap;
-        PreviewFrom = previewFrom;
-        Rotation = rotation;
+        //Bitmap?.Dispose();
     }
+}
 
-    public DisplayItem(byte[] fileFileBytes, PreviewSource previewFrom)
-    {
-        FileAsByteArray = fileFileBytes;
-        PreviewFrom = previewFrom;
-    }
+internal sealed class PreviewDisplayItem(CanvasBitmap bitmap, PreviewSource previewFrom, ImageMetadata metadata = null) : DisplayItem(bitmap)
+{
+    public PreviewSource PreviewFrom { get; } = previewFrom;
+    public ImageMetadata Metadata { get; } = metadata;
 
-    public static DisplayItem Empty()
+    public static PreviewDisplayItem Empty()
     {
-        CanvasBitmap bitmap = null;
-        return new DisplayItem(bitmap, PreviewSource.Undefined, 0);
+        return new PreviewDisplayItem(null, PreviewSource.Undefined, null);
     }
+}
 
-    public bool IsGifOrAnimatedPng()
+internal abstract class HqDisplayItem(CanvasBitmap bitmap, int rotation = 0) : DisplayItem(bitmap, rotation)
+{
+    public static HqDisplayItem Empty()
     {
-        return FileAsByteArray != null;
+        return new StaticHqDisplayItem(null);
     }
+}
+
+internal sealed class StaticHqDisplayItem(CanvasBitmap bitmap, int rotation = 0) : HqDisplayItem(bitmap, rotation);
+
+internal sealed class AnimatedHqDisplayItem(byte[] fileAsByteArray) : HqDisplayItem(null)
+{
+    public byte[] FileAsByteArray { get; } = fileAsByteArray;
 }

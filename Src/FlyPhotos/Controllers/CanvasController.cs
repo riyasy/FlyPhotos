@@ -101,47 +101,60 @@ internal class CanvasController : ICanvasController
         _photoSessionState.CurrentDisplayLevel = displayLevel;
         var displayItem = photo.GetDisplayItemBasedOn(displayLevel);
 
+        var (width, height) = photo.GetActualSize();
+
+        System.Diagnostics.Debug.WriteLine($"Displaying {photo.FileName} at level {displayLevel} with size {width}x{height}");
+
         if (displayItem == null) return;
 
-        if (displayItem.IsGifOrAnimatedPng())
+        switch (displayItem)
         {
-            try
-            {
-                var preview = photo.GetDisplayItemBasedOn(DisplayLevel.Preview);
-                bool previewDrawnAsFirstFrame = false;
-                if (preview != null)
+            case AnimatedHqDisplayItem animDispItem:
+                try
                 {
-                    previewDrawnAsFirstFrame = true;
-                    displayItem.Bitmap = preview.Bitmap;
-                    IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, displayItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
-                    SetupNewRenderer(newRenderer, displayItem.Bitmap.Bounds.Width, displayItem.Bitmap.Bounds.Height, displayItem.Rotation, isFirstPhoto, true);
-                }
+                    bool previewDrawnAsFirstFrame = false;
+                    var preview = photo.GetDisplayItemBasedOn(DisplayLevel.Preview);
+                    if (preview != null)
+                    {
+                        previewDrawnAsFirstFrame = true;
+                        IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, preview.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
+                        SetupNewRenderer(newRenderer, preview.Bitmap.Bounds.Width, preview.Bitmap.Bounds.Height, preview.Rotation, isFirstPhoto, true);
+                    }
 
-                IAnimator newAnimator = Path.GetExtension(photo.FileName).ToUpper() == ".GIF"
-                    ? await GifAnimator.CreateAsync(displayItem.FileAsByteArray, _d2dCanvas)
-                    : await PngAnimator.CreateAsync(displayItem.FileAsByteArray, _d2dCanvas);
+                    IAnimator newAnimator = Path.GetExtension(photo.FileName).ToUpper() == ".GIF"
+                        ? await GifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas)
+                        : await PngAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas);
 
-                if (currentOperationId == _latestSetSourceOperationId)
-                {
-                    await newAnimator.UpdateAsync(TimeSpan.Zero);
-                    IRenderer newRenderer = new AnimatedImageRenderer(_d2dCanvas, _checkeredBrush, newAnimator, _animatorLock, photo.SupportsTransparency(), RequestInvalidate);
-                    SetupNewRenderer(newRenderer, newAnimator.PixelWidth, newAnimator.PixelHeight, displayItem.Rotation, !previewDrawnAsFirstFrame, !previewDrawnAsFirstFrame);
+                    if (currentOperationId == _latestSetSourceOperationId)
+                    {
+                        await newAnimator.UpdateAsync(TimeSpan.Zero);
+                        IRenderer newRenderer = new AnimatedImageRenderer(_d2dCanvas, _checkeredBrush, newAnimator, _animatorLock, photo.SupportsTransparency(), RequestInvalidate);
+                        SetupNewRenderer(newRenderer, newAnimator.PixelWidth, newAnimator.PixelHeight, animDispItem.Rotation, !previewDrawnAsFirstFrame, !previewDrawnAsFirstFrame);
+                    }
+                    else
+                    {
+                        newAnimator.Dispose();
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    newAnimator.Dispose();
+                    Debug.WriteLine($"Failed to display GIF: {ex.Message}");
                 }
-            }
-            catch (Exception ex)
+                break;
+            case HqDisplayItem hqDispItem:
             {
-                Debug.WriteLine($"Failed to display GIF: {ex.Message}");
+                IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, hqDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
+                SetupNewRenderer(newRenderer, hqDispItem.Bitmap.Bounds.Width, hqDispItem.Bitmap.Bounds.Height,
+                    hqDispItem.Rotation, isFirstPhoto, true);
+                break;
             }
-        }
-        else
-        {
-            IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, displayItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
-            SetupNewRenderer(newRenderer, displayItem.Bitmap.Bounds.Width, displayItem.Bitmap.Bounds.Height,
-                displayItem.Rotation, isFirstPhoto, true);
+            case PreviewDisplayItem previewDispItem:
+            {
+                IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, previewDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
+                SetupNewRenderer(newRenderer, previewDispItem.Bitmap.Bounds.Width, previewDispItem.Bitmap.Bounds.Height,
+                    previewDispItem.Rotation, isFirstPhoto, true);
+                break;
+            }
         }
     }
 

@@ -13,26 +13,27 @@ internal class PsdReader
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     // Get preview as a CanvasBitmap for WinUI
-    public static async Task<(bool, DisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
     {
-        if (GetThumbNailByteArray(inputPath, out byte[] thumbnailData))
+        if (GetPsdInfo(inputPath, out int width, out var height, out var thumbnailData))
         {
             try
             {
                 using var stream = new MemoryStream(thumbnailData);
                 CanvasBitmap bitmap = await CanvasBitmap.LoadAsync(ctrl, stream.AsRandomAccessStream());
-                return (true, new DisplayItem(bitmap, PreviewSource.FromDisk));
+                var metaData = new ImageMetadata(width, height);
+                return (true, new PreviewDisplayItem(bitmap, PreviewSource.FromDisk, metaData));
             }
             catch (Exception ex)
             {
                 Logger.Error(ex);
-                return (false, DisplayItem.Empty());
+                return (false, PreviewDisplayItem.Empty());
             }
         }
-        return (false, DisplayItem.Empty());
+        return (false, PreviewDisplayItem.Empty());
     }
 
-    public static async Task<(bool, DisplayItem)> GetHq(CanvasControl d2dCanvas, string path)
+    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl d2dCanvas, string path)
     {
         try
         {
@@ -47,55 +48,74 @@ internal class PsdReader
 
             // Create a CanvasBitmap from the MemoryStream
             var bitmap = await CanvasBitmap.LoadAsync(d2dCanvas, stream.AsRandomAccessStream());
-            return (true, new DisplayItem(bitmap, PreviewSource.FromDisk));
+            return (true, new StaticHqDisplayItem(bitmap));
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
-            return (false, DisplayItem.Empty());
+            return (false, HqDisplayItem.Empty());
         }
     }
 
-    private static bool GetThumbNailByteArray(string inputFilePath, out byte[] thumbnailData)
+    /// <summary>
+    /// Efficiently extracts the main image dimensions (width, height) and the embedded
+    /// JPEG thumbnail from a Photoshop (PSD) file.
+    /// </summary>
+    /// <param name="inputFilePath">The path to the PSD file.</param>
+    /// <param name="width">The width of the main image.</param>
+    /// <param name="height">The height of the main image.</param>
+    /// <param name="thumbnailData">The byte array of the embedded JPEG thumbnail, or null if not found.</param>
+    /// <returns>True if the header was read successfully; false otherwise. The thumbnail may still be null.</returns>
+    public static bool GetPsdInfo(string inputFilePath, out int width, out int height, out byte[] thumbnailData)
     {
+        // Initialize out parameters
+        width = 0;
+        height = 0;
         thumbnailData = null;
 
         try
         {
             using var fileStream = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-
-            // --- Header Validation ---
-            var header = new byte[4];
-            fileStream.ReadExactly(header, 0, header.Length);
-            // PSD header must be '8BPS'
-            if (header[0] != '8' || header[1] != 'B' || header[2] != 'P' || header[3] != 'S')
+            // The file must be at least 26 bytes to contain the full header
+            if (fileStream.Length < 26)
             {
                 return false;
             }
 
+            using var reader = new BinaryReader(fileStream);
+
+            // --- Read Header for Signature, Width, and Height ---
+            var signature = reader.ReadBytes(4);
+            // PSD header must be '8BPS'
+            if (signature[0] != '8' || signature[1] != 'B' || signature[2] != 'P' || signature[3] != 'S')
+            {
+                return false;
+            }
+
+            // The header is fixed. We can jump directly to the dimensions.
+            // Offset 14 for Height, Offset 18 for Width.
+            fileStream.Seek(14, SeekOrigin.Begin);
+
+            // NEW: Read the height and width from the header
+            height = (int)ReadBigEndianUInt32(reader);
+            width = (int)ReadBigEndianUInt32(reader);
+
+
             // --- Efficient Search for Thumbnail Resource ---
+            // The rest of your proven thumbnail logic can now run.
             // The resource marker we are looking for is '8BIM' followed by resource ID 1033 or 1036
             byte[] searchPatternV5 = [(byte)'8', (byte)'B', (byte)'I', (byte)'M', 0x04, 0x0C]; // 1036 for PS 5.0+
             byte[] searchPatternV4 = [(byte)'8', (byte)'B', (byte)'I', (byte)'M', 0x04, 0x09]; // 1033 for PS 4.0
 
             long position = FindBytePattern(fileStream, searchPatternV5);
             if (position == -1)
-            {
                 position = FindBytePattern(fileStream, searchPatternV4);
-            }
 
-            if (position == -1)
-            {
-                return false; // Thumbnail resource not found
-            }
+            if (position == -1) 
+                return false;
 
             // We found the marker. Position the stream right after it.
             fileStream.Position = position + searchPatternV5.Length;
-
-            // The stream is now at the resource name. We can skip it.
-            // A full parser would read this properly, but for just getting the data,
-            // we can read the size of the data block that follows.
-            using var reader = new BinaryReader(fileStream);
 
             // Skip Pascal string for the name (1 byte length + name + padding)
             byte nameLength = reader.ReadByte();
@@ -106,13 +126,8 @@ internal class PsdReader
             fileStream.Seek(nameLength + namePadding, SeekOrigin.Current);
 
             // --- Read Thumbnail Data ---
-            // Read the size of the resource data block (big-endian)
             uint dataSize = ReadBigEndianUInt32(reader);
-            if (dataSize <= 28)
-            {
-                // The first 28 bytes are thumbnail metadata, not image data.
-                return false;
-            }
+            if (dataSize <= 28) return false;
 
             // Skip the 28-byte thumbnail header to get to the raw JPEG data
             fileStream.Seek(28, SeekOrigin.Current);
@@ -120,7 +135,6 @@ internal class PsdReader
             // The actual JPEG data size is the total size minus the header
             int jpegDataSize = (int)(dataSize - 28);
             thumbnailData = reader.ReadBytes(jpegDataSize);
-
             return thumbnailData.Length == jpegDataSize;
         }
         catch (Exception ex)

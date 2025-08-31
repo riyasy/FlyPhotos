@@ -11,8 +11,8 @@ namespace FlyPhotos.Data;
 internal class Photo
 {
     public readonly string FileName;
-    public DisplayItem? Hq;
-    public DisplayItem? Preview;
+    public HqDisplayItem? Hq;
+    public PreviewDisplayItem? Preview;
 
     public Photo(string selectedFileName)
     {
@@ -21,22 +21,28 @@ internal class Photo
 
     public async Task<bool> LoadPreviewFirstPhoto(CanvasControl device)
     {
-        var continueLoadingHq = true;
-        DisplayItem? preview = null;
-
-        async Task GetInitialPreview()
-        {
-            (preview, continueLoadingHq) =
-                await ImageUtil.GetFirstPreviewSpecialHandlingAsync(device, FileName);
-        }
+        var continueLoadingHq = false;
+        DisplayItem? firstDisplay = null;
 
         await Task.Run(GetInitialPreview);
 
-        if (continueLoadingHq)
-            Preview = preview;
-        else
-            Hq = preview;
+        switch (firstDisplay)
+        {
+            case PreviewDisplayItem prev:
+                Preview = prev;
+                continueLoadingHq = true;
+                break;
+            case HqDisplayItem hq:
+                Hq = hq;
+                break;
+        }
+
         return continueLoadingHq;
+
+        async Task GetInitialPreview()
+        {
+            firstDisplay = await ImageUtil.GetFirstPreviewSpecialHandlingAsync(device, FileName);
+        }
     }
 
     public async Task LoadHqFirstPhoto(CanvasControl device)
@@ -50,8 +56,7 @@ internal class Photo
 
     public void LoadHq(CanvasControl device)
     {
-        if (Hq == null || Hq.PreviewFrom == PreviewSource.ErrorScreen ||
-            Hq.PreviewFrom == PreviewSource.Undefined)
+        if (Hq == null)
         {
             Hq = ImageUtil.GetHqImage(device, FileName).GetAwaiter().GetResult();
         }
@@ -78,8 +83,21 @@ internal class Photo
                 return ImageUtil.GetLoadingIndicator();
             case DisplayLevel.None:
             default:
-                return DisplayItem.Empty();
+                return null;
         }
+    }
+
+    public (double, double) GetActualSize()
+    {
+        if (Hq?.Bitmap != null)
+        {
+            return (Hq.Bitmap.SizeInPixels.Width, Hq.Bitmap.SizeInPixels.Height);
+        }
+        if (Preview != null && Preview.Metadata != null)
+        {
+            return (Preview.Metadata.FullWidth, Preview.Metadata.FullHeight);
+        }
+        return (0, 0);
     }
 
     public static DisplayItem GetLoadingIndicator()
@@ -115,4 +133,6 @@ internal class Photo
     {
         return new Photo(string.Empty);
     }
+
+
 }

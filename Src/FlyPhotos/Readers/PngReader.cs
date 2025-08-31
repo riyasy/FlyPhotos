@@ -29,23 +29,24 @@ internal class PngReader
     private const int PngChunkHeaderSize = 8; // 4-byte length + 4-byte type
     private const int PngChunkCrcSize = 4;
 
-    public static async Task<(bool, DisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
     {
         try
         {
             var file = await StorageFile.GetFileFromPathAsync(inputPath);
             using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
-            return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
+            var metaData = new ImageMetadata(canvasBitmap.SizeInPixels.Width, canvasBitmap.SizeInPixels.Height);
+            return (true, new PreviewDisplayItem(canvasBitmap, PreviewSource.FromDisk, metaData));
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
-            return (false, DisplayItem.Empty());
+            return (false, PreviewDisplayItem.Empty());
         }
     }
 
-    public static async Task<(bool, DisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
     {
         try
         {
@@ -54,43 +55,25 @@ internal class PngReader
 
             if (await IsAnimatedPngAsync(stream))
             {
-                // It's animated. Read the whole file from the stream.
-                return await LoadApngFromStreamAsync(stream);
+                // The stream may have been read already, so reset to the beginning.
+                stream.Seek(0);
+                // Read the entire stream into a byte array.
+                var bytes = new byte[stream.Size];
+                await stream.ReadAsync(bytes.AsBuffer(), (uint)stream.Size, InputStreamOptions.None);
+                return (true, new AnimatedHqDisplayItem(bytes));
             }
             else
             {
                 // It's a static PNG. Load it as a bitmap.
                 stream.Seek(0);
                 var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
-                return (true, new DisplayItem(canvasBitmap, PreviewSource.FromDisk));
+                return (true, new StaticHqDisplayItem(canvasBitmap));
             }
         }
         catch (Exception ex)
         {
             Logger.Error(ex, "Failed to process PNG/APNG file at {0}", inputPath);
-            return (false, DisplayItem.Empty());
-        }
-    }
-
-    // Refactored to read from an existing stream to avoid re-opening the file.
-    private static async Task<(bool, DisplayItem)> LoadApngFromStreamAsync(IRandomAccessStream stream)
-    {
-        try
-        {
-            // The stream may have been read already, so reset to the beginning.
-            stream.Seek(0);
-
-            // Read the entire stream into a byte array.
-            var bytes = new byte[stream.Size];
-            await stream.ReadAsync(bytes.AsBuffer(), (uint)stream.Size, InputStreamOptions.None);
-
-            return (true, new DisplayItem(bytes, PreviewSource.FromDisk));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Failed to read byte stream from APNG stream.");
-            // Return DisplayItem.Empty() for consistency.
-            return (false, DisplayItem.Empty());
+            return (false, HqDisplayItem.Empty());
         }
     }
 
