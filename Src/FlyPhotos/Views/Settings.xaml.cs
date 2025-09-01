@@ -99,7 +99,7 @@ internal sealed partial class Settings
         SliderFadeIntensity.Value = AppConfig.Settings.FadeIntensity;
         ButtonHighQualityInterpolation.IsOn = AppConfig.Settings.HighQualityInterpolation;
         ButtonShowCheckeredBackground.IsOn = AppConfig.Settings.CheckeredBackground;
-        SliderStartupDisplayPercentage.Value = AppConfig.Settings.StartupDisplayPercentage;
+        SliderImageFitPercentage.Value = AppConfig.Settings.ImageFitPercentage;
         SliderTransparentBackgroundIntensity.Value = AppConfig.Settings.TransparentBackgroundIntensity;
 
         MainLayout.KeyDown += MainLayout_OnKeyDown;
@@ -115,7 +115,7 @@ internal sealed partial class Settings
         SliderFadeIntensity.ValueChanged += SliderFadeIntensity_ValueChanged;
         ButtonHighQualityInterpolation.Toggled += ButtonHighQualityInterpolation_OnToggled;
         ButtonShowCheckeredBackground.Toggled += ButtonShowCheckeredBackground_OnToggled;
-        SliderStartupDisplayPercentage.ValueChanged += SliderStartupDisplayPercentage_ValueChanged;
+        SliderImageFitPercentage.ValueChanged += SliderImageFitPercentage_ValueChanged;
         SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
 
         SettingsCardKeyboardShortCuts.Description = $"{Environment.NewLine}Left/Right Arrow Keys : Navigate Photos" +
@@ -149,9 +149,9 @@ internal sealed partial class Settings
         await AppConfig.SaveAsync();
     }
 
-    private async void SliderStartupDisplayPercentage_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    private async void SliderImageFitPercentage_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
-        AppConfig.Settings.StartupDisplayPercentage = (int)SliderStartupDisplayPercentage.Value;
+        AppConfig.Settings.ImageFitPercentage = (int)SliderImageFitPercentage.Value;
         await AppConfig.SaveAsync();
     }
 

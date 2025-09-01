@@ -49,10 +49,11 @@ internal class ImageUtil
 
             if (!AppConfig.Settings.OpenExitZoom)
             {
-                var cachedBmp = await DiskCacherWithSqlite.Instance.ReturnFromCache(d2dCanvas, path);
+                var (cachedBmp, actualWidth, actualHeight) = await DiskCacherWithSqlite.Instance.ReturnFromCache(d2dCanvas, path);
                 if (null != cachedBmp)
                 {
-                    return (new PreviewDisplayItem(cachedBmp, PreviewSource.FromDiskCache));
+                    var metadata = new ImageMetadata(actualWidth, actualHeight);
+                    return (new PreviewDisplayItem(cachedBmp, PreviewSource.FromDiskCache, metadata));
                 }
             }
 
@@ -124,10 +125,11 @@ internal class ImageUtil
 
         try
         {
-            var cachedBmp = await DiskCacherWithSqlite.Instance.ReturnFromCache(d2dCanvas, path);
+            var (cachedBmp, actualWidth, actualHeight) = await DiskCacherWithSqlite.Instance.ReturnFromCache(d2dCanvas, path);
             if (null != cachedBmp)
             {
-                return new PreviewDisplayItem(cachedBmp, PreviewSource.FromDiskCache);
+                var metadata = new ImageMetadata(actualWidth, actualHeight);
+                return (new PreviewDisplayItem(cachedBmp, PreviewSource.FromDiskCache, metadata));
             }
 
             var extension = Path.GetExtension(path).ToUpper();

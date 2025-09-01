@@ -38,8 +38,11 @@ internal class CanvasViewManager
         var effectiveWidth = vertical ? imageHeight : imageWidth;
         var effectiveHeight = vertical ? imageWidth : imageHeight;
 
-        var horScale = canvasWidth / effectiveWidth;
-        var vertScale = canvasHeight / effectiveHeight;
+        var paddedCanvasWidth = canvasWidth * (AppConfig.Settings.ImageFitPercentage / 100.0f);
+        var paddedCanvasHeight = canvasHeight * (AppConfig.Settings.ImageFitPercentage / 100.0f);
+
+        var horScale = paddedCanvasWidth / effectiveWidth;
+        var vertScale = paddedCanvasHeight / effectiveHeight;
         var scaleFactor = Math.Min(horScale, vertScale);
         
         if (scaleFactor > 1.0) scaleFactor = 1.0;
@@ -59,7 +62,7 @@ internal class CanvasViewManager
             {
                 var targetPosition = new Point(canvasWidth / 2, canvasHeight / 2);
                 _canvasViewState.Scale = 0.01f;
-                float startupScale = AppConfig.Settings.StartupDisplayPercentage / 100.0f;
+                float startupScale = 1.0f;
                 StartPanAndZoomAnimation(startupScale, targetPosition);
             }
         }
@@ -69,8 +72,13 @@ internal class CanvasViewManager
 
     public void HandleSizeChange(Rect imageBounds, Size newSize, Size previousSize)
     {
-        var scaleFactor = Math.Min(newSize.Width / imageBounds.Width,
-            newSize.Height / imageBounds.Height);
+        var paddedCanvasWidth = newSize.Width * (AppConfig.Settings.ImageFitPercentage / 100.0f);
+        var paddedCanvasHeight = newSize.Height * (AppConfig.Settings.ImageFitPercentage / 100.0f);
+
+        var horScale = paddedCanvasWidth / imageBounds.Width;
+        var vertScale = paddedCanvasHeight / imageBounds.Height;
+
+        var scaleFactor = Math.Min(horScale, vertScale);
 
         if (scaleFactor > 1.0) scaleFactor = 1.0;
 
@@ -125,8 +133,8 @@ internal class CanvasViewManager
         if (!animateChange)
         {
             // If not redrawing, set instantly as before
-            _canvasViewState.Scale = AppConfig.Settings.StartupDisplayPercentage / 100.0f;
-            _canvasViewState.LastScaleTo = _canvasViewState.Scale;
+            _canvasViewState.Scale = 1.0f;
+            _canvasViewState.LastScaleTo = 1.0f;
             _canvasViewState.ImagePos.X = d2dCanvasActualWidth / 2;
             _canvasViewState.ImagePos.Y = d2dCanvasActualHeight / 2;
             return;
@@ -255,7 +263,7 @@ internal class CanvasViewManager
 
     public void SetStartupScale()
     {
-        _canvasViewState.Scale = AppConfig.Settings.StartupDisplayPercentage/100.0f;
-        _canvasViewState.LastScaleTo = AppConfig.Settings.StartupDisplayPercentage/100.0f;
+        _canvasViewState.Scale = 1.0f;
+        _canvasViewState.LastScaleTo = 1.0f;
     }
 }

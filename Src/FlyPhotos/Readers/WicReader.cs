@@ -74,10 +74,10 @@ internal class WicReader
                 int originalWidth = fileInfo.Frames[0].Width;
                 int originalHeight = fileInfo.Frames[0].Height;
                 var metadata = new ImageMetadata(originalWidth, originalHeight);
-                var settings = new ProcessImageSettings { Width = 800, HybridMode = HybridScaleMode.Turbo };
+                var settings = new ProcessImageSettings { Width = 800, Height = 800, ResizeMode = CropScaleMode.Max, HybridMode = HybridScaleMode.Turbo };
 
                 CanvasBitmap canvasBitmap;
-                if (originalWidth < 800 && originalHeight < 800)
+                if (originalWidth <= 800 && originalHeight <= 800)
                 {
                     // Load directly from file path without resizing
                     canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);

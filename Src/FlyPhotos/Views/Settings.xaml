@@ -112,13 +112,13 @@
                             <ToggleSwitch x:Name="ButtonShowCheckeredBackground" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
-                            x:Name="SettingsCardStartupStartupDisplayPercentage"
+                            x:Name="SettingsCardImageFitPercentage"
                             Margin="0,5,0,0"
-                            Description="Choose startup image-window fit percentage"
-                            Header="Startup up image size"
+                            Description="Choose how much screen % to fill with image"
+                            Header="Image to Screen Fit"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE9A6;}">
                             <Slider
-                                x:Name="SliderStartupDisplayPercentage"
+                                x:Name="SliderImageFitPercentage"
                                 Width="200"
                                 Maximum="100"
                                 Minimum="50"

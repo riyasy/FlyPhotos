@@ -34,7 +34,7 @@ public class AppSettings
     public bool OpenExitZoom { get; set; } = false;
     public bool HighQualityInterpolation { get; set; } = true;
     public bool CheckeredBackground { get; set; } = false;
-    public int StartupDisplayPercentage { get; set; } = 100;
+    public int ImageFitPercentage { get; set; } = 100;
     public int TransparentBackgroundIntensity { get; set; } = 40;
 }
 

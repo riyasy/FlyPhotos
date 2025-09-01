@@ -31,7 +31,7 @@ public sealed class DiskCacherWithSqlite : IDisposable
 
     private DiskCacherWithSqlite()
     {
-        var dbPath = Path.Combine(PathResolver.GetDbFolderPath(), "FlyPhotosCache_sqlite.db");
+        var dbPath = Path.Combine(PathResolver.GetDbFolderPath(), "FlyPhotosCache_sqlite_2.db");
 
         // Ensure folder exists
         Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
@@ -50,7 +50,7 @@ public sealed class DiskCacherWithSqlite : IDisposable
 
         // Prepare all statements once for performance
         _cmdSelectByPath = _conn.CreateCommand();
-        _cmdSelectByPath.CommandText = "SELECT imageData, lastModified FROM images WHERE filePath = $p";
+        _cmdSelectByPath.CommandText = "SELECT imageData, lastModified, actualWidth, actualHeight FROM images WHERE filePath = $p";
         _cmdSelectByPath.Parameters.Add("$p", SqliteType.Text);
 
         _cmdTouch = _conn.CreateCommand();
@@ -64,16 +64,20 @@ public sealed class DiskCacherWithSqlite : IDisposable
 
         _cmdUpsert = _conn.CreateCommand();
         _cmdUpsert.CommandText = @"
-            INSERT INTO images (filePath, imageData, lastAccessed, lastModified)
-            VALUES ($p, $d, $a, $m)
+            INSERT INTO images (filePath, imageData, lastAccessed, lastModified, actualWidth, actualHeight)
+            VALUES ($p, $d, $a, $m, $w, $h)
             ON CONFLICT(filePath) DO UPDATE SET
                 imageData    = excluded.imageData,
                 lastAccessed = excluded.lastAccessed,
-                lastModified = excluded.lastModified;";
+                lastModified = excluded.lastModified,
+                actualWidth  = excluded.actualWidth,
+                actualHeight = excluded.actualHeight;";
         _cmdUpsert.Parameters.Add("$p", SqliteType.Text);
         _cmdUpsert.Parameters.Add("$d", SqliteType.Blob);
         _cmdUpsert.Parameters.Add("$a", SqliteType.Integer);
         _cmdUpsert.Parameters.Add("$m", SqliteType.Text);
+        _cmdUpsert.Parameters.Add("$w", SqliteType.Integer);
+        _cmdUpsert.Parameters.Add("$h", SqliteType.Integer);
 
         _cmdCount = _conn.CreateCommand();
         _cmdCount.CommandText = "SELECT COUNT(*) FROM images";
@@ -148,20 +152,21 @@ public sealed class DiskCacherWithSqlite : IDisposable
                 filePath     TEXT    NOT NULL UNIQUE,
                 imageData    BLOB    NOT NULL,
                 lastAccessed INTEGER NOT NULL,
-                lastModified TEXT    NOT NULL
+                lastModified TEXT    NOT NULL,
+                actualWidth  INTEGER NOT NULL,
+                actualHeight INTEGER NOT NULL
             );
             CREATE INDEX IF NOT EXISTS idx_lastAccessed ON images(lastAccessed);";
         cmd.ExecuteNonQuery();
     }
 
-    public async Task<CanvasBitmap?> ReturnFromCache(CanvasControl canvasControl, string filePath)
+    public async Task<(CanvasBitmap? bitmap, int actualWidth, int actualHeight)> ReturnFromCache(CanvasControl canvasControl, string filePath)
     {
-        return null;
         try
         {
-            // Perform file I/O outside the database lock to improve concurrency
             var currentMtime = FileMtimeString(filePath);
             byte[]? imageData = null;
+            int actualWidth = 0, actualHeight = 0;
 
             await _gate.WaitAsync().ConfigureAwait(false);
             try
@@ -178,6 +183,9 @@ public sealed class DiskCacherWithSqlite : IDisposable
                         var blob = new byte[reader.GetBytes(0, 0, null, 0, int.MaxValue)];
                         reader.GetBytes(0, 0, blob, 0, blob.Length);
                         imageData = blob;
+
+                        actualWidth = reader.GetInt32(2);
+                        actualHeight = reader.GetInt32(3);
 
                         _cmdTouch.Parameters["$a"].Value = NowUnix();
                         _cmdTouch.Parameters["$p"].Value = filePath;
@@ -200,20 +208,21 @@ public sealed class DiskCacherWithSqlite : IDisposable
             if (imageData != null)
             {
                 using var ms = new MemoryStream(imageData, false);
-                return await CanvasBitmap.LoadAsync(canvasControl, ms.AsRandomAccessStream());
+                var bitmap = await CanvasBitmap.LoadAsync(canvasControl, ms.AsRandomAccessStream());
+                return (bitmap, actualWidth, actualHeight);
             }
 
-            return null;
+            return (null, 0, 0);
         }
         catch (Exception ex)
         {
             // Cache failures should not crash the app. Log and return null.
             System.Diagnostics.Debug.WriteLine($"[CACHE-ERROR] Failed to read '{filePath}' from cache: {ex.Message}");
-            return null;
+            return (null, 0, 0);
         }
     }
 
-    public async Task PutInCache(string filePath, CanvasBitmap bitmap)
+    public async Task PutInCache(string filePath, CanvasBitmap bitmap, int actualWidth, int actualHeight)
     {
         try
         {
@@ -239,6 +248,8 @@ public sealed class DiskCacherWithSqlite : IDisposable
                 _cmdUpsert.Parameters["$d"].Value = resizedImageData;
                 _cmdUpsert.Parameters["$a"].Value = now;
                 _cmdUpsert.Parameters["$m"].Value = lastMod;
+                _cmdUpsert.Parameters["$w"].Value = actualWidth;
+                _cmdUpsert.Parameters["$h"].Value = actualHeight;
                 await _cmdUpsert.ExecuteNonQueryAsync().ConfigureAwait(false);
             }
             finally
@@ -258,12 +269,21 @@ public sealed class DiskCacherWithSqlite : IDisposable
     // check if we can use canvas pixels directly to be given to magic scaler.
     private static async Task<byte[]> ResizeImageWithPhotoSauce(CanvasBitmap bitmap, int maxSize)
     {
-        using var input = new MemoryStream();
-        // Save as PNG to preserve quality during the intermediate step, or JPEG if speed is critical
-        await bitmap.SaveAsync(input.AsRandomAccessStream(), CanvasBitmapFileFormat.Jpeg, 0.9f);
-        input.Position = 0;
+        using var inputStream = new MemoryStream();
+        // Save as JPEG to match output format
+        await bitmap.SaveAsync(inputStream.AsRandomAccessStream(), CanvasBitmapFileFormat.Jpeg, 0.9f);
+        inputStream.Position = 0;
 
-        using var output = new MemoryStream();
+        // Check CanvasBitmap dimensions
+        double width = bitmap.Size.Width;
+        double height = bitmap.Size.Height;
+
+        // Skip resizing if both dimensions are <= 800
+        if (width <= 800 && height <= 800)
+            return inputStream.ToArray();
+
+        // Resize if either dimension exceeds 800
+        using var outputStream = new MemoryStream();
         var settings = new ProcessImageSettings
         {
             Width = maxSize,
@@ -272,8 +292,7 @@ public sealed class DiskCacherWithSqlite : IDisposable
             HybridMode = HybridScaleMode.Turbo,
             EncoderOptions = new JpegEncoderOptions { Quality = 85, Subsample = ChromaSubsampleMode.Subsample420 }
         };
-
-        MagicImageProcessor.ProcessImage(input, output, settings);
-        return output.ToArray();
+        MagicImageProcessor.ProcessImage(inputStream, outputStream, settings);
+        return outputStream.ToArray();
     }
 }

@@ -226,7 +226,8 @@ internal class PhotoDisplayController : IPhotoDisplayController
                             image.Preview != null &&
                             image.Preview.PreviewFrom == PreviewSource.FromDisk)
                         {
-                            await DiskCacherWithSqlite.Instance.PutInCache(image.FileName, image.Preview.Bitmap);
+                            var (actualWidth, actualHeight) = image.GetActualSize();
+                            await DiskCacherWithSqlite.Instance.PutInCache(image.FileName, image.Preview.Bitmap, (int)Math.Round(actualWidth), (int)Math.Round(actualHeight));
                         }
                     }
                     finally { _diskCacheTaskThrottler.Release(); }
