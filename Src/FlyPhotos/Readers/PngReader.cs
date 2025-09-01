@@ -52,22 +52,18 @@ internal class PngReader
         {
             var storageFile = await StorageFile.GetFileFromPathAsync(inputPath);
             using IRandomAccessStream stream = await storageFile.OpenAsync(FileAccessMode.Read);
+            var firstFrame = await CanvasBitmap.LoadAsync(ctrl, stream);
 
-            if (await IsAnimatedPngAsync(stream))
+            if (await IsAnimatedPngAsync(stream)) // Animated PNG
             {
-                // The stream may have been read already, so reset to the beginning.
                 stream.Seek(0);
-                // Read the entire stream into a byte array.
                 var bytes = new byte[stream.Size];
                 await stream.ReadAsync(bytes.AsBuffer(), (uint)stream.Size, InputStreamOptions.None);
-                return (true, new AnimatedHqDisplayItem(bytes));
+                return (true, new AnimatedHqDisplayItem(firstFrame, bytes));
             }
             else
             {
-                // It's a static PNG. Load it as a bitmap.
-                stream.Seek(0);
-                var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
-                return (true, new StaticHqDisplayItem(canvasBitmap));
+                return (true, new StaticHqDisplayItem(firstFrame));
             }
         }
         catch (Exception ex)

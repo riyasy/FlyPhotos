@@ -41,6 +41,8 @@ internal class CanvasViewManager
         var horScale = canvasWidth / effectiveWidth;
         var vertScale = canvasHeight / effectiveHeight;
         var scaleFactor = Math.Min(horScale, vertScale);
+        
+        if (scaleFactor > 1.0) scaleFactor = 1.0;
 
         // Note: The _imageRect should always be based on the un-rotated dimensions.
         // The rotation is applied later in the transform matrix.
@@ -69,8 +71,12 @@ internal class CanvasViewManager
     {
         var scaleFactor = Math.Min(newSize.Width / imageBounds.Width,
             newSize.Height / imageBounds.Height);
+
+        if (scaleFactor > 1.0) scaleFactor = 1.0;
+
         _canvasViewState.ImageRect = new Rect(0, 0, imageBounds.Width * scaleFactor,
             imageBounds.Height * scaleFactor);
+
         var xChangeRatio = newSize.Width / previousSize.Width;
         var yChangeRatio = newSize.Height / previousSize.Height;
         _canvasViewState.ImagePos.X *= xChangeRatio;
@@ -119,16 +125,16 @@ internal class CanvasViewManager
         if (!animateChange)
         {
             // If not redrawing, set instantly as before
-            _canvasViewState.Scale = 1f;
-            _canvasViewState.LastScaleTo = 1f;
+            _canvasViewState.Scale = AppConfig.Settings.StartupDisplayPercentage / 100.0f;
+            _canvasViewState.LastScaleTo = _canvasViewState.Scale;
             _canvasViewState.ImagePos.X = d2dCanvasActualWidth / 2;
             _canvasViewState.ImagePos.Y = d2dCanvasActualHeight / 2;
             return;
         }
 
         // Define the target state
-        const float targetScale = 1.0f;
         var targetPosition = new Point(d2dCanvasActualWidth / 2, d2dCanvasActualHeight / 2);
+        const float targetScale = 1.0f;
 
         // This is important for subsequent mouse-wheel zooms to work correctly
         _canvasViewState.LastScaleTo = targetScale;

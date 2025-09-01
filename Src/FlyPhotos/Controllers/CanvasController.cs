@@ -25,7 +25,7 @@ internal class CanvasController : ICanvasController
     private readonly PhotoSessionState _photoSessionState;
     private readonly CanvasControl _d2dCanvas;
 
-    private IRenderer _currentRenderer; 
+    private IRenderer _currentRenderer;
 
     private bool _invalidatePending;
     private int _latestSetSourceOperationId;
@@ -103,7 +103,7 @@ internal class CanvasController : ICanvasController
 
         var (width, height) = photo.GetActualSize();
 
-        System.Diagnostics.Debug.WriteLine($"Displaying {photo.FileName} at level {displayLevel} with size {width}x{height}");
+        Debug.WriteLine($"Displaying {photo.FileName} at level {displayLevel} with size {width}x{height}");
 
         if (displayItem == null) return;
 
@@ -112,14 +112,8 @@ internal class CanvasController : ICanvasController
             case AnimatedHqDisplayItem animDispItem:
                 try
                 {
-                    bool previewDrawnAsFirstFrame = false;
-                    var preview = photo.GetDisplayItemBasedOn(DisplayLevel.Preview);
-                    if (preview != null)
-                    {
-                        previewDrawnAsFirstFrame = true;
-                        IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, preview.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
-                        SetupNewRenderer(newRenderer, preview.Bitmap.Bounds.Width, preview.Bitmap.Bounds.Height, preview.Rotation, isFirstPhoto, true);
-                    }
+                    IRenderer firstFrameRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, animDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
+                    SetupNewRenderer(firstFrameRenderer, width, height, animDispItem.Rotation, isFirstPhoto, true);
 
                     IAnimator newAnimator = Path.GetExtension(photo.FileName).ToUpper() == ".GIF"
                         ? await GifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas)
@@ -129,7 +123,7 @@ internal class CanvasController : ICanvasController
                     {
                         await newAnimator.UpdateAsync(TimeSpan.Zero);
                         IRenderer newRenderer = new AnimatedImageRenderer(_d2dCanvas, _checkeredBrush, newAnimator, _animatorLock, photo.SupportsTransparency(), RequestInvalidate);
-                        SetupNewRenderer(newRenderer, newAnimator.PixelWidth, newAnimator.PixelHeight, animDispItem.Rotation, !previewDrawnAsFirstFrame, !previewDrawnAsFirstFrame);
+                        SetupNewRenderer(newRenderer, width, height, animDispItem.Rotation, false, false);
                     }
                     else
                     {
@@ -142,19 +136,22 @@ internal class CanvasController : ICanvasController
                 }
                 break;
             case HqDisplayItem hqDispItem:
-            {
-                IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, hqDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
-                SetupNewRenderer(newRenderer, hqDispItem.Bitmap.Bounds.Width, hqDispItem.Bitmap.Bounds.Height,
-                    hqDispItem.Rotation, isFirstPhoto, true);
-                break;
-            }
+                {
+                    IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, hqDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
+                    SetupNewRenderer(newRenderer, width, height, hqDispItem.Rotation, isFirstPhoto, true);
+                    break;
+                }
             case PreviewDisplayItem previewDispItem:
-            {
-                IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, previewDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
-                SetupNewRenderer(newRenderer, previewDispItem.Bitmap.Bounds.Width, previewDispItem.Bitmap.Bounds.Height,
-                    previewDispItem.Rotation, isFirstPhoto, true);
-                break;
-            }
+                {
+                    // Sometimes preview aspect ratio is different from actual image aspect ratio.
+                    // To avoid image distortion, we calculate the width based on actual image height and preview aspect ratio.
+                    var previewAspectRatio = previewDispItem.Bitmap.Bounds.Width / previewDispItem.Bitmap.Bounds.Height;
+                    var correctedWidth = height * previewAspectRatio;
+
+                    IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, previewDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
+                    SetupNewRenderer(newRenderer, correctedWidth, height, previewDispItem.Rotation, isFirstPhoto, true);
+                    break;
+                }
         }
     }
 

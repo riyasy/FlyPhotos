@@ -70,18 +70,27 @@ internal class WicReader
         {
             try
             {
-                // Define the resizing settings
+                var fileInfo = ImageFileInfo.Load(inputPath);
+                int originalWidth = fileInfo.Frames[0].Width;
+                int originalHeight = fileInfo.Frames[0].Height;
+                var metadata = new ImageMetadata(originalWidth, originalHeight);
                 var settings = new ProcessImageSettings { Width = 800, HybridMode = HybridScaleMode.Turbo };
 
-                // Create a single pipeline for metadata and resizing
-                using var pipeline = MagicImageProcessor.BuildPipeline(inputPath, settings);
-                // Get the original image dimensions from the pipeline's source
-                var imageInfo = pipeline.PixelSource;
-                // Resize the image using the same pipeline
-                using var ms = new MemoryStream();
-                pipeline.WriteOutput(ms); // Process the image to the memory stream
-                var metadata = new ImageMetadata(imageInfo.Width, imageInfo.Height);
-                var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());
+                CanvasBitmap canvasBitmap;
+                if (originalWidth < 800 && originalHeight < 800)
+                {
+                    // Load directly from file path without resizing
+                    canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);
+                }
+                else
+                {
+                    // Create pipeline for resizing
+                    using var pipeline = MagicImageProcessor.BuildPipeline(inputPath, settings);
+                    using var ms = new MemoryStream();
+                    pipeline.WriteOutput(ms);
+                    canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());
+                }
+
                 return (true, new PreviewDisplayItem(canvasBitmap, PreviewSource.FromDisk, metadata));
             }
             catch (Exception ex)

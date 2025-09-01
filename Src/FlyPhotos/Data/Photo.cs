@@ -93,11 +93,16 @@ internal class Photo
         {
             return (Hq.Bitmap.SizeInPixels.Width, Hq.Bitmap.SizeInPixels.Height);
         }
-        if (Preview != null && Preview.Metadata != null)
+        if (Preview != null)
         {
-            return (Preview.Metadata.FullWidth, Preview.Metadata.FullHeight);
+            if (Preview.Metadata != null && Preview.Metadata.FullWidth != 0 && Preview.Metadata.FullHeight != 0)
+            {
+                return (Preview.Metadata.FullWidth, Preview.Metadata.FullHeight);
+            }
+            return (Preview.Bitmap.SizeInPixels.Width, Preview.Bitmap.SizeInPixels.Height);
+
         }
-        return (0, 0);
+        return (100, 100);
     }
 
     public static DisplayItem GetLoadingIndicator()

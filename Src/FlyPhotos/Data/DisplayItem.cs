@@ -37,7 +37,7 @@ internal abstract class HqDisplayItem(CanvasBitmap bitmap, int rotation = 0) : D
 
 internal sealed class StaticHqDisplayItem(CanvasBitmap bitmap, int rotation = 0) : HqDisplayItem(bitmap, rotation);
 
-internal sealed class AnimatedHqDisplayItem(byte[] fileAsByteArray) : HqDisplayItem(null)
+internal sealed class AnimatedHqDisplayItem(CanvasBitmap firstFrame, byte[] fileAsByteArray) : HqDisplayItem(firstFrame)
 {
     public byte[] FileAsByteArray { get; } = fileAsByteArray;
 }

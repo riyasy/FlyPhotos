@@ -1,13 +1,14 @@
-﻿using System;
+﻿using FlyPhotos.Data;
+using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.UI.Xaml;
+using NLog;
+using System;
 using System.IO;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Streams;
-using FlyPhotos.Data;
-using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
-using NLog;
 
 namespace FlyPhotos.Readers;
 
@@ -51,29 +52,26 @@ internal class GifReader
             // We must open the file as a stream for the decoder to read.
             var storageFile = await StorageFile.GetFileFromPathAsync(inputPath);
             using IRandomAccessStream stream = await storageFile.OpenAsync(FileAccessMode.Read);
+            var firstFrame = await CanvasBitmap.LoadAsync(ctrl, stream);
+
+            stream.Seek(0);
             var decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.GifDecoderId, stream);
 
-            // --- Decide loading strategy based on frame count ---
-            if (decoder.FrameCount > 1)
+            if (decoder.FrameCount > 1) // Animated GIF
             {
-                // More than one frame: It's an animated GIF.
-
-                // File.ReadAllBytesAsync is the most efficient way to asynchronously 
-                // read an entire file into a byte array. It avoids blocking threads.
-                byte[] fileBytes = await File.ReadAllBytesAsync(inputPath);
-                return (true, new AnimatedHqDisplayItem(fileBytes));
+                stream.Seek(0);
+                var bytes = new byte[stream.Size];
+                await stream.ReadAsync(bytes.AsBuffer(), (uint)stream.Size, InputStreamOptions.None);
+                return (true, new AnimatedHqDisplayItem(firstFrame, bytes));
             }
             else
             {
-                // Single frame: Load as a static image (CanvasBitmap).
-                stream.Seek(0);
-                var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
-                return (true, new StaticHqDisplayItem(canvasBitmap));
+                return (true, new StaticHqDisplayItem(firstFrame));
             }
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Failed to process image file at {0}", inputPath);
+            Logger.Error(ex, "Failed to process GIF file at {0}", inputPath);
             return (false, HqDisplayItem.Empty());
         }
     }
