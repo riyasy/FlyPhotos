@@ -885,6 +885,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_2B4F1D4E57C647C2B35598F07B990F88"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_2B802E2626D24E3EABE4BE6C2A8555D8"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -898,12 +904,6 @@
         "Entry"
         {
         "MsmKey" = "8:_31C65AAC7DCC4BAE826FC9AA50B36CBC"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_3239B8641FED443A8FEF0C6659483F2E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -957,12 +957,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_4658B22D8F2840E397D2F277ADD1791C"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_4A15ABBDDB1A4B438408E7E04B0FFCF0"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -970,12 +964,6 @@
         "Entry"
         {
         "MsmKey" = "8:_4B108B8013884F02BF075D13C47E08DD"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_4BCD0F6F8818478798DAA4B4E4CACFE5"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1006,12 +994,6 @@
         "Entry"
         {
         "MsmKey" = "8:_55B7050759414B61821DFF2D34F81EC9"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_5893F64C0A2949FABB1C5017355693CD"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1497,6 +1479,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_AA191C2273B7405F84C3ACC745505DD7"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_AB54F1BBCD074E6CA26822A96B5D6D8E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -1540,12 +1528,6 @@
         "Entry"
         {
         "MsmKey" = "8:_B06EB9C89E3644C1BF246752DB5A04AE"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_B0D2153D5C6F4EB5BB7D8105CB549079"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1857,12 +1839,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_C16049FDFA824A3AA7197D932369C226"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_C58DC4A670894D3EADFC325FF773835E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -1989,12 +1965,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_E9EAA4AD63DE4D748981F18ED1687FB5"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_EA30EB6AF1E24A2C9E1B2519C8A766EA"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -2038,12 +2008,6 @@
         "Entry"
         {
         "MsmKey" = "8:_F7FE3AF38B9C499B9C55D6A4856CFD04"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_F8AC496CA39C41E38109E30818F4B63F"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -3004,6 +2968,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2B4F1D4E57C647C2B35598F07B990F88"
+            {
+            "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\vcomp140.dll"
+            "TargetName" = "8:vcomp140.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2B802E2626D24E3EABE4BE6C2A8555D8"
             {
             "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\MRM.dll"
@@ -3050,26 +3034,6 @@
             "TargetName" = "8:Microsoft.Windows.AI.Text.dll"
             "Tag" = "8:"
             "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_3239B8641FED443A8FEF0C6659483F2E"
-            {
-            "SourcePath" = "8:..\\FlyPhotos\\Assets\\Square150x150Logo.scale-200.png"
-            "TargetName" = "8:Square150x150Logo.scale-200.png"
-            "Tag" = "8:"
-            "Folder" = "8:_26865D038034462A970A4EA858C0D83E"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -3299,26 +3263,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4658B22D8F2840E397D2F277ADD1791C"
-            {
-            "SourcePath" = "8:..\\FlyPhotos\\Assets\\SplashScreen.scale-200.png"
-            "TargetName" = "8:SplashScreen.scale-200.png"
-            "Tag" = "8:"
-            "Folder" = "8:_26865D038034462A970A4EA858C0D83E"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4A15ABBDDB1A4B438408E7E04B0FFCF0"
             {
             "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\Microsoft.UI.Xaml.Controls.pri"
@@ -3343,26 +3287,6 @@
             {
             "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\SessionHandleIPCProxyStub.dll"
             "TargetName" = "8:SessionHandleIPCProxyStub.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4BCD0F6F8818478798DAA4B4E4CACFE5"
-            {
-            "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\WindowsAppRuntime.png"
-            "TargetName" = "8:WindowsAppRuntime.png"
             "Tag" = "8:"
             "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
             "Condition" = "8:"
@@ -3487,26 +3411,6 @@
             "TargetName" = "8:Microsoft.WindowsAppRuntime.Bootstrap.dll"
             "Tag" = "8:"
             "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5893F64C0A2949FABB1C5017355693CD"
-            {
-            "SourcePath" = "8:..\\FlyPhotos\\Assets\\Square44x44Logo.scale-200.png"
-            "TargetName" = "8:Square44x44Logo.scale-200.png"
-            "Tag" = "8:"
-            "Folder" = "8:_26865D038034462A970A4EA858C0D83E"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -4446,6 +4350,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AA191C2273B7405F84C3ACC745505DD7"
+            {
+            "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\Microsoft.Windows.Workloads.Resources_ec.dll"
+            "TargetName" = "8:Microsoft.Windows.Workloads.Resources_ec.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_AB54F1BBCD074E6CA26822A96B5D6D8E"
             {
             "AssemblyRegister" = "3:1"
@@ -4625,26 +4549,6 @@
             "TargetName" = "8:workloads.stx.json"
             "Tag" = "8:"
             "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_B0D2153D5C6F4EB5BB7D8105CB549079"
-            {
-            "SourcePath" = "8:..\\FlyPhotos\\Assets\\LockScreenLogo.scale-200.png"
-            "TargetName" = "8:LockScreenLogo.scale-200.png"
-            "Tag" = "8:"
-            "Folder" = "8:_26865D038034462A970A4EA858C0D83E"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -4901,26 +4805,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C16049FDFA824A3AA7197D932369C226"
-            {
-            "SourcePath" = "8:..\\FlyPhotos\\Assets\\Square44x44Logo.targetsize-24_altform-unplated.png"
-            "TargetName" = "8:Square44x44Logo.targetsize-24_altform-unplated.png"
-            "Tag" = "8:"
-            "Folder" = "8:_26865D038034462A970A4EA858C0D83E"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C58DC4A670894D3EADFC325FF773835E"
@@ -5398,26 +5282,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E9EAA4AD63DE4D748981F18ED1687FB5"
-            {
-            "SourcePath" = "8:..\\FlyPhotos\\Assets\\Wide310x150Logo.scale-200.png"
-            "TargetName" = "8:Wide310x150Logo.scale-200.png"
-            "Tag" = "8:"
-            "Folder" = "8:_26865D038034462A970A4EA858C0D83E"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_EA30EB6AF1E24A2C9E1B2519C8A766EA"
             {
             "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\libSkiaSharp.dll"
@@ -5562,26 +5426,6 @@
             {
             "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\libde265.dll"
             "TargetName" = "8:libde265.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_F8AC496CA39C41E38109E30818F4B63F"
-            {
-            "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\Microsoft.Windows.Workloads.Resources_ec.dll"
-            "TargetName" = "8:Microsoft.Windows.Workloads.Resources_ec.dll"
             "Tag" = "8:"
             "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
             "Condition" = "8:"
@@ -5782,15 +5626,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Fly"
-        "ProductCode" = "8:{59D1D690-9794-4D06-A00F-1F2E9A199BCA}"
-        "PackageCode" = "8:{D7B1E5B6-7F66-48EA-B211-210F369FBB0B}"
+        "ProductCode" = "8:{1BA61227-509C-4B69-BF41-45C018DB4B45}"
+        "PackageCode" = "8:{1F45640A-7A2E-4A4B-A748-5DB5DCCD7307}"
         "UpgradeCode" = "8:{5565DCCD-EEED-45A0-93FF-4BABC468C2A7}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:2.5.3"
+        "ProductVersion" = "8:2.5.4"
         "Manufacturer" = "8:RYFTools"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://github.com/riyasy/FlyPhotos"

@@ -5,6 +5,7 @@ using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using System;
 using System.Diagnostics;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -43,7 +44,12 @@ namespace FlyPhotos.Controllers.Renderers
             // Antialiasing can cause fine lines visible at edge of images when drawing checkerboard
             session.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
             if (drawCheckeredBackground)
+            {
+                var brushScale = viewState.MatInv.M11;
+                _checkeredBrush.Transform = Matrix3x2.CreateScale(brushScale);
                 session.FillRectangle(viewState.ImageRect, _checkeredBrush);
+            }
+
             session.DrawImage(_animator.Surface, viewState.ImageRect, _animator.Surface.GetBounds(_canvas), 1.0f, quality);
             _ = RunAnimationLoop();
         }
