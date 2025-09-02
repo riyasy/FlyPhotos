@@ -132,11 +132,10 @@ internal sealed partial class Settings
                                           $"{Environment.NewLine}libheif (For HEIC) - https://github.com/strukturag/libheif " +
                                           $"{Environment.NewLine}libheif-sharp (For HEIC) - https://github.com/0xC0000054/libheif-sharp " +
                                           $"{Environment.NewLine}Magick.NET (For PSD) - https://github.com/dlemstra/Magick.NET" +
+                                          $"{Environment.NewLine}SkiaSharp (For SVG) - https://github.com/mono/SkiaSharp" +
                                           $"{Environment.NewLine}MagicScaler - https://github.com/saucecontrol/PhotoSauce" +
-                                          $"{Environment.NewLine}SkiaSharp - https://github.com/mono/SkiaSharp" +
-                                          $"{Environment.NewLine}nlog - https://github.com/NLog" +                                          
-                                          $"{Environment.NewLine}LiteDB - https://github.com/litedb-org/LiteDB" +
-                                          $"{Environment.NewLine}Vanara - https://github.com/dahall/Vanara";
+                                          $"{Environment.NewLine}WinUIEx - https://github.com/dotMorten/WinUIEx" +
+                                          $"{Environment.NewLine}nlog - https://github.com/NLog";
         TextBoxCodecs.Text =
             $"This program doesn't install any codecs and uses codecs already present in the system.{Environment.NewLine}" +
             $"{Environment.NewLine}{Util.GetExtensionsDisplayString()}";
