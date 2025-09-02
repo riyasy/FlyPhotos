@@ -34,6 +34,7 @@ internal static class Util
         foreach (var codecInfo in _codecInfoList) SupportedExtensions.AddRange(codecInfo.FileExtensions);
         SupportedExtensions.Add(".PSD");
         SupportedExtensions.Add(".SVG");
+        SupportedExtensions.Add(".HEIC");
 
         var memoryLeakingCodecs = _codecInfoList.Where(x => x.FriendlyName.Contains("Raw Image"));
         foreach (var leakingCodec in memoryLeakingCodecs) MemoryLeakingExtensions.AddRange(leakingCodec.FileExtensions);

@@ -49,9 +49,6 @@
 		<Content Include="Assets\Square44x44Logo.scale-200.png" />
 		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
 		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
-		<Content Include="WicImageFileReaderNative.exe">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -122,6 +119,9 @@
 		</None>
 		<None Update="NLog.config">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="WicImageFileReaderNative.exe">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</None>
 		<Page Update="Views\InitWindow.xaml">
 		  <Generator>MSBuild:Compile</Generator>

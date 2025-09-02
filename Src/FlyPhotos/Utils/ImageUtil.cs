@@ -64,14 +64,13 @@ internal class ImageUtil
                     {
                         if (!AppConfig.Settings.OpenExitZoom)
                         {
-                            if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp))
-                                return (retBmp);
+                            if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
                             return (new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen));
                         }
                         else
                         {
-                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2))
-                                return (retBmp2);
+                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
+                            if (HeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                             return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                         }
                     }

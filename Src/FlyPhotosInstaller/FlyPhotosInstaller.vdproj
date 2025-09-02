@@ -975,12 +975,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_4EC5C594726246359AC1C23E3C42E797"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_4F28AB5C787A4372AB79A66C848709BB"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -3318,26 +3312,6 @@
                 }
             "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\Microsoft.Windows.AI.Text.winmd"
             "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4EC5C594726246359AC1C23E3C42E797"
-            {
-            "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\WicImageFileReaderNative.exe"
-            "TargetName" = "8:WicImageFileReaderNative.exe"
             "Tag" = "8:"
             "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
             "Condition" = "8:"
