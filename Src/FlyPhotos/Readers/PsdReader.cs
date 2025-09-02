@@ -22,7 +22,7 @@ internal class PsdReader
                 using var stream = new MemoryStream(thumbnailData);
                 CanvasBitmap bitmap = await CanvasBitmap.LoadAsync(ctrl, stream.AsRandomAccessStream());
                 var metaData = new ImageMetadata(width, height);
-                return (true, new PreviewDisplayItem(bitmap, PreviewSource.FromDisk, metaData));
+                return (true, new PreviewDisplayItem(bitmap, Origin.Disk, metaData));
             }
             catch (Exception ex)
             {
@@ -48,7 +48,7 @@ internal class PsdReader
 
             // Create a CanvasBitmap from the MemoryStream
             var bitmap = await CanvasBitmap.LoadAsync(d2dCanvas, stream.AsRandomAccessStream());
-            return (true, new StaticHqDisplayItem(bitmap));
+            return (true, new StaticHqDisplayItem(bitmap, Origin.Disk));
         }
         catch (Exception ex)
         {

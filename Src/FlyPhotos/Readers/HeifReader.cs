@@ -46,7 +46,7 @@ internal class HeifReader
             using var previewImageHandle = primaryImage.GetThumbnailImage(previewImageIds[0]);
             var retBmp = CreateBitmapSource(ctrl, previewImageHandle, decodingOptions);
             var metaData = new ImageMetadata(primaryImage.Width, primaryImage.Height);
-            return (retBmp.Bounds.Width >= 1, new PreviewDisplayItem(retBmp, PreviewSource.FromDisk, metaData));
+            return (retBmp.Bounds.Width >= 1, new PreviewDisplayItem(retBmp, Origin.Disk, metaData));
         }
         catch (Exception ex)
         {
@@ -78,7 +78,7 @@ internal class HeifReader
 
             // Directly decode the primary image handle, not a thumbnail.
             var retBmp = CreateBitmapSource(ctrl, primaryImageHandle, decodingOptions);
-            return (retBmp.Bounds.Width >= 1, new StaticHqDisplayItem(retBmp));
+            return (retBmp.Bounds.Width >= 1, new StaticHqDisplayItem(retBmp, Origin.Disk));
         }
         catch (Exception ex)
         {

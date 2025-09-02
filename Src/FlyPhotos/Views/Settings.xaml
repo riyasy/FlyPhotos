@@ -144,7 +144,7 @@
                                     x:Name="CheckBoxEnableAutoFade"
                                     HorizontalAlignment="Left"
                                     Content="Enable Auto Fade" />
-                                <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="Fade Intesity" />
+                                <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="Fade Intensity" />
                                 <Slider
                                     x:Name="SliderFadeIntensity"
                                     Width="200"

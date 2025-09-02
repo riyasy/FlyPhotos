@@ -44,7 +44,7 @@ internal class ImageUtil
         try
         {
             if (!File.Exists(path))
-                return (new StaticHqDisplayItem(FileNotFoundIndicator));
+                return (new StaticHqDisplayItem(FileNotFoundIndicator, Origin.ErrorScreen));
 
 
             if (!AppConfig.Settings.OpenExitZoom)
@@ -53,7 +53,7 @@ internal class ImageUtil
                 if (null != cachedBmp)
                 {
                     var metadata = new ImageMetadata(actualWidth, actualHeight);
-                    return (new PreviewDisplayItem(cachedBmp, PreviewSource.FromDiskCache, metadata));
+                    return (new PreviewDisplayItem(cachedBmp, Origin.DiskCache, metadata));
                 }
             }
 
@@ -66,47 +66,47 @@ internal class ImageUtil
                         {
                             if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp))
                                 return (retBmp);
-                            return (new PreviewDisplayItem(PreviewFailedIndicator, PreviewSource.ErrorScreen));
+                            return (new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen));
                         }
                         else
                         {
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2))
                                 return (retBmp2);
-                            return (new StaticHqDisplayItem(HqImageFailedIndicator));
+                            return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                         }
                     }
                 case ".PSD":
                 {
                     if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
                     if (await PsdReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
-                    return (new StaticHqDisplayItem(HqImageFailedIndicator));
+                    return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
                 case ".SVG":
                 {
                     if (await SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
-                    return (new StaticHqDisplayItem(HqImageFailedIndicator));
+                    return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
                 case ".GIF":
                 {
                     if (await GifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
-                    return (new StaticHqDisplayItem(HqImageFailedIndicator));
+                    return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
                 case ".PNG":
                 {
                     if (await PngReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
-                    return (new StaticHqDisplayItem(HqImageFailedIndicator));
+                    return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
                 default:
                 {
                     if (!AppConfig.Settings.OpenExitZoom)
                     {
                         if (await WicReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
-                        return (new PreviewDisplayItem(PreviewFailedIndicator, PreviewSource.ErrorScreen));
+                        return (new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen));
                     }
                     else
                     {
                         if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
-                        return (new StaticHqDisplayItem(HqImageFailedIndicator));
+                        return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                     }
                 }
             }
@@ -114,14 +114,14 @@ internal class ImageUtil
         catch (Exception ex)
         {
             Logger.Error(ex);
-            return (new PreviewDisplayItem(PreviewFailedIndicator, PreviewSource.ErrorScreen));
+            return (new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen));
         }
     }
 
     public static async Task<PreviewDisplayItem> GetPreview(CanvasControl d2dCanvas, string path)
     {
         if (!File.Exists(path)) 
-            return new PreviewDisplayItem(FileNotFoundIndicator, PreviewSource.ErrorScreen);
+            return new PreviewDisplayItem(FileNotFoundIndicator, Origin.ErrorScreen);
 
         try
         {
@@ -129,7 +129,7 @@ internal class ImageUtil
             if (null != cachedBmp)
             {
                 var metadata = new ImageMetadata(actualWidth, actualHeight);
-                return (new PreviewDisplayItem(cachedBmp, PreviewSource.FromDiskCache, metadata));
+                return (new PreviewDisplayItem(cachedBmp, Origin.DiskCache, metadata));
             }
 
             var extension = Path.GetExtension(path).ToUpper();
@@ -139,47 +139,47 @@ internal class ImageUtil
                 {
                     if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                     if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                    return new PreviewDisplayItem(PreviewFailedIndicator, PreviewSource.ErrorScreen);
+                    return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".PSD":
                 {
                     if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new PreviewDisplayItem(PreviewFailedIndicator, PreviewSource.ErrorScreen);
+                    return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".SVG":
                 {
                     if (await SvgReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new PreviewDisplayItem(PreviewFailedIndicator, PreviewSource.ErrorScreen);
+                    return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".GIF":
                 {
                     if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new PreviewDisplayItem(PreviewFailedIndicator, PreviewSource.ErrorScreen);
+                    return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".PNG":
                 {
                     if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new PreviewDisplayItem(PreviewFailedIndicator, PreviewSource.ErrorScreen);
+                    return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
                 default:
                 {
                     if (await WicReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                     if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                    return new PreviewDisplayItem(PreviewFailedIndicator, PreviewSource.ErrorScreen);
+                    return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
             }
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
-            return new PreviewDisplayItem(PreviewFailedIndicator, PreviewSource.ErrorScreen);
+            return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
         }
     }
 
     public static async Task<HqDisplayItem> GetHqImage(CanvasControl d2dCanvas, string path)
     {
         if (!File.Exists(path)) 
-            return new StaticHqDisplayItem(FileNotFoundIndicator);
+            return new StaticHqDisplayItem(FileNotFoundIndicator, Origin.ErrorScreen);
 
         try
         {
@@ -191,44 +191,44 @@ internal class ImageUtil
                 {
                     if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                     if (HeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                    return new StaticHqDisplayItem(HqImageFailedIndicator);
+                    return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".PSD":
                 {
                     if (await PsdReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new StaticHqDisplayItem(HqImageFailedIndicator);
+                    return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
                     }
                 case ".SVG":
                 {
                     if (await SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new StaticHqDisplayItem(HqImageFailedIndicator);
+                    return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".GIF":
                 {
                     if (await GifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new StaticHqDisplayItem(HqImageFailedIndicator);
+                    return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".PNG":
                 {
                     if (await PngReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new StaticHqDisplayItem(HqImageFailedIndicator);
+                    return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
                 }
                 default:
                 {
                     if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new StaticHqDisplayItem(HqImageFailedIndicator);
+                    return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
                 }
             }
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
-            return new StaticHqDisplayItem(HqImageFailedIndicator);
+            return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
         }
     }
 
     public static DisplayItem GetLoadingIndicator()
     {
-        return new PreviewDisplayItem(LoadingIndicator, PreviewSource.ErrorScreen);
+        return new PreviewDisplayItem(LoadingIndicator, Origin.ErrorScreen);
     }
 }

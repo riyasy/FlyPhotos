@@ -33,7 +33,7 @@ internal class GifReader
             using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
             var metaData = new ImageMetadata(canvasBitmap.SizeInPixels.Width, canvasBitmap.SizeInPixels.Height);
-            return (true, new PreviewDisplayItem(canvasBitmap, PreviewSource.FromDisk, metaData));
+            return (true, new PreviewDisplayItem(canvasBitmap, Origin.Disk, metaData));
         }
         catch (Exception ex)
         {
@@ -61,11 +61,11 @@ internal class GifReader
                 stream.Seek(0);
                 var bytes = new byte[stream.Size];
                 await stream.ReadAsync(bytes.AsBuffer(), (uint)stream.Size, InputStreamOptions.None);
-                return (true, new AnimatedHqDisplayItem(firstFrame, bytes));
+                return (true, new AnimatedHqDisplayItem(firstFrame, Origin.Disk, bytes));
             }
             else
             {
-                return (true, new StaticHqDisplayItem(firstFrame));
+                return (true, new StaticHqDisplayItem(firstFrame, Origin.Disk));
             }
         }
         catch (Exception ex)

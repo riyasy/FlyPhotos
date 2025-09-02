@@ -20,14 +20,14 @@ internal class SvgReader
         var(bmp, width, height) = await LoadSvgViaSkia(ctrl, inputPath, 800);
         if (bmp == null) return (false, PreviewDisplayItem.Empty());
         var metadata = new ImageMetadata(width, height);
-        return (true, new PreviewDisplayItem(bmp, PreviewSource.FromDisk, metadata));
+        return (true, new PreviewDisplayItem(bmp, Origin.Disk, metadata));
     }
 
     public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
     {
         var (bmp, _, _) = await LoadSvgViaSkia(ctrl, inputPath, 2000);
         if (bmp == null) return (false, HqDisplayItem.Empty());
-        return (true, new StaticHqDisplayItem(bmp));
+        return (true, new StaticHqDisplayItem(bmp, Origin.Disk));
     }
 
     private static async Task<(CanvasBitmap Bitmap, int Width, int Height)> LoadSvgViaSkia(

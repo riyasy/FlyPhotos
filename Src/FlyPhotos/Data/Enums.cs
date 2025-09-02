@@ -14,10 +14,10 @@
         Prev
     }
 
-    public enum PreviewSource
+    public enum Origin
     {
-        FromDiskCache,
-        FromDisk,
+        DiskCache,
+        Disk,
         ErrorScreen,
         Undefined
     }

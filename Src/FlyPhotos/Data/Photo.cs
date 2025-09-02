@@ -64,8 +64,8 @@ internal class Photo
 
     public void LoadPreview(CanvasControl device)
     {
-        if (Preview == null || Preview.PreviewFrom == PreviewSource.ErrorScreen ||
-            Preview.PreviewFrom == PreviewSource.Undefined)
+        if (Preview == null || Preview.Origin == Origin.ErrorScreen ||
+            Preview.Origin == Origin.Undefined)
         {
             Preview = ImageUtil.GetPreview(device, FileName).GetAwaiter().GetResult();
         }

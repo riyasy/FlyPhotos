@@ -40,20 +40,20 @@ internal class WicReader
         if (bmp == null) return (false, PreviewDisplayItem.Empty());
 
         var metadata = new ImageMetadata(width, height);
-        return (true, new PreviewDisplayItem(bmp, PreviewSource.FromDisk, metadata));
+        return (true, new PreviewDisplayItem(bmp, Origin.Disk, metadata));
     }
 
     public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
     {
-        if (IsMemoryLeakingFormat(inputPath))
-            return await GetHqThruExternalProcess(ctrl, inputPath);
+        //if (IsMemoryLeakingFormat(inputPath))
+        //    return await GetHqThruExternalProcess(ctrl, inputPath);
 
         try
         {
             var file = await StorageFile.GetFileFromPathAsync(inputPath);
             using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
-            return (true, new StaticHqDisplayItem(canvasBitmap));
+            return (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk));
         }
         catch (Exception ex)
         {
@@ -91,7 +91,7 @@ internal class WicReader
                     canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());
                 }
 
-                return (true, new PreviewDisplayItem(canvasBitmap, PreviewSource.FromDisk, metadata));
+                return (true, new PreviewDisplayItem(canvasBitmap, Origin.Disk, metadata));
             }
             catch (Exception ex)
             {
@@ -116,7 +116,7 @@ internal class WicReader
             var canvasBitmap =
                 CanvasBitmap.CreateFromBytes(ctrl, rgbAArray, w, h,
                     Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized);
-            return (true, new StaticHqDisplayItem(canvasBitmap, rotation));
+            return (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk, rotation));
         }
         catch (Exception ex)
         {

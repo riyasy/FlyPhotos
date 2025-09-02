@@ -127,7 +127,12 @@ internal class PhotoDisplayController : IPhotoDisplayController
             {
                 if (_toBeCachedPreviews.IsEmpty)
                 {
-                    GC.Collect(2, GCCollectionMode.Optimized); // Minor optimization
+                    // TODO, the following line was an attempt to clear memory
+                    // while memory cleaning of CanvasBitmaps were not happening as intended.
+                    // After implementing Dispose in DisplayItem, this seems not needed anymore.
+                    // Delete the line after revaluation and feedbaks from users.
+
+                    // GC.Collect(2, GCCollectionMode.Optimized);
                     _diskCachingCanStart.Set();
                     WaitHandle.WaitAny([_previewCachingCanStart, token.WaitHandle]);
                     if (token.IsCancellationRequested) break;
@@ -148,7 +153,7 @@ internal class PhotoDisplayController : IPhotoDisplayController
                         photo.LoadPreview(_d2dCanvas); // TODO In a future refactor, this could accept a token
                         _cachedPreviews[index] = photo;
                         _previewsBeingCached.Remove(index, out _);
-                        if (photo.Preview?.PreviewFrom == PreviewSource.FromDisk) { _toBeDiskCachedPreviews.Push(item); }
+                        if (photo.Preview?.Origin == Origin.Disk) { _toBeDiskCachedPreviews.Push(item); }
                         if (_photoSessionState.CurrentDisplayIndex == index)
                             UpgradeImageIfNeeded(photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
                         _thumbNailController.RedrawThumbNailsIfNeeded(index);
@@ -224,7 +229,7 @@ internal class PhotoDisplayController : IPhotoDisplayController
                     {
                         if (_cachedPreviews.TryGetValue(index, out var image) &&
                             image.Preview != null &&
-                            image.Preview.PreviewFrom == PreviewSource.FromDisk)
+                            image.Preview.Origin == Origin.Disk)
                         {
                             var (actualWidth, actualHeight) = image.GetActualSize();
                             await DiskCacherWithSqlite.Instance.PutInCache(image.FileName, image.Preview.Bitmap, (int)Math.Round(actualWidth), (int)Math.Round(actualHeight));
@@ -257,7 +262,9 @@ internal class PhotoDisplayController : IPhotoDisplayController
             key < curIdx - AppConfig.Settings.CacheSizeOneSideHqImages).ToList();
         keysToRemove.ForEach(delegate (int key)
         {
-            _photos[key].Hq = null;
+            var photo = _photos[key];
+            photo.Hq?.Dispose();
+            photo.Hq = null;
             _cachedHqImages.TryRemove(key, out _);
         });
 
@@ -266,7 +273,9 @@ internal class PhotoDisplayController : IPhotoDisplayController
             key < curIdx - AppConfig.Settings.CacheSizeOneSidePreviews).ToList();
         keysToRemove.ForEach(delegate (int key)
         {
-            _photos[key].Preview = null;
+            var photo = _photos[key];
+            photo.Preview?.Dispose();
+            photo.Preview = null;
             _cachedPreviews.TryRemove(key, out _);
         });
 
