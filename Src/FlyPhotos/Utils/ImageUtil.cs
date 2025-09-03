@@ -70,7 +70,7 @@ internal class ImageUtil
                         else
                         {
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
-                            if (HeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                            if (await HeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                             return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                         }
                     }
@@ -189,7 +189,7 @@ internal class ImageUtil
                 case ".HEIC":
                 {
                     if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    if (HeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                    if (await HeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
                     return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".PSD":
