@@ -10,7 +10,7 @@ using NLog;
 
 namespace FlyPhotos.Utils;
 
-internal class ImageUtil
+internal static class ImageUtil
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private static CanvasBitmap FileNotFoundIndicator;

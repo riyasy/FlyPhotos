@@ -4,10 +4,7 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 using PhotoSauce.MagicScaler;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 

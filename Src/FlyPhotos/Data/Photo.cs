@@ -8,16 +8,11 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 
 namespace FlyPhotos.Data;
 
-internal class Photo
+internal class Photo(string selectedFileName)
 {
-    public readonly string FileName;
+    public readonly string FileName = selectedFileName;
     public HqDisplayItem? Hq;
     public PreviewDisplayItem? Preview;
-
-    public Photo(string selectedFileName)
-    {
-        FileName = selectedFileName;
-    }
 
     public async Task<bool> LoadPreviewFirstPhoto(CanvasControl device)
     {
@@ -56,10 +51,7 @@ internal class Photo
 
     public void LoadHq(CanvasControl device)
     {
-        if (Hq == null)
-        {
-            Hq = ImageUtil.GetHqImage(device, FileName).GetAwaiter().GetResult();
-        }
+        Hq ??= ImageUtil.GetHqImage(device, FileName).GetAwaiter().GetResult();
     }
 
     public void LoadPreview(CanvasControl device)
@@ -73,18 +65,14 @@ internal class Photo
 
     public DisplayItem? GetDisplayItemBasedOn(DisplayLevel displayLevel)
     {
-        switch (displayLevel)
+        return displayLevel switch
         {
-            case DisplayLevel.Preview:
-                return Preview;
-            case DisplayLevel.Hq:
-                return Hq;
-            case DisplayLevel.PlaceHolder:
-                return ImageUtil.GetLoadingIndicator();
-            case DisplayLevel.None:
-            default:
-                return null;
-        }
+            DisplayLevel.Preview => Preview,
+            DisplayLevel.Hq => Hq,
+            DisplayLevel.PlaceHolder => ImageUtil.GetLoadingIndicator(),
+            DisplayLevel.None => null,
+            _ => null
+        };
     }
 
     public (double, double) GetActualSize()

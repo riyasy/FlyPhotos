@@ -13,7 +13,7 @@ using Windows.Storage.Streams;
 namespace FlyPhotos.Controllers.Animators;
 
 
-public class GifAnimator : IAnimator
+public partial class GifAnimator : IAnimator
 {
     // Frame metadata that we pre-load.
     private class FrameMetadata
@@ -28,7 +28,7 @@ public class GifAnimator : IAnimator
     // Main animation driver components
     private readonly BitmapDecoder _decoder;
     private readonly IRandomAccessStream _stream;
-    private readonly IReadOnlyList<FrameMetadata> _frameMetadata;
+    private readonly List<FrameMetadata> _frameMetadata;
     private readonly TimeSpan _totalAnimationDuration;
     private readonly CanvasControl _canvas;
 
@@ -248,5 +248,6 @@ public class GifAnimator : IAnimator
         _previousFrameBackup?.Dispose();
         //_decoder.Dispose(); // BitmapDecoder is IDisposable in UWP/WinUI
         _stream?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

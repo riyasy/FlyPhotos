@@ -40,9 +40,9 @@ public sealed partial class PhotoDisplayWindow
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    private readonly ICanvasController _canvasController;
-    private readonly IThumbnailController _thumbNailController;
-    private readonly IPhotoDisplayController _photoController;
+    private readonly CanvasController _canvasController;
+    private readonly ThumbNailController _thumbNailController;
+    private readonly PhotoDisplayController _photoController;
 
     private Settings? _settingWindow;
 
@@ -118,13 +118,13 @@ public sealed partial class PhotoDisplayWindow
         D2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
         D2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;
         D2dCanvasThumbNail.PointerWheelChanged += D2dCanvasThumbNail_PointerWheelChanged;
-        _thumbNailController.ThumbnailClicked += _thumbNailController_ThumbnailClicked;
+        _thumbNailController.ThumbnailClicked += ThumbNailController_ThumbnailClicked;
 
         MainLayout.KeyDown += HandleKeyDown;
         MainLayout.KeyUp += HandleKeyUp;
 
         _repeatButtonReleaseCheckTimer.Tick += RepeatButtonReleaseCheckTimer_Tick;
-        _wheelScrollBrakeTimer.Tick += _wheelScrollBrakeTimer_Tick;
+        _wheelScrollBrakeTimer.Tick += WheelScrollBrakeTimer_Tick;
 
         //this.Maximize(); // Maximise will be called from App.xaml.cs
         _lastWindowState = OverlappedPresenterState.Maximized;
@@ -132,7 +132,7 @@ public sealed partial class PhotoDisplayWindow
         _opacityFader = new OpacityFader([ButtonPanel, D2dCanvasThumbNail, TxtFileName]);
     }
 
-    private async void _thumbNailController_ThumbnailClicked(int shiftIndex)
+    private async void ThumbNailController_ThumbnailClicked(int shiftIndex)
     {
         await _photoController.FlyBy(shiftIndex);
     }
@@ -370,7 +370,7 @@ public sealed partial class PhotoDisplayWindow
         await _photoController.Brake();
     }
 
-    private async void _wheelScrollBrakeTimer_Tick(object? sender, object e)
+    private async void WheelScrollBrakeTimer_Tick(object? sender, object e)
     {
         _wheelScrollBrakeTimer.Stop();
         await _photoController.Brake();
@@ -389,8 +389,8 @@ public sealed partial class PhotoDisplayWindow
             _settingWindow.SetWindowSize(1024, 768);
             _settingWindow.Closed += SettingWindow_Closed;
             _settingWindow.Activate();
-            _settingWindow.ShowCheckeredBackgroundChanged += _settingWindow_ShowCheckeredBackgroundChanged;
-            _settingWindow.BackDropTransparencyChanged += _settingWindow_BackdropTransparencyChanged;
+            _settingWindow.ShowCheckeredBackgroundChanged += SettingWindow_ShowCheckeredBackgroundChanged;
+            _settingWindow.BackDropTransparencyChanged += SettingWindow_BackdropTransparencyChanged;
             _settingWindow.ThemeChanged += SetWindowTheme;
             _settingWindow.BackdropChanged += SetWindowBackground;
         }
@@ -423,7 +423,7 @@ public sealed partial class PhotoDisplayWindow
     {
         _repeatButtonReleaseCheckTimer.Stop();
         _wheelScrollBrakeTimer.Stop();
-        _thumbNailController.ThumbnailClicked -= _thumbNailController_ThumbnailClicked;
+        _thumbNailController.ThumbnailClicked -= ThumbNailController_ThumbnailClicked;
 
         await _canvasController.DisposeAsync();
         _thumbNailController.Dispose();
@@ -442,18 +442,18 @@ public sealed partial class PhotoDisplayWindow
             _settingWindow.Closed -= SettingWindow_Closed;
             _settingWindow.ThemeChanged -= SetWindowTheme;
             _settingWindow.BackdropChanged -= SetWindowBackground;
-            _settingWindow.ShowCheckeredBackgroundChanged -= _settingWindow_ShowCheckeredBackgroundChanged;
-            _settingWindow.BackDropTransparencyChanged -= _settingWindow_BackdropTransparencyChanged;
+            _settingWindow.ShowCheckeredBackgroundChanged -= SettingWindow_ShowCheckeredBackgroundChanged;
+            _settingWindow.BackDropTransparencyChanged -= SettingWindow_BackdropTransparencyChanged;
         }
 
         _settingWindow = null;
     }
 
-    private void _settingWindow_ShowCheckeredBackgroundChanged(bool showChecker)
+    private void SettingWindow_ShowCheckeredBackgroundChanged(bool showChecker)
     {
         _canvasController.HandleCheckeredBackgroundChange(showChecker);
     }
-    private void _settingWindow_BackdropTransparencyChanged(int obj)
+    private void SettingWindow_BackdropTransparencyChanged(int obj)
     {
         if (_currentBackdropType == WindowBackdropType.Transparent)
         {

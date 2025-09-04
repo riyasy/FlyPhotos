@@ -9,7 +9,7 @@ using NLog;
 
 namespace FlyPhotos.Utils;
 
-internal class FileDiscoveryService
+internal static class FileDiscoveryService
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

@@ -12,7 +12,7 @@ using Windows.Foundation;
 
 namespace FlyPhotos.Controllers.Renderers
 {
-    internal class AnimatedImageRenderer : IRenderer
+    internal partial class AnimatedImageRenderer : IRenderer
     {
         private readonly CanvasControl _canvas;
         private readonly IAnimator _animator;

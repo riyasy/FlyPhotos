@@ -19,7 +19,7 @@ namespace FlyPhotos.Controllers.Animators;
 /// of a GIF animator. It composites frames on-demand based on elapsed time,
 /// providing an efficient way to play complex animations in a Win2D context.
 /// </summary>
-public class PngAnimator : IAnimator
+public partial class PngAnimator : IAnimator
 {
     #region Nested Classes and Constants
 
@@ -52,7 +52,7 @@ public class PngAnimator : IAnimator
     private readonly IRandomAccessStream _stream;
     private readonly Parser.PngChunk _ihdrChunk;
     private readonly List<Parser.PngChunk> _globalChunks;
-    private readonly IReadOnlyList<ApngFrameMetadata> _frameMetadata;
+    private readonly List<ApngFrameMetadata> _frameMetadata;
     private readonly TimeSpan _totalAnimationDuration;
     private readonly CanvasControl _canvas;
 
@@ -269,6 +269,7 @@ public class PngAnimator : IAnimator
         _compositedSurface?.Dispose();
         _previousFrameBackup?.Dispose();
         _stream?.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     #region Private APNG Parser
@@ -326,14 +327,17 @@ public class PngAnimator : IAnimator
                         case AcTL: break; // Just confirms it's an APNG
                         case FcTL: frameControls.Add(ParseFrameControl(chunk)); break;
                         case FdAT:
-                            if (frameControls.Any()) frameControls.Last().FrameDataChunks.Add(ConvertFdatToIdat(chunk));
+                            if (frameControls.Count != 0) frameControls.Last().FrameDataChunks.Add(ConvertFdatToIdat(chunk));
                             break;
                         case "IDAT":
-                            if (!frameControls.Any()) defaultImageIdatChunks.Add(chunk);
-                            else frameControls.Last().FrameDataChunks.Add(chunk);
+                            if (frameControls.Count != 0)
+                                frameControls.Last().FrameDataChunks.Add(chunk);
+                            else
+                                defaultImageIdatChunks.Add(chunk);
                             break;
                         default:
-                            if (!frameControls.Any() && chunk.Type != "IEND") globalChunks.Add(chunk);
+                            if (frameControls.Count == 0 && chunk.Type != "IEND") 
+                                globalChunks.Add(chunk);
                             break;
                     }
                 }
@@ -344,7 +348,7 @@ public class PngAnimator : IAnimator
                 bool defaultImageIsFirstFrame = false;
 
                 // If the default image exists, check if it's used as the first frame.
-                if (defaultImageIdatChunks.Any())
+                if (defaultImageIdatChunks.Count != 0)
                 {
                     var firstFrameControl = orderedFrames.FirstOrDefault();
                     if (firstFrameControl?.SequenceNumber == 0)

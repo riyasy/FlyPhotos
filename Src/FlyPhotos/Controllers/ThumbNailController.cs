@@ -10,7 +10,7 @@ using Microsoft.UI.Xaml;
 
 namespace FlyPhotos.Controllers;
 
-internal class ThumbNailController : IThumbnailController
+internal partial class ThumbNailController : IThumbnailController
 {
     // A shorter interval for more responsive UI updates.
     private static readonly TimeSpan ThrottleInterval = TimeSpan.FromMilliseconds(150);
@@ -38,11 +38,11 @@ internal class ThumbNailController : IThumbnailController
     {
         _d2dCanvasThumbNail = d2dCanvasThumbNail;
         _photoSessionState = photoSessionState;
-        _d2dCanvasThumbNail.Draw += _d2dCanvasThumbNail_Draw;
-        _d2dCanvasThumbNail.SizeChanged += _d2dCanvasThumbNail_SizeChanged;
-        _d2dCanvasThumbNail.Loaded += _d2dCanvasThumbNail_Loaded;
+        _d2dCanvasThumbNail.Draw += D2dCanvasThumbNail_Draw;
+        _d2dCanvasThumbNail.SizeChanged += D2dCanvasThumbNail_SizeChanged;
+        _d2dCanvasThumbNail.Loaded += D2dCanvasThumbNail_Loaded;
         _throttledRedrawTimer.Tick += ThrottledRedrawTimer_Tick;
-        _d2dCanvasThumbNail.PointerPressed += _d2dCanvasThumbNail_PointerPressed;
+        _d2dCanvasThumbNail.PointerPressed += D2dCanvasThumbNail_PointerPressed;
     }
 
     // --- Public Methods ---
@@ -94,7 +94,7 @@ internal class ThumbNailController : IThumbnailController
 
     // --- Event Handlers ---
 
-    private void _d2dCanvasThumbNail_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    private void D2dCanvasThumbNail_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
         var pos = e.GetCurrentPoint(_d2dCanvasThumbNail).Position;
         double canvasCenterX = _d2dCanvasThumbNail.ActualWidth / 2;
@@ -111,18 +111,18 @@ internal class ThumbNailController : IThumbnailController
         }
     }
 
-    private void _d2dCanvasThumbNail_Loaded(object sender, RoutedEventArgs e)
+    private void D2dCanvasThumbNail_Loaded(object sender, RoutedEventArgs e)
     {
         _d2dCanvasThumbNail.Visibility = AppConfig.Settings.ShowThumbnails ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    private void _d2dCanvasThumbNail_SizeChanged(object sender, SizeChangedEventArgs e)
+    private void D2dCanvasThumbNail_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * Constants.ThumbnailBoxSize)) + 1;
         CreateThumbnailRibbonOffScreen();
     }
 
-    private void _d2dCanvasThumbNail_Draw(CanvasControl sender, CanvasDrawEventArgs args)
+    private void D2dCanvasThumbNail_Draw(CanvasControl sender, CanvasDrawEventArgs args)
     {
         if (_thumbnailOffscreen != null && AppConfig.Settings.ShowThumbnails)
         {
@@ -243,10 +243,10 @@ internal class ThumbNailController : IThumbnailController
 
         if (_d2dCanvasThumbNail != null)
         {
-            _d2dCanvasThumbNail.Draw -= _d2dCanvasThumbNail_Draw;
-            _d2dCanvasThumbNail.SizeChanged -= _d2dCanvasThumbNail_SizeChanged;
-            _d2dCanvasThumbNail.Loaded -= _d2dCanvasThumbNail_Loaded;
-            _d2dCanvasThumbNail.PointerPressed -= _d2dCanvasThumbNail_PointerPressed;
+            _d2dCanvasThumbNail.Draw -= D2dCanvasThumbNail_Draw;
+            _d2dCanvasThumbNail.SizeChanged -= D2dCanvasThumbNail_SizeChanged;
+            _d2dCanvasThumbNail.Loaded -= D2dCanvasThumbNail_Loaded;
+            _d2dCanvasThumbNail.PointerPressed -= D2dCanvasThumbNail_PointerPressed;
         }
 
         _thumbnailOffscreen?.Dispose();

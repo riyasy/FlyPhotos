@@ -68,15 +68,14 @@ namespace FlyPhotos.Views
         {
             if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
             var items = await e.DataView.GetStorageItemsAsync();
-            if (!items.Any()) return;
-            var file = items.First() as StorageFile;
-
+            if (items.Count == 0) return;
+            var file = items[0] as StorageFile;
             if (file != null && _supportedFileExtensions.Contains(file.FileType.ToLowerInvariant()))
                 ProcessSelectedFile(file);
             else
                 await ShowMessageDialog("Unsupported File", "The dragged file is not a supported image type.");
-
         }
+
 
         // Shared logic for opening the file picker
         private async Task PickAndProcessFileAsync()

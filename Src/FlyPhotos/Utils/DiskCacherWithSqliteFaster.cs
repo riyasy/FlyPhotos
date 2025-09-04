@@ -10,7 +10,7 @@ using PhotoSauce.MagicScaler;
 
 namespace FlyPhotos.Utils;
 
-public sealed class DiskCacherWithSqlite : IDisposable
+public sealed partial class DiskCacherWithSqlite : IDisposable
 {
     private const int MaxItemCount = 20_000;
     private const int ThumbMaxSize = 800;

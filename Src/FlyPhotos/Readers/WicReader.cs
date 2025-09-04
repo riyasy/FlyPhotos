@@ -1,20 +1,14 @@
 ﻿#nullable enable
 using System;
-using System.Diagnostics;
-using System.IO;
-using System.IO.MemoryMappedFiles;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using FlyPhotos.Data;
-using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
-using Path = System.IO.Path;
 
 namespace FlyPhotos.Readers;
 
@@ -33,41 +27,12 @@ internal static class WicReader
 
     public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
     {
-        //if (IsMemoryLeakingFormat(inputPath))
-        //    return await GetHqThruExternalProcess(ctrl, inputPath);
-
         try
         {
             var file = await StorageFile.GetFileFromPathAsync(inputPath);
             using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
             return (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-            return (false, HqDisplayItem.Empty());
-        }
-    }
-
-    
-
-    private static async Task<(bool, HqDisplayItem)> GetHqThruExternalProcess(CanvasControl ctrl, string inputPath)
-    {
-        try
-        {
-            var file = await StorageFile.GetFileFromPathAsync(inputPath);
-            using var stream = await file.OpenReadAsync();
-            var decoder = await BitmapDecoder.CreateAsync(stream);
-            var rotation = await GetRotationFromMetaData(decoder.BitmapProperties);
-            var w = (int)decoder.PixelWidth;
-            var h = (int)decoder.PixelHeight;
-            if (!CreateMemoryMapAndGetDataFromExternalProcess(inputPath, w, h, out var rgbAArray))
-                return (false, HqDisplayItem.Empty());
-            var canvasBitmap =
-                CanvasBitmap.CreateFromBytes(ctrl, rgbAArray, w, h,
-                    Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized);
-            return (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk, rotation));
         }
         catch (Exception ex)
         {
@@ -118,65 +83,5 @@ internal static class WicReader
             _ => 0
         };
         return rotation;
-    }
-
-    private static unsafe bool CreateMemoryMapAndGetDataFromExternalProcess(string inputPath, int w, int h,
-        out byte[] rgbAArray)
-    {
-        const int channels = 4;
-        var rgbaSize = w * h * channels;
-        rgbAArray = new byte[rgbaSize];
-        var mmfName = Util.RandomString(10);
-        using var mmf = MemoryMappedFile.CreateNew(mmfName, rgbaSize);
-        if (!AskExternalWicReaderExeToCopyPixelsToMemoryMap(inputPath, mmfName))
-        {
-            Logger.Error("External Wic Reader exe failed");
-            return false;
-        }
-
-        const int offset = 0;
-        using var accessor = mmf.CreateViewAccessor(offset, rgbaSize);
-        var ptr = (byte*)0;
-        accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
-        Marshal.Copy(IntPtr.Add(new IntPtr(ptr), offset), rgbAArray, 0, rgbaSize);
-        accessor.SafeMemoryMappedViewHandle.ReleasePointer();
-        return true;
-    }
-
-    private static bool AskExternalWicReaderExeToCopyPixelsToMemoryMap(string path, string mmfName)
-    {
-        var exePath = PathResolver.GetExternalWicReaderExePath();
-        if (PathResolver.IsPackagedApp && !File.Exists(exePath))
-        {
-            CopyWicReaderExeToLocalStorageOnFirstUse().GetAwaiter().GetResult();
-        }
-
-        // A better way to create a Process object
-        var processStartInfo = new ProcessStartInfo
-        {
-            FileName = exePath,
-            Arguments = $"\"{path}\" {mmfName} bgra",
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var p = new Process();
-        p.StartInfo = processStartInfo;
-        p.Start();
-        p.WaitForExit(); // You might want to add a timeout here for robustness
-        return p.ExitCode == 0;
-    }
-
-    private static async Task CopyWicReaderExeToLocalStorageOnFirstUse()
-    {
-        var file = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///WicImageFileReaderNative.exe"));
-        await file.CopyAsync(PathResolver.GetExternalWicReaderExeCopyFolderForPackagedApp());
-        Logger.Trace("Copied WicImageFileReaderNative.exe to local storage");
-    }
-
-    private static bool IsMemoryLeakingFormat(string path)
-    {
-        var fileExt = Path.GetExtension(path).ToUpperInvariant();
-        return Util.MemoryLeakingExtensions.Contains(fileExt);
     }
 }

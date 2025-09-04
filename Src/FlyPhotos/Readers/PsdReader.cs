@@ -41,7 +41,7 @@ internal static class PsdReader
     /// <param name="height">The height of the main image.</param>
     /// <param name="thumbnailData">The byte array of the embedded JPEG thumbnail, or null if not found.</param>
     /// <returns>True if the header was read successfully; false otherwise. The thumbnail may still be null.</returns>
-    public static bool GetPsdInfo(string inputFilePath, out int width, out int height, out byte[] thumbnailData)
+    private static bool GetPsdInfo(string inputFilePath, out int width, out int height, out byte[] thumbnailData)
     {
         // Initialize out parameters
         width = 0;
@@ -120,7 +120,7 @@ internal static class PsdReader
     }
 
     // Helper function to efficiently find a byte pattern in a stream
-    private static long FindBytePattern(Stream stream, byte[] pattern)
+    private static long FindBytePattern(FileStream stream, byte[] pattern)
     {
         stream.Position = 0; // Start search from the beginning
         const int bufferSize = 4096;

@@ -71,17 +71,4 @@ internal static class PathResolver
 
         return userSettingsFolder;
     }
-
-    public static string GetExternalWicReaderExePath()
-    {
-        var exePath = IsPackagedApp
-            ? Path.Combine(ApplicationData.Current.LocalFolder.Path, "WicImageFileReaderNative.exe")
-            : Path.Combine(AppContext.BaseDirectory, "WicImageFileReaderNative.exe");
-        return exePath;
-    }
-
-    public static IStorageFolder GetExternalWicReaderExeCopyFolderForPackagedApp()
-    {
-        return ApplicationData.Current.LocalFolder;
-    }
 }

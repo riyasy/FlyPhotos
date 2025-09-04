@@ -17,7 +17,7 @@ using NLog;
 
 namespace FlyPhotos.Controllers;
 
-internal class PhotoDisplayController : IPhotoDisplayController
+internal partial class PhotoDisplayController : IPhotoDisplayController
 {
     public event EventHandler<StatusUpdateEventArgs>? StatusUpdated;
 
@@ -339,9 +339,9 @@ internal class PhotoDisplayController : IPhotoDisplayController
             string filePath = GetFullPathCurrentFile();
             StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
             IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
-            DataPackage dataPackage = new DataPackage();
+            DataPackage dataPackage = new();
             dataPackage.SetBitmap(RandomAccessStreamReference.CreateFromStream(stream));
-            dataPackage.SetStorageItems(new List<IStorageItem> { file });
+            dataPackage.SetStorageItems([file]);
             Clipboard.SetContent(dataPackage);
         }
         catch (Exception ex)

@@ -12,7 +12,7 @@ namespace FlyPhotos.Controllers.Renderers
 {
 	// TODO - 
 	// 1. Now antialiasing is disabled when drawing checkerboard. Find another way
-    internal class StaticImageRenderer : IRenderer
+    internal partial class StaticImageRenderer : IRenderer
     {
         private readonly CanvasBitmap _sourceBitmap;
         private readonly Action _invalidateCanvas;

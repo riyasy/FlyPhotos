@@ -27,7 +27,6 @@ internal static class Util
     private static List<CodecInfo>? _codecInfoList;
 
     public static List<string> SupportedExtensions { get; } = [];
-    public static List<string> MemoryLeakingExtensions { get; } = [];
 
     static Util()
     {
@@ -36,9 +35,6 @@ internal static class Util
         SupportedExtensions.Add(".PSD");
         SupportedExtensions.Add(".SVG");
         SupportedExtensions.Add(".HEIC");
-
-        var memoryLeakingCodecs = _codecInfoList.Where(x => x.FriendlyName.Contains("Raw Image"));
-        foreach (var leakingCodec in memoryLeakingCodecs) MemoryLeakingExtensions.AddRange(leakingCodec.FileExtensions);
     }
 
     public static List<string> FindAllFilesFromExplorerWindowNative()
@@ -83,17 +79,7 @@ internal static class Util
         }
         return sb.ToString();
     }
-
-    private static readonly Random Random = new();
-
-    public static string RandomString(int length)
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[Random.Next(s.Length)]).ToArray());
-    }
-
-
+    
     public static void ChangeCursor(this UIElement uiElement, InputCursor cursor)
     {
         Type type = typeof(UIElement);

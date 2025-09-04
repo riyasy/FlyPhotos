@@ -14,9 +14,7 @@ public class OpacityFader
 
     public OpacityFader(IEnumerable<FrameworkElement> elements, TimeSpan? fadeDuration = null)
     {
-        if (elements == null)
-            throw new ArgumentNullException(nameof(elements));
-
+        ArgumentNullException.ThrowIfNull(elements);
         _visuals = [];
         foreach (var element in elements)
         {

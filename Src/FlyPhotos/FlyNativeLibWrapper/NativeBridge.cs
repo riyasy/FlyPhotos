@@ -80,8 +80,7 @@ public static class CliWrapper
             {
                 FriendlyName = friendlyName,
                 // The extensions string from C++ is comma-separated, e.g., ".jpg,.jpeg,.jpe"
-                FileExtensions = new List<string>(extensions.ToUpperInvariant()
-                    .Split([','], StringSplitOptions.RemoveEmptyEntries))
+                FileExtensions = [.. extensions.ToUpperInvariant().Split([','], StringSplitOptions.RemoveEmptyEntries)]
             };
             codecs.Add(codec);
         }
