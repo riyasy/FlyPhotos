@@ -42,7 +42,7 @@ internal class PsdReader
             // Convert the image to a format compatible with CanvasBitmap
             using var stream = new MemoryStream();
             image.Format = MagickFormat.Jpeg;
-            image.Quality = 80;
+            image.Quality = 100;
             await image.WriteAsync(stream);
             stream.Position = 0;
 

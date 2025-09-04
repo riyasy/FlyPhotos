@@ -10,6 +10,7 @@ using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas;
 using Microsoft.UI;
 using Buffer = System.Buffer;
+using Microsoft.Graphics.Canvas.UI.Xaml;
 
 namespace FlyPhotos.Controllers.Animators;
 
@@ -53,7 +54,7 @@ public class PngAnimator : IAnimator
     private readonly List<Parser.PngChunk> _globalChunks;
     private readonly IReadOnlyList<ApngFrameMetadata> _frameMetadata;
     private readonly TimeSpan _totalAnimationDuration;
-    private readonly ICanvasResourceCreator _device;
+    private readonly CanvasControl _canvas;
 
     // Off-screen surfaces for composing frames
     private readonly CanvasRenderTarget _compositedSurface;
@@ -69,12 +70,12 @@ public class PngAnimator : IAnimator
     #region Creation and Initialization
 
     private PngAnimator(
-        ICanvasResourceCreator device,
+        CanvasControl canvas,
         IRandomAccessStream stream,
         Parser.ApngData apngData,
         List<ApngFrameMetadata> metadata)
     {
-        _device = device;
+        _canvas = canvas;
         _stream = stream;
         _ihdrChunk = apngData.IhdrChunk;
         _globalChunks = apngData.GlobalChunks;
@@ -84,8 +85,8 @@ public class PngAnimator : IAnimator
         PixelWidth = apngData.CanvasWidth;
         PixelHeight = apngData.CanvasHeight;
 
-        _compositedSurface = new CanvasRenderTarget(_device, PixelWidth, PixelHeight, 96);
-        _previousFrameBackup = new CanvasRenderTarget(_device, PixelWidth, PixelHeight, 96);
+        _compositedSurface = new CanvasRenderTarget(_canvas, PixelWidth, PixelHeight, _canvas.Dpi);
+        _previousFrameBackup = new CanvasRenderTarget(_canvas, PixelWidth, PixelHeight, _canvas.Dpi);
 
         // If the first frame is not the default image, render it immediately.
         if (!apngData.IsDefaultImageFirstFrame)
@@ -103,15 +104,15 @@ public class PngAnimator : IAnimator
         }
     }
 
-    public static async Task<PngAnimator> CreateAsync(byte[] apngData, ICanvasResourceCreator device)
+    public static async Task<PngAnimator> CreateAsync(byte[] apngData, CanvasControl canvas)
     {
         var memoryStream = new MemoryStream(apngData);
         var randomAccessStream = memoryStream.AsRandomAccessStream();
-        return await CreateAsyncInternal(randomAccessStream, device);
+        return await CreateAsyncInternal(randomAccessStream, canvas);
     }
 
     private static async Task<PngAnimator> CreateAsyncInternal(IRandomAccessStream stream,
-        ICanvasResourceCreator device)
+        CanvasControl canvas)
     {
         try
         {
@@ -143,7 +144,7 @@ public class PngAnimator : IAnimator
                 });
             }
 
-            return new PngAnimator(device, stream, apngData, metadata);
+            return new PngAnimator(canvas, stream, apngData, metadata);
         }
         catch (Exception)
         {
@@ -253,7 +254,7 @@ public class PngAnimator : IAnimator
     {
         // This is a lightweight, on-demand version of the extractor's "CreateImageFromChunks".
         return Parser.CreateImageFromChunksAsync(
-            _device,
+            _canvas,
             _ihdrChunk,
             _globalChunks,
             metadata.FrameDataChunks,

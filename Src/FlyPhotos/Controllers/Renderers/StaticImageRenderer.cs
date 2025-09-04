@@ -16,6 +16,7 @@ namespace FlyPhotos.Controllers.Renderers
     {
         private readonly CanvasBitmap _sourceBitmap;
         private readonly Action _invalidateCanvas;
+        private readonly bool _createOffScreen;
         private readonly DispatcherTimer _offscreenDrawTimer;
         private CanvasRenderTarget _offscreen;
         private readonly CanvasViewState _canvasViewState;
@@ -26,11 +27,12 @@ namespace FlyPhotos.Controllers.Renderers
         public Rect SourceBounds => _sourceBitmap.Bounds;
 
         public StaticImageRenderer(CanvasControl canvas, CanvasViewState canvasViewState, CanvasBitmap sourceBitmap,
-            CanvasImageBrush checkeredBrush, bool supportsTransparency, Action invalidateCanvas)
+            CanvasImageBrush checkeredBrush, bool supportsTransparency, Action invalidateCanvas, bool createOffScreen = true)
         {
             _sourceBitmap = sourceBitmap;
             _supportsTransparency = supportsTransparency;
             _invalidateCanvas = invalidateCanvas;
+            _createOffScreen = createOffScreen;
             _canvasViewState = canvasViewState;
             _checkeredBrush = checkeredBrush;
             _canvas = canvas;
@@ -60,12 +62,14 @@ namespace FlyPhotos.Controllers.Renderers
 
         public void RestartOffScreenDrawTimer()
         {
+            if (!_createOffScreen) return;
             _offscreenDrawTimer.Stop();
             _offscreenDrawTimer.Start();
         }
 
         public void TryRedrawOffScreen()
         {
+            if (!_createOffScreen) return;
             CreateOffscreen(true);
             _invalidateCanvas();
         }
@@ -98,7 +102,7 @@ namespace FlyPhotos.Controllers.Renderers
 
             if (_offscreen == null && imageWidth > 0 && imageHeight > 0 && imageWidth < _canvas.ActualWidth * 1.5)
             {
-                var tempOffScreen = new CanvasRenderTarget(_canvas, (float)imageWidth, (float)imageHeight, 96);
+                var tempOffScreen = new CanvasRenderTarget(_canvas, (float)imageWidth, (float)imageHeight, _canvas.Dpi);
                 using (var ds = tempOffScreen.CreateDrawingSession())
                 {
                     var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;

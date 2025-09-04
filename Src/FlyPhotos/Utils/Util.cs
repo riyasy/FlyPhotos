@@ -3,6 +3,7 @@ using FlyPhotos.Data;
 using FlyPhotos.FlyNativeLibWrapper;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
+using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
@@ -115,10 +116,10 @@ internal static class Util
         return isControlPressed;
     }
 
-    public static CanvasImageBrush CreateCheckeredBrush(ICanvasResourceCreator resourceCreator, int checkerSize)
+    public static CanvasImageBrush CreateCheckeredBrush(CanvasControl canvas, int checkerSize)
     {
         // Create a render target for the small 2x2 checker pattern
-        using var patternRenderTarget = new CanvasRenderTarget(resourceCreator, checkerSize * 2, checkerSize * 2, 96);
+        using var patternRenderTarget = new CanvasRenderTarget(canvas, checkerSize * 2, checkerSize * 2, canvas.Dpi);
 
         using (var ds = patternRenderTarget.CreateDrawingSession())
         {
@@ -130,7 +131,7 @@ internal static class Util
         }
 
         // Create a brush from this pattern that can be tiled
-        var checkeredBrush = new CanvasImageBrush(resourceCreator, patternRenderTarget)
+        var checkeredBrush = new CanvasImageBrush(canvas, patternRenderTarget)
         {
             ExtendX = CanvasEdgeBehavior.Wrap,
             ExtendY = CanvasEdgeBehavior.Wrap,

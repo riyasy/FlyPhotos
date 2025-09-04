@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.UI.Xaml;
+using Microsoft.UI;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,8 +9,6 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Graphics.Imaging;
 using Windows.Storage.Streams;
-using Microsoft.Graphics.Canvas;
-using Microsoft.UI;
 
 namespace FlyPhotos.Controllers.Animators;
 
@@ -29,7 +30,7 @@ public class GifAnimator : IAnimator
     private readonly IRandomAccessStream _stream;
     private readonly IReadOnlyList<FrameMetadata> _frameMetadata;
     private readonly TimeSpan _totalAnimationDuration;
-    private readonly ICanvasResourceCreator _device;
+    private readonly CanvasControl _canvas;
 
     // Off-screen surfaces for composing frames
     private readonly CanvasRenderTarget _compositedSurface;
@@ -44,12 +45,12 @@ public class GifAnimator : IAnimator
     public ICanvasImage Surface => _compositedSurface;
 
     private GifAnimator(
-        ICanvasResourceCreator device,
+        CanvasControl canvas,
         BitmapDecoder decoder,
         IRandomAccessStream stream,
         List<FrameMetadata> metadata)
     {
-        _device = device;
+        _canvas = canvas;
         _decoder = decoder;
         _stream = stream;
         _frameMetadata = metadata;
@@ -58,22 +59,22 @@ public class GifAnimator : IAnimator
         PixelWidth = _decoder.OrientedPixelWidth;
         PixelHeight = _decoder.OrientedPixelHeight;
 
-        _compositedSurface = new CanvasRenderTarget(_device, PixelWidth, PixelHeight, 96);
-        _previousFrameBackup = new CanvasRenderTarget(_device, PixelWidth, PixelHeight, 96);
+        _compositedSurface = new CanvasRenderTarget(_canvas, PixelWidth, PixelHeight, _canvas.Dpi);
+        _previousFrameBackup = new CanvasRenderTarget(_canvas, PixelWidth, PixelHeight, _canvas.Dpi);
     }
 
 
-    public static async Task<GifAnimator> CreateAsync(byte[] gifData, ICanvasResourceCreator device)
+    public static async Task<GifAnimator> CreateAsync(byte[] gifData, CanvasControl canvas)
     {
         var memoryStream = new MemoryStream(gifData);
         var randomAccessStream = memoryStream.AsRandomAccessStream();
         // The new private internal method does the rest of the work.
         // The stream will be owned and disposed by the animator instance.
-        return await CreateAsyncInternal(randomAccessStream, device);
+        return await CreateAsyncInternal(randomAccessStream, canvas);
     }
 
     private static async Task<GifAnimator> CreateAsyncInternal(IRandomAccessStream stream,
-        ICanvasResourceCreator device)
+        CanvasControl canvas)
     {
         try
         {
@@ -86,7 +87,7 @@ public class GifAnimator : IAnimator
             var metadata = await ReadAllFrameMetadataAsync(decoder);
 
             // Pass the stream to the constructor so it can be disposed later.
-            return new GifAnimator(device, decoder, stream, metadata);
+            return new GifAnimator(canvas, decoder, stream, metadata);
         }
         catch (Exception)
         {
@@ -149,7 +150,7 @@ public class GifAnimator : IAnimator
         // before we ever open a DrawingSession.
         var frame = await _decoder.GetFrameAsync((uint)frameIndex);
         var softwareBitmap = await frame.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
-        using var frameBitmap = CanvasBitmap.CreateFromSoftwareBitmap(_device, softwareBitmap);
+        using var frameBitmap = CanvasBitmap.CreateFromSoftwareBitmap(_canvas, softwareBitmap);
 
         // --- THEN DRAW ---
         // Now that we have everything, we can perform all drawing.

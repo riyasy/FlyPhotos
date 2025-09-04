@@ -112,7 +112,7 @@ internal class CanvasController : ICanvasController
             case AnimatedHqDisplayItem animDispItem:
                 try
                 {
-                    IRenderer firstFrameRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, animDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
+                    IRenderer firstFrameRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, animDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate, false);
                     SetupNewRenderer(firstFrameRenderer, width, height, animDispItem.Rotation, isFirstPhoto, true);
 
                     IAnimator newAnimator = Path.GetExtension(photo.FileName).ToUpper() == ".GIF"
