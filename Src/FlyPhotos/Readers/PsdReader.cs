@@ -2,18 +2,17 @@
 using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Data;
-using ImageMagick;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 
 namespace FlyPhotos.Readers;
-internal class PsdReader
+internal static class PsdReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     // Get preview as a CanvasBitmap for WinUI
-    public static async Task<(bool, PreviewDisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetEmbedded(CanvasControl ctrl, string inputPath)
     {
         if (GetPsdInfo(inputPath, out int width, out var height, out var thumbnailData))
         {
@@ -31,30 +30,6 @@ internal class PsdReader
             }
         }
         return (false, PreviewDisplayItem.Empty());
-    }
-
-    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl d2dCanvas, string path)
-    {
-        try
-        {
-            // Load the PSD file using ImageMagick
-            using var image = new MagickImage(path);
-            // Convert the image to a format compatible with CanvasBitmap
-            using var stream = new MemoryStream();
-            image.Format = MagickFormat.Jpeg;
-            image.Quality = 100;
-            await image.WriteAsync(stream);
-            stream.Position = 0;
-
-            // Create a CanvasBitmap from the MemoryStream
-            var bitmap = await CanvasBitmap.LoadAsync(d2dCanvas, stream.AsRandomAccessStream());
-            return (true, new StaticHqDisplayItem(bitmap, Origin.Disk));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-            return (false, HqDisplayItem.Empty());
-        }
     }
 
     /// <summary>

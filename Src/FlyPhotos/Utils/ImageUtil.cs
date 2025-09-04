@@ -61,23 +61,26 @@ internal class ImageUtil
             switch (extension)
             {
                 case ".HEIC":
+                case ".HEIF":
+                case ".HIF":
                     {
                         if (!AppConfig.Settings.OpenExitZoom)
                         {
-                            if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                            if (HeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
                             return (new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen));
                         }
                         else
                         {
-                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
-                            if (await HeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                            if (HeifCodecResolver.IsHevcDecoderAvailable)
+                                if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
+                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                             return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                         }
                     }
                 case ".PSD":
                 {
-                    if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
-                    if (await PsdReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
+                    if (await PsdReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                    if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
                     return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
                 case ".SVG":
@@ -87,19 +90,19 @@ internal class ImageUtil
                 }
                 case ".GIF":
                 {
-                    if (await GifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                    if (await GifReader.GetFirstFrameFullSize(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
                     return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
                 case ".PNG":
                 {
-                    if (await PngReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                    if (await PngReader.GetFirstFrameFullSize(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
                     return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
                 default:
                 {
                     if (!AppConfig.Settings.OpenExitZoom)
                     {
-                        if (await WicReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                        if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
                         return (new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen));
                     }
                     else
@@ -135,35 +138,39 @@ internal class ImageUtil
             switch (extension)
             {
                 case ".HEIC":
+                case ".HEIF":
+                case ".HIF":
                 {
-                    if (HeifReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                    if (HeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (HeifCodecResolver.IsHevcDecoderAvailable)
+                            if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                    if (await MagickNetWrap.GetResized(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                     return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".PSD":
                 {
-                    if (await PsdReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (await PsdReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                     return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".SVG":
                 {
-                    if (await SvgReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (await SvgReader.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                     return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".GIF":
                 {
-                    if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                     return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".PNG":
                 {
-                    if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                     return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
                 default:
                 {
-                    if (await WicReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    if (await WicReader.GetHqDownScaled(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                    if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
                     return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
             }
@@ -187,14 +194,17 @@ internal class ImageUtil
             switch (extension)
             {
                 case ".HEIC":
+                case ".HEIF":
+                case ".HIF":
                 {
-                    if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    if (await HeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                    if (HeifCodecResolver.IsHevcDecoderAvailable)
+                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
                     return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".PSD":
                 {
-                    if (await PsdReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                     return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
                     }
                 case ".SVG":

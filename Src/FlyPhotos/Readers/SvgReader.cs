@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace FlyPhotos.Readers;
 
-internal class SvgReader
+internal static class SvgReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public static async Task<(bool, PreviewDisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetResized(CanvasControl ctrl, string inputPath)
     {
         var(bmp, width, height) = await LoadSvgViaSkia(ctrl, inputPath, 800);
         if (bmp == null) return (false, PreviewDisplayItem.Empty());

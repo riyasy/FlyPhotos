@@ -1,19 +1,16 @@
 ﻿using FlyPhotos.Data;
-using ImageMagick;
 using LibHeifSharp;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 using System;
 using System.Buffers;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using Windows.Graphics.DirectX;
 
 namespace FlyPhotos.Readers;
 
-internal class HeifReader
+internal static class HeifReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -22,7 +19,7 @@ internal class HeifReader
         LibHeifSharpDllImportResolver.Register();
     }
 
-    public static (bool, PreviewDisplayItem) GetPreview(CanvasControl ctrl, string inputPath)
+    public static (bool, PreviewDisplayItem) GetEmbedded(CanvasControl ctrl, string inputPath)
     {
         var decodingOptions = new HeifDecodingOptions
         {
@@ -58,33 +55,8 @@ internal class HeifReader
         }
     }
 
-    // Using ImageMagick for HEIF
-    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl d2dCanvas, string path)
-    {
-        try
-        {
-            // Load the HEIF file using ImageMagick
-            using var image = new MagickImage(path);
-            // Convert the image to a format compatible with CanvasBitmap
-            using var stream = new MemoryStream();
-            image.Format = MagickFormat.Jpeg;
-            image.Quality = 100;
-            await image.WriteAsync(stream);
-            stream.Position = 0;
-
-            // Create a CanvasBitmap from the MemoryStream
-            var bitmap = await CanvasBitmap.LoadAsync(d2dCanvas, stream.AsRandomAccessStream());
-            return (true, new StaticHqDisplayItem(bitmap, Origin.Disk));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-            return (false, HqDisplayItem.Empty());
-        }
-    }
-
     // Using LibHeifSharp for HEIF
-    public static (bool, HqDisplayItem) GetHq2(CanvasControl ctrl, string inputPath)
+    public static (bool, HqDisplayItem) GetHq(CanvasControl ctrl, string inputPath)
     {
         var decodingOptions = new HeifDecodingOptions
         {

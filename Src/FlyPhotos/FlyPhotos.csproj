@@ -33,9 +33,6 @@
 		<Exec Command="XCOPY $(ProjectDir)Assets\*.* $(PublishDir)\Assets\ /S /Y" />
 	</Target>
 
-	<ItemGroup>
-	  <Compile Remove="Controllers\PhotoControllerUnUsed.cs" />
-	</ItemGroup>
 
 	<ItemGroup>
 	  <None Remove="Views\InitWindow.xaml" />
@@ -70,6 +67,7 @@
 		<PackageReference Include="SkiaSharp" Version="3.119.0" />
 		<PackageReference Include="Svg.Skia" Version="3.0.6" />
 		<PackageReference Include="System.Drawing.Common" Version="9.0.8" />
+		<PackageReference Include="TerraFX.Interop.Windows" Version="10.0.26100.2" />
 		<PackageReference Include="WinUIEx" Version="2.7.0" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>

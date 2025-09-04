@@ -16,7 +16,7 @@ namespace FlyPhotos.Readers;
 /// NOTE: The consumer of the returned 'DisplayItem' (and the List of CanvasBitmaps within it)
 /// is responsible for disposing those resources to prevent VRAM leaks.
 /// </summary>
-internal class GifReader
+internal static class GifReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -25,7 +25,7 @@ internal class GifReader
     private const int MinimumGifDelayMs = 20;  // Treat delays under 20ms as invalid/too fast.
     private const int DefaultGifDelayMs = 100; // Use 100ms for invalid or zero-delay frames.
 
-    public static async Task<(bool, PreviewDisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetFirstFrameFullSize(CanvasControl ctrl, string inputPath)
     {
         try
         {

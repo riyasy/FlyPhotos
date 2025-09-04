@@ -20,7 +20,7 @@ namespace FlyPhotos.Readers;
 /// NOTE: The consumer of the returned 'DisplayItem' (and its resources)
 /// is responsible for disposing those resources to prevent VRAM leaks.
 /// </summary>
-internal class PngReader
+internal static class PngReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -29,7 +29,7 @@ internal class PngReader
     private const int PngChunkHeaderSize = 8; // 4-byte length + 4-byte type
     private const int PngChunkCrcSize = 4;
 
-    public static async Task<(bool, PreviewDisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetFirstFrameFullSize(CanvasControl ctrl, string inputPath)
     {
         try
         {

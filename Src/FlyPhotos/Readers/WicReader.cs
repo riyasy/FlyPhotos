@@ -5,36 +5,24 @@ using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
-using Windows.Storage.FileProperties;
 using Windows.Storage.Streams;
 using FlyPhotos.Data;
 using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
-using PhotoSauce.MagicScaler;
 using Path = System.IO.Path;
 
 namespace FlyPhotos.Readers;
 
-internal class WicReader
+internal static class WicReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    static WicReader()
-    {
-        CodecManager.Configure(codecs =>
-        {
-            codecs.Clear();
-            codecs.UseWicCodecs(WicCodecPolicy.All);
-        });
-    }
-
-    public static async Task<(bool, PreviewDisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetEmbedded(CanvasControl ctrl, string inputPath)
     {
         var (bmp, width, height) = await GetThumbnail(ctrl, inputPath);
         if (bmp == null) return (false, PreviewDisplayItem.Empty());
@@ -62,44 +50,7 @@ internal class WicReader
         }
     }
 
-    public static async Task<(bool, PreviewDisplayItem)> GetHqDownScaled(CanvasControl ctrl, string inputPath)
-    {
-        if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA) return await Task.Run(Action);
-        return await Action();
-        async Task<(bool, PreviewDisplayItem)> Action()
-        {
-            try
-            {
-                var fileInfo = ImageFileInfo.Load(inputPath);
-                int originalWidth = fileInfo.Frames[0].Width;
-                int originalHeight = fileInfo.Frames[0].Height;
-                var metadata = new ImageMetadata(originalWidth, originalHeight);
-                var settings = new ProcessImageSettings { Width = 800, Height = 800, ResizeMode = CropScaleMode.Max, HybridMode = HybridScaleMode.Turbo };
-
-                CanvasBitmap canvasBitmap;
-                if (originalWidth <= 800 && originalHeight <= 800)
-                {
-                    // Load directly from file path without resizing
-                    canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, inputPath);
-                }
-                else
-                {
-                    // Create pipeline for resizing
-                    using var pipeline = MagicImageProcessor.BuildPipeline(inputPath, settings);
-                    using var ms = new MemoryStream();
-                    pipeline.WriteOutput(ms);
-                    canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());
-                }
-
-                return (true, new PreviewDisplayItem(canvasBitmap, Origin.Disk, metadata));
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex);
-                return (false, PreviewDisplayItem.Empty());
-            }
-        }
-    }
+    
 
     private static async Task<(bool, HqDisplayItem)> GetHqThruExternalProcess(CanvasControl ctrl, string inputPath)
     {
