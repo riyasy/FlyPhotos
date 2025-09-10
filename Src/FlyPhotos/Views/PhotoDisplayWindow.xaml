@@ -105,9 +105,23 @@
                 x:Name="ButtonScaleSet"
                 Width="Auto"
                 Click="ButtonScaleSet_Click"
-                Content="&#xE73F;"
+                Content="&#xE9A6;"
                 FontFamily="{StaticResource FluentIcons}"
                 FontSize="16">
+                <ToolTipService.ToolTip>
+                    <ToolTip
+                        AutomationProperties.FullDescription="Non-occluding tooltip"
+                        Content="Fit"
+                        Placement="Right" />
+                </ToolTipService.ToolTip>
+            </Button>
+            <Button
+                x:Name="ButtonOneIsToOne"
+                Width="Auto"
+                Height="{Binding ElementName=ButtonScaleSet, Path=ActualHeight}"
+                Click="ButtonOneIsToOne_Click"
+                Content="1:1"
+                FontSize="12">
                 <ToolTipService.ToolTip>
                     <ToolTip
                         AutomationProperties.FullDescription="Non-occluding tooltip"

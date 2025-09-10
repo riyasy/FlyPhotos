@@ -88,14 +88,6 @@
                             <ToggleSwitch x:Name="ButtonOpenExitZoom" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
-                            x:Name="SettingsCardPanZoomReset"
-                            Margin="0,5,0,0"
-                            Description="Reset pan and zoom when switching photos."
-                            Header="Pan Zoom Reset"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
-                            <ToggleSwitch x:Name="ButtonResetPanZoom" />
-                        </controls:SettingsCard>
-                        <controls:SettingsCard
                             x:Name="SettingsCardHighQualityInterpolation"
                             Margin="0,5,0,0"
                             Description="Disable for sharper pixel edges (useful for pixel art)."

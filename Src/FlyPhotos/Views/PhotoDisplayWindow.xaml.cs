@@ -478,7 +478,12 @@ public sealed partial class PhotoDisplayWindow
 
     private void ButtonScaleSet_Click(object sender, RoutedEventArgs e)
     {
-        _canvasController.SetHundredPercent(true);
+        _canvasController.FitToScreen(true);
+    }
+
+    private void ButtonOneIsToOne_Click(object sender, RoutedEventArgs e)
+    {
+        _canvasController.ZoomToHundred();
     }
 
     private void SetWindowBackground(WindowBackdropType backdropType)

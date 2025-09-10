@@ -43,6 +43,7 @@ internal class CanvasController : ICanvasController
     // For State management
     private readonly CanvasViewState _canvasViewState;
     private readonly CanvasViewManager _canvasViewManager;
+    private Size _imageSize;
 
     #region Construction and Destruction
 
@@ -101,9 +102,10 @@ internal class CanvasController : ICanvasController
         _photoSessionState.CurrentDisplayLevel = displayLevel;
         var displayItem = photo.GetDisplayItemBasedOn(displayLevel);
 
-        var (width, height) = photo.GetActualSize();
+        var size= photo.GetActualSize();
+        _imageSize = new Size(size.Item1, size.Item2);
 
-        Debug.WriteLine($"Displaying {photo.FileName} at level {displayLevel} with size {width}x{height}");
+        Debug.WriteLine($"Displaying {photo.FileName} at level {displayLevel} with size {_imageSize.Width}x{_imageSize.Height}");
 
         if (displayItem == null) return;
 
@@ -113,7 +115,7 @@ internal class CanvasController : ICanvasController
                 try
                 {
                     IRenderer firstFrameRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, animDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate, false);
-                    SetupNewRenderer(firstFrameRenderer, width, height, animDispItem.Rotation, isFirstPhoto, true);
+                    SetupNewRenderer(firstFrameRenderer, _imageSize, animDispItem.Rotation, isFirstPhoto, true);
 
                     IAnimator newAnimator = Path.GetExtension(photo.FileName).ToUpper() == ".GIF"
                         ? await GifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas)
@@ -123,7 +125,7 @@ internal class CanvasController : ICanvasController
                     {
                         await newAnimator.UpdateAsync(TimeSpan.Zero);
                         IRenderer newRenderer = new AnimatedImageRenderer(_d2dCanvas, _checkeredBrush, newAnimator, _animatorLock, photo.SupportsTransparency(), RequestInvalidate);
-                        SetupNewRenderer(newRenderer, width, height, animDispItem.Rotation, false, false);
+                        SetupNewRenderer(newRenderer, _imageSize, animDispItem.Rotation, false, false);
                     }
                     else
                     {
@@ -138,7 +140,7 @@ internal class CanvasController : ICanvasController
             case HqDisplayItem hqDispItem:
                 {
                     IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, hqDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
-                    SetupNewRenderer(newRenderer, width, height, hqDispItem.Rotation, isFirstPhoto, true);
+                    SetupNewRenderer(newRenderer, _imageSize, hqDispItem.Rotation, isFirstPhoto, true);
                     break;
                 }
             case PreviewDisplayItem previewDispItem:
@@ -146,24 +148,24 @@ internal class CanvasController : ICanvasController
                     // Sometimes preview aspect ratio is different from actual image aspect ratio.
                     // To avoid image distortion, we calculate the width based on actual image height and preview aspect ratio.
                     var previewAspectRatio = previewDispItem.Bitmap.Bounds.Width / previewDispItem.Bitmap.Bounds.Height;
-                    var correctedWidth = height * previewAspectRatio;
+                    var correctedWidth = _imageSize.Height * previewAspectRatio;
 
                     IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, previewDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
-                    SetupNewRenderer(newRenderer, correctedWidth, height, previewDispItem.Rotation, isFirstPhoto, true);
+                    SetupNewRenderer(newRenderer, new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, isFirstPhoto, true);
                     break;
                 }
         }
     }
 
-    private void SetupNewRenderer(IRenderer newRenderer, double imageWidth, double imageHeight, int imageRotation, bool isFirstPhoto, bool forceThumbNailRedraw)
+    private void SetupNewRenderer(IRenderer newRenderer, Size imageSize, int imageRotation, bool isFirstPhoto, bool forceThumbNailRedraw)
     {
-        if (isFirstPhoto)
-        {
-            _canvasViewManager.SetStartupScale();
-        }
+        //if (isFirstPhoto)
+        //{
+        //    _canvasViewManager.SetStartupScale();
+        //}
         _currentRenderer?.Dispose();
         _currentRenderer = newRenderer;
-        _canvasViewManager.SetScaleAndPosition(imageWidth, imageHeight,
+        _canvasViewManager.SetScaleAndPosition(imageSize,
             imageRotation, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight, isFirstPhoto);
         if (forceThumbNailRedraw)
             _thumbNailController.CreateThumbnailRibbonOffScreen();
@@ -171,9 +173,15 @@ internal class CanvasController : ICanvasController
         RequestInvalidate();
     }
 
-    public void SetHundredPercent(bool animateChange)
+    public void FitToScreen(bool animateChange)
     {
-        _canvasViewManager.ZoomPanToFit(animateChange, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight);
+        _canvasViewManager.ZoomPanToFit(animateChange, _imageSize, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight);
+        _currentRenderer?.RestartOffScreenDrawTimer();
+    }
+
+    public void ZoomToHundred()
+    {
+        _canvasViewManager.ZoomToHundred(_imageSize, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight);
         _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
@@ -225,7 +233,7 @@ internal class CanvasController : ICanvasController
     private void D2dCanvas_SizeChanged(object sender, SizeChangedEventArgs args)
     {
         if (IsScreenEmpty()) return;
-        var imageBounds = _currentRenderer.SourceBounds;
+        var imageBounds = new Rect(0, 0, _imageSize.Width, _imageSize.Height);
         _canvasViewManager.HandleSizeChange(imageBounds, args.NewSize, args.PreviousSize);
     }
 
@@ -255,8 +263,7 @@ internal class CanvasController : ICanvasController
     {
         if (IsScreenEmpty() || Util.IsControlPressed()) return;
         var zoomDirection = (e.GetCurrentPoint(_d2dCanvas).Properties.MouseWheelDelta > 0) ? ZoomDirection.In : ZoomDirection.Out;
-        _canvasViewManager.ZoomAtPoint(zoomDirection, e.GetCurrentPoint(_d2dCanvas).Position,
-            _d2dCanvas.Device.MaximumBitmapSizeInPixels);
+        _canvasViewManager.ZoomAtPoint(zoomDirection, e.GetCurrentPoint(_d2dCanvas).Position);
         _currentRenderer.RestartOffScreenDrawTimer();
     }
 

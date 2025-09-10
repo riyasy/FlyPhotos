@@ -90,7 +90,6 @@ internal sealed partial class Settings
         
         SliderHighResCacheSize.Value = AppConfig.Settings.CacheSizeOneSideHqImages;
         SliderLowResCacheSize.Value = AppConfig.Settings.CacheSizeOneSidePreviews;
-        ButtonResetPanZoom.IsOn = AppConfig.Settings.ResetPanZoomOnNextPhoto;
         ComboTheme.SelectedIndex = FindIndexOfItemInComboBox(ComboTheme, _themeTranslator.ToString(AppConfig.Settings.Theme));
         ComboBackGround.SelectedIndex = FindIndexOfItemInComboBox(ComboBackGround, _backdropTranslator.ToString(AppConfig.Settings.WindowBackdrop));
         ButtonShowThumbnail.IsOn = AppConfig.Settings.ShowThumbnails;
@@ -105,7 +104,6 @@ internal sealed partial class Settings
         MainLayout.KeyDown += MainLayout_OnKeyDown;
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
         SliderLowResCacheSize.ValueChanged += SliderLowResCacheSize_OnValueChanged;
-        ButtonResetPanZoom.Toggled += ButtonResetPanZoom_OnToggled;
         ComboTheme.SelectionChanged += ComboTheme_OnSelectionChanged;
         ComboBackGround.SelectionChanged += ComboBackGround_OnSelectionChanged;
         ButtonShowThumbnail.Toggled += ButtonShowThumbnail_OnToggled;
@@ -210,12 +208,6 @@ internal sealed partial class Settings
         AppConfig.Settings.WindowBackdrop = backGroundEnum;
 
         BackdropChanged?.Invoke(backGroundEnum);
-        await AppConfig.SaveAsync();
-    }
-
-    private async void ButtonResetPanZoom_OnToggled(object sender, RoutedEventArgs e)
-    {
-        AppConfig.Settings.ResetPanZoomOnNextPhoto = ButtonResetPanZoom.IsOn;
         await AppConfig.SaveAsync();
     }
 

@@ -377,8 +377,6 @@ internal partial class PhotoDisplayController : IPhotoDisplayController
 
         _photoSessionState.CurrentDisplayIndex += shiftBy;
 
-        if (AppConfig.Settings.ResetPanZoomOnNextPhoto) _canvasController.SetHundredPercent(false);
-
         var photo = _photos[_photoSessionState.CurrentDisplayIndex];
 
         if (!IsContinuousKeyPress() && _cachedHqImages.ContainsKey(_photoSessionState.CurrentDisplayIndex))
@@ -418,8 +416,6 @@ internal partial class PhotoDisplayController : IPhotoDisplayController
                 _photoSessionState.CurrentDisplayIndex--;
                 break;
         }
-
-        if (AppConfig.Settings.ResetPanZoomOnNextPhoto) _canvasController.SetHundredPercent(false);
 
         var photo = _photos[_photoSessionState.CurrentDisplayIndex];
 

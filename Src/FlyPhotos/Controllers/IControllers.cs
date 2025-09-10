@@ -21,7 +21,7 @@ namespace FlyPhotos.Controllers
     internal interface ICanvasController : IAsyncDisposable
     {
         Task SetSource(Photo photo, DisplayLevel displayLevel);
-        void SetHundredPercent(bool animateChange);
+        void FitToScreen(bool animateChange);
         void ZoomOutOnExit(double exitAnimationDuration);
         void ZoomByKeyboard(ZoomDirection zoomDirection);
         void PanByKeyboard(double dx, double dy);

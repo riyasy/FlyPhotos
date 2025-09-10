@@ -25,7 +25,6 @@ public class AppSettings
         set => WindowBackdropAsString = value.ToString();
     }
 
-    public bool ResetPanZoomOnNextPhoto { get; set; } = false;
     public int CacheSizeOneSideHqImages { get; set; } = 2;
     public int CacheSizeOneSidePreviews { get; set; } = 300;
     public bool ShowThumbnails { get; set; } = true;
