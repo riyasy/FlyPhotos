@@ -1,12 +1,14 @@
 ﻿using FlyPhotos.AppSettings;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
+using Microsoft.Graphics.Canvas.Text;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using System;
 using System.Numerics;
 using Windows.Foundation;
+using Windows.UI;
 
 namespace FlyPhotos.Controllers.Renderers
 {
@@ -58,7 +60,54 @@ namespace FlyPhotos.Controllers.Renderers
                 session.DrawImage(_offscreen, viewState.ImageRect, _offscreen.Bounds, 1f, quality);
             else
                 session.DrawImage(_sourceBitmap, viewState.ImageRect, _sourceBitmap.Bounds, 1f, quality);
+
+            // DrawDebugInfo(session, viewState);
         }
+
+        private void DrawDebugInfo(CanvasDrawingSession session, CanvasViewState viewState)
+        {
+            // Save the current transform
+            var originalTransform = session.Transform;
+
+            // Reset transform to identity to draw the debug text at a fixed position
+            session.Transform = Matrix3x2.Identity;
+
+            // Build the debug text including canvas properties
+            string debugText = $"--Canvas Properties--\n" +
+                               $"Width = {_canvas.ActualWidth:0.00}, Height = {_canvas.ActualHeight:0.00}\n" +
+                               $"Dpi = {_canvas.Dpi}, DpiScale = {_canvas.DpiScale:0.00}\n\n" +
+                               $"--Display Source Properties--\n" +
+                               $"Width = {SourceBounds.Width:0.00}, Height = {SourceBounds.Height:0.00}, Dpi = {_sourceBitmap.Dpi}\n\n" +
+                               viewState.GetAsString();
+
+            var textFormat = new CanvasTextFormat()
+            {
+                FontSize = 14,
+                WordWrapping = CanvasWordWrapping.NoWrap
+            };
+
+            var textBrush = new CanvasSolidColorBrush(session, Colors.White);
+
+            // Measure and layout the text
+            using (var layout = new CanvasTextLayout(session, debugText, textFormat, 0.0f, 0.0f))
+            {
+                var textPadding = 4f;
+                var backgroundRect = new Rect(
+                    10 - textPadding,
+                    10 - textPadding,
+                    layout.DrawBounds.Width + 2 * textPadding,
+                    layout.DrawBounds.Height + 2 * textPadding);
+
+                session.FillRectangle(backgroundRect, Color.FromArgb(128, 0, 0, 0)); // semi-transparent black
+                session.DrawTextLayout(layout, 10, 10, textBrush);
+            }
+
+            // Restore the original transform
+            session.Transform = originalTransform;
+        }
+
+
+
 
         public void RestartOffScreenDrawTimer()
         {
