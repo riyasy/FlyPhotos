@@ -21,12 +21,14 @@ internal class CanvasViewManager
     private Point _panTargetPosition;
 
     private readonly CanvasViewState _canvasViewState;
-    private readonly Action _invalidateCanvas; // A callback to trigger a redraw
+    private readonly Action _callbackCanvasRedraw; // A callback to trigger a redraw
+    private readonly Action _callbackZoomUpdate;
 
-    public CanvasViewManager(CanvasViewState canvasViewState, Action invalidateCanvas)
+    public CanvasViewManager(CanvasViewState canvasViewState, Action callbackCanvasRedraw, Action callbackZoomUpdate)
     {
         _canvasViewState = canvasViewState;
-        _invalidateCanvas = invalidateCanvas;
+        _callbackCanvasRedraw = callbackCanvasRedraw;
+        _callbackZoomUpdate = callbackZoomUpdate;
     }
 
     public void SetScaleAndPosition(Size imageSize, int imageRotation,
@@ -143,14 +145,14 @@ internal class CanvasViewManager
         _canvasViewState.ImagePos.X += dx;
         _canvasViewState.ImagePos.Y += dy;
         _canvasViewState.UpdateTransform();
-        _invalidateCanvas();
+        _callbackCanvasRedraw();
     }
 
     public void RotateBy(int rotation)
     {
         _canvasViewState.Rotation += rotation;
         _canvasViewState.UpdateTransform();
-        _invalidateCanvas();
+        _callbackCanvasRedraw();
     }
 
 
@@ -204,7 +206,8 @@ internal class CanvasViewManager
 
         _canvasViewState.Scale = newScale;
         _canvasViewState.UpdateTransform();
-        _invalidateCanvas();
+        _callbackCanvasRedraw();
+        _callbackZoomUpdate();
 
         if (t >= 1.0)
         {
@@ -230,7 +233,8 @@ internal class CanvasViewManager
         _canvasViewState.ImagePos = new Point(newX, newY);
 
         _canvasViewState.UpdateTransform();
-        _invalidateCanvas();
+        _callbackCanvasRedraw();
+        _callbackZoomUpdate();
 
         if (t >= 1.0)
         {

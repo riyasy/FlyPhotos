@@ -21,6 +21,8 @@ namespace FlyPhotos.Controllers;
 
 internal class CanvasController : ICanvasController
 {
+    public event Action<int>? OnZoomChanged;
+
     private readonly IThumbnailController _thumbNailController;
     private readonly PhotoSessionState _photoSessionState;
     private readonly CanvasControl _d2dCanvas;
@@ -62,7 +64,7 @@ internal class CanvasController : ICanvasController
         _d2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;
 
         _canvasViewState = new CanvasViewState();
-        _canvasViewManager = new CanvasViewManager(_canvasViewState, RequestInvalidate);
+        _canvasViewManager = new CanvasViewManager(_canvasViewState, RequestInvalidate, RequestZoomUpdate);
     }
 
     public async ValueTask DisposeAsync()
@@ -298,6 +300,14 @@ internal class CanvasController : ICanvasController
         {
             _invalidatePending = false;
             _d2dCanvas.Invalidate();
+        });
+    }
+
+    private void RequestZoomUpdate()
+    {
+        _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
+        {
+            OnZoomChanged?.Invoke((int)Math.Round(_canvasViewState.Scale * 100));
         });
     }
 

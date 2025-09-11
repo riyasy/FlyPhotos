@@ -3,9 +3,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using TerraFX.Interop.Windows;
 using Windows.System;
-using Windows.UI;
-using FlyPhotos.AppSettings;
+using Windows.UI;using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers;
 using FlyPhotos.Data;
 using FlyPhotos.FlyNativeLibWrapper;
@@ -22,6 +22,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using NLog;
+
 using WinRT;
 using WinRT.Interop;
 using WinUIEx;
@@ -36,7 +37,7 @@ namespace FlyPhotos.Views;
 /// <summary>
 /// An empty window that can be used on its own or navigated to within a Frame.
 /// </summary>
-public sealed partial class PhotoDisplayWindow 
+public sealed partial class PhotoDisplayWindow
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -68,11 +69,12 @@ public sealed partial class PhotoDisplayWindow
     private readonly VirtualKey _minusVk = Util.GetKeyThatProduces('-');
 
     private readonly OpacityFader _opacityFader;
-    private bool _controlsFaded;
+    private readonly InactivityFader _inactivityFader;
 
     private WindowBackdropType _currentBackdropType;
     private ISystemBackdropControllerWithTargets? _backdropController;
     private readonly SystemBackdropConfiguration _configurationSource;
+
 
     public PhotoDisplayWindow(string firstPhotoPath)
     {
@@ -92,18 +94,19 @@ public sealed partial class PhotoDisplayWindow
             IsInputActive = true
         };
 
-        
+
         ((FrameworkElement)Content).ActualThemeChanged += PhotoDisplayWindow_ActualThemeChanged;
         SetConfigurationSourceTheme();
         SetWindowBackground(AppConfig.Settings.WindowBackdrop);
         SetWindowTheme(AppConfig.Settings.Theme);
         DispatcherQueue.EnsureSystemDispatcherQueue();
 
-        var photoSessionState = new PhotoSessionState(){FirstPhotoPath = firstPhotoPath};
+        var photoSessionState = new PhotoSessionState() { FirstPhotoPath = firstPhotoPath };
         _thumbNailController = new ThumbNailController(D2dCanvasThumbNail, photoSessionState);
         _canvasController = new CanvasController(D2dCanvas, _thumbNailController, photoSessionState);
         _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, photoSessionState);
         _photoController.StatusUpdated += PhotoController_StatusUpdated;
+        _canvasController.OnZoomChanged += CanvasController_OnZoomChanged;
 
         TxtFileName.Text = Path.GetFileName(firstPhotoPath);
 
@@ -111,8 +114,6 @@ public sealed partial class PhotoDisplayWindow
         SizeChanged += PhotoDisplayWindow_SizeChanged;
         AppWindow.Closing += PhotoDisplayWindow_Closing;
         Closed += PhotoDisplayWindow_Closed;
-
-        MainLayout.PointerMoved += MainLayout_PointerMoved;
 
         D2dCanvas.CreateResources += D2dCanvas_CreateResources;
         D2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
@@ -129,44 +130,13 @@ public sealed partial class PhotoDisplayWindow
         //this.Maximize(); // Maximise will be called from App.xaml.cs
         _lastWindowState = OverlappedPresenterState.Maximized;
 
-        _opacityFader = new OpacityFader([ButtonPanel, D2dCanvasThumbNail, TxtFileName]);
+        _opacityFader = new OpacityFader([ButtonPanel, D2dCanvasThumbNail, TxtFileName], MainLayout);
+        _inactivityFader = new InactivityFader(TxtZoom);
     }
 
     private async void ThumbNailController_ThumbnailClicked(int shiftIndex)
     {
         await _photoController.FlyBy(shiftIndex);
-    }
-
-    private void MainLayout_PointerMoved(object sender, PointerRoutedEventArgs e)
-    {
-        if (!AppConfig.Settings.AutoFade) 
-        { 
-            // When somebody disables autofade while controls are faded
-            if (_controlsFaded)
-            {
-                _opacityFader.FadeTo(1.0f);
-                _controlsFaded = false;
-            }
-            return; 
-        }
-
-        var pos = e.GetCurrentPoint(MainLayout).Position;
-        double windowHeight = this.Bounds.Height;
-
-        double bottomThreshold = Math.Max(100, windowHeight * 0.30);
-        bool pointerInBottom = pos.Y >= windowHeight - bottomThreshold;
-
-        if (_controlsFaded && pointerInBottom)
-        {
-            _opacityFader.FadeTo(1.0f);
-            _controlsFaded = false;
-        } 
-        else if (!_controlsFaded && !pointerInBottom)
-        {
-            float opacity = (100 - AppConfig.Settings.FadeIntensity) / 100f;
-            _opacityFader.FadeTo(opacity);
-            _controlsFaded = true;
-        }
     }
 
     private async void ButtonBackNext_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
@@ -192,6 +162,12 @@ public sealed partial class PhotoDisplayWindow
             TxtFileName.Text = e.IndexAndFileName;
             CacheStatusProgress.Text = e.CacheProgressStatus;
         });
+    }
+
+    private void CanvasController_OnZoomChanged(int zoomPercent)
+    {
+        TxtZoom.Text = $"{zoomPercent}%";
+        _inactivityFader.ReportActivity();
     }
 
     private void PhotoDisplayWindow_SizeChanged(object sender, Microsoft.UI.Xaml.WindowSizeChangedEventArgs args)
@@ -379,7 +355,7 @@ public sealed partial class PhotoDisplayWindow
     private void ButtonRotate_OnClick(object sender, RoutedEventArgs e)
     {
         _canvasController.RotateCurrentPhotoBy90(true);
-    } 
+    }
 
     private void ButtonSettings_OnClick(object sender, RoutedEventArgs e)
     {
@@ -424,10 +400,15 @@ public sealed partial class PhotoDisplayWindow
         _repeatButtonReleaseCheckTimer.Stop();
         _wheelScrollBrakeTimer.Stop();
         _thumbNailController.ThumbnailClicked -= ThumbNailController_ThumbnailClicked;
+        _photoController.StatusUpdated -= PhotoController_StatusUpdated;
+        _canvasController.OnZoomChanged -= CanvasController_OnZoomChanged;
+        ((FrameworkElement)Content).ActualThemeChanged -= PhotoDisplayWindow_ActualThemeChanged;
 
         await _canvasController.DisposeAsync();
         _thumbNailController.Dispose();
         _photoController.Dispose();
+        _opacityFader.Dispose();
+        _inactivityFader.Dispose();
         DiskCacherWithSqlite.Shutdown();
 
         _backdropController?.RemoveSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
@@ -543,7 +524,7 @@ public sealed partial class PhotoDisplayWindow
     {
         if (!DesktopAcrylicController.IsSupported()) return false;
         var acrylicController = new DesktopAcrylicController
-            { Kind = useAcrylicThin ? DesktopAcrylicKind.Thin : DesktopAcrylicKind.Base };
+        { Kind = useAcrylicThin ? DesktopAcrylicKind.Thin : DesktopAcrylicKind.Base };
         acrylicController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
         acrylicController.SetSystemBackdropConfiguration(_configurationSource);
         _backdropController = acrylicController;
