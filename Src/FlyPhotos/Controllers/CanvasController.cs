@@ -21,7 +21,7 @@ namespace FlyPhotos.Controllers;
 
 internal class CanvasController : ICanvasController
 {
-    public event Action<int>? OnZoomChanged;
+    public event Action<int> OnZoomChanged;
 
     private readonly IThumbnailController _thumbNailController;
     private readonly PhotoSessionState _photoSessionState;
@@ -207,7 +207,7 @@ internal class CanvasController : ICanvasController
 
     public void ZoomToHundred()
     {
-        _canvasViewManager.ZoomToHundred(_imageSize, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight);
+        _canvasViewManager.ZoomToHundred(_d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight);
         _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
@@ -259,15 +259,18 @@ internal class CanvasController : ICanvasController
     private void D2dCanvas_SizeChanged(object sender, SizeChangedEventArgs args)
     {
         if (IsScreenEmpty()) return;
-        var imageBounds = new Rect(0, 0, _imageSize.Width, _imageSize.Height);
-        _canvasViewManager.HandleSizeChange(imageBounds, args.NewSize, args.PreviousSize);
+        _canvasViewManager.HandleSizeChange(args.NewSize, args.PreviousSize);
     }
 
     private void D2dCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
-        if (IsScreenEmpty() || !IsPressedOnImage(e.GetCurrentPoint(_d2dCanvas).Position)) return;
+        var pointerPoint = e.GetCurrentPoint(_d2dCanvas);
+        if (!pointerPoint.Properties.IsLeftButtonPressed)
+            return;
+        if (IsScreenEmpty() || !IsPressedOnImage(pointerPoint.Position))
+            return;
         _d2dCanvas.CapturePointer(e.Pointer);
-        _lastPoint = e.GetCurrentPoint(_d2dCanvas).Position;
+        _lastPoint = pointerPoint.Position;
         _isDragging = true;
     }
 

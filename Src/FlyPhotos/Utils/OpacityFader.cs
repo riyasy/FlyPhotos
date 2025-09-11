@@ -8,7 +8,7 @@ using FlyPhotos.AppSettings;
 
 namespace FlyPhotos.Utils;
 
-public class OpacityFader : IDisposable
+public partial class OpacityFader : IDisposable
 {
     private readonly List<Visual> _visuals;
     private readonly Compositor _compositor;

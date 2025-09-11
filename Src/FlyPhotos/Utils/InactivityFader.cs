@@ -11,28 +11,21 @@ namespace FlyPhotos.Utils;
 /// Manages the visibility of a UIElement, fading it out after a period of inactivity
 /// and making it visible immediately upon reported activity.
 /// </summary>
-public class InactivityFader : IDisposable
+/// <remarks>
+/// Initializes a new instance of the InactivityFader class.
+/// </remarks>
+/// <param name="element">The UIElement to control.</param>
+/// <param name="hideDelayMs">The delay in milliseconds before starting the fade-out.</param>
+/// <param name="fadeDurationMs">The duration of the fade-out animation in milliseconds.</param>
+public partial class InactivityFader(UIElement element, int hideDelayMs = 500, int fadeDurationMs = 300) : IDisposable
 {
-    private readonly UIElement _element;
-    private readonly TimeSpan _hideDelay;
-    private readonly Duration _fadeDuration;
+    private readonly UIElement _element = element;
+    private readonly TimeSpan _hideDelay = TimeSpan.FromMilliseconds(hideDelayMs);
+    private readonly Duration _fadeDuration = new(TimeSpan.FromMilliseconds(fadeDurationMs));
 
     private CancellationTokenSource? _cts;
     private Storyboard? _fadeOutStoryboard;
     private bool _isDisposed;
-
-    /// <summary>
-    /// Initializes a new instance of the InactivityFader class.
-    /// </summary>
-    /// <param name="element">The UIElement to control.</param>
-    /// <param name="hideDelayMs">The delay in milliseconds before starting the fade-out.</param>
-    /// <param name="fadeDurationMs">The duration of the fade-out animation in milliseconds.</param>
-    public InactivityFader(UIElement element, int hideDelayMs = 500, int fadeDurationMs = 300)
-    {
-        _element = element ?? throw new ArgumentNullException(nameof(element));
-        _hideDelay = TimeSpan.FromMilliseconds(hideDelayMs);
-        _fadeDuration = new Duration(TimeSpan.FromMilliseconds(fadeDurationMs));
-    }
 
     /// <summary>
     /// Reports user activity, making the element visible and resetting the fade-out timer.

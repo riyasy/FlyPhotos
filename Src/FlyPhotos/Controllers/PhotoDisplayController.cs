@@ -257,9 +257,9 @@ internal partial class PhotoDisplayController : IPhotoDisplayController
     {
         var curIdx = _photoSessionState.CurrentDisplayIndex;
 
-        var keysToRemove = _cachedHqImages.Keys.Where(key =>
+        List<int> keysToRemove = [.. _cachedHqImages.Keys.Where(key =>
             key > curIdx + AppConfig.Settings.CacheSizeOneSideHqImages ||
-            key < curIdx - AppConfig.Settings.CacheSizeOneSideHqImages).ToList();
+            key < curIdx - AppConfig.Settings.CacheSizeOneSideHqImages)];
         keysToRemove.ForEach(delegate (int key)
         {
             var photo = _photos[key];
@@ -268,9 +268,9 @@ internal partial class PhotoDisplayController : IPhotoDisplayController
             _cachedHqImages.TryRemove(key, out _);
         });
 
-        keysToRemove = _cachedPreviews.Keys.Where(key =>
+        keysToRemove = [.. _cachedPreviews.Keys.Where(key =>
             key > curIdx + AppConfig.Settings.CacheSizeOneSidePreviews ||
-            key < curIdx - AppConfig.Settings.CacheSizeOneSidePreviews).ToList();
+            key < curIdx - AppConfig.Settings.CacheSizeOneSidePreviews)];
         keysToRemove.ForEach(delegate (int key)
         {
             var photo = _photos[key];
@@ -308,10 +308,10 @@ internal partial class PhotoDisplayController : IPhotoDisplayController
 
         _toBeCachedPreviews.Clear();
 
-        tempArray = (from cacheIdx in cacheIndexesPreviews
+        tempArray = [.. (from cacheIdx in cacheIndexesPreviews
                      where !_cachedPreviews.ContainsKey(cacheIdx) && !_previewsBeingCached.ContainsKey(cacheIdx) &&
                            cacheIdx >= 0 && cacheIdx < _photos.Count
-                     select cacheIdx).ToArray();
+                     select cacheIdx)];
         if (tempArray.Length > 0) _toBeCachedPreviews.PushRange(tempArray);
     }
 

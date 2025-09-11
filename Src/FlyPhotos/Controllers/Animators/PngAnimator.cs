@@ -364,7 +364,7 @@ public partial class PngAnimator : IAnimator
                     IhdrChunk = ihdrChunk,
                     CanvasWidth = ReadUInt32BigEndian(ihdrChunk.Data, 0),
                     CanvasHeight = ReadUInt32BigEndian(ihdrChunk.Data, 4),
-                    GlobalChunks = globalChunks.Where(c => c.Type != "IHDR").ToList(),
+                    GlobalChunks = [.. globalChunks.Where(c => c.Type != "IHDR")],
                     FrameControls = orderedFrames,
                     IsDefaultImageFirstFrame = defaultImageIsFirstFrame
                 };

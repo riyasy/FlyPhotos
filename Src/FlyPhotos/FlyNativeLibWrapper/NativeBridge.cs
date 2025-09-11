@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices; // Required for CallConvStdcall
 using System.Runtime.InteropServices;
 using FlyPhotos.Data;
 
 namespace FlyPhotos.FlyNativeLibWrapper;
 
-public static class NativeBridge
+// The class is now internal to encapsulate the P/Invoke calls and partial for the source generator.
+internal static partial class NativeBridge
 {
     // Define the delegate for the codec info callback
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -19,15 +21,21 @@ public static class NativeBridge
 
     private const string DllName = "FlyNativeLib.dll"; // The name of your new native DLL
 
-    [DllImport(DllName, CallingConvention = CallingConvention.StdCall)]
-    public static extern int GetFileListFromExplorer(FileListCallback callback);
+    // Switched to LibraryImport for compile-time marshalling code generation.
+    // Added UnmanagedCallConv to preserve the StdCall calling convention.
+    [LibraryImport(DllName)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
+    internal static partial int GetFileListFromExplorer(FileListCallback callback);
 
-    [DllImport(DllName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+    // Set StringMarshalling to match the original CharSet.Unicode.
+    [LibraryImport(DllName, StringMarshalling = StringMarshalling.Utf16)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool ShowExplorerContextMenu(string filePath, int x, int y);
+    internal static partial bool ShowExplorerContextMenu(string filePath, int x, int y);
 
-    [DllImport(DllName, CallingConvention = CallingConvention.StdCall)]
-    public static extern int GetWicDecoders(CodecInfoCallback callback);
+    [LibraryImport(DllName)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
+    internal static partial int GetWicDecoders(CodecInfoCallback callback);
 }
 
 public static class CliWrapper
@@ -37,6 +45,7 @@ public static class CliWrapper
         var files = new List<string>();
 
         // Call the native function with our callback.
+        // This code remains unchanged as it correctly calls the wrapper.
         var hr = NativeBridge.GetFileListFromExplorer(FileListCallback);
 
         // Optional: Check HRESULT (hr) for success or failure
@@ -53,8 +62,8 @@ public static class CliWrapper
         }
     }
 
-    // You can call this directly
-    // bool success = NativeBridge.ShowExplorerContextMenu("C:\\path\\to\\file.jpg", x, y);
+    // You can call this directly via the ShowContextMenu wrapper
+    // bool success = CliWrapper.ShowContextMenu("C:\\path\\to\\file.jpg", x, y);
 
     // A high-level wrapper for WIC codecs
     public static List<CodecInfo> GetWicDecoders()

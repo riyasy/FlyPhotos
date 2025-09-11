@@ -50,7 +50,7 @@ internal static class Util
         {
             return [];
         }
-        return Directory.EnumerateFiles(dirPath, "*.*", SearchOption.TopDirectoryOnly).ToList();
+        return [.. Directory.EnumerateFiles(dirPath, "*.*", SearchOption.TopDirectoryOnly)];
     }
 
     public static int FindSelectedFileIndex(string selectedFileName, List<string> files)
@@ -90,7 +90,7 @@ internal static class Util
     public static VirtualKey GetKeyThatProduces(char character)
     {
         IntPtr layout = NativeMethods.GetKeyboardLayout(0);
-        short vkScanResult = NativeMethods.VkKeyScanExA((byte)character, layout);
+        short vkScanResult = NativeMethods.VkKeyScanEx((byte)character, layout);
         int virtualKeyCode = vkScanResult & 0xff;
         return (VirtualKey)virtualKeyCode;
     }

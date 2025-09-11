@@ -6,7 +6,7 @@ using Microsoft.UI.Xaml.Media;
 
 namespace FlyPhotos.Controllers;
 
-internal class CanvasViewManager
+internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbackCanvasRedraw, Action callbackZoomUpdate)
 {
     public bool PanZoomAnimationOnGoing { get; private set; }
 
@@ -20,17 +20,11 @@ internal class CanvasViewManager
     private Point _panStartPosition;
     private Point _panTargetPosition;
 
-    private readonly CanvasViewState _canvasViewState;
-    private readonly Action _callbackCanvasRedraw; // A callback to trigger a redraw
-    private readonly Action _callbackZoomUpdate;
+    // A callback to trigger a redraw
     private bool _suppressZoomUpdateForNextAnimation;
-
-    public CanvasViewManager(CanvasViewState canvasViewState, Action callbackCanvasRedraw, Action callbackZoomUpdate)
-    {
-        _canvasViewState = canvasViewState;
-        _callbackCanvasRedraw = callbackCanvasRedraw;
-        _callbackZoomUpdate = callbackZoomUpdate;
-    }
+    private readonly Action _callbackZoomUpdate = callbackZoomUpdate;
+    private readonly Action _callbackCanvasRedraw = callbackCanvasRedraw;
+    private readonly CanvasViewState _canvasViewState = canvasViewState;
 
     public void SetScaleAndPosition(Size imageSize, int imageRotation,
         double canvasWidth, double canvasHeight, bool isFirstPhotoEver)
@@ -80,7 +74,7 @@ internal class CanvasViewManager
         _callbackCanvasRedraw();
     }
 
-    public void HandleSizeChange(Rect imageBounds, Size newSize, Size previousSize)
+    public void HandleSizeChange(Size newSize, Size previousSize)
     {
         var xChangeRatio = newSize.Width / previousSize.Width;
         var yChangeRatio = newSize.Height / previousSize.Height;
@@ -143,7 +137,7 @@ internal class CanvasViewManager
         StartPanAndZoomAnimation((float)scaleFactor, targetPosition);
     }
 
-    public void ZoomToHundred(Size imageSize, double canvasWidth, double canvasHeight)
+    public void ZoomToHundred(double canvasWidth, double canvasHeight)
     {
         var targetPosition = new Point(canvasWidth / 2, canvasHeight / 2);
         _canvasViewState.LastScaleTo = 1.0f;

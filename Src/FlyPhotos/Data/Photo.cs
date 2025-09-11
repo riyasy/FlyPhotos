@@ -13,7 +13,7 @@ internal class Photo(string selectedFileName)
     public readonly string FileName = selectedFileName;
     public HqDisplayItem? Hq;
     public PreviewDisplayItem? Preview;
-    private static readonly Photo _empty = new Photo(string.Empty);
+    private static readonly Photo _empty = new(string.Empty);
     public static Photo Empty() => _empty;
 
     public async Task<bool> LoadPreviewFirstPhoto(CanvasControl device)

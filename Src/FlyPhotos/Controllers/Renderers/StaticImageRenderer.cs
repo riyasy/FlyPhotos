@@ -106,9 +106,6 @@ namespace FlyPhotos.Controllers.Renderers
             session.Transform = originalTransform;
         }
 
-
-
-
         public void RestartOffScreenDrawTimer()
         {
             if (!_createOffScreen) return;

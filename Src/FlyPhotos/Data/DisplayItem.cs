@@ -22,7 +22,7 @@ internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, 
 internal sealed partial class PreviewDisplayItem(CanvasBitmap bitmap, Origin origin, ImageMetadata metadata = null) : DisplayItem(bitmap, origin, 0)
 {    
     public ImageMetadata Metadata { get; } = metadata;
-    private static readonly PreviewDisplayItem _empty = new PreviewDisplayItem(null, Origin.Undefined);
+    private static readonly PreviewDisplayItem _empty = new(null, Origin.Undefined);
     public static PreviewDisplayItem Empty() => _empty;
 }
 

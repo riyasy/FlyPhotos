@@ -80,8 +80,8 @@ internal static class FileDiscoveryService
 
         // 3. Filter for supported extensions, always including the selected file.
         var supportedExtensions = Util.SupportedExtensions;
-        files = files.Where(s =>
-            supportedExtensions.Contains(Path.GetExtension(s).ToUpperInvariant()) || s == selectedFileName).ToList();
+        files = [.. files.Where(s =>
+            supportedExtensions.Contains(Path.GetExtension(s).ToUpperInvariant()) || s == selectedFileName)];
 
         // 4. If, after all fallbacks and filters, the list is empty, add the selected file to ensure we have at least one item.
         if (files.Count == 0)

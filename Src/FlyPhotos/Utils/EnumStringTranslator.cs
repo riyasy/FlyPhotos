@@ -4,16 +4,13 @@ using System.Linq;
 
 namespace FlyPhotos.Utils;
 
-public class EnumStringTranslator<TEnum> where TEnum : struct, Enum
+public class EnumStringTranslator<TEnum>(Dictionary<TEnum, string> map) where TEnum : struct, Enum
 {
-    private readonly Dictionary<string, TEnum> _stringToEnum;
-    private readonly Dictionary<TEnum, string> _enumToString;
-
-    public EnumStringTranslator(Dictionary<TEnum, string> map)
-    {
-        _enumToString = new Dictionary<TEnum, string>(map);
-        _stringToEnum = map.ToDictionary(kvp => kvp.Value, kvp => kvp.Key, StringComparer.OrdinalIgnoreCase);
-    }
+    private readonly Dictionary<TEnum, string> _enumToString = new(map);
+    private readonly Dictionary<string, TEnum> _stringToEnum = map.ToDictionary(
+        kvp => kvp.Value,
+        kvp => kvp.Key,
+        StringComparer.OrdinalIgnoreCase);
 
     public TEnum ToEnum(string name)
     {
