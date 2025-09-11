@@ -30,24 +30,42 @@
             Height="40"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Bottom" />
-        <TextBlock
-            x:Name="TxtZoom"
-            Width="Auto"
-            Height="Auto"
-            Margin="0,0,0,0"
+        <Border
+            x:Name="BorderTxtZoom"
+            Padding="10,5,10,5"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            FontSize="12"
-            Foreground="White" />
-        <TextBlock
-            x:Name="TxtFileName"
-            Width="Auto"
-            Height="Auto"
+            Background="#66000000"
+            CornerRadius="4"
+            Visibility="Collapsed">
+            <TextBlock
+                x:Name="TxtZoom"
+                Width="Auto"
+                Height="Auto"
+                Margin="0"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="12"
+                Foreground="White"
+                Text="" />
+        </Border>
+        <Border
+            x:Name="BorderTxtFileName"
             Margin="0,0,0,85"
+            Padding="5"
             HorizontalAlignment="Center"
             VerticalAlignment="Bottom"
-            FontSize="12"
-            Foreground="White" />
+            Background="#66000000"
+            CornerRadius="4">
+            <TextBlock
+                x:Name="TxtFileName"
+                Width="Auto"
+                Height="Auto"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="12"
+                Foreground="White" />
+        </Border>
         <!--<Rectangle
             Width="40"
             Height="40"

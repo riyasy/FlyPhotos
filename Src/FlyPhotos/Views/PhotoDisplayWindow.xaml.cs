@@ -130,8 +130,8 @@ public sealed partial class PhotoDisplayWindow
         //this.Maximize(); // Maximise will be called from App.xaml.cs
         _lastWindowState = OverlappedPresenterState.Maximized;
 
-        _opacityFader = new OpacityFader([ButtonPanel, D2dCanvasThumbNail, TxtFileName], MainLayout);
-        _inactivityFader = new InactivityFader(TxtZoom);
+        _opacityFader = new OpacityFader([ButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout);
+        _inactivityFader = new InactivityFader(BorderTxtZoom);
     }
 
     private async void ThumbNailController_ThumbnailClicked(int shiftIndex)

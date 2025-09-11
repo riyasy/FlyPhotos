@@ -13,7 +13,7 @@ internal class CanvasViewManager
     private EventHandler<object> _renderingHandler;
     private DateTime _panZoomAnimationStartTime;
     private double _panZoomAnimationDurationMs = Constants.PanZoomAnimationDurationNormal;
-    
+
     private float _zoomStartScale;
     private float _zoomTargetScale;
     private Point _zoomCenter;
@@ -23,6 +23,7 @@ internal class CanvasViewManager
     private readonly CanvasViewState _canvasViewState;
     private readonly Action _callbackCanvasRedraw; // A callback to trigger a redraw
     private readonly Action _callbackZoomUpdate;
+    private bool _suppressZoomUpdateForNextAnimation;
 
     public CanvasViewManager(CanvasViewState canvasViewState, Action callbackCanvasRedraw, Action callbackZoomUpdate)
     {
@@ -32,7 +33,7 @@ internal class CanvasViewManager
     }
 
     public void SetScaleAndPosition(Size imageSize, int imageRotation,
-        double canvasWidth, double canvasHeight, bool isFirstPhoto)
+        double canvasWidth, double canvasHeight, bool isFirstPhotoEver)
     {
         var vertical = imageRotation is 270 or 90;
 
@@ -46,7 +47,7 @@ internal class CanvasViewManager
         var horScale = paddedCanvasWidth / effectiveWidth;
         var vertScale = paddedCanvasHeight / effectiveHeight;
         var scaleFactor = Math.Min(horScale, vertScale);
-        
+
         if (scaleFactor > 1.0) scaleFactor = 1.0;
 
         // Note: The _imageRect should always be based on the un-rotated dimensions.
@@ -58,10 +59,11 @@ internal class CanvasViewManager
 
         _canvasViewState.LastScaleTo = (float)scaleFactor;
 
-        if (isFirstPhoto && AppConfig.Settings.OpenExitZoom)
+        if (isFirstPhotoEver && AppConfig.Settings.OpenExitZoom)
         {
             var targetPosition = new Point(canvasWidth / 2, canvasHeight / 2);
             _canvasViewState.Scale = 0.01f;
+            _suppressZoomUpdateForNextAnimation = true;
             StartPanAndZoomAnimation((float)scaleFactor, targetPosition);
         }
         else
@@ -69,6 +71,13 @@ internal class CanvasViewManager
             _canvasViewState.Scale = (float)scaleFactor;
         }
         _canvasViewState.UpdateTransform();
+    }
+
+    public void UpdateImageMetrics(Size imageSize)
+    {
+        _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+        _canvasViewState.UpdateTransform();
+        _callbackCanvasRedraw();
     }
 
     public void HandleSizeChange(Rect imageBounds, Size newSize, Size previousSize)
@@ -103,6 +112,7 @@ internal class CanvasViewManager
     {
         _panZoomAnimationDurationMs = exitAnimationDuration;
         var targetPosition = new Point(canvasWidth / 2, canvasHeight / 2);
+        _suppressZoomUpdateForNextAnimation = true;
         StartPanAndZoomAnimation(0.001f, targetPosition);
     }
 
@@ -207,12 +217,13 @@ internal class CanvasViewManager
         _canvasViewState.Scale = newScale;
         _canvasViewState.UpdateTransform();
         _callbackCanvasRedraw();
-        _callbackZoomUpdate();
+        if (!_suppressZoomUpdateForNextAnimation) _callbackZoomUpdate();
 
         if (t >= 1.0)
         {
             CompositionTarget.Rendering -= _renderingHandler;
             PanZoomAnimationOnGoing = false;
+            _suppressZoomUpdateForNextAnimation = false;
         }
     }
 
@@ -234,13 +245,14 @@ internal class CanvasViewManager
 
         _canvasViewState.UpdateTransform();
         _callbackCanvasRedraw();
-        _callbackZoomUpdate();
+        if (!_suppressZoomUpdateForNextAnimation) _callbackZoomUpdate();
 
         if (t >= 1.0)
         {
             // Animation finished, stop the handler
             CompositionTarget.Rendering -= _renderingHandler;
             PanZoomAnimationOnGoing = false;
+            _suppressZoomUpdateForNextAnimation = false;
         }
     }
 

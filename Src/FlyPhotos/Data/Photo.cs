@@ -72,7 +72,6 @@ internal class Photo(string selectedFileName)
             DisplayLevel.Preview => Preview,
             DisplayLevel.Hq => Hq,
             DisplayLevel.PlaceHolder => ImageUtil.GetLoadingIndicator(),
-            DisplayLevel.None => null,
             _ => null
         };
     }

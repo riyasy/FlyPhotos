@@ -27,7 +27,7 @@ public class InactivityFader : IDisposable
     /// <param name="element">The UIElement to control.</param>
     /// <param name="hideDelayMs">The delay in milliseconds before starting the fade-out.</param>
     /// <param name="fadeDurationMs">The duration of the fade-out animation in milliseconds.</param>
-    public InactivityFader(UIElement element, int hideDelayMs = 1000, int fadeDurationMs = 300)
+    public InactivityFader(UIElement element, int hideDelayMs = 500, int fadeDurationMs = 300)
     {
         _element = element ?? throw new ArgumentNullException(nameof(element));
         _hideDelay = TimeSpan.FromMilliseconds(hideDelayMs);

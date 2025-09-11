@@ -46,6 +46,9 @@ internal class CanvasController : ICanvasController
     private readonly CanvasViewState _canvasViewState;
     private readonly CanvasViewManager _canvasViewManager;
     private Size _imageSize;
+    private string _currentPhotoPath = string.Empty;
+    private bool _isDisplayingRealImage;
+
 
     #region Construction and Destruction
 
@@ -99,17 +102,32 @@ internal class CanvasController : ICanvasController
         _checkeredBrush ??= Util.CreateCheckeredBrush(_d2dCanvas, Constants.CheckerSize);
 
         var currentOperationId = ++_latestSetSourceOperationId;
-        var isFirstPhoto = _currentRenderer == null;
+        var isFirstPhotoEver = string.IsNullOrEmpty(_currentPhotoPath);
+
+        bool isNewPhoto = photo.FileName != _currentPhotoPath;
+        if (isNewPhoto)
+        {
+            _currentPhotoPath = photo.FileName;
+            _isDisplayingRealImage = false; // Reset on new photo
+        }
+
+        bool isUpgradeFromPlaceholder = !_isDisplayingRealImage && displayLevel > DisplayLevel.PlaceHolder;
+        bool shouldResetView = isNewPhoto || isUpgradeFromPlaceholder;
 
         _photoSessionState.CurrentDisplayLevel = displayLevel;
         var displayItem = photo.GetDisplayItemBasedOn(displayLevel);
 
-        var size= photo.GetActualSize();
+        var size = photo.GetActualSize();
         _imageSize = new Size(size.Item1, size.Item2);
 
         Debug.WriteLine($"Displaying {photo.FileName} at level {displayLevel} with size {_imageSize.Width}x{_imageSize.Height}");
 
         if (displayItem == null) return;
+
+        if (displayLevel > DisplayLevel.PlaceHolder)
+        {
+            _isDisplayingRealImage = true;
+        }
 
         switch (displayItem)
         {
@@ -117,7 +135,7 @@ internal class CanvasController : ICanvasController
                 try
                 {
                     IRenderer firstFrameRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, animDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate, false);
-                    SetupNewRenderer(firstFrameRenderer, _imageSize, animDispItem.Rotation, isFirstPhoto, true);
+                    SetupNewRenderer(firstFrameRenderer, _imageSize, animDispItem.Rotation, isFirstPhotoEver, shouldResetView, true);
 
                     IAnimator newAnimator = Path.GetExtension(photo.FileName).ToUpper() == ".GIF"
                         ? await GifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas)
@@ -127,7 +145,8 @@ internal class CanvasController : ICanvasController
                     {
                         await newAnimator.UpdateAsync(TimeSpan.Zero);
                         IRenderer newRenderer = new AnimatedImageRenderer(_d2dCanvas, _checkeredBrush, newAnimator, _animatorLock, photo.SupportsTransparency(), RequestInvalidate);
-                        SetupNewRenderer(newRenderer, _imageSize, animDispItem.Rotation, false, false);
+                        // For animation, we don't reset the view again, as the static frame is already there
+                        SetupNewRenderer(newRenderer, _imageSize, animDispItem.Rotation, false, false, false);
                     }
                     else
                     {
@@ -142,7 +161,7 @@ internal class CanvasController : ICanvasController
             case HqDisplayItem hqDispItem:
                 {
                     IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, hqDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
-                    SetupNewRenderer(newRenderer, _imageSize, hqDispItem.Rotation, isFirstPhoto, true);
+                    SetupNewRenderer(newRenderer, _imageSize, hqDispItem.Rotation, isFirstPhotoEver, shouldResetView, true);
                     break;
                 }
             case PreviewDisplayItem previewDispItem:
@@ -153,22 +172,27 @@ internal class CanvasController : ICanvasController
                     var correctedWidth = _imageSize.Height * previewAspectRatio;
 
                     IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, previewDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
-                    SetupNewRenderer(newRenderer, new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, isFirstPhoto, true);
+                    SetupNewRenderer(newRenderer, new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, isFirstPhotoEver, shouldResetView, true);
                     break;
                 }
         }
     }
 
-    private void SetupNewRenderer(IRenderer newRenderer, Size imageSize, int imageRotation, bool isFirstPhoto, bool forceThumbNailRedraw)
+    private void SetupNewRenderer(IRenderer newRenderer, Size imageSize, int imageRotation, bool isFirstPhotoEver, bool resetView, bool forceThumbNailRedraw)
     {
-        //if (isFirstPhoto)
-        //{
-        //    _canvasViewManager.SetStartupScale();
-        //}
         _currentRenderer?.Dispose();
         _currentRenderer = newRenderer;
-        _canvasViewManager.SetScaleAndPosition(imageSize,
-            imageRotation, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight, isFirstPhoto);
+
+        if (resetView)
+        {
+            _canvasViewManager.SetScaleAndPosition(imageSize,
+                imageRotation, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight, isFirstPhotoEver);
+        }
+        else
+        {
+            _canvasViewManager.UpdateImageMetrics(imageSize);
+        }
+
         if (forceThumbNailRedraw)
             _thumbNailController.CreateThumbnailRibbonOffScreen();
         _currentRenderer.RestartOffScreenDrawTimer();
