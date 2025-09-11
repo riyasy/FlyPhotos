@@ -17,9 +17,17 @@ internal static class SvgReader
 
     public static async Task<(bool, PreviewDisplayItem)> GetResized(CanvasControl ctrl, string inputPath)
     {
-        var(bmp, width, height) = await LoadSvgViaSkia(ctrl, inputPath, 800);
+        var (bmp, width, height) = await LoadSvgViaSkia(ctrl, inputPath, 800);
         if (bmp == null) return (false, PreviewDisplayItem.Empty());
-        var metadata = new ImageMetadata(width, height);
+
+        // Since both use the same function, scale 800 to 2000 to calculate
+        // width and height for the hq image.
+        int maxCurrent = Math.Max(width, height);
+        double scale = 2000.0 / maxCurrent;
+        int metaWidth = (int)Math.Round(width * scale);
+        int metaHeight = (int)Math.Round(height * scale);
+        var metadata = new ImageMetadata(metaWidth, metaHeight);
+
         return (true, new PreviewDisplayItem(bmp, Origin.Disk, metadata));
     }
 
