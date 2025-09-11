@@ -38,6 +38,7 @@ namespace FlyPhotos.Controllers.Renderers
 
         public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality)
         {
+            session.Units = CanvasUnits.Pixels;
             if (_animator?.Surface == null) return;
 
             var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;

@@ -9,6 +9,7 @@ using System;
 using System.Numerics;
 using Windows.Foundation;
 using Windows.UI;
+using FlyPhotos.Data;
 
 namespace FlyPhotos.Controllers.Renderers
 {
@@ -46,6 +47,7 @@ namespace FlyPhotos.Controllers.Renderers
 
         public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality)
         {
+            session.Units = CanvasUnits.Pixels;
             var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
             session.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
             if (drawCheckeredBackground)
@@ -129,47 +131,59 @@ namespace FlyPhotos.Controllers.Renderers
 
         private void CreateOffscreen(bool forceCreate)
         {
-            var imageWidth = _canvasViewState.ImageRect.Width * _canvasViewState.Scale;
-            var imageHeight = _canvasViewState.ImageRect.Height * _canvasViewState.Scale;
+            if (_canvasViewState.ImageRect.Width < _canvas.GetSize().Width * 1.5 &&
+                _canvasViewState.ImageRect.Height < _canvas.GetSize().Height * 1.5)
+            {
+                return;
+            }
+
+            var scaledImageWidth = _canvasViewState.ImageRect.Width * _canvasViewState.Scale;
+            var scaledImageHeight = _canvasViewState.ImageRect.Height * _canvasViewState.Scale;
 
             var offScreenDimensionsChanged =
                 _offscreen != null &&
-                (_offscreen.SizeInPixels.Width != (int)imageWidth ||
-                 _offscreen.SizeInPixels.Height != (int)imageHeight);
+                (!(_offscreen.SizeInPixels.Width == (int)scaledImageWidth &&
+                   _offscreen.SizeInPixels.Height == (int)scaledImageHeight));
 
             if (forceCreate || offScreenDimensionsChanged)
             {
                 DestroyOffscreen();
             }
 
+            // offscreen already exists and is valid
+            if (_offscreen != null) 
+                return;
+            // invalid size
+            if (scaledImageWidth <= 0 || scaledImageHeight <= 0)  
+                return;
+            // too zoomed-in to bother with offscreen
+            if (scaledImageWidth > _canvas.GetSize().Width * 1.5 &&
+                scaledImageHeight > _canvas.GetSize().Height * 1.5)
+                return;
+
             var drawingQuality = AppConfig.Settings.HighQualityInterpolation
                 ? CanvasImageInterpolation.HighQualityCubic
                 : CanvasImageInterpolation.NearestNeighbor;
 
-            if (_offscreen == null && imageWidth > 0 && imageHeight > 0 && imageWidth < _canvas.ActualWidth * 1.5)
+            var tempOffScreen = new CanvasRenderTarget(_canvas, (float)scaledImageWidth, (float)scaledImageHeight, 96);
+            using (var ds = tempOffScreen.CreateDrawingSession())
             {
-                var tempOffScreen = new CanvasRenderTarget(_canvas, (float)imageWidth, (float)imageHeight, _canvas.Dpi);
-                using (var ds = tempOffScreen.CreateDrawingSession())
+                var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
+                ds.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
+                if (drawCheckeredBackground)
                 {
-                    var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
-                    ds.Antialiasing = drawCheckeredBackground
-                        ? CanvasAntialiasing.Aliased
-                        : CanvasAntialiasing.Antialiased;
-                    if (drawCheckeredBackground)
-                    {
-                        _checkeredBrush.Transform = Matrix3x2.Identity;
-                        ds.FillRectangle(new Rect(0, 0, imageWidth, imageHeight), _checkeredBrush);
-                    }
-                    else
-                    {
-                        ds.Clear(Colors.Transparent);
-                    }
-
-                    ds.DrawImage(_sourceBitmap, new Rect(0, 0, imageWidth, imageHeight),
-                        _sourceBitmap.Bounds, 1, drawingQuality);
+                    _checkeredBrush.Transform = Matrix3x2.Identity;
+                    ds.FillRectangle(new Rect(0, 0, scaledImageWidth, scaledImageHeight), _checkeredBrush);
                 }
-                _offscreen = tempOffScreen;
+                else
+                {
+                    ds.Clear(Colors.Transparent);
+                }
+
+                ds.DrawImage(_sourceBitmap, new Rect(0, 0, scaledImageWidth, scaledImageHeight),
+                    _sourceBitmap.Bounds, 1, drawingQuality);
             }
+            _offscreen = tempOffScreen;
         }
 
         private void DestroyOffscreen()

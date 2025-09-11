@@ -3,9 +3,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using TerraFX.Interop.Windows;
 using Windows.System;
-using Windows.UI;using FlyPhotos.AppSettings;
+using Windows.UI;
+using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers;
 using FlyPhotos.Data;
 using FlyPhotos.FlyNativeLibWrapper;
@@ -22,7 +22,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using NLog;
-
 using WinRT;
 using WinRT.Interop;
 using WinUIEx;
@@ -181,7 +180,8 @@ public sealed partial class PhotoDisplayWindow
 
     private void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
-        if (_canvasController.IsPressedOnImage(e.GetCurrentPoint(D2dCanvas).Position))
+        var dpiAdjustedPosition = e.GetCurrentPoint(D2dCanvas).Position.AdjustForDpi(D2dCanvas);
+        if (_canvasController.IsPressedOnImage(dpiAdjustedPosition))
         {
             var properties = e.GetCurrentPoint(D2dCanvas).Properties;
             if (properties.PointerUpdateKind == Microsoft.UI.Input.PointerUpdateKind.RightButtonReleased)

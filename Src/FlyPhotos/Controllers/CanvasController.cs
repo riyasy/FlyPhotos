@@ -16,6 +16,7 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
+using Size = FlyPhotos.Data.Size;
 
 namespace FlyPhotos.Controllers;
 
@@ -47,7 +48,7 @@ internal class CanvasController : ICanvasController
     private readonly CanvasViewManager _canvasViewManager;
     private Size _imageSize;
     private string _currentPhotoPath = string.Empty;
-    private bool _isDisplayingRealImage;
+    private bool _realImageDisplayedForCurrentPhoto;
 
 
     #region Construction and Destruction
@@ -108,10 +109,11 @@ internal class CanvasController : ICanvasController
         if (isNewPhoto)
         {
             _currentPhotoPath = photo.FileName;
-            _isDisplayingRealImage = false; // Reset on new photo
+            // Real image means, not a placeholder. It can be either preview or hq.
+            _realImageDisplayedForCurrentPhoto = false;
         }
 
-        bool isUpgradeFromPlaceholder = !_isDisplayingRealImage && displayLevel > DisplayLevel.PlaceHolder;
+        bool isUpgradeFromPlaceholder = !_realImageDisplayedForCurrentPhoto && displayLevel > DisplayLevel.PlaceHolder;
         bool shouldResetView = isNewPhoto || isUpgradeFromPlaceholder;
 
         _photoSessionState.CurrentDisplayLevel = displayLevel;
@@ -126,7 +128,7 @@ internal class CanvasController : ICanvasController
 
         if (displayLevel > DisplayLevel.PlaceHolder)
         {
-            _isDisplayingRealImage = true;
+            _realImageDisplayedForCurrentPhoto = true;
         }
 
         switch (displayItem)
@@ -186,7 +188,7 @@ internal class CanvasController : ICanvasController
         if (resetView)
         {
             _canvasViewManager.SetScaleAndPosition(imageSize,
-                imageRotation, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight, isFirstPhotoEver);
+                imageRotation, _d2dCanvas.GetSize(), isFirstPhotoEver);
         }
         else
         {
@@ -201,25 +203,25 @@ internal class CanvasController : ICanvasController
 
     public void FitToScreen(bool animateChange)
     {
-        _canvasViewManager.ZoomPanToFit(animateChange, _imageSize, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight);
+        _canvasViewManager.ZoomPanToFit(animateChange, _imageSize, _d2dCanvas.GetSize());
         _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
     public void ZoomToHundred()
     {
-        _canvasViewManager.ZoomToHundred(_d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight);
+        _canvasViewManager.ZoomToHundred(_d2dCanvas.GetSize());
         _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
     public void ZoomOutOnExit(double exitAnimationDuration)
     {
-        _canvasViewManager.ZoomOutOnExit(exitAnimationDuration, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight);
+        _canvasViewManager.ZoomOutOnExit(exitAnimationDuration, _d2dCanvas.GetSize());
     }
 
     public void ZoomByKeyboard(ZoomDirection zoomDirection)
     {
         if (IsScreenEmpty()) return;
-        _canvasViewManager.ZoomAtCenter(zoomDirection, _d2dCanvas.ActualWidth, _d2dCanvas.ActualHeight);
+        _canvasViewManager.ZoomAtCenter(zoomDirection, _d2dCanvas.GetSize());
         _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
@@ -259,7 +261,7 @@ internal class CanvasController : ICanvasController
     private void D2dCanvas_SizeChanged(object sender, SizeChangedEventArgs args)
     {
         if (IsScreenEmpty()) return;
-        _canvasViewManager.HandleSizeChange(args.NewSize, args.PreviousSize);
+        _canvasViewManager.HandleSizeChange(Size.FromFoundationSize(args.NewSize), Size.FromFoundationSize(args.PreviousSize));
     }
 
     private void D2dCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
@@ -267,7 +269,7 @@ internal class CanvasController : ICanvasController
         var pointerPoint = e.GetCurrentPoint(_d2dCanvas);
         if (!pointerPoint.Properties.IsLeftButtonPressed)
             return;
-        if (IsScreenEmpty() || !IsPressedOnImage(pointerPoint.Position))
+        if (IsScreenEmpty() || !IsPressedOnImage(pointerPoint.Position.AdjustForDpi(_d2dCanvas)))
             return;
         _d2dCanvas.CapturePointer(e.Pointer);
         _lastPoint = pointerPoint.Position;
@@ -277,9 +279,19 @@ internal class CanvasController : ICanvasController
     private void D2dCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
         if (!_isDragging) return;
-        _canvasViewManager.Pan(e.GetCurrentPoint(_d2dCanvas).Position.X - _lastPoint.X,
-            e.GetCurrentPoint(_d2dCanvas).Position.Y - _lastPoint.Y);
-        _lastPoint = e.GetCurrentPoint(_d2dCanvas).Position;
+
+        var currentPoint = e.GetCurrentPoint(_d2dCanvas).Position;
+
+        // Calculate logical delta
+        double deltaX = currentPoint.X - _lastPoint.X;
+        double deltaY = currentPoint.Y - _lastPoint.Y;
+        // Adjust delta for DPI 
+        deltaX = deltaX.AdjustForDpi(_d2dCanvas);
+        deltaY = deltaY.AdjustForDpi(_d2dCanvas);
+
+        _canvasViewManager.Pan(deltaX, deltaY);
+
+        _lastPoint = currentPoint;
     }
 
     private void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
@@ -291,8 +303,14 @@ internal class CanvasController : ICanvasController
     private void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         if (IsScreenEmpty() || Util.IsControlPressed()) return;
+
+        var currentPoint = e.GetCurrentPoint(_d2dCanvas).Position;
+        var adjustedPoint = currentPoint.AdjustForDpi(_d2dCanvas);
+
         var zoomDirection = (e.GetCurrentPoint(_d2dCanvas).Properties.MouseWheelDelta > 0) ? ZoomDirection.In : ZoomDirection.Out;
-        _canvasViewManager.ZoomAtPoint(zoomDirection, e.GetCurrentPoint(_d2dCanvas).Position);
+
+        _canvasViewManager.ZoomAtPoint(zoomDirection, adjustedPoint);
+
         _currentRenderer.RestartOffScreenDrawTimer();
     }
 

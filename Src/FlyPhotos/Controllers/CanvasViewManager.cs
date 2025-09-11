@@ -3,6 +3,7 @@ using Windows.Foundation;
 using FlyPhotos.AppSettings;
 using FlyPhotos.Data;
 using Microsoft.UI.Xaml.Media;
+using Size = FlyPhotos.Data.Size;
 
 namespace FlyPhotos.Controllers;
 
@@ -26,8 +27,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
     private readonly Action _callbackCanvasRedraw = callbackCanvasRedraw;
     private readonly CanvasViewState _canvasViewState = canvasViewState;
 
-    public void SetScaleAndPosition(Size imageSize, int imageRotation,
-        double canvasWidth, double canvasHeight, bool isFirstPhotoEver)
+    public void SetScaleAndPosition(Size imageSize, int imageRotation, Size canvasSize, bool isFirstPhotoEver)
     {
         var vertical = imageRotation is 270 or 90;
 
@@ -35,8 +35,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         var effectiveWidth = vertical ? imageSize.Height : imageSize.Width;
         var effectiveHeight = vertical ? imageSize.Width : imageSize.Height;
 
-        var paddedCanvasWidth = canvasWidth * (AppConfig.Settings.ImageFitPercentage / 100.0f);
-        var paddedCanvasHeight = canvasHeight * (AppConfig.Settings.ImageFitPercentage / 100.0f);
+        var paddedCanvasWidth = canvasSize.Width * (AppConfig.Settings.ImageFitPercentage / 100.0f);
+        var paddedCanvasHeight = canvasSize.Height * (AppConfig.Settings.ImageFitPercentage / 100.0f);
 
         var horScale = paddedCanvasWidth / effectiveWidth;
         var vertScale = paddedCanvasHeight / effectiveHeight;
@@ -48,14 +48,14 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         // The rotation is applied later in the transform matrix.
         _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
         _canvasViewState.Rotation = imageRotation;
-        _canvasViewState.ImagePos.X = canvasWidth / 2;
-        _canvasViewState.ImagePos.Y = canvasHeight / 2;
+        _canvasViewState.ImagePos.X = canvasSize.Width / 2;
+        _canvasViewState.ImagePos.Y = canvasSize.Height / 2;
 
         _canvasViewState.LastScaleTo = (float)scaleFactor;
 
         if (isFirstPhotoEver && AppConfig.Settings.OpenExitZoom)
         {
-            var targetPosition = new Point(canvasWidth / 2, canvasHeight / 2);
+            var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
             _canvasViewState.Scale = 0.01f;
             _suppressZoomUpdateForNextAnimation = true;
             StartPanAndZoomAnimation((float)scaleFactor, targetPosition);
@@ -83,13 +83,13 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _canvasViewState.UpdateTransform();
     }
 
-    public void ZoomAtCenter(ZoomDirection zoomDirection, double canvasWidth, double canvasHeight)
+    public void ZoomAtCenter(ZoomDirection zoomDirection, Size canvasSize)
     {
         var scalePercentage = (zoomDirection == ZoomDirection.In) ? 1.25f : 0.8f;
         var scaleTo = _canvasViewState.LastScaleTo * scalePercentage;
         if (scaleTo < 0.05) return;
         _canvasViewState.LastScaleTo = scaleTo;
-        var center = new Point(canvasWidth / 2, canvasHeight / 2);
+        var center = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         StartZoomAnimation(scaleTo, center);
     }
 
@@ -102,44 +102,43 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         StartZoomAnimation(scaleTo, mousePosition);
     }
 
-    public void ZoomOutOnExit(double exitAnimationDuration, double canvasWidth, double canvasHeight)
+    public void ZoomOutOnExit(double exitAnimationDuration, Size canvasSize)
     {
         _panZoomAnimationDurationMs = exitAnimationDuration;
-        var targetPosition = new Point(canvasWidth / 2, canvasHeight / 2);
+        var targetPosition = new Point(canvasSize.Width/ 2, canvasSize.Height / 2);
         _suppressZoomUpdateForNextAnimation = true;
         StartPanAndZoomAnimation(0.001f, targetPosition);
     }
 
-    public void ZoomPanToFit(bool animateChange, Size imageSize, double canvasWidth,
-        double canvasHeight)
+    public void ZoomPanToFit(bool animateChange, Size imageSize, Size canvasSize)
     {
         var vertical = (_canvasViewState.Rotation % 180) != 0;
         var effectiveWidth = vertical ? imageSize.Height : imageSize.Width;
         var effectiveHeight = vertical ? imageSize.Width : imageSize.Height;
-        var paddedCanvasWidth = canvasWidth * (AppConfig.Settings.ImageFitPercentage / 100.0f);
-        var paddedCanvasHeight = canvasHeight * (AppConfig.Settings.ImageFitPercentage / 100.0f);
+        var paddedCanvasWidth = canvasSize.Width * (AppConfig.Settings.ImageFitPercentage / 100.0f);
+        var paddedCanvasHeight = canvasSize.Height * (AppConfig.Settings.ImageFitPercentage / 100.0f);
         var horScale = paddedCanvasWidth / effectiveWidth;
         var vertScale = paddedCanvasHeight / effectiveHeight;
         var scaleFactor = Math.Min(horScale, vertScale);
-        if (scaleFactor > 1.0) scaleFactor = 1.0;
+        //if (scaleFactor > 1.0) scaleFactor = 1.0;
 
         if (!animateChange)
         {
             _canvasViewState.Scale = (float)scaleFactor;
             _canvasViewState.LastScaleTo = (float)scaleFactor;
-            _canvasViewState.ImagePos.X = canvasWidth / 2;
-            _canvasViewState.ImagePos.Y = canvasHeight / 2;
+            _canvasViewState.ImagePos.X = canvasSize.Width / 2;
+            _canvasViewState.ImagePos.Y = canvasSize.Height / 2;
             return;
         }
 
-        var targetPosition = new Point(canvasWidth / 2, canvasHeight / 2);
+        var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         _canvasViewState.LastScaleTo = (float)scaleFactor;
         StartPanAndZoomAnimation((float)scaleFactor, targetPosition);
     }
 
-    public void ZoomToHundred(double canvasWidth, double canvasHeight)
+    public void ZoomToHundred(Size canvasSize)
     {
-        var targetPosition = new Point(canvasWidth / 2, canvasHeight / 2);
+        var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         _canvasViewState.LastScaleTo = 1.0f;
         StartPanAndZoomAnimation(1.0f, targetPosition);
     }

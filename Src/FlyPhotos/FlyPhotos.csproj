@@ -27,6 +27,7 @@
 		<AppxBundle>Never</AppxBundle>
 		<AppInstallerUri>C:\Users\Riyas\Documents\GitHub\FlyPhotos\Src\FlyPhotos\MSIX_FOLDER</AppInstallerUri>
 		<HoursBetweenUpdateChecks>672</HoursBetweenUpdateChecks>
+		<NoWarn>$(NoWarn);CA1416</NoWarn>
 	</PropertyGroup>
 
 	<Target Name="CopyYourFolderAfterPublish" AfterTargets="Publish">

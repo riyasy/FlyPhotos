@@ -85,8 +85,8 @@ public partial class PngAnimator : IAnimator
         PixelWidth = apngData.CanvasWidth;
         PixelHeight = apngData.CanvasHeight;
 
-        _compositedSurface = new CanvasRenderTarget(_canvas, PixelWidth, PixelHeight, _canvas.Dpi);
-        _previousFrameBackup = new CanvasRenderTarget(_canvas, PixelWidth, PixelHeight, _canvas.Dpi);
+        _compositedSurface = new CanvasRenderTarget(_canvas, PixelWidth, PixelHeight, 96);
+        _previousFrameBackup = new CanvasRenderTarget(_canvas, PixelWidth, PixelHeight, 96);
 
         // If the first frame is not the default image, render it immediately.
         if (!apngData.IsDefaultImageFirstFrame)

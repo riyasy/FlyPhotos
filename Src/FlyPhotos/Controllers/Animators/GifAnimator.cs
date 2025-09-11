@@ -59,8 +59,8 @@ public partial class GifAnimator : IAnimator
         PixelWidth = _decoder.OrientedPixelWidth;
         PixelHeight = _decoder.OrientedPixelHeight;
 
-        _compositedSurface = new CanvasRenderTarget(_canvas, PixelWidth, PixelHeight, _canvas.Dpi);
-        _previousFrameBackup = new CanvasRenderTarget(_canvas, PixelWidth, PixelHeight, _canvas.Dpi);
+        _compositedSurface = new CanvasRenderTarget(_canvas, PixelWidth, PixelHeight, 96);
+        _previousFrameBackup = new CanvasRenderTarget(_canvas, PixelWidth, PixelHeight, 96);
     }
 
 
