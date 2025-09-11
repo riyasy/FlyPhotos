@@ -13,6 +13,8 @@ internal class Photo(string selectedFileName)
     public readonly string FileName = selectedFileName;
     public HqDisplayItem? Hq;
     public PreviewDisplayItem? Preview;
+    private static readonly Photo _empty = new Photo(string.Empty);
+    public static Photo Empty() => _empty;
 
     public async Task<bool> LoadPreviewFirstPhoto(CanvasControl device)
     {
@@ -121,11 +123,4 @@ internal class Photo(string selectedFileName)
         string extension = Path.GetExtension(FileName);
         return !string.IsNullOrEmpty(extension) && FormatsSupportingTransparency.Contains(extension.ToLower());
     }
-
-    public static Photo Empty()
-    {
-        return new Photo(string.Empty);
-    }
-
-
 }

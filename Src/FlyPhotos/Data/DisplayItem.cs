@@ -14,7 +14,7 @@ internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, 
     public void Dispose()
     {
         // We don't dispose bitmaps coming from the error screen as they are reused.
-        if (Origin != Origin.ErrorScreen)
+        if (Origin != Origin.ErrorScreen && Origin != Origin.Undefined)
             Bitmap?.Dispose();
     }
 }
@@ -22,19 +22,14 @@ internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, 
 internal sealed partial class PreviewDisplayItem(CanvasBitmap bitmap, Origin origin, ImageMetadata metadata = null) : DisplayItem(bitmap, origin, 0)
 {    
     public ImageMetadata Metadata { get; } = metadata;
-
-    public static PreviewDisplayItem Empty()
-    {
-        return new PreviewDisplayItem(null, Origin.Undefined);
-    }
+    private static readonly PreviewDisplayItem _empty = new PreviewDisplayItem(null, Origin.Undefined);
+    public static PreviewDisplayItem Empty() => _empty;
 }
 
 internal abstract partial class HqDisplayItem(CanvasBitmap bitmap, Origin origin, int rotation) : DisplayItem(bitmap, origin, rotation)
 {
-    public static HqDisplayItem Empty()
-    {
-        return new StaticHqDisplayItem(null, Origin.Undefined);
-    }
+    private static readonly HqDisplayItem _empty = new StaticHqDisplayItem(null, Origin.Undefined);
+    public static HqDisplayItem Empty() => _empty;
 }
 
 internal sealed partial class StaticHqDisplayItem(CanvasBitmap bitmap, Origin origin, int rotation = 0) : HqDisplayItem(bitmap, origin, rotation);
