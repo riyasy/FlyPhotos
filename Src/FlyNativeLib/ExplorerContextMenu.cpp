@@ -9,7 +9,7 @@ bool ExplorerContextMenu::s_classRegistered = false;
 const wchar_t ExplorerContextMenu::CLASS_NAME[] = L"FlyPhotosHiddenMenuWindow";
 #define SCRATCH_QCM_FIRST 1
 
-bool ExplorerContextMenu::ShowContextMenu(HINSTANCE appInstance, LPCWSTR filePath, int posX, int posY)
+bool ExplorerContextMenu::ShowContextMenu(HINSTANCE appInstance, HWND ownerHwnd, LPCWSTR filePath, int posX, int posY)
 {
     LPITEMIDLIST pidl = nullptr;
     HRESULT hr = SHParseDisplayName(filePath, nullptr, &pidl, 0, nullptr);

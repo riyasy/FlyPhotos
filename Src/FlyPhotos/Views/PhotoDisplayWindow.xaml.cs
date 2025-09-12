@@ -192,7 +192,7 @@ public sealed partial class PhotoDisplayWindow
                     if (File.Exists(filePath))
                     {
                         NativeMethods.GetCursorPos(out NativeMethods.POINT mousePosScreen);
-                        CliWrapper.ShowContextMenu(filePath, mousePosScreen.X, mousePosScreen.Y);
+                        CliWrapper.ShowContextMenu(this, filePath, mousePosScreen.X, mousePosScreen.Y);
                     }
                 }
                 catch (Exception ex)

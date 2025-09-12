@@ -55,7 +55,7 @@
             Padding="5"
             HorizontalAlignment="Center"
             VerticalAlignment="Bottom"
-            Background="#66000000"
+            Background="#44000000"
             CornerRadius="4">
             <TextBlock
                 x:Name="TxtFileName"

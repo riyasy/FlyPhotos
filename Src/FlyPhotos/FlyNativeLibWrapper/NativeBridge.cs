@@ -1,8 +1,11 @@
-﻿using System;
+﻿using FlyPhotos.Data;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices; // Required for CallConvStdcall
 using System.Runtime.InteropServices;
-using FlyPhotos.Data;
+using FlyPhotos.Views;
+using Microsoft.UI.Xaml;
+using WinRT.Interop;
 
 namespace FlyPhotos.FlyNativeLibWrapper;
 
@@ -31,7 +34,7 @@ internal static partial class NativeBridge
     [LibraryImport(DllName, StringMarshalling = StringMarshalling.Utf16)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    internal static partial bool ShowExplorerContextMenu(string filePath, int x, int y);
+    internal static partial bool ShowExplorerContextMenu(IntPtr ownerHwnd, string filePath, int x, int y);
 
     [LibraryImport(DllName)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
@@ -95,8 +98,10 @@ public static class CliWrapper
         }
     }
 
-    public static void ShowContextMenu(string filePath, int lpPointX, int lpPointY)
+    public static void ShowContextMenu(Window ownerWindow, string filePath, int lpPointX,
+        int lpPointY)
     {
-        NativeBridge.ShowExplorerContextMenu(filePath, lpPointX, lpPointY);
+        IntPtr hWnd = WindowNative.GetWindowHandle(ownerWindow);
+        NativeBridge.ShowExplorerContextMenu(hWnd, filePath, lpPointX, lpPointY);
     }
 }

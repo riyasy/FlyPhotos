@@ -32,10 +32,9 @@ HRESULT GetFileListFromExplorer(FileListCallback callback)
 }
 
 // Implementation for showing the context menu
-bool ShowExplorerContextMenu(const wchar_t* filePath, int x, int y)
+bool ShowExplorerContextMenu(HWND ownerHwnd, const wchar_t* filePath, int x, int y)
 {
-    ExplorerContextMenu ctxMenu;
-    return ctxMenu.ShowContextMenu(g_hInst, filePath, x, y);
+    return ExplorerContextMenu::ShowContextMenu(g_hInst, ownerHwnd, filePath, x, y);
 }
 
 // Implementation for getting WIC codecs

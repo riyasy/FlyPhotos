@@ -6,7 +6,7 @@ class ExplorerContextMenu
 public:
     // Shows a fully functional context menu for the given file path at the specified screen coordinates.
     // Returns true if the menu was shown, false on any failure.
-    static bool ShowContextMenu(HINSTANCE appInstance, LPCWSTR filePath, int posX, int posY);
+    static bool ShowContextMenu(HINSTANCE appInstance, HWND ownerHwnd, LPCWSTR filePath, int posX, int posY);
 
 private:
     struct MenuContext
