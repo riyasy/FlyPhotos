@@ -138,16 +138,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DllGlobals.h" />
-    <ClInclude Include="ExplorerContextMenu.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="NativeExports.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="ShellContextMenu.h" />
     <ClInclude Include="ShellUtility.h" />
     <ClInclude Include="WicUtility.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="ExplorerContextMenu.cpp" />
     <ClCompile Include="NativeExports.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -155,6 +154,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="ShellContextMenu.cpp" />
     <ClCompile Include="ShellUtility.cpp" />
     <ClCompile Include="WicUtility.cpp" />
   </ItemGroup>

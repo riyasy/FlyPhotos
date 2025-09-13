@@ -13,7 +13,7 @@ extern "C" {
 
     // The __declspec(dllexport) keyword makes the function visible to other modules.
     __declspec(dllexport) HRESULT GetFileListFromExplorer(FileListCallback callback);
-    __declspec(dllexport) bool ShowExplorerContextMenu(HWND ownerHwnd, const wchar_t* filePath, int x, int y);
+    __declspec(dllexport) int ShowExplorerContextMenu(HWND ownerHwnd, const wchar_t* filePath, int x, int y);
 
     // We can handle the WIC codec list similarly with another callback.
     typedef void(__stdcall* CodecInfoCallback)(const wchar_t* friendlyName, const wchar_t* extensions);

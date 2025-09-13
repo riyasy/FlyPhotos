@@ -186,19 +186,11 @@ public sealed partial class PhotoDisplayWindow
             var properties = e.GetCurrentPoint(D2dCanvas).Properties;
             if (properties.PointerUpdateKind == Microsoft.UI.Input.PointerUpdateKind.RightButtonReleased)
             {
-                try
+                var filePath = _photoController.GetFullPathCurrentFile();
+                if (File.Exists(filePath))
                 {
-                    var filePath = _photoController.GetFullPathCurrentFile();
-                    if (File.Exists(filePath))
-                    {
-                        NativeMethods.GetCursorPos(out NativeMethods.POINT mousePosScreen);
-                        CliWrapper.ShowContextMenu(this, filePath, mousePosScreen.X, mousePosScreen.Y);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error("Showing context menu failed");
-                    Logger.Error(ex);
+                    NativeMethods.GetCursorPos(out NativeMethods.POINT mousePosScreen);
+                    CliWrapper.ShowContextMenu(this, filePath, mousePosScreen.X, mousePosScreen.Y);
                 }
             }
         }
