@@ -1,5 +1,4 @@
 ﻿using FlyPhotos.Data;
-using FlyPhotos.Views;
 using Microsoft.UI.Xaml;
 using NLog;
 using System;

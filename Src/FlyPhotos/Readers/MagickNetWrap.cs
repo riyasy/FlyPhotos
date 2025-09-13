@@ -8,9 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using Windows.Graphics.DirectX;
 using Windows.Graphics.Imaging;
-using Windows.Storage.Streams;
 
 namespace FlyPhotos.Readers
 {

@@ -1,4 +1,10 @@
 ﻿#nullable enable
+using FlyPhotos.AppSettings;
+using FlyPhotos.Data;
+using FlyPhotos.Utils;
+using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.UI.Xaml;
+using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,11 +15,6 @@ using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Streams;
-using FlyPhotos.AppSettings;
-using FlyPhotos.Data;
-using FlyPhotos.Utils;
-using Microsoft.Graphics.Canvas.UI.Xaml;
-using NLog;
 
 namespace FlyPhotos.Controllers;
 
@@ -332,21 +333,42 @@ internal partial class PhotoDisplayController : IPhotoDisplayController
         StatusUpdated?.Invoke(this, new StatusUpdateEventArgs(indexAndFileName, cacheProgressStatus));
     }
 
+
     public async Task CopyFileToClipboardAsync()
     {
         try
         {
-            string filePath = GetFullPathCurrentFile();
-            StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
-            IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
-            DataPackage dataPackage = new();
-            dataPackage.SetBitmap(RandomAccessStreamReference.CreateFromStream(stream));
-            dataPackage.SetStorageItems([file]);
+            var photo = _photos[_photoSessionState.CurrentDisplayIndex];
+            var filePath = photo.FileName;
+
+            if (!File.Exists(filePath))  
+                return; 
+
+            var sourceFile = await StorageFile.GetFileFromPathAsync(filePath);
+            var dataPackage = new DataPackage();
+            if (sourceFile != null)
+                dataPackage.SetStorageItems(new List<IStorageItem> { sourceFile });
+
+            var canvasBitmap = _photoSessionState.CurrentDisplayLevel switch
+            {
+                DisplayLevel.Hq => photo.Hq?.Bitmap,
+                DisplayLevel.Preview => photo.Preview?.Bitmap,
+                _ => null
+            };
+
+            if (canvasBitmap != null)
+            {
+                var memoryStream = new InMemoryRandomAccessStream();
+                await canvasBitmap.SaveAsync(memoryStream, CanvasBitmapFileFormat.Png);
+                memoryStream.Seek(0);
+                var streamReference = RandomAccessStreamReference.CreateFromStream(memoryStream);
+                dataPackage.SetBitmap(streamReference);
+            }
             Clipboard.SetContent(dataPackage);
         }
         catch (Exception ex)
         {
-            Logger.Error(ex);
+            Logger.Error(ex, "Failed to copy CanvasBitmap to clipboard.");
         }
     }
 

@@ -9,7 +9,6 @@ using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
