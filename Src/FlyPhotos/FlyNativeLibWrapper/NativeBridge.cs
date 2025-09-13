@@ -1,10 +1,11 @@
 ﻿using FlyPhotos.Data;
+using FlyPhotos.Views;
+using Microsoft.UI.Xaml;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices; // Required for CallConvStdcall
 using System.Runtime.InteropServices;
-using FlyPhotos.Views;
-using Microsoft.UI.Xaml;
 using WinRT.Interop;
 
 namespace FlyPhotos.FlyNativeLibWrapper;
@@ -33,8 +34,7 @@ internal static partial class NativeBridge
     // Set StringMarshalling to match the original CharSet.Unicode.
     [LibraryImport(DllName, StringMarshalling = StringMarshalling.Utf16)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal static partial bool ShowExplorerContextMenu(IntPtr ownerHwnd, string filePath, int x, int y);
+    internal static partial int ShowExplorerContextMenu(IntPtr ownerHwnd, string filePath, int x, int y);
 
     [LibraryImport(DllName)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
@@ -43,6 +43,8 @@ internal static partial class NativeBridge
 
 public static class CliWrapper
 {
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
     public static List<string> GetFileListFromExplorerWindow()
     {
         var files = new List<string>();
@@ -101,7 +103,18 @@ public static class CliWrapper
     public static void ShowContextMenu(Window ownerWindow, string filePath, int lpPointX,
         int lpPointY)
     {
-        IntPtr hWnd = WindowNative.GetWindowHandle(ownerWindow);
-        NativeBridge.ShowExplorerContextMenu(hWnd, filePath, lpPointX, lpPointY);
+        try
+        {
+            IntPtr hWnd = WindowNative.GetWindowHandle(ownerWindow);
+            var returnCode = NativeBridge.ShowExplorerContextMenu(hWnd, filePath, lpPointX, lpPointY);
+            if (returnCode != 0) // Check for failure
+            {
+                Logger.Error($"NativeBridge - ShowExplorerContextMenu failed with error code {returnCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "NativeBridge - ShowContextMenu failed with exception");
+        }
     }
 }

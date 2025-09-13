@@ -27,13 +27,13 @@
     <ClInclude Include="ShellUtility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ExplorerContextMenu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="WicUtility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DllGlobals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShellContextMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,10 +50,10 @@
     <ClCompile Include="ShellUtility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ExplorerContextMenu.cpp">
+    <ClCompile Include="WicUtility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WicUtility.cpp">
+    <ClCompile Include="ShellContextMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
