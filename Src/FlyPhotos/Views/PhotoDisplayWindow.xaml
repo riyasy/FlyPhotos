@@ -35,7 +35,7 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Background="#66000000"
-            CornerRadius="4"
+            CornerRadius="5"
             Visibility="Collapsed">
             <TextBlock
                 x:Name="TxtZoom"
@@ -51,11 +51,11 @@
         <Border
             x:Name="BorderTxtFileName"
             Margin="0,0,0,87"
-            Padding="5"
+            Padding="10,5,10,5"
             HorizontalAlignment="Center"
             VerticalAlignment="Bottom"
             Background="#44000000"
-            CornerRadius="4">
+            CornerRadius="5">
             <TextBlock
                 x:Name="TxtFileName"
                 Width="Auto"
@@ -72,7 +72,7 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Bottom"
             Background="#44000000"
-            CornerRadius="4">
+            CornerRadius="5">
             <StackPanel
                 x:Name="ButtonPanel"
                 Width="Auto"
