@@ -129,7 +129,7 @@ public sealed partial class PhotoDisplayWindow
         //this.Maximize(); // Maximise will be called from App.xaml.cs
         _lastWindowState = OverlappedPresenterState.Maximized;
 
-        _opacityFader = new OpacityFader([ButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout);
+        _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
     }
 
@@ -547,21 +547,30 @@ public sealed partial class PhotoDisplayWindow
 
     void SetBackColorAsPerThemeAndBackdrop()
     {
-        if (_currentBackdropType == WindowBackdropType.None)
-        {
-            if (((FrameworkElement)Content).ActualTheme == ElementTheme.Light)
-            {
-                ((Grid)Content).Background = new SolidColorBrush(Colors.White);
-            }
-            else if (((FrameworkElement)Content).ActualTheme == ElementTheme.Dark)
-            {
-                ((Grid)Content).Background = new SolidColorBrush(Colors.Black);
-            }
-        }
-        else
-        {
-            ((Grid)Content).Background = new SolidColorBrush(Colors.Transparent);
-        }
+        var actualTheme = ((FrameworkElement)Content).ActualTheme;
+
+        // Determine colors first
+        var gridColor = _currentBackdropType == WindowBackdropType.None
+            ? (actualTheme == ElementTheme.Light ? Colors.White : Colors.Black)
+            : Colors.Transparent;
+
+        var buttonPanelColor = actualTheme == ElementTheme.Light
+            ? Colors.Transparent
+            : Color.FromArgb(0x44, 0, 0, 0);
+
+        var fileNameForegroundColor = actualTheme == ElementTheme.Light
+            ? Colors.Black
+            : Colors.White;
+
+        var fileNameBackgroundColor = actualTheme == ElementTheme.Light
+            ? Color.FromArgb(0x44, 255, 255, 255)
+            : Color.FromArgb(0x44, 0, 0, 0);
+
+        // Assign brushes
+        ((Grid)Content).Background = new SolidColorBrush(gridColor);
+        BorderButtonPanel.Background = new SolidColorBrush(buttonPanelColor);
+        TxtFileName.Foreground = new SolidColorBrush(fileNameForegroundColor);
+        BorderTxtFileName.Background = new SolidColorBrush(fileNameBackgroundColor);
     }
 }
 

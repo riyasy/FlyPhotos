@@ -22,7 +22,6 @@
                 Fill="{ThemeResource SystemControlBackgroundAltHighBrush}"
                 Opacity="0" />
         </Grid>
-        <!--<Image x:Name="ImgDspBg" Stretch="None" />-->
         <win2d:CanvasControl x:Name="D2dCanvas" />
         <win2d:CanvasControl
             x:Name="D2dCanvasThumbNail"
@@ -51,7 +50,7 @@
         </Border>
         <Border
             x:Name="BorderTxtFileName"
-            Margin="0,0,0,85"
+            Margin="0,0,0,87"
             Padding="5"
             HorizontalAlignment="Center"
             VerticalAlignment="Bottom"
@@ -66,124 +65,123 @@
                 FontSize="12"
                 Foreground="White" />
         </Border>
-        <!--<Rectangle
-            Width="40"
-            Height="40"
-            Fill="Transparent"
-            Stroke="GreenYellow"
-            StrokeThickness="3"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Bottom"/>-->
-        <StackPanel
-            x:Name="ButtonPanel"
-            Width="Auto"
-            Height="Auto"
-            Margin="0,0,0,50"
+        <Border
+            x:Name="BorderButtonPanel"
+            Margin="0,0,0,45"
+            Padding="5"
             HorizontalAlignment="Center"
             VerticalAlignment="Bottom"
-            Orientation="Horizontal">
-            <RepeatButton
-                x:Name="ButtonBack"
+            Background="#44000000"
+            CornerRadius="4">
+            <StackPanel
+                x:Name="ButtonPanel"
                 Width="Auto"
-                Click="ButtonBack_OnClick"
-                Content="&#xE96f;"
-                FontFamily="{StaticResource FluentIcons}"
-                FontSize="16"
-                PointerWheelChanged="ButtonBackNext_PointerWheelChanged">
-                <ToolTipService.ToolTip>
-                    <ToolTip
-                        AutomationProperties.FullDescription="Non-occluding tooltip"
-                        Content="Back"
-                        Placement="Right" />
-                </ToolTipService.ToolTip>
-            </RepeatButton>
-            <RepeatButton
-                x:Name="ButtonRotate"
-                Width="Auto"
-                Click="ButtonRotate_OnClick"
-                Content="&#xE89E;"
-                FontFamily="{StaticResource FluentIcons}"
-                FontSize="16"
-                PointerWheelChanged="ButtonRotate_PointerWheelChanged">
-                <ToolTipService.ToolTip>
-                    <ToolTip
-                        AutomationProperties.FullDescription="Non-occluding tooltip"
-                        Content="Rotate"
-                        Placement="Right" />
-                </ToolTipService.ToolTip>
-            </RepeatButton>
-            <RepeatButton
-                x:Name="ButtonNext"
-                Width="Auto"
-                Margin="0,0,10,0"
-                Click="ButtonNext_OnClick"
-                Content="&#xE970;"
-                FontFamily="{StaticResource FluentIcons}"
-                FontSize="16"
-                PointerWheelChanged="ButtonBackNext_PointerWheelChanged">
-                <ToolTipService.ToolTip>
-                    <ToolTip
-                        AutomationProperties.FullDescription="Non-occluding tooltip"
-                        Content="Next"
-                        Placement="Right" />
-                </ToolTipService.ToolTip>
-            </RepeatButton>
-            <Button
-                x:Name="ButtonScaleSet"
-                Width="Auto"
-                Click="ButtonScaleSet_Click"
-                Content="&#xE9A6;"
-                FontFamily="{StaticResource FluentIcons}"
-                FontSize="16">
-                <ToolTipService.ToolTip>
-                    <ToolTip
-                        AutomationProperties.FullDescription="Non-occluding tooltip"
-                        Content="Fit to display area"
-                        Placement="Right" />
-                </ToolTipService.ToolTip>
-            </Button>
-            <Button
-                x:Name="ButtonOneIsToOne"
-                Width="Auto"
-                Height="{Binding ElementName=ButtonScaleSet, Path=ActualHeight}"
-                Click="ButtonOneIsToOne_Click"
-                Content="1:1"
-                FontSize="12">
-                <ToolTipService.ToolTip>
-                    <ToolTip
-                        AutomationProperties.FullDescription="Non-occluding tooltip"
-                        Content="Zoom to 1:1"
-                        Placement="Right" />
-                </ToolTipService.ToolTip>
-            </Button>
-            <Button
-                x:Name="ButtonSettings"
-                Width="Auto"
-                Click="ButtonSettings_OnClick"
-                Content="&#xE713;"
-                FontFamily="{StaticResource FluentIcons}"
-                FontSize="16">
-                <ToolTipService.ToolTip>
-                    <ToolTip
-                        AutomationProperties.FullDescription="Non-occluding tooltip"
-                        Content="Settings"
-                        Placement="Right" />
-                </ToolTipService.ToolTip>
-            </Button>
-            <Button
-                x:Name="ButtonHelp"
-                Width="Auto"
-                Content="🆘"
-                FontSize="16"
-                Visibility="Collapsed">
-                <ToolTipService.ToolTip>
-                    <ToolTip
-                        AutomationProperties.FullDescription="Non-occluding tooltip"
-                        Content="Help"
-                        Placement="Right" />
-                </ToolTipService.ToolTip>
-            </Button>
-            <!--<Button
+                Height="Auto"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+                <RepeatButton
+                    x:Name="ButtonBack"
+                    Width="Auto"
+                    Click="ButtonBack_OnClick"
+                    Content="&#xE96f;"
+                    FontFamily="{StaticResource FluentIcons}"
+                    FontSize="16"
+                    PointerWheelChanged="ButtonBackNext_PointerWheelChanged">
+                    <ToolTipService.ToolTip>
+                        <ToolTip
+                            AutomationProperties.FullDescription="Non-occluding tooltip"
+                            Content="Back"
+                            Placement="Right" />
+                    </ToolTipService.ToolTip>
+                </RepeatButton>
+                <RepeatButton
+                    x:Name="ButtonRotate"
+                    Width="Auto"
+                    Click="ButtonRotate_OnClick"
+                    Content="&#xE89E;"
+                    FontFamily="{StaticResource FluentIcons}"
+                    FontSize="16"
+                    PointerWheelChanged="ButtonRotate_PointerWheelChanged">
+                    <ToolTipService.ToolTip>
+                        <ToolTip
+                            AutomationProperties.FullDescription="Non-occluding tooltip"
+                            Content="Rotate"
+                            Placement="Right" />
+                    </ToolTipService.ToolTip>
+                </RepeatButton>
+                <RepeatButton
+                    x:Name="ButtonNext"
+                    Width="Auto"
+                    Margin="0,0,10,0"
+                    Click="ButtonNext_OnClick"
+                    Content="&#xE970;"
+                    FontFamily="{StaticResource FluentIcons}"
+                    FontSize="16"
+                    PointerWheelChanged="ButtonBackNext_PointerWheelChanged">
+                    <ToolTipService.ToolTip>
+                        <ToolTip
+                            AutomationProperties.FullDescription="Non-occluding tooltip"
+                            Content="Next"
+                            Placement="Right" />
+                    </ToolTipService.ToolTip>
+                </RepeatButton>
+                <Button
+                    x:Name="ButtonScaleSet"
+                    Width="Auto"
+                    Click="ButtonScaleSet_Click"
+                    Content="&#xE9A6;"
+                    FontFamily="{StaticResource FluentIcons}"
+                    FontSize="16">
+                    <ToolTipService.ToolTip>
+                        <ToolTip
+                            AutomationProperties.FullDescription="Non-occluding tooltip"
+                            Content="Fit to display area"
+                            Placement="Right" />
+                    </ToolTipService.ToolTip>
+                </Button>
+                <Button
+                    x:Name="ButtonOneIsToOne"
+                    Width="Auto"
+                    Height="{Binding ElementName=ButtonScaleSet, Path=ActualHeight}"
+                    Click="ButtonOneIsToOne_Click"
+                    Content="1:1"
+                    FontSize="12">
+                    <ToolTipService.ToolTip>
+                        <ToolTip
+                            AutomationProperties.FullDescription="Non-occluding tooltip"
+                            Content="Zoom to 1:1"
+                            Placement="Right" />
+                    </ToolTipService.ToolTip>
+                </Button>
+                <Button
+                    x:Name="ButtonSettings"
+                    Width="Auto"
+                    Click="ButtonSettings_OnClick"
+                    Content="&#xE713;"
+                    FontFamily="{StaticResource FluentIcons}"
+                    FontSize="16">
+                    <ToolTipService.ToolTip>
+                        <ToolTip
+                            AutomationProperties.FullDescription="Non-occluding tooltip"
+                            Content="Settings"
+                            Placement="Right" />
+                    </ToolTipService.ToolTip>
+                </Button>
+                <Button
+                    x:Name="ButtonHelp"
+                    Width="Auto"
+                    Content="🆘"
+                    FontSize="16"
+                    Visibility="Collapsed">
+                    <ToolTipService.ToolTip>
+                        <ToolTip
+                            AutomationProperties.FullDescription="Non-occluding tooltip"
+                            Content="Help"
+                            Placement="Right" />
+                    </ToolTipService.ToolTip>
+                </Button>
+                <!--<Button
                 x:Name="ButtonCoffee"
                 Width="Auto"
                 Click="ButtonCoffee_OnClick"
@@ -198,32 +196,33 @@
                         Placement="Right" />
                 </ToolTipService.ToolTip>
             </Button>-->
-            <Button
-                x:Name="ButtonExpander"
-                Width="Auto"
-                Click="ButtonExpander_Click">
-                <ToolTipService.ToolTip>
-                    <ToolTip
-                        AutomationProperties.FullDescription="Non-occluding tooltip"
-                        Content="View Cache Status"
-                        Placement="Right" />
-                </ToolTipService.ToolTip>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock
-                        x:Name="IconExpander"
-                        Width="Auto"
-                        Margin="3,0,0,0"
-                        FontFamily="{StaticResource FluentIcons}"
-                        FontSize="16"
-                        Text="&#xE761;" />
-                    <TextBlock
-                        x:Name="CacheStatusProgress"
-                        Width="Auto"
-                        Margin="10,0,0,0"
-                        FontSize="12"
-                        Visibility="Collapsed" />
-                </StackPanel>
-            </Button>
-        </StackPanel>
+                <Button
+                    x:Name="ButtonExpander"
+                    Width="Auto"
+                    Click="ButtonExpander_Click">
+                    <ToolTipService.ToolTip>
+                        <ToolTip
+                            AutomationProperties.FullDescription="Non-occluding tooltip"
+                            Content="View Cache Status"
+                            Placement="Right" />
+                    </ToolTipService.ToolTip>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            x:Name="IconExpander"
+                            Width="Auto"
+                            Margin="3,0,0,0"
+                            FontFamily="{StaticResource FluentIcons}"
+                            FontSize="16"
+                            Text="&#xE761;" />
+                        <TextBlock
+                            x:Name="CacheStatusProgress"
+                            Width="Auto"
+                            Margin="10,0,0,0"
+                            FontSize="12"
+                            Visibility="Collapsed" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>
