@@ -59,7 +59,7 @@ namespace FlyPhotos.Readers
             }
         }
         
-        public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl d2dCanvas, string path)
+        public static (bool, HqDisplayItem) GetHq(CanvasControl d2dCanvas, string path)
         {
             try
             {

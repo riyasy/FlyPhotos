@@ -73,14 +73,14 @@ internal static class ImageUtil
                         {
                             if (HeifCodecResolver.IsHevcDecoderAvailable)
                                 if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
-                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                            if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                             return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                         }
                     }
                 case ".PSD":
                 {
                     if (await PsdReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
-                    if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
+                    if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
                     return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
                 case ".SVG":
@@ -199,12 +199,12 @@ internal static class ImageUtil
                 {
                     if (HeifCodecResolver.IsHevcDecoderAvailable)
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                    if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
                     return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".PSD":
                 {
-                    if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                     return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
                     }
                 case ".SVG":

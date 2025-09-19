@@ -51,17 +51,17 @@ internal class Photo(string selectedFileName)
         await Task.Run(GetHqImage);
     }
 
-    public void LoadHq(CanvasControl device)
+    public async Task LoadHq(CanvasControl device)
     {
-        Hq ??= ImageUtil.GetHqImage(device, FileName).GetAwaiter().GetResult();
+        Hq ??= await ImageUtil.GetHqImage(device, FileName);
     }
 
-    public void LoadPreview(CanvasControl device)
+    public async Task LoadPreview(CanvasControl device)
     {
         if (Preview == null || Preview.Origin == Origin.ErrorScreen ||
             Preview.Origin == Origin.Undefined)
         {
-            Preview = ImageUtil.GetPreview(device, FileName).GetAwaiter().GetResult();
+            Preview = await ImageUtil.GetPreview(device, FileName);
         }
     }
 

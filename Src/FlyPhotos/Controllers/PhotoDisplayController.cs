@@ -144,14 +144,14 @@ internal partial class PhotoDisplayController : IPhotoDisplayController
 
                 _previewTaskThrottler.Wait(token);
 
-                Task.Run(() =>
+                Task.Run(async () =>
                 {
                     try
                     {
                         var index = item;
                         _previewsBeingCached[index] = true;
                         var photo = _photos[index];
-                        photo.LoadPreview(_d2dCanvas); // TODO In a future refactor, this could accept a token
+                        await photo.LoadPreview(_d2dCanvas); // TODO In a future refactor, this could accept a token
                         _cachedPreviews[index] = photo;
                         _previewsBeingCached.Remove(index, out _);
                         if (photo.Preview?.Origin == Origin.Disk) { _toBeDiskCachedPreviews.Push(item); }
@@ -184,14 +184,14 @@ internal partial class PhotoDisplayController : IPhotoDisplayController
 
                 _hqTaskThrottler.Wait(token);
 
-                Task.Run(() =>
+                Task.Run(async () =>
                 {
                     try
                     {
                         var index = item;
                         _hqsBeingCached[index] = true;
                         var photo = _photos[index];
-                        photo.LoadHq(_d2dCanvas); // TODO In a future refactor, this could accept a token
+                        await photo.LoadHq(_d2dCanvas); // TODO In a future refactor, this could accept a token
                         _cachedHqImages[index] = photo;
                         _hqsBeingCached.Remove(index, out _);
                         if (_photoSessionState.CurrentDisplayIndex == index)
