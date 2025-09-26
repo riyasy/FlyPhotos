@@ -558,10 +558,6 @@ public sealed partial class PhotoDisplayWindow
             ? Colors.Transparent
             : Color.FromArgb(0x44, 0, 0, 0);
 
-        var fileNameForegroundColor = actualTheme == ElementTheme.Light
-            ? Colors.Black
-            : Colors.White;
-
         var fileNameBackgroundColor = actualTheme == ElementTheme.Light
             ? Color.FromArgb(0x44, 255, 255, 255)
             : Color.FromArgb(0x44, 0, 0, 0);
@@ -569,7 +565,6 @@ public sealed partial class PhotoDisplayWindow
         // Assign brushes
         ((Grid)Content).Background = new SolidColorBrush(gridColor);
         BorderButtonPanel.Background = new SolidColorBrush(buttonPanelColor);
-        TxtFileName.Foreground = new SolidColorBrush(fileNameForegroundColor);
         BorderTxtFileName.Background = new SolidColorBrush(fileNameBackgroundColor);
     }
 }

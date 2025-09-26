@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="utf-8" ?>
-
 <Window
     x:Class="FlyPhotos.Views.Settings"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -9,13 +7,16 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:CommunityToolkit.WinUI"
     mc:Ignorable="d">
-    <Grid x:Name="MainLayout" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+    <Grid x:Name="MainLayout">
         <Pivot Title="Fly Photos - Settings">
             <PivotItem Header="General">
                 <ScrollViewer>
                     <StackPanel Margin="0,0,15,0" Orientation="Vertical">
                         <controls:SettingsExpander
-                            Margin="0,5,0,0"
+                            Margin="0,10,0,0"
                             Header="KeyBoard Shortcuts"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE765;}">
                             <controls:SettingsExpander.Items>
@@ -24,9 +25,9 @@
                         </controls:SettingsExpander>
 
                         <TextBlock
-                            Margin="0,5,0,0"
-                            Style="{StaticResource SubtitleTextBlockStyle}"
-                            Text="Options" />
+                            Margin="0,20,0,0"
+                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                            Text="Theming" />
                         <!--<controls:SettingsCard
                             x:Name="SettingsCardDeveloperSupport"
                             Margin="0,5,0,0"
@@ -79,6 +80,10 @@
                                     Visibility="{x:Bind ShouldDisplayTransparencySlider(ComboBackGround.SelectedIndex), Mode=OneWay}" />
                             </StackPanel>
                         </controls:SettingsCard>
+                        <TextBlock
+                            Margin="0,20,0,0"
+                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                            Text="Photo Display" />
                         <controls:SettingsCard
                             x:Name="SettingsCardOpenExitZoom"
                             Margin="0,5,0,0"
@@ -117,6 +122,10 @@
                                 SmallChange="10"
                                 StepFrequency="10" />
                         </controls:SettingsCard>
+                        <TextBlock
+                            Margin="0,20,0,0"
+                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                            Text="UI Controls" />
                         <controls:SettingsCard
                             x:Name="SettingsCardShowThumbnail"
                             Margin="0,5,0,0"
@@ -158,8 +167,8 @@
                             <ToggleSwitch />
                         </controls:SettingsCard>
                         <TextBlock
-                            Margin="0,5,0,0"
-                            Style="{StaticResource SubtitleTextBlockStyle}"
+                            Margin="0,20,0,0"
+                            Style="{StaticResource BodyStrongTextBlockStyle}"
                             Text="Caching" />
                         <controls:SettingsCard
                             x:Name="SettingsCardCacheSize"
@@ -188,10 +197,13 @@
                                     Value="2" />
                             </StackPanel>
                         </controls:SettingsCard>
-                        <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Log" />
+                        <TextBlock
+                            Margin="0,20,0,0"
+                            Style="{StaticResource BodyStrongTextBlockStyle}"
+                            Text="Log" />
                         <controls:SettingsCard
                             x:Name="SettingsCardLog"
-                            Margin="0,5,0,0"
+                            Margin="0,5,0,30"
                             Description="Open to see the log file"
                             Header="Log File"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE81C;}">

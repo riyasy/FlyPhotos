@@ -63,7 +63,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 FontSize="12"
-                Foreground="White" />
+                Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
         </Border>
         <Border
             x:Name="BorderButtonPanel"
