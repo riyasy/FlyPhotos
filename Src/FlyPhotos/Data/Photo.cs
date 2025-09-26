@@ -120,6 +120,7 @@ internal class Photo(string selectedFileName)
     public bool SupportsTransparency()
     {
         string extension = Path.GetExtension(FileName);
-        return !string.IsNullOrEmpty(extension) && FormatsSupportingTransparency.Contains(extension.ToLower());
+        // No need to make extension to lower as Contains is case-insensitive due to the HashSet configuration.
+        return !string.IsNullOrEmpty(extension) && FormatsSupportingTransparency.Contains(extension);
     }
 }

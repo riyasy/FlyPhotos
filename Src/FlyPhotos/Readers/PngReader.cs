@@ -107,8 +107,8 @@ internal static class PngReader
                 uint chunkLength = BitConverter.ToUInt32(chunkHeaderBuffer, 0);
                 string chunkType = Encoding.ASCII.GetString(chunkHeaderBuffer, 4, 4);
 
-                if (chunkType == "acTL") return true; // Animation Control Chunk found.
-                if (chunkType == "IEND") return false; // End of image, not animated.
+                if (string.Equals(chunkType, "acTL")) return true; // Animation Control Chunk found.
+                if (string.Equals(chunkType, "IEND")) return false; // End of image, not animated.
 
                 // Seek past the chunk's data and its 4-byte CRC.
                 stream.Seek(stream.Position + chunkLength + PngChunkCrcSize);

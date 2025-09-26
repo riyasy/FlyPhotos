@@ -8,7 +8,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents; 
 using Microsoft.UI.Xaml.Input;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
@@ -20,15 +19,9 @@ namespace FlyPhotos.Views
 {
     public sealed partial class InitWindow
     {
-        // This is the list of supported file extensions you can modify.
-        private readonly List<string> _supportedFileExtensions;
-
         public InitWindow()
         {
             this.InitializeComponent();
-
-            _supportedFileExtensions = Util.SupportedExtensions;
-
             var hWnd = WindowNative.GetWindowHandle(this);
             var myWndId = Win32Interop.GetWindowIdFromWindow(hWnd);
             var appWindow = AppWindow.GetFromWindowId(myWndId);
@@ -69,7 +62,7 @@ namespace FlyPhotos.Views
             var items = await e.DataView.GetStorageItemsAsync();
             if (items.Count == 0) return;
             var file = items[0] as StorageFile;
-            if (file != null && _supportedFileExtensions.Contains(file.FileType.ToLowerInvariant()))
+            if (file != null && Util.SupportedExtensions.Contains(file.FileType))
                 ProcessSelectedFile(file);
             else
                 await ShowMessageDialog("Unsupported File", "The dragged file is not a supported image type.");
@@ -87,7 +80,7 @@ namespace FlyPhotos.Views
             filePicker.ViewMode = PickerViewMode.Thumbnail;
             filePicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
 
-            foreach (var ext in _supportedFileExtensions)
+            foreach (var ext in Util.SupportedExtensions)
                 filePicker.FileTypeFilter.Add(ext);
 
 

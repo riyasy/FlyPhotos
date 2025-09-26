@@ -256,10 +256,4 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _renderingHandler = null;
         PanZoomAnimationOnGoing = false;
     }
-
-    public void SetStartupScale()
-    {
-        _canvasViewState.Scale = 1.0f;
-        _canvasViewState.LastScaleTo = 1.0f;
-    }
 }

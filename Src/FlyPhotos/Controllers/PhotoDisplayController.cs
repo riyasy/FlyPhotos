@@ -128,12 +128,6 @@ internal partial class PhotoDisplayController : IPhotoDisplayController
             {
                 if (_toBeCachedPreviews.IsEmpty)
                 {
-                    // TODO, the following line was an attempt to clear memory
-                    // while memory cleaning of CanvasBitmaps were not happening as intended.
-                    // After implementing Dispose in DisplayItem, this seems not needed anymore.
-                    // Delete the line after revaluation and feedbaks from users.
-
-                    // GC.Collect(2, GCCollectionMode.Optimized);
                     _diskCachingCanStart.Set();
                     WaitHandle.WaitAny([_previewCachingCanStart, token.WaitHandle]);
                     if (token.IsCancellationRequested) break;
@@ -229,8 +223,7 @@ internal partial class PhotoDisplayController : IPhotoDisplayController
                     try
                     {
                         if (_cachedPreviews.TryGetValue(index, out var image) &&
-                            image.Preview != null &&
-                            image.Preview.Origin == Origin.Disk)
+                            image.Preview?.Origin == Origin.Disk)
                         {
                             var (actualWidth, actualHeight) = image.GetActualSize();
                             await DiskCacherWithSqlite.Instance.PutInCache(image.FileName, image.Preview.Bitmap, (int)Math.Round(actualWidth), (int)Math.Round(actualHeight));
@@ -347,7 +340,7 @@ internal partial class PhotoDisplayController : IPhotoDisplayController
             var sourceFile = await StorageFile.GetFileFromPathAsync(filePath);
             var dataPackage = new DataPackage();
             if (sourceFile != null)
-                dataPackage.SetStorageItems(new List<IStorageItem> { sourceFile });
+                dataPackage.SetStorageItems((List<IStorageItem>)[sourceFile]);
 
             var canvasBitmap = _photoSessionState.CurrentDisplayLevel switch
             {

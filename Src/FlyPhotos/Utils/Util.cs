@@ -25,12 +25,13 @@ internal static class Util
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private static List<CodecInfo>? _codecInfoList;
 
-    public static List<string> SupportedExtensions { get; } = [];
+    public static HashSet<string> SupportedExtensions { get; } = new(StringComparer.OrdinalIgnoreCase);
 
     static Util()
     {
         _codecInfoList = CliWrapper.GetWicDecoders();
-        foreach (var codecInfo in _codecInfoList) SupportedExtensions.AddRange(codecInfo.FileExtensions);
+        foreach (var codecInfo in _codecInfoList) 
+            SupportedExtensions.UnionWith(codecInfo.FileExtensions);
         SupportedExtensions.Add(".PSD");
         SupportedExtensions.Add(".SVG");
         SupportedExtensions.Add(".HEIC");
@@ -45,7 +46,7 @@ internal static class Util
 
     public static List<string> FindAllFilesFromDirectory(string? dirPath)
     {
-        if (dirPath == null || !Directory.Exists(dirPath))
+        if (String.IsNullOrEmpty(dirPath) || !Directory.Exists(dirPath))
         {
             return [];
         }

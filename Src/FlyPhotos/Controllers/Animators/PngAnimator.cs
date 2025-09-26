@@ -407,7 +407,7 @@ public partial class PngAnimator : IAnimator
                     var data = r.ReadBytes((int)len);
                     ReadUInt32BigEndian(r); // Skip CRC
                     c.Add(new PngChunk { Type = type, Data = data });
-                    if (type == "IEND") break;
+                    if (string.Equals(type, "IEND")) break;
                 }
                 catch (EndOfStreamException) { break; }
             }

@@ -139,7 +139,8 @@ internal class CanvasController : ICanvasController
                     IRenderer firstFrameRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, animDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate, false);
                     SetupNewRenderer(firstFrameRenderer, _imageSize, animDispItem.Rotation, isFirstPhotoEver, shouldResetView, true);
 
-                    IAnimator newAnimator = Path.GetExtension(photo.FileName).ToUpper() == ".GIF"
+                    IAnimator newAnimator = 
+                        string.Equals(Path.GetExtension(photo.FileName), ".gif", StringComparison.OrdinalIgnoreCase)
                         ? await GifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas)
                         : await PngAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas);
 

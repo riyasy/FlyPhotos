@@ -57,7 +57,7 @@ internal static class ImageUtil
                 }
             }
 
-            var extension = Path.GetExtension(path).ToUpper();
+            var extension = Path.GetExtension(path).ToUpperInvariant();
             switch (extension)
             {
                 case ".HEIC":
@@ -134,7 +134,7 @@ internal static class ImageUtil
                 return (new PreviewDisplayItem(cachedBmp, Origin.DiskCache, metadata));
             }
 
-            var extension = Path.GetExtension(path).ToUpper();
+            var extension = Path.GetExtension(path).ToUpperInvariant();
             switch (extension)
             {
                 case ".HEIC":
@@ -189,7 +189,7 @@ internal static class ImageUtil
 
         try
         {
-            var extension = Path.GetExtension(path).ToUpper();
+            var extension = Path.GetExtension(path).ToUpperInvariant();
 
             switch (extension)
             {
