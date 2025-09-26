@@ -98,8 +98,13 @@ internal static class Util
     public static bool IsControlPressed()
     {
         var coreWindow = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
-        var isControlPressed = coreWindow.HasFlag(CoreVirtualKeyStates.Down);
-        return isControlPressed;
+        return coreWindow.HasFlag(CoreVirtualKeyStates.Down);
+    }
+
+    public static bool IsAltPressed()
+    {
+        var coreWindow = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Menu);
+        return coreWindow.HasFlag(CoreVirtualKeyStates.Down);
     }
 
     public static CanvasImageBrush CreateCheckeredBrush(CanvasControl canvas, int checkerSize)

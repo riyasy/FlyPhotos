@@ -303,16 +303,17 @@ internal class CanvasController : ICanvasController
 
     private void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
-        if (IsScreenEmpty() || Util.IsControlPressed()) return;
+        if (IsScreenEmpty()) return;
+        if (Util.IsAltPressed()) return;
 
-        var currentPoint = e.GetCurrentPoint(_d2dCanvas).Position;
-        var adjustedPoint = currentPoint.AdjustForDpi(_d2dCanvas);
-
-        var zoomDirection = (e.GetCurrentPoint(_d2dCanvas).Properties.MouseWheelDelta > 0) ? ZoomDirection.In : ZoomDirection.Out;
-
-        _canvasViewManager.ZoomAtPoint(zoomDirection, adjustedPoint);
-
-        _currentRenderer.RestartOffScreenDrawTimer();
+        if (Util.IsControlPressed() || AppConfig.Settings.DefaultMouseWheelBehavior == DefaultMouseWheelBehavior.Zoom)
+        {
+            var currentPoint = e.GetCurrentPoint(_d2dCanvas).Position;
+            var adjustedPoint = currentPoint.AdjustForDpi(_d2dCanvas);
+            var zoomDirection = (e.GetCurrentPoint(_d2dCanvas).Properties.MouseWheelDelta > 0) ? ZoomDirection.In : ZoomDirection.Out;
+            _canvasViewManager.ZoomAtPoint(zoomDirection, adjustedPoint);
+            _currentRenderer.RestartOffScreenDrawTimer();
+        }
     }
 
     #endregion

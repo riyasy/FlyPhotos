@@ -127,6 +127,17 @@
                             Style="{StaticResource BodyStrongTextBlockStyle}"
                             Text="UI Controls" />
                         <controls:SettingsCard
+                            x:Name="SettingsCardMouseWheelBehaviour"
+                            Margin="0,5,0,0"
+                            Description="Choose default mouse wheel behaviour.%%👉 Ctrl + Mouse wheel always zooms in or out.%%👉 Alt + Mouse wheel always navigates to next or previous"
+                            Header="Mouse Wheel"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;}">
+                            <ComboBox x:Name="ComboMouseWheelBehaviour" SelectedIndex="0">
+                                <ComboBoxItem>Zoom In or Out</ComboBoxItem>
+                                <ComboBoxItem>View Next or Previous</ComboBoxItem>
+                            </ComboBox>
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
                             x:Name="SettingsCardShowThumbnail"
                             Margin="0,5,0,0"
                             Description="Show thumbnail strip at the bottom of window"
@@ -156,15 +167,6 @@
                                     StepFrequency="10"
                                     Value="50" />
                             </StackPanel>
-                        </controls:SettingsCard>
-                        <controls:SettingsCard
-                            x:Name="SettingsCardPanHideRaw"
-                            Margin="0,5,0,0"
-                            Description="Hide Raw files if a similar named JPG/JPEG already exists"
-                            Header="RAW Hiding"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xF19D;}"
-                            Visibility="Collapsed">
-                            <ToggleSwitch />
                         </controls:SettingsCard>
                         <TextBlock
                             Margin="0,20,0,0"

@@ -25,6 +25,15 @@ public class AppSettings
         set => WindowBackdropAsString = value.ToString();
     }
 
+    [JsonPropertyName("DefaultMouseWheelBehavior")] public string DefaultMouseWheelBehaviorAsString { get; set; } = "Zoom";
+
+    [JsonIgnore]
+    public DefaultMouseWheelBehavior DefaultMouseWheelBehavior
+    {
+        get => Enum.Parse<DefaultMouseWheelBehavior>(DefaultMouseWheelBehaviorAsString, true);
+        set => DefaultMouseWheelBehaviorAsString = value.ToString();
+    }
+
     public int CacheSizeOneSideHqImages { get; set; } = 2;
     public int CacheSizeOneSidePreviews { get; set; } = 300;
     public bool ShowThumbnails { get; set; } = true;

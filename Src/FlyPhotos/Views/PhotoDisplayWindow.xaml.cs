@@ -206,12 +206,17 @@ public sealed partial class PhotoDisplayWindow
 
     private async void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
-        if (!Util.IsControlPressed()) return;
         if (_photoController.IsSinglePhoto()) return;
-        var delta = e.GetCurrentPoint(D2dCanvas).Properties.MouseWheelDelta;
-        await _photoController.Fly(delta > 0 ? NavDirection.Prev : NavDirection.Next);
-        _wheelScrollBrakeTimer.Stop();
-        _wheelScrollBrakeTimer.Start();
+
+        if (Util.IsControlPressed()) return;
+
+        if (Util.IsAltPressed() || AppConfig.Settings.DefaultMouseWheelBehavior == DefaultMouseWheelBehavior.Navigate)
+        {
+            var delta = e.GetCurrentPoint(D2dCanvas).Properties.MouseWheelDelta;
+            await _photoController.Fly(delta > 0 ? NavDirection.Prev : NavDirection.Next);
+            _wheelScrollBrakeTimer.Stop();
+            _wheelScrollBrakeTimer.Start();
+        }
     }
 
     private async void D2dCanvasThumbNail_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
@@ -298,9 +303,9 @@ public sealed partial class PhotoDisplayWindow
             }
 
             // Layout-aware override
-            if (e.Key == _plusVk)
+            if (ctrlPressed && e.Key == _plusVk)
                 _canvasController.ZoomByKeyboard(ZoomDirection.In);
-            else if (e.Key == _minusVk)
+            else if (ctrlPressed && e.Key == _minusVk)
                 _canvasController.ZoomByKeyboard(ZoomDirection.Out);
         }
         catch (Exception ex)

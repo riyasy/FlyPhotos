@@ -39,4 +39,10 @@
         Out
     }
 
+    public enum DefaultMouseWheelBehavior
+    {
+        Zoom,
+        Navigate
+    }
+
 }

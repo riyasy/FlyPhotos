@@ -61,6 +61,14 @@ internal sealed partial class Settings
         }
     );
 
+    private readonly EnumStringTranslator<DefaultMouseWheelBehavior> _mouseWheelBehaviourTranslator = new(
+        new Dictionary<DefaultMouseWheelBehavior, string>
+        {
+            { DefaultMouseWheelBehavior.Zoom, "Zoom In or Out" },
+            { DefaultMouseWheelBehavior.Navigate, "View Next or Previous" }
+        }
+    );
+
     internal Settings(IThumbnailController thumbnailDisplayChanger)
     {
         _thumbnailDisplayChanger = thumbnailDisplayChanger;
@@ -92,6 +100,7 @@ internal sealed partial class Settings
         SliderLowResCacheSize.Value = AppConfig.Settings.CacheSizeOneSidePreviews;
         ComboTheme.SelectedIndex = FindIndexOfItemInComboBox(ComboTheme, _themeTranslator.ToString(AppConfig.Settings.Theme));
         ComboBackGround.SelectedIndex = FindIndexOfItemInComboBox(ComboBackGround, _backdropTranslator.ToString(AppConfig.Settings.WindowBackdrop));
+        ComboMouseWheelBehaviour.SelectedIndex = FindIndexOfItemInComboBox(ComboMouseWheelBehaviour, _mouseWheelBehaviourTranslator.ToString(AppConfig.Settings.DefaultMouseWheelBehavior));
         ButtonShowThumbnail.IsOn = AppConfig.Settings.ShowThumbnails;
         CheckBoxEnableAutoFade.IsChecked = AppConfig.Settings.AutoFade;
         ButtonOpenExitZoom.IsOn = AppConfig.Settings.OpenExitZoom;
@@ -106,6 +115,7 @@ internal sealed partial class Settings
         SliderLowResCacheSize.ValueChanged += SliderLowResCacheSize_OnValueChanged;
         ComboTheme.SelectionChanged += ComboTheme_OnSelectionChanged;
         ComboBackGround.SelectionChanged += ComboBackGround_OnSelectionChanged;
+        ComboMouseWheelBehaviour.SelectionChanged += ComboMouseWheel_OnSelectionChanged;
         ButtonShowThumbnail.Toggled += ButtonShowThumbnail_OnToggled;
         ButtonOpenExitZoom.Toggled += ButtonOpenExitZoom_OnToggled;
         CheckBoxEnableAutoFade.Checked += CheckBoxEnableAutoFade_Checked;
@@ -117,14 +127,19 @@ internal sealed partial class Settings
         SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
 
         SettingsCardKeyboardShortCuts.Description = $"{Environment.NewLine}Left/Right Arrow Keys : Navigate Photos" +
-                                                    $"{Environment.NewLine}Mouse Wheel : Zoom In/Out" +
                                                     $"{Environment.NewLine}Mouse Left Click and Drag : Pan Photo" +
-                                                    $"{Environment.NewLine}Ctrl + Mouse Wheel : Navigate Photos" +
+                                                    Environment.NewLine+
+                                                    $"{Environment.NewLine}Mouse Wheel : Zoom In or Out/ Navigate Photos - based on setting" +
+                                                    $"{Environment.NewLine}Ctrl + Mouse Wheel : Zoom In or Out" +
+                                                    $"{Environment.NewLine}Alt + Mouse Wheel : Navigate Photos" +
+                                                    Environment.NewLine +
+                                                    $"{Environment.NewLine}Ctrl + 'Arrow Keys' : Pan Photo" +
                                                     $"{Environment.NewLine}Ctrl + '+' : Zoom In" +
                                                     $"{Environment.NewLine}Ctrl + '-' : Zoom Out" +
-                                                    $"{Environment.NewLine}Ctrl + 'Arrow Keys' : Pan Photo" +
-                                                    $"{Environment.NewLine}Thumbnail Click : Navigate to specific Photo" +
-                                                    $"{Environment.NewLine}Thumbnail Mouse wheel : Navigate Photos";
+                                                    Environment.NewLine +
+                                                    $"{Environment.NewLine}Mouse wheel on Thumbnail strip: Navigate Photos" +
+                                                    $"{Environment.NewLine}Mouse wheel on On Screen Left/Right Button: Navigate Photos" +
+                                                    $"{Environment.NewLine}Mouse wheel on On Screen Rotate Button: Rotate Photo";
 
         SettingsCardCredits.Description = $"Uses packages from " +
                                           $"{Environment.NewLine}libheif (For HEIC) - https://github.com/strukturag/libheif " +
@@ -137,7 +152,12 @@ internal sealed partial class Settings
         TextBoxCodecs.Text =
             $"This program doesn't install any codecs and uses codecs already present in the system.{Environment.NewLine}" +
             $"{Environment.NewLine}{Util.GetExtensionsDisplayString()}";
+
+        SettingsCardMouseWheelBehaviour.Description =
+            (SettingsCardMouseWheelBehaviour.Description as string).Replace("%%", Environment.NewLine);
     }
+
+
 
     private async void SliderTransparentBackgroundIntensity_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
@@ -208,6 +228,13 @@ internal sealed partial class Settings
         AppConfig.Settings.WindowBackdrop = backGroundEnum;
 
         BackdropChanged?.Invoke(backGroundEnum);
+        await AppConfig.SaveAsync();
+    }
+    private async void ComboMouseWheel_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        var comboSelectionAsString = (ComboMouseWheelBehaviour.SelectedItem as ComboBoxItem)?.Content as string;
+        var mouseWheelEnum = _mouseWheelBehaviourTranslator.ToEnum(comboSelectionAsString);
+        AppConfig.Settings.DefaultMouseWheelBehavior = mouseWheelEnum;
         await AppConfig.SaveAsync();
     }
 
