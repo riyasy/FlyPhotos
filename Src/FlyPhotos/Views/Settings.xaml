@@ -55,8 +55,10 @@
                             Header="Window Background"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE70A;}">
                             <StackPanel Orientation="Vertical" Spacing="10">
-                                <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="Choose Background" />
-                                <ComboBox x:Name="ComboBackGround" SelectedIndex="0">
+                                <ComboBox
+                                    x:Name="ComboBackGround"
+                                    HorizontalAlignment="Right"
+                                    SelectedIndex="0">
                                     <ComboBoxItem>Transparent</ComboBoxItem>
                                     <ComboBoxItem>Frozen</ComboBoxItem>
                                     <ComboBoxItem>Acrylic</ComboBoxItem>
@@ -65,14 +67,11 @@
                                     <ComboBoxItem>Mica Alt</ComboBoxItem>
                                     <ComboBoxItem>None</ComboBoxItem>
                                 </ComboBox>
-                                <TextBlock
-                                    Padding="0,10,0,0"
-                                    Style="{StaticResource CaptionTextBlockStyle}"
-                                    Text="Set Transparency Percentage"
-                                    Visibility="{x:Bind ShouldDisplayTransparencySlider(ComboBackGround.SelectedIndex), Mode=OneWay}" />
+
                                 <Slider
                                     x:Name="SliderTransparentBackgroundIntensity"
                                     Width="200"
+                                    Header="Set Transparency Percentage"
                                     Maximum="90"
                                     Minimum="30"
                                     SmallChange="10"
@@ -149,18 +148,15 @@
                             x:Name="SettingsCardFadeControls"
                             Margin="0,5,0,0"
                             Description="Fade UI controls when mouse moves away"
-                            Header="Control Fade Settings"
+                            Header="Auto Fade UI controls"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE754;}">
                             <StackPanel Orientation="Vertical" Spacing="10">
-                                <CheckBox
-                                    x:Name="CheckBoxEnableAutoFade"
-                                    HorizontalAlignment="Left"
-                                    Content="Enable Auto Fade" />
-                                <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="Fade Intensity" />
+                                <ToggleSwitch x:Name="ButtonEnableAutoFade" HorizontalAlignment="Right" />
                                 <Slider
                                     x:Name="SliderFadeIntensity"
                                     Width="200"
-                                    IsEnabled="{x:Bind ConvertNullableBoolToBool(CheckBoxEnableAutoFade.IsChecked), Mode=OneWay}"
+                                    Header="Fade Intensity"
+                                    IsEnabled="{x:Bind ButtonEnableAutoFade.IsOn, Mode=OneWay}"
                                     Maximum="100"
                                     Minimum="30"
                                     SmallChange="10"
@@ -179,19 +175,19 @@
                             Header="Cache Size"
                             HeaderIcon="{ui:FontIcon Glyph=&#xF16A;}">
                             <StackPanel Orientation="Vertical">
-                                <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="Low Res Cache" />
                                 <Slider
                                     x:Name="SliderLowResCacheSize"
                                     Width="200"
+                                    Header="Low Res Cache"
                                     Maximum="300"
                                     Minimum="50"
                                     SmallChange="10"
                                     StepFrequency="10"
                                     Value="300" />
-                                <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="High Res Cache" />
                                 <Slider
                                     x:Name="SliderHighResCacheSize"
                                     Width="200"
+                                    Header="High Res Cache"
                                     Maximum="3"
                                     Minimum="1"
                                     SmallChange="1"

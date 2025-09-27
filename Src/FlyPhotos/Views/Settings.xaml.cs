@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Windows.System;
+using Windows.UI;
 using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers;
 using FlyPhotos.Data;
@@ -16,6 +17,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Media;
 using WinRT.Interop;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -102,7 +104,7 @@ internal sealed partial class Settings
         ComboBackGround.SelectedIndex = FindIndexOfItemInComboBox(ComboBackGround, _backdropTranslator.ToString(AppConfig.Settings.WindowBackdrop));
         ComboMouseWheelBehaviour.SelectedIndex = FindIndexOfItemInComboBox(ComboMouseWheelBehaviour, _mouseWheelBehaviourTranslator.ToString(AppConfig.Settings.DefaultMouseWheelBehavior));
         ButtonShowThumbnail.IsOn = AppConfig.Settings.ShowThumbnails;
-        CheckBoxEnableAutoFade.IsChecked = AppConfig.Settings.AutoFade;
+        ButtonEnableAutoFade.IsOn = AppConfig.Settings.AutoFade;
         ButtonOpenExitZoom.IsOn = AppConfig.Settings.OpenExitZoom;
         SliderFadeIntensity.Value = AppConfig.Settings.FadeIntensity;
         ButtonHighQualityInterpolation.IsOn = AppConfig.Settings.HighQualityInterpolation;
@@ -118,13 +120,14 @@ internal sealed partial class Settings
         ComboMouseWheelBehaviour.SelectionChanged += ComboMouseWheel_OnSelectionChanged;
         ButtonShowThumbnail.Toggled += ButtonShowThumbnail_OnToggled;
         ButtonOpenExitZoom.Toggled += ButtonOpenExitZoom_OnToggled;
-        CheckBoxEnableAutoFade.Checked += CheckBoxEnableAutoFade_Checked;
-        CheckBoxEnableAutoFade.Unchecked += CheckBoxEnableAutoFade_Checked;
+        ButtonEnableAutoFade.Toggled += ButtonEnableAutoFade_OnToggled;
         SliderFadeIntensity.ValueChanged += SliderFadeIntensity_ValueChanged;
         ButtonHighQualityInterpolation.Toggled += ButtonHighQualityInterpolation_OnToggled;
         ButtonShowCheckeredBackground.Toggled += ButtonShowCheckeredBackground_OnToggled;
         SliderImageFitPercentage.ValueChanged += SliderImageFitPercentage_ValueChanged;
         SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
+
+
 
         SettingsCardKeyboardShortCuts.Description = $"{Environment.NewLine}Left/Right Arrow Keys : Navigate Photos" +
                                                     $"{Environment.NewLine}Mouse Left Click and Drag : Pan Photo" +
@@ -139,7 +142,11 @@ internal sealed partial class Settings
                                                     Environment.NewLine +
                                                     $"{Environment.NewLine}Mouse wheel on Thumbnail strip: Navigate Photos" +
                                                     $"{Environment.NewLine}Mouse wheel on On Screen Left/Right Button: Navigate Photos" +
-                                                    $"{Environment.NewLine}Mouse wheel on On Screen Rotate Button: Rotate Photo";
+                                                    $"{Environment.NewLine}Mouse wheel on On Screen Rotate Button: Rotate Photo" +
+                                                    Environment.NewLine +
+                                                    $"{Environment.NewLine}Home - Navigate to first photo" +
+                                                    $"{Environment.NewLine}End - Navigate to last photo" 
+                                                    ;
 
         SettingsCardCredits.Description = $"Uses packages from " +
                                           $"{Environment.NewLine}libheif (For HEIC) - https://github.com/strukturag/libheif " +
@@ -157,6 +164,22 @@ internal sealed partial class Settings
             (SettingsCardMouseWheelBehaviour.Description as string).Replace("%%", Environment.NewLine);
     }
 
+    //private void ButtonSetThumbnailSelColor_OnClicked(object sender, RoutedEventArgs e)
+    //{
+    //    var colorPickerWindow = new ColorPickerWindow(WindowNative.GetWindowHandle(this));
+    //    colorPickerWindow.SetInitialColor(Color.FromArgb(255, 0, 0, 0));
+    //    colorPickerWindow.Closed += (senderWindow, args) =>
+    //    {
+    //        if (senderWindow is ColorPickerWindow pickerWindow && pickerWindow.SelectedColor.HasValue)
+    //        {
+    //            DispatcherQueue.TryEnqueue(() =>
+    //            {
+    //                RectThumbnailSelectionColor.Stroke = new SolidColorBrush(pickerWindow.SelectedColor.Value);
+    //            });
+    //        }
+    //    };
+    //    colorPickerWindow.Activate(); // Use Activate() or Show()
+    //}
 
 
     private async void SliderTransparentBackgroundIntensity_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
@@ -191,9 +214,9 @@ internal sealed partial class Settings
         await AppConfig.SaveAsync();
     }
 
-    private async void CheckBoxEnableAutoFade_Checked(object sender, RoutedEventArgs e)
+    private async void ButtonEnableAutoFade_OnToggled(object sender, RoutedEventArgs e)
     {
-        AppConfig.Settings.AutoFade = (CheckBoxEnableAutoFade.IsChecked == true);
+        AppConfig.Settings.AutoFade = ButtonEnableAutoFade.IsOn;
         await AppConfig.SaveAsync();
     }
 
@@ -290,10 +313,11 @@ internal sealed partial class Settings
         _configurationSource.Theme = (SystemBackdropTheme)((FrameworkElement)Content).ActualTheme;
     }
 
-    private bool ConvertNullableBoolToBool(bool? value)
-    {
-        return value ?? false;
-    }
+    //private bool ConvertNullableBoolToBool(bool? value)
+    //{
+    //    return value ?? false;
+    //}
+
 
     private Visibility ShouldDisplayTransparencySlider(int index)
     {
