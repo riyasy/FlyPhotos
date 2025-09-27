@@ -271,6 +271,13 @@ public sealed partial class PhotoDisplayWindow
                     await AnimatePhotoDisplayWindowClose();
                     break;
 
+                case VirtualKey.Home:
+                    await _photoController.FlyToFirst();
+                    break;
+                case VirtualKey.End:
+                    await _photoController.FlyToLast();
+                    break;
+
                 // File Navigation
                 case VirtualKey.Right when !ctrlPressed:
                     await _photoController.Fly(NavDirection.Next);

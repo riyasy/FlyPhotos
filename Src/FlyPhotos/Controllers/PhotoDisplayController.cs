@@ -386,11 +386,27 @@ internal partial class PhotoDisplayController : IPhotoDisplayController
         _keyPressCounter = 0;
     }
 
+    public async Task FlyToFirst()
+    {
+        if (_photos.Count <= 1) return;
+        await FlyTo(0);
+    }
+
+    public async Task FlyToLast()
+    {
+        if (_photos.Count <= 1) return;
+        await FlyTo(_photos.Count - 1);
+    }
+
     public async Task FlyBy(int shiftBy)
     {
-        if (_cachedPreviews.Count <= 1) return;
+        if (_photos.Count <= 1) return;
+        await FlyTo(_photoSessionState.CurrentDisplayIndex + shiftBy);
+    }
 
-        _photoSessionState.CurrentDisplayIndex += shiftBy;
+    private async Task FlyTo(int toIndex)
+    {
+        _photoSessionState.CurrentDisplayIndex = toIndex;
 
         var photo = _photos[_photoSessionState.CurrentDisplayIndex];
 
