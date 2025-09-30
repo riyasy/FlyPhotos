@@ -78,6 +78,7 @@ public sealed partial class PhotoDisplayWindow
     public PhotoDisplayWindow(string firstPhotoPath)
     {
         InitializeComponent();
+        D2dCanvasThumbNail.Height = Constants.ThumbnailBoxSize;
 
         Title = "Fly Photos";
         if (!PathResolver.IsPackagedApp)

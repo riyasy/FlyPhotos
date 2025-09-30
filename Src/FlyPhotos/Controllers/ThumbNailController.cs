@@ -6,6 +6,7 @@ using FlyPhotos.AppSettings;
 using FlyPhotos.Data;
 using FlyPhotos.Views;
 using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.Geometry;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
@@ -144,7 +145,7 @@ internal partial class ThumbNailController : IThumbnailController
             var drawRect = _thumbnailOffscreen.Bounds;
             args.DrawingSession.Transform = System.Numerics.Matrix3x2.Identity;
             args.DrawingSession.DrawImage(_thumbnailOffscreen, drawRect, _thumbnailOffscreen.Bounds, 0.8f,
-                CanvasImageInterpolation.NearestNeighbor);
+                CanvasImageInterpolation.Linear);
         }
     }
 
@@ -170,7 +171,7 @@ internal partial class ThumbNailController : IThumbnailController
     /// Renders the entire visible thumbnail strip to an off-screen bitmap.
     /// This is the expensive operation that we are throttling.
     /// </summary>
-    public void CreateThumbnailRibbonOffScreen()
+    public void CreateThumbnailRibbonOffScreen_Old()
     {
         // This method is now called by the throttled timer or direct UI actions.
         // We can stop the timer here as a safeguard, but it's primarily stopped in the Tick handler.
@@ -233,6 +234,97 @@ internal partial class ThumbNailController : IThumbnailController
 
         RequestInvalidate();
     }
+
+    /// <summary>
+    /// Renders the entire visible thumbnail strip to an off-screen bitmap.
+    /// This is the expensive operation that we are throttling.
+    /// </summary>
+    /// <summary>
+    /// Renders the entire visible thumbnail strip to an off-screen bitmap using a robust clipping method.
+    /// </summary>
+    public void CreateThumbnailRibbonOffScreen()
+    {
+        // This method is now called by the throttled timer or direct UI actions.
+        _throttledRedrawTimer.Stop();
+
+        if (_photoSessionState.PhotosCount <= 1 || !_canDrawThumbnails || !AppConfig.Settings.ShowThumbnails)
+            return;
+
+        if (_d2dCanvasThumbNail.ActualWidth <= 0) return; // Guard against drawing with no size
+
+        if (_thumbnailOffscreen == null ||
+            (int)Math.Round(_thumbnailOffscreen.Size.Width) != (int)Math.Round(_d2dCanvasThumbNail.ActualWidth))
+        {
+            _thumbnailOffscreen?.Dispose();
+            _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * Constants.ThumbnailBoxSize)) + 1;
+            _thumbnailOffscreen = new CanvasRenderTarget(_d2dCanvasThumbNail, (float)_d2dCanvasThumbNail.ActualWidth, Constants.ThumbnailBoxSize);
+        }
+
+        using var dsThumbNail = _thumbnailOffscreen.CreateDrawingSession();
+        dsThumbNail.Clear(Colors.Transparent);
+
+        if (_cachedPreviews != null)
+        {
+            var startX = (int)_d2dCanvasThumbNail.ActualWidth / 2 - Constants.ThumbnailBoxSize / 2;
+            var startY = 0;
+
+            for (var i = -_numOfThumbNailsInOneDirection; i <= _numOfThumbNailsInOneDirection; i++)
+            {
+                var index = _photoSessionState.CurrentDisplayIndex + i;
+
+                if (index < 0 || index >= _photoSessionState.PhotosCount) continue;
+
+                var bitmap = (_cachedPreviews.TryGetValue(index, out var photo) && photo.Preview?.Bitmap != null)
+                    ? photo.Preview.Bitmap
+                    : Photo.GetLoadingIndicator().Bitmap;
+
+                // Calculate the source crop rectangle (same as before, this was correct)
+                float bitmapWidth = bitmap.SizeInPixels.Width;
+                float bitmapHeight = bitmap.SizeInPixels.Height;
+                var cropSize = Math.Min(bitmapWidth, bitmapHeight);
+                var cropX = (bitmapWidth - cropSize) / 2;
+                var cropY = (bitmapHeight - cropSize) / 2;
+                var sourceRect = new Rect(cropX, cropY, cropSize, cropSize);
+
+                // Calculate the destination rectangle on our canvas (same as before, this was correct)
+                var destX = startX + i * Constants.ThumbnailBoxSize;
+
+                var destRect = new Rect(
+                    destX + Constants.ThumbnailPadding, 
+                    startY + Constants.ThumbnailPadding, 
+                    Constants.ThumbnailBoxSize - (Constants.ThumbnailPadding * 2), 
+                    Constants.ThumbnailBoxSize - (Constants.ThumbnailPadding * 2));
+
+                // 1. Define the clipping shape (our rounded rectangle)
+                using (var clipGeometry = CanvasGeometry.CreateRoundedRectangle(dsThumbNail, destRect, Constants.ThumbnailCornerRadius, Constants.ThumbnailCornerRadius))
+                {
+                    // 2. Create a clipping layer. All drawing inside this 'using' block will be clipped to the geometry.
+                    using (dsThumbNail.CreateLayer(1.0f, clipGeometry))
+                    {
+                        // 3. Draw the image normally. The layer handles the clipping automatically.
+                        // This is your original, working DrawImage call.
+                        dsThumbNail.DrawImage(
+                            bitmap,
+                            destRect,
+                            sourceRect, 1f,
+                            CanvasImageInterpolation.NearestNeighbor
+                        );
+                    } // The clipping layer is automatically disposed and removed here.
+                }
+
+                // Draw the selection indicator on top, without any clipping.
+                if (index == _photoSessionState.CurrentDisplayIndex)
+                {
+                    // Use DrawRoundedRectangle to match the shape of the thumbnail.
+                    dsThumbNail.DrawRoundedRectangle(destRect, Constants.ThumbnailCornerRadius, Constants.ThumbnailCornerRadius, _thumbNailSelectionColor, Constants.ThumbnailSelectionBorderThickness);
+                }
+            }
+        }
+
+        RequestInvalidate();
+    }
+
+
 
     /// <summary>
     /// Coalesces multiple Invalidate requests into a single one on the DispatcherQueue.
