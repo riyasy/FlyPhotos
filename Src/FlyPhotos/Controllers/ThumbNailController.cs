@@ -22,6 +22,7 @@ internal partial class ThumbNailController : IThumbnailController
     // --- Private Settings ---
     private int _numOfThumbNailsInOneDirection = 20;
     private Color _thumbNailSelectionColor;
+    private int _thumbnailBoxSize = AppConfig.Settings.ThumbnailSize;
 
     // --- Drawing Optimization related ---
     private bool _invalidatePending;
@@ -58,7 +59,7 @@ internal partial class ThumbNailController : IThumbnailController
         _cachedPreviews = cachedPreviews;
     }
 
-    public void ShowThumbnailBasedOnSettings()
+    public void ShowHideThumbnailBasedOnSettings()
     {
         if (AppConfig.Settings.ShowThumbnails)
         {
@@ -75,9 +76,10 @@ internal partial class ThumbNailController : IThumbnailController
         }
     }
 
-    public void RefreshThumbnailSelectionColor()
+    public void RefreshThumbnail()
     {
         _thumbNailSelectionColor = ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor);
+        _thumbnailBoxSize = AppConfig.Settings.ThumbnailSize;
         if (AppConfig.Settings.ShowThumbnails)
         {
             CreateThumbnailRibbonOffScreen();
@@ -116,7 +118,7 @@ internal partial class ThumbNailController : IThumbnailController
         double canvasCenterX = _d2dCanvasThumbNail.ActualWidth / 2;
         double clickedX = pos.X;
 
-        int offset = (int)Math.Round((clickedX - canvasCenterX) / Constants.ThumbnailBoxSize);
+        int offset = (int)Math.Round((clickedX - canvasCenterX) / _thumbnailBoxSize);
         if (offset != 0 && _photoSessionState.PhotosCount > 1)
         {
             int newIndex = _photoSessionState.CurrentDisplayIndex + offset;
@@ -134,7 +136,7 @@ internal partial class ThumbNailController : IThumbnailController
 
     private void D2dCanvasThumbNail_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * Constants.ThumbnailBoxSize)) + 1;
+        _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * _thumbnailBoxSize)) + 1;
         CreateThumbnailRibbonOffScreen();
     }
 
@@ -183,12 +185,13 @@ internal partial class ThumbNailController : IThumbnailController
         if (_d2dCanvasThumbNail.ActualWidth <= 0) return; // Guard against drawing with no size
 
         // Recreate render target if needed (e.g., after size change)
-        if (_thumbnailOffscreen == null || 
-            (int)Math.Round(_thumbnailOffscreen.Size.Width) != (int)Math.Round(_d2dCanvasThumbNail.ActualWidth))
+        if (_thumbnailOffscreen == null ||
+            (int)Math.Round(_thumbnailOffscreen.Size.Width) != (int)Math.Round(_d2dCanvasThumbNail.ActualWidth) ||
+            (int)Math.Round(_thumbnailOffscreen.Size.Height) != (int)Math.Round(_d2dCanvasThumbNail.ActualHeight))
         {
             _thumbnailOffscreen?.Dispose();
-            _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * Constants.ThumbnailBoxSize)) + 1;
-            _thumbnailOffscreen = new CanvasRenderTarget(_d2dCanvasThumbNail, (float)_d2dCanvasThumbNail.ActualWidth, Constants.ThumbnailBoxSize);
+            _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * _thumbnailBoxSize)) + 1;
+            _thumbnailOffscreen = new CanvasRenderTarget(_d2dCanvasThumbNail, (float)_d2dCanvasThumbNail.ActualWidth, _thumbnailBoxSize);
         }
 
         using var dsThumbNail = _thumbnailOffscreen.CreateDrawingSession();
@@ -196,7 +199,7 @@ internal partial class ThumbNailController : IThumbnailController
 
         if (_cachedPreviews != null)
         {
-            var startX = (int)_d2dCanvasThumbNail.ActualWidth / 2 - Constants.ThumbnailBoxSize / 2;
+            var startX = (int)_d2dCanvasThumbNail.ActualWidth / 2 - _thumbnailBoxSize / 2;
             var startY = 0;
 
             for (var i = -_numOfThumbNailsInOneDirection; i <= _numOfThumbNailsInOneDirection; i++)
@@ -215,18 +218,18 @@ internal partial class ThumbNailController : IThumbnailController
                 var cropSize = Math.Min(bitmapWidth, bitmapHeight);
                 var cropX = (bitmapWidth - cropSize) / 2;
                 var cropY = (bitmapHeight - cropSize) / 2;
-                var destX = startX + i * Constants.ThumbnailBoxSize;
+                var destX = startX + i * _thumbnailBoxSize;
 
                 dsThumbNail.DrawImage(
                     bitmap,
-                    new Rect(destX, startY, Constants.ThumbnailBoxSize, Constants.ThumbnailBoxSize),
+                    new Rect(destX, startY, _thumbnailBoxSize, _thumbnailBoxSize),
                     new Rect(cropX, cropY, cropSize, cropSize), 1f,
                     CanvasImageInterpolation.NearestNeighbor
                 );
 
                 if (index == _photoSessionState.CurrentDisplayIndex)
                 {
-                    dsThumbNail.DrawRectangle(new Rect(destX, startY, Constants.ThumbnailBoxSize, Constants.ThumbnailBoxSize),
+                    dsThumbNail.DrawRectangle(new Rect(destX, startY, _thumbnailBoxSize, _thumbnailBoxSize),
                         _thumbNailSelectionColor, 3f);
                 }
             }
@@ -253,11 +256,12 @@ internal partial class ThumbNailController : IThumbnailController
         if (_d2dCanvasThumbNail.ActualWidth <= 0) return; // Guard against drawing with no size
 
         if (_thumbnailOffscreen == null ||
-            (int)Math.Round(_thumbnailOffscreen.Size.Width) != (int)Math.Round(_d2dCanvasThumbNail.ActualWidth))
+            (int)Math.Round(_thumbnailOffscreen.Size.Width) != (int)Math.Round(_d2dCanvasThumbNail.ActualWidth) ||
+            (int)Math.Round(_thumbnailOffscreen.Size.Height) != (int)Math.Round(_d2dCanvasThumbNail.ActualHeight))
         {
             _thumbnailOffscreen?.Dispose();
-            _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * Constants.ThumbnailBoxSize)) + 1;
-            _thumbnailOffscreen = new CanvasRenderTarget(_d2dCanvasThumbNail, (float)_d2dCanvasThumbNail.ActualWidth, Constants.ThumbnailBoxSize);
+            _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * _thumbnailBoxSize)) + 1;
+            _thumbnailOffscreen = new CanvasRenderTarget(_d2dCanvasThumbNail, (float)_d2dCanvasThumbNail.ActualWidth, _thumbnailBoxSize);
         }
 
         using var dsThumbNail = _thumbnailOffscreen.CreateDrawingSession();
@@ -265,7 +269,7 @@ internal partial class ThumbNailController : IThumbnailController
 
         if (_cachedPreviews != null)
         {
-            var startX = (int)_d2dCanvasThumbNail.ActualWidth / 2 - Constants.ThumbnailBoxSize / 2;
+            var startX = (int)_d2dCanvasThumbNail.ActualWidth / 2 - _thumbnailBoxSize / 2;
             var startY = 0;
 
             for (var i = -_numOfThumbNailsInOneDirection; i <= _numOfThumbNailsInOneDirection; i++)
@@ -287,13 +291,13 @@ internal partial class ThumbNailController : IThumbnailController
                 var sourceRect = new Rect(cropX, cropY, cropSize, cropSize);
 
                 // Calculate the destination rectangle on our canvas (same as before, this was correct)
-                var destX = startX + i * Constants.ThumbnailBoxSize;
+                var destX = startX + i * _thumbnailBoxSize;
 
                 var destRect = new Rect(
                     destX + Constants.ThumbnailPadding, 
                     startY + Constants.ThumbnailPadding, 
-                    Constants.ThumbnailBoxSize - (Constants.ThumbnailPadding * 2), 
-                    Constants.ThumbnailBoxSize - (Constants.ThumbnailPadding * 2));
+                    _thumbnailBoxSize - (Constants.ThumbnailPadding * 2), 
+                    _thumbnailBoxSize - (Constants.ThumbnailPadding * 2));
 
                 // 1. Define the clipping shape (our rounded rectangle)
                 using (var clipGeometry = CanvasGeometry.CreateRoundedRectangle(dsThumbNail, destRect, Constants.ThumbnailCornerRadius, Constants.ThumbnailCornerRadius))

@@ -78,7 +78,7 @@ public sealed partial class PhotoDisplayWindow
     public PhotoDisplayWindow(string firstPhotoPath)
     {
         InitializeComponent();
-        D2dCanvasThumbNail.Height = Constants.ThumbnailBoxSize;
+        D2dCanvasThumbNail.Height = AppConfig.Settings.ThumbnailSize;
 
         Title = "Fly Photos";
         if (!PathResolver.IsPackagedApp)
@@ -374,8 +374,7 @@ public sealed partial class PhotoDisplayWindow
             _settingWindow.BackDropTransparencyChanged += SettingWindow_BackdropTransparencyChanged;
             _settingWindow.ThemeChanged += SetWindowTheme;
             _settingWindow.BackdropChanged += SetWindowBackground;
-            _settingWindow.ThumbnailShowHideSettingChanged += SettingWindow_ThumbnailShowHideSettingChanged;
-            _settingWindow.ThumbnailSelectionColorChanged += SettingWindow_ThumbnailSelectionColorChanged;
+            _settingWindow.ThumbnailSettingChanged += SettingWindow_ThumbnailSettingChanged;
         }
         else
         {
@@ -432,8 +431,7 @@ public sealed partial class PhotoDisplayWindow
             _settingWindow.BackdropChanged -= SetWindowBackground;
             _settingWindow.ShowCheckeredBackgroundChanged -= SettingWindow_ShowCheckeredBackgroundChanged;
             _settingWindow.BackDropTransparencyChanged -= SettingWindow_BackdropTransparencyChanged;
-            _settingWindow.ThumbnailShowHideSettingChanged -= SettingWindow_ThumbnailShowHideSettingChanged;
-            _settingWindow.ThumbnailSelectionColorChanged -= SettingWindow_ThumbnailSelectionColorChanged;
+            _settingWindow.ThumbnailSettingChanged -= SettingWindow_ThumbnailSettingChanged;
         }
 
         _settingWindow = null;
@@ -451,14 +449,23 @@ public sealed partial class PhotoDisplayWindow
             SystemBackdrop = _transparentTintBackdrop;
         }
     }
-    private void SettingWindow_ThumbnailShowHideSettingChanged()
-    {
-        _thumbNailController.ShowThumbnailBasedOnSettings();
-    }
 
-    private void SettingWindow_ThumbnailSelectionColorChanged()
+    private void SettingWindow_ThumbnailSettingChanged(ThumbnailSetting tbSetting)
     {
-        _thumbNailController.RefreshThumbnailSelectionColor();
+        switch (tbSetting)
+        {
+            case ThumbnailSetting.Size:
+                D2dCanvasThumbNail.Height = AppConfig.Settings.ThumbnailSize;
+                D2dCanvasThumbNail.Invalidate();
+                _thumbNailController.RefreshThumbnail();
+                break;
+            case ThumbnailSetting.SelectionColor:
+                _thumbNailController.RefreshThumbnail();
+                break;
+            case ThumbnailSetting.ShowHide:
+                _thumbNailController.ShowHideThumbnailBasedOnSettings();
+                break;
+        }
     }
 
     private void ButtonExpander_Click(object sender, RoutedEventArgs e)

@@ -45,4 +45,11 @@
         Navigate
     }
 
+    public enum ThumbnailSetting
+    {
+        ShowHide,
+        SelectionColor,
+        Size
+    }
+
 }

@@ -35,9 +35,7 @@ internal sealed partial class Settings
     public event Action<WindowBackdropType>? BackdropChanged;
     public event Action<bool>? ShowCheckeredBackgroundChanged;
     public event Action<int>? BackDropTransparencyChanged;
-    public event Action? ThumbnailShowHideSettingChanged;
-    public event Action? ThumbnailSelectionColorChanged;
-
+    public event Action<ThumbnailSetting>? ThumbnailSettingChanged;
 
     private readonly SystemBackdropConfiguration _configurationSource;
 
@@ -113,6 +111,7 @@ internal sealed partial class Settings
         SliderImageFitPercentage.Value = AppConfig.Settings.ImageFitPercentage;
         SliderTransparentBackgroundIntensity.Value = AppConfig.Settings.TransparentBackgroundIntensity;
         RectThumbnailSelection.Stroke = new SolidColorBrush(ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor));
+        SliderThumbnailSize.Value = AppConfig.Settings.ThumbnailSize;
 
         MainLayout.KeyDown += MainLayout_OnKeyDown;
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
@@ -128,6 +127,7 @@ internal sealed partial class Settings
         ButtonShowCheckeredBackground.Toggled += ButtonShowCheckeredBackground_OnToggled;
         SliderImageFitPercentage.ValueChanged += SliderImageFitPercentage_ValueChanged;
         SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
+        SliderThumbnailSize.ValueChanged += SliderThumbnailSize_ValueChanged;
 
 
 
@@ -166,23 +166,12 @@ internal sealed partial class Settings
             (SettingsCardMouseWheelBehaviour.Description as string).Replace("%%", Environment.NewLine);
     }
 
-    //private void ButtonSetThumbnailSelColor_OnClicked(object sender, RoutedEventArgs e)
-    //{
-    //    var colorPickerWindow = new ColorPickerWindow(WindowNative.GetWindowHandle(this));
-    //    colorPickerWindow.SetInitialColor(Color.FromArgb(255, 0, 0, 0));
-    //    colorPickerWindow.Closed += (senderWindow, args) =>
-    //    {
-    //        if (senderWindow is ColorPickerWindow pickerWindow && pickerWindow.SelectedColor.HasValue)
-    //        {
-    //            DispatcherQueue.TryEnqueue(() =>
-    //            {
-    //                RectThumbnailSelectionColor.Stroke = new SolidColorBrush(pickerWindow.SelectedColor.Value);
-    //            });
-    //        }
-    //    };
-    //    colorPickerWindow.Activate(); // Use Activate() or Show()
-    //}
-
+    private async void SliderThumbnailSize_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    {
+        AppConfig.Settings.ThumbnailSize = (int)SliderThumbnailSize.Value;
+        ThumbnailSettingChanged?.Invoke(ThumbnailSetting.Size);
+        await AppConfig.SaveAsync();
+    }
 
     private async void SliderTransparentBackgroundIntensity_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
@@ -267,7 +256,7 @@ internal sealed partial class Settings
     {
         AppConfig.Settings.ShowThumbnails = ButtonShowThumbnail.IsOn;
         await AppConfig.SaveAsync();
-        ThumbnailShowHideSettingChanged?.Invoke();
+        ThumbnailSettingChanged?.Invoke(ThumbnailSetting.ShowHide);
     }
 
     private async void SliderLowResCacheSize_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
@@ -332,7 +321,7 @@ internal sealed partial class Settings
         RectThumbnailSelection.Stroke = new SolidColorBrush(Color.FromArgb(255, newColor.R, newColor.G, newColor.B));
         ColorPickerFlyout.Hide();
         AppConfig.Settings.ThumbnailSelectionColor = $"#{newColor.R:X2}{newColor.G:X2}{newColor.B:X2}";
-        ThumbnailSelectionColorChanged?.Invoke();
+        ThumbnailSettingChanged?.Invoke(ThumbnailSetting.SelectionColor);
         await AppConfig.SaveAsync();
     }
 

@@ -181,6 +181,16 @@
                                         Tapped="RectThumbnailSelection_Tapped"
                                         ToolTipService.ToolTip="Click me to change my color!" />
                                 </StackPanel>
+                                <Slider
+                                    x:Name="SliderThumbnailSize"
+                                    Width="200"
+                                    Header="Thumbnail Size"
+                                    Maximum="60"
+                                    Minimum="30"
+                                    SmallChange="10"
+                                    StepFrequency="10"
+                                    Visibility="{x:Bind ConvertBoolToVisibility(ButtonShowThumbnail.IsOn), Mode=OneWay}"
+                                    Value="40" />
                             </StackPanel>
                         </controls:SettingsCard>
                         <controls:SettingsCard

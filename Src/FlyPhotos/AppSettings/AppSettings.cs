@@ -45,5 +45,6 @@ public class AppSettings
     public bool CheckeredBackground { get; set; } = false;
     public int ImageFitPercentage { get; set; } = 100;
     public int TransparentBackgroundIntensity { get; set; } = 40;
+    public int ThumbnailSize { get; set; } = 40;
 }
 
