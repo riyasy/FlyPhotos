@@ -1,38 +1,42 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using Windows.Foundation;
+using Windows.UI;
 using FlyPhotos.AppSettings;
 using FlyPhotos.Data;
+using FlyPhotos.Views;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
 
 namespace FlyPhotos.Controllers;
 
 internal partial class ThumbNailController : IThumbnailController
 {
-    // A shorter interval for more responsive UI updates.
-    private static readonly TimeSpan ThrottleInterval = TimeSpan.FromMilliseconds(150);
+    // --- Events ---
+    public event Action<int> ThumbnailClicked;
 
-    private bool _canDrawThumbnails;
+    // --- Private Settings ---
+    private int _numOfThumbNailsInOneDirection = 20;
+    private Color _thumbNailSelectionColor;
+
+    // --- Drawing Optimization related ---
     private bool _invalidatePending;
-    private bool _redrawNeeded; // Flag to track if a redraw is needed.
-
-    private readonly CanvasControl _d2dCanvasThumbNail;
-    private readonly PhotoSessionState _photoSessionState;
-    private CanvasRenderTarget _thumbnailOffscreen;
-    private ConcurrentDictionary<int, Photo> _cachedPreviews;
-
-    // Renamed for clarity. This timer will now implement throttling.
+    private bool _redrawNeeded;
+    private bool _canDrawThumbnails;
+    private static readonly TimeSpan ThrottleInterval = TimeSpan.FromMilliseconds(150);
     private readonly DispatcherTimer _throttledRedrawTimer = new()
     {
         Interval = ThrottleInterval
     };
 
-    private int _numOfThumbNailsInOneDirection = 20;
-
-    public event Action<int> ThumbnailClicked;
+    // --- References ---
+    private readonly CanvasControl _d2dCanvasThumbNail;
+    private readonly PhotoSessionState _photoSessionState;
+    private CanvasRenderTarget _thumbnailOffscreen;
+    private ConcurrentDictionary<int, Photo> _cachedPreviews;
 
     public ThumbNailController(CanvasControl d2dCanvasThumbNail, PhotoSessionState photoSessionState)
     {
@@ -43,6 +47,7 @@ internal partial class ThumbNailController : IThumbnailController
         _d2dCanvasThumbNail.Loaded += D2dCanvasThumbNail_Loaded;
         _throttledRedrawTimer.Tick += ThrottledRedrawTimer_Tick;
         _d2dCanvasThumbNail.PointerPressed += D2dCanvasThumbNail_PointerPressed;
+        _thumbNailSelectionColor = ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor);
     }
 
     // --- Public Methods ---
@@ -68,6 +73,16 @@ internal partial class ThumbNailController : IThumbnailController
             _thumbnailOffscreen = null;
         }
     }
+
+    public void RefreshThumbnailSelectionColor()
+    {
+        _thumbNailSelectionColor = ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor);
+        if (AppConfig.Settings.ShowThumbnails)
+        {
+            CreateThumbnailRibbonOffScreen();
+        }
+    }
+
 
     /// <summary>
     /// Called when an external thumbnail has been loaded.
@@ -211,7 +226,7 @@ internal partial class ThumbNailController : IThumbnailController
                 if (index == _photoSessionState.CurrentDisplayIndex)
                 {
                     dsThumbNail.DrawRectangle(new Rect(destX, startY, Constants.ThumbnailBoxSize, Constants.ThumbnailBoxSize),
-                        Colors.GreenYellow, 3f);
+                        _thumbNailSelectionColor, 3f);
                 }
             }
         }

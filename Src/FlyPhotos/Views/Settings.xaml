@@ -14,6 +14,26 @@
         <Pivot Title="Fly Photos - Settings">
             <PivotItem Header="General">
                 <ScrollViewer>
+                    <ScrollViewer.Resources>
+                        <Flyout x:Name="ColorPickerFlyout" Placement="Right">
+                            <!--  A StackPanel organizes the content of the flyout  -->
+                            <StackPanel MinWidth="300" Spacing="10">
+                                <ColorPicker
+                                    x:Name="FlyoutColorPicker"
+                                    ColorSpectrumShape="Ring"
+                                    IsAlphaEnabled="False"
+                                    IsHexInputVisible="True" />
+                                <!--  Buttons to confirm or cancel the selection  -->
+                                <StackPanel
+                                    HorizontalAlignment="Right"
+                                    Orientation="Horizontal"
+                                    Spacing="10">
+                                    <Button Click="ColorFlyOutOkButton_Click" Content="Ok" />
+                                    <Button Click="ColorFlyOutCancelButton_Click" Content="Cancel" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Flyout>
+                    </ScrollViewer.Resources>
                     <StackPanel Margin="0,0,15,0" Orientation="Vertical">
                         <controls:SettingsExpander
                             Margin="0,10,0,0"
@@ -142,7 +162,26 @@
                             Description="Show thumbnail strip at the bottom of window"
                             Header="Show thumbnail strip"
                             HeaderIcon="{ui:FontIcon Glyph=&#xF597;}">
-                            <ToggleSwitch x:Name="ButtonShowThumbnail" />
+                            <StackPanel Orientation="Vertical" Spacing="10">
+                                <ToggleSwitch x:Name="ButtonShowThumbnail" HorizontalAlignment="Right" />
+                                <StackPanel
+                                    HorizontalAlignment="Right"
+                                    Orientation="Horizontal"
+                                    Spacing="10"
+                                    Visibility="{x:Bind ConvertBoolToVisibility(ButtonShowThumbnail.IsOn), Mode=OneWay}">
+                                    <TextBlock VerticalAlignment="Center" Text="Selection Color" />
+                                    <Rectangle
+                                        x:Name="RectThumbnailSelection"
+                                        Width="30"
+                                        Height="30"
+                                        Fill="Transparent"
+                                        FlyoutBase.AttachedFlyout="{StaticResource ColorPickerFlyout}"
+                                        Stroke="Gray"
+                                        StrokeThickness="3"
+                                        Tapped="RectThumbnailSelection_Tapped"
+                                        ToolTipService.ToolTip="Click me to change my color!" />
+                                </StackPanel>
+                            </StackPanel>
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardFadeControls"
@@ -156,11 +195,11 @@
                                     x:Name="SliderFadeIntensity"
                                     Width="200"
                                     Header="Fade Intensity"
-                                    IsEnabled="{x:Bind ButtonEnableAutoFade.IsOn, Mode=OneWay}"
                                     Maximum="100"
                                     Minimum="30"
                                     SmallChange="10"
                                     StepFrequency="10"
+                                    Visibility="{x:Bind ConvertBoolToVisibility(ButtonEnableAutoFade.IsOn), Mode=OneWay}"
                                     Value="50" />
                             </StackPanel>
                         </controls:SettingsCard>

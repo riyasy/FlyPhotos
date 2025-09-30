@@ -18,7 +18,7 @@ using Windows.Storage.Streams;
 
 namespace FlyPhotos.Controllers;
 
-internal partial class PhotoDisplayController : IPhotoDisplayController
+internal partial class PhotoDisplayController
 {
     public event EventHandler<StatusUpdateEventArgs>? StatusUpdated;
 

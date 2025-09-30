@@ -17,6 +17,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using WinRT.Interop;
 
@@ -34,9 +35,10 @@ internal sealed partial class Settings
     public event Action<WindowBackdropType>? BackdropChanged;
     public event Action<bool>? ShowCheckeredBackgroundChanged;
     public event Action<int>? BackDropTransparencyChanged;
+    public event Action? ThumbnailShowHideSettingChanged;
+    public event Action? ThumbnailSelectionColorChanged;
 
 
-    private readonly IThumbnailController _thumbnailDisplayChanger;
     private readonly SystemBackdropConfiguration _configurationSource;
 
     // Backdrop translator
@@ -71,9 +73,8 @@ internal sealed partial class Settings
         }
     );
 
-    internal Settings(IThumbnailController thumbnailDisplayChanger)
+    internal Settings()
     {
-        _thumbnailDisplayChanger = thumbnailDisplayChanger;
         InitializeComponent();
         Title = "Fly Photos - Settings";
 
@@ -111,6 +112,7 @@ internal sealed partial class Settings
         ButtonShowCheckeredBackground.IsOn = AppConfig.Settings.CheckeredBackground;
         SliderImageFitPercentage.Value = AppConfig.Settings.ImageFitPercentage;
         SliderTransparentBackgroundIntensity.Value = AppConfig.Settings.TransparentBackgroundIntensity;
+        RectThumbnailSelection.Stroke = new SolidColorBrush(ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor));
 
         MainLayout.KeyDown += MainLayout_OnKeyDown;
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
@@ -265,7 +267,7 @@ internal sealed partial class Settings
     {
         AppConfig.Settings.ShowThumbnails = ButtonShowThumbnail.IsOn;
         await AppConfig.SaveAsync();
-        _thumbnailDisplayChanger.ShowThumbnailBasedOnSettings();
+        ThumbnailShowHideSettingChanged?.Invoke();
     }
 
     private async void SliderLowResCacheSize_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
@@ -313,14 +315,54 @@ internal sealed partial class Settings
         _configurationSource.Theme = (SystemBackdropTheme)((FrameworkElement)Content).ActualTheme;
     }
 
-    //private bool ConvertNullableBoolToBool(bool? value)
-    //{
-    //    return value ?? false;
-    //}
+    private Visibility ConvertBoolToVisibility(bool value)
+    {
+        return value == true ? Visibility.Visible : Visibility.Collapsed;
+    }
 
 
     private Visibility ShouldDisplayTransparencySlider(int index)
     {
         return index == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private async void ColorFlyOutOkButton_Click(object sender, RoutedEventArgs e)
+    {
+        Color newColor = FlyoutColorPicker.Color;
+        RectThumbnailSelection.Stroke = new SolidColorBrush(Color.FromArgb(255, newColor.R, newColor.G, newColor.B));
+        ColorPickerFlyout.Hide();
+        AppConfig.Settings.ThumbnailSelectionColor = $"#{newColor.R:X2}{newColor.G:X2}{newColor.B:X2}";
+        ThumbnailSelectionColorChanged?.Invoke();
+        await AppConfig.SaveAsync();
+    }
+
+    private void ColorFlyOutCancelButton_Click(object sender, RoutedEventArgs e)
+    {
+        ColorPickerFlyout.Hide();
+    }
+
+    private void RectThumbnailSelection_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        var currentColor = ((SolidColorBrush)RectThumbnailSelection.Stroke).Color;
+        FlyoutColorPicker.Color = currentColor;
+        FlyoutBase.ShowAttachedFlyout(RectThumbnailSelection);
+    }
+}
+
+internal static class ColorConverter
+{
+    public static Color FromHex(string hex)
+    {
+        hex = hex.TrimStart('#');
+        byte a = 255; // Default alpha value
+        byte r = byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
+        byte g = byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
+        byte b = byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+
+        if (hex.Length == 8)
+        {
+            a = byte.Parse(hex.Substring(6, 2), System.Globalization.NumberStyles.HexNumber);
+        }
+        return Color.FromArgb(a, r, g, b);
     }
 }

@@ -37,6 +37,7 @@ public class AppSettings
     public int CacheSizeOneSideHqImages { get; set; } = 2;
     public int CacheSizeOneSidePreviews { get; set; } = 300;
     public bool ShowThumbnails { get; set; } = true;
+    public string ThumbnailSelectionColor { get; set; } = "#ADFF2F";
     public bool AutoFade { get; set; } = true;
     public int FadeIntensity { get; set; } = 60;
     public bool OpenExitZoom { get; set; } = false;

@@ -365,7 +365,7 @@ public sealed partial class PhotoDisplayWindow
     {
         if (_settingWindow == null)
         {
-            _settingWindow = new Settings(_thumbNailController);
+            _settingWindow = new Settings();
             _settingWindow.SetWindowSize(1024, 768);
             _settingWindow.Closed += SettingWindow_Closed;
             _settingWindow.Activate();
@@ -373,6 +373,8 @@ public sealed partial class PhotoDisplayWindow
             _settingWindow.BackDropTransparencyChanged += SettingWindow_BackdropTransparencyChanged;
             _settingWindow.ThemeChanged += SetWindowTheme;
             _settingWindow.BackdropChanged += SetWindowBackground;
+            _settingWindow.ThumbnailShowHideSettingChanged += SettingWindow_ThumbnailShowHideSettingChanged;
+            _settingWindow.ThumbnailSelectionColorChanged += SettingWindow_ThumbnailSelectionColorChanged;
         }
         else
         {
@@ -429,6 +431,8 @@ public sealed partial class PhotoDisplayWindow
             _settingWindow.BackdropChanged -= SetWindowBackground;
             _settingWindow.ShowCheckeredBackgroundChanged -= SettingWindow_ShowCheckeredBackgroundChanged;
             _settingWindow.BackDropTransparencyChanged -= SettingWindow_BackdropTransparencyChanged;
+            _settingWindow.ThumbnailShowHideSettingChanged -= SettingWindow_ThumbnailShowHideSettingChanged;
+            _settingWindow.ThumbnailSelectionColorChanged -= SettingWindow_ThumbnailSelectionColorChanged;
         }
 
         _settingWindow = null;
@@ -445,6 +449,15 @@ public sealed partial class PhotoDisplayWindow
             _transparentTintBackdrop.TintColor = Color.FromArgb((byte)(((100 - obj) * 255) / 100), 0, 0, 0);
             SystemBackdrop = _transparentTintBackdrop;
         }
+    }
+    private void SettingWindow_ThumbnailShowHideSettingChanged()
+    {
+        _thumbNailController.ShowThumbnailBasedOnSettings();
+    }
+
+    private void SettingWindow_ThumbnailSelectionColorChanged()
+    {
+        _thumbNailController.RefreshThumbnailSelectionColor();
     }
 
     private void ButtonExpander_Click(object sender, RoutedEventArgs e)
