@@ -1,13 +1,10 @@
 ﻿using System;
-using Windows.Foundation;
 using Microsoft.Graphics.Canvas;
 
 namespace FlyPhotos.Controllers.Renderers
 {
     internal interface IRenderer : IDisposable
     {
-        Rect SourceBounds { get; }
-
         /// <summary>
         /// Draws the content to the canvas.
         /// </summary>

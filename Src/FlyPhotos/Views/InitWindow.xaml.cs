@@ -34,7 +34,7 @@ namespace FlyPhotos.Views
 
             ((FrameworkElement)Content).RequestedTheme = AppConfig.Settings.Theme;
 
-            MainLayout.KeyDown += delegate(object o, KeyRoutedEventArgs args)
+            MainLayout.KeyDown += delegate(object _, KeyRoutedEventArgs args)
             {
                 if (args.Key == VirtualKey.Escape) this.Close();
             };

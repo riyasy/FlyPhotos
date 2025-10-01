@@ -441,7 +441,7 @@ public sealed partial class PhotoDisplayWindow
 
     private void SettingWindow_ShowCheckeredBackgroundChanged(bool showChecker)
     {
-        _canvasController.HandleCheckeredBackgroundChange(showChecker);
+        _canvasController.HandleCheckeredBackgroundChange();
     }
     private void SettingWindow_BackdropTransparencyChanged(int obj)
     {

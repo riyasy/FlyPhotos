@@ -2,7 +2,6 @@
 using FlyPhotos.Utils;
 using FlyPhotos.Views;
 using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using NLog;
 using System;
@@ -10,9 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
-using Windows.Graphics;
 using WinUIEx;
 using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 
@@ -78,7 +75,7 @@ public partial class App
             initWindow.SetWindowSize(600, 600);
             initWindow.CenterOnScreen();
             initWindow.Activate();
-            initWindow.Closed += delegate(object o, WindowEventArgs eventArgs)
+            initWindow.Closed += delegate
             {
                 if (File.Exists(initWindow.SelectedFile))
                     LaunchPhotoDisplayWindow(initWindow.SelectedFile);

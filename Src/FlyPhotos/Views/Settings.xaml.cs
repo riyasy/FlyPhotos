@@ -7,7 +7,6 @@ using System.Linq;
 using Windows.System;
 using Windows.UI;
 using FlyPhotos.AppSettings;
-using FlyPhotos.Controllers;
 using FlyPhotos.Data;
 using FlyPhotos.Utils;
 using Microsoft.UI;
@@ -164,8 +163,10 @@ internal sealed partial class Settings
             $"This program doesn't install any codecs and uses codecs already present in the system.{Environment.NewLine}" +
             $"{Environment.NewLine}{Util.GetExtensionsDisplayString()}";
 
-        SettingsCardMouseWheelBehaviour.Description =
-            (SettingsCardMouseWheelBehaviour.Description as string).Replace("%%", Environment.NewLine);
+    
+        if (SettingsCardMouseWheelBehaviour.Description is string desc)
+            SettingsCardMouseWheelBehaviour.Description = desc.Replace("%%", Environment.NewLine);
+                
     }
 
     private async void ButtonRememberLastMonitor_OnToggled(object sender, RoutedEventArgs e)
@@ -314,7 +315,7 @@ internal sealed partial class Settings
 
     private Visibility ConvertBoolToVisibility(bool value)
     {
-        return value == true ? Visibility.Visible : Visibility.Collapsed;
+        return value ? Visibility.Visible : Visibility.Collapsed;
     }
 
 

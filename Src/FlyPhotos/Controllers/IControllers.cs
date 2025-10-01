@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Windows.Foundation;
 
 namespace FlyPhotos.Controllers
 {

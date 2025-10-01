@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using FlyPhotos.AppSettings;
 using FlyPhotos.Data;
 using FlyPhotos.FlyNativeLibWrapper;
 using Microsoft.Graphics.Canvas;
