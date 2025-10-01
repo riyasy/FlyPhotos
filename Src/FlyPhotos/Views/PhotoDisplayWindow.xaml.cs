@@ -1,10 +1,4 @@
 ﻿#nullable enable
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
-using Windows.System;
-using Windows.UI;
 using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers;
 using FlyPhotos.Data;
@@ -22,6 +16,12 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using NLog;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
+using Windows.System;
+using Windows.UI;
 using WinRT;
 using WinRT.Interop;
 using WinUIEx;
@@ -367,7 +367,9 @@ public sealed partial class PhotoDisplayWindow
         if (_settingWindow == null)
         {
             _settingWindow = new Settings();
-            _settingWindow.SetWindowSize(1024, 768);
+            _settingWindow.SetWindowSize(900, 768);
+            Util.MoveWindowToMonitor(_settingWindow, Util.GetMonitorForWindow(this));
+            _settingWindow.CenterOnScreen();
             _settingWindow.Closed += SettingWindow_Closed;
             _settingWindow.Activate();
             _settingWindow.ShowCheckeredBackgroundChanged += SettingWindow_ShowCheckeredBackgroundChanged;

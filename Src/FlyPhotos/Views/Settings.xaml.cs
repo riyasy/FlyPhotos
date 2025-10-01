@@ -112,6 +112,7 @@ internal sealed partial class Settings
         SliderTransparentBackgroundIntensity.Value = AppConfig.Settings.TransparentBackgroundIntensity;
         RectThumbnailSelection.Stroke = new SolidColorBrush(ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor));
         SliderThumbnailSize.Value = AppConfig.Settings.ThumbnailSize;
+        ButtonRememberLastMonitor.IsOn = AppConfig.Settings.RememberLastMonitor;
 
         MainLayout.KeyDown += MainLayout_OnKeyDown;
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
@@ -128,6 +129,7 @@ internal sealed partial class Settings
         SliderImageFitPercentage.ValueChanged += SliderImageFitPercentage_ValueChanged;
         SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
         SliderThumbnailSize.ValueChanged += SliderThumbnailSize_ValueChanged;
+        ButtonRememberLastMonitor.Toggled += ButtonRememberLastMonitor_OnToggled;
 
 
 
@@ -164,6 +166,12 @@ internal sealed partial class Settings
 
         SettingsCardMouseWheelBehaviour.Description =
             (SettingsCardMouseWheelBehaviour.Description as string).Replace("%%", Environment.NewLine);
+    }
+
+    private async void ButtonRememberLastMonitor_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.RememberLastMonitor = ButtonRememberLastMonitor.IsOn;
+        await AppConfig.SaveAsync();
     }
 
     private async void SliderThumbnailSize_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
@@ -334,7 +342,7 @@ internal sealed partial class Settings
     {
         var currentColor = ((SolidColorBrush)RectThumbnailSelection.Stroke).Color;
         FlyoutColorPicker.Color = currentColor;
-        FlyoutBase.ShowAttachedFlyout(RectThumbnailSelection);
+        FlyoutBase.ShowAttachedFlyout(ButtonSetThumbnailSelColor);
     }
 }
 

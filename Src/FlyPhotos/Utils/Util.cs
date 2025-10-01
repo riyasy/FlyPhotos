@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using FlyPhotos.AppSettings;
 using FlyPhotos.Data;
 using FlyPhotos.FlyNativeLibWrapper;
 using Microsoft.Graphics.Canvas;
@@ -6,6 +7,7 @@ using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Input;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using NLog;
 using System;
@@ -13,6 +15,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using Windows.Graphics;
 using Windows.System;
 using Windows.UI;
 using Windows.UI.Core;
@@ -131,4 +134,44 @@ internal static class Util
         return checkeredBrush;
     }
 
+    public static void MoveWindowToMonitor(Window window, ulong monitorId)
+    {
+        try
+        {
+            var allMonitors = DisplayArea.FindAll();
+            if (allMonitors.Count <= 1) return;
+            // NEVER CONVERT TO FOREACH OR LINQ - IT WILL CAUSE A CRASH
+            // https://github.com/microsoft/microsoft-ui-xaml/issues/6454
+            DisplayArea? targetMonitor = null;
+            for (var index = 0; index < allMonitors.Count; index++)
+            {
+                var m = allMonitors[index];
+                if (m.DisplayId.Value != monitorId) continue;
+                targetMonitor = m;
+                break;
+            }
+            if (targetMonitor == null) return;
+            var newPosition = new PointInt32(targetMonitor.WorkArea.X, targetMonitor.WorkArea.Y);
+            // IMPORTANT: We move it first before resizing or maximizing.
+            window.AppWindow.Move(newPosition);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
+    }
+
+    public static ulong GetMonitorForWindow(Window window)
+    {
+        try
+        {
+            DisplayArea currentDisplayArea = DisplayArea.GetFromWindowId(window.AppWindow.Id, DisplayAreaFallback.Nearest);
+            return currentDisplayArea.DisplayId.Value;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
+        return 0;
+    }
 }

@@ -1,6 +1,7 @@
 ﻿using FlyPhotos.AppSettings;
 using FlyPhotos.Utils;
 using FlyPhotos.Views;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using NLog;
@@ -9,7 +10,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
+using Windows.Graphics;
 using WinUIEx;
 using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 
@@ -27,7 +30,7 @@ public partial class App
 
     private string _selectedFileName;
     private static Mutex _mutex;
-    private Window _mWindow;
+    private PhotoDisplayWindow _photoDisplayWindow;
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -78,22 +81,32 @@ public partial class App
             initWindow.Closed += delegate(object o, WindowEventArgs eventArgs)
             {
                 if (File.Exists(initWindow.SelectedFile))
-                {
-                    _mWindow = new PhotoDisplayWindow(initWindow.SelectedFile);
-                    _mWindow.Maximize();
-                    _mWindow.Activate();
-                }
+                    LaunchPhotoDisplayWindow(initWindow.SelectedFile);
             };
 
         }
         else
         {
-            _mWindow = new PhotoDisplayWindow(_selectedFileName);
-            _mWindow.Maximize();
-            _mWindow.Activate();
+            LaunchPhotoDisplayWindow(_selectedFileName);
         }
     }
 
+    private void LaunchPhotoDisplayWindow(string selectedFileName)
+    {
+        _photoDisplayWindow = new PhotoDisplayWindow(selectedFileName);
+        _photoDisplayWindow.AppWindow.Closing += PhotoDisplayWindow_Closing;
+        if (AppConfig.Settings.RememberLastMonitor) 
+            Util.MoveWindowToMonitor(_photoDisplayWindow, AppConfig.Settings.LastUsedMonitorId);
+        _photoDisplayWindow.Maximize();
+        _photoDisplayWindow.Activate();
+    }
+
+    private async void PhotoDisplayWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
+    {
+        if (!AppConfig.Settings.RememberLastMonitor) return;
+        AppConfig.Settings.LastUsedMonitorId = Util.GetMonitorForWindow(_photoDisplayWindow);
+        await AppConfig.SaveAsync();
+    }
 
 
     private static void KillOtherFlys()

@@ -62,7 +62,10 @@
                             Description="Select the app theme."
                             Header="Window Theme"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE790;}">
-                            <ComboBox x:Name="ComboTheme" SelectedIndex="0">
+                            <ComboBox
+                                x:Name="ComboTheme"
+                                MinWidth="150"
+                                SelectedIndex="0">
                                 <ComboBoxItem>Default</ComboBoxItem>
                                 <ComboBoxItem>Dark</ComboBoxItem>
                                 <ComboBoxItem>Light</ComboBoxItem>
@@ -77,6 +80,7 @@
                             <StackPanel Orientation="Vertical" Spacing="10">
                                 <ComboBox
                                     x:Name="ComboBackGround"
+                                    MinWidth="150"
                                     HorizontalAlignment="Right"
                                     SelectedIndex="0">
                                     <ComboBoxItem>Transparent</ComboBoxItem>
@@ -90,8 +94,8 @@
 
                                 <Slider
                                     x:Name="SliderTransparentBackgroundIntensity"
-                                    Width="200"
-                                    Header="Set Transparency Percentage"
+                                    MinWidth="150"
+                                    Header="Set Transparency %"
                                     Maximum="90"
                                     Minimum="30"
                                     SmallChange="10"
@@ -135,11 +139,19 @@
                             HeaderIcon="{ui:FontIcon Glyph=&#xE9A6;}">
                             <Slider
                                 x:Name="SliderImageFitPercentage"
-                                Width="200"
+                                MinWidth="150"
                                 Maximum="100"
                                 Minimum="50"
                                 SmallChange="10"
                                 StepFrequency="10" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardRememberLastMonitor"
+                            Margin="0,5,0,0"
+                            Description="Fly will open on last used monitor. Don't enable if you have only one monitor."
+                            Header="Remember last used monitor"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xEC77;}">
+                            <ToggleSwitch x:Name="ButtonRememberLastMonitor" />
                         </controls:SettingsCard>
                         <TextBlock
                             Margin="0,20,0,0"
@@ -151,7 +163,10 @@
                             Description="Choose default mouse wheel behaviour.%%👉 Ctrl + Mouse wheel always zooms in or out.%%👉 Alt + Mouse wheel always navigates to next or previous"
                             Header="Mouse Wheel"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE962;}">
-                            <ComboBox x:Name="ComboMouseWheelBehaviour" SelectedIndex="0">
+                            <ComboBox
+                                x:Name="ComboMouseWheelBehaviour"
+                                MinWidth="150"
+                                SelectedIndex="0">
                                 <ComboBoxItem>Zoom In or Out</ComboBoxItem>
                                 <ComboBoxItem>View Next or Previous</ComboBoxItem>
                             </ComboBox>
@@ -164,26 +179,9 @@
                             HeaderIcon="{ui:FontIcon Glyph=&#xF597;}">
                             <StackPanel Orientation="Vertical" Spacing="10">
                                 <ToggleSwitch x:Name="ButtonShowThumbnail" HorizontalAlignment="Right" />
-                                <StackPanel
-                                    HorizontalAlignment="Right"
-                                    Orientation="Horizontal"
-                                    Spacing="10"
-                                    Visibility="{x:Bind ConvertBoolToVisibility(ButtonShowThumbnail.IsOn), Mode=OneWay}">
-                                    <TextBlock VerticalAlignment="Center" Text="Selection Color" />
-                                    <Rectangle
-                                        x:Name="RectThumbnailSelection"
-                                        Width="30"
-                                        Height="30"
-                                        Fill="Transparent"
-                                        FlyoutBase.AttachedFlyout="{StaticResource ColorPickerFlyout}"
-                                        Stroke="Gray"
-                                        StrokeThickness="3"
-                                        Tapped="RectThumbnailSelection_Tapped"
-                                        ToolTipService.ToolTip="Click me to change my color!" />
-                                </StackPanel>
                                 <Slider
                                     x:Name="SliderThumbnailSize"
-                                    Width="200"
+                                    MinWidth="150"
                                     Header="Thumbnail Size"
                                     Maximum="60"
                                     Minimum="30"
@@ -191,6 +189,31 @@
                                     StepFrequency="10"
                                     Visibility="{x:Bind ConvertBoolToVisibility(ButtonShowThumbnail.IsOn), Mode=OneWay}"
                                     Value="40" />
+                                <StackPanel
+                                    MinWidth="150"
+                                    HorizontalAlignment="Right"
+                                    Orientation="Horizontal"
+                                    Spacing="10"
+                                    Visibility="{x:Bind ConvertBoolToVisibility(ButtonShowThumbnail.IsOn), Mode=OneWay}">
+                                    <TextBlock
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        Text="Selection Color" />
+                                    <Button
+                                        x:Name="ButtonSetThumbnailSelColor"
+                                        HorizontalAlignment="Right"
+                                        FlyoutBase.AttachedFlyout="{StaticResource ColorPickerFlyout}"
+                                        Tapped="RectThumbnailSelection_Tapped"
+                                        ToolTipService.ToolTip="Click me to change my color!">
+                                        <Button.Content>
+                                            <Rectangle
+                                                x:Name="RectThumbnailSelection"
+                                                Width="20"
+                                                Height="20"
+                                                StrokeThickness="3" />
+                                        </Button.Content>
+                                    </Button>
+                                </StackPanel>
                             </StackPanel>
                         </controls:SettingsCard>
                         <controls:SettingsCard
@@ -203,7 +226,7 @@
                                 <ToggleSwitch x:Name="ButtonEnableAutoFade" HorizontalAlignment="Right" />
                                 <Slider
                                     x:Name="SliderFadeIntensity"
-                                    Width="200"
+                                    MinWidth="150"
                                     Header="Fade Intensity"
                                     Maximum="100"
                                     Minimum="30"
@@ -226,7 +249,7 @@
                             <StackPanel Orientation="Vertical">
                                 <Slider
                                     x:Name="SliderLowResCacheSize"
-                                    Width="200"
+                                    MinWidth="150"
                                     Header="Low Res Cache"
                                     Maximum="300"
                                     Minimum="50"
@@ -235,7 +258,7 @@
                                     Value="300" />
                                 <Slider
                                     x:Name="SliderHighResCacheSize"
-                                    Width="200"
+                                    MinWidth="150"
                                     Header="High Res Cache"
                                     Maximum="3"
                                     Minimum="1"

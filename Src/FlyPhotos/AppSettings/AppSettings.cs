@@ -46,5 +46,7 @@ public class AppSettings
     public int ImageFitPercentage { get; set; } = 100;
     public int TransparentBackgroundIntensity { get; set; } = 40;
     public int ThumbnailSize { get; set; } = 40;
+    public ulong LastUsedMonitorId { get; set; } = 0;
+    public bool RememberLastMonitor { get; set; } = false;
 }
 
