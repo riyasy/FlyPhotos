@@ -365,7 +365,7 @@ internal class CanvasController : ICanvasController
     /// Returns true if delta is not a multiple of standard WHEEL_DELTA (120),
     /// which usually indicates a touchpad gesture.
     /// </summary>
-    private bool IsPrecisionTouchpad(int delta) => Math.Abs(delta) % 120 != 0;
+    private static bool IsPrecisionTouchpad(int delta) => Math.Abs(delta) % 120 != 0;
 
     #endregion
 

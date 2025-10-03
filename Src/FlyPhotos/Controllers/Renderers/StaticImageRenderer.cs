@@ -27,7 +27,7 @@ namespace FlyPhotos.Controllers.Renderers
         private readonly bool _supportsTransparency;
         private readonly CanvasControl _canvas;
 
-        public Rect SourceBounds => _sourceBitmap.Bounds;
+        private Rect SourceBounds => _sourceBitmap.Bounds;
 
         public StaticImageRenderer(CanvasControl canvas, CanvasViewState canvasViewState, CanvasBitmap sourceBitmap,
             CanvasImageBrush checkeredBrush, bool supportsTransparency, Action invalidateCanvas, bool createOffScreen = true)

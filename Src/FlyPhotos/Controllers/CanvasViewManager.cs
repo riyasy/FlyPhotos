@@ -43,18 +43,18 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _canvasViewState.ImagePos.X = canvasSize.Width / 2;
         _canvasViewState.ImagePos.Y = canvasSize.Height / 2;
 
-        _canvasViewState.LastScaleTo = (float)scaleFactor;
+        _canvasViewState.LastScaleTo = scaleFactor;
 
         if (isFirstPhotoEver && AppConfig.Settings.OpenExitZoom)
         {
             var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
             _canvasViewState.Scale = 0.01f;
             _suppressZoomUpdateForNextAnimation = true;
-            StartPanAndZoomAnimation((float)scaleFactor, targetPosition);
+            StartPanAndZoomAnimation(scaleFactor, targetPosition);
         }
         else
         {
-            _canvasViewState.Scale = (float)scaleFactor;
+            _canvasViewState.Scale = scaleFactor;
         }
         _canvasViewState.UpdateTransform();
     }
@@ -221,7 +221,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
     /// The function determines whether to fit the image based on its width or height, choosing the
     /// scale that ensures the entire image remains visible.
     /// </summary>
-    private float CalculateScreenFitScale(Size canvasSize, Size imageSize, int imageRotation)
+    private static float CalculateScreenFitScale(Size canvasSize, Size imageSize, int imageRotation)
     {
         // Determine if the image is rotated to a vertical orientation (e.g., 90 or 270 degrees).
         var isVertical = (imageRotation % 180) != 0;

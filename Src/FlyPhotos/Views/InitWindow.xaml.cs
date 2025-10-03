@@ -2,7 +2,6 @@
 using FlyPhotos.AppSettings;
 using FlyPhotos.Utils;
 using Microsoft.UI;
-using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents; 
@@ -13,7 +12,6 @@ using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.System;
-using WinRT.Interop;
 
 namespace FlyPhotos.Views
 {
@@ -22,11 +20,7 @@ namespace FlyPhotos.Views
         public InitWindow()
         {
             this.InitializeComponent();
-            var hWnd = WindowNative.GetWindowHandle(this);
-            var myWndId = Win32Interop.GetWindowIdFromWindow(hWnd);
-            var appWindow = AppWindow.GetFromWindowId(myWndId);
-
-            var titleBar = appWindow.TitleBar;
+            var titleBar = AppWindow.TitleBar;
             titleBar.ExtendsContentIntoTitleBar = true;
             titleBar.ButtonBackgroundColor = Colors.Transparent;
             titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
