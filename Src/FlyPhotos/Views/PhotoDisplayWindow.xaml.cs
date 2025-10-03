@@ -249,7 +249,12 @@ public sealed partial class PhotoDisplayWindow
 
         if (Math.Abs(accumulator) < Constants.ScrollThreshold) return;
 
-        var direction = accumulator > 0 ? NavDirection.Prev : NavDirection.Next;
+        // Vertical: up → prev, down → next
+        // Horizontal: right → next, left → prev
+        var direction = isHorizontal ? 
+            (accumulator > 0 ? NavDirection.Next : NavDirection.Prev) :
+            (accumulator > 0 ? NavDirection.Prev : NavDirection.Next);
+
         accumulator = 0; // reset after firing
         await _photoController.Fly(direction);
         RestartBrakeTimer();
