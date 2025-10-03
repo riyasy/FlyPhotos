@@ -1,44 +1,98 @@
-
 # Fly Photos
 
-Fly Photos is one of the fastest photoviewer for Windows. It tries to mimic many features of the now extinct Google Picasa Photo Viewer. This project was born out of finding the ideal replacement for Google Picasa Photo Viewer.
+Fly Photos is one of the fastest photo viewers for Windows, designed as a modern replacement for the now-discontinued Google Picasa Photo Viewer.  
+Built with **WinUI 3, WinRT, and Win2D**, it delivers smooth animations, instant startup, and an efficient viewing experience.  
 
-![](https://github.com/riyasy/FlyPhotos/blob/main/Misc/ImagesForDocumentation/03FullScreen.png?raw=true)
+<img width="1238" height="674" alt="image" src="https://github.com/user-attachments/assets/479fdcad-609d-47b3-9c93-5adc7d679728" />
 
-Watch Fly Photos in action
-
+Watch Fly Photos in action [Old Video]:  
 [![Fly Photos](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DQkL2-WYY2Ic%26t)](https://www.youtube.com/watch?v=QkL2-WYY2Ic&t)
 
+---
 
-### Features
-1. **Full Screen mode with transparent background like in Picasa Photo Viewer.**
-2. Fast startup even for raw files with image size greater than 100 MB.
-3. Full Screen exit on pressing anywhere outside the image.
-4. Close on pressing escape key.
-5. Use < or > keys on screen or on keyboard to navigate between photos.
-6. **Long press < or > to fly through all cached images on left and right.** This makes using thumbnails redundant as traversal between photos is so fast.
-7. Fully in memory caching enhanced now with disk caching for previews.
-8. No files are opened in write mode. So your images are fully safe.
-9. **Respects Windows Explorer sort order and filtering.** For e.g, if we right click and open an image in the Recent Items view of explorer, the App shows only items in the recent items view. Likewise, if we have filtered images using explorer search-filter and open one image, navigation moves through only the filtered list.
-10. Thumbnail strip as in Picasa photo viewer. (Experimental, more coding needed to make it interactive)
+## ✨ Features
+- **Fast and lightweight**
+  - Instant startup with Native AOT build.  
+  - In-memory and disk caching for smooth navigation even in folders with thousands of photos.  
+  - Press and hold ← / → after opening a folder with thousands of photos to get a feel of Fly's performance.  
 
-### Limitations
-1. Supports image formats supported by Windows Imaging Component only. For Windows 11, the format list is exhaustive. (Same as formats which can be opened by Windows Photos App). For Windows 10, this list of formats is less than Windows 11. But if any WIC compliant codec is already installed in the PC, then Fly can automatically detect and load the photo. Check *Settings>Show Codecs* button to know the detected OS supported formats.
+- **Image format support**
+  - All formats supported by Windows Imaging Component (JPEG, PNG, TIFF, RAW, etc.).  
+  - Extended support for PSD (with transparency), HEIC/HEIF, SVG, GIF, and APNG (Animated PNG).  
 
+- **Viewing experience**
+  - Transparent background like in Picasa Photo Viewer.  
+  - Modern Windows themes like Mica, Acrylic, and Frozen Glass.  
+  - Smooth pan and zoom animations.  
+  - Thumbnail strip with adjustable size and click-to-jump navigation.  
+  - Multi-monitor support (remembers last used monitor).  
 
-### Installation
-Currently only 64 bit versions of Windows 7, 8, 10 and 11 are supported. Download and install Ver 1.x.x for Windows 7 and 8. Ver 2.x.x for Windows 10 and 11. 
+- **Controls**
+  - Zoom, pan, and rotate using mouse, keyboard, or scroll wheel.  
+  - Configurable mouse wheel behavior: zoom or navigate.  
+  - Shortcuts:  
+    - `← / →` : Next / Previous photo  
+    - Hold `← / →` : Fly through photos super fast  
+    - `Mouse Wheel` : Zoom or Navigate (based on setting)  
+    - `Ctrl + Mouse Wheel` : Always zoom  
+    - `Alt + Mouse Wheel` : Always navigate  
+    - `Ctrl + + / −` : Zoom in / out  
+    - `Ctrl + Arrow Keys` : Pan photo  
+    - `Ctrl + C` : Copy photo (bitmap or file)  
+    - `Home / End` : Jump to first / last photo  
+    - Click + Drag : Pan photo  
+    - `Mouse Wheel` on `Thumbnail bar` : Navigate  
+    - `Mouse Wheel` on `On-screen Next / Previous button` : Navigate  
+    - `Mouse Wheel` on `On-screen Rotate button` : Rotate  
 
-### How to use
-Right click any image and click the **Open with Fly** menu item to see the App. In Windows 7,8 and 10 this menu will be accessible on right click itself. With Windows 11, sometimes we may need to press **Show more options** to see the **Open with Fly** menu. With regular usage in Windows 11, the **Open with Fly** menu will get promoted to the main menu.
+- **Windows Explorer integration**
+  - Right-click an image → **Open with Fly**.  
+  - Right-clicking an image shows the classic Windows Explorer context menu.  
+  - Follows Explorer sort order and filtering (Recent, Search, etc.).  
 
-![](https://github.com/riyasy/FlyPhotos/blob/main/Misc/ImagesForDocumentation/02RightClickMenu.png?raw=true)
+---
 
-Click the < or > buttons or keyboard arrow keys to navigate. After cache is created long press these buttons to fly through the list of images.
-CTRL + scroll on image to navigate to next or previous photo.
-Scroll after placing mouse cursor on < or > key on screen to get next or previous photo.
+## 🚧 Known Limitations
+- v2.x supports Windows 10 and 11 only (x64).  
+- SVG rendering limited to 2000px on the longest side.  
+- Touchpad gestures and delete shortcut are planned.  
 
+---
 
+## 📥 Installation
+- Download the latest build from the [Releases](https://github.com/riyasy/FlyPhotos/releases) page.  
+- Right-click any image and choose **Open with Fly** to start viewing.  
+- On Windows 11, it may appear under **Show more options** until promoted with regular use.  
+- Or set as the default app for each image file extension manually.  
 
+---
 
+## 🎮 Usage
+Keyboard and mouse shortcuts:  
 
+| Action | Shortcut |
+|--------|----------|
+| Next / Previous photo | ← / → |
+| Fly-through mode | Hold ← / → |
+| Zoom In / Out | Mouse Wheel / Ctrl + + / − |
+| Pan | Click + Drag / Ctrl + Arrow Keys |
+| Rotate | Mouse Wheel on On-screen Rotate button |
+| Fit to Screen | Double-click |
+| 1:1 Zoom | Button / Small images auto-1:1 |
+| Jump First / Last | Home / End |
+| Copy to Clipboard | Ctrl + C |
+| Navigate via Thumbnails | Mouse Wheel on Thumbnail bar |
+| Navigate via On-screen Buttons | Mouse Wheel on Next / Previous button |
+| Rotate via On-screen Button | Mouse Wheel on Rotate button |
+
+---
+
+## 📊 Feedback
+- Issues and feature requests: [GitHub Issues](https://github.com/riyasy/FlyPhotos/issues)  
+- Feedback: ryftools@outlook.com  
+
+---
+
+### Compatibility Note
+Fly Photos **2.x** requires Windows 10/11 and is built with **WinUI 3 and WinRT**, providing GPU acceleration and modern caching.  
+Older **1.x** versions were based on WPF and remain available only for Windows 7/8, but are no longer updated.  
