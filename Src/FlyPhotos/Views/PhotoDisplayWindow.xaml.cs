@@ -74,6 +74,10 @@ public sealed partial class PhotoDisplayWindow
     private ISystemBackdropControllerWithTargets? _backdropController;
     private readonly SystemBackdropConfiguration _configurationSource;
 
+    // Accumulators for smooth scrolling
+    private int _verticalDeltaAccumulator;
+    private int _horizontalDeltaAccumulator;
+    private int _thumbDeltaAccumulator;
 
     public PhotoDisplayWindow(string firstPhotoPath)
     {
@@ -205,26 +209,78 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
+    /// <summary>
+    /// Maps mouse wheel / touchpad gestures to navigation.
+    /// Zooming is handled in CanvasController.
+    /// 
+    /// Rules:
+    ///  - Single photo → no navigation
+    ///  - Ctrl + Vertical Scroll → zoom (ignore here)
+    ///  - Alt + Vertical Scroll → always navigate
+    ///  - Vertical Scroll → navigate if user setting = Navigate
+    ///  - Horizontal Scroll → always navigate
+    /// 
+    /// Input behavior:
+    /// Mouse wheel: deltas are ±120 → fires instantly
+    /// Touchpad: smaller deltas accumulate until threshold
+    /// </summary>
     private async void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
 
-        if (Util.IsControlPressed()) return;
+        var props = e.GetCurrentPoint(D2dCanvas).Properties;
+        int delta = props.MouseWheelDelta;
+        bool isHorizontal = props.IsHorizontalMouseWheel;
 
-        if (Util.IsAltPressed() || AppConfig.Settings.DefaultMouseWheelBehavior == DefaultMouseWheelBehavior.Navigate)
-        {
-            var delta = e.GetCurrentPoint(D2dCanvas).Properties.MouseWheelDelta;
-            await _photoController.Fly(delta > 0 ? NavDirection.Prev : NavDirection.Next);
-            _wheelScrollBrakeTimer.Stop();
-            _wheelScrollBrakeTimer.Start();
-        }
+        // Rule: Ctrl + Vertical scroll = zoom (handled elsewhere)
+        if (!isHorizontal && Util.IsControlPressed()) return;
+
+        // Determine if this input should navigate
+        bool shouldNavigate =
+            isHorizontal ||                         // Horizontal → always navigate
+            Util.IsAltPressed() ||                  // Alt + Vertical → always navigate
+            (!isHorizontal && AppConfig.Settings.DefaultMouseWheelBehavior == DefaultMouseWheelBehavior.Navigate);
+
+        if (!shouldNavigate) return;
+
+        // Pick correct accumulator
+        ref int accumulator = ref (isHorizontal ? ref _horizontalDeltaAccumulator : ref _verticalDeltaAccumulator);
+        accumulator += delta;
+
+        if (Math.Abs(accumulator) < Constants.ScrollThreshold) return;
+
+        var direction = accumulator > 0 ? NavDirection.Prev : NavDirection.Next;
+        accumulator = 0; // reset after firing
+        await _photoController.Fly(direction);
+        RestartBrakeTimer();
     }
 
+    /// <summary>
+    /// Maps mouse wheel / touchpad scroll gestures done on thumbnail to navigation.
+    /// 
+    /// Rules:
+    /// - Both vertical and horizontal scroll are treated the same → always navigate
+    /// 
+    /// Input behavior:
+    /// - Mouse wheel: deltas are multiples of ±120, fires immediately.
+    /// - Precision touchpad: smaller deltas accumulate until threshold
+    /// </summary>
     private async void D2dCanvasThumbNail_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
         var delta = e.GetCurrentPoint(D2dCanvasThumbNail).Properties.MouseWheelDelta;
-        await _photoController.Fly(delta > 0 ? NavDirection.Prev : NavDirection.Next);
+        _thumbDeltaAccumulator += delta;
+
+        if (Math.Abs(_thumbDeltaAccumulator) < Constants.ScrollThreshold) return;
+
+        var direction = _thumbDeltaAccumulator > 0 ? NavDirection.Prev : NavDirection.Next;
+        _thumbDeltaAccumulator = 0; // reset after firing
+        await _photoController.Fly(direction);
+        RestartBrakeTimer();
+    }
+
+    private void RestartBrakeTimer()
+    {
         _wheelScrollBrakeTimer.Stop();
         _wheelScrollBrakeTimer.Start();
     }
@@ -293,6 +349,13 @@ public sealed partial class PhotoDisplayWindow
                     break;
                 case VirtualKey.Subtract when ctrlPressed:
                     _canvasController.ZoomByKeyboard(ZoomDirection.Out);
+                    break;
+
+                case VirtualKey.PageUp:
+                    _canvasController.StepZoom(ZoomDirection.In);
+                    break;
+                case VirtualKey.PageDown:
+                    _canvasController.StepZoom(ZoomDirection.Out);
                     break;
 
                 // PAN

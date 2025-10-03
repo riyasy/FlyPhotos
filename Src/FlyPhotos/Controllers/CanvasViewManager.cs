@@ -1,8 +1,10 @@
-﻿using System;
-using Windows.Foundation;
-using FlyPhotos.AppSettings;
+﻿using FlyPhotos.AppSettings;
 using FlyPhotos.Data;
 using Microsoft.UI.Xaml.Media;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Windows.Foundation;
 using Size = FlyPhotos.Data.Size;
 
 namespace FlyPhotos.Controllers;
@@ -29,20 +31,10 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
 
     public void SetScaleAndPosition(Size imageSize, int imageRotation, Size canvasSize, bool isFirstPhotoEver)
     {
-        var vertical = imageRotation is 270 or 90;
+        // Use the reusable helper to calculate the scale factor.
+        var scaleFactor = CalculateScreenFitScale(canvasSize, imageSize, imageRotation);
 
-        // Use rotated dimensions for scaling calculation
-        var effectiveWidth = vertical ? imageSize.Height : imageSize.Width;
-        var effectiveHeight = vertical ? imageSize.Width : imageSize.Height;
-
-        var paddedCanvasWidth = canvasSize.Width * (AppConfig.Settings.ImageFitPercentage / 100.0f);
-        var paddedCanvasHeight = canvasSize.Height * (AppConfig.Settings.ImageFitPercentage / 100.0f);
-
-        var horScale = paddedCanvasWidth / effectiveWidth;
-        var vertScale = paddedCanvasHeight / effectiveHeight;
-        var scaleFactor = Math.Min(horScale, vertScale);
-
-        if (scaleFactor > 1.0) scaleFactor = 1.0;
+        if (scaleFactor > 1.0f) scaleFactor = 1.0f;
 
         // Note: The _imageRect should always be based on the un-rotated dimensions.
         // The rotation is applied later in the transform matrix.
@@ -102,6 +94,68 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         StartZoomAnimation(scaleTo, mousePosition);
     }
 
+    public void ZoomAtPointPrecision(int delta, Point mousePosition)
+    {
+        if (delta == 0) return;
+
+        // Base scale for one "full" mouse wheel step
+        const float baseZoomIn = 1.25f;
+        const float minScale = 0.05f;
+
+        // Compute scale factor proportional to delta
+        float scaleFactor = (float)Math.Pow(baseZoomIn, delta / 120.0);
+        float newScale = _canvasViewState.LastScaleTo * scaleFactor;
+
+        if (newScale < minScale) return;
+
+        // 1. Capture the scale *before* it's changed.
+        float oldScale = _canvasViewState.Scale;
+        // 2. Calculate the new position based on the ratio of the new scale to the old scale.
+        // This is the core formula for zooming at a point.
+        var newPosX = mousePosition.X - (newScale / oldScale) * (mousePosition.X - _canvasViewState.ImagePos.X);
+        var newPosY = mousePosition.Y - (newScale / oldScale) * (mousePosition.Y - _canvasViewState.ImagePos.Y);
+        // 3. Now, update the state with the new values.
+        _canvasViewState.Scale = newScale;
+        _canvasViewState.LastScaleTo = newScale; // Keep LastScaleTo in sync
+        _canvasViewState.ImagePos = new Point(newPosX, newPosY);
+        // 4. Update transform and notify for redraw.
+        _canvasViewState.UpdateTransform();
+        _callbackCanvasRedraw();
+        _callbackZoomUpdate();
+    }
+
+    /// <summary>
+    /// Zooms in or out to predefined steps: Screen Fit, 100%, and 400%.
+    /// When zooming in, it moves to the next highest step.
+    /// When zooming out, it moves to the next lowest step.
+    /// The zoom is animated and centered on the canvas.
+    /// </summary>
+    public void StepZoom(ZoomDirection zoomDirection, Size canvasSize)
+    {
+        // 1. Establish the ordered list of zoom stops, including the dynamic "screen fit" size.
+        var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
+        var screenFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+        var zoomStops = new List<float> { screenFitScale, 1.0f, 4.0f }
+            .Distinct().OrderBy(s => s).ToList();
+
+        // 2. Find the index of the next logical stop based on the current scale and direction.
+        const float tolerance = 0.001f;
+        var currentScale = _canvasViewState.LastScaleTo;
+
+        int nextStopIndex = zoomDirection == ZoomDirection.In
+            ? zoomStops.FindIndex(stop => stop > currentScale + tolerance)
+            : zoomStops.FindLastIndex(stop => stop < currentScale - tolerance);
+
+        // 3. If a valid next stop doesn't exist (i.e., we're at the end), do nothing.
+        if (nextStopIndex == -1) return;
+
+        // 4. Animate the zoom and pan to the center for the new scale.
+        var targetScale = zoomStops[nextStopIndex];
+        _canvasViewState.LastScaleTo = targetScale;
+        var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
+        StartPanAndZoomAnimation(targetScale, targetPosition);
+    }
+
     public void ZoomOutOnExit(double exitAnimationDuration, Size canvasSize)
     {
         _panZoomAnimationDurationMs = exitAnimationDuration;
@@ -158,6 +212,37 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _callbackCanvasRedraw();
     }
 
+    /// <summary>
+    /// Calculates the scale factor required to fit an image fully within the canvas.
+    /// This calculation considers three key factors:
+    /// 1.  The current rotation of the image (e.g., a tall image rotated 90 degrees becomes wide).
+    /// 2.  The dimensions of the canvas area available for display.
+    /// 3.  A user-configurable padding percentage (`ImageFitPercentage`) that reduces the effective canvas area.
+    /// The function determines whether to fit the image based on its width or height, choosing the
+    /// scale that ensures the entire image remains visible.
+    /// </summary>
+    private float CalculateScreenFitScale(Size canvasSize, Size imageSize, int imageRotation)
+    {
+        // Determine if the image is rotated to a vertical orientation (e.g., 90 or 270 degrees).
+        var isVertical = (imageRotation % 180) != 0;
+
+        // Calculate the "effective" dimensions of the image after rotation.
+        // If vertical, the original width becomes the new height, and vice-versa.
+        var effectiveWidth = isVertical ? imageSize.Height : imageSize.Width;
+        var effectiveHeight = isVertical ? imageSize.Width : imageSize.Height;
+
+        // Calculate the usable canvas dimensions, applying the padding from user settings.
+        var paddedCanvasWidth = canvasSize.Width * (AppConfig.Settings.ImageFitPercentage / 100.0f);
+        var paddedCanvasHeight = canvasSize.Height * (AppConfig.Settings.ImageFitPercentage / 100.0f);
+
+        // Determine the scale factor needed to fit the image horizontally and vertically.
+        var horizontalScale = paddedCanvasWidth / effectiveWidth;
+        var verticalScale = paddedCanvasHeight / effectiveHeight;
+
+        // Return the smaller of the two scale factors. This ensures that the image fits
+        // completely on the canvas without being cropped on either axis.
+        return (float)Math.Min(horizontalScale, verticalScale);
+    }
 
     private void StartZoomAnimation(float targetScale, Point zoomCenter)
     {

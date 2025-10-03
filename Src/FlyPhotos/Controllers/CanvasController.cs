@@ -226,6 +226,13 @@ internal class CanvasController : ICanvasController
         _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
+    public void StepZoom(ZoomDirection zoomDirection)
+    {
+        if (IsScreenEmpty()) return;
+        _canvasViewManager.StepZoom(zoomDirection, _d2dCanvas.GetSize());
+        _currentRenderer?.RestartOffScreenDrawTimer();
+    }
+
     public void PanByKeyboard(double dx, double dy)
     {
         if (IsScreenEmpty()) return;
@@ -301,20 +308,64 @@ internal class CanvasController : ICanvasController
         _isDragging = false;
     }
 
+    /// <summary>
+    /// Handles mouse wheel (and touchpad scroll/pinch) input for the main canvas.
+    /// This function only manages zooming – navigation via scroll is handled in view class.
+    /// 
+    /// Rules:
+    /// - If Alt is pressed → ignore (Alt+Wheel is reserved for navigation).
+    /// - If horizontal scrolling is detected → ignore (horizontal wheel is navigation only).
+    /// - If Ctrl is pressed, or the default setting is "Zoom" → treat vertical wheel as zoom.
+    /// - For precision touchpads (non-120 deltas) → use <see cref="CanvasViewManager.ZoomAtPointPrecision"/> 
+    ///   for smooth, proportional, instant zoom.
+    /// - For standard mouse wheels (±120 steps) → use <see cref="CanvasViewManager.ZoomAtPoint"/> 
+    ///   which animates zoom smoothly.
+    /// </summary>
     private void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
+        // Nothing to do if no photo loaded
         if (IsScreenEmpty()) return;
+        // Alt + Wheel is reserved for navigation → skip zoom
         if (Util.IsAltPressed()) return;
 
-        if (Util.IsControlPressed() || AppConfig.Settings.DefaultMouseWheelBehavior == DefaultMouseWheelBehavior.Zoom)
+        var props = e.GetCurrentPoint(_d2dCanvas).Properties;
+        var delta = props.MouseWheelDelta;
+        var isHorizontal = props.IsHorizontalMouseWheel;
+
+        // Horizontal wheel is navigation only (It is handled in PhotoDisplayWindow.xaml.cs)
+        if (isHorizontal) return;
+
+        // Zoom is enabled if Ctrl is pressed or app setting requests wheel = Zoom
+        bool isZoom = Util.IsControlPressed() ||
+                      AppConfig.Settings.DefaultMouseWheelBehavior == DefaultMouseWheelBehavior.Zoom;
+        if (!isZoom) return;
+
+        // Convert pointer coordinates to DPI-adjusted space
+        var currentPoint = e.GetCurrentPoint(_d2dCanvas).Position;
+        var adjustedPoint = currentPoint.AdjustForDpi(_d2dCanvas);
+
+        if (IsPrecisionTouchpad(delta))
         {
-            var currentPoint = e.GetCurrentPoint(_d2dCanvas).Position;
-            var adjustedPoint = currentPoint.AdjustForDpi(_d2dCanvas);
-            var zoomDirection = (e.GetCurrentPoint(_d2dCanvas).Properties.MouseWheelDelta > 0) ? ZoomDirection.In : ZoomDirection.Out;
-            _canvasViewManager.ZoomAtPoint(zoomDirection, adjustedPoint);
-            _currentRenderer.RestartOffScreenDrawTimer();
+            // Precision touchpad deltas are small and continuous
+            // → use proportional, instant zoom for finer control
+            _canvasViewManager.ZoomAtPointPrecision(delta, adjustedPoint);
         }
+        else
+        {
+            // Standard mouse wheel deltas (±120 per notch)
+            // → use animated zoom for smoother user experience
+            var zoomDirection = delta > 0 ? ZoomDirection.In : ZoomDirection.Out;
+            _canvasViewManager.ZoomAtPoint(zoomDirection, adjustedPoint);
+        }
+        _currentRenderer.RestartOffScreenDrawTimer();
     }
+
+    /// <summary>
+    /// Heuristic to detect precision touchpad / smooth pinch scroll.
+    /// Returns true if delta is not a multiple of standard WHEEL_DELTA (120),
+    /// which usually indicates a touchpad gesture.
+    /// </summary>
+    private bool IsPrecisionTouchpad(int delta) => Math.Abs(delta) % 120 != 0;
 
     #endregion
 
