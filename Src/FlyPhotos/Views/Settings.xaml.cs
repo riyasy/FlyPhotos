@@ -12,13 +12,11 @@ using FlyPhotos.Utils;
 using Microsoft.UI;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.System;
-using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-using WinRT.Interop;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -75,11 +73,7 @@ internal sealed partial class Settings
         InitializeComponent();
         Title = "Fly Photos - Settings";
 
-        var hWnd = WindowNative.GetWindowHandle(this);
-        var myWndId = Win32Interop.GetWindowIdFromWindow(hWnd);
-        var appWindow = AppWindow.GetFromWindowId(myWndId);
-
-        var titleBar = appWindow.TitleBar;
+        var titleBar = AppWindow.TitleBar;
         titleBar.ExtendsContentIntoTitleBar = true;
         titleBar.ButtonBackgroundColor = Colors.Transparent;
         titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
@@ -142,6 +136,8 @@ internal sealed partial class Settings
                                                     $"{Environment.NewLine}Ctrl + 'Arrow Keys' : Pan Photo" +
                                                     $"{Environment.NewLine}Ctrl + '+' : Zoom In" +
                                                     $"{Environment.NewLine}Ctrl + '-' : Zoom Out" +
+                                                    $"{Environment.NewLine}Page Up : Zoom In to next Preset (100%,400%,Fit)" +
+                                                    $"{Environment.NewLine}Page Down : Zoom Out to next Preset (100%,400%,Fit)" +
                                                     Environment.NewLine +
                                                     $"{Environment.NewLine}Mouse wheel on Thumbnail strip: Navigate Photos" +
                                                     $"{Environment.NewLine}Mouse wheel on On Screen Left/Right Button: Navigate Photos" +
