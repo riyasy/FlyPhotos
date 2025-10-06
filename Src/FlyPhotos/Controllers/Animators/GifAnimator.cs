@@ -216,21 +216,11 @@ public partial class GifAnimator : IAnimator
             };
             var props = await frame.BitmapProperties.GetPropertiesAsync(propertyKeys);
 
-            // Frame Delay
-            double delayMs = defaultGifDelayMs;
-
-            // Try the native GIF metadata path.
-            if (props.TryGetValue("/grctlext/Delay", out var nativeDelayValue) && nativeDelayValue.Type == PropertyType.UInt16)
-            {
-                ushort rawDelay = (ushort)nativeDelayValue.Value;
-                // The rawDelay is in 1/100s of a second. A value of 0 or 1 is a special case, treated
-                // as 100ms for browser compatibility. Any other value is respected.
-                if (rawDelay > 1)
-                {
-                    delayMs = rawDelay * gifDelayMultiplier;
-                }
-            }
-
+            // Get native GIF delay property
+            var rawDelay = props.TryGetValue("/grctlext/Delay", out var delay) ? (ushort)delay.Value : 0;
+            // The rawDelay is in 1/100s of a second. A value of 0 or 1 is a special case,
+            // treated as 100ms for browser compatibility. Any other value is respected.
+            var delayMs = rawDelay > 1 ? rawDelay * gifDelayMultiplier : defaultGifDelayMs;
             // Frame Dimensions
             var frameLeft = props.TryGetValue("/imgdesc/Left", out var l) ? (ushort)l.Value : 0;
             var frameTop = props.TryGetValue("/imgdesc/Top", out var t) ? (ushort)t.Value : 0;
