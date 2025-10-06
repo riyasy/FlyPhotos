@@ -48,5 +48,7 @@ public class AppSettings
     public int ThumbnailSize { get; set; } = 40;
     public ulong LastUsedMonitorId { get; set; } = 0;
     public bool RememberLastMonitor { get; set; } = false;
+    public int ScrollThreshold  { get; set; } = 60;
+    public bool UseMouseFwdBackForStepZoom { get; set; } = false;
 }
 

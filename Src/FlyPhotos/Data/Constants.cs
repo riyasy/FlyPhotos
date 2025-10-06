@@ -9,6 +9,5 @@
         public const int ThumbnailPadding = 2;
         public const float ThumbnailSelectionBorderThickness = 3.0f;
         public const float ThumbnailCornerRadius = 4.0f;
-        public const int ScrollThreshold = 60;
     }
 }

@@ -15,7 +15,6 @@ using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Input;
 using Size = FlyPhotos.Data.Size;
 
 namespace FlyPhotos.Controllers;
@@ -33,9 +32,7 @@ internal class CanvasController : ICanvasController
     private bool _invalidatePending;
     private int _latestSetSourceOperationId;
 
-    // For Dragging
-    private Point _lastPoint;
-    private bool _isDragging;
+
 
     // For GIF and APNG File handling
     private readonly SemaphoreSlim _animatorLock = new(1, 1);
@@ -62,10 +59,6 @@ internal class CanvasController : ICanvasController
 
         _d2dCanvas.Draw += D2dCanvas_Draw;
         _d2dCanvas.SizeChanged += D2dCanvas_SizeChanged;
-        _d2dCanvas.PointerMoved += D2dCanvas_PointerMoved;
-        _d2dCanvas.PointerPressed += D2dCanvas_PointerPressed;
-        _d2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
-        _d2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;
 
         _canvasViewState = new CanvasViewState();
         _canvasViewManager = new CanvasViewManager(_canvasViewState, RequestInvalidate, RequestZoomUpdate);
@@ -233,7 +226,21 @@ internal class CanvasController : ICanvasController
         _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
-    public void PanByKeyboard(double dx, double dy)
+    public void ZoomAtPoint(ZoomDirection zoomDirection, Point adjustedPoint)
+    {
+        if (IsScreenEmpty()) return;
+        _canvasViewManager.ZoomAtPoint(zoomDirection, adjustedPoint);
+        _currentRenderer?.RestartOffScreenDrawTimer();
+    }
+
+    public void ZoomAtPointPrecision(int delta, Point adjustedPoint)
+    {
+        if (IsScreenEmpty()) return;
+        _canvasViewManager.ZoomAtPointPrecision(delta, adjustedPoint);
+        _currentRenderer?.RestartOffScreenDrawTimer();
+    }
+
+    public void Pan(double dx, double dy)
     {
         if (IsScreenEmpty()) return;
         _canvasViewManager.Pan(dx, dy);
@@ -271,101 +278,6 @@ internal class CanvasController : ICanvasController
         if (IsScreenEmpty()) return;
         _canvasViewManager.HandleSizeChange(Size.FromFoundationSize(args.NewSize), Size.FromFoundationSize(args.PreviousSize));
     }
-
-    private void D2dCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
-    {
-        var pointerPoint = e.GetCurrentPoint(_d2dCanvas);
-        if (!pointerPoint.Properties.IsLeftButtonPressed)
-            return;
-        if (IsScreenEmpty() || !IsPressedOnImage(pointerPoint.Position.AdjustForDpi(_d2dCanvas)))
-            return;
-        _d2dCanvas.CapturePointer(e.Pointer);
-        _lastPoint = pointerPoint.Position;
-        _isDragging = true;
-    }
-
-    private void D2dCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
-    {
-        if (!_isDragging) return;
-
-        var currentPoint = e.GetCurrentPoint(_d2dCanvas).Position;
-
-        // Calculate logical delta
-        double deltaX = currentPoint.X - _lastPoint.X;
-        double deltaY = currentPoint.Y - _lastPoint.Y;
-        // Adjust delta for DPI 
-        deltaX = deltaX.AdjustForDpi(_d2dCanvas);
-        deltaY = deltaY.AdjustForDpi(_d2dCanvas);
-
-        _canvasViewManager.Pan(deltaX, deltaY);
-
-        _lastPoint = currentPoint;
-    }
-
-    private void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
-    {
-        _d2dCanvas.ReleasePointerCapture(e.Pointer);
-        _isDragging = false;
-    }
-
-    /// <summary>
-    /// Handles mouse wheel (and touchpad scroll/pinch) input for the main canvas.
-    /// This function only manages zooming – navigation via scroll is handled in view class.
-    /// 
-    /// Rules:
-    /// - If Alt is pressed → ignore (Alt+Wheel is reserved for navigation).
-    /// - If horizontal scrolling is detected → ignore (horizontal wheel is navigation only).
-    /// - If Ctrl is pressed, or the default setting is "Zoom" → treat vertical wheel as zoom.
-    /// - For precision touchpads (non-120 deltas) → use <see cref="CanvasViewManager.ZoomAtPointPrecision"/> 
-    ///   for smooth, proportional, instant zoom.
-    /// - For standard mouse wheels (±120 steps) → use <see cref="CanvasViewManager.ZoomAtPoint"/> 
-    ///   which animates zoom smoothly.
-    /// </summary>
-    private void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
-    {
-        // Nothing to do if no photo loaded
-        if (IsScreenEmpty()) return;
-        // Alt + Wheel is reserved for navigation → skip zoom
-        if (Util.IsAltPressed()) return;
-
-        var props = e.GetCurrentPoint(_d2dCanvas).Properties;
-        var delta = props.MouseWheelDelta;
-        var isHorizontal = props.IsHorizontalMouseWheel;
-
-        // Horizontal wheel is navigation only (It is handled in PhotoDisplayWindow.xaml.cs)
-        if (isHorizontal) return;
-
-        // Zoom is enabled if Ctrl is pressed or app setting requests wheel = Zoom
-        bool isZoom = Util.IsControlPressed() ||
-                      AppConfig.Settings.DefaultMouseWheelBehavior == DefaultMouseWheelBehavior.Zoom;
-        if (!isZoom) return;
-
-        // Convert pointer coordinates to DPI-adjusted space
-        var currentPoint = e.GetCurrentPoint(_d2dCanvas).Position;
-        var adjustedPoint = currentPoint.AdjustForDpi(_d2dCanvas);
-
-        if (IsPrecisionTouchpad(delta))
-        {
-            // Precision touchpad deltas are small and continuous
-            // → use proportional, instant zoom for finer control
-            _canvasViewManager.ZoomAtPointPrecision(delta, adjustedPoint);
-        }
-        else
-        {
-            // Standard mouse wheel deltas (±120 per notch)
-            // → use animated zoom for smoother user experience
-            var zoomDirection = delta > 0 ? ZoomDirection.In : ZoomDirection.Out;
-            _canvasViewManager.ZoomAtPoint(zoomDirection, adjustedPoint);
-        }
-        _currentRenderer.RestartOffScreenDrawTimer();
-    }
-
-    /// <summary>
-    /// Heuristic to detect precision touchpad / smooth pinch scroll.
-    /// Returns true if delta is not a multiple of standard WHEEL_DELTA (120),
-    /// which usually indicates a touchpad gesture.
-    /// </summary>
-    private static bool IsPrecisionTouchpad(int delta) => Math.Abs(delta) % 120 != 0;
 
     #endregion
 

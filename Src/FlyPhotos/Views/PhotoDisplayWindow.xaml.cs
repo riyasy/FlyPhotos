@@ -20,6 +20,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.System;
 using Windows.UI;
 using WinRT;
@@ -77,7 +78,10 @@ public sealed partial class PhotoDisplayWindow
     // Accumulators for smooth scrolling
     private int _verticalDeltaAccumulator;
     private int _horizontalDeltaAccumulator;
-    private int _thumbDeltaAccumulator;
+
+    // For Dragging
+    private Point _lastPoint;
+    private bool _isDragging;
 
     public PhotoDisplayWindow(string firstPhotoPath)
     {
@@ -111,6 +115,7 @@ public sealed partial class PhotoDisplayWindow
         _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, photoSessionState);
         _photoController.StatusUpdated += PhotoController_StatusUpdated;
         _canvasController.OnZoomChanged += CanvasController_OnZoomChanged;
+        _thumbNailController.ThumbnailClicked += ThumbNailController_ThumbnailClicked;
 
         TxtFileName.Text = Path.GetFileName(firstPhotoPath);
 
@@ -122,8 +127,11 @@ public sealed partial class PhotoDisplayWindow
         D2dCanvas.CreateResources += D2dCanvas_CreateResources;
         D2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
         D2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;
+        D2dCanvas.PointerMoved += D2dCanvas_PointerMoved;
+        D2dCanvas.PointerPressed += D2dCanvas_PointerPressed;
+        D2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
+
         D2dCanvasThumbNail.PointerWheelChanged += D2dCanvasThumbNail_PointerWheelChanged;
-        _thumbNailController.ThumbnailClicked += ThumbNailController_ThumbnailClicked;
 
         MainLayout.KeyDown += HandleKeyDown;
         MainLayout.KeyUp += HandleKeyUp;
@@ -174,7 +182,7 @@ public sealed partial class PhotoDisplayWindow
         _inactivityFader.ReportActivity();
     }
 
-    private void PhotoDisplayWindow_SizeChanged(object sender, Microsoft.UI.Xaml.WindowSizeChangedEventArgs args)
+    private void PhotoDisplayWindow_SizeChanged(object sender, WindowSizeChangedEventArgs args)
     {
         var presenter = (AppWindow.Presenter as OverlappedPresenter);
         if (presenter != null && presenter.State != _lastWindowState)
@@ -183,105 +191,168 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
-    private void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
+    private void D2dCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
-        var dpiAdjustedPosition = e.GetCurrentPoint(D2dCanvas).Position.AdjustForDpi(D2dCanvas);
-        if (_canvasController.IsPressedOnImage(dpiAdjustedPosition))
+        var pointerPoint = e.GetCurrentPoint(D2dCanvas);
+        if (!pointerPoint.Properties.IsLeftButtonPressed) return;
+        if (!_canvasController.IsPressedOnImage(pointerPoint.Position.AdjustForDpi(D2dCanvas))) return;
+        D2dCanvas.CapturePointer(e.Pointer);
+        _lastPoint = pointerPoint.Position;
+        _isDragging = true;
+    }
+
+    private void D2dCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
+    {
+        if (!_isDragging) return;
+
+        var currentPoint = e.GetCurrentPoint(D2dCanvas).Position;
+
+        // Calculate logical delta
+        double deltaX = currentPoint.X - _lastPoint.X;
+        double deltaY = currentPoint.Y - _lastPoint.Y;
+        // Adjust delta for DPI 
+        deltaX = deltaX.AdjustForDpi(D2dCanvas);
+        deltaY = deltaY.AdjustForDpi(D2dCanvas);
+
+        _canvasController.Pan(deltaX, deltaY);
+
+        _lastPoint = currentPoint;
+    }
+
+    private async void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
+    {
+        var properties = e.GetCurrentPoint(D2dCanvas).Properties;
+
+        switch (properties.PointerUpdateKind)
         {
-            var properties = e.GetCurrentPoint(D2dCanvas).Properties;
-            if (properties.PointerUpdateKind == Microsoft.UI.Input.PointerUpdateKind.RightButtonReleased)
+            case Microsoft.UI.Input.PointerUpdateKind.RightButtonReleased:
             {
-                var filePath = _photoController.GetFullPathCurrentFile();
-                if (File.Exists(filePath))
+                var dpiAdjustedPosition = e.GetCurrentPoint(D2dCanvas).Position.AdjustForDpi(D2dCanvas);
+                if (_canvasController.IsPressedOnImage(dpiAdjustedPosition))
                 {
-                    NativeMethods.GetCursorPos(out NativeMethods.POINT mousePosScreen);
-                    CliWrapper.ShowContextMenu(this, filePath, mousePosScreen.X, mousePosScreen.Y);
+                    var filePath = _photoController.GetFullPathCurrentFile();
+                    if (File.Exists(filePath))
+                    {
+                        NativeMethods.GetCursorPos(out NativeMethods.POINT mousePosScreen);
+                        CliWrapper.ShowContextMenu(this, filePath, mousePosScreen.X, mousePosScreen.Y);
+                    }
                 }
+
+                break;
             }
-        }
-        else
-        {
-            var pointerY = e.GetCurrentPoint(D2dCanvas).Position.Y;
-            if (_lastWindowState == OverlappedPresenterState.Maximized && pointerY >= AppTitlebar.ActualHeight)
+            case Microsoft.UI.Input.PointerUpdateKind.LeftButtonReleased:
             {
-                this.Restore();
+                if (_isDragging)
+                {
+                    D2dCanvas.ReleasePointerCapture(e.Pointer);
+                    _isDragging = false;
+                }
+                else
+                {
+                    var dpiAdjustedPosition = e.GetCurrentPoint(D2dCanvas).Position.AdjustForDpi(D2dCanvas);
+                    if (!_canvasController.IsPressedOnImage(dpiAdjustedPosition))
+                    {
+                        var pointerY = e.GetCurrentPoint(D2dCanvas).Position.Y;
+                        if (_lastWindowState == OverlappedPresenterState.Maximized && pointerY >= AppTitlebar.ActualHeight)
+                        {
+                            this.Restore();
+                        }
+                    }
+                }
+                break;
+            }
+            case Microsoft.UI.Input.PointerUpdateKind.XButton1Released: // Mouse Back button pressed
+                {
+                if (AppConfig.Settings.UseMouseFwdBackForStepZoom)
+                    _canvasController.StepZoom(ZoomDirection.Out);
+                else
+                    await _photoController.Fly(NavDirection.Prev);
+                break;
+            }
+            case Microsoft.UI.Input.PointerUpdateKind.XButton2Released: // Mouse Forward button pressed
+                {
+                if (AppConfig.Settings.UseMouseFwdBackForStepZoom)
+                    _canvasController.StepZoom(ZoomDirection.In);
+                else
+                    await _photoController.Fly(NavDirection.Next);
+                break;
             }
         }
     }
 
-    /// <summary>
-    /// Maps mouse wheel / touchpad gestures to navigation.
-    /// Zooming is handled in CanvasController.
-    /// 
-    /// Rules:
-    ///  - Single photo → no navigation
-    ///  - Ctrl + Vertical Scroll → zoom (ignore here)
-    ///  - Alt + Vertical Scroll → always navigate
-    ///  - Vertical Scroll → navigate if user setting = Navigate
-    ///  - Horizontal Scroll → always navigate
-    /// 
-    /// Input behavior:
-    /// Mouse wheel: deltas are ±120 → fires instantly
-    /// Touchpad: smaller deltas accumulate until threshold
-    /// </summary>
     private async void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
 
         var props = e.GetCurrentPoint(D2dCanvas).Properties;
+        var delta = props.MouseWheelDelta;
+        var isHorizontalScroll = props.IsHorizontalMouseWheel;
+        var currentPoint = e.GetCurrentPoint(D2dCanvas).Position;
+
+        if (isHorizontalScroll)
+        {
+            await HandleMouseWheelNavigation(delta, isHorizontalScroll: true);
+        }
+        else // Is vertical scroll
+        {
+            // Alt + vertical scroll always navigates
+            if (Util.IsAltPressed()) 
+            {
+                await HandleMouseWheelNavigation(delta, isHorizontalScroll: false);
+            }
+            // Ctrl + vertical scroll always zooms
+            else if (Util.IsControlPressed()) 
+            {
+                HandleMouseWheelZoom(delta, currentPoint);
+            }
+            // When Alt and Ctrl are not pressed, behave based on settings
+            else switch (AppConfig.Settings.DefaultMouseWheelBehavior) 
+            {
+                case DefaultMouseWheelBehavior.Navigate:
+                    await HandleMouseWheelNavigation(delta, isHorizontalScroll: false);
+                    break;
+                case DefaultMouseWheelBehavior.Zoom:
+                    HandleMouseWheelZoom(delta, currentPoint);
+                    break;
+            }
+        }
+    }
+
+    private async void D2dCanvasThumbNail_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+    {
+        var props = e.GetCurrentPoint(D2dCanvasThumbNail).Properties;
         int delta = props.MouseWheelDelta;
         bool isHorizontal = props.IsHorizontalMouseWheel;
 
-        // Rule: Ctrl + Vertical scroll = zoom (handled elsewhere)
-        if (!isHorizontal && Util.IsControlPressed()) return;
+        await HandleMouseWheelNavigation(delta, isHorizontal);
+    }
 
-        // Determine if this input should navigate
-        bool shouldNavigate =
-            isHorizontal ||                         // Horizontal → always navigate
-            Util.IsAltPressed() ||                  // Alt + Vertical → always navigate
-            (!isHorizontal && AppConfig.Settings.DefaultMouseWheelBehavior == DefaultMouseWheelBehavior.Navigate);
+    private async Task HandleMouseWheelNavigation(int delta, bool isHorizontalScroll)
+    {
+        if (_photoController.IsSinglePhoto()) return;
 
-        if (!shouldNavigate) return;
-
-        // Pick correct accumulator
-        ref int accumulator = ref (isHorizontal ? ref _horizontalDeltaAccumulator : ref _verticalDeltaAccumulator);
+        ref int accumulator = ref (isHorizontalScroll ? ref _horizontalDeltaAccumulator : ref _verticalDeltaAccumulator);
         accumulator += delta;
 
-        if (Math.Abs(accumulator) < Constants.ScrollThreshold) return;
+        if (Math.Abs(accumulator) < AppConfig.Settings.ScrollThreshold) return;
 
-        // Vertical: up → prev, down → next
-        // Horizontal: right → next, left → prev
-        var direction = isHorizontal ? 
+        var direction = isHorizontalScroll ?
             (accumulator > 0 ? NavDirection.Next : NavDirection.Prev) :
             (accumulator > 0 ? NavDirection.Prev : NavDirection.Next);
 
-        accumulator = 0; // reset after firing
+        accumulator = 0;
         await _photoController.Fly(direction);
         RestartBrakeTimer();
     }
 
-    /// <summary>
-    /// Maps mouse wheel / touchpad scroll gestures done on thumbnail to navigation.
-    /// 
-    /// Rules:
-    /// - Both vertical and horizontal scroll are treated the same → always navigate
-    /// 
-    /// Input behavior:
-    /// - Mouse wheel: deltas are multiples of ±120, fires immediately.
-    /// - Precision touchpad: smaller deltas accumulate until threshold
-    /// </summary>
-    private async void D2dCanvasThumbNail_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+    private void HandleMouseWheelZoom(int delta, Point point)
     {
-        if (_photoController.IsSinglePhoto()) return;
-        var delta = e.GetCurrentPoint(D2dCanvasThumbNail).Properties.MouseWheelDelta;
-        _thumbDeltaAccumulator += delta;
+        var adjustedPoint = point.AdjustForDpi(D2dCanvas);
 
-        if (Math.Abs(_thumbDeltaAccumulator) < Constants.ScrollThreshold) return;
-
-        var direction = _thumbDeltaAccumulator > 0 ? NavDirection.Prev : NavDirection.Next;
-        _thumbDeltaAccumulator = 0; // reset after firing
-        await _photoController.Fly(direction);
-        RestartBrakeTimer();
+        if (IsPrecisionTouchpad(delta))
+            _canvasController.ZoomAtPointPrecision(delta, adjustedPoint);
+        else
+            _canvasController.ZoomAtPoint(delta > 0 ? ZoomDirection.In : ZoomDirection.Out, adjustedPoint);
     }
 
     private void RestartBrakeTimer()
@@ -355,6 +426,12 @@ public sealed partial class PhotoDisplayWindow
                 case VirtualKey.Subtract when ctrlPressed:
                     _canvasController.ZoomByKeyboard(ZoomDirection.Out);
                     break;
+                case VirtualKey.Up when !ctrlPressed:
+                    _canvasController.ZoomByKeyboard(ZoomDirection.In);
+                    break;
+                case VirtualKey.Down when !ctrlPressed:
+                    _canvasController.ZoomByKeyboard(ZoomDirection.Out);
+                    break;
 
                 case VirtualKey.PageUp:
                     _canvasController.StepZoom(ZoomDirection.In);
@@ -365,16 +442,16 @@ public sealed partial class PhotoDisplayWindow
 
                 // PAN
                 case VirtualKey.Up when ctrlPressed:
-                    _canvasController.PanByKeyboard(0, -20);
+                    _canvasController.Pan(0, -20);
                     break;
                 case VirtualKey.Down when ctrlPressed:
-                    _canvasController.PanByKeyboard(0, 20);
+                    _canvasController.Pan(0, 20);
                     break;
                 case VirtualKey.Left when ctrlPressed:
-                    _canvasController.PanByKeyboard(-20, 0);
+                    _canvasController.Pan(-20, 0);
                     break;
                 case VirtualKey.Right when ctrlPressed:
-                    _canvasController.PanByKeyboard(20, 0);
+                    _canvasController.Pan(20, 0);
                     break;
             }
 
@@ -632,7 +709,7 @@ public sealed partial class PhotoDisplayWindow
         SetBackColorAsPerThemeAndBackdrop();
     }
 
-    private void PhotoDisplayWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
+    private void PhotoDisplayWindow_Activated(object sender, WindowActivatedEventArgs args)
     {
         _configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
     }
@@ -670,6 +747,13 @@ public sealed partial class PhotoDisplayWindow
         BorderButtonPanel.Background = new SolidColorBrush(buttonPanelColor);
         BorderTxtFileName.Background = new SolidColorBrush(fileNameBackgroundColor);
     }
+
+    /// <summary>
+    /// Heuristic to detect precision touchpad / smooth pinch scroll.
+    /// Returns true if delta is not a multiple of standard WHEEL_DELTA (120),
+    /// which usually indicates a touchpad gesture.
+    /// </summary>
+    private static bool IsPrecisionTouchpad(int delta) => Math.Abs(delta) % 120 != 0;
 }
 
 public partial class BlurredBackdrop : CompositionBrushBackdrop
