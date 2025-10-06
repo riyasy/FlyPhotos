@@ -169,14 +169,26 @@ public partial class GifAnimator : IAnimator
             // 1. Handle disposal of the PREVIOUS frame.
             if (_previousFrameDisposal == 2) // Restore to background (transparent)
             {
-                ds.FillRectangle(_previousFrameRect, Colors.Transparent);
+                // To clear a region without blending, we first make our backup surface entirely transparent.
+                using (var clearDs = _previousFrameBackup.CreateDrawingSession())
+                {
+                    clearDs.Clear(Colors.Transparent);
+                }
+
+                // Then we copy a transparent rectangle from the backup surface onto the main surface,
+                // effectively "stamping" transparency to clear the area.
+                var sourceRect = new Rect(0, 0, _previousFrameRect.Width, _previousFrameRect.Height);
+                ds.DrawImage(_previousFrameBackup, _previousFrameRect, sourceRect, 1.0f, CanvasImageInterpolation.NearestNeighbor, CanvasComposite.Copy);
             }
             else if (_previousFrameDisposal == 3) // Restore to previous state
             {
-                ds.DrawImage(_previousFrameBackup);
+                // Use the DrawImage overload that specifies CanvasComposite.Copy.
+                // This copies the pixels from the backup, replacing what's on the main surface.
+                ds.DrawImage(_previousFrameBackup, _previousFrameRect, _previousFrameRect, 1.0f, CanvasImageInterpolation.NearestNeighbor, CanvasComposite.Copy);
             }
 
             // 3. Draw the CURRENT frame.
+            // This uses the default SourceOver blending, which is correct for overlaying the new frame.
             ds.DrawImage(frameBitmap, (float)metadata.Bounds.X, (float)metadata.Bounds.Y);
         }
 
