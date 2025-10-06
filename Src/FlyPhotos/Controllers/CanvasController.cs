@@ -219,24 +219,24 @@ internal class CanvasController : ICanvasController
         _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
-    public void StepZoom(ZoomDirection zoomDirection)
+    public void StepZoom(ZoomDirection zoomDirection, Point? zoomAnchor = null)
     {
         if (IsScreenEmpty()) return;
-        _canvasViewManager.StepZoom(zoomDirection, _d2dCanvas.GetSize());
+        _canvasViewManager.StepZoom(zoomDirection, _d2dCanvas.GetSize(), zoomAnchor);
         _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
-    public void ZoomAtPoint(ZoomDirection zoomDirection, Point adjustedPoint)
+    public void ZoomAtPoint(ZoomDirection zoomDirection, Point zoomAnchor)
     {
         if (IsScreenEmpty()) return;
-        _canvasViewManager.ZoomAtPoint(zoomDirection, adjustedPoint);
+        _canvasViewManager.ZoomAtPoint(zoomDirection, zoomAnchor);
         _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
-    public void ZoomAtPointPrecision(int delta, Point adjustedPoint)
+    public void ZoomAtPointPrecision(int delta, Point zoomAnchor)
     {
         if (IsScreenEmpty()) return;
-        _canvasViewManager.ZoomAtPointPrecision(delta, adjustedPoint);
+        _canvasViewManager.ZoomAtPointPrecision(delta, zoomAnchor);
         _currentRenderer?.RestartOffScreenDrawTimer();
     }
 

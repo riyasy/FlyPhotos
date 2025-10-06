@@ -129,7 +129,6 @@ public sealed partial class PhotoDisplayWindow
         D2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;
         D2dCanvas.PointerMoved += D2dCanvas_PointerMoved;
         D2dCanvas.PointerPressed += D2dCanvas_PointerPressed;
-        D2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
 
         D2dCanvasThumbNail.PointerWheelChanged += D2dCanvasThumbNail_PointerWheelChanged;
 
@@ -222,61 +221,60 @@ public sealed partial class PhotoDisplayWindow
     private async void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
         var properties = e.GetCurrentPoint(D2dCanvas).Properties;
+        var dpiAdjustedPosition = e.GetCurrentPoint(D2dCanvas).Position.AdjustForDpi(D2dCanvas);
 
         switch (properties.PointerUpdateKind)
         {
             case Microsoft.UI.Input.PointerUpdateKind.RightButtonReleased:
-            {
-                var dpiAdjustedPosition = e.GetCurrentPoint(D2dCanvas).Position.AdjustForDpi(D2dCanvas);
-                if (_canvasController.IsPressedOnImage(dpiAdjustedPosition))
                 {
-                    var filePath = _photoController.GetFullPathCurrentFile();
-                    if (File.Exists(filePath))
+                    if (_canvasController.IsPressedOnImage(dpiAdjustedPosition))
                     {
-                        NativeMethods.GetCursorPos(out NativeMethods.POINT mousePosScreen);
-                        CliWrapper.ShowContextMenu(this, filePath, mousePosScreen.X, mousePosScreen.Y);
-                    }
-                }
-
-                break;
-            }
-            case Microsoft.UI.Input.PointerUpdateKind.LeftButtonReleased:
-            {
-                if (_isDragging)
-                {
-                    D2dCanvas.ReleasePointerCapture(e.Pointer);
-                    _isDragging = false;
-                }
-                else
-                {
-                    var dpiAdjustedPosition = e.GetCurrentPoint(D2dCanvas).Position.AdjustForDpi(D2dCanvas);
-                    if (!_canvasController.IsPressedOnImage(dpiAdjustedPosition))
-                    {
-                        var pointerY = e.GetCurrentPoint(D2dCanvas).Position.Y;
-                        if (_lastWindowState == OverlappedPresenterState.Maximized && pointerY >= AppTitlebar.ActualHeight)
+                        var filePath = _photoController.GetFullPathCurrentFile();
+                        if (File.Exists(filePath))
                         {
-                            this.Restore();
+                            NativeMethods.GetCursorPos(out NativeMethods.POINT mousePosScreen);
+                            CliWrapper.ShowContextMenu(this, filePath, mousePosScreen.X, mousePosScreen.Y);
                         }
                     }
+
+                    break;
                 }
-                break;
-            }
+            case Microsoft.UI.Input.PointerUpdateKind.LeftButtonReleased:
+                {
+                    if (_isDragging)
+                    {
+                        D2dCanvas.ReleasePointerCapture(e.Pointer);
+                        _isDragging = false;
+                    }
+                    else
+                    {
+                        if (!_canvasController.IsPressedOnImage(dpiAdjustedPosition))
+                        {
+                            var pointerY = e.GetCurrentPoint(D2dCanvas).Position.Y;
+                            if (_lastWindowState == OverlappedPresenterState.Maximized && pointerY >= AppTitlebar.ActualHeight)
+                            {
+                                this.Restore();
+                            }
+                        }
+                    }
+                    break;
+                }
             case Microsoft.UI.Input.PointerUpdateKind.XButton1Released: // Mouse Back button pressed
                 {
-                if (AppConfig.Settings.UseMouseFwdBackForStepZoom)
-                    _canvasController.StepZoom(ZoomDirection.Out);
-                else
-                    await _photoController.Fly(NavDirection.Prev);
-                break;
-            }
+                    if (AppConfig.Settings.UseMouseFwdBackForStepZoom)
+                        _canvasController.StepZoom(ZoomDirection.Out, dpiAdjustedPosition);
+                    else
+                        await _photoController.Fly(NavDirection.Prev);
+                    break;
+                }
             case Microsoft.UI.Input.PointerUpdateKind.XButton2Released: // Mouse Forward button pressed
                 {
-                if (AppConfig.Settings.UseMouseFwdBackForStepZoom)
-                    _canvasController.StepZoom(ZoomDirection.In);
-                else
-                    await _photoController.Fly(NavDirection.Next);
-                break;
-            }
+                    if (AppConfig.Settings.UseMouseFwdBackForStepZoom)
+                        _canvasController.StepZoom(ZoomDirection.In, dpiAdjustedPosition);
+                    else
+                        await _photoController.Fly(NavDirection.Next);
+                    break;
+                }
         }
     }
 
@@ -296,24 +294,27 @@ public sealed partial class PhotoDisplayWindow
         else // Is vertical scroll
         {
             // Alt + vertical scroll always navigates
-            if (Util.IsAltPressed()) 
+            if (Util.IsAltPressed())
             {
                 await HandleMouseWheelNavigation(delta, isHorizontalScroll: false);
             }
             // Ctrl + vertical scroll always zooms
-            else if (Util.IsControlPressed()) 
+            else if (Util.IsControlPressed())
             {
                 HandleMouseWheelZoom(delta, currentPoint);
             }
-            // When Alt and Ctrl are not pressed, behave based on settings
-            else switch (AppConfig.Settings.DefaultMouseWheelBehavior) 
+            else
             {
-                case DefaultMouseWheelBehavior.Navigate:
-                    await HandleMouseWheelNavigation(delta, isHorizontalScroll: false);
-                    break;
-                case DefaultMouseWheelBehavior.Zoom:
-                    HandleMouseWheelZoom(delta, currentPoint);
-                    break;
+                // When Alt and Ctrl are not pressed, behave based on settings
+                switch (AppConfig.Settings.DefaultMouseWheelBehavior)
+                {
+                    case DefaultMouseWheelBehavior.Navigate:
+                        await HandleMouseWheelNavigation(delta, isHorizontalScroll: false);
+                        break;
+                    case DefaultMouseWheelBehavior.Zoom:
+                        HandleMouseWheelZoom(delta, currentPoint);
+                        break;
+                }
             }
         }
     }

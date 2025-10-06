@@ -85,16 +85,16 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         StartZoomAnimation(scaleTo, center);
     }
 
-    public void ZoomAtPoint(ZoomDirection zoomDirection, Point mousePosition)
+    public void ZoomAtPoint(ZoomDirection zoomDirection, Point zoomAnchor)
     {
         var scalePercentage = (zoomDirection == ZoomDirection.In) ? 1.25f : 0.8f;
         var scaleTo = _canvasViewState.LastScaleTo * scalePercentage;
         if (scaleTo < 0.05) return;
         _canvasViewState.LastScaleTo = scaleTo;
-        StartZoomAnimation(scaleTo, mousePosition);
+        StartZoomAnimation(scaleTo, zoomAnchor);
     }
 
-    public void ZoomAtPointPrecision(int delta, Point mousePosition)
+    public void ZoomAtPointPrecision(int delta, Point zoomAnchor)
     {
         if (delta == 0) return;
 
@@ -112,8 +112,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         float oldScale = _canvasViewState.Scale;
         // 2. Calculate the new position based on the ratio of the new scale to the old scale.
         // This is the core formula for zooming at a point.
-        var newPosX = mousePosition.X - (newScale / oldScale) * (mousePosition.X - _canvasViewState.ImagePos.X);
-        var newPosY = mousePosition.Y - (newScale / oldScale) * (mousePosition.Y - _canvasViewState.ImagePos.Y);
+        var newPosX = zoomAnchor.X - (newScale / oldScale) * (zoomAnchor.X - _canvasViewState.ImagePos.X);
+        var newPosY = zoomAnchor.Y - (newScale / oldScale) * (zoomAnchor.Y - _canvasViewState.ImagePos.Y);
         // 3. Now, update the state with the new values.
         _canvasViewState.Scale = newScale;
         _canvasViewState.LastScaleTo = newScale; // Keep LastScaleTo in sync
@@ -130,7 +130,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
     /// When zooming out, it moves to the next lowest step.
     /// The zoom is animated and centered on the canvas.
     /// </summary>
-    public void StepZoom(ZoomDirection zoomDirection, Size canvasSize)
+    public void StepZoom(ZoomDirection zoomDirection, Size canvasSize, Point? zoomAnchor = null)
     {
         // 1. Establish the ordered list of zoom stops, including the dynamic "screen fit" size.
         var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
@@ -152,8 +152,13 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         // 4. Animate the zoom and pan to the center for the new scale.
         var targetScale = zoomStops[nextStopIndex];
         _canvasViewState.LastScaleTo = targetScale;
-        var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
-        StartPanAndZoomAnimation(targetScale, targetPosition);
+
+        var anchor = zoomAnchor ?? new Point(canvasSize.Width / 2, canvasSize.Height / 2);
+
+        if (zoomAnchor.HasValue)
+            StartZoomAnimation(targetScale, anchor);
+        else
+            StartPanAndZoomAnimation(targetScale, anchor);
     }
 
     public void ZoomOutOnExit(double exitAnimationDuration, Size canvasSize)
@@ -244,12 +249,12 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         return (float)Math.Min(horizontalScale, verticalScale);
     }
 
-    private void StartZoomAnimation(float targetScale, Point zoomCenter)
+    private void StartZoomAnimation(float targetScale, Point zoomAnchor)
     {
         _panZoomAnimationStartTime = DateTime.UtcNow;
         _zoomStartScale = _canvasViewState.Scale;
         _zoomTargetScale = targetScale;
-        _zoomCenter = zoomCenter;
+        _zoomCenter = zoomAnchor;
 
         if (_renderingHandler != null)
             CompositionTarget.Rendering -= _renderingHandler;
