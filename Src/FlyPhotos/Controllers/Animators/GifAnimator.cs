@@ -201,14 +201,13 @@ public partial class GifAnimator : IAnimator
     {
         var metadataList = new List<FrameMetadata>();
         const double defaultGifDelayMs = 100.0;
-        const double minimumGifDelayMs = 20.0;
         const double gifDelayMultiplier = 10.0;
 
         for (uint i = 0; i < decoder.FrameCount; i++)
         {
             var frame = await decoder.GetFrameAsync(i);
             var propertyKeys = new[] {
-                "System.Animation.FrameDelay",
+                "/grctlext/Delay",
                 "/imgdesc/Left",
                 "/imgdesc/Top",
                 "/imgdesc/Width",
@@ -217,21 +216,18 @@ public partial class GifAnimator : IAnimator
             };
             var props = await frame.BitmapProperties.GetPropertiesAsync(propertyKeys);
 
-            // CALLING LIKE THIS IS NOT AOT SAFE
-            //var props = await frame.BitmapProperties.GetPropertiesAsync([
-            //    "System.Animation.FrameDelay", "/imgdesc/Left", "/imgdesc/Top",
-            //    "/imgdesc/Width", "/imgdesc/Height", "/grctlext/Disposal"
-            //]);
-
             // Frame Delay
             double delayMs = defaultGifDelayMs;
-            if (props.TryGetValue("System.Animation.FrameDelay", out var delayValue) && delayValue.Type == PropertyType.UInt16)
+
+            // Try the native GIF metadata path.
+            if (props.TryGetValue("/grctlext/Delay", out var nativeDelayValue) && nativeDelayValue.Type == PropertyType.UInt16)
             {
-                ushort rawDelay = (ushort)delayValue.Value;
-                if (rawDelay > 0)
+                ushort rawDelay = (ushort)nativeDelayValue.Value;
+                // The rawDelay is in 1/100s of a second. A value of 0 or 1 is a special case, treated
+                // as 100ms for browser compatibility. Any other value is respected.
+                if (rawDelay > 1)
                 {
                     delayMs = rawDelay * gifDelayMultiplier;
-                    if (delayMs < minimumGifDelayMs) delayMs = defaultGifDelayMs;
                 }
             }
 
