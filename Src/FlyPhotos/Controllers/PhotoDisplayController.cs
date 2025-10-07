@@ -334,8 +334,7 @@ internal partial class PhotoDisplayController
             var photo = _photos[_photoSessionState.CurrentDisplayIndex];
             var filePath = photo.FileName;
 
-            if (!File.Exists(filePath))  
-                return; 
+            if (!File.Exists(filePath)) return;
 
             var sourceFile = await StorageFile.GetFileFromPathAsync(filePath);
             var dataPackage = new DataPackage();
@@ -370,22 +369,12 @@ internal partial class PhotoDisplayController
         _keyPressCounter++;
         if (_cachedPreviews.Count <= 1) return;
 
-        await DisplayNextPhoto(direction);
-        UpdateProgressStatusDebug();
-        _previewCachingCanStart.Set();
+        int newIndex = _photoSessionState.CurrentDisplayIndex + (direction == NavDirection.Next ? 1 : -1);
+        if (newIndex < 0 || newIndex >= _photos.Count) return;
+
+        _photoSessionState.CurrentDisplayIndex = newIndex;
+        await DisplayPhotoAtIndex(_photoSessionState.CurrentDisplayIndex, false);
     }
-
-    public async Task Brake()
-    {
-        if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq && _cachedHqImages.TryGetValue(_photoSessionState.CurrentDisplayIndex, out var hqImage))
-        {
-            await _canvasController.SetSource(hqImage, DisplayLevel.Hq);
-        }
-
-        _hqCachingCanStart.Set();
-        _keyPressCounter = 0;
-    }
-
     public async Task FlyToFirst()
     {
         if (_photos.Count <= 1) return;
@@ -407,62 +396,38 @@ internal partial class PhotoDisplayController
     private async Task FlyTo(int toIndex)
     {
         _photoSessionState.CurrentDisplayIndex = toIndex;
+        await DisplayPhotoAtIndex(_photoSessionState.CurrentDisplayIndex, true);
+    }
+    public async Task Brake()
+    {
+        if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq && _cachedHqImages.TryGetValue(_photoSessionState.CurrentDisplayIndex, out var hqImage))
+            await _canvasController.SetSource(hqImage, DisplayLevel.Hq);
+        _hqCachingCanStart.Set();
+        _keyPressCounter = 0;
+    }
 
-        var photo = _photos[_photoSessionState.CurrentDisplayIndex];
+    private async Task DisplayPhotoAtIndex(int index, bool triggerHqCaching)
+    {
+        var photo = _photos[index];
 
-        if (!IsContinuousKeyPress() && _cachedHqImages.ContainsKey(_photoSessionState.CurrentDisplayIndex))
-        {
+        if (!IsContinuousKeyPress() && _cachedHqImages.ContainsKey(index))
             await _canvasController.SetSource(photo, DisplayLevel.Hq);
-        }
-        else if (_cachedPreviews.ContainsKey(_photoSessionState.CurrentDisplayIndex))
-        {
+        else if (_cachedPreviews.ContainsKey(index))
             await _canvasController.SetSource(photo, DisplayLevel.Preview);
-        }
         else
-        {
             await _canvasController.SetSource(photo, DisplayLevel.PlaceHolder);
-        }
+
         UpdateCacheLists();
         UpdateProgressStatusDebug();
+
         _previewCachingCanStart.Set();
-        _hqCachingCanStart.Set();
+        if (triggerHqCaching)
+            _hqCachingCanStart.Set();
     }
 
     private bool IsContinuousKeyPress()
     {
         return _keyPressCounter > 1;
-    }
-
-    private async Task DisplayNextPhoto(NavDirection direction)
-    {
-        switch (direction)
-        {
-            case NavDirection.Next when _photoSessionState.CurrentDisplayIndex >= _photos.Count - 1:
-            case NavDirection.Prev when _photoSessionState.CurrentDisplayIndex <= 0:
-                return;
-            case NavDirection.Next:
-                _photoSessionState.CurrentDisplayIndex++;
-                break;
-            case NavDirection.Prev:
-                _photoSessionState.CurrentDisplayIndex--;
-                break;
-        }
-
-        var photo = _photos[_photoSessionState.CurrentDisplayIndex];
-
-        if (!IsContinuousKeyPress() && _cachedHqImages.ContainsKey(_photoSessionState.CurrentDisplayIndex))
-        {
-            await _canvasController.SetSource(photo, DisplayLevel.Hq);
-        }
-        else if (_cachedPreviews.ContainsKey(_photoSessionState.CurrentDisplayIndex))
-        {
-            await _canvasController.SetSource(photo, DisplayLevel.Preview);
-        }
-        else
-        {
-            await _canvasController.SetSource(photo, DisplayLevel.PlaceHolder);
-        }
-        UpdateCacheLists();
     }
 
     public bool IsSinglePhoto()
