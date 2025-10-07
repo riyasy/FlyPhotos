@@ -28,15 +28,8 @@ using WinRT.Interop;
 using WinUIEx;
 using Icon = System.Drawing.Icon;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace FlyPhotos.Views;
 
-
-/// <summary>
-/// An empty window that can be used on its own or navigated to within a Frame.
-/// </summary>
 public sealed partial class PhotoDisplayWindow
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -115,7 +108,7 @@ public sealed partial class PhotoDisplayWindow
         _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, photoSessionState);
         _photoController.StatusUpdated += PhotoController_StatusUpdated;
         _canvasController.OnZoomChanged += CanvasController_OnZoomChanged;
-        _thumbNailController.ThumbnailClicked += ThumbNailController_ThumbnailClicked;
+        _thumbNailController.ThumbnailClicked += Thumbnail_Clicked;
 
         TxtFileName.Text = Path.GetFileName(firstPhotoPath);
 
@@ -125,12 +118,12 @@ public sealed partial class PhotoDisplayWindow
         Closed += PhotoDisplayWindow_Closed;
 
         D2dCanvas.CreateResources += D2dCanvas_CreateResources;
+        D2dCanvas.PointerPressed += D2dCanvas_PointerPressed;
+        D2dCanvas.PointerMoved += D2dCanvas_PointerMoved;
         D2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
         D2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;
-        D2dCanvas.PointerMoved += D2dCanvas_PointerMoved;
-        D2dCanvas.PointerPressed += D2dCanvas_PointerPressed;
 
-        D2dCanvasThumbNail.PointerWheelChanged += D2dCanvasThumbNail_PointerWheelChanged;
+        D2dCanvasThumbNail.PointerWheelChanged += ThumbNail_PointerWheelChanged;
 
         MainLayout.KeyDown += HandleKeyDown;
         MainLayout.KeyUp += HandleKeyUp;
@@ -145,9 +138,56 @@ public sealed partial class PhotoDisplayWindow
         _inactivityFader = new InactivityFader(BorderTxtZoom);
     }
 
-    private async void ThumbNailController_ThumbnailClicked(int shiftIndex)
+    #region Event Handlers
+
+    private void PhotoDisplayWindow_SizeChanged(object sender, WindowSizeChangedEventArgs args)
     {
-        await _photoController.FlyBy(shiftIndex);
+        var presenter = (AppWindow.Presenter as OverlappedPresenter);
+        if (presenter != null && presenter.State != _lastWindowState)
+            _lastWindowState = presenter.State;
+    }
+
+    private async void PhotoDisplayWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
+    {
+        args.Cancel = true;
+        await AnimatePhotoDisplayWindowClose();
+    }
+
+    private async void PhotoDisplayWindow_Closed(object sender, WindowEventArgs args)
+    {
+        _repeatButtonReleaseCheckTimer.Stop();
+        _wheelScrollBrakeTimer.Stop();
+        _thumbNailController.ThumbnailClicked -= Thumbnail_Clicked;
+        _photoController.StatusUpdated -= PhotoController_StatusUpdated;
+        _canvasController.OnZoomChanged -= CanvasController_OnZoomChanged;
+        ((FrameworkElement)Content).ActualThemeChanged -= PhotoDisplayWindow_ActualThemeChanged;
+
+        await _canvasController.DisposeAsync();
+        _thumbNailController.Dispose();
+        _photoController.Dispose();
+        _opacityFader.Dispose();
+        _inactivityFader.Dispose();
+        DiskCacherWithSqlite.Shutdown();
+
+        _backdropController?.RemoveSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
+        _backdropController?.Dispose();
+        _backdropController = null;
+    }
+
+    private async void ButtonNext_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (_photoController.IsSinglePhoto()) return;
+        await _photoController.Fly(NavDirection.Next);
+        _repeatButtonReleaseCheckTimer.Stop();
+        _repeatButtonReleaseCheckTimer.Start();
+    }
+
+    private async void ButtonBack_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (_photoController.IsSinglePhoto()) return;
+        await _photoController.Fly(NavDirection.Prev);
+        _repeatButtonReleaseCheckTimer.Stop();
+        _repeatButtonReleaseCheckTimer.Start();
     }
 
     private async void ButtonBackNext_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
@@ -159,6 +199,11 @@ public sealed partial class PhotoDisplayWindow
         _wheelScrollBrakeTimer.Start();
     }
 
+    private void ButtonRotate_OnClick(object sender, RoutedEventArgs e)
+    {
+        _canvasController.RotateCurrentPhotoBy90(true);
+    }
+
     private void ButtonRotate_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
@@ -166,28 +211,71 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.RotateCurrentPhotoBy90(delta > 0);
     }
 
-    private void PhotoController_StatusUpdated(object? sender, StatusUpdateEventArgs e)
+    private void ButtonScaleSet_Click(object sender, RoutedEventArgs e)
     {
-        DispatcherQueue.TryEnqueue(() =>
-        {
-            TxtFileName.Text = e.IndexAndFileName;
-            CacheStatusProgress.Text = e.CacheProgressStatus;
-        });
+        _canvasController.FitToScreen(true);
     }
 
-    private void CanvasController_OnZoomChanged(int zoomPercent)
+    private void ButtonOneIsToOne_Click(object sender, RoutedEventArgs e)
     {
-        TxtZoom.Text = $"{zoomPercent}%";
-        _inactivityFader.ReportActivity();
+        _canvasController.ZoomToHundred();
     }
 
-    private void PhotoDisplayWindow_SizeChanged(object sender, WindowSizeChangedEventArgs args)
+    private void ButtonExpander_Click(object sender, RoutedEventArgs e)
     {
-        var presenter = (AppWindow.Presenter as OverlappedPresenter);
-        if (presenter != null && presenter.State != _lastWindowState)
+        if (IconExpander.Text == ((char)0xE761).ToString())
         {
-            _lastWindowState = presenter.State;
+            IconExpander.Text = ((char)0xE760).ToString();
+            CacheStatusProgress.Visibility = Visibility.Visible;
         }
+        else
+        {
+            IconExpander.Text = ((char)0xE761).ToString();
+            CacheStatusProgress.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private void ButtonSettings_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (_settingWindow == null)
+        {
+            _settingWindow = new Settings();
+            _settingWindow.SetWindowSize(900, 768);
+            Util.MoveWindowToMonitor(_settingWindow, Util.GetMonitorForWindow(this));
+            _settingWindow.CenterOnScreen();
+            _settingWindow.Closed += SettingWindow_Closed;
+            _settingWindow.Activate();
+            _settingWindow.ShowCheckeredBackgroundChanged += SettingWindow_ShowCheckeredBackgroundChanged;
+            _settingWindow.BackDropTransparencyChanged += SettingWindow_BackdropTransparencyChanged;
+            _settingWindow.ThemeChanged += SetWindowTheme;
+            _settingWindow.BackdropChanged += SetWindowBackground;
+            _settingWindow.ThumbnailSettingChanged += SettingWindow_ThumbnailSettingChanged;
+        }
+        else
+        {
+            _settingWindow.Activate();
+        }
+    }
+
+    private void SettingWindow_Closed(object sender, WindowEventArgs args)
+    {
+        if (_settingWindow != null)
+        {
+            _settingWindow.Closed -= SettingWindow_Closed;
+            _settingWindow.ThemeChanged -= SetWindowTheme;
+            _settingWindow.BackdropChanged -= SetWindowBackground;
+            _settingWindow.ShowCheckeredBackgroundChanged -= SettingWindow_ShowCheckeredBackgroundChanged;
+            _settingWindow.BackDropTransparencyChanged -= SettingWindow_BackdropTransparencyChanged;
+            _settingWindow.ThumbnailSettingChanged -= SettingWindow_ThumbnailSettingChanged;
+        }
+        _settingWindow = null;
+    }
+
+    private void D2dCanvas_CreateResources(CanvasControl sender,
+        CanvasCreateResourcesEventArgs args)
+    {
+        //args.TrackAsyncAction(_photoController.LoadFirstPhoto().AsAsyncAction());
+        _ = _photoController.LoadFirstPhoto();
     }
 
     private void D2dCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
@@ -203,18 +291,14 @@ public sealed partial class PhotoDisplayWindow
     private void D2dCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
         if (!_isDragging) return;
-
         var currentPoint = e.GetCurrentPoint(D2dCanvas).Position;
-
         // Calculate logical delta
         double deltaX = currentPoint.X - _lastPoint.X;
         double deltaY = currentPoint.Y - _lastPoint.Y;
         // Adjust delta for DPI 
         deltaX = deltaX.AdjustForDpi(D2dCanvas);
         deltaY = deltaY.AdjustForDpi(D2dCanvas);
-
         _canvasController.Pan(deltaX, deltaY);
-
         _lastPoint = currentPoint;
     }
 
@@ -236,7 +320,6 @@ public sealed partial class PhotoDisplayWindow
                             CliWrapper.ShowContextMenu(this, filePath, mousePosScreen.X, mousePosScreen.Y);
                         }
                     }
-
                     break;
                 }
             case Microsoft.UI.Input.PointerUpdateKind.LeftButtonReleased:
@@ -319,75 +402,18 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
-    private async void D2dCanvasThumbNail_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+    private async void Thumbnail_Clicked(int shiftIndex)
+    {
+        await _photoController.FlyBy(shiftIndex);
+    }
+
+    private async void ThumbNail_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         var props = e.GetCurrentPoint(D2dCanvasThumbNail).Properties;
         int delta = props.MouseWheelDelta;
         bool isHorizontal = props.IsHorizontalMouseWheel;
 
         await HandleMouseWheelNavigation(delta, isHorizontal);
-    }
-
-    private async Task HandleMouseWheelNavigation(int delta, bool isHorizontalScroll)
-    {
-        if (_photoController.IsSinglePhoto()) return;
-
-        ref int accumulator = ref (isHorizontalScroll ? ref _horizontalDeltaAccumulator : ref _verticalDeltaAccumulator);
-        accumulator += delta;
-
-        if (Math.Abs(accumulator) < AppConfig.Settings.ScrollThreshold) return;
-
-        var direction = isHorizontalScroll ?
-            (accumulator > 0 ? NavDirection.Next : NavDirection.Prev) :
-            (accumulator > 0 ? NavDirection.Prev : NavDirection.Next);
-
-        accumulator = 0;
-        await _photoController.Fly(direction);
-        RestartBrakeTimer();
-    }
-
-    private void HandleMouseWheelZoom(int delta, Point point)
-    {
-        var adjustedPoint = point.AdjustForDpi(D2dCanvas);
-
-        if (IsPrecisionTouchpad(delta))
-            _canvasController.ZoomAtPointPrecision(delta, adjustedPoint);
-        else
-            _canvasController.ZoomAtPoint(delta > 0 ? ZoomDirection.In : ZoomDirection.Out, adjustedPoint);
-    }
-
-    private void RestartBrakeTimer()
-    {
-        _wheelScrollBrakeTimer.Stop();
-        _wheelScrollBrakeTimer.Start();
-    }
-
-    private void SetupTransparentTitleBar()
-    {
-        SetTitleBar(AppTitlebar);
-        var titleBar = AppWindow.TitleBar;
-        titleBar.ExtendsContentIntoTitleBar = true;
-        titleBar.ButtonBackgroundColor = Colors.Transparent;
-        titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
-        titleBar.ButtonForegroundColor = Colors.Gray;
-    }
-
-    private void SetUnpackagedAppIcon()
-    {
-        var hWnd = WindowNative.GetWindowHandle(this);
-        var processModule = Process.GetCurrentProcess().MainModule;
-        if (processModule == null) return;
-        var sExe = processModule.FileName;
-        var ico = Icon.ExtractAssociatedIcon(sExe);
-        if (ico == null) return;
-        NativeMethods.SendMessage(hWnd, NativeMethods.WM_SETICON, new IntPtr(1), ico.Handle);
-    }
-
-    private void D2dCanvas_CreateResources(CanvasControl sender,
-        CanvasCreateResourcesEventArgs args)
-    {
-        //args.TrackAsyncAction(_photoController.LoadFirstPhoto().AsAsyncAction());
-        _ = _photoController.LoadFirstPhoto();
     }
 
     private async void HandleKeyDown(object sender, KeyRoutedEventArgs e)
@@ -474,21 +500,10 @@ public sealed partial class PhotoDisplayWindow
         await _photoController.Brake();
     }
 
-    private async void ButtonBack_OnClick(object sender, RoutedEventArgs e)
-    {
-        if (_photoController.IsSinglePhoto()) return;
-        await _photoController.Fly(NavDirection.Prev);
-        _repeatButtonReleaseCheckTimer.Stop();
-        _repeatButtonReleaseCheckTimer.Start();
-    }
 
-    private async void ButtonNext_OnClick(object sender, RoutedEventArgs e)
-    {
-        if (_photoController.IsSinglePhoto()) return;
-        await _photoController.Fly(NavDirection.Next);
-        _repeatButtonReleaseCheckTimer.Stop();
-        _repeatButtonReleaseCheckTimer.Start();
-    }
+    #endregion
+
+    #region Timer Ticks
 
     private async void RepeatButtonReleaseCheckTimer_Tick(object? sender, object e)
     {
@@ -503,37 +518,68 @@ public sealed partial class PhotoDisplayWindow
         await _photoController.Brake();
     }
 
-    private void ButtonRotate_OnClick(object sender, RoutedEventArgs e)
+    #endregion
+
+    #region callbacks
+
+    private void PhotoController_StatusUpdated(object? sender, StatusUpdateEventArgs e)
     {
-        _canvasController.RotateCurrentPhotoBy90(true);
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            TxtFileName.Text = e.IndexAndFileName;
+            CacheStatusProgress.Text = e.CacheProgressStatus;
+        });
     }
 
-    private void ButtonSettings_OnClick(object sender, RoutedEventArgs e)
+    private void CanvasController_OnZoomChanged(int zoomPercent)
     {
-        if (_settingWindow == null)
-        {
-            _settingWindow = new Settings();
-            _settingWindow.SetWindowSize(900, 768);
-            Util.MoveWindowToMonitor(_settingWindow, Util.GetMonitorForWindow(this));
-            _settingWindow.CenterOnScreen();
-            _settingWindow.Closed += SettingWindow_Closed;
-            _settingWindow.Activate();
-            _settingWindow.ShowCheckeredBackgroundChanged += SettingWindow_ShowCheckeredBackgroundChanged;
-            _settingWindow.BackDropTransparencyChanged += SettingWindow_BackdropTransparencyChanged;
-            _settingWindow.ThemeChanged += SetWindowTheme;
-            _settingWindow.BackdropChanged += SetWindowBackground;
-            _settingWindow.ThumbnailSettingChanged += SettingWindow_ThumbnailSettingChanged;
-        }
+        TxtZoom.Text = $"{zoomPercent}%";
+        _inactivityFader.ReportActivity();
+    }
+
+    #endregion
+
+    #region Helper Functions
+
+    private async Task HandleMouseWheelNavigation(int delta, bool isHorizontalScroll)
+    {
+        if (_photoController.IsSinglePhoto()) return;
+
+        ref int accumulator = ref (isHorizontalScroll ? ref _horizontalDeltaAccumulator : ref _verticalDeltaAccumulator);
+        accumulator += delta;
+
+        if (Math.Abs(accumulator) < AppConfig.Settings.ScrollThreshold) return;
+
+        var direction = isHorizontalScroll ?
+            (accumulator > 0 ? NavDirection.Next : NavDirection.Prev) :
+            (accumulator > 0 ? NavDirection.Prev : NavDirection.Next);
+
+        accumulator = 0;
+        await _photoController.Fly(direction);
+        RestartBrakeTimer();
+    }
+
+    private void HandleMouseWheelZoom(int delta, Point point)
+    {
+        var adjustedPoint = point.AdjustForDpi(D2dCanvas);
+
+        if (IsPrecisionTouchpad(delta))
+            _canvasController.ZoomAtPointPrecision(delta, adjustedPoint);
         else
-        {
-            _settingWindow.Activate();
-        }
+            _canvasController.ZoomAtPoint(delta > 0 ? ZoomDirection.In : ZoomDirection.Out, adjustedPoint);
     }
 
-    private async void PhotoDisplayWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
+    /// <summary>
+    /// Heuristic to detect precision touchpad / smooth pinch scroll.
+    /// Returns true if delta is not a multiple of standard WHEEL_DELTA (120),
+    /// which usually indicates a touchpad gesture.
+    /// </summary>
+    private static bool IsPrecisionTouchpad(int delta) => Math.Abs(delta) % 120 != 0;
+
+    private void RestartBrakeTimer()
     {
-        args.Cancel = true;
-        await AnimatePhotoDisplayWindowClose();
+        _wheelScrollBrakeTimer.Stop();
+        _wheelScrollBrakeTimer.Start();
     }
 
     private async Task AnimatePhotoDisplayWindowClose()
@@ -549,40 +595,28 @@ public sealed partial class PhotoDisplayWindow
         this.Close();
     }
 
-    private async void PhotoDisplayWindow_Closed(object sender, WindowEventArgs args)
+    #endregion
+
+    #region Theming and Backdrop
+    private void SetupTransparentTitleBar()
     {
-        _repeatButtonReleaseCheckTimer.Stop();
-        _wheelScrollBrakeTimer.Stop();
-        _thumbNailController.ThumbnailClicked -= ThumbNailController_ThumbnailClicked;
-        _photoController.StatusUpdated -= PhotoController_StatusUpdated;
-        _canvasController.OnZoomChanged -= CanvasController_OnZoomChanged;
-        ((FrameworkElement)Content).ActualThemeChanged -= PhotoDisplayWindow_ActualThemeChanged;
-
-        await _canvasController.DisposeAsync();
-        _thumbNailController.Dispose();
-        _photoController.Dispose();
-        _opacityFader.Dispose();
-        _inactivityFader.Dispose();
-        DiskCacherWithSqlite.Shutdown();
-
-        _backdropController?.RemoveSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
-        _backdropController?.Dispose();
-        _backdropController = null;
+        SetTitleBar(AppTitlebar);
+        var titleBar = AppWindow.TitleBar;
+        titleBar.ExtendsContentIntoTitleBar = true;
+        titleBar.ButtonBackgroundColor = Colors.Transparent;
+        titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+        titleBar.ButtonForegroundColor = Colors.Gray;
     }
 
-    private void SettingWindow_Closed(object sender, WindowEventArgs args)
+    private void SetUnpackagedAppIcon()
     {
-        if (_settingWindow != null)
-        {
-            _settingWindow.Closed -= SettingWindow_Closed;
-            _settingWindow.ThemeChanged -= SetWindowTheme;
-            _settingWindow.BackdropChanged -= SetWindowBackground;
-            _settingWindow.ShowCheckeredBackgroundChanged -= SettingWindow_ShowCheckeredBackgroundChanged;
-            _settingWindow.BackDropTransparencyChanged -= SettingWindow_BackdropTransparencyChanged;
-            _settingWindow.ThumbnailSettingChanged -= SettingWindow_ThumbnailSettingChanged;
-        }
-
-        _settingWindow = null;
+        var hWnd = WindowNative.GetWindowHandle(this);
+        var processModule = Process.GetCurrentProcess().MainModule;
+        if (processModule == null) return;
+        var sExe = processModule.FileName;
+        var ico = Icon.ExtractAssociatedIcon(sExe);
+        if (ico == null) return;
+        NativeMethods.SendMessage(hWnd, NativeMethods.WM_SETICON, new IntPtr(1), ico.Handle);
     }
 
     private void SettingWindow_ShowCheckeredBackgroundChanged(bool showChecker)
@@ -614,30 +648,6 @@ public sealed partial class PhotoDisplayWindow
                 _thumbNailController.ShowHideThumbnailBasedOnSettings();
                 break;
         }
-    }
-
-    private void ButtonExpander_Click(object sender, RoutedEventArgs e)
-    {
-        if (IconExpander.Text == ((char)0xE761).ToString())
-        {
-            IconExpander.Text = ((char)0xE760).ToString();
-            CacheStatusProgress.Visibility = Visibility.Visible;
-        }
-        else
-        {
-            IconExpander.Text = ((char)0xE761).ToString();
-            CacheStatusProgress.Visibility = Visibility.Collapsed;
-        }
-    }
-
-    private void ButtonScaleSet_Click(object sender, RoutedEventArgs e)
-    {
-        _canvasController.FitToScreen(true);
-    }
-
-    private void ButtonOneIsToOne_Click(object sender, RoutedEventArgs e)
-    {
-        _canvasController.ZoomToHundred();
     }
 
     private void SetWindowBackground(WindowBackdropType backdropType)
@@ -749,12 +759,7 @@ public sealed partial class PhotoDisplayWindow
         BorderTxtFileName.Background = new SolidColorBrush(fileNameBackgroundColor);
     }
 
-    /// <summary>
-    /// Heuristic to detect precision touchpad / smooth pinch scroll.
-    /// Returns true if delta is not a multiple of standard WHEEL_DELTA (120),
-    /// which usually indicates a touchpad gesture.
-    /// </summary>
-    private static bool IsPrecisionTouchpad(int delta) => Math.Abs(delta) % 120 != 0;
+    #endregion
 }
 
 public partial class BlurredBackdrop : CompositionBrushBackdrop
