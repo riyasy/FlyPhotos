@@ -150,6 +150,9 @@ public sealed partial class PhotoDisplayWindow
     private async void PhotoDisplayWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {
         args.Cancel = true;
+
+        await SaveLastUsedMonitorInfo();
+
         await AnimatePhotoDisplayWindowClose();
     }
 
@@ -580,6 +583,14 @@ public sealed partial class PhotoDisplayWindow
     {
         _wheelScrollBrakeTimer.Stop();
         _wheelScrollBrakeTimer.Start();
+    }
+
+    private async Task SaveLastUsedMonitorInfo()
+    {
+        // Save monitor information before closing
+        if (!AppConfig.Settings.RememberLastMonitor) return;
+        AppConfig.Settings.LastUsedMonitorId = Util.GetMonitorForWindow(this);
+        await AppConfig.SaveAsync();
     }
 
     private async Task AnimatePhotoDisplayWindowClose()

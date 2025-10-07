@@ -90,21 +90,12 @@ public partial class App
 
     private void LaunchPhotoDisplayWindow(string selectedFileName)
     {
-        _photoDisplayWindow = new PhotoDisplayWindow(selectedFileName);
-        _photoDisplayWindow.AppWindow.Closing += PhotoDisplayWindow_Closing;
+        _photoDisplayWindow = new PhotoDisplayWindow(selectedFileName);        
         if (AppConfig.Settings.RememberLastMonitor) 
             Util.MoveWindowToMonitor(_photoDisplayWindow, AppConfig.Settings.LastUsedMonitorId);
         _photoDisplayWindow.Maximize();
         _photoDisplayWindow.Activate();
     }
-
-    private async void PhotoDisplayWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
-    {
-        if (!AppConfig.Settings.RememberLastMonitor) return;
-        AppConfig.Settings.LastUsedMonitorId = Util.GetMonitorForWindow(_photoDisplayWindow);
-        await AppConfig.SaveAsync();
-    }
-
 
     private static void KillOtherFlys()
     {
