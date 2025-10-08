@@ -2152,36 +2152,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_0A38C97FF5424FF2B6D31F3C3240453F"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_4C3A397D12994C6982635937E82E6237"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_6DE045C509DA4EB7978A81845B05771B"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_1F1FA78C32DC4144936F3836ECAFEA44"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_A95B1C514EDD4C52AB28DD631BD31483"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_FD5B1F897B2E4646AD19F14771CADBA3"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -2266,6 +2236,12 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_A95B1C514EDD4C52AB28DD631BD31483"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_A78033BB84C5888A7F57CE432CA79C94"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -2338,6 +2314,12 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_6DE045C509DA4EB7978A81845B05771B"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_5E7BA298A94B4013BF5D972F34250191"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -2351,6 +2333,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_4DCC516EE0B6427B92F6076FA5EB7B3C"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_4C3A397D12994C6982635937E82E6237"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -2392,6 +2380,12 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_1F1FA78C32DC4144936F3836ECAFEA44"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_1CEE920D2D714BD792254807B0D962E3"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -2417,6 +2411,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_0E91DB38551C45208ED2158D410CA809"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_0A38C97FF5424FF2B6D31F3C3240453F"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -5908,15 +5908,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Fly"
-        "ProductCode" = "8:{9B9E7E96-57A9-46B0-869C-722CA1A4240E}"
-        "PackageCode" = "8:{150EEB12-9F9C-4EDF-AC45-2ECE89726E82}"
+        "ProductCode" = "8:{F920A16A-70E6-4860-BE9B-0057A489698E}"
+        "PackageCode" = "8:{7829554F-BE26-4BFC-A10B-2A057A128F51}"
         "UpgradeCode" = "8:{5565DCCD-EEED-45A0-93FF-4BABC468C2A7}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:2.5.5"
+        "ProductVersion" = "8:2.5.7"
         "Manufacturer" = "8:RYFTools"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://github.com/riyasy/FlyPhotos"
