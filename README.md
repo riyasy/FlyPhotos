@@ -28,22 +28,34 @@ Watch Fly Photos in action [Old Video]:
   - Multi-monitor support (remembers last used monitor).  
 
 - **Controls**
-  - Zoom, pan, and rotate using mouse, keyboard, or scroll wheel.  
+  - Zoom, pan, and rotate using **touchpad**, **mouse wheel**, or **keyboard**.  
   - Configurable mouse wheel behavior: zoom or navigate.  
-  - Shortcuts:  
-    - `← / →` : Next / Previous photo  
-    - Hold `← / →` : Fly through photos super fast  
-    - `Mouse Wheel` : Zoom or Navigate (based on setting)  
-    - `Ctrl + Mouse Wheel` : Always zoom  
-    - `Alt + Mouse Wheel` : Always navigate  
-    - `Ctrl + + / −` : Zoom in / out  
-    - `Ctrl + Arrow Keys` : Pan photo  
-    - `Ctrl + C` : Copy photo (bitmap or file)  
-    - `Home / End` : Jump to first / last photo  
-    - Click + Drag : Pan photo  
-    - `Mouse Wheel` on `Thumbnail bar` : Navigate  
-    - `Mouse Wheel` on `On-screen Next / Previous button` : Navigate  
-    - `Mouse Wheel` on `On-screen Rotate button` : Rotate  
+
+  ### 🖐 Touchpad
+  - Two-finger swipe **Left / Right** → Navigate photos  
+  - Two-finger swipe **Up / Down** → Zoom In/Out or Navigate (based on mouse wheel setting)  
+  - Pinch **Open / Close** → Zoom In / Out  
+
+  ### 🖱 Mouse Wheel
+  - **Wheel Scroll** → Zoom In/Out or Navigate (based on setting)  
+  - **Ctrl + Wheel** → Always zoom  
+  - **Alt + Wheel** → Always navigate  
+  - **Tilt Wheel Left / Right** → Navigate photos (for mouses that support horizontal scroll)  
+  - **Mouse Wheel on Thumbnail Strip** → Navigate photos  
+  - **Mouse Wheel on On-screen Buttons** → Navigate photos / Rotate photo  
+  - **Mouse Back / Forward Buttons** → Navigate photos  
+  - **Click + Drag** → Pan photo  
+
+  ### ⌨️ Keyboard
+  - `← / →` → Next / Previous photo  
+  - Hold `← / →` → Fly through photos super fast  
+  - `↑ / ↓` → Zoom In / Out  
+  - `Page Up / Page Down` → Zoom In/Out to next preset (100%, 400%, Fit)  
+  - `Ctrl + + / −` → Zoom In / Out  
+  - `Ctrl + Arrow Keys` → Pan photo  
+  - `Home / End` → Jump to first / last photo  
+  - `Ctrl + C` → Copy photo (bitmap or file)  
+  - `Esc` → Close settings or exit app  
 
 - **Windows Explorer integration**
   - Right-click an image → **Open with Fly**.  
@@ -55,7 +67,7 @@ Watch Fly Photos in action [Old Video]:
 ## 🚧 Known Limitations
 - v2.x supports Windows 10 and 11 only (x64).  
 - SVG rendering limited to 2000px on the longest side.  
-- Touchpad gestures and delete shortcut are planned.  
+- Delete shortcut planned.  
 
 ---
 
@@ -68,31 +80,37 @@ Watch Fly Photos in action [Old Video]:
 ---
 
 ## 🎮 Usage
-Keyboard and mouse shortcuts:  
 
-| Action | Shortcut |
-|--------|----------|
-| Next / Previous photo | ← / → |
-| Fly-through mode | Hold ← / → |
-| Zoom In / Out | Mouse Wheel / Ctrl + + / − |
-| Pan | Click + Drag / Ctrl + Arrow Keys |
-| Rotate | Mouse Wheel on On-screen Rotate button |
-| Fit to Screen | Double-click |
-| 1:1 Zoom | Button / Small images auto-1:1 |
-| Jump First / Last | Home / End |
-| Copy to Clipboard | Ctrl + C |
-| Navigate via Thumbnails | Mouse Wheel on Thumbnail bar |
-| Navigate via On-screen Buttons | Mouse Wheel on Next / Previous button |
-| Rotate via On-screen Button | Mouse Wheel on Rotate button |
+| Category | Action | Shortcut |
+|-----------|---------|-----------|
+| **Touchpad** | Navigate photos | Two-finger Swipe Left / Right |
+|  | Zoom or Navigate | Two-finger Swipe Up / Down (based on setting) |
+|  | Zoom In / Out | Pinch Open / Close |
+| **Mouse Wheel** | Zoom / Navigate | Wheel Scroll (based on setting) |
+|  | Always Zoom | Ctrl + Wheel |
+|  | Always Navigate | Alt + Wheel |
+|  | Navigate Photos | Tilt Wheel Left / Right |
+|  | Pan Photo | Click + Drag |
+|  | Navigate Photos | Mouse Back / Forward Buttons |
+|  | Navigate Photos | Wheel on Thumbnail Strip |
+|  | Navigate / Rotate | Wheel on On-screen Buttons |
+| **Keyboard** | Next / Previous Photo | ← / → |
+|  | Fly-through Mode | Hold ← / → |
+|  | Zoom In / Out | ↑ / ↓ OR Ctrl + (+ / −) |
+|  | Zoom Presets | Page Up / Page Down |
+|  | Pan Photo | Ctrl + Arrow Keys |
+|  | Jump First / Last | Home / End |
+|  | Copy to Clipboard | Ctrl + C |
+|  | Exit App | Esc |
 
 ---
 
 ## 📊 Feedback
 - Issues and feature requests: [GitHub Issues](https://github.com/riyasy/FlyPhotos/issues)  
-- Feedback: ryftools@outlook.com  
+- Feedback: **ryftools@outlook.com**  
 
 ---
 
-### Compatibility Note
-Fly Photos **2.x** requires Windows 10/11 and is built with **WinUI 3 and WinRT**, providing GPU acceleration and modern caching.  
+### 🧩 Compatibility Note
+Fly Photos **2.x** requires Windows 10/11 and is built with **WinUI 3 and WinRT**, providing a modern fluent UI expreriance.  
 Older **1.x** versions were based on WPF and remain available only for Windows 7/8, but are no longer updated.  
