@@ -93,8 +93,8 @@ internal partial class ThumbNailController : IThumbnailController
     public void RedrawThumbNailsIfNeeded(int index)
     {
         // Check if the updated thumbnail is actually visible
-        if (index >= _photoSessionState.CurrentDisplayIndex - _numOfThumbNailsInOneDirection &&
-            index <= _photoSessionState.CurrentDisplayIndex + _numOfThumbNailsInOneDirection)
+        if (index >= _photoSessionState.CurrentDisplayKey - _numOfThumbNailsInOneDirection &&
+            index <= _photoSessionState.CurrentDisplayKey + _numOfThumbNailsInOneDirection)
             _d2dCanvasThumbNail.DispatcherQueue.TryEnqueue(() =>
             {
                 _canDrawThumbnails = true;
@@ -120,7 +120,7 @@ internal partial class ThumbNailController : IThumbnailController
         int offset = (int)Math.Round((clickedX - canvasCenterX) / _thumbnailBoxSize);
         if (offset != 0 && _photoSessionState.PhotosCount > 1)
         {
-            int newIndex = _photoSessionState.CurrentDisplayIndex + offset;
+            int newIndex = _photoSessionState.CurrentDisplayKey + offset;
             if (newIndex >= 0 && newIndex < _photoSessionState.PhotosCount)
             {
                 ThumbnailClicked?.Invoke(offset);
@@ -203,7 +203,7 @@ internal partial class ThumbNailController : IThumbnailController
 
             for (var i = -_numOfThumbNailsInOneDirection; i <= _numOfThumbNailsInOneDirection; i++)
             {
-                var index = _photoSessionState.CurrentDisplayIndex + i;
+                var index = _photoSessionState.CurrentDisplayKey + i;
 
                 if (index < 0 || index >= _photoSessionState.PhotosCount) continue;
 
@@ -226,7 +226,7 @@ internal partial class ThumbNailController : IThumbnailController
                     CanvasImageInterpolation.NearestNeighbor
                 );
 
-                if (index == _photoSessionState.CurrentDisplayIndex)
+                if (index == _photoSessionState.CurrentDisplayKey)
                 {
                     dsThumbNail.DrawRectangle(new Rect(destX, startY, _thumbnailBoxSize, _thumbnailBoxSize),
                         _thumbNailSelectionColor, 3f);
@@ -273,7 +273,7 @@ internal partial class ThumbNailController : IThumbnailController
 
             for (var i = -_numOfThumbNailsInOneDirection; i <= _numOfThumbNailsInOneDirection; i++)
             {
-                var index = _photoSessionState.CurrentDisplayIndex + i;
+                var index = _photoSessionState.CurrentDisplayKey + i;
 
                 if (index < 0 || index >= _photoSessionState.PhotosCount) continue;
 
@@ -316,7 +316,7 @@ internal partial class ThumbNailController : IThumbnailController
                 }
 
                 // Draw the selection indicator on top, without any clipping.
-                if (index == _photoSessionState.CurrentDisplayIndex)
+                if (index == _photoSessionState.CurrentDisplayKey)
                 {
                     // Use DrawRoundedRectangle to match the shape of the thumbnail.
                     dsThumbNail.DrawRoundedRectangle(destRect, Constants.ThumbnailCornerRadius, Constants.ThumbnailCornerRadius, _thumbNailSelectionColor, Constants.ThumbnailSelectionBorderThickness);

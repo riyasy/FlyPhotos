@@ -434,6 +434,10 @@ public sealed partial class PhotoDisplayWindow
                     await AnimatePhotoDisplayWindowClose();
                     break;
 
+                case VirtualKey.Delete:
+                    await _photoController.DeleteCurrentPhoto();
+                    break;
+
                 case VirtualKey.Home:
                     await _photoController.FlyToFirst();
                     break;
