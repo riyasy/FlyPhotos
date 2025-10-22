@@ -21,7 +21,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Foundation;
-using Windows.Storage;
 using Windows.System;
 using Windows.UI;
 using WinRT;
@@ -580,7 +579,7 @@ public sealed partial class PhotoDisplayWindow
     {
         DispatcherQueue.TryEnqueue(() =>
         {
-            TxtFileName.Text = e.IndexAndFileName;
+            TxtFileName.Text = e.ListPositionAndFileName;
             CacheStatusProgress.Text = e.CacheProgressStatus;
         });
     }
