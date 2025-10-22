@@ -503,6 +503,9 @@ public sealed partial class PhotoDisplayWindow
     {
         if (!_photoController.CanDeleteCurrentPhoto())
         {
+            TxtZoom.Text = "Loading high quality version. Try after some time";
+            _inactivityFader.ReportActivity();
+            _canvasController.Shrug();
             return;
         }
         var confirmDialog = new ContentDialog
