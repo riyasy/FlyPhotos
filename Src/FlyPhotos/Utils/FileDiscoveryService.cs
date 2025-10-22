@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
@@ -78,17 +77,25 @@ internal static class FileDiscoveryService
             }
         }
 
-        // 3. Filter for supported extensions, always including the selected file.
-        files = [.. files.Where(s =>
-            Util.SupportedExtensions.Contains(Path.GetExtension(s)) ||
-            string.Equals(s, selectedFileName, StringComparison.OrdinalIgnoreCase))];
+        // 3. Filter for supported extensions, always including the selected file, while preserving order.
+        var filteredFiles = new List<string>(files.Count);
 
-        // 4. If, after all fallbacks and filters, the list is empty, add the selected file to ensure we have at least one item.
-        if (files.Count == 0)
+        foreach (var file in files)
         {
-            files.Add(selectedFileName);
+            // Get the file extension once.
+            var extension = Path.GetExtension(file);
+            // Check if the file meets either of the criteria for inclusion.
+            if ((!string.IsNullOrEmpty(extension) && Util.SupportedExtensions.Contains(extension)) ||
+                (string.Equals(file, selectedFileName, StringComparison.OrdinalIgnoreCase)))
+                filteredFiles.Add(file);
         }
 
-        return files;
+        // 4. If, after all fallbacks and filters, the list is empty (which can happen
+        //    if the initial 'files' list was empty or didn't contain the selected file),
+        //    add the selected file to ensure we have at least one item.
+        if (filteredFiles.Count == 0)
+            filteredFiles.Add(selectedFileName);
+
+        return filteredFiles;
     }
 }

@@ -274,17 +274,12 @@ internal partial class PhotoDisplayController
             return;
         }
 
-        var sw = Stopwatch.StartNew();
-
         var desiredHqKeys = FindNeighborKeys(currentPos, AppConfig.Settings.CacheSizeOneSideHqImages);
         var desiredPreviewKeys = FindNeighborKeys(currentPos, AppConfig.Settings.CacheSizeOneSidePreviews);
         SyncCacheState(desiredHqKeys, _cachedHqImages, _hqsBeingCached, _toBeCachedHqImages,
             photo => { photo.Hq?.Dispose(); photo.Hq = null; });
         SyncCacheState(desiredPreviewKeys, _cachedPreviews, _previewsBeingCached, _toBeCachedPreviews,
             photo => { photo.Preview?.Dispose(); photo.Preview = null; });
-
-        sw.Stop();
-        Logger.Trace($"UpdateCacheLists took {sw.ElapsedMilliseconds} ms");
     }
 
     private void SyncCacheState(List<int> desiredKeys, ConcurrentDictionary<int, Photo> cachedItems,
