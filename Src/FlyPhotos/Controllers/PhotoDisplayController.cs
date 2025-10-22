@@ -64,6 +64,7 @@ internal partial class PhotoDisplayController
         _thumbNailController = thumbNailController;
         _photoSessionState = photoSessionState;
         _thumbNailController.SetPreviewCacheReference(_cachedPreviews);
+        _thumbNailController.SetSortedPhotoKeysReference(_sortedPhotoKeys);
         _firstPhoto = Photo.Empty();
 
         var thread = new Thread(() => { DoStartupActivities(_photoSessionState.FirstPhotoPath, _cts.Token); });
@@ -430,31 +431,77 @@ internal partial class PhotoDisplayController
         await DisplayPhotoAtKey(_photoSessionState.CurrentDisplayKey, triggerHqCaching);
     }
 
-    public async Task DeleteCurrentPhoto()
+    public bool CanDeleteCurrentPhoto()
+    {        
+        if (_sortedPhotoKeys.Count == 0) return false;
+        if (IsContinuousKeyPress()) return false;
+        if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq) return false;
+        return true;
+    }
+    public async Task<DeleteResult> DeleteCurrentPhoto()
     {
+        // --- Step 1: Guard Clauses and State Capture ---
         var keyToDelete = _photoSessionState.CurrentDisplayKey;
-
-        // Find where to navigate next BEFORE deleting
         int currentPosition = _sortedPhotoKeys.BinarySearch(keyToDelete);
-        int nextPosition = (currentPosition >= _sortedPhotoKeys.Count - 1)
-            ? currentPosition - 1 // If last, go to previous
-            : currentPosition;    // Otherwise, the next element will slide into current position
+        // Safety check: If the current key isn't in our sorted list, something is wrong.
+        if (currentPosition < 0)
+        {
+            Logger.Error($"Inconsistent state: Could not find key {keyToDelete} in sorted list during deletion.");
+            return new DeleteResult(false, false, "App - Inconsistent State");
+        }
 
-        // 1. Remove from all data structures
-        _photos.TryRemove(keyToDelete, out _);
-        _sortedPhotoKeys.Remove(keyToDelete); // CRITICAL STEP
+        var delResult = await DeleteFileFromDisk(keyToDelete);
+        if (!delResult.DeleteSuccess) return delResult;
 
-        // ... remove from caches, etc. ...
+        // --- Step 2: Determine the Next Photo to Display ---
+        int nextPosition = (currentPosition >= _sortedPhotoKeys.Count - 1) ? currentPosition - 1 : currentPosition;
 
-        // 2. Navigate to the new photo
+        // --- Step 3: Remove the Photo from All In-Memory Collections ---
+        _photos.TryRemove(keyToDelete, out var deletedPhoto);
+        _sortedPhotoKeys.RemoveAt(currentPosition);
+        _cachedHqImages.TryRemove(keyToDelete, out _);
+        _cachedPreviews.TryRemove(keyToDelete, out _);
+
+        // --- Step 4: Navigate to the New Photo or Handle Empty State ---
         if (_sortedPhotoKeys.Count > 0)
         {
             int newKey = _sortedPhotoKeys[nextPosition];
-            await FlyTo(newKey, true); // Fire-and-forget
+            await FlyTo(newKey, true);
+
+            // --- Step 5: Clean Up Resources ---
+            if (deletedPhoto != null)
+            {
+                deletedPhoto.Hq?.Dispose();
+                deletedPhoto.Preview?.Dispose();
+            }
+            return new DeleteResult(true, false);
         }
         else
         {
-            // Handle case where last photo was deleted
+            // TODO - Cleanup properly. If we call dispose now, the zoom out animation during
+            // app close will crash as the draw call will try to display disposed canvas bitmaps.
+            return new DeleteResult(true, true);            
+        }
+    }
+
+    private async Task<DeleteResult> DeleteFileFromDisk(int keyToDelete)
+    {
+        if (!_photos.TryGetValue(keyToDelete, out var photo))
+        {
+            Logger.Error($"DeleteFileFromDiskAsync failed: Key {keyToDelete} not found in the collection.");
+            return new DeleteResult(false, false, "App - Inconsistent State");
+        }
+        var filePath = photo.FileName;
+        try
+        {
+            var file = await StorageFile.GetFileFromPathAsync(filePath);
+            await file.DeleteAsync(StorageDeleteOption.Default);
+            Logger.Info($"Successfully deleted file: {filePath}");
+            return new DeleteResult(true, false);
+        }
+        catch (Exception ex)
+        {
+            return new DeleteResult(false, false, $"Exeption : {ex.Message}");
         }
     }
 
@@ -527,4 +574,11 @@ internal class StatusUpdateEventArgs(string indexAndFileName, string cacheProgre
 {
     public string IndexAndFileName { get; } = indexAndFileName;
     public string CacheProgressStatus { get; } = cacheProgressStatus;
+}
+
+internal class DeleteResult(bool deleteSuccess, bool isLastPhoto, string failMessage = "")
+{
+    public bool DeleteSuccess { get; } = deleteSuccess;
+    public bool IsLastPhoto { get; } = isLastPhoto;
+    public string FailMessage { get; } = failMessage;
 }

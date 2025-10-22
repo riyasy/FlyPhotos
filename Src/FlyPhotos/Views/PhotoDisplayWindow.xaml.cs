@@ -21,6 +21,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using Windows.Storage;
 using Windows.System;
 using Windows.UI;
 using WinRT;
@@ -150,9 +151,7 @@ public sealed partial class PhotoDisplayWindow
     private async void PhotoDisplayWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {
         args.Cancel = true;
-
         await SaveLastUsedMonitorInfo();
-
         await AnimatePhotoDisplayWindowClose();
     }
 
@@ -435,7 +434,7 @@ public sealed partial class PhotoDisplayWindow
                     break;
 
                 case VirtualKey.Delete:
-                    await _photoController.DeleteCurrentPhoto();
+                    await DeleteCurrentlyDisplayedPhoto();
                     break;
 
                 case VirtualKey.Home:
@@ -498,6 +497,54 @@ public sealed partial class PhotoDisplayWindow
         catch (Exception ex)
         {
             Logger.Error(ex);
+        }
+    }
+
+    private async Task DeleteCurrentlyDisplayedPhoto()
+    {
+        if (!_photoController.CanDeleteCurrentPhoto())
+        {
+            return;
+        }
+        var confirmDialog = new ContentDialog
+        {
+            XamlRoot = this.Content.XamlRoot,
+            Title = "Confirm Deletion",
+            Content = $"Are you sure you want to delete this file?",
+            PrimaryButtonText = "Delete",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close
+        };
+
+        var result = await confirmDialog.ShowAsync();
+
+        if (result != ContentDialogResult.Primary)
+        {
+            Logger.Info("User cancelled file deletion.");
+            return;
+        }
+
+        var delResult = await _photoController.DeleteCurrentPhoto();
+
+        if (delResult.DeleteSuccess)
+        {
+            if (delResult.IsLastPhoto)
+            {
+                await AnimatePhotoDisplayWindowClose();
+            }
+        }
+        else
+        {
+            _canvasController.Shrug();
+            Logger.Error("Failed to delete file");
+            var errorDialog = new ContentDialog
+            {
+                XamlRoot = this.Content.XamlRoot,
+                Title = "Deletion Failed",
+                Content = $"The application could not delete the file.{Environment.NewLine}{delResult.FailMessage}",
+                CloseButtonText = "OK"
+            };
+            await errorDialog.ShowAsync();
         }
     }
 

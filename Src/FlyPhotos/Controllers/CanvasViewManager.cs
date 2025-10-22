@@ -164,7 +164,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
     public void ZoomOutOnExit(double exitAnimationDuration, Size canvasSize)
     {
         _panZoomAnimationDurationMs = exitAnimationDuration;
-        var targetPosition = new Point(canvasSize.Width/ 2, canvasSize.Height / 2);
+        var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         _suppressZoomUpdateForNextAnimation = true;
         StartPanAndZoomAnimation(0.001f, targetPosition);
     }
@@ -215,6 +215,21 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _canvasViewState.Rotation += rotation;
         _canvasViewState.UpdateTransform();
         _callbackCanvasRedraw();
+    }
+
+    /// <summary>
+    /// Triggers a "shrug" or "shake" animation on the photo.
+    /// This is used to provide visual feedback that an operation was not accepted.
+    /// The animation will not play if another animation is already in progress.
+    /// </summary>
+    public void Shrug()
+    {
+        // Don't start a shrug if another animation is already running.
+        if (PanZoomAnimationOnGoing)
+        {
+            return;
+        }
+        StartShrugAnimation();
     }
 
     /// <summary>
@@ -283,6 +298,23 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         PanZoomAnimationOnGoing = true;
     }
 
+    // NEW: A private method to set up and start the shrug animation.
+    private void StartShrugAnimation()
+    {
+        // Store the original position to return to
+        _panStartPosition = _canvasViewState.ImagePos;
+        _panZoomAnimationStartTime = DateTime.UtcNow;
+
+        if (_renderingHandler != null)
+        {
+            CompositionTarget.Rendering -= _renderingHandler;
+        }
+
+        _renderingHandler = (_, _) => AnimateShrug();
+        CompositionTarget.Rendering += _renderingHandler;
+        PanZoomAnimationOnGoing = true;
+    }
+
     private void AnimateZoom()
     {
         var elapsed = (DateTime.UtcNow - _panZoomAnimationStartTime).TotalMilliseconds;
@@ -338,6 +370,40 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
             _suppressZoomUpdateForNextAnimation = false;
         }
     }
+
+    // NEW: The core animation logic for the shrug effect.
+    private void AnimateShrug()
+    {
+        var elapsed = (DateTime.UtcNow - _panZoomAnimationStartTime).TotalMilliseconds;
+        var t = Math.Clamp(elapsed / Constants.ShrugAnimationDurationMs, 0.0, 1.0);
+
+        if (t >= 1.0)
+        {
+            // Animation finished. Ensure the image is back to its exact starting position.
+            _canvasViewState.ImagePos = _panStartPosition;
+            _canvasViewState.UpdateTransform();
+            _callbackCanvasRedraw();
+
+            CompositionTarget.Rendering -= _renderingHandler;
+            PanZoomAnimationOnGoing = false;
+            return;
+        }
+
+        // --- The Shrug Logic ---
+        // 1. Damping factor: (1 - t) makes the shake fade out over time.
+        var damping = 1 - t;
+        // 2. Sine wave: Creates the oscillating (back and forth) motion.
+        var wave = Math.Sin(t * Constants.ShrugFrequency * 2 * Math.PI);
+        // 3. Combine them to get the final offset from the original position.
+        var xOffset = Constants.ShrugAmplitude * wave * damping;
+
+        // Apply the offset to the original X position. Y position remains unchanged.
+        _canvasViewState.ImagePos.X = _panStartPosition.X + xOffset;
+
+        _canvasViewState.UpdateTransform();
+        _callbackCanvasRedraw();
+    }
+
 
     public void Dispose()
     {

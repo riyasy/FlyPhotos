@@ -113,6 +113,8 @@ SCM_RESULT ShellContextMenu::ShowContextMenu(HWND owner, const std::vector<std::
         return SCM_RESULT::QueryContextMenuFailed;
     }
 
+    RemoveMenuItemsByVerb(hMenu, { L"delete", L"cut" });    
+
     UINT iCmd = TrackPopupMenuEx(hMenu, TPM_RETURNCMD, pt.x, pt.y, m_hMessageWnd, NULL);
     if (iCmd > 0) {
         InvokeCommand(iCmd - 1, pt);
@@ -121,6 +123,38 @@ SCM_RESULT ShellContextMenu::ShowContextMenu(HWND owner, const std::vector<std::
     DestroyMenu(hMenu);
     ReleaseAll(); // Final cleanup for this operation.
     return SCM_RESULT::Success;
+}
+
+void ShellContextMenu::RemoveMenuItemsByVerb(HMENU hMenu, std::initializer_list<const WCHAR*> verbsToRemove)
+{
+    if (!hMenu || !m_pContextMenu || verbsToRemove.size() == 0) {
+        return;
+    }
+
+    // For efficient lookup, copy the verbs into a hash set.
+    // This is much faster than iterating the list for every menu item.
+    std::unordered_set<std::wstring> verbSet(verbsToRemove.begin(), verbsToRemove.end());
+
+    int itemCount = GetMenuItemCount(hMenu);
+    for (int i = itemCount - 1; i >= 0; --i) {
+        UINT cmd = GetMenuItemID(hMenu, i);
+
+        if (cmd >= idCmdFirst && cmd <= idCmdLast) {
+            WCHAR verb[256];
+            HRESULT hr = m_pContextMenu->GetCommandString(
+                cmd - idCmdFirst,
+                GCS_VERBW,
+                NULL,
+                (LPSTR)verb,
+                ARRAYSIZE(verb)
+            );
+
+            // Check if the retrieved verb exists in our set of verbs to remove.
+            if (SUCCEEDED(hr) && verbSet.count(verb) > 0) {
+                DeleteMenu(hMenu, i, MF_BYPOSITION);
+            }
+        }
+    }
 }
 
 void ShellContextMenu::ReleaseAll() {

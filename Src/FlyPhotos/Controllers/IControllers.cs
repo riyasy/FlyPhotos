@@ -1,6 +1,7 @@
 ﻿using FlyPhotos.Data;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FlyPhotos.Controllers
@@ -15,5 +16,6 @@ namespace FlyPhotos.Controllers
         void CreateThumbnailRibbonOffScreen();
         void RedrawThumbNailsIfNeeded(int index);
         void SetPreviewCacheReference(ConcurrentDictionary<int, Photo> cachedPreviews);
+        void SetSortedPhotoKeysReference(List<int> sortedPhotoKeys);
     }
 }

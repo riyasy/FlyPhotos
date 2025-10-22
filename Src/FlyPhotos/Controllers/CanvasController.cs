@@ -252,6 +252,12 @@ internal class CanvasController : ICanvasController
         _canvasViewManager.RotateBy(clockWise ? 90 : -90);
     }
 
+    public void Shrug()
+    {
+        if (IsScreenEmpty()) return;
+        _canvasViewManager.Shrug();
+    }
+
     #endregion
 
     #region Event Handlers
