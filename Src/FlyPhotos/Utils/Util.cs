@@ -39,22 +39,6 @@ internal static class Util
         SupportedExtensions.Add(".HEIC");
     }
 
-    public static List<string> FindAllFilesFromExplorerWindowNative()
-    {
-        var fileList = CliWrapper.GetFileListFromExplorerWindow();
-        Logger.Trace($"{fileList.Count} files listed from Explorer");
-        return fileList;
-    }
-
-    public static List<string> FindAllFilesFromDirectory(string? dirPath)
-    {
-        if (String.IsNullOrEmpty(dirPath) || !Directory.Exists(dirPath))
-        {
-            return [];
-        }
-        return [.. Directory.EnumerateFiles(dirPath, "*.*", SearchOption.TopDirectoryOnly)];
-    }
-
     public static int FindSelectedFileIndex(string selectedFileName, List<string> files)
     {
         var curIdx = 0;

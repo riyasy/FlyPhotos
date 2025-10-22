@@ -1,10 +1,11 @@
 ﻿#nullable enable
+using FlyPhotos.FlyNativeLibWrapper;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using NLog;
 
 namespace FlyPhotos.Utils;
 
@@ -14,7 +15,11 @@ internal static class FileDiscoveryService
 
     public static List<string> DiscoverFiles(string selectedFileName)
     {
-        return ListFiles(selectedFileName);
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var files = ListFiles(selectedFileName);
+        sw.Stop();
+        Logger.Trace($"Discovered {files.Count} files in {sw.ElapsedMilliseconds} ms");
+        return files;
     }
 
     /// <summary>
@@ -63,7 +68,7 @@ internal static class FileDiscoveryService
         List<string> files = [];
         if (!App.Debug)
         {
-            files = Util.FindAllFilesFromExplorerWindowNative();
+            files = FindAllFilesFromExplorerWindowNative();
         }
 
         // 2. If explorer gives no files, fall back to reading from the directory.
@@ -73,7 +78,7 @@ internal static class FileDiscoveryService
             string? directory = Path.GetDirectoryName(selectedFileName);
             if (directory != null)
             {
-                files = Util.FindAllFilesFromDirectory(directory);
+                files = FindAllFilesFromDirectory(directory);
             }
         }
 
@@ -97,5 +102,20 @@ internal static class FileDiscoveryService
             filteredFiles.Add(selectedFileName);
 
         return filteredFiles;
+    }
+
+    private static List<string> FindAllFilesFromExplorerWindowNative()
+    {
+        var fileList = CliWrapper.GetFileListFromExplorerWindow();        
+        return fileList;
+    }
+
+    private static List<string> FindAllFilesFromDirectory(string? dirPath)
+    {
+        if (String.IsNullOrEmpty(dirPath) || !Directory.Exists(dirPath))
+        {
+            return [];
+        }
+        return [.. Directory.EnumerateFiles(dirPath, "*.*", SearchOption.TopDirectoryOnly)];
     }
 }
