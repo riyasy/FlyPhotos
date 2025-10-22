@@ -14,7 +14,7 @@ namespace FlyPhotos.Controllers
     internal interface IThumbnailController : IDisposable
     {
         void CreateThumbnailRibbonOffScreen();
-        void RedrawThumbNailsIfNeeded(int index);
+        void RedrawThumbNailsIfNeeded(int key);
         void SetPreviewCacheReference(ConcurrentDictionary<int, Photo> cachedPreviews);
         void SetSortedPhotoKeysReference(List<int> sortedPhotoKeys);
     }

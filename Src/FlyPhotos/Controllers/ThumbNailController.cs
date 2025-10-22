@@ -101,7 +101,7 @@ internal partial class ThumbNailController : IThumbnailController
         if (_sortedPhotoKeys == null || _sortedPhotoKeys.Count == 0) return;
 
         // Find the POSITION of the current and updated keys.
-        int currentPosition = _sortedPhotoKeys.BinarySearch(_photoSessionState.CurrentDisplayKey);
+        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
         int updatedPosition = _sortedPhotoKeys.BinarySearch(updatedKey);
 
         // If either key isn't found (e.g., already deleted), we can't proceed.
@@ -140,7 +140,7 @@ internal partial class ThumbNailController : IThumbnailController
         if (offset == 0) return; // No navigation needed if the center thumbnail is clicked.
 
         // 2. Find the POSITION of the current key.
-        int currentPosition = _sortedPhotoKeys.BinarySearch(_photoSessionState.CurrentDisplayKey);
+        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
         if (currentPosition < 0) return;
 
         // 3. Calculate the new target POSITION.
@@ -226,7 +226,7 @@ internal partial class ThumbNailController : IThumbnailController
         }
 
         // Find the position of the currently displayed photo.
-        int currentPosition = _sortedPhotoKeys.BinarySearch(_photoSessionState.CurrentDisplayKey);
+        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
         if (currentPosition < 0) return; // Can't draw if the current photo is invalid.
 
         using var dsThumbNail = _thumbnailOffscreen.CreateDrawingSession();
@@ -279,7 +279,7 @@ internal partial class ThumbNailController : IThumbnailController
                 }
 
                 // Draw the selection indicator on top, without any clipping.
-                if (key == _photoSessionState.CurrentDisplayKey)
+                if (key == _photoSessionState.CurrentPhotoKey)
                 {
                     // Use DrawRoundedRectangle to match the shape of the thumbnail.
                     dsThumbNail.DrawRoundedRectangle(destRect, Constants.ThumbnailCornerRadius, Constants.ThumbnailCornerRadius, _thumbNailSelectionColor, Constants.ThumbnailSelectionBorderThickness);

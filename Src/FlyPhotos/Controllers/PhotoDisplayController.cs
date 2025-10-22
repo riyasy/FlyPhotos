@@ -10,7 +10,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
@@ -107,9 +106,12 @@ internal partial class PhotoDisplayController
 
             _firstPhotoLoadedTcs.Task.Wait(token);
 
-            _photoSessionState.CurrentDisplayKey = Util.FindSelectedFileIndex(selectedFileName, files);
-            _photos[_photoSessionState.CurrentDisplayKey] = _firstPhoto;
-            _cachedHqImages[_photoSessionState.CurrentDisplayKey] = _firstPhoto;
+            var currentDisplayIndex = Util.FindSelectedFileIndex(selectedFileName, files);
+            // In the starting Keys and Index will be same as the keys are continous.
+            _photoSessionState.SetCurrentPhotoKeyAndListPosition(currentDisplayIndex, currentDisplayIndex);
+
+            _photos[_photoSessionState.CurrentPhotoKey] = _firstPhoto;
+            _cachedHqImages[_photoSessionState.CurrentPhotoKey] = _firstPhoto;
 
             UpdateCacheLists();
 
@@ -149,16 +151,16 @@ internal partial class PhotoDisplayController
                 {
                     try
                     {
-                        var index = item;
-                        _previewsBeingCached[index] = true;
-                        var photo = _photos[index];
+                        var key = item;
+                        _previewsBeingCached[key] = true;
+                        var photo = _photos[key];
                         await photo.LoadPreview(_d2dCanvas); // TODO In a future refactor, this could accept a token
-                        _cachedPreviews[index] = photo;
-                        _previewsBeingCached.Remove(index, out _);
+                        _cachedPreviews[key] = photo;
+                        _previewsBeingCached.Remove(key, out _);
                         if (photo.Preview?.Origin == Origin.Disk) { _toBeDiskCachedPreviews.Push(item); }
-                        if (_photoSessionState.CurrentDisplayKey == index)
+                        if (_photoSessionState.CurrentPhotoKey == key)
                             UpgradeImageIfNeeded(photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
-                        _thumbNailController.RedrawThumbNailsIfNeeded(index);
+                        _thumbNailController.RedrawThumbNailsIfNeeded(key);
                         UpdateProgressStatusDebug();
                     }
                     finally { _previewTaskThrottler.Release(); }
@@ -189,13 +191,13 @@ internal partial class PhotoDisplayController
                 {
                     try
                     {
-                        var index = item;
-                        _hqsBeingCached[index] = true;
-                        var photo = _photos[index];
+                        var key = item;
+                        _hqsBeingCached[key] = true;
+                        var photo = _photos[key];
                         await photo.LoadHq(_d2dCanvas); // TODO In a future refactor, this could accept a token
-                        _cachedHqImages[index] = photo;
-                        _hqsBeingCached.Remove(index, out _);
-                        if (_photoSessionState.CurrentDisplayKey == index)
+                        _cachedHqImages[key] = photo;
+                        _hqsBeingCached.Remove(key, out _);
+                        if (_photoSessionState.CurrentPhotoKey == key)
                             UpgradeImageIfNeeded(photo, DisplayLevel.Preview, DisplayLevel.Hq);
                     }
                     finally { _hqTaskThrottler.Release(); }
@@ -221,7 +223,7 @@ internal partial class PhotoDisplayController
                     continue;
                 }
 
-                if (!_toBeDiskCachedPreviews.TryPop(out var index)) continue;
+                if (!_toBeDiskCachedPreviews.TryPop(out var key)) continue;
 
                 _diskCacheTaskThrottler.Wait(token);
 
@@ -229,7 +231,7 @@ internal partial class PhotoDisplayController
                 {
                     try
                     {
-                        if (_cachedPreviews.TryGetValue(index, out var image) &&
+                        if (_cachedPreviews.TryGetValue(key, out var image) &&
                             image.Preview?.Origin == Origin.Disk)
                         {
                             var (actualWidth, actualHeight) = image.GetActualSize();
@@ -263,18 +265,19 @@ internal partial class PhotoDisplayController
             _cachedPreviews.Clear();
             return;
         }
-        var curIdx = _photoSessionState.CurrentDisplayKey;
-        int currentPositionInList = _sortedPhotoKeys.BinarySearch(curIdx);
-        if (currentPositionInList < 0)
+        var currentKey = _photoSessionState.CurrentPhotoKey;
+        int currentPos = _photoSessionState.CurrentPhotoListPosition;
+
+        if (currentPos < 0)
         {
-            Logger.Warn($"Current photo key {curIdx} not found in key list. Aborting cache update.");
+            Logger.Warn($"Current photo key {currentKey} not found in key list. Aborting cache update.");
             return;
         }
 
         var sw = Stopwatch.StartNew();
 
-        var desiredHqKeys = FindNeighborKeys(currentPositionInList, AppConfig.Settings.CacheSizeOneSideHqImages);
-        var desiredPreviewKeys = FindNeighborKeys(currentPositionInList, AppConfig.Settings.CacheSizeOneSidePreviews);
+        var desiredHqKeys = FindNeighborKeys(currentPos, AppConfig.Settings.CacheSizeOneSideHqImages);
+        var desiredPreviewKeys = FindNeighborKeys(currentPos, AppConfig.Settings.CacheSizeOneSidePreviews);
         SyncCacheState(desiredHqKeys, _cachedHqImages, _hqsBeingCached, _toBeCachedHqImages,
             photo => { photo.Hq?.Dispose(); photo.Hq = null; });
         SyncCacheState(desiredPreviewKeys, _cachedPreviews, _previewsBeingCached, _toBeCachedPreviews,
@@ -331,23 +334,30 @@ internal partial class PhotoDisplayController
 
     private void UpdateProgressStatusDebug()
     {
-        var currentKey = _photoSessionState.CurrentDisplayKey;
-        int currentPosition = _sortedPhotoKeys.BinarySearch(currentKey);
-        if (currentPosition < 0) return; // TODO - Should never happen. Photo not found, can't update status
+        var currentKey = _photoSessionState.CurrentPhotoKey;
+        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
+        if (currentPosition < 0) return;
 
         var totalFileCount = _sortedPhotoKeys.Count;
         var noOfFilesOnLeft = currentPosition;
         var noOfFilesOnRight = totalFileCount - 1 - currentPosition;
 
-        // TODO - Get rid of Binary Search somwhow.. NOt here everywhere where _sortedPhotoKeys is used.
-        var noOfCachedItemsOnLeft = _cachedPreviews.Keys.Count(key => _sortedPhotoKeys.BinarySearch(key) < currentPosition);
-        var noOfCachedItemsOnRight = _cachedPreviews.Keys.Count(key => _sortedPhotoKeys.BinarySearch(key) > currentPosition);
+        int noOfCachedItemsOnLeft = 0;
+        int noOfCachedItemsOnRight = 0;
+
+        foreach (int key in _cachedPreviews.Keys)
+        {
+            if (key < currentKey)            
+                noOfCachedItemsOnLeft++;            
+            else if (key > currentKey)            
+                noOfCachedItemsOnRight++;            
+        }
         var cacheProgressStatus = $"{noOfCachedItemsOnLeft}/{noOfFilesOnLeft} < Cache > {noOfCachedItemsOnRight}/{noOfFilesOnRight}";
 
         var fileName = Path.GetFileName(_photos[currentKey].FileName);
-        var indexAndFileName = $"[{currentPosition + 1}/{totalFileCount}] {fileName}";
+        var listPositionAndFileName = $"[{currentPosition + 1}/{totalFileCount}] {fileName}";
 
-        StatusUpdated?.Invoke(this, new StatusUpdateEventArgs(indexAndFileName, cacheProgressStatus));
+        StatusUpdated?.Invoke(this, new StatusUpdateEventArgs(listPositionAndFileName, cacheProgressStatus));
     }
 
 
@@ -355,7 +365,7 @@ internal partial class PhotoDisplayController
     {
         try
         {
-            var photo = _photos[_photoSessionState.CurrentDisplayKey];
+            var photo = _photos[_photoSessionState.CurrentPhotoKey];
             var filePath = photo.FileName;
 
             if (!File.Exists(filePath)) return;
@@ -392,7 +402,7 @@ internal partial class PhotoDisplayController
     {
         _keyPressCounter++;
         if (_sortedPhotoKeys.Count <= 1) return;
-        int currentPosition = _sortedPhotoKeys.BinarySearch(_photoSessionState.CurrentDisplayKey);
+        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
         if (currentPosition < 0) return; // TODO Should not happen if state is consistent
         int newPosition = currentPosition + (direction == NavDirection.Next ? 1 : -1);
         if (newPosition < 0 || newPosition >= _sortedPhotoKeys.Count) return;
@@ -416,7 +426,7 @@ internal partial class PhotoDisplayController
     public async Task FlyBy(int shiftBy)
     {
         if (_sortedPhotoKeys.Count <= 1) return;
-        int currentPosition = _sortedPhotoKeys.BinarySearch(_photoSessionState.CurrentDisplayKey);
+        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
         if (currentPosition < 0) return;
         int newPosition = Math.Clamp(currentPosition + shiftBy, 0, _sortedPhotoKeys.Count - 1);
         int newKey = _sortedPhotoKeys[newPosition];
@@ -427,8 +437,10 @@ internal partial class PhotoDisplayController
     {
         // Safety check if the target key is valid
         if (!_photos.ContainsKey(toKey)) return;
-        _photoSessionState.CurrentDisplayKey = toKey;
-        await DisplayPhotoAtKey(_photoSessionState.CurrentDisplayKey, triggerHqCaching);
+
+        _photoSessionState.SetCurrentPhotoKeyAndListPosition(toKey, _sortedPhotoKeys.BinarySearch(toKey));
+
+        await DisplayPhotoAtKey(_photoSessionState.CurrentPhotoKey, triggerHqCaching);
     }
 
     public bool CanDeleteCurrentPhoto()
@@ -441,8 +453,8 @@ internal partial class PhotoDisplayController
     public async Task<DeleteResult> DeleteCurrentPhoto()
     {
         // --- Step 1: Guard Clauses and State Capture ---
-        var keyToDelete = _photoSessionState.CurrentDisplayKey;
-        int currentPosition = _sortedPhotoKeys.BinarySearch(keyToDelete);
+        var keyToDelete = _photoSessionState.CurrentPhotoKey;
+        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
         // Safety check: If the current key isn't in our sorted list, something is wrong.
         if (currentPosition < 0)
         {
@@ -507,7 +519,7 @@ internal partial class PhotoDisplayController
 
     public async Task Brake()
     {
-        if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq && _cachedHqImages.TryGetValue(_photoSessionState.CurrentDisplayKey, out var hqImage))
+        if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq && _cachedHqImages.TryGetValue(_photoSessionState.CurrentPhotoKey, out var hqImage))
             await _canvasController.SetSource(hqImage, DisplayLevel.Hq);
         _hqCachingCanStart.Set();
         _keyPressCounter = 0;
@@ -544,7 +556,7 @@ internal partial class PhotoDisplayController
 
     public string GetFullPathCurrentFile()
     {
-        return _photos[_photoSessionState.CurrentDisplayKey].FileName;
+        return _photos[_photoSessionState.CurrentPhotoKey].FileName;
     }
 
     public void Dispose()
@@ -570,9 +582,9 @@ internal partial class PhotoDisplayController
     }
 }
 
-internal class StatusUpdateEventArgs(string indexAndFileName, string cacheProgressStatus) : EventArgs
+internal class StatusUpdateEventArgs(string listPositionAndFileName, string cacheProgressStatus) : EventArgs
 {
-    public string IndexAndFileName { get; } = indexAndFileName;
+    public string ListPositionAndFileName { get; } = listPositionAndFileName;
     public string CacheProgressStatus { get; } = cacheProgressStatus;
 }
 
