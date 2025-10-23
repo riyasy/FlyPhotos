@@ -364,8 +364,6 @@ public sealed partial class PhotoDisplayWindow
 
     private async void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
-        if (_photoController.IsSinglePhoto()) return;
-
         var props = e.GetCurrentPoint(D2dCanvas).Properties;
         var delta = props.MouseWheelDelta;
         var isHorizontalScroll = props.IsHorizontalMouseWheel;
@@ -512,7 +510,7 @@ public sealed partial class PhotoDisplayWindow
         {
             XamlRoot = this.Content.XamlRoot,
             Title = "Confirm Deletion",
-            Content = $"Are you sure you want to delete this file?",
+            Content = "Are you sure you want to delete this file?",
             PrimaryButtonText = "Delete",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Close
