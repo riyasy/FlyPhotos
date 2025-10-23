@@ -2,7 +2,6 @@
 {
     public enum DisplayLevel
     {
-        None,
         PlaceHolder,
         Preview,
         Hq

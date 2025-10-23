@@ -290,7 +290,7 @@ internal sealed partial class Settings
             Process.Start("notepad.exe", logFilePath);
     }
 
-    private void MainLayout_OnKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    private void MainLayout_OnKeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key == VirtualKey.Escape) this.Close();
     }

@@ -1,7 +1,6 @@
 ﻿using FlyPhotos.AppSettings;
 using FlyPhotos.Utils;
 using FlyPhotos.Views;
-using Microsoft.UI.Windowing;
 using Microsoft.Windows.AppLifecycle;
 using NLog;
 using System;
