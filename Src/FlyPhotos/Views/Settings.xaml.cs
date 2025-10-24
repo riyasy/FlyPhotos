@@ -156,7 +156,6 @@ internal sealed partial class Settings
 
         SettingsCardCredits.Description = $"Uses packages from " +
                                           $"{Environment.NewLine}libheif (For HEIC) - https://github.com/strukturag/libheif " +
-                                          $"{Environment.NewLine}libheif-sharp (For HEIC) - https://github.com/0xC0000054/libheif-sharp " +
                                           $"{Environment.NewLine}Magick.NET (For PSD) - https://github.com/dlemstra/Magick.NET" +
                                           $"{Environment.NewLine}SkiaSharp (For SVG) - https://github.com/mono/SkiaSharp" +
                                           $"{Environment.NewLine}MagicScaler - https://github.com/saucecontrol/PhotoSauce" +

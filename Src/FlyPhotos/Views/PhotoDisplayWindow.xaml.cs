@@ -2,7 +2,6 @@
 using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers;
 using FlyPhotos.Data;
-using FlyPhotos.FlyNativeLibWrapper;
 using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
@@ -23,10 +22,12 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.System;
 using Windows.UI;
+using FlyPhotos.NativeWrappers;
 using WinRT;
 using WinRT.Interop;
 using WinUIEx;
 using Icon = System.Drawing.Icon;
+using Win32Methods = FlyPhotos.NativeWrappers.Win32Methods;
 
 namespace FlyPhotos.Views;
 
@@ -317,7 +318,7 @@ public sealed partial class PhotoDisplayWindow
                         var filePath = _photoController.GetFullPathCurrentFile();
                         if (File.Exists(filePath))
                         {
-                            NativeMethods.GetCursorPos(out NativeMethods.POINT mousePosScreen);
+                            Win32Methods.GetCursorPos(out Win32Methods.POINT mousePosScreen);
                             CliWrapper.ShowContextMenu(this, filePath, mousePosScreen.X, mousePosScreen.Y);
                         }
                     }
@@ -678,7 +679,7 @@ public sealed partial class PhotoDisplayWindow
         var sExe = processModule.FileName;
         var ico = Icon.ExtractAssociatedIcon(sExe);
         if (ico == null) return;
-        NativeMethods.SendMessage(hWnd, NativeMethods.WM_SETICON, new IntPtr(1), ico.Handle);
+        Win32Methods.SendMessage(hWnd, Win32Methods.WM_SETICON, new IntPtr(1), ico.Handle);
     }
 
     private void SettingWindow_ShowCheckeredBackgroundChanged(bool showChecker)

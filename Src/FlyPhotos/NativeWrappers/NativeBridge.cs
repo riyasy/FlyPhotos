@@ -1,13 +1,14 @@
-﻿using FlyPhotos.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using FlyPhotos.Data;
 using Microsoft.UI.Xaml;
 using NLog;
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices; // Required for CallConvStdcall
-using System.Runtime.InteropServices;
 using WinRT.Interop;
+// Required for CallConvStdcall
 
-namespace FlyPhotos.FlyNativeLibWrapper;
+namespace FlyPhotos.NativeWrappers;
 
 // The class is now internal to encapsulate the P/Invoke calls and partial for the source generator.
 internal static partial class NativeBridge

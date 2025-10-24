@@ -1,6 +1,5 @@
 ﻿#nullable enable
 using FlyPhotos.Data;
-using FlyPhotos.FlyNativeLibWrapper;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
@@ -18,6 +17,7 @@ using Windows.Graphics;
 using Windows.System;
 using Windows.UI;
 using Windows.UI.Core;
+using FlyPhotos.NativeWrappers;
 
 
 namespace FlyPhotos.Utils;
@@ -37,6 +37,8 @@ internal static class Util
         SupportedExtensions.Add(".PSD");
         SupportedExtensions.Add(".SVG");
         SupportedExtensions.Add(".HEIC");
+        SupportedExtensions.Add(".HEIF");
+        SupportedExtensions.Add(".HIF");
     }
 
     public static int FindSelectedFileIndex(string selectedFileName, List<string> files)
@@ -75,8 +77,8 @@ internal static class Util
 
     public static VirtualKey GetKeyThatProduces(char character)
     {
-        IntPtr layout = NativeMethods.GetKeyboardLayout(0);
-        short vkScanResult = NativeMethods.VkKeyScanEx((byte)character, layout);
+        IntPtr layout = NativeWrappers.Win32Methods.GetKeyboardLayout(0);
+        short vkScanResult = NativeWrappers.Win32Methods.VkKeyScanEx((byte)character, layout);
         int virtualKeyCode = vkScanResult & 0xff;
         return (VirtualKey)virtualKeyCode;
     }

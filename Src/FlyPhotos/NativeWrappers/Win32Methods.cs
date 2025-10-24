@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace FlyPhotos.Utils;
+namespace FlyPhotos.NativeWrappers;
 
-internal static partial class NativeMethods
+internal static partial class Win32Methods
 {
     // Converted to LibraryImport.
     [LibraryImport("user32.dll")]
