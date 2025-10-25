@@ -98,12 +98,6 @@
 		<None Update="appsettings.json">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="FlyNativeLib.dll">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="FlyNativeLibHeif.dll">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
 		<None Update="NLog.config">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
@@ -117,6 +111,32 @@
 		  <Generator>MSBuild:Compile</Generator>
 		</Page>
 	</ItemGroup>
+	<ItemGroup>
+		<None Include="DLLs\*.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest">
+		</None>
+	</ItemGroup>
+
+	<Target Name="FlattenExternalDlls" AfterTargets="Build">
+		<ItemGroup>
+			<FlatExternalDlls Include="DLLs\*.dll" />
+		</ItemGroup>
+		<Copy
+			SourceFiles="@(FlatExternalDlls)"
+			DestinationFolder="$(OutputPath)"
+			SkipUnchangedFiles="true"
+		/>
+	</Target>
+
+	<Target Name="FlattenExternalDllsOnPublish" AfterTargets="Publish">
+		<ItemGroup>
+			<FlatExternalDlls Include="DLLs\*.dll" />
+		</ItemGroup>
+		<Copy
+			SourceFiles="@(FlatExternalDlls)"
+			DestinationFolder="$(PublishDir)"
+			SkipUnchangedFiles="true"
+		/>
+	</Target>
 	<!-- 
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution 
     Explorer "Package and Publish" context menu entry to be enabled for this project even if 

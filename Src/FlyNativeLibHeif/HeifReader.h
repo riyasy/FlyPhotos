@@ -47,12 +47,6 @@ public:
     HeifReader();
     ~HeifReader();
 
-    /// @brief Extracts the thumbnail and saves it as a PNG file.
-    HeifError ExtractThumbnailToPng(const std::string& input_filename, const std::string& output_png_filename);
-
-    /// @brief Extracts the primary image and saves it as a PNG file.
-    HeifError ExtractPrimaryImageToPng(const std::string& input_filename, const std::string& output_png_filename);
-
 	/// @brief Extracts the thumbnail into a raw BGRA pixel buffer. If no thumbnail exists, generates one from primary image.
     HeifError ExtractThumbnailBGRA(const std::string& input_filename, PixelBuffer& out_buffer);
 
@@ -60,9 +54,6 @@ public:
     HeifError ExtractPrimaryImageBGRA(const std::string& input_filename, PixelBuffer& out_buffer);
 
 private:
-    /// @brief Internal helper to decode and save an image handle to a PNG.
-    HeifError ExtractImageToPng(heif_image_handle* image_handle, const std::string& output_png_filename);
-
     ///@brief Internal helper to decode any image handle into a BGRA buffer.
     HeifError ExtractImageToBGRA(heif_image_handle* image_handle, PixelBuffer& out_buffer);
 

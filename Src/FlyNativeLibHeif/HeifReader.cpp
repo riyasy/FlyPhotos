@@ -1,7 +1,6 @@
 #include "pch.h"
 
 #include "HeifReader.h"
-#include "PngEncoder.h"
 #include <iostream>
 #include <memory>
 #include <cassert>
@@ -14,140 +13,6 @@ HeifReader::HeifReader() {
 
 HeifReader::~HeifReader() {
     // The heif_initializer_ member handles deinitialization automatically.
-}
-
-/**
- * @brief Extracts the first thumbnail from a HEIC file and saves it as a PNG.
- */
-HeifError HeifReader::ExtractThumbnailToPng(const std::string& input_filename, const std::string& output_png_filename) {
-    // Use a shared_ptr with a custom deleter to ensure heif_context is always freed (RAII).
-    std::shared_ptr<heif_context> context(heif_context_alloc(),
-        [](heif_context* c) { heif_context_free(c); });
-
-    // Attempt to read the HEIC file into the context.
-    heif_error err = heif_context_read_from_file(context.get(), input_filename.c_str(), nullptr);
-    if (err.code != 0) {
-        std::cerr << "HEIF file read error: " << err.message << "\n";
-        return HeifError::FileReadError;
-    }
-
-    // Get the handle for the main image, as thumbnails are associated with it.
-    heif_image_handle* primary_image_handle = nullptr;
-    err = heif_context_get_primary_image_handle(context.get(), &primary_image_handle);
-    if (err.code) {
-        std::cerr << "Could not get primary image handle: " << err.message << "\n";
-        return HeifError::NoPrimaryImage;
-    }
-    // Ensure primary_image_handle is always released using a RAII smart pointer.
-    std::shared_ptr<heif_image_handle> primary_handle_guard(primary_image_handle, heif_image_handle_release);
-
-    // Get the ID of the first available thumbnail.
-    heif_item_id thumbnail_id;
-    int thumbnail_count = heif_image_handle_get_list_of_thumbnail_IDs(primary_image_handle, &thumbnail_id, 1);
-    if (thumbnail_count == 0) {
-        return HeifError::NoThumbnailFound;
-    }
-
-    // Retrieve the handle for the specific thumbnail using its ID.
-    heif_image_handle* thumbnail_handle = nullptr;
-    err = heif_image_handle_get_thumbnail(primary_image_handle, thumbnail_id, &thumbnail_handle);
-    if (err.code) {
-        std::cerr << "Could not read HEIF thumbnail: " << err.message << "\n";
-        return HeifError::ThumbnailReadError;
-    }
-
-    // Pass ownership to the internal extraction function to decode and save the image.
-    return ExtractImageToPng(thumbnail_handle, output_png_filename);
-}
-
-/**
- * @brief Extracts the primary image from a HEIC file and saves it as a PNG.
- */
-HeifError HeifReader::ExtractPrimaryImageToPng(const std::string& input_filename, const std::string& output_png_filename) {
-    // Manage the heif_context resource automatically using RAII.
-    std::shared_ptr<heif_context> context(heif_context_alloc(),
-        [](heif_context* c) { heif_context_free(c); });
-
-    std::cout << "### Entering ExtractPrimaryImage\n";
-
-    // Read the file data into the context.
-    heif_error err = heif_context_read_from_file(context.get(), input_filename.c_str(), nullptr);
-    if (err.code != 0) {
-        std::cerr << "HEIF file read error: " << err.message << "\n";
-        return HeifError::FileReadError;
-    }
-
-    // Get a handle to the main image within the file.
-    heif_image_handle* primary_image_handle = nullptr;
-    err = heif_context_get_primary_image_handle(context.get(), &primary_image_handle);
-    if (err.code) {
-        std::cerr << "Could not get primary image handle: " << err.message << "\n";
-        return HeifError::NoPrimaryImage;
-    }
-
-    std::cout << "### Primary Image Handle GOT\n";
-
-    // Pass ownership to the internal extraction function to decode and save the image.
-    return ExtractImageToPng(primary_image_handle, output_png_filename);
-}
-
-/**
- * @brief Private helper to decode and encode any given image handle to a PNG file.
- * This avoids code duplication between thumbnail and primary image extraction logic.
- */
-HeifError HeifReader::ExtractImageToPng(heif_image_handle* image_handle, const std::string& output_png_filename) {
-    // Ensure the handle is released when this function exits by taking ownership with a smart pointer.
-    std::shared_ptr<heif_image_handle> handle_guard(image_handle, heif_image_handle_release);
-
-    // --- START: Added Code ---
-    // Get width and height from the image handle.
-    int width = heif_image_handle_get_width(image_handle);
-    int height = heif_image_handle_get_height(image_handle);
-
-    // Print the dimensions to the console.
-    std::cout << "Image Dimensions (WxH): " << width << " x " << height << std::endl;
-    // --- END: Added Code ---
-
-    // Configure decoding options and manage their lifetime with RAII.
-    PngEncoder encoder;
-    std::unique_ptr<heif_decoding_options, decltype(&heif_decoding_options_free)> decode_options(
-        heif_decoding_options_alloc(),
-        &heif_decoding_options_free
-    );
-    // Ensure HDR content is converted to 8-bit for standard PNG compatibility.
-    decode_options->convert_hdr_to_8bit = true;
-
-    // Decode the image handle into a raw, uncompressed heif_image object.
-    heif_image* image = nullptr;
-    heif_error err = heif_decode_image(image_handle,
-        &image,
-        encoder.colorspace(false),
-        encoder.chroma(false, 8), // Assuming 8-bit for simplicity
-        decode_options.get());
-
-    std::cout << "### Decode Image Complete\n";
-
-    if (err.code) {
-        std::cerr << "Could not decode HEIF image: " << err.message << "\n";
-        return HeifError::ImageDecodeError;
-    }
-    assert(image); // Ensure the image pointer is valid after successful decoding.
-    // Manage the lifetime of the decoded heif_image object.
-    std::shared_ptr<heif_image> image_guard(image, heif_image_release);
-
-    // Set a fast compression level for the output PNG.
-    encoder.set_compression_level(0);
-
-    // Use the PngEncoder to write the decoded pixels to a file.
-    bool written = encoder.Encode(image, width, height, output_png_filename);
-    if (!written) {
-        std::cerr << "Could not write PNG image.\n";
-        return HeifError::PngEncodeError;
-    }
-
-    std::cout << "### Encode PNG Complete\n";
-
-    return HeifError::Ok;
 }
 
 /**
@@ -185,7 +50,17 @@ HeifError HeifReader::ExtractThumbnailBGRA(const std::string& input_filename, Pi
         if (err.code == 0) {
             // Success: an embedded thumbnail was found and retrieved.
             // Delegate to the helper, which will take ownership of thumbnail_handle.
-            return ExtractImageToBGRA(thumbnail_handle, out_buffer);
+            HeifError thumb_decode_result = ExtractImageToBGRA(thumbnail_handle, out_buffer);
+            if (thumb_decode_result == HeifError::Ok) {
+                // SUCCESS: The embedded thumbnail was found, retrieved, AND decoded successfully.
+                // We are done, so we can return immediately.
+                return HeifError::Ok;
+            }
+            else {
+                // FAILURE: The embedded thumbnail was corrupt or could not be decoded.
+                // We log this specific issue and then allow the code to "fall through"
+                std::cerr << "Note: Embedded thumbnail found but failed to decode. Generating a new one." << std::endl;
+            }
         }
         // If getting the thumbnail failed, we fall through to the generation logic below.
     }
