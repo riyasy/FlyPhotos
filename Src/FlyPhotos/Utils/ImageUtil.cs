@@ -99,6 +99,12 @@ internal static class ImageUtil
                     if (await PngReader.GetFirstFrameFullSize(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
                     return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
+                case ".ICO":
+                case ".ICON":
+                    {
+                    if (await IcoReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                    return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
+                }
                 default:
                 {
                     if (!AppConfig.Settings.OpenExitZoom)
@@ -159,14 +165,16 @@ internal static class ImageUtil
                     return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".GIF":
-                {
-                    if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
-                }
                 case ".PNG":
                 {
                     if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                     return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
+                }
+                case ".ICO":
+                case ".ICON":
+                {
+                    if (await IcoReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                    return (new PreviewDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
                 default:
                 {
@@ -223,6 +231,12 @@ internal static class ImageUtil
                 {
                     if (await PngReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                     return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
+                }
+                case ".ICO":
+                case ".ICON":
+                {
+                    if (await IcoReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                    return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
                 default:
                 {
