@@ -28,11 +28,7 @@ namespace FlyPhotos.Views;
 /// </summary>
 internal sealed partial class Settings
 {
-    public event Action<ElementTheme>? ThemeChanged;
-    public event Action<WindowBackdropType>? BackdropChanged;
-    public event Action<bool>? ShowCheckeredBackgroundChanged;
-    public event Action<int>? BackDropTransparencyChanged;
-    public event Action<ThumbnailSetting>? ThumbnailSettingChanged;
+    public event Action<Setting>? SettingChanged;
 
     private readonly SystemBackdropConfiguration _configurationSource;
 
@@ -180,14 +176,14 @@ internal sealed partial class Settings
     private async void SliderThumbnailSize_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
         AppConfig.Settings.ThumbnailSize = (int)SliderThumbnailSize.Value;
-        ThumbnailSettingChanged?.Invoke(ThumbnailSetting.Size);
+        SettingChanged?.Invoke(Setting.ThumbnailSizeSize);
         await AppConfig.SaveAsync();
     }
 
     private async void SliderTransparentBackgroundIntensity_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
         AppConfig.Settings.TransparentBackgroundIntensity = (int)SliderTransparentBackgroundIntensity.Value;
-        BackDropTransparencyChanged?.Invoke(AppConfig.Settings.TransparentBackgroundIntensity);
+        SettingChanged?.Invoke(Setting.BackDropTransparency);
         await AppConfig.SaveAsync();
     }
 
@@ -200,7 +196,7 @@ internal sealed partial class Settings
     private async void ButtonShowCheckeredBackground_OnToggled(object sender, RoutedEventArgs e)
     {
         AppConfig.Settings.CheckeredBackground = ButtonShowCheckeredBackground.IsOn;
-        ShowCheckeredBackgroundChanged?.Invoke(ButtonShowCheckeredBackground.IsOn);
+        SettingChanged?.Invoke(Setting.CheckeredBackgroundShowHide);
         await AppConfig.SaveAsync();
     }
 
@@ -242,7 +238,7 @@ internal sealed partial class Settings
         AppConfig.Settings.Theme = themeEnum;
 
         SetWindowTheme(themeEnum);
-        ThemeChanged?.Invoke(themeEnum); 
+        SettingChanged?.Invoke(Setting.Theme);
         await AppConfig.SaveAsync();
     }
 
@@ -251,8 +247,7 @@ internal sealed partial class Settings
         var backGroundDisplayName = (ComboBackGround.SelectedItem as ComboBoxItem)?.Content as string;
         var backGroundEnum = _backdropTranslator.ToEnum(backGroundDisplayName);
         AppConfig.Settings.WindowBackdrop = backGroundEnum;
-
-        BackdropChanged?.Invoke(backGroundEnum);
+        SettingChanged?.Invoke(Setting.BackDrop);
         await AppConfig.SaveAsync();
     }
     private async void ComboMouseWheel_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -267,7 +262,7 @@ internal sealed partial class Settings
     {
         AppConfig.Settings.ShowThumbnails = ButtonShowThumbnail.IsOn;
         await AppConfig.SaveAsync();
-        ThumbnailSettingChanged?.Invoke(ThumbnailSetting.ShowHide);
+        SettingChanged?.Invoke(Setting.ThumbnailShowHide);
     }
 
     private async void SliderLowResCacheSize_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
@@ -332,7 +327,7 @@ internal sealed partial class Settings
         RectThumbnailSelection.Stroke = new SolidColorBrush(Color.FromArgb(255, newColor.R, newColor.G, newColor.B));
         ColorPickerFlyout.Hide();
         AppConfig.Settings.ThumbnailSelectionColor = $"#{newColor.R:X2}{newColor.G:X2}{newColor.B:X2}";
-        ThumbnailSettingChanged?.Invoke(ThumbnailSetting.SelectionColor);
+        SettingChanged?.Invoke(Setting.ThumbnailSelectionColor);
         await AppConfig.SaveAsync();
     }
 

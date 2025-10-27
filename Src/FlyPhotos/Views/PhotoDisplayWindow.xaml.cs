@@ -99,7 +99,7 @@ public sealed partial class PhotoDisplayWindow
 
         ((FrameworkElement)Content).ActualThemeChanged += PhotoDisplayWindow_ActualThemeChanged;
         SetConfigurationSourceTheme();
-        SetWindowBackground(AppConfig.Settings.WindowBackdrop);
+        SetWindowBackdrop(AppConfig.Settings.WindowBackdrop);
         SetWindowTheme(AppConfig.Settings.Theme);
         DispatcherQueue.EnsureSystemDispatcherQueue();
 
@@ -247,11 +247,7 @@ public sealed partial class PhotoDisplayWindow
             _settingWindow.CenterOnScreen();
             _settingWindow.Closed += SettingWindow_Closed;
             _settingWindow.Activate();
-            _settingWindow.ShowCheckeredBackgroundChanged += SettingWindow_ShowCheckeredBackgroundChanged;
-            _settingWindow.BackDropTransparencyChanged += SettingWindow_BackdropTransparencyChanged;
-            _settingWindow.ThemeChanged += SetWindowTheme;
-            _settingWindow.BackdropChanged += SetWindowBackground;
-            _settingWindow.ThumbnailSettingChanged += SettingWindow_ThumbnailSettingChanged;
+            _settingWindow.SettingChanged += SettingWindow_SettingChanged;
         }
         else
         {
@@ -264,11 +260,7 @@ public sealed partial class PhotoDisplayWindow
         if (_settingWindow != null)
         {
             _settingWindow.Closed -= SettingWindow_Closed;
-            _settingWindow.ThemeChanged -= SetWindowTheme;
-            _settingWindow.BackdropChanged -= SetWindowBackground;
-            _settingWindow.ShowCheckeredBackgroundChanged -= SettingWindow_ShowCheckeredBackgroundChanged;
-            _settingWindow.BackDropTransparencyChanged -= SettingWindow_BackdropTransparencyChanged;
-            _settingWindow.ThumbnailSettingChanged -= SettingWindow_ThumbnailSettingChanged;
+            _settingWindow.SettingChanged -= SettingWindow_SettingChanged;
         }
         _settingWindow = null;
     }
@@ -682,38 +674,48 @@ public sealed partial class PhotoDisplayWindow
         Win32Methods.SendMessage(hWnd, Win32Methods.WM_SETICON, new IntPtr(1), ico.Handle);
     }
 
-    private void SettingWindow_ShowCheckeredBackgroundChanged(bool showChecker)
-    {
-        _canvasController.HandleCheckeredBackgroundChange();
-    }
-    private void SettingWindow_BackdropTransparencyChanged(int obj)
+    private void SetWindowBackdropTransparency(int transparencyIntensity)
     {
         if (_currentBackdropType == WindowBackdropType.Transparent)
         {
-            _transparentTintBackdrop.TintColor = Color.FromArgb((byte)(((100 - obj) * 255) / 100), 0, 0, 0);
+            _transparentTintBackdrop.TintColor = Color.FromArgb((byte)(((100 - transparencyIntensity) * 255) / 100), 0, 0, 0);
             SystemBackdrop = _transparentTintBackdrop;
         }
     }
 
-    private void SettingWindow_ThumbnailSettingChanged(ThumbnailSetting tbSetting)
+    private void SettingWindow_SettingChanged(Setting setting)
     {
-        switch (tbSetting)
+        switch (setting)
         {
-            case ThumbnailSetting.Size:
+            case Setting.ThumbnailSizeSize:
                 D2dCanvasThumbNail.Height = AppConfig.Settings.ThumbnailSize;
                 D2dCanvasThumbNail.Invalidate();
                 _thumbNailController.RefreshThumbnail();
                 break;
-            case ThumbnailSetting.SelectionColor:
+            case Setting.ThumbnailSelectionColor:
                 _thumbNailController.RefreshThumbnail();
                 break;
-            case ThumbnailSetting.ShowHide:
+            case Setting.ThumbnailShowHide:
                 _thumbNailController.ShowHideThumbnailBasedOnSettings();
+                break;
+            case Setting.CheckeredBackgroundShowHide:
+                _canvasController.HandleCheckeredBackgroundChange();
+                break;
+            case Setting.Theme:
+                SetWindowTheme(AppConfig.Settings.Theme);
+                break;
+            case Setting.BackDrop:
+                SetWindowBackdrop(AppConfig.Settings.WindowBackdrop);
+                break;
+            case Setting.BackDropTransparency:
+                SetWindowBackdropTransparency(AppConfig.Settings.TransparentBackgroundIntensity);
+                break;
+            default:
                 break;
         }
     }
 
-    private void SetWindowBackground(WindowBackdropType backdropType)
+    private void SetWindowBackdrop(WindowBackdropType backdropType)
     {
         _currentBackdropType = backdropType;
         if (_backdropController != null)
@@ -799,7 +801,7 @@ public sealed partial class PhotoDisplayWindow
         ((FrameworkElement)Content).RequestedTheme = theme;
     }
 
-    void SetBackColorAsPerThemeAndBackdrop()
+    private void SetBackColorAsPerThemeAndBackdrop()
     {
         var actualTheme = ((FrameworkElement)Content).ActualTheme;
 

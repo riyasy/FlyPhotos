@@ -44,11 +44,15 @@
         Navigate
     }
 
-    public enum ThumbnailSetting
+    public enum Setting
     {
-        ShowHide,
-        SelectionColor,
-        Size
+        ThumbnailShowHide,
+        ThumbnailSelectionColor,
+        ThumbnailSizeSize,
+        CheckeredBackgroundShowHide,
+        Theme,
+        BackDrop,
+        BackDropTransparency
     }
 
 }
