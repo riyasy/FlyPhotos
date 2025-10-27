@@ -102,6 +102,9 @@ internal sealed partial class Settings
         RectThumbnailSelection.Stroke = new SolidColorBrush(ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor));
         SliderThumbnailSize.Value = AppConfig.Settings.ThumbnailSize;
         ButtonRememberLastMonitor.IsOn = AppConfig.Settings.RememberLastMonitor;
+        ButtonConfirmBeforeDelete.IsOn = AppConfig.Settings.ConfirmForDelete;
+        ButtonShowFileName.IsOn = AppConfig.Settings.ShowFileName;
+        ButtonShowCacheStatusExpander.IsOn = AppConfig.Settings.ShowCacheStatus;
 
         MainLayout.KeyDown += MainLayout_OnKeyDown;
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
@@ -119,7 +122,9 @@ internal sealed partial class Settings
         SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
         SliderThumbnailSize.ValueChanged += SliderThumbnailSize_ValueChanged;
         ButtonRememberLastMonitor.Toggled += ButtonRememberLastMonitor_OnToggled;
-
+        ButtonConfirmBeforeDelete.Toggled += ButtonConfirmBeforeDelete_OnToggled;
+        ButtonShowFileName.Toggled += ButtonShowFileName_OnToggled;
+        ButtonShowCacheStatusExpander.Toggled += ButtonShowCacheStatusExpander_OnToggled;
 
 
         SettingsCardKeyboardShortCuts.Description = $"{Environment.NewLine}Left/Right Arrow Keys : Navigate Photos" +
@@ -162,10 +167,31 @@ internal sealed partial class Settings
             $"{Environment.NewLine}{Util.GetExtensionsDisplayString()}";
 
     
-        if (SettingsCardMouseWheelBehaviour.Description is string desc)
-            SettingsCardMouseWheelBehaviour.Description = desc.Replace("%%", Environment.NewLine);
+        if (ComboMouseWheelBehaviourInfo.Description is string desc)
+            ComboMouseWheelBehaviourInfo.Description = desc.Replace("%%", Environment.NewLine);
                 
     }
+
+    private async void ButtonShowCacheStatusExpander_OnToggled(object s, RoutedEventArgs e)
+    {
+        AppConfig.Settings.ShowCacheStatus = ButtonShowCacheStatusExpander.IsOn;
+        SettingChanged?.Invoke(Setting.CacheStatusShowHide);
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ButtonShowFileName_OnToggled(object s, RoutedEventArgs e)
+    {
+        AppConfig.Settings.ShowFileName = ButtonShowFileName.IsOn;
+        SettingChanged?.Invoke(Setting.FileNameShowHide);
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ButtonConfirmBeforeDelete_OnToggled(object s, RoutedEventArgs e)
+    {
+        AppConfig.Settings.ConfirmForDelete = ButtonConfirmBeforeDelete.IsOn;
+        await AppConfig.SaveAsync();
+    }
+
 
     private async void ButtonRememberLastMonitor_OnToggled(object sender, RoutedEventArgs e)
     {
@@ -315,10 +341,9 @@ internal sealed partial class Settings
         return value ? Visibility.Visible : Visibility.Collapsed;
     }
 
-
-    private Visibility ShouldDisplayTransparencySlider(int index)
+    private bool ShouldEnableTransparencySlider(int index)
     {
-        return index == 0 ? Visibility.Visible : Visibility.Collapsed;
+        return index == 0;
     }
 
     private async void ColorFlyOutOkButton_Click(object sender, RoutedEventArgs e)

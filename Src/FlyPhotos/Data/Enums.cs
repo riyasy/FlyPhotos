@@ -52,7 +52,9 @@
         CheckeredBackgroundShowHide,
         Theme,
         BackDrop,
-        BackDropTransparency
+        BackDropTransparency,
+        FileNameShowHide,
+        CacheStatusShowHide
     }
 
 }

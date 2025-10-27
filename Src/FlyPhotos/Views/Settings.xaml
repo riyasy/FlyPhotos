@@ -35,27 +35,26 @@
                         </Flyout>
                     </ScrollViewer.Resources>
                     <StackPanel Margin="0,0,15,0" Orientation="Vertical">
-                        <controls:SettingsExpander
+                        <controls:SettingsCard
+                            x:Name="SettingsCardDeveloperSupport"
                             Margin="0,10,0,0"
+                            Description="Make Fly more awesome."
+                            Header="Support Flyphotos"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xEB51;}">
+                            <HyperlinkButton Content="Donate" NavigateUri="https://github.com/sponsors/riyasy" />
+                        </controls:SettingsCard>
+                        <controls:SettingsExpander
+                            Margin="0,5,0,0"
                             Header="KeyBoard Shortcuts"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE765;}">
                             <controls:SettingsExpander.Items>
                                 <controls:SettingsCard x:Name="SettingsCardKeyboardShortCuts" Description="" />
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
-
                         <TextBlock
                             Margin="0,20,0,0"
                             Style="{StaticResource BodyStrongTextBlockStyle}"
                             Text="Theming" />
-                        <!--<controls:SettingsCard
-                            x:Name="SettingsCardDeveloperSupport"
-                            Margin="0,5,0,0"
-                            Description="I wish to make FlyPhotos more awesome."
-                            Header="Support Flyphotos"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xEC32;}">
-                            <HyperlinkButton Content="Buy me a coffee" NavigateUri="https://buymeacoffee.com/ryftools" />
-                        </controls:SettingsCard>-->
                         <controls:SettingsCard
                             x:Name="SettingsCardTheme"
                             Margin="0,5,0,0"
@@ -71,38 +70,42 @@
                                 <ComboBoxItem>Light</ComboBoxItem>
                             </ComboBox>
                         </controls:SettingsCard>
-                        <controls:SettingsCard
+                        <controls:SettingsExpander
                             x:Name="SettingsCardWindowBackground"
                             Margin="0,5,0,0"
                             Description="Set the window background."
                             Header="Window Background"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE70A;}">
-                            <StackPanel Orientation="Vertical" Spacing="10">
-                                <ComboBox
-                                    x:Name="ComboBackGround"
-                                    MinWidth="150"
-                                    HorizontalAlignment="Right"
-                                    SelectedIndex="0">
-                                    <ComboBoxItem>Transparent</ComboBoxItem>
-                                    <ComboBoxItem>Frozen</ComboBoxItem>
-                                    <ComboBoxItem>Acrylic</ComboBoxItem>
-                                    <ComboBoxItem>Acrylic Thin</ComboBoxItem>
-                                    <ComboBoxItem>Mica</ComboBoxItem>
-                                    <ComboBoxItem>Mica Alt</ComboBoxItem>
-                                    <ComboBoxItem>None</ComboBoxItem>
-                                </ComboBox>
-
-                                <Slider
-                                    x:Name="SliderTransparentBackgroundIntensity"
-                                    MinWidth="150"
-                                    Header="Set Transparency %"
-                                    Maximum="90"
-                                    Minimum="30"
-                                    SmallChange="10"
-                                    StepFrequency="10"
-                                    Visibility="{x:Bind ShouldDisplayTransparencySlider(ComboBackGround.SelectedIndex), Mode=OneWay}" />
-                            </StackPanel>
-                        </controls:SettingsCard>
+                            <ComboBox
+                                x:Name="ComboBackGround"
+                                MinWidth="150"
+                                HorizontalAlignment="Right"
+                                SelectedIndex="0">
+                                <ComboBoxItem>Transparent</ComboBoxItem>
+                                <ComboBoxItem>Frozen</ComboBoxItem>
+                                <ComboBoxItem>Acrylic</ComboBoxItem>
+                                <ComboBoxItem>Acrylic Thin</ComboBoxItem>
+                                <ComboBoxItem>Mica</ComboBoxItem>
+                                <ComboBoxItem>Mica Alt</ComboBoxItem>
+                                <ComboBoxItem>None</ComboBoxItem>
+                            </ComboBox>
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardTransparentBackgroundIntensity"
+                                    Description="Applicable only for Transparent Window Background."
+                                    Header="Set transparency %"
+                                    IsEnabled="{x:Bind ShouldEnableTransparencySlider(ComboBackGround.SelectedIndex), Mode=OneWay}">
+                                    <Slider
+                                        x:Name="SliderTransparentBackgroundIntensity"
+                                        MinWidth="150"
+                                        Maximum="90"
+                                        Minimum="30"
+                                        SmallChange="10"
+                                        StepFrequency="10"
+                                        Value="60" />
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
                         <TextBlock
                             Margin="0,20,0,0"
                             Style="{StaticResource BodyStrongTextBlockStyle}"
@@ -124,14 +127,6 @@
                             <ToggleSwitch x:Name="ButtonHighQualityInterpolation" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
-                            x:Name="SettingsCardShowCheckeredBackground"
-                            Margin="0,5,0,0"
-                            Description="Show checkered background for transparent images. ⚠ May reduce Fly performance."
-                            Header="Show Checkered Background"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE80A;}">
-                            <ToggleSwitch x:Name="ButtonShowCheckeredBackground" />
-                        </controls:SettingsCard>
-                        <controls:SettingsCard
                             x:Name="SettingsCardImageFitPercentage"
                             Margin="0,5,0,0"
                             Description="Choose how much screen % to fill with image"
@@ -146,6 +141,14 @@
                                 StepFrequency="10" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
+                            x:Name="SettingsCardShowCheckeredBackground"
+                            Margin="0,5,0,0"
+                            Description="Show checkered background for transparent images. ⚠ May reduce Fly performance."
+                            Header="Show Checkered Background"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE80A;}">
+                            <ToggleSwitch x:Name="ButtonShowCheckeredBackground" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
                             x:Name="SettingsCardRememberLastMonitor"
                             Margin="0,5,0,0"
                             Description="Fly will open on last used monitor. Don't enable if you have only one monitor."
@@ -157,10 +160,34 @@
                             Margin="0,20,0,0"
                             Style="{StaticResource BodyStrongTextBlockStyle}"
                             Text="UI Controls" />
-                        <controls:SettingsCard
+                        <controls:SettingsExpander
+                            x:Name="SettingsCardFadeControls"
+                            Margin="0,5,0,0"
+                            Description="Fade UI controls when mouse moves away"
+                            Header="Auto Fade UI controls"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE754;}">
+                            <ToggleSwitch x:Name="ButtonEnableAutoFade" HorizontalAlignment="Right" />
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardFadeIntensity"
+                                    Description="Adjust how strong the auto-fade effect appears on screen."
+                                    Header="Fade intensity %"
+                                    IsEnabled="{x:Bind ButtonEnableAutoFade.IsOn, Mode=OneWay}">
+                                    <Slider
+                                        x:Name="SliderFadeIntensity"
+                                        MinWidth="150"
+                                        Maximum="100"
+                                        Minimum="30"
+                                        SmallChange="10"
+                                        StepFrequency="10"
+                                        Value="50" />
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
+                        <controls:SettingsExpander
                             x:Name="SettingsCardMouseWheelBehaviour"
                             Margin="0,5,0,0"
-                            Description="Choose default mouse wheel behaviour.%%👉 Ctrl + Mouse wheel always zooms in or out.%%👉 Alt + Mouse wheel always navigates to next or previous"
+                            Description="Choose default mouse wheel behaviour."
                             Header="Mouse Wheel"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE962;}">
                             <ComboBox
@@ -170,41 +197,45 @@
                                 <ComboBoxItem>Zoom In or Out</ComboBoxItem>
                                 <ComboBoxItem>View Next or Previous</ComboBoxItem>
                             </ComboBox>
-                        </controls:SettingsCard>
-                        <controls:SettingsCard
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard x:Name="ComboMouseWheelBehaviourInfo" Description="👉 Ctrl + Mouse wheel always zooms in or out.%%👉 Alt + Mouse wheel always navigates to next or previous" />
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
+                        <controls:SettingsExpander
                             x:Name="SettingsCardShowThumbnail"
                             Margin="0,5,0,0"
                             Description="Show thumbnail strip at the bottom of window"
                             Header="Show thumbnail strip"
                             HeaderIcon="{ui:FontIcon Glyph=&#xF597;}">
-                            <StackPanel Orientation="Vertical" Spacing="10">
-                                <ToggleSwitch x:Name="ButtonShowThumbnail" HorizontalAlignment="Right" />
-                                <Slider
-                                    x:Name="SliderThumbnailSize"
-                                    MinWidth="150"
-                                    Header="Thumbnail Size"
-                                    Maximum="60"
-                                    Minimum="30"
-                                    SmallChange="10"
-                                    StepFrequency="10"
-                                    Visibility="{x:Bind ConvertBoolToVisibility(ButtonShowThumbnail.IsOn), Mode=OneWay}"
-                                    Value="40" />
-                                <StackPanel
-                                    MinWidth="150"
-                                    HorizontalAlignment="Right"
-                                    Orientation="Horizontal"
-                                    Spacing="10"
-                                    Visibility="{x:Bind ConvertBoolToVisibility(ButtonShowThumbnail.IsOn), Mode=OneWay}">
-                                    <TextBlock
-                                        HorizontalAlignment="Left"
-                                        VerticalAlignment="Center"
-                                        Text="Selection Color" />
+                            <ToggleSwitch x:Name="ButtonShowThumbnail" HorizontalAlignment="Right" />
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardThumbnailSize"
+                                    Description="Adjust the size of the thumbnails in the viewer."
+                                    Header="Thumbnail size"
+                                    HeaderIcon="{ui:FontIcon Glyph=&#xE620;}"
+                                    IsEnabled="{x:Bind ButtonShowThumbnail.IsOn, Mode=OneWay}">
+                                    <Slider
+                                        x:Name="SliderThumbnailSize"
+                                        MinWidth="150"
+                                        Maximum="60"
+                                        Minimum="30"
+                                        SmallChange="10"
+                                        StepFrequency="10"
+                                        Value="40" />
+                                </controls:SettingsCard>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardThumbnailSelectionColor"
+                                    Description="Set the highlight color used for selected thumbnails."
+                                    Header="Thumbnail selection color"
+                                    HeaderIcon="{ui:FontIcon Glyph=&#xE790;}"
+                                    IsEnabled="{x:Bind ButtonShowThumbnail.IsOn, Mode=OneWay}">
                                     <Button
                                         x:Name="ButtonSetThumbnailSelColor"
                                         HorizontalAlignment="Right"
                                         FlyoutBase.AttachedFlyout="{StaticResource ColorPickerFlyout}"
                                         Tapped="RectThumbnailSelection_Tapped"
-                                        ToolTipService.ToolTip="Click me to change my color!">
+                                        ToolTipService.ToolTip="Click to change selection color.">
                                         <Button.Content>
                                             <Rectangle
                                                 x:Name="RectThumbnailSelection"
@@ -213,60 +244,78 @@
                                                 StrokeThickness="3" />
                                         </Button.Content>
                                     </Button>
-                                </StackPanel>
-                            </StackPanel>
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardShowFileName"
+                            Margin="0,5,0,0"
+                            Description="Display file name of currently opened file"
+                            Header="Show file name on screen"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
+                            <ToggleSwitch x:Name="ButtonShowFileName" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
-                            x:Name="SettingsCardFadeControls"
+                            x:Name="SettingsCardConfirmBeforeDelete"
                             Margin="0,5,0,0"
-                            Description="Fade UI controls when mouse moves away"
-                            Header="Auto Fade UI controls"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE754;}">
-                            <StackPanel Orientation="Vertical" Spacing="10">
-                                <ToggleSwitch x:Name="ButtonEnableAutoFade" HorizontalAlignment="Right" />
-                                <Slider
-                                    x:Name="SliderFadeIntensity"
-                                    MinWidth="150"
-                                    Header="Fade Intensity"
-                                    Maximum="100"
-                                    Minimum="30"
-                                    SmallChange="10"
-                                    StepFrequency="10"
-                                    Visibility="{x:Bind ConvertBoolToVisibility(ButtonEnableAutoFade.IsOn), Mode=OneWay}"
-                                    Value="50" />
-                            </StackPanel>
+                            Description="Ask for confirmation before deleting any file."
+                            Header="Show confirmation dialog for file delete"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE74D;}">
+                            <ToggleSwitch x:Name="ButtonConfirmBeforeDelete" />
                         </controls:SettingsCard>
+
+
+
+
+
                         <TextBlock
                             Margin="0,20,0,0"
                             Style="{StaticResource BodyStrongTextBlockStyle}"
                             Text="Caching" />
-                        <controls:SettingsCard
-                            x:Name="SettingsCardCacheSize"
+                        <controls:SettingsExpander
+                            x:Name="SettingsExpanderCaching"
                             Margin="0,5,0,0"
-                            Description="Set the amount of low resolution and high resolution photos to be cached on each side"
-                            Header="Cache Size"
+                            Description="Configure how Fly handles photo caching."
+                            Header="Caching"
                             HeaderIcon="{ui:FontIcon Glyph=&#xF16A;}">
-                            <StackPanel Orientation="Vertical">
-                                <Slider
-                                    x:Name="SliderLowResCacheSize"
-                                    MinWidth="150"
-                                    Header="Low Res Cache"
-                                    Maximum="300"
-                                    Minimum="50"
-                                    SmallChange="10"
-                                    StepFrequency="10"
-                                    Value="300" />
-                                <Slider
-                                    x:Name="SliderHighResCacheSize"
-                                    MinWidth="150"
-                                    Header="High Res Cache"
-                                    Maximum="3"
-                                    Minimum="1"
-                                    SmallChange="1"
-                                    StepFrequency="1"
-                                    Value="2" />
-                            </StackPanel>
-                        </controls:SettingsCard>
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardLowResCache"
+                                    Description="Set the number of low-resolution photos cached on each side."
+                                    Header="Low-res cache"
+                                    HeaderIcon="{ui:FontIcon Glyph=&#xF16A;}">
+                                    <Slider
+                                        x:Name="SliderLowResCacheSize"
+                                        MinWidth="150"
+                                        Maximum="300"
+                                        Minimum="50"
+                                        SmallChange="10"
+                                        StepFrequency="10"
+                                        Value="300" />
+                                </controls:SettingsCard>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardHighResCache"
+                                    Description="Set the number of high-resolution photos cached on each side."
+                                    Header="High-res cache"
+                                    HeaderIcon="{ui:FontIcon Glyph=&#xF16A;}">
+                                    <Slider
+                                        x:Name="SliderHighResCacheSize"
+                                        MinWidth="150"
+                                        Maximum="3"
+                                        Minimum="1"
+                                        SmallChange="1"
+                                        StepFrequency="1"
+                                        Value="2" />
+                                </controls:SettingsCard>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardShowCacheStatusExpander"
+                                    Description="Show cache status expander in the button panel."
+                                    Header="Show cache status"
+                                    HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
+                                    <ToggleSwitch x:Name="ButtonShowCacheStatusExpander" />
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
                         <TextBlock
                             Margin="0,20,0,0"
                             Style="{StaticResource BodyStrongTextBlockStyle}"

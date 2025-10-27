@@ -333,9 +333,11 @@ internal partial class PhotoDisplayController
         if (currentPosition < 0) return;
 
         var totalFileCount = _sortedPhotoKeys.Count;
+        var fileName = Path.GetFileName(_photos[currentKey].FileName);
+        var listPositionAndFileName = $"[{currentPosition + 1}/{totalFileCount}] {fileName}";
+
         var noOfFilesOnLeft = currentPosition;
         var noOfFilesOnRight = totalFileCount - 1 - currentPosition;
-
         int noOfCachedItemsOnLeft = 0;
         int noOfCachedItemsOnRight = 0;
 
@@ -347,9 +349,6 @@ internal partial class PhotoDisplayController
                 noOfCachedItemsOnRight++;            
         }
         var cacheProgressStatus = $"{noOfCachedItemsOnLeft}/{noOfFilesOnLeft} < Cache > {noOfCachedItemsOnRight}/{noOfFilesOnRight}";
-
-        var fileName = Path.GetFileName(_photos[currentKey].FileName);
-        var listPositionAndFileName = $"[{currentPosition + 1}/{totalFileCount}] {fileName}";
 
         StatusUpdated?.Invoke(this, new StatusUpdateEventArgs(listPositionAndFileName, cacheProgressStatus));
     }

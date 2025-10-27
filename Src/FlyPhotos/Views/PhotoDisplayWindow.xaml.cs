@@ -112,6 +112,8 @@ public sealed partial class PhotoDisplayWindow
         _thumbNailController.ThumbnailClicked += Thumbnail_Clicked;
 
         TxtFileName.Text = Path.GetFileName(firstPhotoPath);
+        BorderTxtFileName.Visibility = AppConfig.Settings.ShowFileName ? Visibility.Visible : Visibility.Collapsed;
+        ButtonExpander.Visibility = AppConfig.Settings.ShowCacheStatus ? Visibility.Visible : Visibility.Collapsed;
 
         Activated += PhotoDisplayWindow_Activated;
         SizeChanged += PhotoDisplayWindow_SizeChanged;
@@ -499,22 +501,24 @@ public sealed partial class PhotoDisplayWindow
             _canvasController.Shrug();
             return;
         }
-        var confirmDialog = new ContentDialog
-        {
-            XamlRoot = this.Content.XamlRoot,
-            Title = "Confirm Deletion",
-            Content = "Are you sure you want to delete this file?",
-            PrimaryButtonText = "Delete",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Close
-        };
 
-        var result = await confirmDialog.ShowAsync();
-
-        if (result != ContentDialogResult.Primary)
+        if (AppConfig.Settings.ConfirmForDelete)
         {
-            Logger.Info("User cancelled file deletion.");
-            return;
+            var confirmDialog = new ContentDialog
+            {
+                XamlRoot = this.Content.XamlRoot,
+                Title = "Confirm Deletion",
+                Content = "Are you sure you want to delete this file?",
+                PrimaryButtonText = "Delete",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Close
+            };
+            var result = await confirmDialog.ShowAsync();
+            if (result != ContentDialogResult.Primary)
+            {
+                Logger.Info("User cancelled file deletion.");
+                return;
+            }
         }
 
         var delResult = await _photoController.DeleteCurrentPhoto();
@@ -709,6 +713,12 @@ public sealed partial class PhotoDisplayWindow
                 break;
             case Setting.BackDropTransparency:
                 SetWindowBackdropTransparency(AppConfig.Settings.TransparentBackgroundIntensity);
+                break;
+            case Setting.FileNameShowHide:
+                BorderTxtFileName.Visibility = AppConfig.Settings.ShowFileName ? Visibility.Visible : Visibility.Collapsed;
+                break;
+            case Setting.CacheStatusShowHide:
+                ButtonExpander.Visibility = AppConfig.Settings.ShowCacheStatus ? Visibility.Visible : Visibility.Collapsed;
                 break;
             default:
                 break;

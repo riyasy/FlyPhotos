@@ -50,5 +50,8 @@ public class AppSettings
     public bool RememberLastMonitor { get; set; } = false;
     public int ScrollThreshold  { get; set; } = 60;
     public bool UseMouseFwdBackForStepZoom { get; set; } = false;
+    public bool ConfirmForDelete { get; set; } = true;
+    public bool ShowFileName { get; set; } = true;
+    public bool ShowCacheStatus { get; set; } = true;
 }
 
