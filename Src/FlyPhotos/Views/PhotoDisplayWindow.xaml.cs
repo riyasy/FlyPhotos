@@ -720,8 +720,6 @@ public sealed partial class PhotoDisplayWindow
             case Setting.CacheStatusShowHide:
                 ButtonExpander.Visibility = AppConfig.Settings.ShowCacheStatus ? Visibility.Visible : Visibility.Collapsed;
                 break;
-            default:
-                break;
         }
     }
 

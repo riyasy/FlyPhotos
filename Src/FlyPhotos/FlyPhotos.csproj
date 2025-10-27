@@ -67,7 +67,6 @@
 		<PackageReference Include="Svg.Skia" Version="3.2.1" />
 		<PackageReference Include="System.Drawing.Common" Version="9.0.10" />
 		<PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
-		<PackageReference Include="TerraFX.Interop.Windows" Version="10.0.26100.2" />
 		<PackageReference Include="WinUIEx" Version="2.9.0" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
@@ -120,22 +119,14 @@
 		<ItemGroup>
 			<FlatExternalDlls Include="DLLs\*.dll" />
 		</ItemGroup>
-		<Copy
-			SourceFiles="@(FlatExternalDlls)"
-			DestinationFolder="$(OutputPath)"
-			SkipUnchangedFiles="true"
-		/>
+		<Copy SourceFiles="@(FlatExternalDlls)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
 	</Target>
 
 	<Target Name="FlattenExternalDllsOnPublish" AfterTargets="Publish">
 		<ItemGroup>
 			<FlatExternalDlls Include="DLLs\*.dll" />
 		</ItemGroup>
-		<Copy
-			SourceFiles="@(FlatExternalDlls)"
-			DestinationFolder="$(PublishDir)"
-			SkipUnchangedFiles="true"
-		/>
+		<Copy SourceFiles="@(FlatExternalDlls)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
 	</Target>
 	<!-- 
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution 

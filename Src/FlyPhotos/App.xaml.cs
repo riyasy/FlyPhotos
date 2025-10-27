@@ -36,7 +36,7 @@ public partial class App
     /// </summary>
     public App()
     {
-        NLog.GlobalDiagnosticsContext.Set("LogPath", PathResolver.GetLogFolderPath());
+        GlobalDiagnosticsContext.Set("LogPath", PathResolver.GetLogFolderPath());
 
         KillOtherFlys();
         InitializeComponent();

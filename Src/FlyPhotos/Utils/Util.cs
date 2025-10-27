@@ -39,6 +39,7 @@ internal static class Util
         SupportedExtensions.Add(".HEIC");
         SupportedExtensions.Add(".HEIF");
         SupportedExtensions.Add(".HIF");
+        SupportedExtensions.Add(".AVIF");
     }
 
     public static int FindSelectedFileIndex(string selectedFileName, List<string> files)
@@ -77,8 +78,8 @@ internal static class Util
 
     public static VirtualKey GetKeyThatProduces(char character)
     {
-        IntPtr layout = NativeWrappers.Win32Methods.GetKeyboardLayout(0);
-        short vkScanResult = NativeWrappers.Win32Methods.VkKeyScanEx((byte)character, layout);
+        IntPtr layout = Win32Methods.GetKeyboardLayout(0);
+        short vkScanResult = Win32Methods.VkKeyScanEx((byte)character, layout);
         int virtualKeyCode = vkScanResult & 0xff;
         return (VirtualKey)virtualKeyCode;
     }

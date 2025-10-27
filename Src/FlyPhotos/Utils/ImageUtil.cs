@@ -63,6 +63,7 @@ internal static class ImageUtil
                 case ".HEIC":
                 case ".HEIF":
                 case ".HIF":
+                case ".AVIF":
                     {
                         if (!AppConfig.Settings.OpenExitZoom)
                         {
@@ -72,8 +73,7 @@ internal static class ImageUtil
                         else
                         {
                             if (NativeHeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                            if (HeifCodecResolver.IsHevcDecoderAvailable)
-                                if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
+                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
                             if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                             return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                         }
@@ -115,6 +115,7 @@ internal static class ImageUtil
                     else
                     {
                         if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
+                        if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                         return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                     }
                 }
@@ -147,11 +148,10 @@ internal static class ImageUtil
                 case ".HEIC":
                 case ".HEIF":
                 case ".HIF":
-                {
+                case ".AVIF":
+                    {
                     if (NativeHeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    //if (HeifCodecResolver.IsHevcDecoderAvailable)
-                    //        if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                    //if (await MagickNetWrap.GetResized(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                    if (await MagickNetWrap.GetResized(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                     return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
                 case ".PSD":
@@ -180,6 +180,7 @@ internal static class ImageUtil
                 {
                     if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                     if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                    if (await MagickNetWrap.GetResized(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                     return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
             }
@@ -205,10 +206,10 @@ internal static class ImageUtil
                 case ".HEIC":
                 case ".HEIF":
                 case ".HIF":
-                {
+                case ".AVIF":
+                    {
                     if (NativeHeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    if (HeifCodecResolver.IsHevcDecoderAvailable)
-                        if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
+                    if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
                     if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                     return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
                 }
@@ -241,6 +242,7 @@ internal static class ImageUtil
                 default:
                 {
                     if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                     return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
                 }
             }
