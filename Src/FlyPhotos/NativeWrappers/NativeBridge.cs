@@ -10,96 +10,139 @@ using WinRT.Interop;
 
 namespace FlyPhotos.NativeWrappers;
 
-// The class is now internal to encapsulate the P/Invoke calls and partial for the source generator.
+/// <summary>
+/// Provides static methods for direct interoperability with the native library (FlyNativeLib.dll).
+/// This class handles the P/Invoke declarations for functions exposed by the C++ DLL.
+/// </summary>
 internal static partial class NativeBridge
 {
-    // Define the delegate for the codec info callback
+    /// <summary>
+    /// The name of the native DLL containing the functions to be imported.
+    /// </summary>
+    private const string DllName = "FlyNativeLib.dll";
+
+    /// <summary>
+    /// Represents the signature of a callback function used by <see cref="GetFileListFromExplorer"/>.
+    /// This delegate is invoked by the native code for each file path found.
+    /// </summary>
+    /// <param name="filePath">The path of a file, marshalled as a wide character string.</param>
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate void FileListCallback([MarshalAs(UnmanagedType.LPWStr)] string filePath);
+
+    /// <summary>
+    /// Imports the native `GetFileListFromExplorer` function from `FlyNativeLib.dll`.
+    /// This function typically interacts with the Windows Explorer shell to retrieve list of files in the open File Explorer window.
+    /// </summary>
+    /// <param name="callback">A delegate that the native function will call for each file path it finds.</param>
+    /// <returns>An HRESULT indicating the success or failure of the native operation.</returns>
+    [LibraryImport(DllName)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
+    internal static partial int GetFileListFromExplorer(FileListCallback callback);
+
+    /// <summary>
+    /// Represents the signature of a callback function used by <see cref="GetWicDecoders"/>.
+    /// This delegate is invoked by the native code for each WIC codec found.
+    /// </summary>
+    /// <param name="friendlyName">The friendly name of the codec, marshalled as a wide character string.</param>
+    /// <param name="fileExtensions">A comma-separated string of file extensions supported by the codec, marshalled as a wide character string.</param>
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void CodecInfoCallback(
         [MarshalAs(UnmanagedType.LPWStr)] string friendlyName,
         [MarshalAs(UnmanagedType.LPWStr)] string fileExtensions);
 
-    // Define the delegate that matches the C++ FileListCallback
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void FileListCallback([MarshalAs(UnmanagedType.LPWStr)] string filePath);
-
-    private const string DllName = "FlyNativeLib.dll"; // The name of your new native DLL
-
-    // Switched to LibraryImport for compile-time marshalling code generation.
-    // Added UnmanagedCallConv to preserve the StdCall calling convention.
-    [LibraryImport(DllName)]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
-    internal static partial int GetFileListFromExplorer(FileListCallback callback);
-
-    // Set StringMarshalling to match the original CharSet.Unicode.
-    [LibraryImport(DllName, StringMarshalling = StringMarshalling.Utf16)]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
-    internal static partial int ShowExplorerContextMenu(IntPtr ownerHwnd, string filePath, int x, int y);
-
+    /// <summary>
+    /// Imports the native `GetWicDecoders` function from `FlyNativeLib.dll`.
+    /// This function enumerates available Windows Imaging Component (WIC) decoders.
+    /// </summary>
+    /// <param name="callback">A delegate that the native function will call for each WIC decoder it finds.</param>
+    /// <returns>An HRESULT indicating the success or failure of the native operation.</returns>
     [LibraryImport(DllName)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
     internal static partial int GetWicDecoders(CodecInfoCallback callback);
+
+    /// <summary>
+    /// Imports the native `ShowExplorerContextMenu` function from `FlyNativeLib.dll`.
+    /// This function displays the Windows Explorer context menu for a specified file at a given screen coordinate.
+    /// </summary>
+    /// <param name="ownerHwnd">The window handle (HWND) of the owner window for the context menu.</param>
+    /// <param name="filePath">The path of the file for which to show the context menu.</param>
+    /// <param name="x">The X-coordinate (screen coordinates) where the context menu should appear.</param>
+    /// <param name="y">The Y-coordinate (screen coordinates) where the context menu should appear.</param>
+    /// <returns>An integer indicating the result of the operation (0 for success, non-zero for failure).</returns>
+    [LibraryImport(DllName, StringMarshalling = StringMarshalling.Utf16)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
+    internal static partial int ShowExplorerContextMenu(IntPtr ownerHwnd, string filePath, int x, int y);
 }
 
-public static class CliWrapper
+/// <summary>
+/// Provides a high-level, managed wrapper for native functionalities exposed by `FlyNativeLib.dll`.
+/// This class simplifies interaction with the native library and handles common tasks like error checking and data marshaling.
+/// </summary>
+public static class NativeWrapper
 {
+    /// <summary>
+    /// NLog logger instance for logging messages, warnings, and errors.
+    /// </summary>
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    /// <summary>
+    /// Retrieves a list of file paths from the Windows Explorer shell.
+    /// This typically corresponds to files in the currently open and active Explorer window.
+    /// </summary>
+    /// <returns>A <see cref="List{T}"/> of strings, where each string is a full file path.</returns>
     public static List<string> GetFileListFromExplorerWindow()
     {
         var files = new List<string>();
-
-        // Call the native function with our callback.
-        // This code remains unchanged as it correctly calls the wrapper.
-        var hr = NativeBridge.GetFileListFromExplorer(FileListCallback);
-
-        // Optional: Check HRESULT (hr) for success or failure
-        if (hr >= 0) // SUCCEEDED
+        var hresult = NativeBridge.GetFileListFromExplorer(FileListCallback);
+        if (hresult >= 0) // SUCCEEDED
             return files;
 
-        // Handle error, maybe return an empty list or throw an exception
+        Logger.Error($"GetFileListFromExplorer failed with HRESULT: {hresult}");
         return [];
 
-        // The callback function adds each file to our list.
         void FileListCallback(string filePath)
         {
             files.Add(filePath);
         }
     }
 
-    // You can call this directly via the ShowContextMenu wrapper
-    // bool success = CliWrapper.ShowContextMenu("C:\\path\\to\\file.jpg", x, y);
-
-    // A high-level wrapper for WIC codecs
+    /// <summary>
+    /// Retrieves a list of available Windows Imaging Component (WIC) decoders.
+    /// Each decoder's friendly name and supported file extensions are captured.
+    /// </summary>
+    /// <returns>A <see cref="List{T}"/> of <see cref="CodecInfo"/> objects, each representing a WIC decoder.</returns>
+    /// <exception cref="MarshalDirectiveException">Thrown if the native call to get WIC decoders fails (HRESULT is negative).</exception>
     public static List<CodecInfo> GetWicDecoders()
     {
         var codecs = new List<CodecInfo>();
-
-        // Call the native function
         var hresult = NativeBridge.GetWicDecoders(CodecInfoCallback);
 
-        // Optional: Check the HRESULT for errors
-        if (hresult < 0)
-            // Throw an exception or handle the error from the native call
-            Marshal.ThrowExceptionForHR(hresult);
 
-        return codecs;
+        if (hresult >= 0) 
+            return codecs;
 
-        // The delegate instance must be kept alive during the native call,
-        // so the garbage collector doesn't clean it up prematurely.
-        // Assigning it to a local variable is sufficient.
+        Logger.Error($"GetWicDecoders failed with HRESULT: {hresult}");
+        return [];
+
         void CodecInfoCallback(string friendlyName, string extensions)
         {
             var codec = new CodecInfo
             {
                 FriendlyName = friendlyName,
-                // The extensions string from C++ is comma-separated, e.g., ".jpg,.jpeg,.jpe"
+                // The extensions string from C++ is comma-separated (e.g., ".jpg,.jpeg,.jpe").// Split it and convert to uppercase for consistency.
                 FileExtensions = [.. extensions.ToUpperInvariant().Split([','], StringSplitOptions.RemoveEmptyEntries)]
             };
             codecs.Add(codec);
         }
     }
 
+    /// <summary>
+    /// Displays the Windows Explorer context menu for a specified file at given screen coordinates.
+    /// </summary>
+    /// <param name="ownerWindow">The owner <see cref="Microsoft.UI.Xaml.Window"/> for the context menu. Its HWND will be used.</param>
+    /// <param name="filePath">The full path to the file for which to show the context menu.</param>
+    /// <param name="lpPointX">The X-coordinate (screen coordinates) where the context menu should appear.</param>
+    /// <param name="lpPointY">The Y-coordinate (screen coordinates) where the context menu should appear.</param>
     public static void ShowContextMenu(Window ownerWindow, string filePath, int lpPointX,
         int lpPointY)
     {
@@ -107,7 +150,7 @@ public static class CliWrapper
         {
             IntPtr hWnd = WindowNative.GetWindowHandle(ownerWindow);
             var returnCode = NativeBridge.ShowExplorerContextMenu(hWnd, filePath, lpPointX, lpPointY);
-            if (returnCode != 0) // Check for failure
+            if (returnCode != 0) // Check for non-zero return code, which indicates failure.
             {
                 Logger.Error($"NativeBridge - ShowExplorerContextMenu failed with error code {returnCode}");
             }

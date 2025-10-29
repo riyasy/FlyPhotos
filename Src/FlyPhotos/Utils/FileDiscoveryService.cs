@@ -106,7 +106,7 @@ internal static class FileDiscoveryService
 
     private static List<string> FindAllFilesFromExplorerWindowNative()
     {
-        var fileList = CliWrapper.GetFileListFromExplorerWindow();        
+        var fileList = NativeWrapper.GetFileListFromExplorerWindow();        
         return fileList;
     }
 

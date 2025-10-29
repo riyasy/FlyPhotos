@@ -31,7 +31,7 @@ internal static class Util
 
     static Util()
     {
-        _codecInfoList = CliWrapper.GetWicDecoders();
+        _codecInfoList = NativeWrapper.GetWicDecoders();
         foreach (var codecInfo in _codecInfoList) 
             SupportedExtensions.UnionWith(codecInfo.FileExtensions);
         SupportedExtensions.Add(".PSD");
@@ -59,7 +59,7 @@ internal static class Util
     public static string GetExtensionsDisplayString()
     {
         var sb = new StringBuilder();
-        _codecInfoList ??= CliWrapper.GetWicDecoders();
+        _codecInfoList ??= NativeWrapper.GetWicDecoders();
 
         foreach (var codec in _codecInfoList)
         {

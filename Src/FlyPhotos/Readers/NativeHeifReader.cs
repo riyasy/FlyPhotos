@@ -22,7 +22,7 @@ internal static class NativeHeifReader
         try
         {
             // 1. Call our new native decoder to get the thumbnail's pixel data and dimensions.
-            var heifImage = NativeHeifBridge.DecodeThumbnail(inputPath);
+            var heifImage = NativeHeifWrapper.DecodeThumbnail(inputPath);
 
             // 2. Check if a valid thumbnail was returned.
             if (heifImage == null || heifImage.Pixels == null || heifImage.Pixels.Length == 0)
@@ -62,7 +62,7 @@ internal static class NativeHeifReader
         try
         {
             // 1. Call our new native decoder to get the primary image's pixel data.
-            var heifImage = NativeHeifBridge.DecodePrimaryImage(inputPath);
+            var heifImage = NativeHeifWrapper.DecodePrimaryImage(inputPath);
 
             // 2. Check if a valid image was returned.
             if (heifImage == null || heifImage.Pixels == null || heifImage.Pixels.Length == 0)
