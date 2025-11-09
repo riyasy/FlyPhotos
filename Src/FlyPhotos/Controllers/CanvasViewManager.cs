@@ -13,7 +13,7 @@ namespace FlyPhotos.Controllers;
 /// Manages the view state (pan, zoom, rotation) of the canvas.
 /// Handles user interactions, animations, and state transitions.
 /// </summary>
-internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbackCanvasRedraw, Action callbackZoomUpdate)
+internal class CanvasViewManager(CanvasViewState canvasViewState)
 {
     // --- Public Properties & Events ---
 
@@ -32,10 +32,15 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
     /// </summary>
     public event Action<bool> OneToOneStateChanged;
 
+    /// <summary>
+    /// Fires when the zoom value changes.
+    /// </summary>
+    public event Action ZoomChanged;
 
-    private readonly Action _callbackZoomUpdate = callbackZoomUpdate;
-
-    private readonly Action _callbackCanvasRedraw = callbackCanvasRedraw;
+    /// <summary>
+    /// Fires when there is a need to redraw the canvas.
+    /// </summary>
+    public event Action ViewChanged;
 
     // --- Animation & State Fields ---
 
@@ -148,7 +153,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
             _canvasViewState.Scale = newScale;
             _canvasViewState.LastScaleTo = newScale;
             _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
-            _callbackZoomUpdate();
+            ZoomChanged?.Invoke();
             IsAtOneToOne = Math.Abs(newScale - 1.0f) < 0.001f;
         }
         else // The view was not fitted (user has custom pan/zoom).
@@ -168,7 +173,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         }
 
         _canvasViewState.UpdateTransform();
-        _callbackCanvasRedraw();
+        ViewChanged?.Invoke();
     }
 
     /// <summary>
@@ -188,8 +193,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
             _canvasViewState.ImagePos = new Point(newSize.Width / 2, newSize.Height / 2);
 
             _canvasViewState.UpdateTransform();
-            _callbackCanvasRedraw();
-            _callbackZoomUpdate();
+            ViewChanged?.Invoke();
+            ZoomChanged?.Invoke();
             IsAtOneToOne = Math.Abs(newScale - 1.0f) < 0.001f;
         }
         else
@@ -200,7 +205,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
             _canvasViewState.ImagePos.X *= xChangeRatio;
             _canvasViewState.ImagePos.Y *= yChangeRatio;
             _canvasViewState.UpdateTransform();
-            _callbackCanvasRedraw();
+            ViewChanged?.Invoke();
         }
     }
 
@@ -265,8 +270,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _canvasViewState.ImagePos = new Point(newPosX, newPosY);
         // 4. Update transform and notify for redraw.
         _canvasViewState.UpdateTransform();
-        _callbackCanvasRedraw();
-        _callbackZoomUpdate();
+        ViewChanged?.Invoke();
+        ZoomChanged?.Invoke();
 
         // Any manual zoom action invalidates both fitted and 1:1 states.
         IsFittedToScreen = false;
@@ -343,8 +348,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
             _canvasViewState.ImagePos.X = canvasSize.Width / 2;
             _canvasViewState.ImagePos.Y = canvasSize.Height / 2;
             _canvasViewState.UpdateTransform();
-            _callbackCanvasRedraw();
-            _callbackZoomUpdate();
+            ViewChanged?.Invoke();
+            ZoomChanged?.Invoke();
             IsFittedToScreen = true;
             IsAtOneToOne = Math.Abs(scaleFactor - 1.0f) < 0.001f;
             return;
@@ -383,7 +388,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _canvasViewState.ImagePos.X += dx;
         _canvasViewState.ImagePos.Y += dy;
         _canvasViewState.UpdateTransform();
-        _callbackCanvasRedraw();
+        ViewChanged?.Invoke();
 
         // Any manual pan breaks the fitted state.
         IsFittedToScreen = false;
@@ -397,7 +402,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
     {
         _canvasViewState.Rotation += rotation;
         _canvasViewState.UpdateTransform();
-        _callbackCanvasRedraw();
+        ViewChanged?.Invoke();
 
         // Rotation changes the effective dimensions, breaking the fitted state.
         IsFittedToScreen = false;
@@ -528,8 +533,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
 
         _canvasViewState.Scale = newScale;
         _canvasViewState.UpdateTransform();
-        _callbackCanvasRedraw();
-        if (!_suppressZoomUpdateForNextAnimation) _callbackZoomUpdate();
+        ViewChanged?.Invoke();
+        if (!_suppressZoomUpdateForNextAnimation) ZoomChanged?.Invoke();
 
         // Stop the animation when finished.
         if (t >= 1.0)
@@ -557,8 +562,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _canvasViewState.ImagePos = new Point(newX, newY);
 
         _canvasViewState.UpdateTransform();
-        _callbackCanvasRedraw();
-        if (!_suppressZoomUpdateForNextAnimation) _callbackZoomUpdate();
+        ViewChanged?.Invoke();
+        if (!_suppressZoomUpdateForNextAnimation) ZoomChanged?.Invoke();
 
         // Stop the animation when finished.
         if (t >= 1.0)
@@ -593,7 +598,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
             // Animation finished. Ensure the image is back to its exact starting position.
             _canvasViewState.ImagePos = _panStartPosition;
             _canvasViewState.UpdateTransform();
-            _callbackCanvasRedraw();
+            ViewChanged?.Invoke();
 
             CompositionTarget.Rendering -= _renderingHandler;
             PanZoomAnimationOnGoing = false;
@@ -612,7 +617,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _canvasViewState.ImagePos.X = _panStartPosition.X + xOffset;
 
         _canvasViewState.UpdateTransform();
-        _callbackCanvasRedraw();
+        ViewChanged?.Invoke();
     }
 
     /// <summary>
