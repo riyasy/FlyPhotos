@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using FlyPhotos.Data;
+using FlyPhotos.NativeWrappers;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
@@ -12,12 +13,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using Windows.Graphics;
 using Windows.System;
 using Windows.UI;
 using Windows.UI.Core;
-using FlyPhotos.NativeWrappers;
+using WinRT.Interop;
+using static FlyPhotos.NativeWrappers.Win32Methods;
 
 
 namespace FlyPhotos.Utils;
@@ -159,5 +162,20 @@ internal static class Util
             Logger.Error(ex);
         }
         return 0;
+    }
+
+    public static void ShowFileProperties(string filePath, Window ownerWindow)
+    {
+        if (!File.Exists(filePath))        
+            return;
+        
+        SHELLEXECUTEINFO info = new SHELLEXECUTEINFO();
+        info.cbSize = Marshal.SizeOf(info);
+        info.lpVerb = "properties";
+        info.lpFile = filePath;
+        info.nShow = SW_SHOW;
+        info.fMask = SEE_MASK_INVOKEIDLIST;
+        //info.hwnd = WindowNative.GetWindowHandle(ownerWindow);
+        ShellExecuteEx(ref info);
     }
 }

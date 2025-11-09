@@ -483,6 +483,10 @@ public sealed partial class PhotoDisplayWindow
                 case VirtualKey.Right when ctrlPressed:
                     _canvasController.Pan(20, 0);
                     break;
+
+                case VirtualKey.D:
+                    Util.ShowFileProperties(_photoController.GetFullPathCurrentFile(), this);
+                    break;
             }
 
             // Layout-aware override

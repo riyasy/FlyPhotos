@@ -74,4 +74,62 @@ internal static partial class Win32Methods
     /// </remarks>
     [LibraryImport("user32.dll", EntryPoint = "SendMessageW", SetLastError = true)]
     internal static partial IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+    /// <summary>
+    /// Performs an operation on a specified file, such as opening a file or showing its properties.
+    /// This is an extended version of ShellExecute and is recommended for new applications.
+    /// </summary>
+    /// <param name="pExecInfo">A reference to a <see cref="SHELLEXECUTEINFO"/> structure that contains and receives information about the operation.</param>
+    /// <returns>
+    /// Returns <see langword="true"/> if successful; otherwise, <see langword="false"/>.
+    /// Call <see cref="Marshal.GetLastWin32Error"/> to get extended error information on failure.
+    /// </returns>
+    /// <remarks>
+    /// This function uses <c>[DllImport]</c> instead of <c>[LibraryImport]</c> because its struct parameter (<see cref="SHELLEXECUTEINFO"/>)
+    /// is non-blittable (contains strings) and is passed by reference (<c>ref</c>). This specific scenario is not yet supported
+    /// by the <c>[LibraryImport]</c> source generator, making <c>[DllImport]</c> the correct choice here.
+    /// </remarks>
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool ShellExecuteEx(ref SHELLEXECUTEINFO pExecInfo);
+
+    /// <summary>
+    /// Contains information used by the <see cref="ShellExecuteEx"/> function.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    public struct SHELLEXECUTEINFO
+    {
+        public int cbSize;
+        public uint fMask;
+        public IntPtr hwnd;
+        [MarshalAs(UnmanagedType.LPTStr)]
+        public string lpVerb;
+        [MarshalAs(UnmanagedType.LPTStr)]
+        public string lpFile;
+        [MarshalAs(UnmanagedType.LPTStr)]
+        public string lpParameters;
+        [MarshalAs(UnmanagedType.LPTStr)]
+        public string lpDirectory;
+        public int nShow;
+        public IntPtr hInstApp;
+        public IntPtr lpIDList;
+        [MarshalAs(UnmanagedType.LPTStr)]
+        public string lpClass;
+        public IntPtr hkeyClass;
+        public uint dwHotKey;
+        public IntPtr hIcon;
+        public IntPtr hProcess;
+    }
+
+    /// <summary>
+    /// Activates a window and displays it in its current size and position.
+    /// This is one of the command flags for the <see cref="SHELLEXECUTEINFO.nShow"/> member.
+    /// </summary>
+    internal const int SW_SHOW = 5;
+
+    /// <summary>
+    /// Use this flag in the <see cref="SHELLEXECUTEINFO.fMask"/> member when the <see cref="SHELLEXECUTEINFO.lpIDList"/> member is being used.
+    /// This is typically for operations on Shell namespace objects that are not part of the file system.
+    /// </summary>
+    internal const uint SEE_MASK_INVOKEIDLIST = 12;
 }

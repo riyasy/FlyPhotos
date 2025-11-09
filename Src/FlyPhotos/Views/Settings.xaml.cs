@@ -154,6 +154,7 @@ internal sealed partial class Settings
                                                     $"{Environment.NewLine}TouchPad two finger swipe Up or Down: Zoom In or Out/ Navigate Photos - based on Mouse Wheel setting" +
                                                     $"{Environment.NewLine}TouchPad pinch open or close: Zoom In or Out" +                                                    
                                                     Environment.NewLine +
+                                                    $"{Environment.NewLine}D : Show File Properties" +
                                                     $"{Environment.NewLine}Del : Delete Photo" +
                                                     Environment.NewLine +
                                                     $"{Environment.NewLine}Esc : Close Settings or Exit App"
