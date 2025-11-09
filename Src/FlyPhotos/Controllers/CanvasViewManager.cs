@@ -9,11 +9,35 @@ using Size = FlyPhotos.Data.Size;
 
 namespace FlyPhotos.Controllers;
 
+/// <summary>
+/// Manages the view state (pan, zoom, rotation) of the canvas.
+/// Handles user interactions, animations, and state transitions.
+/// </summary>
 internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbackCanvasRedraw, Action callbackZoomUpdate)
 {
+    // --- Public Properties & Events ---
+
+    /// <summary>
+    /// Indicates if a pan or zoom animation is currently in progress.
+    /// </summary>
     public bool PanZoomAnimationOnGoing { get; private set; }
+
+    /// <summary>
+    /// Fires when the view's "fitted to screen" state changes.
+    /// </summary>
     public event Action<bool> FitToScreenStateChanged;
+
+    /// <summary>
+    /// Fires when the view's "100% zoom" state changes.
+    /// </summary>
     public event Action<bool> OneToOneStateChanged;
+
+
+    private readonly Action _callbackZoomUpdate = callbackZoomUpdate;
+
+    private readonly Action _callbackCanvasRedraw = callbackCanvasRedraw;
+
+    // --- Animation & State Fields ---
 
     private EventHandler<object> _renderingHandler;
     private DateTime _panZoomAnimationStartTime;
@@ -25,6 +49,12 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
     private Point _panStartPosition;
     private Point _panTargetPosition;
 
+    // --- State Management Properties ---
+
+    /// <summary>
+    /// Tracks if the image is perfectly fitted to the canvas (respecting padding).
+    /// Setting this property will fire the FitToScreenStateChanged event if the value changes.
+    /// </summary>
     private bool _isFittedToScreen;
     private bool IsFittedToScreen
     {
@@ -37,6 +67,10 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         }
     }
 
+    /// <summary>
+    /// Tracks if the image is at exactly 100% scale.
+    /// Setting this property will fire the OneToOneStateChanged event if the value changes.
+    /// </summary>
     private bool _isAtOneToOne;
     private bool IsAtOneToOne
     {
@@ -49,12 +83,17 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         }
     }
 
-    // A callback to trigger a redraw
+
     private bool _suppressZoomUpdateForNextAnimation;
-    private readonly Action _callbackZoomUpdate = callbackZoomUpdate;
-    private readonly Action _callbackCanvasRedraw = callbackCanvasRedraw;
+
     private readonly CanvasViewState _canvasViewState = canvasViewState;
 
+    // --- Public API Methods ---
+
+    /// <summary>
+    /// Sets the initial scale and position for a new image.
+    /// This respects the "no upscale on load" rule for small images.
+    /// </summary>
     public void SetScaleAndPosition(Size imageSize, int imageRotation, Size canvasSize, bool isFirstPhotoEver)
     {
         // 1. Calculate the true "fit-to-screen" scale, which may be > 1.0 for small images.
@@ -63,13 +102,14 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         // 2. Determine the initial display scale. By default, we don't scale past 100% (1.0f).
         var initialScale = Math.Min(fitScale, 1.0f);
 
+        // Configure the view state with the new image metrics and initial scale.
         _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
         _canvasViewState.Rotation = imageRotation;
         _canvasViewState.ImagePos.X = canvasSize.Width / 2;
         _canvasViewState.ImagePos.Y = canvasSize.Height / 2;
-
         _canvasViewState.LastScaleTo = initialScale;
 
+        // Animate the first-ever image load if configured.
         if (isFirstPhotoEver && AppConfig.Settings.OpenExitZoom)
         {
             var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
@@ -91,6 +131,10 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         IsAtOneToOne = Math.Abs(initialScale - 1.0f) < 0.001f;
     }
 
+    /// <summary>
+    /// Updates the view when the image source changes (e.g., from preview to HQ).
+    /// Preserves the current view state (fitted or custom pan/zoom) as appropriate.
+    /// </summary>
     public void UpdateImageMetrics(Size imageSize, Size canvasSize)
     {
         var oldImageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
@@ -127,10 +171,15 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _callbackCanvasRedraw();
     }
 
+    /// <summary>
+    /// Responds to window size changes, keeping the image view consistent.
+    /// If fitted, it re-fits. Otherwise, it adjusts the pan position proportionally.
+    /// </summary>
     public void HandleSizeChange(Size newSize, Size previousSize)
     {
         if (IsFittedToScreen)
         {
+            // If the image is fitted, recalculate the fit for the new window size.
             var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
             var newScale = CalculateScreenFitScale(newSize, imageSize, _canvasViewState.Rotation);
 
@@ -145,6 +194,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         }
         else
         {
+            // If custom pan/zoom, adjust the image position to maintain its relative screen location.
             var xChangeRatio = newSize.Width / previousSize.Width;
             var yChangeRatio = newSize.Height / previousSize.Height;
             _canvasViewState.ImagePos.X *= xChangeRatio;
@@ -154,6 +204,9 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         }
     }
 
+    /// <summary>
+    /// Performs a standard zoom operation centered on the canvas.
+    /// </summary>
     public void ZoomAtCenter(ZoomDirection zoomDirection, Size canvasSize)
     {
         var scalePercentage = (zoomDirection == ZoomDirection.In) ? 1.25f : 0.8f;
@@ -162,10 +215,15 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _canvasViewState.LastScaleTo = scaleTo;
         var center = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         StartZoomAnimation(scaleTo, center);
+
+        // Any manual zoom action invalidates both fitted and 1:1 states.
         IsFittedToScreen = false;
         IsAtOneToOne = false;
     }
 
+    /// <summary>
+    /// Performs a standard zoom operation anchored at a specific point (e.g., mouse cursor).
+    /// </summary>
     public void ZoomAtPoint(ZoomDirection zoomDirection, Point zoomAnchor)
     {
         var scalePercentage = (zoomDirection == ZoomDirection.In) ? 1.25f : 0.8f;
@@ -173,10 +231,15 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         if (scaleTo < 0.05) return;
         _canvasViewState.LastScaleTo = scaleTo;
         StartZoomAnimation(scaleTo, zoomAnchor);
+
+        // Any manual zoom action invalidates both fitted and 1:1 states.
         IsFittedToScreen = false;
         IsAtOneToOne = false;
     }
 
+    /// <summary>
+    /// Performs a precision zoom (e.g., from a touchpad) anchored at a specific point.
+    /// </summary>
     public void ZoomAtPointPrecision(int delta, Point zoomAnchor)
     {
         if (delta == 0) return;
@@ -188,7 +251,6 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         // Compute scale factor proportional to delta
         float scaleFactor = (float)Math.Pow(baseZoomIn, delta / 120.0);
         float newScale = _canvasViewState.LastScaleTo * scaleFactor;
-
         if (newScale < minScale) return;
 
         // 1. Capture the scale *before* it's changed.
@@ -205,6 +267,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _canvasViewState.UpdateTransform();
         _callbackCanvasRedraw();
         _callbackZoomUpdate();
+
+        // Any manual zoom action invalidates both fitted and 1:1 states.
         IsFittedToScreen = false;
         IsAtOneToOne = false;
     }
@@ -240,15 +304,20 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
 
         var anchor = zoomAnchor ?? new Point(canvasSize.Width / 2, canvasSize.Height / 2);
 
+        // A pure zoom doesn't change pan; a pan/zoom centers the image.
         if (zoomAnchor.HasValue)
             StartZoomAnimation(targetScale, anchor);
         else
             StartPanAndZoomAnimation(targetScale, anchor);
 
+        // Set state immediately for responsive UI.
         IsFittedToScreen = Math.Abs(targetScale - screenFitScale) < 0.001f;
         IsAtOneToOne = Math.Abs(targetScale - 1.0f) < 0.001f;
     }
 
+    /// <summary>
+    /// Performs the zoom-out animation when closing the application.
+    /// </summary>
     public void ZoomOutOnExit(double exitAnimationDuration, Size canvasSize)
     {
         _panZoomAnimationDurationMs = exitAnimationDuration;
@@ -259,10 +328,12 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         IsAtOneToOne = false;
     }
 
+    /// <summary>
+    /// Explicit user action to fit the image to the screen. Allows upscaling of small images.
+    /// </summary>
     public void ZoomPanToFit(bool animateChange, Size imageSize, Size canvasSize)
     {
-        // This method is for the EXPLICIT user action, so it DOES upscale small images.
-        // It does not use the Math.Min(..., 1.0f) logic.
+        // This is the EXPLICIT user action, so it DOES upscale small images.
         var scaleFactor = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
 
         if (!animateChange)
@@ -283,37 +354,54 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _canvasViewState.LastScaleTo = (float)scaleFactor;
         StartPanAndZoomAnimation((float)scaleFactor, targetPosition);
 
+        // Set state immediately for responsive UI, even when animating.
         IsFittedToScreen = true;
         IsAtOneToOne = Math.Abs(scaleFactor - 1.0f) < 0.001f;
     }
 
+    /// <summary>
+    /// Explicit user action to set zoom to 100%.
+    /// </summary>
     public void ZoomToHundred(Size canvasSize)
     {
         var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         _canvasViewState.LastScaleTo = 1.0f;
         StartPanAndZoomAnimation(1.0f, targetPosition);
 
+        // Set state immediately. The view is fitted only if 100% happens to be the fit scale.
         var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
         var screenFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
         IsFittedToScreen = Math.Abs(1.0f - screenFitScale) < 0.001f;
         IsAtOneToOne = true;
     }
 
+    /// <summary>
+    /// Pans the image by the specified delta.
+    /// </summary>
     public void Pan(double dx, double dy)
     {
         _canvasViewState.ImagePos.X += dx;
         _canvasViewState.ImagePos.Y += dy;
         _canvasViewState.UpdateTransform();
         _callbackCanvasRedraw();
+
+        // Any manual pan breaks the fitted state.
         IsFittedToScreen = false;
+        // Per requirements, panning does not affect the 1:1 state.
     }
 
+    /// <summary>
+    /// Rotates the image by 90 degrees.
+    /// </summary>
     public void RotateBy(int rotation)
     {
         _canvasViewState.Rotation += rotation;
         _canvasViewState.UpdateTransform();
         _callbackCanvasRedraw();
+
+        // Rotation changes the effective dimensions, breaking the fitted state.
         IsFittedToScreen = false;
+        // Rotation does not change scale, so 1:1 state is preserved.
     }
 
     /// <summary>
@@ -330,6 +418,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         }
         StartShrugAnimation();
     }
+
+    // --- Helper & Animation Methods ---
 
     /// <summary>
     /// Calculates the scale factor required to fit an image fully within the canvas.
@@ -363,6 +453,9 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         return (float)Math.Min(horizontalScale, verticalScale);
     }
 
+    /// <summary>
+    /// Starts a pure zoom animation, keeping the anchor point stationary on screen.
+    /// </summary>
     private void StartZoomAnimation(float targetScale, Point zoomAnchor)
     {
         _panZoomAnimationStartTime = DateTime.UtcNow;
@@ -378,6 +471,9 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         PanZoomAnimationOnGoing = true;
     }
 
+    /// <summary>
+    /// Starts an animation that interpolates both pan and zoom simultaneously.
+    /// </summary>
     private void StartPanAndZoomAnimation(float targetScale, Point targetPosition)
     {
         // Setup animation state
@@ -397,7 +493,9 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         PanZoomAnimationOnGoing = true;
     }
 
-    // A private method to set up and start the shrug animation.
+    /// <summary>
+    /// Starts the shrug/shake animation.
+    /// </summary>
     private void StartShrugAnimation()
     {
         // Store the original position to return to
@@ -414,17 +512,17 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         PanZoomAnimationOnGoing = true;
     }
 
+    /// <summary>
+    /// The rendering loop callback for the pure zoom animation.
+    /// </summary>
     private void AnimateZoom()
     {
         var elapsed = (DateTime.UtcNow - _panZoomAnimationStartTime).TotalMilliseconds;
         var t = Math.Clamp(elapsed / _panZoomAnimationDurationMs, 0.0, 1.0);
-
-        // Ease-out cubic: f(t) = 1 - (1 - t)^3
-        float easedT = 1f - (float)Math.Pow(1 - t, 3);
-
+        float easedT = 1f - (float)Math.Pow(1 - t, 3); // Ease-out cubic: f(t) = 1 - (1 - t)^3
         var newScale = _zoomStartScale + (_zoomTargetScale - _zoomStartScale) * easedT;
 
-        // Maintain zoom center relative to the mouse
+        // Formula to keep the zoom anchor stationary.
         _canvasViewState.ImagePos.X = _zoomCenter.X - (newScale / _canvasViewState.Scale) * (_zoomCenter.X - _canvasViewState.ImagePos.X);
         _canvasViewState.ImagePos.Y = _zoomCenter.Y - (newScale / _canvasViewState.Scale) * (_zoomCenter.Y - _canvasViewState.ImagePos.Y);
 
@@ -433,6 +531,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _callbackCanvasRedraw();
         if (!_suppressZoomUpdateForNextAnimation) _callbackZoomUpdate();
 
+        // Stop the animation when finished.
         if (t >= 1.0)
         {
             CompositionTarget.Rendering -= _renderingHandler;
@@ -441,17 +540,17 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         }
     }
 
+    /// <summary>
+    /// The rendering loop callback for the combined pan and zoom animation.
+    /// </summary>
     private void AnimatePanAndZoom()
     {
         var elapsed = (DateTime.UtcNow - _panZoomAnimationStartTime).TotalMilliseconds;
         var t = Math.Clamp(elapsed / _panZoomAnimationDurationMs, 0.0, 1.0);
+        float easedT = 1f - (float)Math.Pow(1 - t, 3); // Ease-out cubic: f(t) = 1 - (1 - t)^3
 
-        // Ease-out cubic: f(t) = 1 - (1 - t)^3
-        float easedT = 1f - (float)Math.Pow(1 - t, 3);
-
-        // Interpolate scale
+        // Interpolate scale and position.
         _canvasViewState.Scale = _zoomStartScale + (_zoomTargetScale - _zoomStartScale) * easedT;
-
         // Interpolate position (a simple linear interpolation)
         var newX = _panStartPosition.X + (_panTargetPosition.X - _panStartPosition.X) * easedT;
         var newY = _panStartPosition.Y + (_panTargetPosition.Y - _panStartPosition.Y) * easedT;
@@ -461,6 +560,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _callbackCanvasRedraw();
         if (!_suppressZoomUpdateForNextAnimation) _callbackZoomUpdate();
 
+        // Stop the animation when finished.
         if (t >= 1.0)
         {
             CompositionTarget.Rendering -= _renderingHandler;
@@ -480,6 +580,9 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         }
     }
 
+    /// <summary>
+    /// The rendering loop callback for the shrug animation.
+    /// </summary>
     private void AnimateShrug()
     {
         var elapsed = (DateTime.UtcNow - _panZoomAnimationStartTime).TotalMilliseconds;
@@ -512,7 +615,9 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _callbackCanvasRedraw();
     }
 
-
+    /// <summary>
+    /// Cleans up resources, specifically the rendering event handler.
+    /// </summary>
     public void Dispose()
     {
         if (_renderingHandler == null) return;
