@@ -110,22 +110,32 @@
                             Margin="0,20,0,0"
                             Style="{StaticResource BodyStrongTextBlockStyle}"
                             Text="Photo Display" />
-                        <controls:SettingsCard
-                            x:Name="SettingsCardOpenExitZoom"
+                        <controls:SettingsExpander
                             Margin="0,5,0,0"
-                            Description="⚠ May slowdown startup: Fly waits to load full image instead of preview during startup."
-                            Header="Zoom in on file Open, Zoom out on exit"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE9A6;}">
-                            <ToggleSwitch x:Name="ButtonOpenExitZoom" />
-                        </controls:SettingsCard>
-                        <controls:SettingsCard
-                            x:Name="SettingsCardHighQualityInterpolation"
-                            Margin="0,5,0,0"
-                            Description="Disable for sharper pixel edges (useful for pixel art)."
-                            Header="Use high quality interpolation when zooming"
+                            Description="Customize Pan and Zoom behaviour."
+                            Header="Pan and Zoom Settings"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE71E;}">
-                            <ToggleSwitch x:Name="ButtonHighQualityInterpolation" />
-                        </controls:SettingsCard>
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardOpenExitZoom"
+                                    Description="⚠ May slowdown startup: Fly waits to load full image instead of preview during startup."
+                                    Header="Zoom in on file Open, Zoom out on exit">
+                                    <ToggleSwitch x:Name="ButtonOpenExitZoom" />
+                                </controls:SettingsCard>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardHighQualityInterpolation"
+                                    Description="Disable for sharper pixel edges (useful for pixel art)."
+                                    Header="Use high quality interpolation when zooming">
+                                    <ToggleSwitch x:Name="ButtonHighQualityInterpolation" />
+                                </controls:SettingsCard>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardPreserveZoomAndPan"
+                                    Description="⚠ Enable only if you usually browse folders with same sized photos."
+                                    Header="Preserve Pan and Zoom across photos">
+                                    <ToggleSwitch x:Name="ButtonPreserveZoomAndPan" />
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
                         <controls:SettingsCard
                             x:Name="SettingsCardImageFitPercentage"
                             Margin="0,5,0,0"

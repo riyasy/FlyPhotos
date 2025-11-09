@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -105,6 +105,7 @@ internal sealed partial class Settings
         ButtonConfirmBeforeDelete.IsOn = AppConfig.Settings.ConfirmForDelete;
         ButtonShowFileName.IsOn = AppConfig.Settings.ShowFileName;
         ButtonShowCacheStatusExpander.IsOn = AppConfig.Settings.ShowCacheStatus;
+        ButtonPreserveZoomAndPan.IsOn = AppConfig.Settings.PreserveZoomAndPan;
 
         MainLayout.KeyDown += MainLayout_OnKeyDown;
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
@@ -125,6 +126,7 @@ internal sealed partial class Settings
         ButtonConfirmBeforeDelete.Toggled += ButtonConfirmBeforeDelete_OnToggled;
         ButtonShowFileName.Toggled += ButtonShowFileName_OnToggled;
         ButtonShowCacheStatusExpander.Toggled += ButtonShowCacheStatusExpander_OnToggled;
+        ButtonPreserveZoomAndPan.Toggled += ButtonPreserveZoomAndPan_OnToggled;
 
 
         SettingsCardKeyboardShortCuts.Description = $"{Environment.NewLine}Left/Right Arrow Keys : Navigate Photos" +
@@ -141,8 +143,8 @@ internal sealed partial class Settings
                                                     $"{Environment.NewLine}Ctrl + '-' : Zoom Out" +
                                                     Environment.NewLine +
                                                     $"{Environment.NewLine}Page Up/Page Down : Zoom In/Out to next Preset (100%,400%,Fit)" +
-                                                    $"{Environment.NewLine}Home - Navigate to first photo" +
-                                                    $"{Environment.NewLine}End - Navigate to last photo" +
+                                                    $"{Environment.NewLine}Home : Navigate to first photo" +
+                                                    $"{Environment.NewLine}End : Navigate to last photo" +
                                                     Environment.NewLine +
                                                     $"{Environment.NewLine}Mouse wheel on Thumbnail strip: Navigate Photos" +
                                                     $"{Environment.NewLine}Mouse wheel on On Screen Left/Right Button: Navigate Photos" +
@@ -152,7 +154,9 @@ internal sealed partial class Settings
                                                     $"{Environment.NewLine}TouchPad two finger swipe Up or Down: Zoom In or Out/ Navigate Photos - based on Mouse Wheel setting" +
                                                     $"{Environment.NewLine}TouchPad pinch open or close: Zoom In or Out" +                                                    
                                                     Environment.NewLine +
-                                                    $"{Environment.NewLine}Esc - Close Settings or Exit App"
+                                                    $"{Environment.NewLine}Del : Delete Photo" +
+                                                    Environment.NewLine +
+                                                    $"{Environment.NewLine}Esc : Close Settings or Exit App"
                                                     ;
 
         SettingsCardCredits.Description = $"Uses packages from " +
@@ -170,6 +174,31 @@ internal sealed partial class Settings
         if (ComboMouseWheelBehaviourInfo.Description is string desc)
             ComboMouseWheelBehaviourInfo.Description = desc.Replace("%%", Environment.NewLine);
                 
+    }
+
+    private async void ButtonPreserveZoomAndPan_OnToggled(object sender, RoutedEventArgs e)
+    {
+        if (ButtonPreserveZoomAndPan.IsOn)
+        {
+            var warningDialog = new ContentDialog
+            {
+                XamlRoot = this.Content.XamlRoot,
+                Title = "Preserve Pan and Zoom across photos?",
+                Content = "Enable only if you usually browse folders with same sized images. ⚠ Enabling will badly affect user experience in folders with mixed size images.",
+                PrimaryButtonText = "Enable",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Close // Default to cancel for safety
+            };
+
+            var result = await warningDialog.ShowAsync();
+            if (result != ContentDialogResult.Primary)
+            {
+                ButtonPreserveZoomAndPan.IsOn = false;
+                return;
+            }
+        }
+        AppConfig.Settings.PreserveZoomAndPan = ButtonPreserveZoomAndPan.IsOn;
+        await AppConfig.SaveAsync();
     }
 
     private async void ButtonShowCacheStatusExpander_OnToggled(object s, RoutedEventArgs e)

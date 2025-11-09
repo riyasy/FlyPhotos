@@ -109,6 +109,7 @@ public sealed partial class PhotoDisplayWindow
         _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, photoSessionState);
         _photoController.StatusUpdated += PhotoController_StatusUpdated;
         _canvasController.OnZoomChanged += CanvasController_OnZoomChanged;
+        _canvasController.OnFitToScreenStateChanged += CanvasController_OnFitToScreenStateChanged;
         _thumbNailController.ThumbnailClicked += Thumbnail_Clicked;
 
         TxtFileName.Text = Path.GetFileName(firstPhotoPath);
@@ -164,6 +165,7 @@ public sealed partial class PhotoDisplayWindow
         _thumbNailController.ThumbnailClicked -= Thumbnail_Clicked;
         _photoController.StatusUpdated -= PhotoController_StatusUpdated;
         _canvasController.OnZoomChanged -= CanvasController_OnZoomChanged;
+        _canvasController.OnFitToScreenStateChanged -= CanvasController_OnFitToScreenStateChanged;
         ((FrameworkElement)Content).ActualThemeChanged -= PhotoDisplayWindow_ActualThemeChanged;
 
         await _canvasController.DisposeAsync();
@@ -586,6 +588,14 @@ public sealed partial class PhotoDisplayWindow
     {
         TxtZoom.Text = $"{zoomPercent}%";
         _inactivityFader.ReportActivity();
+    }
+
+    private void CanvasController_OnFitToScreenStateChanged(bool isFitted)
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            ButtonScaleSet.IsEnabled = !isFitted;
+        });
     }
 
     #endregion

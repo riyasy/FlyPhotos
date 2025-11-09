@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
@@ -22,6 +22,7 @@ namespace FlyPhotos.Controllers;
 internal class CanvasController : ICanvasController
 {
     public event Action<int> OnZoomChanged;
+    public event Action<bool> OnFitToScreenStateChanged;
 
     private readonly IThumbnailController _thumbNailController;
     private readonly PhotoSessionState _photoSessionState;
@@ -62,6 +63,7 @@ internal class CanvasController : ICanvasController
 
         _canvasViewState = new CanvasViewState();
         _canvasViewManager = new CanvasViewManager(_canvasViewState, RequestInvalidate, RequestZoomUpdate);
+        _canvasViewManager.FitToScreenStateChanged += (isFitted) => OnFitToScreenStateChanged?.Invoke(isFitted);
     }
 
     public async ValueTask DisposeAsync()
@@ -107,7 +109,10 @@ internal class CanvasController : ICanvasController
         }
 
         bool isUpgradeFromPlaceholder = !_realImageDisplayedForCurrentPhoto && displayLevel > DisplayLevel.PlaceHolder;
-        bool shouldResetView = isNewPhoto || isUpgradeFromPlaceholder;
+        // TODO - REVIEW THIS MODIFICATION: The decision to reset the view now depends on the PreserveZoomAndPan setting.
+        // The view is reset only for the very first photo, or when changing photos/upgrading
+        // from a placeholder AND the setting to preserve zoom is OFF.
+        bool shouldResetView = isFirstPhotoEver || (!AppConfig.Settings.PreserveZoomAndPan && (isNewPhoto || isUpgradeFromPlaceholder));
 
         _photoSessionState.CurrentDisplayLevel = displayLevel;
         var displayItem = photo.GetDisplayItemBasedOn(displayLevel);
@@ -186,7 +191,7 @@ internal class CanvasController : ICanvasController
         }
         else
         {
-            _canvasViewManager.UpdateImageMetrics(imageSize);
+            _canvasViewManager.UpdateImageMetrics(imageSize, _d2dCanvas.GetSize());
         }
 
         if (forceThumbNailRedraw)

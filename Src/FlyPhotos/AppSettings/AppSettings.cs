@@ -53,5 +53,6 @@ public class AppSettings
     public bool ConfirmForDelete { get; set; } = true;
     public bool ShowFileName { get; set; } = true;
     public bool ShowCacheStatus { get; set; } = true;
+    public bool PreserveZoomAndPan { get; set; } = false;
 }
 
