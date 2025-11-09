@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿﻿﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
@@ -23,6 +23,7 @@ internal class CanvasController : ICanvasController
 {
     public event Action<int> OnZoomChanged;
     public event Action<bool> OnFitToScreenStateChanged;
+    public event Action<bool> OnOneToOneStateChanged;
 
     private readonly IThumbnailController _thumbNailController;
     private readonly PhotoSessionState _photoSessionState;
@@ -64,6 +65,7 @@ internal class CanvasController : ICanvasController
         _canvasViewState = new CanvasViewState();
         _canvasViewManager = new CanvasViewManager(_canvasViewState, RequestInvalidate, RequestZoomUpdate);
         _canvasViewManager.FitToScreenStateChanged += (isFitted) => OnFitToScreenStateChanged?.Invoke(isFitted);
+        _canvasViewManager.OneToOneStateChanged += (isOneToOne) => OnOneToOneStateChanged?.Invoke(isOneToOne);
     }
 
     public async ValueTask DisposeAsync()
@@ -137,7 +139,7 @@ internal class CanvasController : ICanvasController
                     IRenderer firstFrameRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, animDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate, false);
                     SetupNewRenderer(firstFrameRenderer, _imageSize, animDispItem.Rotation, isFirstPhotoEver, shouldResetView, true);
 
-                    IAnimator newAnimator = 
+                    IAnimator newAnimator =
                         string.Equals(Path.GetExtension(photo.FileName), ".gif", StringComparison.OrdinalIgnoreCase)
                         ? await GifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas)
                         : await PngAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas);

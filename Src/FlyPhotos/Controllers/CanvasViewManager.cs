@@ -1,4 +1,4 @@
-﻿﻿using FlyPhotos.AppSettings;
+﻿using FlyPhotos.AppSettings;
 using FlyPhotos.Data;
 using Microsoft.UI.Xaml.Media;
 using System;
@@ -13,6 +13,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
 {
     public bool PanZoomAnimationOnGoing { get; private set; }
     public event Action<bool> FitToScreenStateChanged;
+    public event Action<bool> OneToOneStateChanged;
 
     private EventHandler<object> _renderingHandler;
     private DateTime _panZoomAnimationStartTime;
@@ -33,6 +34,18 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
             if (_isFittedToScreen == value) return;
             _isFittedToScreen = value;
             FitToScreenStateChanged?.Invoke(_isFittedToScreen);
+        }
+    }
+
+    private bool _isAtOneToOne;
+    private bool IsAtOneToOne
+    {
+        get => _isAtOneToOne;
+        set
+        {
+            if (_isAtOneToOne == value) return;
+            _isAtOneToOne = value;
+            OneToOneStateChanged?.Invoke(_isAtOneToOne);
         }
     }
 
@@ -75,6 +88,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         // For small images, initialScale will be 1.0f while fitScale is > 1.0f, so this will be false. Correct.
         // For large images, initialScale and fitScale will both be < 1.0f and equal, so this will be true. Correct.
         IsFittedToScreen = Math.Abs(initialScale - fitScale) < 0.001f;
+        IsAtOneToOne = Math.Abs(initialScale - 1.0f) < 0.001f;
     }
 
     public void UpdateImageMetrics(Size imageSize, Size canvasSize)
@@ -90,7 +104,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
             _canvasViewState.Scale = newScale;
             _canvasViewState.LastScaleTo = newScale;
             _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
-            _callbackZoomUpdate(); // The zoom percentage might have changed.
+            _callbackZoomUpdate();
+            IsAtOneToOne = Math.Abs(newScale - 1.0f) < 0.001f;
         }
         else // The view was not fitted (user has custom pan/zoom).
         {
@@ -126,6 +141,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
             _canvasViewState.UpdateTransform();
             _callbackCanvasRedraw();
             _callbackZoomUpdate();
+            IsAtOneToOne = Math.Abs(newScale - 1.0f) < 0.001f;
         }
         else
         {
@@ -147,6 +163,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         var center = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         StartZoomAnimation(scaleTo, center);
         IsFittedToScreen = false;
+        IsAtOneToOne = false;
     }
 
     public void ZoomAtPoint(ZoomDirection zoomDirection, Point zoomAnchor)
@@ -157,6 +174,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _canvasViewState.LastScaleTo = scaleTo;
         StartZoomAnimation(scaleTo, zoomAnchor);
         IsFittedToScreen = false;
+        IsAtOneToOne = false;
     }
 
     public void ZoomAtPointPrecision(int delta, Point zoomAnchor)
@@ -188,6 +206,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _callbackCanvasRedraw();
         _callbackZoomUpdate();
         IsFittedToScreen = false;
+        IsAtOneToOne = false;
     }
 
     /// <summary>
@@ -227,6 +246,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
             StartPanAndZoomAnimation(targetScale, anchor);
 
         IsFittedToScreen = Math.Abs(targetScale - screenFitScale) < 0.001f;
+        IsAtOneToOne = Math.Abs(targetScale - 1.0f) < 0.001f;
     }
 
     public void ZoomOutOnExit(double exitAnimationDuration, Size canvasSize)
@@ -236,6 +256,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         _suppressZoomUpdateForNextAnimation = true;
         StartPanAndZoomAnimation(0.001f, targetPosition);
         IsFittedToScreen = false;
+        IsAtOneToOne = false;
     }
 
     public void ZoomPanToFit(bool animateChange, Size imageSize, Size canvasSize)
@@ -254,12 +275,16 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
             _callbackCanvasRedraw();
             _callbackZoomUpdate();
             IsFittedToScreen = true;
+            IsAtOneToOne = Math.Abs(scaleFactor - 1.0f) < 0.001f;
             return;
         }
 
         var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         _canvasViewState.LastScaleTo = (float)scaleFactor;
         StartPanAndZoomAnimation((float)scaleFactor, targetPosition);
+
+        IsFittedToScreen = true;
+        IsAtOneToOne = Math.Abs(scaleFactor - 1.0f) < 0.001f;
     }
 
     public void ZoomToHundred(Size canvasSize)
@@ -267,9 +292,12 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
         var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         _canvasViewState.LastScaleTo = 1.0f;
         StartPanAndZoomAnimation(1.0f, targetPosition);
-        IsFittedToScreen = false;
-    }
 
+        var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
+        var screenFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+        IsFittedToScreen = Math.Abs(1.0f - screenFitScale) < 0.001f;
+        IsAtOneToOne = true;
+    }
 
     public void Pan(double dx, double dy)
     {
@@ -435,20 +463,19 @@ internal class CanvasViewManager(CanvasViewState canvasViewState, Action callbac
 
         if (t >= 1.0)
         {
-            // Animation finished, stop the handler
             CompositionTarget.Rendering -= _renderingHandler;
             PanZoomAnimationOnGoing = false;
             _suppressZoomUpdateForNextAnimation = false;
 
+            // This block remains as a final "truth-setter" after animation,
+            // which is harmless and good for robustness.
             var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
             var canvasSize = new Size(_panTargetPosition.X * 2, _panTargetPosition.Y * 2);
             if (canvasSize.Width > 0 && canvasSize.Height > 0)
             {
                 var screenFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
-                if (Math.Abs(_zoomTargetScale - screenFitScale) < 0.001)
-                {
-                    IsFittedToScreen = true;
-                }
+                IsFittedToScreen = Math.Abs(_zoomTargetScale - screenFitScale) < 0.001f;
+                IsAtOneToOne = Math.Abs(_zoomTargetScale - 1.0f) < 0.001f;
             }
         }
     }

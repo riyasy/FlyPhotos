@@ -41,15 +41,8 @@ public sealed partial class PhotoDisplayWindow
 
     private Settings? _settingWindow;
 
-    private readonly DispatcherTimer _repeatButtonReleaseCheckTimer = new()
-    {
-        Interval = new TimeSpan(0, 0, 0, 0, 100)
-    };
-
-    private readonly DispatcherTimer _wheelScrollBrakeTimer = new()
-    {
-        Interval = TimeSpan.FromMilliseconds(400)
-    };
+    private readonly DispatcherTimer _repeatButtonReleaseCheckTimer = new() { Interval = new TimeSpan(0, 0, 0, 0, 100) };
+    private readonly DispatcherTimer _wheelScrollBrakeTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
 
     private readonly TransparentTintBackdrop _transparentTintBackdrop = new()
     {
@@ -109,7 +102,8 @@ public sealed partial class PhotoDisplayWindow
         _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, photoSessionState);
         _photoController.StatusUpdated += PhotoController_StatusUpdated;
         _canvasController.OnZoomChanged += CanvasController_OnZoomChanged;
-        _canvasController.OnFitToScreenStateChanged += CanvasController_OnFitToScreenStateChanged;
+        _canvasController.OnFitToScreenStateChanged += CanvasController_OnFitToScreenStateChanged;  
+        _canvasController.OnOneToOneStateChanged += CanvasController_OnOneToOneStateChanged;
         _thumbNailController.ThumbnailClicked += Thumbnail_Clicked;
 
         TxtFileName.Text = Path.GetFileName(firstPhotoPath);
@@ -165,7 +159,8 @@ public sealed partial class PhotoDisplayWindow
         _thumbNailController.ThumbnailClicked -= Thumbnail_Clicked;
         _photoController.StatusUpdated -= PhotoController_StatusUpdated;
         _canvasController.OnZoomChanged -= CanvasController_OnZoomChanged;
-        _canvasController.OnFitToScreenStateChanged -= CanvasController_OnFitToScreenStateChanged;
+        _canvasController.OnFitToScreenStateChanged -= CanvasController_OnFitToScreenStateChanged;        
+        _canvasController.OnOneToOneStateChanged -= CanvasController_OnOneToOneStateChanged;
         ((FrameworkElement)Content).ActualThemeChanged -= PhotoDisplayWindow_ActualThemeChanged;
 
         await _canvasController.DisposeAsync();
@@ -219,12 +214,20 @@ public sealed partial class PhotoDisplayWindow
 
     private void ButtonScaleSet_Click(object sender, RoutedEventArgs e)
     {
-        _canvasController.FitToScreen(true);
+        if (ButtonScaleSet.IsChecked != false)        
+            _canvasController.FitToScreen(true);        
+        else        
+            ButtonScaleSet.IsChecked = true;
+         
     }
 
     private void ButtonOneIsToOne_Click(object sender, RoutedEventArgs e)
     {
-        _canvasController.ZoomToHundred();
+        if (ButtonOneIsToOne.IsChecked != false)        
+            _canvasController.ZoomToHundred();        
+        else        
+            ButtonOneIsToOne.IsChecked = true;
+        
     }
 
     private void ButtonExpander_Click(object sender, RoutedEventArgs e)
@@ -592,10 +595,12 @@ public sealed partial class PhotoDisplayWindow
 
     private void CanvasController_OnFitToScreenStateChanged(bool isFitted)
     {
-        DispatcherQueue.TryEnqueue(() =>
-        {
-            ButtonScaleSet.IsEnabled = !isFitted;
-        });
+        DispatcherQueue.TryEnqueue(() => { ButtonScaleSet.IsChecked = isFitted; });
+    }
+
+    private void CanvasController_OnOneToOneStateChanged(bool isOneToOne)
+    {
+        DispatcherQueue.TryEnqueue(() => { ButtonOneIsToOne.IsChecked = isOneToOne; });
     }
 
     #endregion
