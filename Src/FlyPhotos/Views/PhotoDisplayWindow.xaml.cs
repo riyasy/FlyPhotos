@@ -366,38 +366,30 @@ public sealed partial class PhotoDisplayWindow
     {
         var props = e.GetCurrentPoint(D2dCanvas).Properties;
         var delta = props.MouseWheelDelta;
+        var scroll = props.IsHorizontalMouseWheel ? ScrollDirection.Horizontal : ScrollDirection.Vertical;
         var isHorizontalScroll = props.IsHorizontalMouseWheel;
         var currentPoint = e.GetCurrentPoint(D2dCanvas).Position;
 
-        if (isHorizontalScroll)
+        switch (scroll)
         {
-            await HandleMouseWheelNavigation(delta, isHorizontalScroll: true);
-        }
-        else // Is vertical scroll
-        {
+            case ScrollDirection.Horizontal:
+                await HandleMouseWheelNavigation(delta, true);
+                break;
             // Alt + vertical scroll always navigates
-            if (Util.IsAltPressed())
-            {
-                await HandleMouseWheelNavigation(delta, isHorizontalScroll: false);
-            }
+            case ScrollDirection.Vertical when Util.IsAltPressed():
+                await HandleMouseWheelNavigation(delta, false);
+                break;
             // Ctrl + vertical scroll always zooms
-            else if (Util.IsControlPressed())
-            {
+            case ScrollDirection.Vertical when Util.IsControlPressed():
                 HandleMouseWheelZoom(delta, currentPoint);
-            }
-            else
-            {
-                // When Alt and Ctrl are not pressed, behave based on settings
-                switch (AppConfig.Settings.DefaultMouseWheelBehavior)
-                {
-                    case DefaultMouseWheelBehavior.Navigate:
-                        await HandleMouseWheelNavigation(delta, isHorizontalScroll: false);
-                        break;
-                    case DefaultMouseWheelBehavior.Zoom:
-                        HandleMouseWheelZoom(delta, currentPoint);
-                        break;
-                }
-            }
+                break;
+            // When Alt and Ctrl are not pressed, behave based on settings
+            case ScrollDirection.Vertical when AppConfig.Settings.DefaultMouseWheelBehavior == DefaultMouseWheelBehavior.Navigate:
+                await HandleMouseWheelNavigation(delta, false);
+                break;
+            case ScrollDirection.Vertical when AppConfig.Settings.DefaultMouseWheelBehavior == DefaultMouseWheelBehavior.Zoom:
+                HandleMouseWheelZoom(delta, currentPoint);
+                break;
         }
     }
 
@@ -607,6 +599,42 @@ public sealed partial class PhotoDisplayWindow
         DispatcherQueue.TryEnqueue(() => { ButtonOneIsToOne.IsChecked = isOneToOne; });
     }
 
+    private void SettingWindow_SettingChanged(Setting setting)
+    {
+        switch (setting)
+        {
+            case Setting.ThumbnailSizeSize:
+                D2dCanvasThumbNail.Height = AppConfig.Settings.ThumbnailSize;
+                D2dCanvasThumbNail.Invalidate();
+                _thumbNailController.RefreshThumbnail();
+                break;
+            case Setting.ThumbnailSelectionColor:
+                _thumbNailController.RefreshThumbnail();
+                break;
+            case Setting.ThumbnailShowHide:
+                _thumbNailController.ShowHideThumbnailBasedOnSettings();
+                break;
+            case Setting.CheckeredBackgroundShowHide:
+                _canvasController.HandleCheckeredBackgroundChange();
+                break;
+            case Setting.Theme:
+                SetWindowTheme(AppConfig.Settings.Theme);
+                break;
+            case Setting.BackDrop:
+                SetWindowBackdrop(AppConfig.Settings.WindowBackdrop);
+                break;
+            case Setting.BackDropTransparency:
+                SetWindowBackdropTransparency(AppConfig.Settings.TransparentBackgroundIntensity);
+                break;
+            case Setting.FileNameShowHide:
+                BorderTxtFileName.Visibility = AppConfig.Settings.ShowFileName ? Visibility.Visible : Visibility.Collapsed;
+                break;
+            case Setting.CacheStatusShowHide:
+                ButtonExpander.Visibility = AppConfig.Settings.ShowCacheStatus ? Visibility.Visible : Visibility.Collapsed;
+                break;
+        }
+    }
+
     #endregion
 
     #region Helper Functions
@@ -706,42 +734,6 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
-    private void SettingWindow_SettingChanged(Setting setting)
-    {
-        switch (setting)
-        {
-            case Setting.ThumbnailSizeSize:
-                D2dCanvasThumbNail.Height = AppConfig.Settings.ThumbnailSize;
-                D2dCanvasThumbNail.Invalidate();
-                _thumbNailController.RefreshThumbnail();
-                break;
-            case Setting.ThumbnailSelectionColor:
-                _thumbNailController.RefreshThumbnail();
-                break;
-            case Setting.ThumbnailShowHide:
-                _thumbNailController.ShowHideThumbnailBasedOnSettings();
-                break;
-            case Setting.CheckeredBackgroundShowHide:
-                _canvasController.HandleCheckeredBackgroundChange();
-                break;
-            case Setting.Theme:
-                SetWindowTheme(AppConfig.Settings.Theme);
-                break;
-            case Setting.BackDrop:
-                SetWindowBackdrop(AppConfig.Settings.WindowBackdrop);
-                break;
-            case Setting.BackDropTransparency:
-                SetWindowBackdropTransparency(AppConfig.Settings.TransparentBackgroundIntensity);
-                break;
-            case Setting.FileNameShowHide:
-                BorderTxtFileName.Visibility = AppConfig.Settings.ShowFileName ? Visibility.Visible : Visibility.Collapsed;
-                break;
-            case Setting.CacheStatusShowHide:
-                ButtonExpander.Visibility = AppConfig.Settings.ShowCacheStatus ? Visibility.Visible : Visibility.Collapsed;
-                break;
-        }
-    }
-
     private void SetWindowBackdrop(WindowBackdropType backdropType)
     {
         _currentBackdropType = backdropType;
@@ -831,24 +823,10 @@ public sealed partial class PhotoDisplayWindow
     private void SetBackColorAsPerThemeAndBackdrop()
     {
         var actualTheme = ((FrameworkElement)Content).ActualTheme;
-
-        // Determine colors first
         var gridColor = _currentBackdropType == WindowBackdropType.None
             ? (actualTheme == ElementTheme.Light ? Colors.White : Colors.Black)
             : Colors.Transparent;
-
-        var buttonPanelColor = actualTheme == ElementTheme.Light
-            ? Colors.Transparent
-            : Color.FromArgb(0x44, 0, 0, 0);
-
-        var fileNameBackgroundColor = actualTheme == ElementTheme.Light
-            ? Color.FromArgb(0x44, 255, 255, 255)
-            : Color.FromArgb(0x44, 0, 0, 0);
-
-        // Assign brushes
         ((Grid)Content).Background = new SolidColorBrush(gridColor);
-        BorderButtonPanel.Background = new SolidColorBrush(buttonPanelColor);
-        BorderTxtFileName.Background = new SolidColorBrush(fileNameBackgroundColor);
     }
 
     #endregion

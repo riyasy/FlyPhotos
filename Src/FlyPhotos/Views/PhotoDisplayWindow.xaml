@@ -7,10 +7,25 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:win2d="using:Microsoft.Graphics.Canvas.UI.Xaml"
     mc:Ignorable="d">
+
     <Grid
         x:Name="MainLayout"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch">
+        <Grid.Resources>
+            <ResourceDictionary>
+                <ResourceDictionary.ThemeDictionaries>
+                    <ResourceDictionary x:Key="Light">
+                        <SolidColorBrush x:Key="ButtonPanelBackgroundBrush" Color="Transparent" />
+                        <SolidColorBrush x:Key="FileNameBackgroundBrush" Color="#44FFFFFF" />
+                    </ResourceDictionary>
+                    <ResourceDictionary x:Key="Dark">
+                        <SolidColorBrush x:Key="ButtonPanelBackgroundBrush" Color="#44000000" />
+                        <SolidColorBrush x:Key="FileNameBackgroundBrush" Color="#44000000" />
+                    </ResourceDictionary>
+                </ResourceDictionary.ThemeDictionaries>
+            </ResourceDictionary>
+        </Grid.Resources>
         <Grid
             x:Name="AppTitlebar"
             Height="28"
@@ -52,7 +67,7 @@
                 Padding="10,5,10,5"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
-                Background="#44000000"
+                Background="{ThemeResource FileNameBackgroundBrush}"
                 CornerRadius="5">
                 <TextBlock
                     x:Name="TxtFileName"
@@ -68,7 +83,7 @@
                 Padding="5"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
-                Background="#44000000"
+                Background="{ThemeResource ButtonPanelBackgroundBrush}"
                 CornerRadius="5">
                 <StackPanel
                     x:Name="ButtonPanel"
@@ -165,34 +180,6 @@
                                 Placement="Right" />
                         </ToolTipService.ToolTip>
                     </Button>
-                    <Button
-                        x:Name="ButtonHelp"
-                        Width="Auto"
-                        Content="🆘"
-                        FontSize="16"
-                        Visibility="Collapsed">
-                        <ToolTipService.ToolTip>
-                            <ToolTip
-                                AutomationProperties.FullDescription="Non-occluding tooltip"
-                                Content="Help"
-                                Placement="Right" />
-                        </ToolTipService.ToolTip>
-                    </Button>
-                    <!--<Button
-                x:Name="ButtonCoffee"
-                Width="Auto"
-                Click="ButtonCoffee_OnClick"
-                Content="&#xEC32;"
-                FontFamily="{StaticResource FluentIcons}"
-                FontSize="16"
-                Visibility="Collapsed">
-                <ToolTipService.ToolTip>
-                    <ToolTip
-                        AutomationProperties.FullDescription="Non-occluding tooltip"
-                        Content="Buy a coffee"
-                        Placement="Right" />
-                </ToolTipService.ToolTip>
-            </Button>-->
                     <Button
                         x:Name="ButtonExpander"
                         Width="Auto"

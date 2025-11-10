@@ -57,4 +57,10 @@
         CacheStatusShowHide
     }
 
+    public enum ScrollDirection
+    {
+        Horizontal,
+        Vertical
+    }
+
 }
