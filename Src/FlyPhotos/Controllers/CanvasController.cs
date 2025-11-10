@@ -63,8 +63,8 @@ internal class CanvasController : ICanvasController
         _canvasViewManager = new CanvasViewManager(_canvasViewState);
         _canvasViewManager.FitToScreenStateChanged += (isFitted) => OnFitToScreenStateChanged?.Invoke(isFitted);
         _canvasViewManager.OneToOneStateChanged += (isOneToOne) => OnOneToOneStateChanged?.Invoke(isOneToOne);
-        _canvasViewManager.ZoomChanged += () => RequestZoomUpdate();
-        _canvasViewManager.ViewChanged += () => RequestInvalidate();
+        _canvasViewManager.ZoomChanged += RequestZoomUpdate;
+        _canvasViewManager.ViewChanged += RequestInvalidate;
     }
 
     public async ValueTask DisposeAsync()

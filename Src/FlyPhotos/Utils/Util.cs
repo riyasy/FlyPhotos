@@ -19,9 +19,6 @@ using Windows.Graphics;
 using Windows.System;
 using Windows.UI;
 using Windows.UI.Core;
-using WinRT.Interop;
-using static FlyPhotos.NativeWrappers.Win32Methods;
-
 
 namespace FlyPhotos.Utils;
 
@@ -164,18 +161,25 @@ internal static class Util
         return 0;
     }
 
-    public static void ShowFileProperties(string filePath, Window ownerWindow)
+    public static void ShowFileProperties(string filePath)
     {
         if (!File.Exists(filePath))        
             return;
-        
-        SHELLEXECUTEINFO info = new SHELLEXECUTEINFO();
-        info.cbSize = Marshal.SizeOf(info);
-        info.lpVerb = "properties";
-        info.lpFile = filePath;
-        info.nShow = SW_SHOW;
-        info.fMask = SEE_MASK_INVOKEIDLIST;
-        //info.hwnd = WindowNative.GetWindowHandle(ownerWindow);
-        ShellExecuteEx(ref info);
+
+        try
+        {
+            var info = new Win32Methods.SHELLEXECUTEINFO();
+            info.cbSize = Marshal.SizeOf(info);
+            info.lpVerb = "properties";
+            info.lpFile = filePath;
+            info.nShow = Win32Methods.SW_SHOW;
+            info.fMask = Win32Methods.SEE_MASK_INVOKEIDLIST;
+            //info.hwnd = WindowNative.GetWindowHandle(ownerWindow);
+            Win32Methods.ShellExecuteEx(ref info);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
     }
 }

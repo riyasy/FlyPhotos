@@ -485,7 +485,7 @@ public sealed partial class PhotoDisplayWindow
                     break;
 
                 case VirtualKey.D:
-                    Util.ShowFileProperties(_photoController.GetFullPathCurrentFile(), this);
+                    Util.ShowFileProperties(_photoController.GetFullPathCurrentFile());
                     break;
             }
 

@@ -366,11 +366,6 @@ internal sealed partial class Settings
         _configurationSource.Theme = (SystemBackdropTheme)((FrameworkElement)Content).ActualTheme;
     }
 
-    private Visibility ConvertBoolToVisibility(bool value)
-    {
-        return value ? Visibility.Visible : Visibility.Collapsed;
-    }
-
     private bool ShouldEnableTransparencySlider(int index)
     {
         return index == 0;
@@ -405,9 +400,9 @@ internal static class ColorConverter
     {
         hex = hex.TrimStart('#');
         byte a = 255; // Default alpha value
-        byte r = byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
-        byte g = byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
-        byte b = byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+        byte r = byte.Parse(hex[..2], System.Globalization.NumberStyles.HexNumber);
+        byte g = byte.Parse(hex[2..4], System.Globalization.NumberStyles.HexNumber);
+        byte b = byte.Parse(hex[4..6], System.Globalization.NumberStyles.HexNumber);
 
         if (hex.Length == 8)
         {

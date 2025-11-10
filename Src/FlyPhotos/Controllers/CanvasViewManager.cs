@@ -343,8 +343,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
 
         if (!animateChange)
         {
-            _canvasViewState.Scale = (float)scaleFactor;
-            _canvasViewState.LastScaleTo = (float)scaleFactor;
+            _canvasViewState.Scale = scaleFactor;
+            _canvasViewState.LastScaleTo = scaleFactor;
             _canvasViewState.ImagePos.X = canvasSize.Width / 2;
             _canvasViewState.ImagePos.Y = canvasSize.Height / 2;
             _canvasViewState.UpdateTransform();
@@ -356,8 +356,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         }
 
         var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
-        _canvasViewState.LastScaleTo = (float)scaleFactor;
-        StartPanAndZoomAnimation((float)scaleFactor, targetPosition);
+        _canvasViewState.LastScaleTo = scaleFactor;
+        StartPanAndZoomAnimation(scaleFactor, targetPosition);
 
         // Set state immediately for responsive UI, even when animating.
         IsFittedToScreen = true;

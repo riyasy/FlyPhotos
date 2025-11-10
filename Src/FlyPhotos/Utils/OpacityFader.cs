@@ -173,7 +173,7 @@ public partial class OpacityFader : IDisposable
                     var transform = _trackingElement.TransformToVisual(null); // 'null' represents the screen's coordinate system
                     initialPointerPosRelativeToTrackingElement = transform.Inverse.TransformPoint(globalScreenPoint);
                 }
-                catch (System.ArgumentException)
+                catch (ArgumentException)
                 {
                     // Log if the element's transform is not ready, keeping the default "outside" position.
                     System.Diagnostics.Debug.WriteLine("OpacityFader: _trackingElement not fully rendered for initial position calculation.");
