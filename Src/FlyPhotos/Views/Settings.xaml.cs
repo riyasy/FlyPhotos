@@ -69,8 +69,8 @@ internal sealed partial class Settings
         new Dictionary<PanZoomBehaviourOnNavigation, string>
         {
             { PanZoomBehaviourOnNavigation.Reset, "Reset" },
-            { PanZoomBehaviourOnNavigation.RetainFromLastPhoto, "Retain from previous" },
-            { PanZoomBehaviourOnNavigation.RememberPerPhoto, "Remember per photo" }
+            { PanZoomBehaviourOnNavigation.RememberPerPhoto, "Remember per photo" },
+            { PanZoomBehaviourOnNavigation.RetainFromLastPhoto, "Retain from previous photo" }
         }
     );
 

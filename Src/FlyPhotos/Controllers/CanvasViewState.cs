@@ -16,6 +16,31 @@ namespace FlyPhotos.Controllers
 
         public int Rotation = 0;
 
+        /// <summary>
+        /// Applies the core view properties from another state object to this one.
+        /// </summary>
+        public void Apply(CanvasViewState source)
+        {
+            this.Scale = source.Scale;
+            this.LastScaleTo = source.LastScaleTo;
+            this.ImagePos = source.ImagePos;
+            this.Rotation = source.Rotation;
+        }
+
+        /// <summary>
+        /// Creates a new CanvasViewState instance with a copy of the core view properties.
+        /// </summary>
+        public CanvasViewState Clone()
+        {
+            return new CanvasViewState
+            {
+                Scale = this.Scale,
+                LastScaleTo = this.LastScaleTo,
+                ImagePos = this.ImagePos,
+                Rotation = this.Rotation
+            };
+        }
+
         public void UpdateTransform()
         {
             Mat = Matrix3x2.Identity;
@@ -59,8 +84,6 @@ Step3: Rotate := {Rotation:00}deg
 Step4: Translate to ImagePos := [x={ImagePos.X:0.00}, y={ImagePos.Y:0.00}]
 
 ";
-
-
         }
     }
 }

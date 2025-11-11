@@ -101,36 +101,33 @@ internal class CanvasController : ICanvasController
     /// <param name="displayLevel">The quality level to display (e.g., PlaceHolder, Preview, Hq).</param>
     public async Task SetSource(Photo photo, DisplayLevel displayLevel)
     {
-        // Ensure that any ongoing animation processing is complete before changing the source.
         await _animatorLock.WaitAsync();
         _animatorLock.Release();
 
-        // Lazily create the checkered brush used for transparent images on first use.
         _checkeredBrush ??= Util.CreateCheckeredBrush(_d2dCanvas, Constants.CheckerSize);
 
-        // Assign a unique ID to this operation. This is crucial for handling race conditions where
-        // a user navigates to another photo before the current one has fully loaded (e.g., before an
-        // animated GIF has been processed).
         var currentOperationId = ++_latestSetSourceOperationId;
         var isFirstPhotoEver = string.IsNullOrEmpty(_currentPhotoPath);
 
-        // Determine if this is a request for a completely new photo file.
         bool isNewPhoto = photo.FileName != _currentPhotoPath;
         if (isNewPhoto)
         {
+            // If switching to a new photo, cache the view state of the old photo first.
+            if (!string.IsNullOrEmpty(_currentPhotoPath))
+                _canvasViewManager.CacheCurrentViewState(_currentPhotoPath);
+            
             _currentPhotoPath = photo.FileName;
-            // Reset the flag indicating whether a "real" image (Preview or HQ) has been shown for this file.
             _realImageDisplayedForCurrentPhoto = false;
         }
 
-        // Check if we are upgrading from a temporary placeholder to a real image.
         bool isUpgradeFromPlaceholder = !_realImageDisplayedForCurrentPhoto && displayLevel > DisplayLevel.PlaceHolder;
 
-        // Decide whether to reset the view's pan, zoom, and rotation.
-        // The view is reset only for the very first photo, or when changing photos/upgrading
-        // from a placeholder AND the setting to preserve zoom is OFF.
-        bool shouldResetView = isFirstPhotoEver || 
-                               (AppConfig.Settings.PanZoomBehaviourOnNavigation == PanZoomBehaviourOnNavigation.Reset && (isNewPhoto || isUpgradeFromPlaceholder));
+        // Decide whether to call SetScaleAndPosition (true) or UpdateImageMetrics (false).
+        // - Reset: Always resets the view for a new photo.
+        // - RetainFromLastPhoto: Never resets; it preserves the current view state for the next photo.
+        // - RememberPerPhoto: Acts like Reset, but SetScaleAndPosition will check its cache for a saved state.
+        bool shouldResetView = isFirstPhotoEver ||
+                               (AppConfig.Settings.PanZoomBehaviourOnNavigation != PanZoomBehaviourOnNavigation.RetainFromLastPhoto && (isNewPhoto || isUpgradeFromPlaceholder));
 
         _photoSessionState.CurrentDisplayLevel = displayLevel;
         var displayItem = photo.GetDisplayItemBasedOn(displayLevel);
@@ -142,7 +139,6 @@ internal class CanvasController : ICanvasController
 
         if (displayItem == null) return;
 
-        // If we've reached Preview or HQ, mark that a real image is now displayed.
         if (displayLevel > DisplayLevel.PlaceHolder)
         {
             _realImageDisplayedForCurrentPhoto = true;
@@ -226,7 +222,7 @@ internal class CanvasController : ICanvasController
         if (resetView)
         {
             // If resetting, tell the view manager to calculate a fresh scale and position.
-            _canvasViewManager.SetScaleAndPosition(imageSize,
+            _canvasViewManager.SetScaleAndPosition(_currentPhotoPath, imageSize,
                 imageRotation, _d2dCanvas.GetSize(), isFirstPhotoEver);
         }
         else

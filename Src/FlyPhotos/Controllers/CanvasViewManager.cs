@@ -57,6 +57,12 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     // --- State Management Properties ---
 
     /// <summary>
+    /// Volatile cache to store view state per photo for the current session.
+    /// Key: Photo file path. Value: A clone of the photo's CanvasViewState.
+    /// </summary>
+    private readonly Dictionary<string, CanvasViewState> _perPhotoStateCache = new();
+
+    /// <summary>
     /// Tracks if the image is perfectly fitted to the canvas (respecting padding).
     /// Setting this property will fire the FitToScreenStateChanged event if the value changes.
     /// </summary>
@@ -96,31 +102,55 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     // --- Public API Methods ---
 
     /// <summary>
-    /// Sets the initial scale and position for a new image.
-    /// This respects the "no upscale on load" rule for small images.
+    /// Saves the current view state for a given photo path if the user setting is enabled.
     /// </summary>
-    public void SetScaleAndPosition(Size imageSize, int imageRotation, Size canvasSize, bool isFirstPhotoEver)
+    /// <param name="photoPath">The file path of the photo whose state is to be cached.</param>
+    public void CacheCurrentViewState(string photoPath)
     {
-        // 1. Calculate the true "fit-to-screen" scale, which may be > 1.0 for small images.
-        var fitScale = CalculateScreenFitScale(canvasSize, imageSize, imageRotation);
+        if (AppConfig.Settings.PanZoomBehaviourOnNavigation == PanZoomBehaviourOnNavigation.RememberPerPhoto)
+        {
+            // Store a clone of the state, not a reference, to prevent it from being modified.
+            _perPhotoStateCache[photoPath] = _canvasViewState.Clone();
+        }
+    }
 
-        // 2. Determine the initial display scale. By default, we don't scale past 100% (1.0f).
-        var initialScale = Math.Min(fitScale, 1.0f);
-
-        // Configure the view state with the new image metrics and initial scale.
+    /// <summary>
+    /// Sets the initial scale and position for a new image.
+    /// If 'RememberPerPhoto' is enabled, it will first attempt to restore a cached state.
+    /// Otherwise, it calculates a default view, respecting the "no upscale on load" rule.
+    /// </summary>
+    public void SetScaleAndPosition(string photoPath, Size imageSize, int imageRotation, Size canvasSize, bool isFirstPhotoEver)
+    {
         _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
         _canvasViewState.Rotation = imageRotation;
-        _canvasViewState.ImagePos.X = canvasSize.Width / 2;
-        _canvasViewState.ImagePos.Y = canvasSize.Height / 2;
+
+        // For "RememberPerPhoto", try to apply a cached state first.
+        if (AppConfig.Settings.PanZoomBehaviourOnNavigation == PanZoomBehaviourOnNavigation.RememberPerPhoto &&
+            _perPhotoStateCache.TryGetValue(photoPath, out var cachedState))
+        {
+            _canvasViewState.Apply(cachedState);
+            // After applying, recalculate if the restored state is fitted or 1:1.
+            var fitScale = CalculateScreenFitScale(canvasSize, imageSize, imageRotation);
+            IsFittedToScreen = Math.Abs(_canvasViewState.Scale - fitScale) < 0.001f;
+            IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < 0.001f;
+            _canvasViewState.UpdateTransform();
+            ViewChanged?.Invoke();
+            ZoomChanged?.Invoke();
+            return;
+        }
+
+        // --- Default view calculation (for Reset mode or first-time view in Remember mode) ---
+        var defaultFitScale = CalculateScreenFitScale(canvasSize, imageSize, imageRotation);
+        var initialScale = Math.Min(defaultFitScale, 1.0f);
+
+        _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         _canvasViewState.LastScaleTo = initialScale;
 
-        // Animate the first-ever image load if configured.
         if (isFirstPhotoEver && AppConfig.Settings.OpenExitZoom)
         {
-            var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
             _canvasViewState.Scale = 0.01f;
             _suppressZoomUpdateForNextAnimation = true;
-            StartPanAndZoomAnimation(initialScale, targetPosition);
+            StartPanAndZoomAnimation(initialScale, new Point(canvasSize.Width / 2, canvasSize.Height / 2));
         }
         else
         {
@@ -129,10 +159,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
 
         _canvasViewState.UpdateTransform();
 
-        // 3. The view is only "fitted" if the initial scale we are using IS the calculated fit scale.
-        // For small images, initialScale will be 1.0f while fitScale is > 1.0f, so this will be false. Correct.
-        // For large images, initialScale and fitScale will both be < 1.0f and equal, so this will be true. Correct.
-        IsFittedToScreen = Math.Abs(initialScale - fitScale) < 0.001f;
+
+        IsFittedToScreen = Math.Abs(initialScale - defaultFitScale) < 0.001f;
         IsAtOneToOne = Math.Abs(initialScale - 1.0f) < 0.001f;
     }
 
@@ -158,8 +186,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         }
         else // The view was not fitted (user has custom pan/zoom).
         {
-            // Preserve the custom view by adjusting the pan position proportionally to the change in image size.
-            if (AppConfig.Settings.PanZoomBehaviourOnNavigation != PanZoomBehaviourOnNavigation.Reset && oldImageSize.Width > 0 && oldImageSize.Height > 0 && oldImageSize != imageSize)
+            // The `RetainFromLastPhoto` mode relies on this proportional adjustment logic.
+            if (AppConfig.Settings.PanZoomBehaviourOnNavigation == PanZoomBehaviourOnNavigation.RetainFromLastPhoto && oldImageSize.Width > 0 && oldImageSize.Height > 0 && oldImageSize != imageSize)
             {
                 var panOffsetX = _canvasViewState.ImagePos.X - canvasSize.Width / 2;
                 var panOffsetY = _canvasViewState.ImagePos.Y - canvasSize.Height / 2;
