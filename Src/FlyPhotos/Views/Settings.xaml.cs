@@ -64,6 +64,16 @@ internal sealed partial class Settings
         }
     );
 
+    // Pan/Zoom Navigation Behavior translator
+    private readonly EnumStringTranslator<PanZoomBehaviourOnNavigation> _panZoomBehaviourTranslator = new(
+        new Dictionary<PanZoomBehaviourOnNavigation, string>
+        {
+            { PanZoomBehaviourOnNavigation.Reset, "Reset" },
+            { PanZoomBehaviourOnNavigation.RetainFromLastPhoto, "Retain from previous" },
+            { PanZoomBehaviourOnNavigation.RememberPerPhoto, "Remember per photo" }
+        }
+    );
+
     internal Settings()
     {
         InitializeComponent();
@@ -83,9 +93,9 @@ internal sealed partial class Settings
         this.Activated += Settings_Activated;
         ((FrameworkElement)Content).ActualThemeChanged += Settings_ActualThemeChanged;
         SetConfigurationSourceTheme();
-        SetWindowTheme(AppConfig.Settings.Theme); 
+        SetWindowTheme(AppConfig.Settings.Theme);
         DispatcherQueue.EnsureSystemDispatcherQueue();
-        
+
         SliderHighResCacheSize.Value = AppConfig.Settings.CacheSizeOneSideHqImages;
         SliderLowResCacheSize.Value = AppConfig.Settings.CacheSizeOneSidePreviews;
         ComboTheme.SelectedIndex = FindIndexOfItemInComboBox(ComboTheme, _themeTranslator.ToString(AppConfig.Settings.Theme));
@@ -105,7 +115,8 @@ internal sealed partial class Settings
         ButtonConfirmBeforeDelete.IsOn = AppConfig.Settings.ConfirmForDelete;
         ButtonShowFileName.IsOn = AppConfig.Settings.ShowFileName;
         ButtonShowCacheStatusExpander.IsOn = AppConfig.Settings.ShowCacheStatus;
-        ButtonPreserveZoomAndPan.IsOn = AppConfig.Settings.PreserveZoomAndPan;
+        ComboPanZoomNavBehaviour.SelectedIndex = FindIndexOfItemInComboBox(ComboPanZoomNavBehaviour, _panZoomBehaviourTranslator.ToString(AppConfig.Settings.PanZoomBehaviourOnNavigation));
+
 
         MainLayout.KeyDown += MainLayout_OnKeyDown;
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
@@ -126,13 +137,13 @@ internal sealed partial class Settings
         ButtonConfirmBeforeDelete.Toggled += ButtonConfirmBeforeDelete_OnToggled;
         ButtonShowFileName.Toggled += ButtonShowFileName_OnToggled;
         ButtonShowCacheStatusExpander.Toggled += ButtonShowCacheStatusExpander_OnToggled;
-        ButtonPreserveZoomAndPan.Toggled += ButtonPreserveZoomAndPan_OnToggled;
+        ComboPanZoomNavBehaviour.SelectionChanged += ComboPanZoomNavBehaviour_OnSelectionChanged;
 
 
         SettingsCardKeyboardShortCuts.Description = $"{Environment.NewLine}Left/Right Arrow Keys : Navigate Photos" +
                                                     $"{Environment.NewLine}Up/Down Arrow Keys : Zoom In or Out" +
                                                     $"{Environment.NewLine}Mouse Left Click and Drag : Pan Photo" +
-                                                    Environment.NewLine+
+                                                    Environment.NewLine +
                                                     $"{Environment.NewLine}Mouse Wheel : Zoom In or Out/ Navigate Photos - based on setting" +
                                                     $"{Environment.NewLine}Ctrl + Mouse Wheel : Zoom In or Out" +
                                                     $"{Environment.NewLine}Alt + Mouse Wheel : Navigate Photos" +
@@ -152,7 +163,7 @@ internal sealed partial class Settings
                                                     Environment.NewLine +
                                                     $"{Environment.NewLine}TouchPad two finger swipe Left or Right: Navigate Photos" +
                                                     $"{Environment.NewLine}TouchPad two finger swipe Up or Down: Zoom In or Out/ Navigate Photos - based on Mouse Wheel setting" +
-                                                    $"{Environment.NewLine}TouchPad pinch open or close: Zoom In or Out" +                                                    
+                                                    $"{Environment.NewLine}TouchPad pinch open or close: Zoom In or Out" +
                                                     Environment.NewLine +
                                                     $"{Environment.NewLine}D : Show File Properties" +
                                                     $"{Environment.NewLine}Del : Delete Photo" +
@@ -171,36 +182,23 @@ internal sealed partial class Settings
             $"This program doesn't install any codecs and uses codecs already present in the system.{Environment.NewLine}" +
             $"{Environment.NewLine}{Util.GetExtensionsDisplayString()}";
 
-    
+
         if (ComboMouseWheelBehaviourInfo.Description is string desc)
             ComboMouseWheelBehaviourInfo.Description = desc.Replace("%%", Environment.NewLine);
-                
+
     }
 
-    private async void ButtonPreserveZoomAndPan_OnToggled(object sender, RoutedEventArgs e)
-    {
-        if (ButtonPreserveZoomAndPan.IsOn)
-        {
-            var warningDialog = new ContentDialog
-            {
-                XamlRoot = this.Content.XamlRoot,
-                Title = "Preserve Pan and Zoom across photos?",
-                Content = "Enable only if you usually browse folders with same sized images. ⚠ Enabling will badly affect user experience in folders with mixed size images.",
-                PrimaryButtonText = "Enable",
-                CloseButtonText = "Cancel",
-                DefaultButton = ContentDialogButton.Close // Default to cancel for safety
-            };
 
-            var result = await warningDialog.ShowAsync();
-            if (result != ContentDialogResult.Primary)
-            {
-                ButtonPreserveZoomAndPan.IsOn = false;
-                return;
-            }
-        }
-        AppConfig.Settings.PreserveZoomAndPan = ButtonPreserveZoomAndPan.IsOn;
+    private async void ComboPanZoomNavBehaviour_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        var comboSelectionAsString = (ComboPanZoomNavBehaviour.SelectedItem as ComboBoxItem)?.Content as string;
+        if (comboSelectionAsString == null) return;
+
+        var panZoomEnum = _panZoomBehaviourTranslator.ToEnum(comboSelectionAsString);
+        AppConfig.Settings.PanZoomBehaviourOnNavigation = panZoomEnum;
         await AppConfig.SaveAsync();
     }
+
 
     private async void ButtonShowCacheStatusExpander_OnToggled(object s, RoutedEventArgs e)
     {

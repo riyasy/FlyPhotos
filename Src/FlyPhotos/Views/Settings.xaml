@@ -129,10 +129,17 @@
                                     <ToggleSwitch x:Name="ButtonHighQualityInterpolation" />
                                 </controls:SettingsCard>
                                 <controls:SettingsCard
-                                    x:Name="SettingsCardPreserveZoomAndPan"
-                                    Description="⚠ Enable only if you usually browse folders with same sized photos."
-                                    Header="Preserve Pan and Zoom across photos">
-                                    <ToggleSwitch x:Name="ButtonPreserveZoomAndPan" />
+                                    x:Name="SettingsCardPanZoomNavBehaviour"
+                                    Description="⚠ Use &apos;Retain from previous photo&apos; option only on folder with same resolution photos."
+                                    Header="Pan Zoom behaviour on navigation">
+                                    <ComboBox
+                                        x:Name="ComboPanZoomNavBehaviour"
+                                        MinWidth="150"
+                                        HorizontalAlignment="Right">
+                                        <ComboBoxItem>Reset</ComboBoxItem>
+                                        <ComboBoxItem>Remember per photo</ComboBoxItem>
+                                        <ComboBoxItem>Retain from previous photo</ComboBoxItem>
+                                    </ComboBox>
                                 </controls:SettingsCard>
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
@@ -273,11 +280,6 @@
                             HeaderIcon="{ui:FontIcon Glyph=&#xE74D;}">
                             <ToggleSwitch x:Name="ButtonConfirmBeforeDelete" />
                         </controls:SettingsCard>
-
-
-
-
-
                         <TextBlock
                             Margin="0,20,0,0"
                             Style="{StaticResource BodyStrongTextBlockStyle}"

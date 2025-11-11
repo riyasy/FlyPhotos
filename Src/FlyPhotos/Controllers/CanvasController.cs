@@ -129,7 +129,8 @@ internal class CanvasController : ICanvasController
         // Decide whether to reset the view's pan, zoom, and rotation.
         // The view is reset only for the very first photo, or when changing photos/upgrading
         // from a placeholder AND the setting to preserve zoom is OFF.
-        bool shouldResetView = isFirstPhotoEver || (!AppConfig.Settings.PreserveZoomAndPan && (isNewPhoto || isUpgradeFromPlaceholder));
+        bool shouldResetView = isFirstPhotoEver || 
+                               (AppConfig.Settings.PanZoomBehaviourOnNavigation == PanZoomBehaviourOnNavigation.Reset && (isNewPhoto || isUpgradeFromPlaceholder));
 
         _photoSessionState.CurrentDisplayLevel = displayLevel;
         var displayItem = photo.GetDisplayItemBasedOn(displayLevel);

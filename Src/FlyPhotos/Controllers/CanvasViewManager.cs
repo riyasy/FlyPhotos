@@ -159,7 +159,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         else // The view was not fitted (user has custom pan/zoom).
         {
             // Preserve the custom view by adjusting the pan position proportionally to the change in image size.
-            if (AppConfig.Settings.PreserveZoomAndPan && oldImageSize.Width > 0 && oldImageSize.Height > 0 && oldImageSize != imageSize)
+            if (AppConfig.Settings.PanZoomBehaviourOnNavigation != PanZoomBehaviourOnNavigation.Reset && oldImageSize.Width > 0 && oldImageSize.Height > 0 && oldImageSize != imageSize)
             {
                 var panOffsetX = _canvasViewState.ImagePos.X - canvasSize.Width / 2;
                 var panOffsetY = _canvasViewState.ImagePos.Y - canvasSize.Height / 2;

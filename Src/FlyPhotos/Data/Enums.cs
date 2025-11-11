@@ -63,4 +63,11 @@
         Vertical
     }
 
+    public enum PanZoomBehaviourOnNavigation
+    {
+        Reset,
+        RememberPerPhoto,
+        RetainFromLastPhoto
+    }
+
 }

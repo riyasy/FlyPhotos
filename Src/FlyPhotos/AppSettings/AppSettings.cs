@@ -34,6 +34,16 @@ public class AppSettings
         set => DefaultMouseWheelBehaviorAsString = value.ToString();
     }
 
+    [JsonPropertyName("PanZoomBehaviourOnNavigation")]
+    public string PanZoomBehaviourOnNavigationAsString { get; set; } = "Reset";
+
+    [JsonIgnore]
+    public PanZoomBehaviourOnNavigation PanZoomBehaviourOnNavigation
+    {
+        get => Enum.Parse<PanZoomBehaviourOnNavigation>(PanZoomBehaviourOnNavigationAsString, true);
+        set => PanZoomBehaviourOnNavigationAsString = value.ToString();
+    }
+
     public int CacheSizeOneSideHqImages { get; set; } = 2;
     public int CacheSizeOneSidePreviews { get; set; } = 300;
     public bool ShowThumbnails { get; set; } = true;
@@ -48,11 +58,9 @@ public class AppSettings
     public int ThumbnailSize { get; set; } = 40;
     public ulong LastUsedMonitorId { get; set; } = 0;
     public bool RememberLastMonitor { get; set; } = false;
-    public int ScrollThreshold  { get; set; } = 60;
+    public int ScrollThreshold { get; set; } = 60;
     public bool UseMouseFwdBackForStepZoom { get; set; } = false;
     public bool ConfirmForDelete { get; set; } = true;
     public bool ShowFileName { get; set; } = true;
     public bool ShowCacheStatus { get; set; } = true;
-    public bool PreserveZoomAndPan { get; set; } = false;
 }
-
