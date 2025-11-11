@@ -104,7 +104,6 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     /// <summary>
     /// Saves the current view state for a given photo path if the user setting is enabled.
     /// </summary>
-    /// <param name="photoPath">The file path of the photo whose state is to be cached.</param>
     public void CacheCurrentViewState(string photoPath)
     {
         if (AppConfig.Settings.PanZoomBehaviourOnNavigation == PanZoomBehaviourOnNavigation.RememberPerPhoto)
@@ -116,30 +115,54 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
 
     /// <summary>
     /// Sets the initial scale and position for a new image.
-    /// If 'RememberPerPhoto' is enabled, it will first attempt to restore a cached state.
-    /// Otherwise, it calculates a default view, respecting the "no upscale on load" rule.
     /// </summary>
-    public void SetScaleAndPosition(string photoPath, Size imageSize, int imageRotation, Size canvasSize, bool isFirstPhotoEver)
+    public void SetScaleAndPosition(string photoPath, Size imageSize, int imageRotation, Size canvasSize,
+        bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
     {
-        _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
-        _canvasViewState.Rotation = imageRotation;
+        var panZoomBehaviourOnNavigation = AppConfig.Settings.PanZoomBehaviourOnNavigation;
 
-        // For "RememberPerPhoto", try to apply a cached state first.
-        if (AppConfig.Settings.PanZoomBehaviourOnNavigation == PanZoomBehaviourOnNavigation.RememberPerPhoto &&
-            _perPhotoStateCache.TryGetValue(photoPath, out var cachedState))
+        if (isFirstPhotoEver)
+            panZoomBehaviourOnNavigation = PanZoomBehaviourOnNavigation.Reset;
+        else if (!isNewPhoto && !isUpgradeFromPlaceholder)
+            panZoomBehaviourOnNavigation = PanZoomBehaviourOnNavigation.RetainFromLastPhoto;
+
+        switch (panZoomBehaviourOnNavigation)
         {
-            _canvasViewState.Apply(cachedState);
-            // After applying, recalculate if the restored state is fitted or 1:1.
-            var fitScale = CalculateScreenFitScale(canvasSize, imageSize, imageRotation);
-            IsFittedToScreen = Math.Abs(_canvasViewState.Scale - fitScale) < 0.001f;
-            IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < 0.001f;
-            _canvasViewState.UpdateTransform();
-            ViewChanged?.Invoke();
-            ZoomChanged?.Invoke();
-            return;
-        }
+            case PanZoomBehaviourOnNavigation.RememberPerPhoto:
+                _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+                _canvasViewState.Rotation = imageRotation;
 
-        // --- Default view calculation (for Reset mode or first-time view in Remember mode) ---
+                if (_perPhotoStateCache.TryGetValue(photoPath, out var cachedState))
+                    SetCachedView(imageSize, imageRotation, canvasSize, cachedState);
+                else
+                    SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver);
+
+                break;
+
+            case PanZoomBehaviourOnNavigation.Reset:
+                _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+                _canvasViewState.Rotation = imageRotation;
+                SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver);
+                break;
+
+            case PanZoomBehaviourOnNavigation.RetainFromLastPhoto:
+                var oldImageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
+                _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+                if (isNewPhoto)
+                    _canvasViewState.Rotation = imageRotation;
+
+                SetViewFromPrevious(oldImageSize, imageSize, canvasSize);
+                break;
+                
+        }
+        ViewChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// Sets the default view for a photo by fitting it to screen or 100% for smaller photos.
+    /// </summary>
+    private void SetDefaultView(Size imageSize, int imageRotation, Size canvasSize, bool isFirstPhotoEver)
+    {
         var defaultFitScale = CalculateScreenFitScale(canvasSize, imageSize, imageRotation);
         var initialScale = Math.Min(defaultFitScale, 1.0f);
 
@@ -156,27 +179,31 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         {
             _canvasViewState.Scale = initialScale;
         }
-
         _canvasViewState.UpdateTransform();
-
-
         IsFittedToScreen = Math.Abs(initialScale - defaultFitScale) < 0.001f;
         IsAtOneToOne = Math.Abs(initialScale - 1.0f) < 0.001f;
     }
 
     /// <summary>
-    /// Updates the view when the image source changes (e.g., from preview to HQ).
-    /// Preserves the current view state (fitted or custom pan/zoom) as appropriate.
+    /// Sets the view for a photo by retrieving its cached state if it was panned or zoomed earlier in the current session.
     /// </summary>
-    public void UpdateImageMetrics(Size imageSize, Size canvasSize)
+    private void SetCachedView(Size imageSize, int imageRotation, Size canvasSize, CanvasViewState cachedState)
     {
-        var oldImageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
-        _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+        _canvasViewState.Apply(cachedState);
+        // After applying, recalculate if the restored state is fitted or 1:1.
+        var fitScale = CalculateScreenFitScale(canvasSize, imageSize, imageRotation);
+        IsFittedToScreen = Math.Abs(_canvasViewState.Scale - fitScale) < 0.001f;
+        IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < 0.001f;
+        _canvasViewState.UpdateTransform();
+    }
 
+    /// <summary>
+    /// Sets the view for the current photo by reusing pan and zoom from previous photo.
+    /// </summary>
+    private void SetViewFromPrevious(Size oldImageSize, Size imageSize, Size canvasSize)
+    {
         if (IsFittedToScreen)
         {
-            // The view was fitted. To maintain this state, we must re-calculate the fit for the new image dimensions.
-            // This is crucial for HQ upgrades where the preview's aspect ratio might differ slightly.
             var newScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
             _canvasViewState.Scale = newScale;
             _canvasViewState.LastScaleTo = newScale;
@@ -184,24 +211,16 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
             ZoomChanged?.Invoke();
             IsAtOneToOne = Math.Abs(newScale - 1.0f) < 0.001f;
         }
-        else // The view was not fitted (user has custom pan/zoom).
+        else if (oldImageSize.Width > 0 && oldImageSize.Height > 0 && oldImageSize != imageSize)
         {
-            // The `RetainFromLastPhoto` mode relies on this proportional adjustment logic.
-            if (AppConfig.Settings.PanZoomBehaviourOnNavigation == PanZoomBehaviourOnNavigation.RetainFromLastPhoto && oldImageSize.Width > 0 && oldImageSize.Height > 0 && oldImageSize != imageSize)
-            {
-                var panOffsetX = _canvasViewState.ImagePos.X - canvasSize.Width / 2;
-                var panOffsetY = _canvasViewState.ImagePos.Y - canvasSize.Height / 2;
-
-                var widthRatio = imageSize.Width / oldImageSize.Width;
-                var heightRatio = imageSize.Height / oldImageSize.Height;
-
-                _canvasViewState.ImagePos.X = (panOffsetX * widthRatio) + canvasSize.Width / 2;
-                _canvasViewState.ImagePos.Y = (panOffsetY * heightRatio) + canvasSize.Height / 2;
-            }
+            var panOffsetX = _canvasViewState.ImagePos.X - canvasSize.Width / 2;
+            var panOffsetY = _canvasViewState.ImagePos.Y - canvasSize.Height / 2;
+            var widthRatio = imageSize.Width / oldImageSize.Width;
+            var heightRatio = imageSize.Height / oldImageSize.Height;
+            _canvasViewState.ImagePos.X = (panOffsetX * widthRatio) + canvasSize.Width / 2;
+            _canvasViewState.ImagePos.Y = (panOffsetY * heightRatio) + canvasSize.Height / 2;
         }
-
         _canvasViewState.UpdateTransform();
-        ViewChanged?.Invoke();
     }
 
     /// <summary>

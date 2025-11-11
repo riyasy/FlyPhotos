@@ -68,9 +68,9 @@ internal sealed partial class Settings
     private readonly EnumStringTranslator<PanZoomBehaviourOnNavigation> _panZoomBehaviourTranslator = new(
         new Dictionary<PanZoomBehaviourOnNavigation, string>
         {
-            { PanZoomBehaviourOnNavigation.Reset, "Reset" },
-            { PanZoomBehaviourOnNavigation.RememberPerPhoto, "Remember per photo" },
-            { PanZoomBehaviourOnNavigation.RetainFromLastPhoto, "Retain from previous photo" }
+            { PanZoomBehaviourOnNavigation.Reset, "Reset Pan/Zoom/Rotation" },
+            { PanZoomBehaviourOnNavigation.RememberPerPhoto, "Remember Pan/Zoom/Rotation per photo" },
+            { PanZoomBehaviourOnNavigation.RetainFromLastPhoto, "Retain Pan/Zoom from previous photo" }
         }
     );
 

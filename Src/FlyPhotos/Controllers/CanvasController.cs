@@ -122,13 +122,6 @@ internal class CanvasController : ICanvasController
 
         bool isUpgradeFromPlaceholder = !_realImageDisplayedForCurrentPhoto && displayLevel > DisplayLevel.PlaceHolder;
 
-        // Decide whether to call SetScaleAndPosition (true) or UpdateImageMetrics (false).
-        // - Reset: Always resets the view for a new photo.
-        // - RetainFromLastPhoto: Never resets; it preserves the current view state for the next photo.
-        // - RememberPerPhoto: Acts like Reset, but SetScaleAndPosition will check its cache for a saved state.
-        bool shouldResetView = isFirstPhotoEver ||
-                               (AppConfig.Settings.PanZoomBehaviourOnNavigation != PanZoomBehaviourOnNavigation.RetainFromLastPhoto && (isNewPhoto || isUpgradeFromPlaceholder));
-
         _photoSessionState.CurrentDisplayLevel = displayLevel;
         var displayItem = photo.GetDisplayItemBasedOn(displayLevel);
 
@@ -148,59 +141,74 @@ internal class CanvasController : ICanvasController
         switch (displayItem)
         {
             case AnimatedHqDisplayItem animDispItem:
-                try
-                {
-                    // For animated images, first display the static first frame immediately for responsiveness.
-                    IRenderer firstFrameRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, animDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate, false);
-                    SetupNewRenderer(firstFrameRenderer, _imageSize, animDispItem.Rotation, isFirstPhotoEver, shouldResetView, true);
-
-                    // Asynchronously create the appropriate animator (GIF or APNG).
-                    IAnimator newAnimator =
-                        string.Equals(Path.GetExtension(photo.FileName), ".gif", StringComparison.OrdinalIgnoreCase)
-                        ? await GifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas)
-                        : await PngAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas);
-
-                    // RACE CONDITION CHECK: If another SetSource call has started while we were creating the
-                    // animator, this operation is now obsolete. We should discard the result and clean up.
-                    if (currentOperationId == _latestSetSourceOperationId)
-                    {
-                        // The operation is still valid. Prepare the animator and swap the renderer.
-                        await newAnimator.UpdateAsync(TimeSpan.Zero);
-                        IRenderer newRenderer = new AnimatedImageRenderer(_d2dCanvas, _checkeredBrush, newAnimator, _animatorLock, photo.SupportsTransparency(), RequestInvalidate);
-                        // For animation, we don't reset the view again, as the static frame is already there.
-                        SetupNewRenderer(newRenderer, _imageSize, animDispItem.Rotation, false, false, false);
-                    }
-                    else
-                    {
-                        // This operation was superseded; dispose the newly created animator to prevent leaks.
-                        newAnimator.Dispose();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Failed to display GIF: {ex.Message}");
-                }
+                await HandleHqAnimatedDisplayItemAsync(currentOperationId, photo, animDispItem, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
                 break;
             case HqDisplayItem hqDispItem:
-                {
-                    // For a high-quality static image, create and set the static renderer.
-                    IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, hqDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
-                    SetupNewRenderer(newRenderer, _imageSize, hqDispItem.Rotation, isFirstPhotoEver, shouldResetView, true);
-                    break;
-                }
+                HandleHqStaticDisplayItem(photo, hqDispItem, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
+                break;
+            
             case PreviewDisplayItem previewDispItem:
-                {
-                    // Previews can sometimes have a slightly different aspect ratio than the HQ image.
-                    // To prevent distortion when the HQ image eventually loads, we adjust the preview's
-                    // display dimensions to match the final aspect ratio.
-                    var previewAspectRatio = previewDispItem.Bitmap.Bounds.Width / previewDispItem.Bitmap.Bounds.Height;
-                    var correctedWidth = _imageSize.Height * previewAspectRatio;
-
-                    IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, previewDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
-                    SetupNewRenderer(newRenderer, new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, isFirstPhotoEver, shouldResetView, true);
-                    break;
-                }
+                HandlePreviewDisplayItem(photo, previewDispItem, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder); 
+                break;
         }
+    }
+
+    private async Task HandleHqAnimatedDisplayItemAsync(int currentOperationId, Photo photo, AnimatedHqDisplayItem animDispItem, 
+        bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
+    {
+        try
+        {
+            // For animated images, first display the static first frame immediately for responsiveness.
+            IRenderer firstFrameRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, animDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate, false);
+            SetupNewRenderer(firstFrameRenderer, _imageSize, animDispItem.Rotation, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, true);
+
+            // Asynchronously create the appropriate animator (GIF or APNG).
+            IAnimator newAnimator =
+                string.Equals(Path.GetExtension(photo.FileName), ".gif", StringComparison.OrdinalIgnoreCase)
+                    ? await GifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas)
+                    : await PngAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas);
+
+            // RACE CONDITION CHECK: If another SetSource call has started while we were creating the
+            // animator, this operation is now obsolete. We should discard the result and clean up.
+            if (currentOperationId == _latestSetSourceOperationId)
+            {
+                // The operation is still valid. Prepare the animator and swap the renderer.
+                await newAnimator.UpdateAsync(TimeSpan.Zero);
+                IRenderer newRenderer = new AnimatedImageRenderer(_d2dCanvas, _checkeredBrush, newAnimator, _animatorLock, photo.SupportsTransparency(), RequestInvalidate);
+                // For animation, we don't reset the view again, as the static frame is already there.
+                SetupNewRenderer(newRenderer, _imageSize, animDispItem.Rotation, false, false, false, false);
+            }
+            else
+            {
+                // This operation was superseded; dispose the newly created animator to prevent leaks.
+                newAnimator.Dispose();
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to display GIF: {ex.Message}");
+        }
+    }
+
+    private void HandleHqStaticDisplayItem(Photo photo, HqDisplayItem hqDispItem, 
+        bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
+    {
+        // For a high-quality static image, create and set the static renderer.
+        IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, hqDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
+        SetupNewRenderer(newRenderer, _imageSize, hqDispItem.Rotation, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, true);
+    }
+
+    private void HandlePreviewDisplayItem(Photo photo, PreviewDisplayItem previewDispItem, 
+        bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
+    {
+        // Previews can sometimes have a slightly different aspect ratio than the HQ image.
+        // To prevent distortion when the HQ image eventually loads, we adjust the preview's
+        // display dimensions to match the final aspect ratio.
+        var previewAspectRatio = previewDispItem.Bitmap.Bounds.Width / previewDispItem.Bitmap.Bounds.Height;
+        var correctedWidth = _imageSize.Height * previewAspectRatio;
+
+        IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, previewDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
+        SetupNewRenderer(newRenderer, new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, true);
     }
 
     /// <summary>
@@ -211,25 +219,15 @@ internal class CanvasController : ICanvasController
     /// <param name="imageSize">The actual dimensions of the image being displayed.</param>
     /// <param name="imageRotation">The rotation of the image.</param>
     /// <param name="isFirstPhotoEver">True if this is the very first image loaded in the session.</param>
-    /// <param name="resetView">True if the pan, zoom, and rotation should be reset to the default view.</param>
     /// <param name="forceThumbNailRedraw">True to force the thumbnail strip to regenerate its off-screen bitmap.</param>
-    private void SetupNewRenderer(IRenderer newRenderer, Size imageSize, int imageRotation, bool isFirstPhotoEver, bool resetView, bool forceThumbNailRedraw)
+    private void SetupNewRenderer(IRenderer newRenderer, Size imageSize, int imageRotation, bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder, bool forceThumbNailRedraw)
     {
         // Dispose the previous renderer to release its resources (e.g., CanvasBitmap).
         _currentRenderer?.Dispose();
         _currentRenderer = newRenderer;
 
-        if (resetView)
-        {
-            // If resetting, tell the view manager to calculate a fresh scale and position.
-            _canvasViewManager.SetScaleAndPosition(_currentPhotoPath, imageSize,
-                imageRotation, _d2dCanvas.GetSize(), isFirstPhotoEver);
-        }
-        else
-        {
-            // Otherwise, just update the image metrics, preserving the current pan/zoom state.
-            _canvasViewManager.UpdateImageMetrics(imageSize, _d2dCanvas.GetSize());
-        }
+        _canvasViewManager.SetScaleAndPosition(_currentPhotoPath, imageSize,
+            imageRotation, _d2dCanvas.GetSize(), isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
 
         // The thumbnail ribbon is drawn to an off-screen surface. If the set of images changes,
         // we need to force a redraw of this surface.
@@ -238,9 +236,6 @@ internal class CanvasController : ICanvasController
 
         // Each renderer may have its own off-screen drawing logic 
         _currentRenderer.RestartOffScreenDrawTimer();
-
-        // Invalidate the main canvas to trigger a D2dCanvas_Draw event with the new renderer.
-        RequestInvalidate();
     }
 
     public void FitToScreen(bool animateChange)

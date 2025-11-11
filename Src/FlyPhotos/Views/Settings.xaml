@@ -130,15 +130,15 @@
                                 </controls:SettingsCard>
                                 <controls:SettingsCard
                                     x:Name="SettingsCardPanZoomNavBehaviour"
-                                    Description="⚠ Use &apos;Retain from previous photo&apos; option only on folder with same resolution photos."
-                                    Header="Pan Zoom behaviour on navigation">
+                                    Description="⚠ Use Retain option only in folder with same size photos"
+                                    Header="Pan, Zoom & Rotation behaviour during navigation">
                                     <ComboBox
                                         x:Name="ComboPanZoomNavBehaviour"
                                         MinWidth="150"
                                         HorizontalAlignment="Right">
-                                        <ComboBoxItem>Reset</ComboBoxItem>
-                                        <ComboBoxItem>Remember per photo</ComboBoxItem>
-                                        <ComboBoxItem>Retain from previous photo</ComboBoxItem>
+                                        <ComboBoxItem>Reset Pan/Zoom/Rotation</ComboBoxItem>
+                                        <ComboBoxItem>Remember Pan/Zoom/Rotation per photo</ComboBoxItem>
+                                        <ComboBoxItem>Retain Pan/Zoom from previous photo</ComboBoxItem>
                                     </ComboBox>
                                 </controls:SettingsCard>
                             </controls:SettingsExpander.Items>
