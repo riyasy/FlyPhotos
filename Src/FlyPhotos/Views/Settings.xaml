@@ -131,7 +131,7 @@
                                 <controls:SettingsCard
                                     x:Name="SettingsCardPanZoomNavBehaviour"
                                     Description="⚠ Use Retain option only in folder with same size photos"
-                                    Header="Pan, Zoom & Rotation behaviour during navigation">
+                                    Header="Pan, Zoom &amp; Rotation behaviour during navigation">
                                     <ComboBox
                                         x:Name="ComboPanZoomNavBehaviour"
                                         MinWidth="150"
