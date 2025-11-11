@@ -109,7 +109,7 @@ internal class CanvasController : ICanvasController
         var currentOperationId = ++_latestSetSourceOperationId;
         var isFirstPhotoEver = string.IsNullOrEmpty(_currentPhotoPath);
 
-        bool isNewPhoto = photo.FileName != _currentPhotoPath;
+        var isNewPhoto = photo.FileName != _currentPhotoPath;
         if (isNewPhoto)
         {
             // If switching to a new photo, cache the view state of the old photo first.
@@ -120,7 +120,7 @@ internal class CanvasController : ICanvasController
             _realImageDisplayedForCurrentPhoto = false;
         }
 
-        bool isUpgradeFromPlaceholder = !_realImageDisplayedForCurrentPhoto && displayLevel > DisplayLevel.PlaceHolder;
+        var isUpgradeFromPlaceholder = !_realImageDisplayedForCurrentPhoto && displayLevel > DisplayLevel.PlaceHolder;
 
         _photoSessionState.CurrentDisplayLevel = displayLevel;
         var displayItem = photo.GetDisplayItemBasedOn(displayLevel);
@@ -133,9 +133,7 @@ internal class CanvasController : ICanvasController
         if (displayItem == null) return;
 
         if (displayLevel > DisplayLevel.PlaceHolder)
-        {
             _realImageDisplayedForCurrentPhoto = true;
-        }
 
         // Handle the specific type of display item (Animated, HQ Static, Preview).
         switch (displayItem)
@@ -219,22 +217,20 @@ internal class CanvasController : ICanvasController
     /// <param name="imageSize">The actual dimensions of the image being displayed.</param>
     /// <param name="imageRotation">The rotation of the image.</param>
     /// <param name="isFirstPhotoEver">True if this is the very first image loaded in the session.</param>
+    /// /// <param name="isNewPhoto">A new photo at a new path. Will be false for a HQ loading after low res preview of same photo.</param>
+    /// <param name="isUpgradeFromPlaceholder">Will be true for preview and HQ loading after a place-holder display.</param>
     /// <param name="forceThumbNailRedraw">True to force the thumbnail strip to regenerate its off-screen bitmap.</param>
     private void SetupNewRenderer(IRenderer newRenderer, Size imageSize, int imageRotation, bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder, bool forceThumbNailRedraw)
     {
-        // Dispose the previous renderer to release its resources (e.g., CanvasBitmap).
         _currentRenderer?.Dispose();
         _currentRenderer = newRenderer;
 
         _canvasViewManager.SetScaleAndPosition(_currentPhotoPath, imageSize,
             imageRotation, _d2dCanvas.GetSize(), isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
 
-        // The thumbnail ribbon is drawn to an off-screen surface. If the set of images changes,
-        // we need to force a redraw of this surface.
         if (forceThumbNailRedraw)
             _thumbNailController.CreateThumbnailRibbonOffScreen();
 
-        // Each renderer may have its own off-screen drawing logic 
         _currentRenderer.RestartOffScreenDrawTimer();
     }
 
@@ -311,11 +307,9 @@ internal class CanvasController : ICanvasController
 
         if (_currentRenderer == null) return;
 
-        CanvasImageInterpolation drawingQuality;
-        if (!AppConfig.Settings.HighQualityInterpolation || _canvasViewManager.PanZoomAnimationOnGoing)
-            drawingQuality = CanvasImageInterpolation.NearestNeighbor;
-        else
-            drawingQuality = CanvasImageInterpolation.HighQualityCubic;
+        var drawingQuality = !AppConfig.Settings.HighQualityInterpolation || _canvasViewManager.PanZoomAnimationOnGoing
+            ? CanvasImageInterpolation.NearestNeighbor
+            : CanvasImageInterpolation.HighQualityCubic;
 
         args.DrawingSession.Transform = _canvasViewState.Mat;
 

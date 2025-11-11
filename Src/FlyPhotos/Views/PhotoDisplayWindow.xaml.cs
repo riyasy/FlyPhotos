@@ -367,7 +367,6 @@ public sealed partial class PhotoDisplayWindow
         var props = e.GetCurrentPoint(D2dCanvas).Properties;
         var delta = props.MouseWheelDelta;
         var scroll = props.IsHorizontalMouseWheel ? ScrollDirection.Horizontal : ScrollDirection.Vertical;
-        var isHorizontalScroll = props.IsHorizontalMouseWheel;
         var currentPoint = e.GetCurrentPoint(D2dCanvas).Position;
 
         switch (scroll)
