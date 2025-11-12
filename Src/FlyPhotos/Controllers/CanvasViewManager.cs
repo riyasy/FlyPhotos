@@ -18,6 +18,11 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     // --- Public Properties & Events ---
 
     /// <summary>
+    /// File path of current photo
+    /// </summary>
+    private string _photoPath = string.Empty;
+
+    /// <summary>
     /// Indicates if a pan or zoom animation is currently in progress.
     /// </summary>
     public bool PanZoomAnimationOnGoing { get; private set; }
@@ -53,14 +58,22 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     private Point _zoomCenter;
     private Point _panStartPosition;
     private Point _panTargetPosition;
+    private int _originalImageRotation;
 
     // --- State Management Properties ---
 
     /// <summary>
     /// Volatile cache to store view state per photo for the current session.
     /// Key: Photo file path. Value: A clone of the photo's CanvasViewState.
+    /// The ImagePos in the cached state is a *normalized* offset from the center, not absolute pixels.
     /// </summary>
     private readonly Dictionary<string, CanvasViewState> _perPhotoStateCache = new();
+
+    /// <summary>
+    /// Tracks if the view state has been modified by user input (pan, zoom, rotate).
+    /// Used to determine if the state is worth caching for "RememberPerPhoto" mode.
+    /// </summary>
+    private bool _isStateModifiedByUser;
 
     /// <summary>
     /// Tracks if the image is perfectly fitted to the canvas (respecting padding).
@@ -102,14 +115,29 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     // --- Public API Methods ---
 
     /// <summary>
-    /// Saves the current view state for a given photo path if the user setting is enabled.
+    /// Saves the current view state for a given photo path if the user setting is enabled
+    /// and the user has actually modified the view (panned, zoomed, or rotated).
+    /// The pan position is saved as a normalized value to be resilient to window resizing.
     /// </summary>
-    public void CacheCurrentViewState(string photoPath)
+    public void CacheCurrentViewState(string photoPath, Size canvasSize)
     {
-        if (AppConfig.Settings.PanZoomBehaviourOnNavigation == PanZoomBehaviourOnNavigation.RememberPerPhoto)
+        if (AppConfig.Settings.PanZoomBehaviourOnNavigation == PanZoomBehaviourOnNavigation.RememberPerPhoto && _isStateModifiedByUser)
         {
-            // Store a clone of the state, not a reference, to prevent it from being modified.
-            _perPhotoStateCache[photoPath] = _canvasViewState.Clone();
+            // Store a clone of the state, not a reference.
+            var stateToCache = _canvasViewState.Clone();
+
+            // Convert the absolute pan position to a normalized offset from the center.
+            // This makes the cached pan position independent of the canvas size.
+            var panOffsetX = _canvasViewState.ImagePos.X - canvasSize.Width / 2.0;
+            var panOffsetY = _canvasViewState.ImagePos.Y - canvasSize.Height / 2.0;
+
+            // Avoid division by zero if canvas is not yet sized.
+            var normalizedPanX = canvasSize.Width > 0 ? panOffsetX / canvasSize.Width : 0;
+            var normalizedPanY = canvasSize.Height > 0 ? panOffsetY / canvasSize.Height : 0;
+
+            stateToCache.ImagePos = new Point(normalizedPanX, normalizedPanY);
+
+            _perPhotoStateCache[photoPath] = stateToCache;
         }
     }
 
@@ -119,6 +147,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     public void SetScaleAndPosition(string photoPath, Size imageSize, int imageRotation, Size canvasSize,
         bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
     {
+        _photoPath = photoPath;
+
         var panZoomBehaviourOnNavigation = AppConfig.Settings.PanZoomBehaviourOnNavigation;
 
         if (isFirstPhotoEver)
@@ -130,10 +160,15 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         {
             case PanZoomBehaviourOnNavigation.RememberPerPhoto:
                 _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
-                _canvasViewState.Rotation = imageRotation;
+                // For a new photo, always start with its native rotation.
+                if (isNewPhoto)
+                {
+                    _canvasViewState.Rotation = imageRotation;
+                    _originalImageRotation = imageRotation;
+                }
 
                 if (_perPhotoStateCache.TryGetValue(photoPath, out var cachedState))
-                    SetCachedView(imageSize, imageRotation, canvasSize, cachedState);
+                    SetCachedView(imageSize, canvasSize, cachedState);
                 else
                     SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver);
 
@@ -142,6 +177,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
             case PanZoomBehaviourOnNavigation.Reset:
                 _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
                 _canvasViewState.Rotation = imageRotation;
+                _originalImageRotation = imageRotation;
                 SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver);
                 break;
 
@@ -149,11 +185,13 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
                 var oldImageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
                 _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
                 if (isNewPhoto)
+                {
                     _canvasViewState.Rotation = imageRotation;
-
+                    _originalImageRotation = imageRotation;
+                }
                 SetViewFromPrevious(oldImageSize, imageSize, canvasSize);
                 break;
-                
+
         }
         ViewChanged?.Invoke();
     }
@@ -168,6 +206,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
 
         _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         _canvasViewState.LastScaleTo = initialScale;
+        _canvasViewState.Rotation = imageRotation; // Ensure rotation is set correctly for default view.
 
         if (isFirstPhotoEver && AppConfig.Settings.OpenExitZoom)
         {
@@ -182,19 +221,33 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         _canvasViewState.UpdateTransform();
         IsFittedToScreen = Math.Abs(initialScale - defaultFitScale) < 0.001f;
         IsAtOneToOne = Math.Abs(initialScale - 1.0f) < 0.001f;
+        _isStateModifiedByUser = false; // This is a default state, not a user-modified one.
     }
 
     /// <summary>
     /// Sets the view for a photo by retrieving its cached state if it was panned or zoomed earlier in the current session.
     /// </summary>
-    private void SetCachedView(Size imageSize, int imageRotation, Size canvasSize, CanvasViewState cachedState)
+    private void SetCachedView(Size imageSize, Size canvasSize, CanvasViewState cachedState)
     {
-        _canvasViewState.Apply(cachedState);
+        // Apply scale and rotation directly from the cached state.
+        _canvasViewState.Scale = cachedState.Scale;
+        _canvasViewState.LastScaleTo = cachedState.LastScaleTo;
+        _canvasViewState.Rotation = cachedState.Rotation;
+
+        // Re-hydrate the absolute pan position from the normalized offset stored in the cache.
+        // This makes the restored position correct for the current canvas size.
+        var normalizedPanX = cachedState.ImagePos.X;
+        var normalizedPanY = cachedState.ImagePos.Y;
+        var panOffsetX = normalizedPanX * canvasSize.Width;
+        var panOffsetY = normalizedPanY * canvasSize.Height;
+        _canvasViewState.ImagePos = new Point(canvasSize.Width / 2.0 + panOffsetX, canvasSize.Height / 2.0 + panOffsetY);
+
         // After applying, recalculate if the restored state is fitted or 1:1.
-        var fitScale = CalculateScreenFitScale(canvasSize, imageSize, imageRotation);
+        var fitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
         IsFittedToScreen = Math.Abs(_canvasViewState.Scale - fitScale) < 0.001f;
         IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < 0.001f;
         _canvasViewState.UpdateTransform();
+        _isStateModifiedByUser = true; // A cached state is by definition a user-modified one.
     }
 
     /// <summary>
@@ -244,7 +297,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
             ZoomChanged?.Invoke();
             IsAtOneToOne = Math.Abs(newScale - 1.0f) < 0.001f;
         }
-        else
+        else if (previousSize.Width > 0 && previousSize.Height > 0)
         {
             // If custom pan/zoom, adjust the image position to maintain its relative screen location.
             var xChangeRatio = newSize.Width / previousSize.Width;
@@ -271,6 +324,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         // Any manual zoom action invalidates both fitted and 1:1 states.
         IsFittedToScreen = false;
         IsAtOneToOne = false;
+        _isStateModifiedByUser = true;
     }
 
     /// <summary>
@@ -287,6 +341,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         // Any manual zoom action invalidates both fitted and 1:1 states.
         IsFittedToScreen = false;
         IsAtOneToOne = false;
+        _isStateModifiedByUser = true;
     }
 
     /// <summary>
@@ -323,6 +378,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         // Any manual zoom action invalidates both fitted and 1:1 states.
         IsFittedToScreen = false;
         IsAtOneToOne = false;
+        _isStateModifiedByUser = true;
     }
 
     /// <summary>
@@ -365,6 +421,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         // Set state immediately for responsive UI.
         IsFittedToScreen = Math.Abs(targetScale - screenFitScale) < 0.001f;
         IsAtOneToOne = Math.Abs(targetScale - 1.0f) < 0.001f;
+        _isStateModifiedByUser = true;
     }
 
     /// <summary>
@@ -409,6 +466,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         // Set state immediately for responsive UI, even when animating.
         IsFittedToScreen = true;
         IsAtOneToOne = Math.Abs(scaleFactor - 1.0f) < 0.001f;
+        _isStateModifiedByUser = true;
+        CheckIfViewBackToDefaultState(scaleFactor, canvasSize, imageSize);
     }
 
     /// <summary>
@@ -416,6 +475,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     /// </summary>
     public void ZoomToHundred(Size canvasSize)
     {
+        const float targetScale = 1.0f;
         var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         _canvasViewState.LastScaleTo = 1.0f;
         StartPanAndZoomAnimation(1.0f, targetPosition);
@@ -425,6 +485,8 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         var screenFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
         IsFittedToScreen = Math.Abs(1.0f - screenFitScale) < 0.001f;
         IsAtOneToOne = true;
+        _isStateModifiedByUser = true;
+        CheckIfViewBackToDefaultState(targetScale, canvasSize, imageSize);
     }
 
     /// <summary>
@@ -440,6 +502,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         // Any manual pan breaks the fitted state.
         IsFittedToScreen = false;
         // Per requirements, panning does not affect the 1:1 state.
+        _isStateModifiedByUser = true;
     }
 
     /// <summary>
@@ -454,6 +517,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         // Rotation changes the effective dimensions, breaking the fitted state.
         IsFittedToScreen = false;
         // Rotation does not change scale, so 1:1 state is preserved.
+        _isStateModifiedByUser = true;
     }
 
     /// <summary>
@@ -503,6 +567,43 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         // Return the smaller of the two scale factors. This ensures that the image fits
         // completely on the canvas without being cropped on either axis.
         return (float)Math.Min(horizontalScale, verticalScale);
+    }
+
+    /// <summary>
+    /// Checks if the current view state matches the photo's default view. If it does,
+    /// it resets the modified flag and removes the photo from the cache.
+    /// Otherwise, it marks the state as user-modified.
+    /// </summary>
+    private void CheckIfViewBackToDefaultState(float finalScale, Size canvasSize, Size imageSize)
+    {
+        // 1. Calculate the scale of the *actual* default view (which doesn't upscale small images).
+        var defaultFitScale = CalculateScreenFitScale(canvasSize, imageSize, _originalImageRotation);
+        var defaultInitialScale = Math.Min(defaultFitScale, 1.0f);
+
+        // 2. Check if the final scale from the user action matches the default scale.
+        var isDefaultScale = Math.Abs(finalScale - defaultInitialScale) < 0.001f;
+
+        // 3. Check if the current rotation matches the original, unmodified rotation.
+        // The modulo logic handles cases like 360 vs 0 and -90 vs 270.
+        var currentRotationNormalized = ((_canvasViewState.Rotation % 360) + 360) % 360;
+        var originalRotationNormalized = ((_originalImageRotation % 360) + 360) % 360;
+        var isDefaultRotation = currentRotationNormalized == originalRotationNormalized;
+
+        // 4. Check if the pan position is centered on the canvas. A tolerance of 0.5 pixels
+        // is used to account for potential floating point inaccuracies.
+        var canvasCenterX = canvasSize.Width / 2.0;
+        var canvasCenterY = canvasSize.Height / 2.0;
+        var isDefaultPan = Math.Abs(_canvasViewState.ImagePos.X - canvasCenterX) < 0.5 &&
+                           Math.Abs(_canvasViewState.ImagePos.Y - canvasCenterY) < 0.5;
+
+        // 5. The view is considered "default" only if scale, rotation, AND pan match the default state.
+        if (isDefaultScale && isDefaultRotation && isDefaultPan)
+        {
+            _isStateModifiedByUser = false;
+            if (!string.IsNullOrEmpty(_photoPath))
+                _perPhotoStateCache.Remove(_photoPath);
+        }
+        else { _isStateModifiedByUser = true; }
     }
 
     /// <summary>

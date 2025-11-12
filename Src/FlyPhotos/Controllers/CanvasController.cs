@@ -114,7 +114,7 @@ internal class CanvasController : ICanvasController
         {
             // If switching to a new photo, cache the view state of the old photo first.
             if (!string.IsNullOrEmpty(_currentPhotoPath))
-                _canvasViewManager.CacheCurrentViewState(_currentPhotoPath);
+                _canvasViewManager.CacheCurrentViewState(_currentPhotoPath, _d2dCanvas.GetSize());
             
             _currentPhotoPath = photo.FileName;
             _realImageDisplayedForCurrentPhoto = false;
