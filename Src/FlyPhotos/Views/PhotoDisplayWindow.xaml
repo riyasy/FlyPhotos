@@ -5,14 +5,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:utils="using:FlyPhotos.Utils"
     xmlns:win2d="using:Microsoft.Graphics.Canvas.UI.Xaml"
     mc:Ignorable="d">
 
-    <Grid
+    <utils:CursorHost
         x:Name="MainLayout"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch">
-        <Grid.Resources>
+        <utils:CursorHost.Resources>
             <ResourceDictionary>
                 <ResourceDictionary.ThemeDictionaries>
                     <ResourceDictionary x:Key="Light">
@@ -25,7 +26,7 @@
                     </ResourceDictionary>
                 </ResourceDictionary.ThemeDictionaries>
             </ResourceDictionary>
-        </Grid.Resources>
+        </utils:CursorHost.Resources>
         <Grid
             x:Name="AppTitlebar"
             Height="28"
@@ -216,5 +217,5 @@
                 VerticalAlignment="Bottom" />
         </StackPanel>
 
-    </Grid>
+    </utils:CursorHost>
 </Window>

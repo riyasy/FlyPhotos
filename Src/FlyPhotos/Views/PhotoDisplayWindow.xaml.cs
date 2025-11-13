@@ -57,6 +57,7 @@ public sealed partial class PhotoDisplayWindow
 
     private readonly OpacityFader _opacityFader;
     private readonly InactivityFader _inactivityFader;
+    private readonly MouseAutoHider _mouseAutoHider;
 
     private WindowBackdropType _currentBackdropType;
     private ISystemBackdropControllerWithTargets? _backdropController;
@@ -134,6 +135,7 @@ public sealed partial class PhotoDisplayWindow
 
         _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
+        _mouseAutoHider = new MouseAutoHider(MainLayout, TimeSpan.FromSeconds(1));
     }
 
     #region Event Handlers
@@ -168,6 +170,7 @@ public sealed partial class PhotoDisplayWindow
         _photoController.Dispose();
         _opacityFader.Dispose();
         _inactivityFader.Dispose();
+        _mouseAutoHider.Dispose();
         DiskCacherWithSqlite.Shutdown();
 
         _backdropController?.RemoveSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());

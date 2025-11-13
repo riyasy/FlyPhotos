@@ -178,17 +178,20 @@
                             Style="{StaticResource BodyStrongTextBlockStyle}"
                             Text="UI Controls" />
                         <controls:SettingsExpander
-                            x:Name="SettingsCardFadeControls"
                             Margin="0,5,0,0"
-                            Description="Fade UI controls when mouse moves away"
-                            Header="Auto Fade UI controls"
+                            Header="Auto Fade / Hide Settings"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE754;}">
-                            <ToggleSwitch x:Name="ButtonEnableAutoFade" HorizontalAlignment="Right" />
                             <controls:SettingsExpander.Items>
                                 <controls:SettingsCard
+                                    x:Name="SettingsCardFadeControls"
+                                    Description="Fade UI controls when mouse moves away."
+                                    Header="Auto Fade UI controls">
+                                    <ToggleSwitch x:Name="ButtonEnableAutoFade" HorizontalAlignment="Right" />
+                                </controls:SettingsCard>
+                                <controls:SettingsCard
                                     x:Name="SettingsCardFadeIntensity"
-                                    Description="Adjust how strong the auto-fade effect appears on screen."
-                                    Header="Fade intensity %"
+                                    Description="Adjust strength of auto-fade effect."
+                                    Header="Auto Fade intensity %"
                                     IsEnabled="{x:Bind ButtonEnableAutoFade.IsOn, Mode=OneWay}">
                                     <Slider
                                         x:Name="SliderFadeIntensity"
@@ -198,6 +201,12 @@
                                         SmallChange="10"
                                         StepFrequency="10"
                                         Value="50" />
+                                </controls:SettingsCard>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardAutoHideMouse"
+                                    Description="Hide mouse cursor if mouse is inactive."
+                                    Header="Auto Hide mouse cursor">
+                                    <ToggleSwitch x:Name="ButtonEnableAutoHideMouse" HorizontalAlignment="Right" />
                                 </controls:SettingsCard>
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>

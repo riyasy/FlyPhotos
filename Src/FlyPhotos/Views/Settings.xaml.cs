@@ -116,6 +116,7 @@ internal sealed partial class Settings
         ButtonShowFileName.IsOn = AppConfig.Settings.ShowFileName;
         ButtonShowCacheStatusExpander.IsOn = AppConfig.Settings.ShowCacheStatus;
         ComboPanZoomNavBehaviour.SelectedIndex = FindIndexOfItemInComboBox(ComboPanZoomNavBehaviour, _panZoomBehaviourTranslator.ToString(AppConfig.Settings.PanZoomBehaviourOnNavigation));
+        ButtonEnableAutoHideMouse.IsOn = AppConfig.Settings.AutoHideMouse;
 
 
         MainLayout.KeyDown += MainLayout_OnKeyDown;
@@ -138,6 +139,7 @@ internal sealed partial class Settings
         ButtonShowFileName.Toggled += ButtonShowFileName_OnToggled;
         ButtonShowCacheStatusExpander.Toggled += ButtonShowCacheStatusExpander_OnToggled;
         ComboPanZoomNavBehaviour.SelectionChanged += ComboPanZoomNavBehaviour_OnSelectionChanged;
+        ButtonEnableAutoHideMouse.Toggled += ButtonEnableAutoHideMouse_OnToggled;
 
 
         SettingsCardKeyboardShortCuts.Description = $"{Environment.NewLine}Left/Right Arrow Keys : Navigate Photos" +
@@ -188,6 +190,11 @@ internal sealed partial class Settings
 
     }
 
+    private async void ButtonEnableAutoHideMouse_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.AutoHideMouse = ButtonEnableAutoHideMouse.IsOn;
+        await AppConfig.SaveAsync();
+    }
 
     private async void ComboPanZoomNavBehaviour_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
