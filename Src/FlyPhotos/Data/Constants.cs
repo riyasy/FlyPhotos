@@ -5,6 +5,7 @@
         // Pan Zoom Animation Related
         public const int PanZoomAnimationDurationForExit = 200;
         public const int PanZoomAnimationDurationNormal = 400;
+        public const int OffScreenDrawDelayMs = 410;
 
         // Related to Shrug Animation for Delete Failure
         public const double ShrugAnimationDurationMs = 350;

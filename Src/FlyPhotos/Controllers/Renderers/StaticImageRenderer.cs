@@ -40,7 +40,7 @@ namespace FlyPhotos.Controllers.Renderers
             _checkeredBrush = checkeredBrush;
             _canvas = canvas;
 
-            _offscreenDrawTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(410) };
+            _offscreenDrawTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(Constants.OffScreenDrawDelayMs) };
             _offscreenDrawTimer.Tick += OffScreenDrawTimer_Tick;
         }
 
