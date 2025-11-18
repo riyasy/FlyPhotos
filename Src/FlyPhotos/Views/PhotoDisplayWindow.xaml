@@ -184,6 +184,7 @@
                     <Button
                         x:Name="ButtonShortcuts"
                         Width="Auto"
+                        Margin="10,0,0,0"
                         Click="ButtonShortcuts_OnClick"
                         Content="&#xE7AC;"
                         FontFamily="{StaticResource FluentIcons}"

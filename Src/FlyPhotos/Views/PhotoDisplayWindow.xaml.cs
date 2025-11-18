@@ -17,6 +17,7 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using NLog;
+using NLog.Layouts;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -288,12 +289,11 @@ public sealed partial class PhotoDisplayWindow
                 stackPanel.Children.Add(flyoutButton);
             }
         }
-        if (stackPanel.Children.Any())
-        {
-            var flyout = new Flyout { Content = stackPanel };
-            FlyoutBase.SetAttachedFlyout(senderButton, flyout);
-            FlyoutBase.ShowAttachedFlyout(senderButton);
-        }
+
+        UIElement content = stackPanel.Children.Any() ? stackPanel : new TextBlock { Text = "No shortcuts created. Configure in settings." };
+        var flyout = new Flyout { Content = content };        
+        FlyoutBase.SetAttachedFlyout(senderButton, flyout);
+        FlyoutBase.ShowAttachedFlyout(senderButton);
     }
 
     /// <summary>
