@@ -1647,6 +1647,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_AF42530492F6497084880917FC1AAF2C"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_AF89030E09834EFA84DF44DD73FE8ABD"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -2218,6 +2224,12 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_BF6989FB7C4014C6AE0F8CD9BC89B7F4"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_BBF1FEB51F35404994322712FD170B15"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -2255,6 +2267,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_A95B1C514EDD4C52AB28DD631BD31483"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_A78033BB84C5888A7F57CE432CA79C94"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -2303,12 +2321,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_893FBC47BE944706B8EDF330F6ECA938"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_07253C41B5FF4C150DEEF20EA1C2015D"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -2410,6 +2422,12 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_188F522A3115984ACD2AC28127B02ED9"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_17A667F4BA154D74B4E287F2E5881C60"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -2440,6 +2458,12 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_07253C41B5FF4C150DEEF20EA1C2015D"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_06DC6F5BA93441E996C73A85AF02198D"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -2447,24 +2471,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_03EC3E55C6744FE593224598CEB3A0D0"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_188F522A3115984ACD2AC28127B02ED9"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_BF6989FB7C4014C6AE0F8CD9BC89B7F4"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_A78033BB84C5888A7F57CE432CA79C94"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -2605,7 +2611,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -2718,7 +2724,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -2984,7 +2990,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -3086,7 +3092,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -4670,7 +4676,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -4884,6 +4890,26 @@
             "TargetName" = "8:FileNotFound.png"
             "Tag" = "8:"
             "Folder" = "8:_752CA1FDE6254AB8B0E85E88E0147DAF"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AF42530492F6497084880917FC1AAF2C"
+            {
+            "SourcePath" = "8:..\\FlyPhotos\\Assets\\transparent.cur"
+            "TargetName" = "8:transparent.cur"
+            "Tag" = "8:"
+            "Folder" = "8:_26865D038034462A970A4EA858C0D83E"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -5218,7 +5244,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -6012,15 +6038,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Fly"
-        "ProductCode" = "8:{85E17DF4-7308-4225-B29A-0BF5CF9497B4}"
-        "PackageCode" = "8:{E673969C-917B-40CC-A468-5B6DF7840920}"
+        "ProductCode" = "8:{3491D5AF-47B4-4CFF-8BC0-041BAEFB226A}"
+        "PackageCode" = "8:{974D68A8-6E16-48E3-A73C-AA023DB64DBE}"
         "UpgradeCode" = "8:{5565DCCD-EEED-45A0-93FF-4BABC468C2A7}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:2.5.8"
+        "ProductVersion" = "8:2.5.9"
         "Manufacturer" = "8:RYFTools"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://github.com/riyasy/FlyPhotos"
