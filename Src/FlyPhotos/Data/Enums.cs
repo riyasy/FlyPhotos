@@ -54,7 +54,8 @@
         BackDrop,
         BackDropTransparency,
         FileNameShowHide,
-        CacheStatusShowHide
+        CacheStatusShowHide,
+        ExtShortcutsShowHide
     }
 
     public enum ScrollDirection

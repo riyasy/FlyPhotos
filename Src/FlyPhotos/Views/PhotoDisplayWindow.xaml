@@ -182,6 +182,20 @@
                         </ToolTipService.ToolTip>
                     </Button>
                     <Button
+                        x:Name="ButtonShortcuts"
+                        Width="Auto"
+                        Click="ButtonShortcuts_OnClick"
+                        Content="&#xE7AC;"
+                        FontFamily="{StaticResource FluentIcons}"
+                        FontSize="16">
+                        <ToolTipService.ToolTip>
+                            <ToolTip
+                                AutomationProperties.FullDescription="Non-occluding tooltip"
+                                Content="Open in other apps"
+                                Placement="Right" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+                    <Button
                         x:Name="ButtonExpander"
                         Width="Auto"
                         Click="ButtonExpander_Click">

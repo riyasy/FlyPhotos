@@ -2,6 +2,7 @@
 using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers;
 using FlyPhotos.Data;
+using FlyPhotos.NativeWrappers;
 using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
@@ -12,17 +13,19 @@ using Microsoft.UI.System;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using NLog;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.System;
 using Windows.UI;
-using FlyPhotos.NativeWrappers;
 using WinRT;
 using WinRT.Interop;
 using WinUIEx;
@@ -110,6 +113,7 @@ public sealed partial class PhotoDisplayWindow
         TxtFileName.Text = Path.GetFileName(firstPhotoPath);
         BorderTxtFileName.Visibility = AppConfig.Settings.ShowFileName ? Visibility.Visible : Visibility.Collapsed;
         ButtonExpander.Visibility = AppConfig.Settings.ShowCacheStatus ? Visibility.Visible : Visibility.Collapsed;
+        ButtonShortcuts.Visibility = AppConfig.Settings.ShowExternalAppShortcuts ? Visibility.Visible : Visibility.Collapsed;
 
         Activated += PhotoDisplayWindow_Activated;
         SizeChanged += PhotoDisplayWindow_SizeChanged;
@@ -262,6 +266,56 @@ public sealed partial class PhotoDisplayWindow
         else
         {
             _settingWindow.Activate();
+        }
+    }
+
+    private async void ButtonShortcuts_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (!File.Exists(_photoController.GetFullPathCurrentFile())) return;
+
+        var senderButton = sender as Button;
+        if (senderButton == null) return;
+        var stackPanel = new StackPanel { Spacing = 4, };
+        var appPaths = new List<string> { AppConfig.Settings.ExternalApp1, AppConfig.Settings.ExternalApp2, AppConfig.Settings.ExternalApp3, AppConfig.Settings.ExternalApp4 };
+
+        foreach (var path in appPaths)
+        {
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
+            {
+                var flyoutButton = new Button { Width = 60, Height = 50, Tag = path };
+                await Util.SetButtonIconFromExeAsync(flyoutButton, path);
+                flyoutButton.Click += FlyoutButton_OnClick;
+                stackPanel.Children.Add(flyoutButton);
+            }
+        }
+        if (stackPanel.Children.Any())
+        {
+            var flyout = new Flyout { Content = stackPanel };
+            FlyoutBase.SetAttachedFlyout(senderButton, flyout);
+            FlyoutBase.ShowAttachedFlyout(senderButton);
+        }
+    }
+
+    /// <summary>
+    /// This event handler is for the buttons INSIDE the flyout.
+    /// It launches the application path stored in the button's Tag property.
+    /// </summary>
+    private void FlyoutButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var clickedButton = sender as Button;
+        var exeToLaunch = clickedButton?.Tag as string;
+
+        if (string.IsNullOrEmpty(exeToLaunch)) { return; }
+
+        string filePathArgument = _photoController.GetFullPathCurrentFile();
+        try
+        {
+            var startInfo = new ProcessStartInfo { FileName = exeToLaunch, Arguments = $"\"{filePathArgument}\"", UseShellExecute = true };
+            Process.Start(startInfo);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to launch '{exeToLaunch}' with argument '{filePathArgument}': {ex.Message}");
         }
     }
 
@@ -633,6 +687,9 @@ public sealed partial class PhotoDisplayWindow
                 break;
             case Setting.CacheStatusShowHide:
                 ButtonExpander.Visibility = AppConfig.Settings.ShowCacheStatus ? Visibility.Visible : Visibility.Collapsed;
+                break;
+            case Setting.ExtShortcutsShowHide:
+                ButtonShortcuts.Visibility = AppConfig.Settings.ShowExternalAppShortcuts ? Visibility.Visible : Visibility.Collapsed;
                 break;
         }
     }

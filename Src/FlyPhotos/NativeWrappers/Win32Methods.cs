@@ -132,4 +132,43 @@ internal static partial class Win32Methods
     /// This is typically for operations on Shell namespace objects that are not part of the file system.
     /// </summary>
     internal const uint SEE_MASK_INVOKEIDLIST = 12;
+
+    /// <summary>
+    /// Imports the `ExtractIconEx` function from `shell32.dll`.
+    /// This function creates arrays of handles to large or small icons extracted from the specified file.
+    /// </summary>
+    /// <param name="lpszFile">The path and name of the file from which to extract the icons (e.g., an .exe, .dll, or .ico file).</param>
+    /// <param name="nIconIndex">
+    /// The zero-based index of the icon to extract.
+    /// If this value is -1, the function extracts all icons specified by <paramref name="nIcons"/>.
+    /// If this value is a negative number other than -1, the function begins by extracting the icon whose resource identifier is equal to the absolute value of <paramref name="nIconIndex"/>.
+    /// </param>
+    /// <param name="phiconLarge">An array of IntPtr that receives the handles to the large icons extracted from the file. Can be null if large icons are not required.</param>
+    /// <param name="phiconSmall">An array of IntPtr that receives the handles to the small icons extracted from the file. Can be null if small icons are not required.</param>
+    /// <param name="nIcons">The number of icons to extract from the file. This parameter is only used when <paramref name="nIconIndex"/> is -1.</param>
+    /// <returns>
+    /// If <paramref name="nIconIndex"/> is -1 and both <paramref name="phiconLarge"/> and <paramref name="phiconSmall"/> are null, the return value is the total number of icons in the specified file.
+    /// Otherwise, the return value is the number of icons successfully extracted from the file.
+    /// </returns>
+    /// <remarks>
+    /// The caller is responsible for destroying all icon handles returned by this function by calling the <see cref="DestroyIcon"/> function.
+    /// To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>.
+    /// </remarks>
+    [DllImport("shell32.dll", CharSet = CharSet.Auto)]
+    internal static extern uint ExtractIconEx(string lpszFile, int nIconIndex, IntPtr[] phiconLarge, IntPtr[] phiconSmall, uint nIcons);
+
+    /// <summary>
+    /// Imports the `DestroyIcon` function from `user32.dll`.
+    /// This function destroys an icon and frees any memory the icon occupied.
+    /// </summary>
+    /// <param name="hIcon">A handle to the icon to be destroyed. The icon must not be in use.</param>
+    /// <returns>Returns true if the function succeeds; otherwise, false.</returns>
+    /// <remarks>
+    /// This function should be called to free resources for any icon handle created by functions like <see cref="ExtractIconEx"/>.
+    /// It is only necessary to call DestroyIcon for icons and cursors created with functions that do not have their own cleanup mechanism.
+    /// To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>.
+    /// </remarks>
+    [LibraryImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool DestroyIcon(IntPtr hIcon);
 }

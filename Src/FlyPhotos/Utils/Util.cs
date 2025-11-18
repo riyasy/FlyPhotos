@@ -8,17 +8,22 @@ using Microsoft.UI;
 using Microsoft.UI.Input;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using Windows.Graphics;
 using Windows.System;
 using Windows.UI;
 using Windows.UI.Core;
+using Color = Windows.UI.Color;
 
 namespace FlyPhotos.Utils;
 
@@ -181,5 +186,37 @@ internal static class Util
         {
             Logger.Error(ex);
         }
+    }
+
+    public static async Task SetButtonIconFromExeAsync(Button button, string exePath)
+    {
+        if (string.IsNullOrEmpty(exePath) || !File.Exists(exePath))
+            return;
+
+        IntPtr[] iconPtr = new IntPtr[1];
+        Win32Methods.ExtractIconEx(exePath, 0, iconPtr, null, 1);
+        BitmapImage? bmp = null;
+
+        if (iconPtr[0] != IntPtr.Zero)
+        {
+            try
+            {
+                using var icon = Icon.FromHandle(iconPtr[0]);
+                using var bitmap = icon.ToBitmap();
+                using var ms = new MemoryStream();
+                bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                ms.Position = 0;
+                bmp = new BitmapImage();
+                await bmp.SetSourceAsync(ms.AsRandomAccessStream());
+            }
+            finally
+            {
+                Win32Methods.DestroyIcon(iconPtr[0]);
+            }
+        }
+        if (bmp != null)
+            button.Content = new Microsoft.UI.Xaml.Controls.Image { Source = bmp, Width = 32, Height = 32 };
+        else
+            button.Content = new FontIcon { Glyph = "\uED35", FontSize = 32 }; // Default icon
     }
 }
