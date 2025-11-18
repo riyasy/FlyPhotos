@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using Windows.Storage.Pickers;
 using Windows.System;
-using Windows.UI;
 using FlyPhotos.AppSettings;
 using FlyPhotos.Data;
 using FlyPhotos.Utils;
@@ -91,6 +92,7 @@ internal sealed partial class Settings
             IsInputActive = true
         };
         this.Activated += Settings_Activated;
+        MainLayout.Loaded += Settings_Loaded;
         ((FrameworkElement)Content).ActualThemeChanged += Settings_ActualThemeChanged;
         SetConfigurationSourceTheme();
         SetWindowTheme(AppConfig.Settings.Theme);
@@ -117,7 +119,7 @@ internal sealed partial class Settings
         ButtonShowCacheStatusExpander.IsOn = AppConfig.Settings.ShowCacheStatus;
         ComboPanZoomNavBehaviour.SelectedIndex = FindIndexOfItemInComboBox(ComboPanZoomNavBehaviour, _panZoomBehaviourTranslator.ToString(AppConfig.Settings.PanZoomBehaviourOnNavigation));
         ButtonEnableAutoHideMouse.IsOn = AppConfig.Settings.AutoHideMouse;
-
+        ButtonEnableExternalShortcut.IsOn = AppConfig.Settings.ShowExternalAppShortcuts;
 
         MainLayout.KeyDown += MainLayout_OnKeyDown;
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
@@ -140,54 +142,30 @@ internal sealed partial class Settings
         ButtonShowCacheStatusExpander.Toggled += ButtonShowCacheStatusExpander_OnToggled;
         ComboPanZoomNavBehaviour.SelectionChanged += ComboPanZoomNavBehaviour_OnSelectionChanged;
         ButtonEnableAutoHideMouse.Toggled += ButtonEnableAutoHideMouse_OnToggled;
+        ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
 
-
-        SettingsCardKeyboardShortCuts.Description = $"{Environment.NewLine}Left/Right Arrow Keys : Navigate Photos" +
-                                                    $"{Environment.NewLine}Up/Down Arrow Keys : Zoom In or Out" +
-                                                    $"{Environment.NewLine}Mouse Left Click and Drag : Pan Photo" +
-                                                    Environment.NewLine +
-                                                    $"{Environment.NewLine}Mouse Wheel : Zoom In or Out/ Navigate Photos - based on setting" +
-                                                    $"{Environment.NewLine}Ctrl + Mouse Wheel : Zoom In or Out" +
-                                                    $"{Environment.NewLine}Alt + Mouse Wheel : Navigate Photos" +
-                                                    $"{Environment.NewLine}Tilt Mouse Wheel Left or Right: Navigate Photos" +
-                                                    Environment.NewLine +
-                                                    $"{Environment.NewLine}Ctrl + 'Arrow Keys' : Pan Photo" +
-                                                    $"{Environment.NewLine}Ctrl + '+' : Zoom In" +
-                                                    $"{Environment.NewLine}Ctrl + '-' : Zoom Out" +
-                                                    Environment.NewLine +
-                                                    $"{Environment.NewLine}Page Up/Page Down : Zoom In/Out to next Preset (100%,400%,Fit)" +
-                                                    $"{Environment.NewLine}Home : Navigate to first photo" +
-                                                    $"{Environment.NewLine}End : Navigate to last photo" +
-                                                    Environment.NewLine +
-                                                    $"{Environment.NewLine}Mouse wheel on Thumbnail strip: Navigate Photos" +
-                                                    $"{Environment.NewLine}Mouse wheel on On Screen Left/Right Button: Navigate Photos" +
-                                                    $"{Environment.NewLine}Mouse wheel on On Screen Rotate Button: Rotate Photo" +
-                                                    Environment.NewLine +
-                                                    $"{Environment.NewLine}TouchPad two finger swipe Left or Right: Navigate Photos" +
-                                                    $"{Environment.NewLine}TouchPad two finger swipe Up or Down: Zoom In or Out/ Navigate Photos - based on Mouse Wheel setting" +
-                                                    $"{Environment.NewLine}TouchPad pinch open or close: Zoom In or Out" +
-                                                    Environment.NewLine +
-                                                    $"{Environment.NewLine}D : Show File Properties" +
-                                                    $"{Environment.NewLine}Del : Delete Photo" +
-                                                    Environment.NewLine +
-                                                    $"{Environment.NewLine}Esc : Close Settings or Exit App"
-                                                    ;
-
-        SettingsCardCredits.Description = $"Uses packages from " +
-                                          $"{Environment.NewLine}libheif (For HEIC) - https://github.com/strukturag/libheif " +
-                                          $"{Environment.NewLine}Magick.NET (For PSD) - https://github.com/dlemstra/Magick.NET" +
-                                          $"{Environment.NewLine}SkiaSharp (For SVG) - https://github.com/mono/SkiaSharp" +
-                                          $"{Environment.NewLine}MagicScaler - https://github.com/saucecontrol/PhotoSauce" +
-                                          $"{Environment.NewLine}WinUIEx - https://github.com/dotMorten/WinUIEx" +
-                                          $"{Environment.NewLine}nlog - https://github.com/NLog";
-        TextBoxCodecs.Text =
-            $"This program doesn't install any codecs and uses codecs already present in the system.{Environment.NewLine}" +
-            $"{Environment.NewLine}{Util.GetExtensionsDisplayString()}";
-
+        SettingsCardKeyboardShortCuts.Description = Constants.ShortCuts;
+        SettingsCardCredits.Description = Constants.Credits;
+        TextBoxCodecs.Text = Constants.CodecDisclaimer;
 
         if (ComboMouseWheelBehaviourInfo.Description is string desc)
             ComboMouseWheelBehaviourInfo.Description = desc.Replace("%%", Environment.NewLine);
 
+    }
+
+    private async void ButtonEnableExternalShortcut_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.ShowExternalAppShortcuts = ButtonEnableExternalShortcut.IsOn;
+        SettingChanged?.Invoke(Setting.ExtShortcutsShowHide);
+        await AppConfig.SaveAsync();
+    }
+
+    private async void Settings_Loaded(object sender, RoutedEventArgs e)
+    {
+        await Util.SetButtonIconFromExeAsync(BtnShortcut1, AppConfig.Settings.ExternalApp1);
+        await Util.SetButtonIconFromExeAsync(BtnShortcut2, AppConfig.Settings.ExternalApp2);
+        await Util.SetButtonIconFromExeAsync(BtnShortcut3, AppConfig.Settings.ExternalApp3);
+        await Util.SetButtonIconFromExeAsync(BtnShortcut4, AppConfig.Settings.ExternalApp4);
     }
 
     private async void ButtonEnableAutoHideMouse_OnToggled(object sender, RoutedEventArgs e)
@@ -378,8 +356,8 @@ internal sealed partial class Settings
 
     private async void ColorFlyOutOkButton_Click(object sender, RoutedEventArgs e)
     {
-        Color newColor = FlyoutColorPicker.Color;
-        RectThumbnailSelection.Stroke = new SolidColorBrush(Color.FromArgb(255, newColor.R, newColor.G, newColor.B));
+        Windows.UI.Color newColor = FlyoutColorPicker.Color;
+        RectThumbnailSelection.Stroke = new SolidColorBrush(Windows.UI.Color.FromArgb(255, newColor.R, newColor.G, newColor.B));
         ColorPickerFlyout.Hide();
         AppConfig.Settings.ThumbnailSelectionColor = $"#{newColor.R:X2}{newColor.G:X2}{newColor.B:X2}";
         SettingChanged?.Invoke(Setting.ThumbnailSelectionColor);
@@ -397,11 +375,52 @@ internal sealed partial class Settings
         FlyoutColorPicker.Color = currentColor;
         FlyoutBase.ShowAttachedFlyout(ButtonSetThumbnailSelColor);
     }
+
+    private async void OnShortcutButtonClick(object sender, RoutedEventArgs e)
+    {
+        var button = (Button)sender;
+        var exe = await PickExeAsync();
+        if (exe != null)
+        {
+            SetShortCutSettingForButton(button, exe);
+            await AppConfig.SaveAsync();
+            await Util.SetButtonIconFromExeAsync(button, exe);
+        }
+    }
+
+    private static void SetShortCutSettingForButton(Button button, string exe)
+    {
+        switch (button.Name)
+        {
+            case "BtnShortcut1":
+                AppConfig.Settings.ExternalApp1 = exe;
+                break;
+            case "BtnShortcut2":
+                AppConfig.Settings.ExternalApp2 = exe;
+                break;
+            case "BtnShortcut3":
+                AppConfig.Settings.ExternalApp3 = exe;
+                break;
+            case "BtnShortcut4":
+                AppConfig.Settings.ExternalApp4 = exe;
+                break;
+        }
+    }
+
+    private async Task<string?> PickExeAsync()
+    {
+        var picker = new FileOpenPicker();
+        WinRT.Interop.InitializeWithWindow.Initialize(picker,
+            WinRT.Interop.WindowNative.GetWindowHandle(this));
+        picker.FileTypeFilter.Add(".exe");
+        var file = await picker.PickSingleFileAsync();
+        return file?.Path;
+    }    
 }
 
 internal static class ColorConverter
 {
-    public static Color FromHex(string hex)
+    public static Windows.UI.Color FromHex(string hex)
     {
         hex = hex.TrimStart('#');
         byte a = 255; // Default alpha value
@@ -413,6 +432,6 @@ internal static class ColorConverter
         {
             a = byte.Parse(hex.Substring(6, 2), System.Globalization.NumberStyles.HexNumber);
         }
-        return Color.FromArgb(a, r, g, b);
+        return Windows.UI.Color.FromArgb(a, r, g, b);
     }
 }

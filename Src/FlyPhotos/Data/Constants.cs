@@ -1,11 +1,14 @@
-﻿namespace FlyPhotos.Data
+﻿using FlyPhotos.Utils;
+using System;
+
+namespace FlyPhotos.Data
 {
     internal static class Constants
     {
         // Pan Zoom Animation Related
         public const int PanZoomAnimationDurationForExit = 200;
-        public const int PanZoomAnimationDurationNormal = 400;
-        public const int OffScreenDrawDelayMs = 410;
+        public const int PanZoomAnimationDurationNormal = 600;
+        public const int OffScreenDrawDelayMs = 650;
 
         // Related to Shrug Animation for Delete Failure
         public const double ShrugAnimationDurationMs = 350;
@@ -19,5 +22,46 @@
 
         // Others
         public const int CheckerSize = 10;
+
+        public static string ShortCuts = $"{Environment.NewLine}Left/Right Arrow Keys : Navigate Photos" +
+                                            $"{Environment.NewLine}Up/Down Arrow Keys : Zoom In or Out" +
+                                            $"{Environment.NewLine}Mouse Left Click and Drag : Pan Photo" +
+                                            Environment.NewLine +
+                                            $"{Environment.NewLine}Mouse Wheel : Zoom In or Out/ Navigate Photos - based on setting" +
+                                            $"{Environment.NewLine}Ctrl + Mouse Wheel : Zoom In or Out" +
+                                            $"{Environment.NewLine}Alt + Mouse Wheel : Navigate Photos" +
+                                            $"{Environment.NewLine}Tilt Mouse Wheel Left or Right: Navigate Photos" +
+                                            Environment.NewLine +
+                                            $"{Environment.NewLine}Ctrl + 'Arrow Keys' : Pan Photo" +
+                                            $"{Environment.NewLine}Ctrl + '+' : Zoom In" +
+                                            $"{Environment.NewLine}Ctrl + '-' : Zoom Out" +
+                                            Environment.NewLine +
+                                            $"{Environment.NewLine}Page Up/Page Down : Zoom In/Out to next Preset (100%,400%,Fit)" +
+                                            $"{Environment.NewLine}Home : Navigate to first photo" +
+                                            $"{Environment.NewLine}End : Navigate to last photo" +
+                                            Environment.NewLine +
+                                            $"{Environment.NewLine}Mouse wheel on Thumbnail strip: Navigate Photos" +
+                                            $"{Environment.NewLine}Mouse wheel on On Screen Left/Right Button: Navigate Photos" +
+                                            $"{Environment.NewLine}Mouse wheel on On Screen Rotate Button: Rotate Photo" +
+                                            Environment.NewLine +
+                                            $"{Environment.NewLine}TouchPad two finger swipe Left or Right: Navigate Photos" +
+                                            $"{Environment.NewLine}TouchPad two finger swipe Up or Down: Zoom In or Out/ Navigate Photos - based on Mouse Wheel setting" +
+                                            $"{Environment.NewLine}TouchPad pinch open or close: Zoom In or Out" +
+                                            Environment.NewLine +
+                                            $"{Environment.NewLine}D : Show File Properties" +
+                                            $"{Environment.NewLine}Del : Delete Photo" +
+                                            Environment.NewLine +
+                                            $"{Environment.NewLine}Esc : Close Settings or Exit App";
+
+        public static string Credits = $"Uses packages from " +
+                                  $"{Environment.NewLine}libheif (For HEIC) - https://github.com/strukturag/libheif " +
+                                  $"{Environment.NewLine}Magick.NET (For PSD) - https://github.com/dlemstra/Magick.NET" +
+                                  $"{Environment.NewLine}SkiaSharp (For SVG) - https://github.com/mono/SkiaSharp" +
+                                  $"{Environment.NewLine}MagicScaler - https://github.com/saucecontrol/PhotoSauce" +
+                                  $"{Environment.NewLine}WinUIEx - https://github.com/dotMorten/WinUIEx" +
+                                  $"{Environment.NewLine}nlog - https://github.com/NLog";
+
+        public static string CodecDisclaimer = $"This program doesn't install any codecs and uses codecs already present in the system.{Environment.NewLine}" +
+                                  $"{Environment.NewLine}{Util.GetExtensionsDisplayString()}";
     }
 }

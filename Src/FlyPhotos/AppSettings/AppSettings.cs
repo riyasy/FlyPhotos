@@ -63,6 +63,11 @@ public class AppSettings
     public bool ConfirmForDelete { get; set; } = true;
     public bool ShowFileName { get; set; } = true;
     public bool ShowCacheStatus { get; set; } = true;
-
     public bool AutoHideMouse { get; set; } = false;
+
+    public bool ShowExternalAppShortcuts { get; set; } = false;
+    public string ExternalApp1 { get; set; } = string.Empty;
+    public string ExternalApp2 { get; set; } = string.Empty;
+    public string ExternalApp3 { get; set; } = string.Empty;
+    public string ExternalApp4 { get; set; } = string.Empty;
 }
