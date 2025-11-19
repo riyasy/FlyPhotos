@@ -176,6 +176,7 @@ internal static class Util
             var info = new Win32Methods.SHELLEXECUTEINFO();
             info.cbSize = Marshal.SizeOf(info);
             info.lpVerb = "properties";
+            info.lpParameters = "Details";
             info.lpFile = filePath;
             info.nShow = Win32Methods.SW_SHOW;
             info.fMask = Win32Methods.SEE_MASK_INVOKEIDLIST;
