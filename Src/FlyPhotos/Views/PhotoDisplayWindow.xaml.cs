@@ -17,7 +17,6 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using NLog;
-using NLog.Layouts;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -836,25 +835,23 @@ public sealed partial class PhotoDisplayWindow
         SetBackColorAsPerThemeAndBackdrop();
     }
 
-    bool TrySetMicaBackdrop(bool useMicaAlt)
+    void TrySetMicaBackdrop(bool useMicaAlt)
     {
-        if (!MicaController.IsSupported()) return false;
+        if (!MicaController.IsSupported()) return;
         var micaController = new MicaController { Kind = useMicaAlt ? MicaKind.BaseAlt : MicaKind.Base };
         micaController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
         micaController.SetSystemBackdropConfiguration(_configurationSource);
         _backdropController = micaController;
-        return true;
     }
 
-    bool TrySetAcrylicBackdrop(bool useAcrylicThin)
+    void TrySetAcrylicBackdrop(bool useAcrylicThin)
     {
-        if (!DesktopAcrylicController.IsSupported()) return false;
+        if (!DesktopAcrylicController.IsSupported()) return;
         var acrylicController = new DesktopAcrylicController
         { Kind = useAcrylicThin ? DesktopAcrylicKind.Thin : DesktopAcrylicKind.Base };
         acrylicController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
         acrylicController.SetSystemBackdropConfiguration(_configurationSource);
         _backdropController = acrylicController;
-        return true;
     }
 
     private void PhotoDisplayWindow_ActualThemeChanged(FrameworkElement sender, object args)

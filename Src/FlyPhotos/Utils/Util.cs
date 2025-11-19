@@ -21,7 +21,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Graphics;
 using Windows.System;
-using Windows.UI;
 using Windows.UI.Core;
 using Color = Windows.UI.Color;
 

@@ -8,12 +8,9 @@
     <Window.SystemBackdrop>
         <MicaBackdrop />
     </Window.SystemBackdrop>
-    <Grid x:Name="MainLayout">
-
+    <Grid x:Name="MainLayout" Background="Transparent">
         <StackPanel Margin="20,10,20,20" Spacing="15">
-
             <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Fly Photos - Select Photo" />
-
             <!--  File Interaction Area  -->
             <Border
                 x:Name="DropArea"
@@ -31,7 +28,6 @@
                         Stroke="{ThemeResource SystemControlForegroundBaseMediumBrush}"
                         StrokeDashArray="4 2"
                         StrokeThickness="3" />
-
                     <!--  Content: Text with an inline hyperlink  -->
                     <TextBlock
                         HorizontalAlignment="Center"
@@ -43,32 +39,24 @@
                     </TextBlock>
                 </Grid>
             </Border>
-
             <TextBlock
                 Margin="0,10,0,0"
                 Text="FlyPhotos is intended to be used by right-clicking an image and then selecting Open With &quot;Fly Photos&quot;."
                 TextWrapping="Wrap" />
-
             <Border
                 Margin="0,5"
                 BorderBrush="Gray"
                 BorderThickness="0,1,0,0" />
-
             <TextBlock Text="FlyPhotos can also be set as the default viewer for an extension by right-clicking an image and selecting &quot;Open With&quot; and then &quot;Choose another app&quot; and then select &quot;Fly Photos&quot; and press the &quot;Always&quot; button." TextWrapping="Wrap" />
-
             <Border
                 Margin="0,5"
                 BorderBrush="Gray"
                 BorderThickness="0,1,0,0" />
-
             <TextBlock Text="FlyPhotos can also be set as the default viewer for an extension in &quot;Apps &gt; Default Apps&quot; page in &quot;Settings&quot; app of Windows 11." TextWrapping="Wrap" />
-
             <Border
                 Margin="0,5"
                 BorderBrush="Gray"
                 BorderThickness="0,1,0,0" />
-
-
         </StackPanel>
     </Grid>
 </Window>

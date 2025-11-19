@@ -79,15 +79,14 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     /// Tracks if the image is perfectly fitted to the canvas (respecting padding).
     /// Setting this property will fire the FitToScreenStateChanged event if the value changes.
     /// </summary>
-    private bool _isFittedToScreen;
     private bool IsFittedToScreen
     {
-        get => _isFittedToScreen;
+        get;
         set
         {
-            if (_isFittedToScreen == value) return;
-            _isFittedToScreen = value;
-            FitToScreenStateChanged?.Invoke(_isFittedToScreen);
+            if (field == value) return;
+            field = value;
+            FitToScreenStateChanged?.Invoke(field);
         }
     }
 
@@ -95,15 +94,14 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     /// Tracks if the image is at exactly 100% scale.
     /// Setting this property will fire the OneToOneStateChanged event if the value changes.
     /// </summary>
-    private bool _isAtOneToOne;
     private bool IsAtOneToOne
     {
-        get => _isAtOneToOne;
+        get;
         set
         {
-            if (_isAtOneToOne == value) return;
-            _isAtOneToOne = value;
-            OneToOneStateChanged?.Invoke(_isAtOneToOne);
+            if (field == value) return;
+            field = value;
+            OneToOneStateChanged?.Invoke(field);
         }
     }
 
