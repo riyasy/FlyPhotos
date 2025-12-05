@@ -373,8 +373,7 @@ public sealed partial class PhotoDisplayWindow
                         var filePath = _photoController.GetFullPathCurrentFile();
                         if (File.Exists(filePath))
                         {
-                            Win32Methods.GetCursorPos(out Win32Methods.POINT mousePosScreen);
-                            NativeWrapper.ShowContextMenu(this, filePath, mousePosScreen.X, mousePosScreen.Y);
+                            ContextMenuHelper.ShowContextMenu(this, filePath);
                         }
                     }
                     break;

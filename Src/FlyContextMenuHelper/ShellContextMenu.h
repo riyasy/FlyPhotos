@@ -4,11 +4,11 @@
  *
  * This class encapsulates the complex COM and Win32 interactions required to query
  * and display the right-click menu for one or more file system objects.
- * 
+ *
  * @details
  * Key Features:
  * - In-Process Handling: Runs within the application process.
- * - Window Subclassing: Hooks the owner window to handle menu messages (WM_DRAWITEM, etc.) 
+ * - Hooks the owner window to handle menu messages (WM_DRAWITEM, etc.)
  *   ensuring correct focus, Z-order, and DPI inheritance.
  * - Crash Protection: Uses SEH (Structured Exception Handling) to guard against buggy shell extensions.
  */
@@ -55,19 +55,24 @@ public:
     /// @brief Destructs the ShellContextMenu object, releasing all resources.
     ~ShellContextMenu();
 
-    /// @brief Initializes the object by setting up OLE.
+    /// @brief Initializes the object by setting up OLE and creating a hidden message window.
     /// @return SCM_RESULT::Success, or an error code on failure.
     /// @note Must be called successfully before ShowContextMenu.
     SCM_RESULT Init();
 
     /// @brief Displays the context menu for the given files at the specified location.
     /// @details This method orchestrates the entire lifecycle: obtaining PIDLs, querying interfaces,
-    /// subclassing the owner window, showing the menu, and invoking the command.
-    /// @param owner The handle of the window that will own the context menu (must be a valid window).
+    /// showing the menu, and invoking the command.
+    /// @param owner The handle of the window that will own the context menu.
     /// @param files A vector of full file paths (UTF-16) to generate the menu for.
     /// @param pt The screen coordinates (POINT) where the menu should appear.
     /// @return SCM_RESULT::Success, or an error code on failure.
     SCM_RESULT ShowContextMenu(HWND owner, const std::vector<std::wstring>& files, POINT pt);
+
+    /// @brief Routes window messages to the active IContextMenu interface (V2 or V3).
+    /// @param outResult The result to return to Windows if the message was handled.
+    /// @return true if the message was handled by the shell extension; false otherwise.
+    bool HandleWindowMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT* outResult);
 
 private:
     /// @brief Releases all COM interfaces and frees PIDL memory.
@@ -97,17 +102,7 @@ private:
     /// @param verbsToRemove An initializer list of verbs (e.g., L"delete", L"cut") to remove.
     void RemoveMenuItemsByVerb(HMENU hMenu, std::initializer_list<const WCHAR*> verbsToRemove);
 
-    /// @brief Static callback for window subclassing.
-    /// @details Intercepts messages destined for the owner window (like WM_DRAWITEM) and routes them 
-    /// to the ShellContextMenu instance.
-    static LRESULT CALLBACK OwnerSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
-
-    /// @brief Instance-specific handler for menu messages.
-    /// @param uMsg The message ID.
-    /// @param outResult [out] The result to return if the message is handled.
-    /// @return true if the shell extension handled the message; false if it should be passed to DefSubclassProc.
-    bool MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT* outResult);
-
+    // Member variables
     bool m_isInitialized;                       ///< True if Init() has succeeded.
     IContextMenu* m_pContextMenu;               ///< The primary context menu interface.
     IContextMenu2* m_pContextMenu2;             ///< Interface for handling custom-drawn menu items.
@@ -116,8 +111,7 @@ private:
     std::vector<LPITEMIDLIST> m_pidls;          ///< A list of item ID lists (PIDLs) for the selected files.
     std::wstring m_parentFolderStr;             ///< The parent directory path as a string.
 
-    
-    const UINT_PTR      SUBCLASS_ID = 101; ///< Unique ID used for SetWindowSubclass to identify this hook.
+    HWND m_hOwner;                              ///< The owner HWND used when showing the menu (for InvokeCommand).
 
     const UINT idCmdFirst = 1;                  ///< The minimum command identifier for shell menu items.
     const UINT idCmdLast = 0x7FFF;              ///< The maximum command identifier for shell menu items.

@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlyNativeLibHeif", "FlyNati
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "FlyPhotosInstaller", "FlyPhotosInstaller\FlyPhotosInstaller.vdproj", "{033FFAB1-39D5-FCAE-669D-3DF2A0B6CAE5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FlyContextMenuHelper", "FlyContextMenuHelper\FlyContextMenuHelper.vcxproj", "{9E3501EB-D536-4837-8707-DD4732ED3F48}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,6 +97,22 @@ Global
 		{033FFAB1-39D5-FCAE-669D-3DF2A0B6CAE5}.Release|x64.Build.0 = Release
 		{033FFAB1-39D5-FCAE-669D-3DF2A0B6CAE5}.Release|x86.ActiveCfg = Release
 		{033FFAB1-39D5-FCAE-669D-3DF2A0B6CAE5}.Release|x86.Build.0 = Release
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Debug|Any CPU.Build.0 = Debug|x64
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Debug|ARM64.ActiveCfg = Debug|x64
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Debug|ARM64.Build.0 = Debug|x64
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Debug|x64.ActiveCfg = Debug|x64
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Debug|x64.Build.0 = Debug|x64
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Debug|x86.ActiveCfg = Debug|Win32
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Debug|x86.Build.0 = Debug|Win32
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Release|Any CPU.ActiveCfg = Release|x64
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Release|Any CPU.Build.0 = Release|x64
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Release|ARM64.ActiveCfg = Release|x64
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Release|ARM64.Build.0 = Release|x64
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Release|x64.ActiveCfg = Release|x64
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Release|x64.Build.0 = Release|x64
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Release|x86.ActiveCfg = Release|Win32
+		{9E3501EB-D536-4837-8707-DD4732ED3F48}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

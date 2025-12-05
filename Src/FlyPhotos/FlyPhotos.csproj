@@ -99,11 +99,11 @@
 		<None Update="Assets\transparent.cur">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<None Update="FlyContextMenuHelper.exe">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="NLog.config">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="WicImageFileReaderNative.exe">
-			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</None>
 		<Page Update="Views\InitWindow.xaml">
 			<Generator>MSBuild:Compile</Generator>
@@ -113,26 +113,31 @@
 		</Page>
 	</ItemGroup>
 	<ItemGroup>
-		<None Include="DLLs\*.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest">
-		</None>
-	</ItemGroup>
-	<ItemGroup>
 		<Content Remove="Assets\transparent.cur" />
 	</ItemGroup>
 
-	<Target Name="FlattenExternalDlls" AfterTargets="Build">
-		<ItemGroup>
-			<FlatExternalDlls Include="DLLs\*.dll" />
-		</ItemGroup>
-		<Copy SourceFiles="@(FlatExternalDlls)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+	<!-- 1. Define the DLLs in a custom group so we don't have to type the path twice -->
+	<ItemGroup>
+		<ExternalDlls Include="DLLs\*.dll" />
+	</ItemGroup>
+
+	<!-- 2. Configuration for Debugging & MSIX Packaging
+          The 'Link' metadata tells VS to treat these files as if they are in the root.
+          This makes DllImport work while debugging and inside the MSIX container. -->
+	<ItemGroup>
+		<Content Include="@(ExternalDlls)">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>%(Filename)%(Extension)</Link>
+		</Content>
+	</ItemGroup>
+
+	<!-- 3. Configuration for Unpackaged Publish
+          'dotnet publish' ignores the Link attribute and creates the 'DLLs' folder anyway.
+          This target runs after publish to manually copy them to the root. -->
+	<Target Name="FlattenDllsOnPublish" AfterTargets="Publish" Condition="'$(WindowsPackageType)'!='MSIX'">
+		<Copy SourceFiles="@(ExternalDlls)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
 	</Target>
 
-	<Target Name="FlattenExternalDllsOnPublish" AfterTargets="Publish">
-		<ItemGroup>
-			<FlatExternalDlls Include="DLLs\*.dll" />
-		</ItemGroup>
-		<Copy SourceFiles="@(FlatExternalDlls)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
-	</Target>
 	<!-- 
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution 
     Explorer "Package and Publish" context menu entry to be enabled for this project even if 

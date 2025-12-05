@@ -10,6 +10,8 @@ using WinRT.Interop;
 
 namespace FlyPhotos.NativeWrappers;
 
+#region P/Invoke Declarations
+
 /// <summary>
 /// Provides static methods for direct interoperability with the native library (FlyNativeLib.dll).
 /// This class handles the P/Invoke declarations for functions exposed by the C++ DLL.
@@ -73,6 +75,8 @@ internal static partial class NativeBridge
     [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
     internal static partial int ShowExplorerContextMenu(IntPtr ownerHwnd, string filePath, int x, int y);
 }
+
+#endregion
 
 /// <summary>
 /// Provides a high-level, managed wrapper for native functionalities exposed by `FlyNativeLib.dll`.
@@ -139,17 +143,16 @@ public static class NativeWrapper
     /// <summary>
     /// Displays the Windows Explorer context menu for a specified file at given screen coordinates.
     /// </summary>
-    /// <param name="ownerWindow">The owner <see cref="Microsoft.UI.Xaml.Window"/> for the context menu. Its HWND will be used.</param>
+    /// <param name="ownerWindow">The HWND of owner <see cref="Microsoft.UI.Xaml.Window"/> for the context menu.</param>
     /// <param name="filePath">The full path to the file for which to show the context menu.</param>
     /// <param name="lpPointX">The X-coordinate (screen coordinates) where the context menu should appear.</param>
     /// <param name="lpPointY">The Y-coordinate (screen coordinates) where the context menu should appear.</param>
-    public static void ShowContextMenu(Window ownerWindow, string filePath, int lpPointX,
+    public static void ShowContextMenu(IntPtr ownerWindow, string filePath, int lpPointX,
         int lpPointY)
     {
         try
         {
-            IntPtr hWnd = WindowNative.GetWindowHandle(ownerWindow);
-            var returnCode = NativeBridge.ShowExplorerContextMenu(hWnd, filePath, lpPointX, lpPointY);
+            var returnCode = NativeBridge.ShowExplorerContextMenu(ownerWindow, filePath, lpPointX, lpPointY);
             if (returnCode != 0) // Check for non-zero return code, which indicates failure.
             {
                 Logger.Error($"NativeBridge - ShowExplorerContextMenu failed with error code {returnCode}");

@@ -1,23 +1,25 @@
 /**
  * @file ShellContextMenu.cpp
  * @brief Implements the ShellContextMenu class for displaying the native Windows Shell context menu.
- * 
+ *
  * @details
  * Implementation Notes:
- * - Uses Window Subclassing (SetWindowSubclass) instead of a hidden window. This ensures that 
- *   context menus are modal to the application window and inherit DPI/Focus correctly.
+ * This implementation handles the complex interactions between Win32, COM, and Shell Interfaces
+ * (IContextMenu, IContextMenu2, IContextMenu3).
  */
 
-#include "pch.h" // Depending on your project settings
 #include "ShellContextMenu.h"
 #include <shlwapi.h>
 #include <string>
-#include <commctrl.h> // Required for SetWindowSubclass
+#include <iostream>
+#include <commctrl.h>
 
-// Link against necessary libraries
+ // Link against necessary Windows libraries
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "ole32.lib")
-#pragma comment(lib, "comctl32.lib") // Required for Subclassing
+#pragma comment(lib, "comctl32.lib")
+// Note: Shell32.lib is also required for ILCreateFromPathW/SHBindToParent but is often linked by default. 
+// If linking errors occur, #pragma comment(lib, "shell32.lib") may be needed.
 
 // -----------------------------------------------------------------------------
 // CRASH PROTECTION HELPERS (SEH)
@@ -51,7 +53,7 @@ static HRESULT SafeGetCommandString(IContextMenu* pCtx, UINT_PTR idCmd, LPSTR ps
     }
     __except (EXCEPTION_EXECUTE_HANDLER) {
         // Swallow the crash to protect the host app
-        OutputDebugStringW(L"FlyNativeLib: Crash in GetCommandString.\n");
+        OutputDebugStringW(L"ShellContextMenu: Extension crashed inside GetCommandString.\n");
         hr = E_FAIL;
     }
     return hr;
@@ -80,7 +82,7 @@ static HRESULT SafeQueryContextMenu(IContextMenu* pCtx, HMENU hMenu, UINT indexM
         hr = pCtx->QueryContextMenu(hMenu, indexMenu, idCmdFirst, idCmdLast, uFlags);
     }
     __except (EXCEPTION_EXECUTE_HANDLER) {
-        OutputDebugStringW(L"FlyNativeLib: Crash in QueryContextMenu.\n");
+        OutputDebugStringW(L"ShellContextMenu: Extension crashed inside QueryContextMenu.\n");
         hr = E_FAIL;
     }
     return hr;
@@ -94,7 +96,7 @@ static HRESULT SafeQueryContextMenu(IContextMenu* pCtx, HMENU hMenu, UINT indexM
  */
 ShellContextMenu::ShellContextMenu()
     : m_isInitialized(false), m_pContextMenu(nullptr),
-    m_pContextMenu2(nullptr), m_pContextMenu3(nullptr), m_pParentFolder(nullptr)
+    m_pContextMenu2(nullptr), m_pContextMenu3(nullptr), m_pParentFolder(nullptr), m_hOwner(NULL)
 {
 }
 
@@ -134,55 +136,26 @@ SCM_RESULT ShellContextMenu::Init() {
 }
 
 /**
- * @brief The Subclass Procedure.
- * @details Intercepts messages meant for the WinUI window. If the message is related to the 
- * context menu (DrawItem, InitMenuPopup), it is routed to the ShellContextMenu handler.
- * All other messages are passed to DefSubclassProc to ensure the UI remains responsive.
- */
-LRESULT CALLBACK ShellContextMenu::OwnerSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
-{
-    ShellContextMenu* pThis = reinterpret_cast<ShellContextMenu*>(dwRefData);
-
-    if (pThis) {
-        switch (uMsg) {
-        case WM_DRAWITEM:
-        case WM_MEASUREITEM:
-        case WM_INITMENUPOPUP:
-        case WM_MENUCHAR:
-            LRESULT lRes = 0;
-            // CRITICAL: Only stop processing if MessageHandler returns TRUE.
-            // If it returns FALSE (e.g. S_FALSE from extension), we MUST call DefSubclassProc
-            // so standard submenus and system items draw correctly.
-            if (pThis->MessageHandler(uMsg, wParam, lParam, &lRes)) {
-                return lRes;
-            }
-            break; // Break to fall through to DefSubclassProc
-        }
-    }
-
-    return DefSubclassProc(hWnd, uMsg, wParam, lParam);
-}
-
-/**
- * @brief Displays the shell context menu for a given set of files.
- * @details 
- * Steps:
- * 1. Resolves PIDLs for files using robust binding.
- * 2. Gets IContextMenu interfaces.
- * 3. Populates the menu (Safely).
- * 4. Subclasses the Owner Window to capture menu messages.
- * 5. Shows the menu (Blocking call).
- * 6. Removes Subclass.
- * 7. Invokes result.
+ * @brief Displays the shell context menu for a given set of files at a specific point.
+ *
+ * This is the main entry point. It orchestrates:
+ * 1. Resolving PIDLs for the files.
+ * 2. Loading the IContextMenu interfaces.
+ * 3. Creating and populating the Win32 Popup Menu.
+ * 4. Managing Thread Input attachment (critical for focus/tooltips).
+ * 5. Displaying the menu and waiting for user selection.
+ * 6. Invoking the selected command.
  *
  * @param owner The window handle that will own the menu and receive messages.
  * @param files Vector of file paths to include in the menu.
  * @param pt Screen coordinates for the menu position.
- * @return SCM_RESULT Success or specific error code.
+ * @return SCM_RESULT::Success on success, or an error code describing the failure.
  */
-
 SCM_RESULT ShellContextMenu::ShowContextMenu(HWND owner, const std::vector<std::wstring>& files, POINT pt) {
     ReleaseAll();
+
+    // Record owner for MessageHandler default routing and InvokeCommand parentage
+    m_hOwner = owner;
 
     // 1. Generate PIDLs (Item ID Lists) for the target files
     SCM_RESULT result = GetParentAndPIDLs(files);
@@ -214,29 +187,63 @@ SCM_RESULT ShellContextMenu::ShowContextMenu(HWND owner, const std::vector<std::
     // 6. Filter out unwanted dangerous verbs
     RemoveMenuItemsByVerb(hMenu, { L"delete", L"cut" });
 
-    // 7. Install Subclass on the Owner Window
-    // This redirects WM_DRAWITEM etc. from the WinUI window to us.
-    if (owner && IsWindow(owner)) {
-        SetWindowSubclass(owner, OwnerSubclassProc, SUBCLASS_ID, (DWORD_PTR)this);
-    }
+    // 7. --- THREAD INPUT ATTACHMENT LOGIC ---
+    // Context menus rely on the owner window being "active" to handle keyboard input and 
+    // ensure that sub-menus/tooltips work correctly. If the helper window is hidden or 
+    // created on a background thread, we must explicitly bridge the input queues.
+
+    HWND fgWnd = GetForegroundWindow();
+    DWORD fgThreadId = 0;
+    if (fgWnd) fgThreadId = GetWindowThreadProcessId(fgWnd, NULL);
+    DWORD ownerThreadId = GetWindowThreadProcessId(owner, NULL);
+    DWORD thisThreadId = GetCurrentThreadId();
+
+    // Attach to the current foreground window (likely the user's active app)
+    BOOL attachedToForeground = FALSE;
+    if (fgThreadId != 0 && fgThreadId != thisThreadId)
+        if (AttachThreadInput(thisThreadId, fgThreadId, TRUE))
+            attachedToForeground = TRUE;
+
+    // Attach to the owner window (our hidden helper window)
+    BOOL attachedToOwner = FALSE;
+    if (ownerThreadId != 0 && ownerThreadId != thisThreadId && ownerThreadId != fgThreadId)
+        if (AttachThreadInput(thisThreadId, ownerThreadId, TRUE))
+            attachedToOwner = TRUE;
+
+    // Force the owner window to the foreground to capture menu events
+    BringWindowToTop(owner);
+    SetForegroundWindow(owner);
+    SetActiveWindow(owner);
 
     // 8. Show Menu
     // Note: TPM_NOANIMATION can make it feel snappier, optional.
     // We use 'owner' (the WinUI window) so the menu is modal and focus works right. (Blocking call)
     UINT iCmd = TrackPopupMenuEx(hMenu, TPM_RETURNCMD, pt.x, pt.y, owner, NULL);
 
-    // 9. Remove Subclass immediately after menu closes
-    if (owner && IsWindow(owner)) {
-        RemoveWindowSubclass(owner, OwnerSubclassProc, SUBCLASS_ID);
-    }
-    
-    // 10. If a selection was made, invoke the command
+    // 8. If a selection was made, invoke the command
     if (iCmd > 0) {
         // Fix for lnt-arithmetic-overflow:
         // Explicitly cast the subtraction result to UINT to tell the compiler 
         // "I know what I'm doing, treat this as an unsigned integer offset".
         InvokeCommand(static_cast<UINT>(iCmd - idCmdFirst), pt, owner);
     }
+
+
+    // --- CLEANUP ---
+
+    // Detach from threads
+    if (attachedToOwner) {
+        AttachThreadInput(thisThreadId, ownerThreadId, FALSE);
+    }
+    if (attachedToForeground) {
+        AttachThreadInput(thisThreadId, fgThreadId, FALSE);
+    }
+
+    // Post benign message to owner to clear internal menu loop state
+    PostMessage(owner, WM_NULL, 0, 0);
+
+    // Clear owner reference
+    m_hOwner = NULL;
 
     DestroyMenu(hMenu);
     ReleaseAll();
@@ -289,7 +296,10 @@ void ShellContextMenu::ReleaseAll() {
     for (LPITEMIDLIST pidl : m_pidls) CoTaskMemFree(pidl);
     m_pidls.clear();
     m_parentFolderStr.clear();
+
+    m_hOwner = NULL;
 }
+
 
 /**
  * @brief Gets the IShellFolder for the parent directory and creates PIDLs for each file.
@@ -361,8 +371,11 @@ SCM_RESULT ShellContextMenu::GetContextMenuInterfaces(IShellFolder* pParentFolde
 
     LPCITEMIDLIST* nonConstPidls = const_cast<LPCITEMIDLIST*>(pidls.data());
 
-    // Pass the owner HWND here. Some extensions use it during initialization.
-    if (FAILED(pParentFolder->GetUIObjectOf(owner, static_cast<UINT>(pidls.size()), nonConstPidls, IID_IContextMenu, NULL, (void**)&m_pContextMenu))) {
+    // Use the owner HWND when requesting UI objects so menu messages are routed to owner.
+    HWND hwndForGetUI = owner ? owner : NULL;
+
+    // Request IContextMenu
+    if (FAILED(pParentFolder->GetUIObjectOf(hwndForGetUI, static_cast<UINT>(pidls.size()), nonConstPidls, IID_IContextMenu, NULL, (void**)&m_pContextMenu))) {
         return SCM_RESULT::GetContextMenuInterfacesFailed;
     }
 
@@ -390,7 +403,7 @@ void ShellContextMenu::InvokeCommand(UINT iCmd, POINT pt, HWND owner) {
     if (GetKeyState(VK_CONTROL) < 0) cmi.fMask |= CMIC_MASK_CONTROL_DOWN;
     if (GetKeyState(VK_SHIFT) < 0) cmi.fMask |= CMIC_MASK_SHIFT_DOWN;
 
-    cmi.hwnd = owner; // Important: The WinUI window owns any dialogs (Properties, etc)
+    cmi.hwnd = owner;
     cmi.lpVerb = MAKEINTRESOURCEA(iCmd);
     cmi.lpVerbW = MAKEINTRESOURCEW(iCmd);
     cmi.lpDirectoryW = m_parentFolderStr.c_str();
@@ -401,35 +414,59 @@ void ShellContextMenu::InvokeCommand(UINT iCmd, POINT pt, HWND owner) {
 }
 
 /**
- * @brief Instance-specific message handler that forwards menu messages to the shell interfaces.
+ * @brief Routes window messages from the main window procedure to the active IContextMenu interface.
+ *
+ * This acts as a bridge. The Helper Window receives messages (WM_DRAWITEM, WM_INITMENUPOPUP, etc.)
+ * and calls this method. This method forwards them to the shell extensions so they can draw icons
+ * and handle sub-menus.
+ *
  * @param uMsg The Windows message ID.
  * @param wParam Message parameter (e.g., ID or char).
  * @param lParam Message parameter (e.g., struct pointer).
- * @param outResult [out] Returns the result from the IContextMenu handler.
- * @return true if the message was handled and we should skip default processing.
- * @return false if the message was NOT handled (S_FALSE) and should be passed to DefSubclassProc.
+ * @param outResult [out] Pointer to store the result code if handled.
+ * @return true if the message was handled by the Shell Extension, false otherwise.
  */
-bool ShellContextMenu::MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT* outResult) {
+bool ShellContextMenu::HandleWindowMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT* outResult) {
+    // Initialize output
     if (outResult) *outResult = 0;
 
-    HRESULT hr = E_FAIL;
-    LRESULT localResult = 0;
+    // If we haven't built the menu interfaces yet, we can't handle messages.
+    if (!m_pContextMenu2 && !m_pContextMenu3) {
+        return false;
+    }
 
+    // Filter: We only care about menu-related messages
+    switch (uMsg) {
+    case WM_MEASUREITEM:
+    case WM_DRAWITEM:
+    case WM_INITMENUPOPUP:
+    case WM_MENUCHAR:
+        break;
+    default:
+        return false; // Not a message shell extensions care about
+    }
+
+    // PRIORITIZE IContextMenu3 (Windows Vista+)
+    // It handles owner-draw PLUS keyboard messages (WM_MENUCHAR).
     if (m_pContextMenu3) {
-        // IContextMenu3::HandleMenuMsg2 returns S_OK if handled, S_FALSE if not.
-        hr = m_pContextMenu3->HandleMenuMsg2(uMsg, wParam, lParam, &localResult);
+        LRESULT lRes = 0;
+        // HandleMenuMsg2 requires a pointer to LRESULT to return the specific value 
+        // the extension wants (e.g., for WM_MENUCHAR).
+        HRESULT hr = m_pContextMenu3->HandleMenuMsg2(uMsg, wParam, lParam, &lRes);
+        if (SUCCEEDED(hr)) {
+            if (outResult) *outResult = lRes;
+            return true;
+        }
     }
+    // FALLBACK to IContextMenu2 (Windows 2000/XP)
+    // It handles owner-draw only.
     else if (m_pContextMenu2) {
-        hr = m_pContextMenu2->HandleMenuMsg(uMsg, wParam, lParam);
-        // HandleMenuMsg doesn't return a specific LRESULT in the param, 
-        // but usually implies 0 or 1 depending on message. 
-        // We assume 0 (handled) if S_OK.
+        HRESULT hr = m_pContextMenu2->HandleMenuMsg(uMsg, wParam, lParam);
+        if (SUCCEEDED(hr)) {
+            // For WM_DRAWITEM/WM_MEASUREITEM, returning TRUE (1) typically means "handled".
+            if (outResult) *outResult = 1;
+            return true;
+        }
     }
-
-    if (hr == S_OK) {
-        if (outResult) *outResult = localResult;
-        return true; // WE HANDLED IT. Skip DefSubclassProc.
-    }
-
-    return false; // NOT HANDLED (or S_FALSE). Let DefSubclassProc do its job.
+    return false;
 }

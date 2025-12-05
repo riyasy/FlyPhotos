@@ -171,4 +171,58 @@ internal static partial class Win32Methods
     [LibraryImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool DestroyIcon(IntPtr hIcon);
+
+    /// <summary>
+    /// Constant value for the <c>WM_COPYDATA</c> message used to send data between processes.
+    /// Applications send this message to pass data blocks to another application.
+    /// </summary>
+    internal const int WM_COPYDATA = 0x004A;
+
+    /// <summary>
+    /// Structure used with the <c>WM_COPYDATA</c> message to send data to another process.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct COPYDATASTRUCT
+    {
+        /// <summary>
+        /// User-defined data. Applications can use this field to pass a value identifying the data type.
+        /// </summary>
+        public IntPtr dwData;
+
+        /// <summary>
+        /// Size, in bytes, of the data pointed to by <see cref="lpData"/>.
+        /// </summary>
+        public int cbData;
+
+        /// <summary>
+        /// Pointer to data to be passed to the receiving application. The data is copied into the address space of the receiving process.
+        /// </summary>
+        public IntPtr lpData;
+    }
+
+    /// <summary>
+    /// Finds a top-level window whose class name and/or window name match the specified strings.
+    /// This is a managed declaration of the Win32 <c>FindWindow</c> function from <c>user32.dll</c>.
+    /// </summary>
+    /// <param name="lpClassName">The class name or a class atom created by a previous call to RegisterClass. If this parameter is null, it finds any window whose title matches <paramref name="lpWindowName"/>.</param>
+    /// <param name="lpWindowName">The window name (the window's title). If this parameter is null, all window names match.</param>
+    /// <returns>
+    /// A handle to the window that has the specified class name and window name. If no such window exists, <see cref="IntPtr.Zero"/> is returned.
+    /// </returns>
+    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    internal static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+    /// <summary>
+    /// Sends the specified message to a window or windows. This overload is used to send a <see cref="COPYDATASTRUCT"/> with the <c>WM_COPYDATA</c> message.
+    /// This is a managed declaration of the Win32 <c>SendMessage</c> function from <c>user32.dll</c>.
+    /// </summary>
+    /// <param name="hWnd">A handle to the window whose window procedure will receive the message.</param>
+    /// <param name="Msg">The message to be sent. Use <see cref="WM_COPYDATA"/> to send data blocks.</param>
+    /// <param name="wParam">Additional message-specific information. When sending <c>WM_COPYDATA</c>, this is typically the sender window handle.</param>
+    /// <param name="lParam">A reference to a <see cref="COPYDATASTRUCT"/> that contains the data to be passed to the receiving application.</param>
+    /// <returns>
+    /// The return value specifies the result of the message processing; its value depends on the message sent. For <c>WM_COPYDATA</c>, the return value is typically the value returned by the receiving window procedure.
+    /// </returns>
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    internal static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, ref COPYDATASTRUCT lParam);
 }
