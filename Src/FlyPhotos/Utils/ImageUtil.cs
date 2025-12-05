@@ -105,6 +105,12 @@ internal static class ImageUtil
                     if (await IcoReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
                     return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
+                case ".TIF":
+                case ".TIFF":
+                {
+                    if (await TiffReader.GetFirstFrameFullSize(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                    return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
+                }
                 default:
                 {
                     if (!AppConfig.Settings.OpenExitZoom)
@@ -176,6 +182,12 @@ internal static class ImageUtil
                     if (await IcoReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
                     return (new PreviewDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
+                case ".TIF":
+                case ".TIFF":
+                {
+                    if (await TiffReader.GetFirstFrameFullSize(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                    return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
+                }
                 default:
                 {
                     if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
@@ -238,6 +250,12 @@ internal static class ImageUtil
                 {
                     if (await IcoReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
                     return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
+                }
+                case ".TIF":
+                case ".TIFF":
+                {
+                    if (await TiffReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
                 }
                 default:
                 {

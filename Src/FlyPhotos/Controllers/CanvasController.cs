@@ -1,4 +1,4 @@
-﻿﻿﻿using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
@@ -15,6 +15,7 @@ using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Input;
 using Size = FlyPhotos.Data.Size;
 
 namespace FlyPhotos.Controllers;
@@ -24,6 +25,7 @@ internal class CanvasController : ICanvasController
     public event Action<int> OnZoomChanged;
     public event Action<bool> OnFitToScreenStateChanged;
     public event Action<bool> OnOneToOneStateChanged;
+    public event Action<bool> OnMutliPagePhotoLoaded;
 
     private readonly IThumbnailController _thumbNailController;
     private readonly PhotoSessionState _photoSessionState;
@@ -135,23 +137,27 @@ internal class CanvasController : ICanvasController
         if (displayLevel > DisplayLevel.PlaceHolder)
             _realImageDisplayedForCurrentPhoto = true;
 
-        // Handle the specific type of display item (Animated, HQ Static, Preview).
+        // Handle the specific type of display item (Animated, HQ Static, Preview, MultiPage)
         switch (displayItem)
         {
             case AnimatedHqDisplayItem animDispItem:
                 await HandleHqAnimatedDisplayItemAsync(currentOperationId, photo, animDispItem, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
                 break;
+            case MultiPageHqDisplayItem multiDispItem:
+                HandleHqMultiPageDisplayItem(photo, multiDispItem, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
+                break;
             case HqDisplayItem hqDispItem:
                 HandleHqStaticDisplayItem(photo, hqDispItem, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
                 break;
-            
             case PreviewDisplayItem previewDispItem:
-                HandlePreviewDisplayItem(photo, previewDispItem, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder); 
+                HandlePreviewDisplayItem(photo, previewDispItem, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
                 break;
         }
     }
 
-    private async Task HandleHqAnimatedDisplayItemAsync(int currentOperationId, Photo photo, AnimatedHqDisplayItem animDispItem, 
+
+
+    private async Task HandleHqAnimatedDisplayItemAsync(int currentOperationId, Photo photo, AnimatedHqDisplayItem animDispItem,
         bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
     {
         try
@@ -188,7 +194,7 @@ internal class CanvasController : ICanvasController
         }
     }
 
-    private void HandleHqStaticDisplayItem(Photo photo, HqDisplayItem hqDispItem, 
+    private void HandleHqStaticDisplayItem(Photo photo, HqDisplayItem hqDispItem,
         bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
     {
         // For a high-quality static image, create and set the static renderer.
@@ -196,7 +202,14 @@ internal class CanvasController : ICanvasController
         SetupNewRenderer(newRenderer, _imageSize, hqDispItem.Rotation, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, true);
     }
 
-    private void HandlePreviewDisplayItem(Photo photo, PreviewDisplayItem previewDispItem, 
+    private void HandleHqMultiPageDisplayItem(Photo photo, MultiPageHqDisplayItem multiDispItem,
+        bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
+    {
+        var renderer = new MultiPageRenderer(_d2dCanvas, _canvasViewState, multiDispItem.FileAsByteArray, 0, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
+        SetupNewRenderer(renderer, _imageSize, multiDispItem.Rotation, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, true);
+    }
+
+    private void HandlePreviewDisplayItem(Photo photo, PreviewDisplayItem previewDispItem,
         bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
     {
         // Previews can sometimes have a slightly different aspect ratio than the HQ image.
@@ -224,6 +237,7 @@ internal class CanvasController : ICanvasController
     {
         _currentRenderer?.Dispose();
         _currentRenderer = newRenderer;
+        OnMutliPagePhotoLoaded?.Invoke(newRenderer is MultiPageRenderer);
 
         _canvasViewManager.SetScaleAndPosition(_currentPhotoPath, imageSize,
             imageRotation, _d2dCanvas.GetSize(), isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
@@ -295,6 +309,23 @@ internal class CanvasController : ICanvasController
     {
         if (IsScreenEmpty()) return;
         _canvasViewManager.Shrug();
+    }
+
+    public async Task ChangePage(NavDirection navDirection)
+    {
+        if (_currentRenderer is not MultiPageRenderer multiPageRenderer) return;
+
+        switch (navDirection)
+        {
+            case NavDirection.Next:
+                var next = multiPageRenderer.CurrentPageIndex + 1;
+                await multiPageRenderer.LoadPageAsync(next);
+                break;
+            case NavDirection.Prev:
+                var prev = multiPageRenderer.CurrentPageIndex - 1;
+                await multiPageRenderer.LoadPageAsync(prev);
+                break;
+        }
     }
 
     #endregion

@@ -38,3 +38,8 @@ internal sealed partial class AnimatedHqDisplayItem(CanvasBitmap firstFrame, Ori
 {
     public byte[] FileAsByteArray { get; } = fileAsByteArray;
 }
+
+internal sealed partial class MultiPageHqDisplayItem(CanvasBitmap firstFrame, Origin origin, byte[] fileAsByteArray) : HqDisplayItem(firstFrame, origin, 0)
+{
+    public byte[] FileAsByteArray { get; } = fileAsByteArray;
+}

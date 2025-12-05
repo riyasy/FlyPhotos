@@ -104,7 +104,7 @@
                         <ToolTipService.ToolTip>
                             <ToolTip
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
-                                Content="Back"
+                                Content="Previous Photo"
                                 Placement="Right" />
                         </ToolTipService.ToolTip>
                     </RepeatButton>
@@ -119,7 +119,7 @@
                         <ToolTipService.ToolTip>
                             <ToolTip
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
-                                Content="Rotate"
+                                Content="Rotate Photo"
                                 Placement="Right" />
                         </ToolTipService.ToolTip>
                     </RepeatButton>
@@ -135,7 +135,38 @@
                         <ToolTipService.ToolTip>
                             <ToolTip
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
-                                Content="Next"
+                                Content="Next Photo"
+                                Placement="Right" />
+                        </ToolTipService.ToolTip>
+                    </RepeatButton>
+                    <RepeatButton
+                        x:Name="ButtonPrevPage"
+                        Width="Auto"
+                        Click="ButtonPrevPage_OnClick"
+                        Content="&#xE892;"
+                        FontFamily="{StaticResource FluentIcons}"
+                        FontSize="16"
+                        PointerWheelChanged="ButtonBackNextPage_PointerWheelChanged">
+                        <ToolTipService.ToolTip>
+                            <ToolTip
+                                AutomationProperties.FullDescription="Non-occluding tooltip"
+                                Content="Prev Page"
+                                Placement="Right" />
+                        </ToolTipService.ToolTip>
+                    </RepeatButton>
+                    <RepeatButton
+                        x:Name="ButtonNextPage"
+                        Width="Auto"
+                        Margin="0,0,10,0"
+                        Click="ButtonNextPage_OnClick"
+                        Content="&#xE893;"
+                        FontFamily="{StaticResource FluentIcons}"
+                        FontSize="16"
+                        PointerWheelChanged="ButtonBackNextPage_PointerWheelChanged">
+                        <ToolTipService.ToolTip>
+                            <ToolTip
+                                AutomationProperties.FullDescription="Non-occluding tooltip"
+                                Content="Next Page"
                                 Placement="Right" />
                         </ToolTipService.ToolTip>
                     </RepeatButton>

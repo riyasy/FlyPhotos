@@ -108,6 +108,7 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.OnZoomChanged += CanvasController_OnZoomChanged;
         _canvasController.OnFitToScreenStateChanged += CanvasController_OnFitToScreenStateChanged;  
         _canvasController.OnOneToOneStateChanged += CanvasController_OnOneToOneStateChanged;
+        _canvasController.OnMutliPagePhotoLoaded += CanvasController_OnMultiPagePhotoLoaded;
         _thumbNailController.ThumbnailClicked += Thumbnail_Clicked;
 
         TxtFileName.Text = Path.GetFileName(firstPhotoPath);
@@ -182,14 +183,6 @@ public sealed partial class PhotoDisplayWindow
         _backdropController = null;
     }
 
-    private async void ButtonNext_OnClick(object sender, RoutedEventArgs e)
-    {
-        if (_photoController.IsSinglePhoto()) return;
-        await _photoController.Fly(NavDirection.Next);
-        _repeatButtonReleaseCheckTimer.Stop();
-        _repeatButtonReleaseCheckTimer.Start();
-    }
-
     private async void ButtonBack_OnClick(object sender, RoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
@@ -198,6 +191,13 @@ public sealed partial class PhotoDisplayWindow
         _repeatButtonReleaseCheckTimer.Start();
     }
 
+    private async void ButtonNext_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (_photoController.IsSinglePhoto()) return;
+        await _photoController.Fly(NavDirection.Next);
+        _repeatButtonReleaseCheckTimer.Stop();
+        _repeatButtonReleaseCheckTimer.Start();
+    }
     private async void ButtonBackNext_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
@@ -217,6 +217,22 @@ public sealed partial class PhotoDisplayWindow
         if (_photoController.IsSinglePhoto()) return;
         var delta = e.GetCurrentPoint(ButtonBack).Properties.MouseWheelDelta;
         _canvasController.RotateCurrentPhotoBy90(delta > 0);
+    }
+
+    private async void ButtonPrevPage_OnClick(object sender, RoutedEventArgs e)
+    {
+        await _canvasController.ChangePage(NavDirection.Prev);
+    }
+
+    private async void ButtonNextPage_OnClick(object sender, RoutedEventArgs e)
+    {
+        await _canvasController.ChangePage(NavDirection.Next);
+    }
+
+    private async void ButtonBackNextPage_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+    {
+        var delta = e.GetCurrentPoint(ButtonBack).Properties.MouseWheelDelta;
+        await _canvasController.ChangePage(delta > 0 ? NavDirection.Prev : NavDirection.Next);
     }
 
     private void ButtonScaleSet_Click(object sender, RoutedEventArgs e)
@@ -466,6 +482,7 @@ public sealed partial class PhotoDisplayWindow
         try
         {
             bool ctrlPressed = Util.IsControlPressed();
+            bool altPressed = Util.IsAltPressed();
             switch (e.Key)
             {
                 case VirtualKey.C when ctrlPressed:
@@ -487,13 +504,24 @@ public sealed partial class PhotoDisplayWindow
                     await _photoController.FlyToLast();
                     break;
 
+
+                // Page Navigation in multi page photos (like TIFF)
+                case VirtualKey.Right when altPressed:
+                    await _canvasController.ChangePage(NavDirection.Next);
+                    break;
+                case VirtualKey.Left when altPressed:
+                    await _canvasController.ChangePage(NavDirection.Prev);
+                    break;
+
+
                 // File Navigation
-                case VirtualKey.Right when !ctrlPressed:
+                case VirtualKey.Right when !ctrlPressed && !altPressed:
                     await _photoController.Fly(NavDirection.Next);
                     break;
-                case VirtualKey.Left when !ctrlPressed:
+                case VirtualKey.Left when !ctrlPressed && !altPressed:
                     await _photoController.Fly(NavDirection.Prev);
                     break;
+
 
                 // ZOOM
                 case VirtualKey.Add when ctrlPressed:
@@ -653,6 +681,19 @@ public sealed partial class PhotoDisplayWindow
         DispatcherQueue.TryEnqueue(() => { ButtonOneIsToOne.IsChecked = isOneToOne; });
     }
 
+    private void CanvasController_OnMultiPagePhotoLoaded(bool isMultiPagePhoto)
+    {
+        if (isMultiPagePhoto)
+        {
+            ButtonNextPage.Visibility = Visibility.Visible;
+            ButtonPrevPage.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            ButtonNextPage.Visibility = Visibility.Collapsed;
+            ButtonPrevPage.Visibility = Visibility.Collapsed;
+        }
+    }
     private void SettingWindow_SettingChanged(Setting setting)
     {
         switch (setting)
