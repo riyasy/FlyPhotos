@@ -333,8 +333,10 @@ internal partial class PhotoDisplayController
         if (currentPosition < 0) return;
 
         var totalFileCount = _sortedPhotoKeys.Count;
-        var fileName = Path.GetFileName(_photos[currentKey].FileName);
-        var listPositionAndFileName = $"[{currentPosition + 1}/{totalFileCount}] {fileName}";
+        var photo = _photos[currentKey];
+        var fileName = Path.GetFileName(photo.FileName);
+        var dimension = photo.GetActualSize();
+        var listPositionAndFileName = $"[{currentPosition + 1}/{totalFileCount}] {fileName} ({dimension.Item1} x {dimension.Item2})";
 
         var noOfFilesOnLeft = currentPosition;
         var noOfFilesOnRight = totalFileCount - 1 - currentPosition;
