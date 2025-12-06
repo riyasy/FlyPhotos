@@ -116,24 +116,31 @@
 		<Content Remove="Assets\transparent.cur" />
 	</ItemGroup>
 
-	<!-- 1. Define the DLLs in a custom group so we don't have to type the path twice -->
+	<!-- 1. Define the source files once so we don't repeat the path -->
 	<ItemGroup>
 		<ExternalDlls Include="DLLs\*.dll" />
 	</ItemGroup>
 
-	<!-- 2. Configuration for Debugging & MSIX Packaging
-          The 'Link' metadata tells VS to treat these files as if they are in the root.
-          This makes DllImport work while debugging and inside the MSIX container. -->
 	<ItemGroup>
+		<!-- 2. VISUAL STUDIO DISPLAY:
+            Include them as 'None' so they appear inside the 'DLLs' folder 
+            in Solution Explorer, just like normal files. -->
+		<None Include="@(ExternalDlls)" />
+
+		<!-- 3. BUILD & MSIX LOGIC:
+            Include them as 'Content' with 'Link' to flatten them to root.
+            CRITICAL: Set <Visible>false</Visible> so these "links" do not 
+            show up as duplicates in the Solution Explorer root. -->
 		<Content Include="@(ExternalDlls)">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Visible>false</Visible>
 		</Content>
 	</ItemGroup>
 
-	<!-- 3. Configuration for Unpackaged Publish
-          'dotnet publish' ignores the Link attribute and creates the 'DLLs' folder anyway.
-          This target runs after publish to manually copy them to the root. -->
+	<!-- 4. PUBLISH LOGIC (Unpackaged):
+            'dotnet publish' ignores the Link attribute. 
+            This target manually copies them to the root of the publish folder. -->
 	<Target Name="FlattenDllsOnPublish" AfterTargets="Publish" Condition="'$(WindowsPackageType)'!='MSIX'">
 		<Copy SourceFiles="@(ExternalDlls)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
 	</Target>
