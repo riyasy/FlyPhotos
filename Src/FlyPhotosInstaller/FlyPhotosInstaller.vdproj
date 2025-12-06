@@ -969,6 +969,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_2B5CD94B6B3F43038476D809B0F21841"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_2B802E2626D24E3EABE4BE6C2A8555D8"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -3242,6 +3248,26 @@
             {
             "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\vcomp140.dll"
             "TargetName" = "8:vcomp140.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2B5CD94B6B3F43038476D809B0F21841"
+            {
+            "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\FlyContextMenuHelper.exe"
+            "TargetName" = "8:FlyContextMenuHelper.exe"
             "Tag" = "8:"
             "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
             "Condition" = "8:"
