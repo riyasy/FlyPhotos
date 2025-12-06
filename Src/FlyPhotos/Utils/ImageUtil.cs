@@ -185,7 +185,9 @@ internal static class ImageUtil
                 case ".TIF":
                 case ".TIFF":
                 {
-                    if (await TiffReader.GetFirstFrameFullSize(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                    if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                    if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                    if (await TiffReader.GetFirstFrameFullSize(d2dCanvas, path) is (true, { } retBmp3)) return (retBmp3);
                     return new PreviewDisplayItem(PreviewFailedIndicator, Origin.ErrorScreen);
                 }
                 default:

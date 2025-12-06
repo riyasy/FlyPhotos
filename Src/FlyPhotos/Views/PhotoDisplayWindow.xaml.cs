@@ -683,16 +683,9 @@ public sealed partial class PhotoDisplayWindow
 
     private void CanvasController_OnMultiPagePhotoLoaded(bool isMultiPagePhoto)
     {
-        if (isMultiPagePhoto)
-        {
-            ButtonNextPage.Visibility = Visibility.Visible;
-            ButtonPrevPage.Visibility = Visibility.Visible;
-        }
-        else
-        {
-            ButtonNextPage.Visibility = Visibility.Collapsed;
-            ButtonPrevPage.Visibility = Visibility.Collapsed;
-        }
+        var visibilityState = isMultiPagePhoto ? Visibility.Visible : Visibility.Collapsed;
+        ButtonNextPage.Visibility = visibilityState;
+        ButtonPrevPage.Visibility = visibilityState;
     }
     private void SettingWindow_SettingChanged(Setting setting)
     {

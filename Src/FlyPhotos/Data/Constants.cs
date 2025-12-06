@@ -36,6 +36,8 @@ namespace FlyPhotos.Data
                                             $"{Environment.NewLine}Ctrl + '+' : Zoom In" +
                                             $"{Environment.NewLine}Ctrl + '-' : Zoom Out" +
                                             Environment.NewLine +
+                                            $"{Environment.NewLine}Alt + 'Left/Right Arrow Keys' : Navigate pages in multi-page TIFF" +
+                                            Environment.NewLine +
                                             $"{Environment.NewLine}Page Up/Page Down : Zoom In/Out to next Preset (100%,400%,Fit)" +
                                             $"{Environment.NewLine}Home : Navigate to first photo" +
                                             $"{Environment.NewLine}End : Navigate to last photo" +
