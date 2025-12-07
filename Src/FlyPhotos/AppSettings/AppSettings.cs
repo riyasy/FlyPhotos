@@ -63,6 +63,7 @@ public class AppSettings
     public bool ConfirmForDelete { get; set; } = true;
     public bool ShowFileName { get; set; } = true;
     public bool ShowCacheStatus { get; set; } = true;
+    public bool ShowImageDimensions { get; set; } = false;
     public bool AutoHideMouse { get; set; } = false;
 
     public bool UseExternalExeForContextMenu { get; set; } = false;

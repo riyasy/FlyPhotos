@@ -337,24 +337,48 @@ internal partial class PhotoDisplayController
 
     private void UpdateFileNameAndDetails()
     {
-        var currentKey = _photoSessionState.CurrentPhotoKey;
-        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
-        if (currentPosition < 0) return;
+        try
+        {
+            var currentKey = _photoSessionState.CurrentPhotoKey;
 
-        var totalFileCount = _sortedPhotoKeys.Count;
-        var photo = _photos[currentKey];
-        var fileName = Path.GetFileName(photo.FileName);
-        var dimension = photo.GetActualSize();
+            var fileListingCompleted = _photos.TryGetValue(currentKey, out var photoInList);
+            var photo = fileListingCompleted ? photoInList : _firstPhoto;
 
-        bool hideDimension = _photoSessionState.CurrentDisplayLevel == DisplayLevel.PlaceHolder ||
-                                    photo.IsVector ||
-                                    photo.IsErrorScreen(_photoSessionState.CurrentDisplayLevel);           
+            if (photo == null) return;
 
-        var fileNameAndDetails = hideDimension ? 
-            $"[{currentPosition + 1}/{totalFileCount}] {fileName}" : 
-            $"[{currentPosition + 1}/{totalFileCount}] {fileName} ({dimension.Item1} x {dimension.Item2})";
+            var fileNameAndDetails = Path.GetFileName(photo.FileName);
 
-        FileNameOrDetailsChanged?.Invoke(fileNameAndDetails);
+            if (fileListingCompleted)
+            {
+                int currentPosition = _photoSessionState.CurrentPhotoListPosition;
+                if (currentPosition < 0) return;
+                var totalFileCount = _sortedPhotoKeys.Count;
+                fileNameAndDetails = $"[{currentPosition + 1}/{totalFileCount}] {fileNameAndDetails}";
+            }
+
+            var hideDimension = !AppConfig.Settings.ShowImageDimensions ||
+                                 _photoSessionState.CurrentDisplayLevel == DisplayLevel.PlaceHolder ||
+                                 photo.IsVector ||
+                                 photo.IsErrorScreen(_photoSessionState.CurrentDisplayLevel);
+
+            if (!hideDimension)
+            {
+                var dimension = photo.GetActualSize();
+                fileNameAndDetails = $"{fileNameAndDetails} ({dimension.Item1} x {dimension.Item2})";
+            }
+
+            FileNameOrDetailsChanged?.Invoke(fileNameAndDetails);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
+
+    }
+
+    public void RefreshFileNameAndDetails()
+    {
+        UpdateFileNameAndDetails();
     }
 
     private void UpdateCacheProgress()

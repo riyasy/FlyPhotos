@@ -719,6 +719,9 @@ public sealed partial class PhotoDisplayWindow
             case Setting.FileNameShowHide:
                 BorderTxtFileName.Visibility = AppConfig.Settings.ShowFileName ? Visibility.Visible : Visibility.Collapsed;
                 break;
+            case Setting.ImageDimensionsShowHide:
+                _photoController.RefreshFileNameAndDetails();
+                break;
             case Setting.CacheStatusShowHide:
                 ButtonExpander.Visibility = AppConfig.Settings.ShowCacheStatus ? Visibility.Visible : Visibility.Collapsed;
                 break;

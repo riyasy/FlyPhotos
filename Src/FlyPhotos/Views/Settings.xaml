@@ -342,6 +342,13 @@
                             HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
                             <ToggleSwitch x:Name="ButtonShowCacheStatusExpander" />
                         </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardShowImageDimensions"
+                            Description="Show width and height of photo next to file name."
+                            Header="Show photo dimensions"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
+                            <ToggleSwitch x:Name="ButtonShowImageDimensions" />
+                        </controls:SettingsCard>
                         <TextBlock
                             Margin="0,20,0,0"
                             Style="{StaticResource BodyStrongTextBlockStyle}"

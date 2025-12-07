@@ -117,6 +117,7 @@ internal sealed partial class Settings
         ButtonConfirmBeforeDelete.IsOn = AppConfig.Settings.ConfirmForDelete;
         ButtonShowFileName.IsOn = AppConfig.Settings.ShowFileName;
         ButtonShowCacheStatusExpander.IsOn = AppConfig.Settings.ShowCacheStatus;
+        ButtonShowImageDimensions.IsOn = AppConfig.Settings.ShowImageDimensions;
         ComboPanZoomNavBehaviour.SelectedIndex = FindIndexOfItemInComboBox(ComboPanZoomNavBehaviour, _panZoomBehaviourTranslator.ToString(AppConfig.Settings.PanZoomBehaviourOnNavigation));
         ButtonEnableAutoHideMouse.IsOn = AppConfig.Settings.AutoHideMouse;
         ButtonEnableExternalShortcut.IsOn = AppConfig.Settings.ShowExternalAppShortcuts;
@@ -139,6 +140,7 @@ internal sealed partial class Settings
         ButtonRememberLastMonitor.Toggled += ButtonRememberLastMonitor_OnToggled;
         ButtonConfirmBeforeDelete.Toggled += ButtonConfirmBeforeDelete_OnToggled;
         ButtonShowFileName.Toggled += ButtonShowFileName_OnToggled;
+        ButtonShowImageDimensions.Toggled += ButtonShowImageDimensions_OnToggled;
         ButtonShowCacheStatusExpander.Toggled += ButtonShowCacheStatusExpander_OnToggled;
         ComboPanZoomNavBehaviour.SelectionChanged += ComboPanZoomNavBehaviour_OnSelectionChanged;
         ButtonEnableAutoHideMouse.Toggled += ButtonEnableAutoHideMouse_OnToggled;
@@ -195,6 +197,13 @@ internal sealed partial class Settings
     {
         AppConfig.Settings.ShowFileName = ButtonShowFileName.IsOn;
         SettingChanged?.Invoke(Setting.FileNameShowHide);
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ButtonShowImageDimensions_OnToggled(object s, RoutedEventArgs e)
+    {
+        AppConfig.Settings.ShowImageDimensions = ButtonShowImageDimensions.IsOn;
+        SettingChanged?.Invoke(Setting.ImageDimensionsShowHide);
         await AppConfig.SaveAsync();
     }
 
