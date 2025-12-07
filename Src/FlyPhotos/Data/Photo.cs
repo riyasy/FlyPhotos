@@ -1,18 +1,31 @@
 ﻿#nullable enable
+using FlyPhotos.Utils;
+using Microsoft.Graphics.Canvas.UI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using FlyPhotos.Utils;
-using Microsoft.Graphics.Canvas.UI.Xaml;
 
 namespace FlyPhotos.Data;
 
-internal class Photo(string selectedFileName)
+internal partial class Photo : IDisposable
 {
-    public readonly string FileName = selectedFileName;
-    public HqDisplayItem? Hq;
-    public PreviewDisplayItem? Preview;
+    public readonly string FileName;
+    public HqDisplayItem? Hq { get; private set; }
+    public PreviewDisplayItem? Preview { get; private set; }
+
+    public bool SupportsTransparency { get; }
+
+    public bool IsVector { get; }
+
+    public Photo(string selectedFileName)
+    {
+        FileName = selectedFileName;
+        string extension = Path.GetExtension(FileName);
+        SupportsTransparency = !string.IsNullOrEmpty(extension) && FormatsSupportingTransparency.Contains(extension);
+        IsVector = extension.Contains(".svg", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static readonly Photo _empty = new(string.Empty);
     public static Photo Empty() => _empty;
 
@@ -117,10 +130,27 @@ internal class Photo(string selectedFileName)
         ".psd"   // Photoshop document
     };
 
-    public bool SupportsTransparency()
+    public bool IsErrorScreen(DisplayLevel currentDisplayLevel)
     {
-        string extension = Path.GetExtension(FileName);
-        // No need to make extension to lower as Contains is case-insensitive due to the HashSet configuration.
-        return !string.IsNullOrEmpty(extension) && FormatsSupportingTransparency.Contains(extension);
+        var dispItem = GetDisplayItemBasedOn(currentDisplayLevel);
+        return dispItem == null || dispItem.IsErrorOrUndefined();
+    }
+
+    public void Dispose()
+    {
+        Hq?.Dispose();
+        Preview?.Dispose();
+    }
+
+    public void DisposeHqOnly()
+    {
+        Hq?.Dispose();
+        Hq = null;
+    }
+
+    public void DisposePreviewOnly()
+    {
+        Preview?.Dispose();
+        Preview = null;
     }
 }

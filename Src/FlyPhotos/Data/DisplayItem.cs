@@ -11,10 +11,15 @@ internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, 
     public Origin Origin { get; } = origin;
     public int Rotation { get; } = rotation;
 
+    public bool IsErrorOrUndefined()
+    {
+        return Origin == Origin.ErrorScreen || Origin == Origin.Undefined;
+    }
+
     public void Dispose()
     {
         // We don't dispose bitmaps coming from the error screen as they are reused.
-        if (Origin != Origin.ErrorScreen && Origin != Origin.Undefined)
+        if (!IsErrorOrUndefined()) 
             Bitmap?.Dispose();
     }
 }

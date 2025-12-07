@@ -2,7 +2,6 @@
 using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers;
 using FlyPhotos.Data;
-using FlyPhotos.NativeWrappers;
 using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
@@ -104,7 +103,8 @@ public sealed partial class PhotoDisplayWindow
         _thumbNailController = new ThumbNailController(D2dCanvasThumbNail, photoSessionState);
         _canvasController = new CanvasController(D2dCanvas, _thumbNailController, photoSessionState);
         _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, photoSessionState);
-        _photoController.StatusUpdated += PhotoController_StatusUpdated;
+        _photoController.CacheStatusChanged += PhotoController_CacheStatusChanged;
+        _photoController.FileNameOrDetailsChanged += PhotoController_FileNameOrDetailsChanged;
         _canvasController.OnZoomChanged += CanvasController_OnZoomChanged;
         _canvasController.OnFitToScreenStateChanged += CanvasController_OnFitToScreenStateChanged;  
         _canvasController.OnOneToOneStateChanged += CanvasController_OnOneToOneStateChanged;
@@ -164,7 +164,8 @@ public sealed partial class PhotoDisplayWindow
         _repeatButtonReleaseCheckTimer.Stop();
         _wheelScrollBrakeTimer.Stop();
         _thumbNailController.ThumbnailClicked -= Thumbnail_Clicked;
-        _photoController.StatusUpdated -= PhotoController_StatusUpdated;
+        _photoController.CacheStatusChanged -= PhotoController_CacheStatusChanged;
+        _photoController.FileNameOrDetailsChanged -= PhotoController_FileNameOrDetailsChanged;
         _canvasController.OnZoomChanged -= CanvasController_OnZoomChanged;
         _canvasController.OnFitToScreenStateChanged -= CanvasController_OnFitToScreenStateChanged;        
         _canvasController.OnOneToOneStateChanged -= CanvasController_OnOneToOneStateChanged;
@@ -656,13 +657,14 @@ public sealed partial class PhotoDisplayWindow
 
     #region callbacks
 
-    private void PhotoController_StatusUpdated(object? sender, StatusUpdateEventArgs e)
+    private void PhotoController_FileNameOrDetailsChanged(string fileNameAndDetails)
     {
-        DispatcherQueue.TryEnqueue(() =>
-        {
-            TxtFileName.Text = e.ListPositionAndFileName;
-            CacheStatusProgress.Text = e.CacheProgressStatus;
-        });
+        DispatcherQueue.TryEnqueue(() => { TxtFileName.Text = fileNameAndDetails; });
+    }
+
+    private void PhotoController_CacheStatusChanged(string cacheProgressStatus)
+    {
+        DispatcherQueue.TryEnqueue(() => { CacheStatusProgress.Text = cacheProgressStatus; });
     }
 
     private void CanvasController_OnZoomChanged(int zoomPercent)

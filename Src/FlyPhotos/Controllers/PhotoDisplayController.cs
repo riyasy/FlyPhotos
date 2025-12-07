@@ -19,7 +19,8 @@ namespace FlyPhotos.Controllers;
 
 internal partial class PhotoDisplayController
 {
-    public event EventHandler<StatusUpdateEventArgs>? StatusUpdated;
+    public event Action<string>? CacheStatusChanged;
+    public event Action<string>? FileNameOrDetailsChanged;
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -70,6 +71,13 @@ internal partial class PhotoDisplayController
         thread.Start();
     }
 
+
+    private async Task SetSourceAsync(Photo photo, DisplayLevel displayLevel)
+    {
+        await _canvasController.SetSource(photo, displayLevel);
+        UpdateFileNameAndDetails();
+    }
+
     public async Task LoadFirstPhoto()
     {
         await ImageUtil.Initialize(_d2dCanvas);
@@ -79,11 +87,11 @@ internal partial class PhotoDisplayController
 
         if (continueLoadingHq)
         {
-            await _canvasController.SetSource(_firstPhoto, DisplayLevel.Preview);
+            await SetSourceAsync(_firstPhoto, DisplayLevel.Preview);
             await _firstPhoto.LoadHqFirstPhoto(_d2dCanvas);
         }
 
-        await _canvasController.SetSource(_firstPhoto, DisplayLevel.Hq);
+        await SetSourceAsync(_firstPhoto, DisplayLevel.Hq);
         if (AppConfig.Settings.OpenExitZoom)
             await Task.Delay(Constants.PanZoomAnimationDurationNormal);
         _firstPhotoLoadedTcs.SetResult(true);
@@ -113,6 +121,7 @@ internal partial class PhotoDisplayController
             _cachedHqImages[_photoSessionState.CurrentPhotoKey] = _firstPhoto;
 
             UpdateCacheLists();
+            UpdateFileNameAndDetails();
 
             var previewCachingThread = new Thread(() => PreviewCacheBuilderDoWork(_cts.Token)) { IsBackground = true };
             previewCachingThread.Start();
@@ -160,7 +169,7 @@ internal partial class PhotoDisplayController
                         if (_photoSessionState.CurrentPhotoKey == key)
                             UpgradeImageIfNeeded(photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
                         _thumbNailController.RedrawThumbNailsIfNeeded(key);
-                        UpdateProgressStatusDebug();
+                        UpdateCacheProgress();
                     }
                     finally { _previewTaskThrottler.Release(); }
                 }, token);
@@ -251,7 +260,7 @@ internal partial class PhotoDisplayController
         if (_photoSessionState.CurrentDisplayLevel == fromDisplayState)
             _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
             {
-                _canvasController.SetSource(photo, toDisplayState);
+                _ = SetSourceAsync(photo, toDisplayState);
             });
     }
     
@@ -276,9 +285,9 @@ internal partial class PhotoDisplayController
         var desiredHqKeys = FindNeighborKeys(currentPos, AppConfig.Settings.CacheSizeOneSideHqImages);
         var desiredPreviewKeys = FindNeighborKeys(currentPos, AppConfig.Settings.CacheSizeOneSidePreviews);
         SyncCacheState(desiredHqKeys, _cachedHqImages, _hqsBeingCached, _toBeCachedHqImages,
-            photo => { photo.Hq?.Dispose(); photo.Hq = null; });
+            photo => { photo.DisposeHqOnly(); });
         SyncCacheState(desiredPreviewKeys, _cachedPreviews, _previewsBeingCached, _toBeCachedPreviews,
-            photo => { photo.Preview?.Dispose(); photo.Preview = null; });
+            photo => { photo.DisposePreviewOnly(); });
     }
 
     private void SyncCacheState(List<int> desiredKeys, ConcurrentDictionary<int, Photo> cachedItems,
@@ -326,7 +335,7 @@ internal partial class PhotoDisplayController
         return desiredKeys;
     }
 
-    private void UpdateProgressStatusDebug()
+    private void UpdateFileNameAndDetails()
     {
         var currentKey = _photoSessionState.CurrentPhotoKey;
         int currentPosition = _photoSessionState.CurrentPhotoListPosition;
@@ -336,8 +345,24 @@ internal partial class PhotoDisplayController
         var photo = _photos[currentKey];
         var fileName = Path.GetFileName(photo.FileName);
         var dimension = photo.GetActualSize();
-        var listPositionAndFileName = $"[{currentPosition + 1}/{totalFileCount}] {fileName} ({dimension.Item1} x {dimension.Item2})";
 
+        bool hideDimension = _photoSessionState.CurrentDisplayLevel == DisplayLevel.PlaceHolder ||
+                                    photo.IsVector ||
+                                    photo.IsErrorScreen(_photoSessionState.CurrentDisplayLevel);           
+
+        var fileNameAndDetails = hideDimension ? 
+            $"[{currentPosition + 1}/{totalFileCount}] {fileName}" : 
+            $"[{currentPosition + 1}/{totalFileCount}] {fileName} ({dimension.Item1} x {dimension.Item2})";
+
+        FileNameOrDetailsChanged?.Invoke(fileNameAndDetails);
+    }
+
+    private void UpdateCacheProgress()
+    {
+        var currentKey = _photoSessionState.CurrentPhotoKey;
+        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
+        if (currentPosition < 0) return;
+        var totalFileCount = _sortedPhotoKeys.Count;
         var noOfFilesOnLeft = currentPosition;
         var noOfFilesOnRight = totalFileCount - 1 - currentPosition;
         int noOfCachedItemsOnLeft = 0;
@@ -345,16 +370,14 @@ internal partial class PhotoDisplayController
 
         foreach (int key in _cachedPreviews.Keys)
         {
-            if (key < currentKey)            
-                noOfCachedItemsOnLeft++;            
-            else if (key > currentKey)            
-                noOfCachedItemsOnRight++;            
+            if (key < currentKey)
+                noOfCachedItemsOnLeft++;
+            else if (key > currentKey)
+                noOfCachedItemsOnRight++;
         }
         var cacheProgressStatus = $"{noOfCachedItemsOnLeft}/{noOfFilesOnLeft} < Cache > {noOfCachedItemsOnRight}/{noOfFilesOnRight}";
-
-        StatusUpdated?.Invoke(this, new StatusUpdateEventArgs(listPositionAndFileName, cacheProgressStatus));
+        CacheStatusChanged?.Invoke(cacheProgressStatus);
     }
-
 
     public async Task CopyFileToClipboardAsync()
     {
@@ -476,11 +499,8 @@ internal partial class PhotoDisplayController
             await FlyTo(newKey, true);
 
             // --- Step 5: Clean Up Resources ---
-            if (deletedPhoto != null)
-            {
-                deletedPhoto.Hq?.Dispose();
-                deletedPhoto.Preview?.Dispose();
-            }
+            deletedPhoto?.Dispose();
+
             return new DeleteResult(true, false);
         }
         else
@@ -515,7 +535,7 @@ internal partial class PhotoDisplayController
     public async Task Brake()
     {
         if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq && _cachedHqImages.TryGetValue(_photoSessionState.CurrentPhotoKey, out var hqImage))
-            await _canvasController.SetSource(hqImage, DisplayLevel.Hq);
+            await SetSourceAsync(hqImage, DisplayLevel.Hq);
         _hqCachingCanStart.Set();
         _keyPressCounter = 0;
     }
@@ -525,14 +545,15 @@ internal partial class PhotoDisplayController
         var photo = _photos[key];
 
         if (!IsContinuousKeyPress() && _cachedHqImages.ContainsKey(key))
-            await _canvasController.SetSource(photo, DisplayLevel.Hq);
+            await SetSourceAsync(photo, DisplayLevel.Hq);
         else if (_cachedPreviews.ContainsKey(key))
-            await _canvasController.SetSource(photo, DisplayLevel.Preview);
+            await SetSourceAsync(photo, DisplayLevel.Preview);
         else
-            await _canvasController.SetSource(photo, DisplayLevel.PlaceHolder);
+            await SetSourceAsync(photo, DisplayLevel.PlaceHolder);
 
         UpdateCacheLists();
-        UpdateProgressStatusDebug();
+
+        UpdateCacheProgress();
 
         _previewCachingCanStart.Set();
         if (triggerHqCaching)
@@ -575,12 +596,6 @@ internal partial class PhotoDisplayController
 
         Logger.Info("PhotoDisplayController disposed.");
     }
-}
-
-internal class StatusUpdateEventArgs(string listPositionAndFileName, string cacheProgressStatus) : EventArgs
-{
-    public string ListPositionAndFileName { get; } = listPositionAndFileName;
-    public string CacheProgressStatus { get; } = cacheProgressStatus;
 }
 
 internal class DeleteResult(bool deleteSuccess, bool isLastPhoto, string failMessage = "")

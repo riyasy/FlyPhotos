@@ -163,7 +163,7 @@ internal class CanvasController : ICanvasController
         try
         {
             // For animated images, first display the static first frame immediately for responsiveness.
-            IRenderer firstFrameRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, animDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate, false);
+            IRenderer firstFrameRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, animDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency, RequestInvalidate, false);
             SetupNewRenderer(firstFrameRenderer, _imageSize, animDispItem.Rotation, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, true);
 
             // Asynchronously create the appropriate animator (GIF or APNG).
@@ -178,7 +178,7 @@ internal class CanvasController : ICanvasController
             {
                 // The operation is still valid. Prepare the animator and swap the renderer.
                 await newAnimator.UpdateAsync(TimeSpan.Zero);
-                IRenderer newRenderer = new AnimatedImageRenderer(_d2dCanvas, _checkeredBrush, newAnimator, _animatorLock, photo.SupportsTransparency(), RequestInvalidate);
+                IRenderer newRenderer = new AnimatedImageRenderer(_d2dCanvas, _checkeredBrush, newAnimator, _animatorLock, photo.SupportsTransparency, RequestInvalidate);
                 // For animation, we don't reset the view again, as the static frame is already there.
                 SetupNewRenderer(newRenderer, _imageSize, animDispItem.Rotation, false, false, false, false);
             }
@@ -198,14 +198,14 @@ internal class CanvasController : ICanvasController
         bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
     {
         // For a high-quality static image, create and set the static renderer.
-        IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, hqDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
+        IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, hqDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency, RequestInvalidate);
         SetupNewRenderer(newRenderer, _imageSize, hqDispItem.Rotation, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, true);
     }
 
     private void HandleHqMultiPageDisplayItem(Photo photo, MultiPageHqDisplayItem multiDispItem,
         bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
     {
-        var renderer = new MultiPageRenderer(_d2dCanvas, _canvasViewState, multiDispItem.FileAsByteArray, 0, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
+        var renderer = new MultiPageRenderer(_d2dCanvas, _canvasViewState, multiDispItem.FileAsByteArray, 0, _checkeredBrush, photo.SupportsTransparency, RequestInvalidate);
         SetupNewRenderer(renderer, _imageSize, multiDispItem.Rotation, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, true);
     }
 
@@ -218,7 +218,7 @@ internal class CanvasController : ICanvasController
         var previewAspectRatio = previewDispItem.Bitmap.Bounds.Width / previewDispItem.Bitmap.Bounds.Height;
         var correctedWidth = _imageSize.Height * previewAspectRatio;
 
-        IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, previewDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency(), RequestInvalidate);
+        IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, previewDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency, RequestInvalidate);
         SetupNewRenderer(newRenderer, new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, true);
     }
 
