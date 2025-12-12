@@ -26,13 +26,9 @@ internal static class TiffReader
         {
             var file = await StorageFile.GetFileFromPathAsync(inputPath);
             using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
-
-            var decoder = await BitmapDecoder.CreateAsync(stream);
             stream.Seek(0);
-
             var firstFrameBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
             var metaData = new ImageMetadata(firstFrameBitmap.SizeInPixels.Width, firstFrameBitmap.SizeInPixels.Height);
-
             return (true, new PreviewDisplayItem(firstFrameBitmap, Origin.Disk, metaData));
         }
         catch (Exception ex)

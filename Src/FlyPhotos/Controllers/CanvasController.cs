@@ -15,7 +15,6 @@ using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Input;
 using Size = FlyPhotos.Data.Size;
 
 namespace FlyPhotos.Controllers;

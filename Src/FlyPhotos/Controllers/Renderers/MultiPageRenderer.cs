@@ -2,15 +2,9 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
-using FlyPhotos.Controllers.Renderers;
-using FlyPhotos.Data;
-using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas.Brushes;
-using Microsoft.UI;
-using System.IO;
 using Windows.Graphics.Imaging;
 using Windows.Storage.Streams;
-using Windows.Storage;
 using FlyPhotos.AppSettings;
 using NLog;
 
