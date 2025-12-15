@@ -3,10 +3,10 @@ using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 using System;
+using System.IO;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
-using Windows.Storage;
 using Windows.Storage.Streams;
 
 namespace FlyPhotos.Readers;
@@ -29,8 +29,8 @@ internal static class GifReader
     {
         try
         {
-            var file = await StorageFile.GetFileFromPathAsync(inputPath);
-            using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
+            await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var stream = fs.AsRandomAccessStream();
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
             var metaData = new ImageMetadata(canvasBitmap.SizeInPixels.Width, canvasBitmap.SizeInPixels.Height);
             return (true, new PreviewDisplayItem(canvasBitmap, Origin.Disk, metaData));
@@ -49,8 +49,8 @@ internal static class GifReader
         {
             // --- Use BitmapDecoder to check frame count ---
             // We must open the file as a stream for the decoder to read.
-            var storageFile = await StorageFile.GetFileFromPathAsync(inputPath);
-            using IRandomAccessStream stream = await storageFile.OpenAsync(FileAccessMode.Read);
+            await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var stream = fs.AsRandomAccessStream();
             var firstFrame = await CanvasBitmap.LoadAsync(ctrl, stream);
 
             stream.Seek(0);

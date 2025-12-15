@@ -1,8 +1,9 @@
 ﻿#nullable enable
 using System;
+using System.IO;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Graphics.Imaging;
-using Windows.Storage;
 using Windows.Storage.Streams;
 using FlyPhotos.Data;
 using Microsoft.Graphics.Canvas;
@@ -60,8 +61,8 @@ internal static class IcoReader
     {
         try
         {
-            var file = await StorageFile.GetFileFromPathAsync(filePath);
-            using IRandomAccessStream stream = await file.OpenReadAsync();
+            await using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var stream = fs.AsRandomAccessStream();
 
             // The BitmapDecoder is essential for inspecting multi-frame images.
             var decoder = await BitmapDecoder.CreateAsync(stream);

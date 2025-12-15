@@ -1,9 +1,10 @@
 ﻿#nullable enable
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Graphics.Imaging;
-using Windows.Storage;
 using Windows.Storage.Streams;
 using FlyPhotos.Data;
 using Microsoft.Graphics.Canvas;
@@ -29,8 +30,8 @@ internal static class WicReader
     {
         try
         {
-            var file = await StorageFile.GetFileFromPathAsync(inputPath);
-            using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
+            await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var stream = fs.AsRandomAccessStream();
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
             return (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk));
         }
@@ -45,8 +46,8 @@ internal static class WicReader
     {
         try
         {
-            var file = await StorageFile.GetFileFromPathAsync(inputPath);
-            using var stream = await file.OpenReadAsync();
+            await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var stream = fs.AsRandomAccessStream();
             var decoder = await BitmapDecoder.CreateAsync(stream);
 
             // Get the full, original dimensions from the decoder

@@ -1,8 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.Storage;
 using Windows.Storage.Streams;
 using FlyPhotos.Data;
 using Microsoft.Graphics.Canvas;
@@ -32,8 +32,8 @@ internal static class PngReader
     {
         try
         {
-            var file = await StorageFile.GetFileFromPathAsync(inputPath);
-            using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
+            await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var stream = fs.AsRandomAccessStream();
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
             var metaData = new ImageMetadata(canvasBitmap.SizeInPixels.Width, canvasBitmap.SizeInPixels.Height);
             return (true, new PreviewDisplayItem(canvasBitmap, Origin.Disk, metaData));
@@ -49,8 +49,8 @@ internal static class PngReader
     {
         try
         {
-            var storageFile = await StorageFile.GetFileFromPathAsync(inputPath);
-            using IRandomAccessStream stream = await storageFile.OpenAsync(FileAccessMode.Read);
+            await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var stream = fs.AsRandomAccessStream();
             var firstFrame = await CanvasBitmap.LoadAsync(ctrl, stream);
 
             if (await IsAnimatedPngAsync(stream)) // Animated PNG

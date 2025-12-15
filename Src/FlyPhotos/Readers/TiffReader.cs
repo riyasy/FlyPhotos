@@ -1,7 +1,7 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.Graphics.Imaging;
 using FlyPhotos.Data;
@@ -24,8 +24,8 @@ internal static class TiffReader
     {
         try
         {
-            var file = await StorageFile.GetFileFromPathAsync(inputPath);
-            using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
+            await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var stream = fs.AsRandomAccessStream();
             stream.Seek(0);
             var firstFrameBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
             var metaData = new ImageMetadata(firstFrameBitmap.SizeInPixels.Width, firstFrameBitmap.SizeInPixels.Height);
@@ -46,8 +46,8 @@ internal static class TiffReader
     {
         try
         {
-            var file = await StorageFile.GetFileFromPathAsync(inputPath);
-            using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
+            await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var stream = fs.AsRandomAccessStream();
 
             var decoder = await BitmapDecoder.CreateAsync(stream);
             ulong frameCount = decoder.FrameCount;

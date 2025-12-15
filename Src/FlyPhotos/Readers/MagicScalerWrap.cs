@@ -7,7 +7,6 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Storage;
 using Windows.Storage.Streams;
 
 namespace FlyPhotos.Readers
@@ -42,8 +41,8 @@ namespace FlyPhotos.Readers
                     if (originalWidth <= 800 && originalHeight <= 800)
                     {
                         // Load directly from file path without resizing
-                        var file = await StorageFile.GetFileFromPathAsync(inputPath);
-                        using IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
+                        await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                        using var stream = fs.AsRandomAccessStream();
                         canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
                     }
                     else
