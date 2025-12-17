@@ -1,4 +1,5 @@
 ﻿using FlyPhotos.Data;
+using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
@@ -7,7 +8,6 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Storage.Streams;
 
 namespace FlyPhotos.Readers
 {
@@ -41,8 +41,7 @@ namespace FlyPhotos.Readers
                     if (originalWidth <= 800 && originalHeight <= 800)
                     {
                         // Load directly from file path without resizing
-                        await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                        using var stream = fs.AsRandomAccessStream();
+                        using var stream = await ReaderUtil.GetWin2DPerformantStream(inputPath);
                         canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
                     }
                     else

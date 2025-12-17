@@ -1,13 +1,11 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Storage.Streams;
-using Windows.Graphics.Imaging;
 using FlyPhotos.Data;
+using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
+using System;
+using System.Threading.Tasks;
+using Windows.Graphics.Imaging;
 
 namespace FlyPhotos.Readers;
 
@@ -24,12 +22,10 @@ internal static class TiffReader
     {
         try
         {
-            await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var stream = fs.AsRandomAccessStream();
-            stream.Seek(0);
-            var firstFrameBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
-            var metaData = new ImageMetadata(firstFrameBitmap.SizeInPixels.Width, firstFrameBitmap.SizeInPixels.Height);
-            return (true, new PreviewDisplayItem(firstFrameBitmap, Origin.Disk, metaData));
+            using var stream = await ReaderUtil.GetWin2DPerformantStream(inputPath);
+            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
+            var metaData = new ImageMetadata(canvasBitmap.SizeInPixels.Width, canvasBitmap.SizeInPixels.Height);
+            return (true, new PreviewDisplayItem(canvasBitmap, Origin.Disk, metaData));
         }
         catch (Exception ex)
         {
@@ -38,54 +34,23 @@ internal static class TiffReader
         }
     }
 
-    /// <summary>
-    /// Returns either a StaticHqDisplayItem for single-page TIFFs or a MultiPageHqDisplayItem for multi-page TIFFs.
-    /// The MultiPageHqDisplayItem contains the original file bytes so renderers can decode individual pages on demand.
-    /// </summary>
     public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
     {
         try
         {
-            await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var stream = fs.AsRandomAccessStream();
-
-            var decoder = await BitmapDecoder.CreateAsync(stream);
-            ulong frameCount = decoder.FrameCount;
-
-            // Rewind and read all bytes
+            using var stream = await ReaderUtil.GetWin2DPerformantStream(inputPath);
+            var firstFrame = await CanvasBitmap.LoadAsync(ctrl, stream);
             stream.Seek(0);
-            var bytes = new byte[stream.Size];
-            await stream.ReadAsync(bytes.AsBuffer(), (uint)stream.Size, InputStreamOptions.None);
+            var decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.TiffDecoderId, stream);
 
-            if (frameCount <= 1)
+            if (decoder.FrameCount > 1) // Multi-page TIFF
             {
-                // Single page TIFF: return StaticHqDisplayItem
-                using var ms = new InMemoryRandomAccessStream();
-                using (var outStream = ms.GetOutputStreamAt(0))
-                using (var writer = new DataWriter(outStream))
-                {
-                    writer.WriteBytes(bytes);
-                    await writer.StoreAsync();
-                    await outStream.FlushAsync();
-                }
-                ms.Seek(0);
-                var bmp = await CanvasBitmap.LoadAsync(ctrl, ms);
-                return (true, new StaticHqDisplayItem(bmp, Origin.Disk));
+                var bytes = await ReaderUtil.GetInMemByteArray(stream);
+                return (true, new MultiPageHqDisplayItem(firstFrame, Origin.Disk, bytes));
             }
             else
             {
-                // Multi-page TIFF: load first page for immediate display and return MultiPageHqDisplayItem with bytes
-                using var ms = new InMemoryRandomAccessStream();
-                using (var outStream = ms.GetOutputStreamAt(0))
-                using (var writer = new DataWriter(outStream))
-                {
-                    writer.WriteBytes(bytes);
-                    await writer.StoreAsync();
-                    await outStream.FlushAsync();
-                }
-                ms.Seek(0);
-                var firstFrame = await CanvasBitmap.LoadAsync(ctrl, ms);
-                return (true, new MultiPageHqDisplayItem(firstFrame, Origin.Disk, bytes));
+                return (true, new StaticHqDisplayItem(firstFrame, Origin.Disk));
             }
         }
         catch (Exception ex)

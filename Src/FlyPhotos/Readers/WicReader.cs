@@ -1,15 +1,13 @@
 ﻿#nullable enable
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Graphics.Imaging;
-using Windows.Storage.Streams;
 using FlyPhotos.Data;
+using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Windows.Graphics.Imaging;
 
 namespace FlyPhotos.Readers;
 
@@ -30,8 +28,7 @@ internal static class WicReader
     {
         try
         {
-            await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var stream = fs.AsRandomAccessStream();
+            using var stream = await ReaderUtil.GetWin2DPerformantStream(inputPath);
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
             return (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk));
         }
@@ -46,12 +43,9 @@ internal static class WicReader
     {
         try
         {
-            await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var stream = fs.AsRandomAccessStream();
+            using var stream = await ReaderUtil.GetWin2DPerformantStream(inputPath);
             var decoder = await BitmapDecoder.CreateAsync(stream);
-
             // Get the full, original dimensions from the decoder
-
             var rotation = await GetRotationFromMetaData(decoder.BitmapProperties);
             var verticalOrientation = rotation is 90 or 270;
             var originalWidth = verticalOrientation ? (int)decoder.PixelHeight : (int)decoder.PixelWidth;

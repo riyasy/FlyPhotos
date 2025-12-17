@@ -1,46 +1,40 @@
-﻿using System;
-using System.IO;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.Storage.Streams;
-using FlyPhotos.Data;
+﻿using FlyPhotos.Data;
+using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
+using System;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
+using Windows.Storage.Streams;
 
 namespace FlyPhotos.Readers;
 
-/// <summary>
-/// Reads and decodes PNG/APNG files. For animated PNGs, it passes the raw file
-/// data for a specialized control to handle animation. For static PNGs, it provides
-/// a standard CanvasBitmap.
-/// This reader correctly detects all APNG variants by scanning the entire file for the 'acTL' chunk.
-/// NOTE: The consumer of the returned 'DisplayItem' (and its resources)
-/// is responsible for disposing those resources to prevent VRAM leaks.
-/// </summary>
 internal static class PngReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    // Standard 8-byte PNG file signature.
     private static readonly byte[] PngSignature = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
-    private const int PngChunkHeaderSize = 8; // 4-byte length + 4-byte type
+    private const int PngChunkHeaderSize = 8; // 4 byte Length + 4 byte Type
     private const int PngChunkCrcSize = 4;
+
+    // Pre-calculated byte arrays for chunk types to avoid string allocation
+    private static readonly byte[] ChunkAcTL = [(byte)'a', (byte)'c', (byte)'T', (byte)'L'];
+    private static readonly byte[] ChunkIDAT = [(byte)'I', (byte)'D', (byte)'A', (byte)'T'];
+    private static readonly byte[] ChunkIEND = [(byte)'I', (byte)'E', (byte)'N', (byte)'D'];
 
     public static async Task<(bool, PreviewDisplayItem)> GetFirstFrameFullSize(CanvasControl ctrl, string inputPath)
     {
         try
         {
-            await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var stream = fs.AsRandomAccessStream();
+            using var stream = await ReaderUtil.GetWin2DPerformantStream(inputPath);
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
             var metaData = new ImageMetadata(canvasBitmap.SizeInPixels.Width, canvasBitmap.SizeInPixels.Height);
             return (true, new PreviewDisplayItem(canvasBitmap, Origin.Disk, metaData));
         }
         catch (Exception ex)
         {
-            Logger.Error(ex);
+            Logger.Error(ex, "PngReader - GetFirstFrameFullSize failed for {0}", inputPath);
             return (false, PreviewDisplayItem.Empty());
         }
     }
@@ -49,15 +43,11 @@ internal static class PngReader
     {
         try
         {
-            await using var fs = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var stream = fs.AsRandomAccessStream();
+            using var stream = await ReaderUtil.GetWin2DPerformantStream(inputPath);
             var firstFrame = await CanvasBitmap.LoadAsync(ctrl, stream);
-
             if (await IsAnimatedPngAsync(stream)) // Animated PNG
             {
-                stream.Seek(0);
-                var bytes = new byte[stream.Size];
-                await stream.ReadAsync(bytes.AsBuffer(), (uint)stream.Size, InputStreamOptions.None);
+                var bytes = await ReaderUtil.GetInMemByteArray(stream);
                 return (true, new AnimatedHqDisplayItem(firstFrame, Origin.Disk, bytes));
             }
             else
@@ -72,52 +62,62 @@ internal static class PngReader
         }
     }
 
-    /// <summary>
-    /// Correctly and robustly checks if a PNG stream is an APNG by searching the entire file 
-    /// for the 'acTL' (Animation Control) chunk.
-    /// </summary>
+
+
     private static async Task<bool> IsAnimatedPngAsync(IRandomAccessStream stream)
     {
         try
         {
             stream.Seek(0);
 
-            // 1. Verify PNG Signature
-            var signatureBuffer = new byte[PngSignature.Length];
-            await stream.ReadAsync(signatureBuffer.AsBuffer(), (uint)signatureBuffer.Length, InputStreamOptions.None);
+            var signatureBuffer = new byte[8];
+            // ReadAsync returns IBuffer, we check Length property of result or rely on await behavior
+            var readBuffer = await stream.ReadAsync(signatureBuffer.AsBuffer(), 8, InputStreamOptions.None);
+            if (readBuffer.Length < 8) return false;
 
-            if (!signatureBuffer.SequenceEqual(PngSignature))
-            {
-                return false; // Not a valid PNG file.
-            }
+            // 1. Verify PNG Signature
+            // Note: WindowsRuntimeBuffer extensions (AsBuffer) write directly to the underlying byte[]
+            if (!SpanEquals(signatureBuffer, PngSignature)) return false;
 
             var chunkHeaderBuffer = new byte[PngChunkHeaderSize];
 
-            // 2. Loop through ALL chunks to find 'acTL'
+            // 2. Loop through chunks
             while (stream.Position < stream.Size)
             {
-                await stream.ReadAsync(chunkHeaderBuffer.AsBuffer(), PngChunkHeaderSize, InputStreamOptions.None);
+                var chunkRead = await stream.ReadAsync(chunkHeaderBuffer.AsBuffer(), (uint)PngChunkHeaderSize, InputStreamOptions.None);
+                if (chunkRead.Length < PngChunkHeaderSize) break;
 
-                // Manually parse chunk header, handling Big-Endian byte order for length.
+                // Parse Length (Bytes 0-3) - Handle Endianness
                 if (BitConverter.IsLittleEndian)
-                {
-                    Array.Reverse(chunkHeaderBuffer, 0, 4); // Convert length to Little-Endian
-                }
-                uint chunkLength = BitConverter.ToUInt32(chunkHeaderBuffer, 0);
-                string chunkType = Encoding.ASCII.GetString(chunkHeaderBuffer, 4, 4);
+                    Array.Reverse(chunkHeaderBuffer, 0, 4);
 
-                if (string.Equals(chunkType, "acTL")) return true; // Animation Control Chunk found.
-                if (string.Equals(chunkType, "IEND")) return false; // End of image, not animated.
+                var chunkLength = BitConverter.ToUInt32(chunkHeaderBuffer, 0);
 
-                // Seek past the chunk's data and its 4-byte CRC.
-                stream.Seek(stream.Position + chunkLength + PngChunkCrcSize);
+                // Check Type (Bytes 4-7)
+                ReadOnlySpan<byte> typeSpan = chunkHeaderBuffer.AsSpan(4, 4);
+
+                if (typeSpan.SequenceEqual(ChunkAcTL)) return true; // Found Animation Control
+                // If we hit 'IDAT' (Image Data) and haven't found 'acTL', it's not animated.
+                if (typeSpan.SequenceEqual(ChunkIDAT)) return false;
+                if (typeSpan.SequenceEqual(ChunkIEND)) return false;
+
+                // Seek past the chunk's data and CRC (4 bytes)
+                // IRandomAccessStream.Seek takes a ulong absolute position
+                var nextPosition = stream.Position + chunkLength + PngChunkCrcSize;
+                if (nextPosition > stream.Size) break;
+                stream.Seek(nextPosition);
             }
-            return false; // Reached end of file without finding IEND (malformed PNG).
+            return false;
         }
         catch (Exception ex)
         {
-            Logger.Warn(ex, "Could not determine if PNG is animated due to an error. Assuming not.");
+            Logger.Warn(ex, "Could not determine if PNG is animated. Assuming not.");
             return false;
         }
+    }
+
+    private static bool SpanEquals(byte[] buffer, byte[] target)
+    {
+        return buffer.AsSpan().SequenceEqual(target);
     }
 }

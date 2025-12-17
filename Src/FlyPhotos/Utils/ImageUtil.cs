@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Windows.UI.ViewManagement;
 using FlyPhotos.AppSettings;
 using FlyPhotos.Data;
 using FlyPhotos.Readers;
@@ -91,12 +93,12 @@ internal static class ImageUtil
                 }
                 case ".GIF":
                 {
-                    if (await GifReader.GetFirstFrameFullSize(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                    if (await GifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
                     return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
                 case ".PNG":
                 {
-                    if (await PngReader.GetFirstFrameFullSize(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                    if (await PngReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
                     return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
                 case ".ICO":
@@ -108,7 +110,7 @@ internal static class ImageUtil
                 case ".TIF":
                 case ".TIFF":
                 {
-                    if (await TiffReader.GetFirstFrameFullSize(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                    if (await TiffReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
                     return (new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen));
                 }
                 default:
@@ -211,6 +213,8 @@ internal static class ImageUtil
         if (!File.Exists(path)) 
             return new StaticHqDisplayItem(FileNotFoundIndicator, Origin.ErrorScreen);
 
+        //var sw = Stopwatch.StartNew();
+
         try
         {
             var extension = Path.GetExtension(path).ToUpperInvariant();
@@ -272,6 +276,12 @@ internal static class ImageUtil
             Logger.Error(ex);
             return new StaticHqDisplayItem(HqImageFailedIndicator, Origin.ErrorScreen);
         }
+        //finally
+        //{
+        //    sw.Stop();
+        //    try { Logger.Debug("GetHqImage total time for {0}: {1} ms", path, sw.ElapsedMilliseconds); }
+        //    catch { }
+        //}
     }
 
     public static DisplayItem GetLoadingIndicator()

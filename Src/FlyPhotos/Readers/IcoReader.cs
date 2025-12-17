@@ -1,14 +1,12 @@
 ﻿#nullable enable
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Graphics.Imaging;
-using Windows.Storage.Streams;
 using FlyPhotos.Data;
+using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
+using System;
+using System.Threading.Tasks;
+using Windows.Graphics.Imaging;
 
 namespace FlyPhotos.Readers;
 
@@ -27,14 +25,13 @@ internal static class IcoReader
     {
         var (bitmap, width, height) = await LoadLargestFrameAsync(ctrl, inputPath);
 
-        if (bitmap == null)
+        if (bitmap != null)
         {
-            return (false, PreviewDisplayItem.Empty());
+            var metadata = new ImageMetadata(width, height);
+            var previewItem = new PreviewDisplayItem(bitmap, Origin.Disk, metadata);
+            return (true, previewItem);
         }
-
-        var metadata = new ImageMetadata(width, height);
-        var previewItem = new PreviewDisplayItem(bitmap, Origin.Disk, metadata);
-        return (true, previewItem);
+        return (false, PreviewDisplayItem.Empty());
     }
 
     /// <summary>
@@ -44,13 +41,12 @@ internal static class IcoReader
     {
         var (bitmap, _, _) = await LoadLargestFrameAsync(ctrl, inputPath);
 
-        if (bitmap == null)
+        if (bitmap != null)
         {
-            return (false, HqDisplayItem.Empty());
+            var hqItem = new StaticHqDisplayItem(bitmap, Origin.Disk);
+            return (true, hqItem);
         }
-
-        var hqItem = new StaticHqDisplayItem(bitmap, Origin.Disk);
-        return (true, hqItem);
+        return (false, HqDisplayItem.Empty());
     }
 
     /// <summary>
@@ -61,15 +57,12 @@ internal static class IcoReader
     {
         try
         {
-            await using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var stream = fs.AsRandomAccessStream();
+            using var stream = await ReaderUtil.GetWin2DPerformantStream(filePath);
 
             // The BitmapDecoder is essential for inspecting multi-frame images.
             var decoder = await BitmapDecoder.CreateAsync(stream);
-
             // Find the index of the frame with the most pixels.
             var bestFrameIndex = await FindLargestFrameIndexAsync(decoder);
-
             // Retrieve the specific frame we identified as the largest.
             var bestFrame = await decoder.GetFrameAsync(bestFrameIndex);
 
@@ -108,10 +101,7 @@ internal static class IcoReader
     private static async Task<uint> FindLargestFrameIndexAsync(BitmapDecoder decoder)
     {
         // If there's only one frame, no need to search.
-        if (decoder.FrameCount <= 1)
-        {
-            return 0;
-        }
+        if (decoder.FrameCount <= 1) return 0;
 
         uint bestFrameIndex = 0;
         uint maxPixelCount = 0;
@@ -127,7 +117,6 @@ internal static class IcoReader
                 bestFrameIndex = i;
             }
         }
-
         return bestFrameIndex;
     }
 }
