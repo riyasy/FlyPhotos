@@ -55,6 +55,8 @@ internal partial class PhotoDisplayController
     private readonly IThumbnailController _thumbNailController;
     private readonly PhotoSessionState _photoSessionState;
 
+    private volatile bool _initialFileListingCompleted = false;
+
     public PhotoDisplayController(CanvasControl d2dCanvas, ICanvasController canvasController, IThumbnailController thumbNailController,
         PhotoSessionState photoSessionState)
     {
@@ -119,6 +121,8 @@ internal partial class PhotoDisplayController
 
             _photos[_photoSessionState.CurrentPhotoKey] = _firstPhoto;
             _cachedHqImages[_photoSessionState.CurrentPhotoKey] = _firstPhoto;
+
+            _initialFileListingCompleted = true;
 
             UpdateCacheLists();
             UpdateFileNameAndDetails();
@@ -339,18 +343,23 @@ internal partial class PhotoDisplayController
     {
         try
         {
+            var initialFileListingCompleted = _initialFileListingCompleted;
+
             var currentKey = _photoSessionState.CurrentPhotoKey;
 
-            var fileListingCompleted = _photos.TryGetValue(currentKey, out var photoInList);
-            var photo = fileListingCompleted ? photoInList : _firstPhoto;
+            Photo? photo = null;
+            if (initialFileListingCompleted)
+                _photos.TryGetValue(currentKey, out photo);
+            else
+                photo = _firstPhoto;
 
             if (photo == null) return;
 
             var fileNameAndDetails = Path.GetFileName(photo.FileName);
 
-            if (fileListingCompleted)
+            if (initialFileListingCompleted)
             {
-                int currentPosition = _photoSessionState.CurrentPhotoListPosition;
+                var currentPosition = _photoSessionState.CurrentPhotoListPosition;
                 if (currentPosition < 0) return;
                 var totalFileCount = _sortedPhotoKeys.Count;
                 fileNameAndDetails = $"[{currentPosition + 1}/{totalFileCount}] {fileNameAndDetails}";
@@ -373,7 +382,6 @@ internal partial class PhotoDisplayController
         {
             Logger.Error(ex);
         }
-
     }
 
     public void RefreshFileNameAndDetails()

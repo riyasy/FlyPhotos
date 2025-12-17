@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using Windows.UI.ViewManagement;
 using FlyPhotos.AppSettings;
 using FlyPhotos.Data;
 using FlyPhotos.Readers;

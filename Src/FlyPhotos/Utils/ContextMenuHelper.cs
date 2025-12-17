@@ -102,7 +102,7 @@ namespace FlyPhotos.Utils
                         // WinUI 3 apps(Packaged) run with Full Trust. You do not need to copy executables
                         // to AppData to run them.You can run them directly from the installation
                         // directory, just like the Unpackaged version.
-                        var exePath = System.IO.Path.Combine(AppContext.BaseDirectory, ContextMenuHelperProcessName);
+                        var exePath = Path.Combine(AppContext.BaseDirectory, ContextMenuHelperProcessName);
 
                         // var exePath = ResolveHelperExePath(); // uncomment this line if any issue arises for packaged app type
 
@@ -188,7 +188,7 @@ namespace FlyPhotos.Utils
             }
             else
             {
-                return System.IO.Path.Combine(AppContext.BaseDirectory, ContextMenuHelperProcessName);
+                return Path.Combine(AppContext.BaseDirectory, ContextMenuHelperProcessName);
             }
         }
 

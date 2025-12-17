@@ -25,13 +25,11 @@ namespace FlyPhotos.Controllers.Renderers
         private CanvasBitmap _currentBitmap;
         private readonly byte[] _fileBytes;
         private int _currentPageIndex;
-        private readonly CanvasViewState _canvasViewState;
         private readonly bool _supportsTransparency;
 
         public MultiPageRenderer(CanvasControl canvas, CanvasViewState canvasViewState,  byte[] fileBytes, int initialPageIndex, CanvasImageBrush checkeredBrush, bool supportsTransparency, Action invalidate)
         {
             _canvas = canvas;
-            _canvasViewState = canvasViewState;
             _supportsTransparency = supportsTransparency;
             _checkeredBrush = checkeredBrush;
             _fileBytes = fileBytes;
@@ -89,7 +87,7 @@ namespace FlyPhotos.Controllers.Renderers
                 }
                 ms.Seek(0);
 
-                var decoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(ms);
+                var decoder = await BitmapDecoder.CreateAsync(ms);
                 if (pageIndex < 0 || pageIndex >= decoder.FrameCount) return false;
 
                 // Decode the requested frame to a SoftwareBitmap then to CanvasBitmap.

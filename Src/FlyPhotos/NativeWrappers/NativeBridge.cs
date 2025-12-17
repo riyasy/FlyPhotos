@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using FlyPhotos.Data;
-using Microsoft.UI.Xaml;
 using NLog;
-using WinRT.Interop;
+
 // Required for CallConvStdcall
 
 namespace FlyPhotos.NativeWrappers;

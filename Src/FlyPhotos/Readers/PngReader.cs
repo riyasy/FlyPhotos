@@ -19,9 +19,9 @@ internal static class PngReader
     private const int PngChunkCrcSize = 4;
 
     // Pre-calculated byte arrays for chunk types to avoid string allocation
-    private static readonly byte[] ChunkAcTL = [(byte)'a', (byte)'c', (byte)'T', (byte)'L'];
-    private static readonly byte[] ChunkIDAT = [(byte)'I', (byte)'D', (byte)'A', (byte)'T'];
-    private static readonly byte[] ChunkIEND = [(byte)'I', (byte)'E', (byte)'N', (byte)'D'];
+    private static readonly byte[] ChunkAcTL = "acTL"u8.ToArray();
+    private static readonly byte[] ChunkIDAT = "IDAT"u8.ToArray();
+    private static readonly byte[] ChunkIEND = "IEND"u8.ToArray();
 
     public static async Task<(bool, PreviewDisplayItem)> GetFirstFrameFullSize(CanvasControl ctrl, string inputPath)
     {
@@ -84,7 +84,7 @@ internal static class PngReader
             // 2. Loop through chunks
             while (stream.Position < stream.Size)
             {
-                var chunkRead = await stream.ReadAsync(chunkHeaderBuffer.AsBuffer(), (uint)PngChunkHeaderSize, InputStreamOptions.None);
+                var chunkRead = await stream.ReadAsync(chunkHeaderBuffer.AsBuffer(), PngChunkHeaderSize, InputStreamOptions.None);
                 if (chunkRead.Length < PngChunkHeaderSize) break;
 
                 // Parse Length (Bytes 0-3) - Handle Endianness
