@@ -146,7 +146,8 @@
                         Content="&#xF587;"
                         FontFamily="{StaticResource FluentIcons}"
                         FontSize="16"
-                        PointerWheelChanged="ButtonBackNextPage_PointerWheelChanged">
+                        PointerWheelChanged="ButtonBackNextPage_PointerWheelChanged"
+                        Visibility="Collapsed">
                         <ToolTipService.ToolTip>
                             <ToolTip
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
@@ -162,7 +163,8 @@
                         Content="&#xF586;"
                         FontFamily="{StaticResource FluentIcons}"
                         FontSize="16"
-                        PointerWheelChanged="ButtonBackNextPage_PointerWheelChanged">
+                        PointerWheelChanged="ButtonBackNextPage_PointerWheelChanged"
+                        Visibility="Collapsed">
                         <ToolTipService.ToolTip>
                             <ToolTip
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
