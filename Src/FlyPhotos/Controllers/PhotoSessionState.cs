@@ -10,6 +10,7 @@ internal class PhotoSessionState
     public DisplayLevel CurrentDisplayLevel { get; set; }
     public int PhotosCount { get; set; }
     public string FirstPhotoPath { get; init; } = string.Empty;
+    public bool FlyLaunchedExternally { get; set; }
 
     public void SetCurrentPhotoKeyAndListPosition(int newKey, int newPosition)
     {

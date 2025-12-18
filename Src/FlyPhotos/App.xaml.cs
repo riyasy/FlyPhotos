@@ -67,19 +67,19 @@ public partial class App
             initWindow.Closed += delegate
             {
                 if (File.Exists(initWindow.SelectedFile))
-                    LaunchPhotoDisplayWindow(initWindow.SelectedFile);
+                    LaunchPhotoDisplayWindow(initWindow.SelectedFile, false);
             };
 
         }
         else
         {
-            LaunchPhotoDisplayWindow(_selectedFileName);
+            LaunchPhotoDisplayWindow(_selectedFileName, true);
         }
     }
 
-    private void LaunchPhotoDisplayWindow(string selectedFileName)
+    private void LaunchPhotoDisplayWindow(string selectedFileName, bool extLaunch)
     {
-        _photoDisplayWindow = new PhotoDisplayWindow(selectedFileName);        
+        _photoDisplayWindow = new PhotoDisplayWindow(selectedFileName, extLaunch);        
         if (AppConfig.Settings.RememberLastMonitor) 
             Util.MoveWindowToMonitor(_photoDisplayWindow, AppConfig.Settings.LastUsedMonitorId);
         _photoDisplayWindow.Maximize();

@@ -103,7 +103,7 @@ internal partial class PhotoDisplayController
     {
         try
         {
-            var files = FileDiscoveryService.DiscoverFiles(selectedFileName);
+            var files = FileDiscoveryService.DiscoverFiles(selectedFileName, _photoSessionState.FlyLaunchedExternally);
 
             _photoSessionState.PhotosCount = files.Count;
 

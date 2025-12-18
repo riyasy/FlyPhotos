@@ -73,7 +73,7 @@ public sealed partial class PhotoDisplayWindow
     private Point _lastPoint;
     private bool _isDragging;
 
-    public PhotoDisplayWindow(string firstPhotoPath)
+    public PhotoDisplayWindow(string firstPhotoPath, bool extLaunch)
     {
         InitializeComponent();
         D2dCanvasThumbNail.Height = AppConfig.Settings.ThumbnailSize;
@@ -99,7 +99,7 @@ public sealed partial class PhotoDisplayWindow
         SetWindowTheme(AppConfig.Settings.Theme);
         DispatcherQueue.EnsureSystemDispatcherQueue();
 
-        var photoSessionState = new PhotoSessionState() { FirstPhotoPath = firstPhotoPath };
+        var photoSessionState = new PhotoSessionState() { FirstPhotoPath = firstPhotoPath, FlyLaunchedExternally = extLaunch };
         _thumbNailController = new ThumbNailController(D2dCanvasThumbNail, photoSessionState);
         _canvasController = new CanvasController(D2dCanvas, _thumbNailController, photoSessionState);
         _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, photoSessionState);
