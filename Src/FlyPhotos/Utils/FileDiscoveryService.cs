@@ -65,11 +65,7 @@ internal static class FileDiscoveryService
     private static List<string> ListFiles(string selectedFileName)
     {
         // 1. Attempt to get files from the active Explorer window.
-        List<string> files = [];
-        if (!App.Debug)
-        {
-            files = FindAllFilesFromExplorerWindowNative();
-        }
+        var files = FindAllFilesFromExplorerWindowNative();
 
         // 2. If explorer gives no files, fall back to reading from the directory.
         if (files.Count == 0)

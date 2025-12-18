@@ -154,8 +154,8 @@ internal static partial class Win32Methods
     /// The caller is responsible for destroying all icon handles returned by this function by calling the <see cref="DestroyIcon"/> function.
     /// To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>.
     /// </remarks>
-    [DllImport("shell32.dll", CharSet = CharSet.Auto)]
-    internal static extern uint ExtractIconEx(string lpszFile, int nIconIndex, IntPtr[] phiconLarge, IntPtr[] phiconSmall, uint nIcons);
+    [LibraryImport("shell32.dll", EntryPoint = "ExtractIconExW", StringMarshalling = StringMarshalling.Utf16)]
+    internal static partial uint ExtractIconEx(string lpszFile, int nIconIndex, IntPtr[] phiconLarge, IntPtr[] phiconSmall, uint nIcons);
 
     /// <summary>
     /// Imports the `DestroyIcon` function from `user32.dll`.
@@ -209,8 +209,8 @@ internal static partial class Win32Methods
     /// <returns>
     /// A handle to the window that has the specified class name and window name. If no such window exists, <see cref="IntPtr.Zero"/> is returned.
     /// </returns>
-    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-    internal static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+    [LibraryImport("user32.dll", EntryPoint = "FindWindowW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    internal static partial IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     /// <summary>
     /// Sends the specified message to a window or windows. This overload is used to send a <see cref="COPYDATASTRUCT"/> with the <c>WM_COPYDATA</c> message.
@@ -223,6 +223,6 @@ internal static partial class Win32Methods
     /// <returns>
     /// The return value specifies the result of the message processing; its value depends on the message sent. For <c>WM_COPYDATA</c>, the return value is typically the value returned by the receiving window procedure.
     /// </returns>
-    [DllImport("user32.dll", CharSet = CharSet.Auto)]
-    internal static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, ref COPYDATASTRUCT lParam);
+    [LibraryImport("user32.dll", EntryPoint = "SendMessageW")]
+    internal static partial IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, ref COPYDATASTRUCT lParam);
 }

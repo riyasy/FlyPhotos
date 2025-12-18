@@ -22,8 +22,6 @@ namespace FlyPhotos;
 /// </summary>
 public partial class App
 {
-    public static readonly bool Debug = false;
-
     private string _selectedFileName;
     private static Mutex _mutex;
     private PhotoDisplayWindow _photoDisplayWindow;
@@ -56,14 +54,6 @@ public partial class App
         else
         {
             _selectedFileName = GetFileNameFromCommandLine();
-        }
-
-
-        if (Debug)
-        {
-            //SelectedFileName = @"C:\Users\Riyas\Desktop\SingleGIF\output.gif";
-            _selectedFileName = @"C:\Users\Riyas\Desktop\TestImages\SVG\New folder\NewHomepage_Illustration_dark.svg";
-            //SelectedFileName = @"C:\Users\Riyas\Desktop\APNG\dancing-fruits.png";
         }
 
         AppConfig.Initialize();

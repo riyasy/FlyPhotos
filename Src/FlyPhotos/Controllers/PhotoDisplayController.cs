@@ -347,7 +347,7 @@ internal partial class PhotoDisplayController
 
             var currentKey = _photoSessionState.CurrentPhotoKey;
 
-            Photo? photo = null;
+            Photo? photo;
             if (initialFileListingCompleted)
                 _photos.TryGetValue(currentKey, out photo);
             else
