@@ -11,6 +11,8 @@
 #include <cstdint> // For uint8_t
 #include <libheif/heif.h>
 
+#pragma comment(lib, "heif.lib")
+
  /// @brief Converts a decoded `heif_image` into a raw 32-bit BGRA pixel buffer.
  /// @note This class is optimized for interoperability with Windows graphics APIs.
 class BGRAEncoder {

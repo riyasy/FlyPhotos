@@ -71,12 +71,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\Riyas\Documents\GitHub\TestHeif\vcpkg_installed\x64-windows\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Riyas\Documents\GitHub\TestHeif\vcpkg_installed\x64-windows\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)..\build_libheif\vcpkg_installed\x64-windows\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\build_libheif\vcpkg_installed\x64-windows\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\Riyas\Documents\GitHub\TestHeif\vcpkg_installed\x64-windows\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Riyas\Documents\GitHub\TestHeif\vcpkg_installed\x64-windows\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)..\build_libheif\vcpkg_installed\x64-windows\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\build_libheif\vcpkg_installed\x64-windows\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -90,7 +90,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>"C:\Users\Riyas\Documents\GitHub\TestHeif\vcpkg_installed\x64-windows\lib\heif.lib";%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>"$(ProjectDir)..\build_libheif\vcpkg_installed\x64-windows\lib\heif.lib";%(AdditionalDependencies)</AdditionalDependencies>
       <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
@@ -108,7 +108,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>"C:\Users\Riyas\Documents\GitHub\TestHeif\vcpkg_installed\x64-windows\lib\heif.lib";%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>"$(ProjectDir)..\build_libheif\vcpkg_installed\x64-windows\lib\heif.lib";%(AdditionalDependencies)</AdditionalDependencies>
       <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
@@ -125,7 +125,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>"C:\Users\Riyas\Documents\GitHub\TestHeif\vcpkg_installed\x64-windows\lib\heif.lib";%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
@@ -144,7 +144,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>"C:\Users\Riyas\Documents\GitHub\TestHeif\vcpkg_installed\x64-windows\lib\heif.lib";%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
