@@ -259,7 +259,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
             _canvasViewState.Scale = newScale;
             _canvasViewState.LastScaleTo = newScale;
             _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
-            ZoomChanged?.Invoke();
+            // ZoomChanged?.Invoke();
             IsAtOneToOne = Math.Abs(newScale - 1.0f) < 0.001f;
         }
         else if (oldImageSize.Width > 0 && oldImageSize.Height > 0 && oldImageSize != imageSize)
