@@ -141,6 +141,9 @@
                                         <ComboBoxItem>Retain Pan/Zoom from previous photo</ComboBoxItem>
                                     </ComboBox>
                                 </controls:SettingsCard>
+                                <controls:SettingsCard x:Name="SettingsCardShowZoomPercent" Header="Show Zoom percentage on screen">
+                                    <ToggleSwitch x:Name="ButtonShowZoomPercent" />
+                                </controls:SettingsCard>
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
                         <controls:SettingsCard

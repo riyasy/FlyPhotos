@@ -669,8 +669,11 @@ public sealed partial class PhotoDisplayWindow
 
     private void CanvasController_OnZoomChanged(int zoomPercent)
     {
-        TxtZoom.Text = $"{zoomPercent}%";
-        _inactivityFader.ReportActivity();
+        if (AppConfig.Settings.ShowZoomPercent)
+        {
+            TxtZoom.Text = $"{zoomPercent}%";
+            _inactivityFader.ReportActivity();
+        }
     }
 
     private void CanvasController_OnFitToScreenStateChanged(bool isFitted)

@@ -108,6 +108,7 @@ internal sealed partial class Settings
         ButtonOpenExitZoom.IsOn = AppConfig.Settings.OpenExitZoom;
         SliderFadeIntensity.Value = AppConfig.Settings.FadeIntensity;
         ButtonHighQualityInterpolation.IsOn = AppConfig.Settings.HighQualityInterpolation;
+        ButtonShowZoomPercent.IsOn = AppConfig.Settings.ShowZoomPercent;
         ButtonShowCheckeredBackground.IsOn = AppConfig.Settings.CheckeredBackground;
         SliderImageFitPercentage.Value = AppConfig.Settings.ImageFitPercentage;
         SliderTransparentBackgroundIntensity.Value = AppConfig.Settings.TransparentBackgroundIntensity;
@@ -133,6 +134,7 @@ internal sealed partial class Settings
         ButtonEnableAutoFade.Toggled += ButtonEnableAutoFade_OnToggled;
         SliderFadeIntensity.ValueChanged += SliderFadeIntensity_ValueChanged;
         ButtonHighQualityInterpolation.Toggled += ButtonHighQualityInterpolation_OnToggled;
+        ButtonShowZoomPercent.Toggled += ButtonShowZoomPercent_OnToggled;
         ButtonShowCheckeredBackground.Toggled += ButtonShowCheckeredBackground_OnToggled;
         SliderImageFitPercentage.ValueChanged += SliderImageFitPercentage_ValueChanged;
         SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
@@ -250,6 +252,12 @@ internal sealed partial class Settings
     private async void ButtonHighQualityInterpolation_OnToggled(object sender, RoutedEventArgs e)
     {
         AppConfig.Settings.HighQualityInterpolation = ButtonHighQualityInterpolation.IsOn;
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ButtonShowZoomPercent_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.ShowZoomPercent = ButtonShowZoomPercent.IsOn;
         await AppConfig.SaveAsync();
     }
 
