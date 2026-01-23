@@ -259,6 +259,13 @@ internal class CanvasController : ICanvasController
         _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
+    public void ZoomToHundred(Point anchor)
+    {
+        if (IsScreenEmpty()) return;
+        _canvasViewManager.ZoomToHundred(_d2dCanvas.GetSize(), anchor);
+        _currentRenderer?.RestartOffScreenDrawTimer();
+    }
+
     public void ZoomOutOnExit(double exitAnimationDuration)
     {
         _canvasViewManager.ZoomOutOnExit(exitAnimationDuration, _d2dCanvas.GetSize());

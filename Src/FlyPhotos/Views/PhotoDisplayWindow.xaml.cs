@@ -125,6 +125,7 @@ public sealed partial class PhotoDisplayWindow
         D2dCanvas.PointerPressed += D2dCanvas_PointerPressed;
         D2dCanvas.PointerMoved += D2dCanvas_PointerMoved;
         D2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
+        D2dCanvas.DoubleTapped += D2dCanvas_DoubleTapped;
         D2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;
 
         D2dCanvasThumbNail.PointerWheelChanged += ThumbNail_PointerWheelChanged;
@@ -141,6 +142,25 @@ public sealed partial class PhotoDisplayWindow
         _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
         _mouseAutoHider = new MouseAutoHider(MainLayout, TimeSpan.FromSeconds(1));
+    }
+
+    private void D2dCanvas_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
+    {
+        var point = e.GetPosition(D2dCanvas).AdjustForDpi(D2dCanvas);
+        // Only handle double click if inside image bounds
+        if (!_canvasController.IsPressedOnImage(point)) return;
+
+        // Toggle between 1:1 and Fit
+        // If currently one-to-one, then fit. Otherwise zoom to 100%.
+        // CanvasController raises events to update button states.
+        if (ButtonOneIsToOne.IsChecked == true)
+        {
+            _canvasController.FitToScreen(true);
+        }
+        else
+        {
+            _canvasController.ZoomToHundred(point);
+        }
     }
 
     #region Event Handlers
@@ -169,6 +189,7 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.OnZoomChanged -= CanvasController_OnZoomChanged;
         _canvasController.OnFitToScreenStateChanged -= CanvasController_OnFitToScreenStateChanged;        
         _canvasController.OnOneToOneStateChanged -= CanvasController_OnOneToOneStateChanged;
+        D2dCanvas.DoubleTapped -= D2dCanvas_DoubleTapped;
         ((FrameworkElement)Content).ActualThemeChanged -= PhotoDisplayWindow_ActualThemeChanged;
 
         await _canvasController.DisposeAsync();

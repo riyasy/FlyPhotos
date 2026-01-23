@@ -488,6 +488,38 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     }
 
     /// <summary>
+    /// Zoom to 100% but center the view on a specific anchor point (screen coordinates).
+    /// </summary>
+    public void ZoomToHundred(Size canvasSize, Point anchor)
+    {
+        const float targetScale = 1.0f;
+        _canvasViewState.LastScaleTo = 1.0f;
+
+        // Compute the target image position so that the provided anchor remains at the same
+        // screen coordinate after scaling to 1:1. Use the same formula as in precision zoom.
+        var oldScale = _canvasViewState.Scale;
+        // If already at 1:1, just center on anchor
+        if (Math.Abs(oldScale - targetScale) < 0.0001f)
+        {
+            StartPanAndZoomAnimation(targetScale, anchor);
+        }
+        else
+        {
+            var newPosX = anchor.X - (targetScale / oldScale) * (anchor.X - _canvasViewState.ImagePos.X);
+            var newPosY = anchor.Y - (targetScale / oldScale) * (anchor.Y - _canvasViewState.ImagePos.Y);
+            var targetPos = new Point(newPosX, newPosY);
+            StartPanAndZoomAnimation(targetScale, targetPos);
+        }
+
+        var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
+        var screenFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+        IsFittedToScreen = Math.Abs(targetScale - screenFitScale) < 0.001f;
+        IsAtOneToOne = true;
+        _isStateModifiedByUser = true;
+        CheckIfViewBackToDefaultState(targetScale, canvasSize, imageSize);
+    }
+
+    /// <summary>
     /// Pans the image by the specified delta.
     /// </summary>
     public void Pan(double dx, double dy)
