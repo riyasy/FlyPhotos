@@ -5,51 +5,53 @@
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 		<RootNamespace>FlyPhotos</RootNamespace>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<Platforms>x86;x64;ARM64</Platforms>
-		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+		<Platforms>x64;ARM64</Platforms>
+		<RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+		
 		<PublishProfile>Properties\PublishProfiles\win-$(Platform).pubxml</PublishProfile>
 		<UseWinUI>true</UseWinUI>
-		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-		<PackageCertificateThumbprint>16DD4A33999E587FDF9D20E2A50636BE04BD85F7</PackageCertificateThumbprint>
-		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>		
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<WindowsPackageType>None</WindowsPackageType>
+		
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
 		<PublishAot>true</PublishAot>
 		<SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
 		<InvariantGlobalization>true</InvariantGlobalization>
+		<GenerateTestArtifacts>False</GenerateTestArtifacts>
+		<NoWarn>$(NoWarn);CA1416</NoWarn>
+		
+		<GenerateTemporaryStoreCertificate>True</GenerateTemporaryStoreCertificate>	
+
+		<!-- MSIX Side Loading Related -->
 		<GenerateAppInstallerFile>True</GenerateAppInstallerFile>
+		<PackageCertificateThumbprint>16DD4A33999E587FDF9D20E2A50636BE04BD85F7</PackageCertificateThumbprint>		
+		<AppInstallerUri>C:\Users\Riyas\Documents\GitHub\FlyPhotos\Src\FlyPhotos\MSIX_FOLDER</AppInstallerUri>
+		<HoursBetweenUpdateChecks>672</HoursBetweenUpdateChecks>		
+
+		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
 		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
 		<AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
 		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
-		<GenerateTestArtifacts>True</GenerateTestArtifacts>
 		<AppxBundle>Never</AppxBundle>
-		<AppInstallerUri>C:\Users\Riyas\Documents\GitHub\FlyPhotos\Src\FlyPhotos\MSIX_FOLDER</AppInstallerUri>
-		<HoursBetweenUpdateChecks>672</HoursBetweenUpdateChecks>
-		<NoWarn>$(NoWarn);CA1416</NoWarn>
+		
 	</PropertyGroup>
 
 	<Target Name="CopyYourFolderAfterPublish" AfterTargets="Publish">
 		<Exec Command="XCOPY $(ProjectDir)Assets\*.* $(PublishDir)\Assets\ /S /Y" />
 	</Target>
+  <ItemGroup>
+    <Content Include="Assets\SplashScreen.scale-200.png" />
+    <Content Include="Assets\LockScreenLogo.scale-200.png" />
+    <Content Include="Assets\Square150x150Logo.scale-200.png" />
+    <Content Include="Assets\Square44x44Logo.scale-200.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+    <Content Include="Assets\StoreLogo.scale-200.png" />
+    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+  </ItemGroup>
 
-
-	<ItemGroup>
-		<None Remove="Views\InitWindow.xaml" />
-		<None Remove="Views\Settings.xaml" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Include="Assets\SplashScreen.scale-200.png" />
-		<Content Include="Assets\LockScreenLogo.scale-200.png" />
-		<Content Include="Assets\Square150x150Logo.scale-200.png" />
-		<Content Include="Assets\Square44x44Logo.scale-200.png" />
-		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
-	</ItemGroup>
-
-	<ItemGroup>
+	<ItemGroup>		
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
 		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.10.2" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.2" />
@@ -105,12 +107,6 @@
 		<None Update="NLog.config">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-		<Page Update="Views\InitWindow.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-		<Page Update="Views\Settings.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
 	</ItemGroup>
 	<ItemGroup>
 		<Content Remove="Assets\transparent.cur" />
@@ -141,7 +137,7 @@
 	<!-- 4. PUBLISH LOGIC (Unpackaged):
             'dotnet publish' ignores the Link attribute. 
             This target manually copies them to the root of the publish folder. -->
-	<Target Name="FlattenDllsOnPublish" AfterTargets="Publish" Condition="'$(WindowsPackageType)'!='MSIX'">
+	<Target Name="FlattenDllsOnPublish" AfterTargets="Publish" Condition="'$(WindowsPackageType)'=='None'">
 		<Copy SourceFiles="@(ExternalDlls)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
 	</Target>
 
@@ -153,16 +149,10 @@
 	<PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
 		<HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-		<WarningsAsErrors>NU1605</WarningsAsErrors>
-	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 		<WarningsAsErrors>NU1605</WarningsAsErrors>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-		<WarningsAsErrors>NU1605</WarningsAsErrors>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
 		<WarningsAsErrors>NU1605</WarningsAsErrors>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

@@ -8,15 +8,15 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="FlyPhotos"
-    Publisher="CN=Riyas"
-    Version="2.5.3.0" />
+    Name="RYFTools.FlyPhotos"
+    Publisher="CN=44A50C10-C1BE-4575-B17F-07954C8C2229"
+    Version="2.5.13.0" />
 
-  <mp:PhoneIdentity PhoneProductId="390b4158-350f-4215-9419-541715ee51b0" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="e339cc4b-62cb-4c55-8824-4d81b3d4c0b6" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>FlyPhotos</DisplayName>
-    <PublisherDisplayName>Riyas</PublisherDisplayName>
+    <PublisherDisplayName>RYF Tools</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
