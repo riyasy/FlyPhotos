@@ -12,7 +12,7 @@
 		<UseWinUI>true</UseWinUI>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>		
 		<EnableMsixTooling>true</EnableMsixTooling>
-		<WindowsPackageType>None</WindowsPackageType>
+		<!--WindowsPackageType>None</WindowsPackageType-->
 		
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>

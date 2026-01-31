@@ -34,10 +34,10 @@
                             </StackPanel>
                         </Flyout>
                     </ScrollViewer.Resources>
-                    <StackPanel Margin="0,0,15,0" Orientation="Vertical">
+                    <StackPanel Margin="0,5,15,0" Orientation="Vertical">
                         <controls:SettingsCard
                             x:Name="SettingsCardDeveloperSupport"
-                            Margin="0,10,0,0"
+                            Margin="0,5,0,0"
                             Description="Make Fly more awesome."
                             Header="Support Flyphotos"
                             HeaderIcon="{ui:FontIcon Glyph=&#xEB51;}">
@@ -426,7 +426,7 @@
                         Description="Current version is 2.5.13"
                         Header="Current Version"
                         HeaderIcon="{ui:FontIcon Glyph=&#xF133;}">
-                        <HyperlinkButton Content="Check latest version" NavigateUri="https://github.com/riyasy/FlyPhotos/releases" />
+                        <HyperlinkButton x:Name="BtnCheckVersion" Content="Check latest version" NavigateUri="https://github.com/riyasy/FlyPhotos/releases" />
                     </controls:SettingsCard>
                     <controls:SettingsCard
                         x:Name="SettingsCardSourceCode"

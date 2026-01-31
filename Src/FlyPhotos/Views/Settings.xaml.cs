@@ -155,6 +155,12 @@ internal sealed partial class Settings
         if (ComboMouseWheelBehaviourInfo.Description is string desc)
             ComboMouseWheelBehaviourInfo.Description = desc.Replace("%%", Environment.NewLine);
 
+        if (PathResolver.IsPackagedApp)
+        {
+            SettingsCardDeveloperSupport.Visibility = Visibility.Collapsed;
+            BtnCheckVersion.Visibility = Visibility.Collapsed;
+        }
+
     }
 
     private async void ButtonEnableExternalShortcut_OnToggled(object sender, RoutedEventArgs e)
