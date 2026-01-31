@@ -63,7 +63,5 @@ namespace FlyPhotos.Data
                                   $"{Environment.NewLine}WinUIEx - https://github.com/dotMorten/WinUIEx" +
                                   $"{Environment.NewLine}nlog - https://github.com/NLog";
 
-        public static string CodecDisclaimer = $"This program doesn't install any codecs and uses codecs already present in the system.{Environment.NewLine}" +
-                                  $"{Environment.NewLine}{Util.GetExtensionsDisplayString()}";
     }
 }

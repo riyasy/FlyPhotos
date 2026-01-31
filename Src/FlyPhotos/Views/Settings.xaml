@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:CommunityToolkit.WinUI"
+    xmlns:data="using:FlyPhotos.Data"
     mc:Ignorable="d">
     <Window.SystemBackdrop>
         <MicaBackdrop />
@@ -411,11 +412,27 @@
             </PivotItem>
             <PivotItem Header="Codecs">
                 <ScrollViewer>
-                    <TextBlock
-                        x:Name="TextBoxCodecs"
-                        Margin="0,5,0,0"
-                        Style="{StaticResource BodyTextBlockStyle}"
-                        TextWrapping="Wrap" />
+                    <ListView x:Name="ListViewCodecs" Margin="0,5,0,0">
+                        <ListView.HeaderTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="*,120,2*" Padding="16,0,12,0">
+                                    <TextBlock Text="Codec" FontWeight="Bold" />
+                                    <TextBlock Grid.Column="1" Text="Type" FontWeight="Bold" />
+                                    <TextBlock Grid.Column="2" Text="Extensions" FontWeight="Bold" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.HeaderTemplate>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="data:CodecInfo">
+                                <Grid ColumnDefinitions="*,120,2*" Padding="4">
+                                    <TextBlock Text="{x:Bind FriendlyName}" />
+                                    <TextBlock Grid.Column="1" Text="{x:Bind Type}" />
+                                    <TextBlock Grid.Column="2" Text="{x:Bind ExtensionsDisplay}" TextWrapping="Wrap" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </ScrollViewer>
             </PivotItem>
             <PivotItem Header="About">

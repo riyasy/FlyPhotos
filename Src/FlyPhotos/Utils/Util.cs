@@ -34,15 +34,10 @@ internal static class Util
 
     static Util()
     {
-        _codecInfoList = NativeWrapper.GetWicDecoders();
+        _codecInfoList = GetWicCodecs();
+        _codecInfoList.AddRange(GetFlyCodecs());
         foreach (var codecInfo in _codecInfoList) 
             SupportedExtensions.UnionWith(codecInfo.FileExtensions);
-        SupportedExtensions.Add(".PSD");
-        SupportedExtensions.Add(".SVG");
-        SupportedExtensions.Add(".HEIC");
-        SupportedExtensions.Add(".HEIF");
-        SupportedExtensions.Add(".HIF");
-        SupportedExtensions.Add(".AVIF");
     }
 
     public static int FindSelectedFileIndex(string selectedFileName, List<string> files)
@@ -59,17 +54,23 @@ internal static class Util
         return curIdx;
     }
 
-    public static string GetExtensionsDisplayString()
+    public static IReadOnlyList<CodecInfo> GetAllCodecs()
     {
-        var sb = new StringBuilder();
-        _codecInfoList ??= NativeWrapper.GetWicDecoders();
+        return _codecInfoList ?? [];
+    }
 
-        foreach (var codec in _codecInfoList)
-        {
-            sb.Append(Environment.NewLine + codec.FriendlyName + Environment.NewLine);
-            sb.Append("    " + string.Join(", ", codec.FileExtensions) + Environment.NewLine);
-        }
-        return sb.ToString();
+    private static List<CodecInfo> GetWicCodecs()
+    {
+        return NativeWrapper.GetWicDecoders() ?? new List<CodecInfo>();
+    }
+
+    private static List<CodecInfo> GetFlyCodecs()
+    {
+        var list = new List<CodecInfo>();
+        list.Add(new CodecInfo { FriendlyName = "PSD Decoder", Type = "Fly", FileExtensions = [".PSD"] });
+        list.Add(new CodecInfo { FriendlyName = "SVG Decoder", Type = "Fly", FileExtensions = [".SVG"] });
+        list.Add(new CodecInfo { FriendlyName = "HEIC Decoder", Type = "Fly", FileExtensions = [".HEIC", ".HEIF", ".HIF", ".AVIF"] });
+        return list;
     }
 
     public static VirtualKey GetKeyThatProduces(char character)

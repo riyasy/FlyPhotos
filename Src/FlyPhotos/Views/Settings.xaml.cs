@@ -150,7 +150,14 @@ internal sealed partial class Settings
 
         SettingsCardKeyboardShortCuts.Description = Constants.ShortCuts;
         SettingsCardCredits.Description = Constants.Credits;
-        TextBoxCodecs.Text = Constants.CodecDisclaimer;
+        TextBoxCodecsChanged();
+
+        // Initialize codec list view
+        try
+        {
+            ListViewCodecs.ItemsSource = Util.GetAllCodecs();
+        }
+        catch { }
 
         if (ComboMouseWheelBehaviourInfo.Description is string desc)
             ComboMouseWheelBehaviourInfo.Description = desc.Replace("%%", Environment.NewLine);
@@ -161,6 +168,11 @@ internal sealed partial class Settings
             BtnCheckVersion.Visibility = Visibility.Collapsed;
         }
 
+    }
+
+    private void TextBoxCodecsChanged()
+    {
+        // keep the disclaimer in case it's used elsewhere; nothing to do here now
     }
 
     private async void ButtonEnableExternalShortcut_OnToggled(object sender, RoutedEventArgs e)
@@ -192,8 +204,7 @@ internal sealed partial class Settings
         AppConfig.Settings.PanZoomBehaviourOnNavigation = panZoomEnum;
         await AppConfig.SaveAsync();
     }
-
-
+    
     private async void ButtonShowCacheStatusExpander_OnToggled(object s, RoutedEventArgs e)
     {
         AppConfig.Settings.ShowCacheStatus = ButtonShowCacheStatusExpander.IsOn;

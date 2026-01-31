@@ -17,4 +17,14 @@ public class CodecInfo
     /// </summary>
     public List<string> FileExtensions { get; init; } = [];
 
+    /// <summary>
+    /// Type of the codec (e.g., "Inbuilt", "Fly").
+    /// </summary>
+    public string Type { get; init; } = string.Empty;
+
+    /// <summary>
+    /// A comma-separated display string of extensions.
+    /// </summary>
+    public string ExtensionsDisplay => FileExtensions == null ? string.Empty : string.Join(", ", FileExtensions);
+
 }
