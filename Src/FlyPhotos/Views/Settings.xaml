@@ -4,9 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:data="using:FlyPhotos.Data"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:CommunityToolkit.WinUI"
-    xmlns:data="using:FlyPhotos.Data"
     mc:Ignorable="d">
     <Window.SystemBackdrop>
         <MicaBackdrop />
@@ -412,27 +412,42 @@
             </PivotItem>
             <PivotItem Header="Codecs">
                 <ScrollViewer>
-                    <ListView x:Name="ListViewCodecs" Margin="0,5,0,0">
-                        <ListView.HeaderTemplate>
-                            <DataTemplate>
-                                <Grid ColumnDefinitions="*,120,2*" Padding="16,0,12,0">
-                                    <TextBlock Text="Codec" FontWeight="Bold" />
-                                    <TextBlock Grid.Column="1" Text="Type" FontWeight="Bold" />
-                                    <TextBlock Grid.Column="2" Text="Extensions" FontWeight="Bold" />
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.HeaderTemplate>
+                    <StackPanel Margin="0,5,15,0" Orientation="Vertical">
+                        <TextBlock
+                            Margin="0,10,0,0"
+                            Style="{StaticResource BodyTextBlockStyle}"
+                            Text="Fly uses Windows Inbuilt Imaging Component (WIC) codecs mostly." />
+                        <ListView x:Name="ListViewCodecs" Margin="0,10,0,0">
+                            <ListView.HeaderTemplate>
+                                <DataTemplate>
+                                    <Grid Padding="16,0,12,0" ColumnDefinitions="*,120,2*">
+                                        <TextBlock FontWeight="Bold" Text="Codec" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            FontWeight="Bold"
+                                            Text="Type" />
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            FontWeight="Bold"
+                                            Text="Extensions" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.HeaderTemplate>
 
-                        <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="data:CodecInfo">
-                                <Grid ColumnDefinitions="*,120,2*" Padding="4">
-                                    <TextBlock Text="{x:Bind FriendlyName}" />
-                                    <TextBlock Grid.Column="1" Text="{x:Bind Type}" />
-                                    <TextBlock Grid.Column="2" Text="{x:Bind ExtensionsDisplay}" TextWrapping="Wrap" />
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="data:CodecInfo">
+                                    <Grid Padding="4" ColumnDefinitions="*,120,2*">
+                                        <TextBlock Text="{x:Bind FriendlyName}" />
+                                        <TextBlock Grid.Column="1" Text="{x:Bind Type}" />
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            Text="{x:Bind ExtensionsDisplay}"
+                                            TextWrapping="Wrap" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </StackPanel>
                 </ScrollViewer>
             </PivotItem>
             <PivotItem Header="About">
@@ -443,7 +458,10 @@
                         Description="Current version is 2.5.13"
                         Header="Current Version"
                         HeaderIcon="{ui:FontIcon Glyph=&#xF133;}">
-                        <HyperlinkButton x:Name="BtnCheckVersion" Content="Check latest version" NavigateUri="https://github.com/riyasy/FlyPhotos/releases" />
+                        <HyperlinkButton
+                            x:Name="BtnCheckVersion"
+                            Content="Check latest version"
+                            NavigateUri="https://github.com/riyasy/FlyPhotos/releases" />
                     </controls:SettingsCard>
                     <controls:SettingsCard
                         x:Name="SettingsCardSourceCode"
@@ -461,16 +479,14 @@
                         HeaderIcon="{ui:FontIcon Glyph=&#xE730;}">
                         <HyperlinkButton Content="Go to bug page in repo" NavigateUri="https://github.com/riyasy/FlyPhotos/issues" />
                     </controls:SettingsCard>
-                    <TextBlock
-                        Margin="0,5,0,0"
-                        Style="{StaticResource SubtitleTextBlockStyle}"
-                        Text="Credits" />
                     <controls:SettingsCard
                         x:Name="SettingsCardCredits"
                         Margin="0,5,0,0"
-                        Description=""
+                        Description="Fly thanks Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog, and WinUIEx."
                         Header="Credits"
-                        HeaderIcon="{ui:FontIcon Glyph=&#xE728;}" />
+                        HeaderIcon="{ui:FontIcon Glyph=&#xE728;}">
+                        <HyperlinkButton Click="ButtonThirdPartyLicenses_Click" Content="View 3rd party licenses" />
+                    </controls:SettingsCard>
                 </StackPanel>
             </PivotItem>
         </Pivot>

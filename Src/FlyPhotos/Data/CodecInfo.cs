@@ -18,7 +18,7 @@ public class CodecInfo
     public List<string> FileExtensions { get; init; } = [];
 
     /// <summary>
-    /// Type of the codec (e.g., "Inbuilt", "Fly").
+    /// Type of the codec (e.g., "WIC", "Fly").
     /// </summary>
     public string Type { get; init; } = string.Empty;
 

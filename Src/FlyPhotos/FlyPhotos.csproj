@@ -11,8 +11,9 @@
 		<PublishProfile>Properties\PublishProfiles\win-$(Platform).pubxml</PublishProfile>
 		<UseWinUI>true</UseWinUI>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>		
+		
 		<EnableMsixTooling>true</EnableMsixTooling>
-		<!--WindowsPackageType>None</WindowsPackageType-->
+		<!-- WindowsPackageType>None</WindowsPackageType -->
 		
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
@@ -22,20 +23,17 @@
 		<GenerateTestArtifacts>False</GenerateTestArtifacts>
 		<NoWarn>$(NoWarn);CA1416</NoWarn>
 		
-		<GenerateTemporaryStoreCertificate>True</GenerateTemporaryStoreCertificate>	
-
-		<!-- MSIX Side Loading Related -->
-		<GenerateAppInstallerFile>True</GenerateAppInstallerFile>
-		<PackageCertificateThumbprint>16DD4A33999E587FDF9D20E2A50636BE04BD85F7</PackageCertificateThumbprint>		
-		<AppInstallerUri>C:\Users\Riyas\Documents\GitHub\FlyPhotos\Src\FlyPhotos\MSIX_FOLDER</AppInstallerUri>
-		<HoursBetweenUpdateChecks>672</HoursBetweenUpdateChecks>		
-
-		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-		<AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
+		<GenerateTemporaryStoreCertificate>True</GenerateTemporaryStoreCertificate>		
+		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>		
+		<AppxPackageSigningEnabled>False</AppxPackageSigningEnabled>		
+		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>		
+		<AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>		
+		<AppxBundle>Never</AppxBundle>		
+		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>		
 		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
-		<AppxBundle>Never</AppxBundle>
-		
+		<!--PackageCertificateThumbprint>16DD4A33999E587FDF9D20E2A50636BE04BD85F7</PackageCertificateThumbprint-->
+
+
 	</PropertyGroup>
 
 	<Target Name="CopyYourFolderAfterPublish" AfterTargets="Publish">
@@ -102,10 +100,13 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="FlyContextMenuHelper.exe">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</None>
 		<None Update="NLog.config">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="ThirdPartyNotices.txt">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 	<ItemGroup>

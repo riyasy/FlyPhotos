@@ -55,13 +55,5 @@ namespace FlyPhotos.Data
                                             Environment.NewLine +
                                             $"{Environment.NewLine}Esc : Close Settings or Exit App";
 
-        public static string Credits = $"Uses packages from " +
-                                  $"{Environment.NewLine}libheif (For HEIC) - https://github.com/strukturag/libheif " +
-                                  $"{Environment.NewLine}Magick.NET (For PSD) - https://github.com/dlemstra/Magick.NET" +
-                                  $"{Environment.NewLine}SkiaSharp (For SVG) - https://github.com/mono/SkiaSharp" +
-                                  $"{Environment.NewLine}MagicScaler - https://github.com/saucecontrol/PhotoSauce" +
-                                  $"{Environment.NewLine}WinUIEx - https://github.com/dotMorten/WinUIEx" +
-                                  $"{Environment.NewLine}nlog - https://github.com/NLog";
-
     }
 }

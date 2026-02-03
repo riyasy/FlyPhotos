@@ -132,7 +132,7 @@ public static class NativeWrapper
             var codec = new CodecInfo
             {
                 FriendlyName = friendlyName,
-                Type = "Inbuilt WIC",
+                Type = "WIC",
                 // The extensions string from C++ is comma-separated (e.g., ".jpg,.jpeg,.jpe").// Split it and convert to uppercase for consistency.
                 FileExtensions = [.. extensions.ToUpperInvariant().Split([','], StringSplitOptions.RemoveEmptyEntries)]
             };

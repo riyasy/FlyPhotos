@@ -1,12 +1,4 @@
 ﻿#nullable enable
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Windows.Storage.Pickers;
-using Windows.System;
 using FlyPhotos.AppSettings;
 using FlyPhotos.Data;
 using FlyPhotos.Utils;
@@ -18,6 +10,15 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Windows.Storage;
+using Windows.Storage.Pickers;
+using Windows.System;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -149,7 +150,6 @@ internal sealed partial class Settings
         ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
 
         SettingsCardKeyboardShortCuts.Description = Constants.ShortCuts;
-        SettingsCardCredits.Description = Constants.Credits;
         TextBoxCodecsChanged();
 
         // Initialize codec list view
@@ -438,6 +438,13 @@ internal sealed partial class Settings
                 AppConfig.Settings.ExternalApp4 = exe;
                 break;
         }
+    }
+
+    private async void ButtonThirdPartyLicenses_Click(object sender, RoutedEventArgs e)
+    {
+        var filePath = Path.Combine(AppContext.BaseDirectory, "ThirdPartyNotices.txt");
+        var file = await StorageFile.GetFileFromPathAsync(filePath);
+        await Launcher.LaunchFileAsync(file);
     }
 
     private async Task<string?> PickExeAsync()
