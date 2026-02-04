@@ -24,7 +24,7 @@ namespace FlyPhotos.Utils
     /// Usage:
     /// - Call <see cref="ShowContextMenu(Window, string)"/> to show the menu for a given file
     ///   at the current mouse position.
-    /// - If <see cref="AppConfig.Settings.UseExternalExeForContextMenu"/> is true, the
+    /// - If <see cref="AppSettings.UseExternalExeForContextMenu"/> is true, the
     ///   helper will attempt to locate or launch the external helper process and send
     ///   the request via WM_COPYDATA. Otherwise it will call the native wrapper directly.
     /// </remarks>

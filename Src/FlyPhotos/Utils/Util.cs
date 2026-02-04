@@ -16,7 +16,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Graphics;
 using Windows.System;
@@ -28,7 +27,7 @@ namespace FlyPhotos.Utils;
 internal static class Util
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-    private static List<CodecInfo>? _codecInfoList;
+    private static readonly List<CodecInfo>? _codecInfoList;
 
     public static HashSet<string> SupportedExtensions { get; } = new(StringComparer.OrdinalIgnoreCase);
 
@@ -61,15 +60,17 @@ internal static class Util
 
     private static List<CodecInfo> GetWicCodecs()
     {
-        return NativeWrapper.GetWicDecoders() ?? new List<CodecInfo>();
+        return NativeWrapper.GetWicDecoders() ?? [];
     }
 
     private static List<CodecInfo> GetFlyCodecs()
     {
-        var list = new List<CodecInfo>();
-        list.Add(new CodecInfo { FriendlyName = "PSD Decoder", Type = "Fly", FileExtensions = [".PSD"] });
-        list.Add(new CodecInfo { FriendlyName = "SVG Decoder", Type = "Fly", FileExtensions = [".SVG"] });
-        list.Add(new CodecInfo { FriendlyName = "HEIC Decoder", Type = "Fly", FileExtensions = [".HEIC", ".HEIF", ".HIF", ".AVIF"] });
+        var list = new List<CodecInfo>
+        {
+            new CodecInfo { FriendlyName = "PSD Decoder", Type = "Fly", FileExtensions = [".PSD"] },
+            new CodecInfo { FriendlyName = "SVG Decoder", Type = "Fly", FileExtensions = [".SVG"] },
+            new CodecInfo { FriendlyName = "HEIC Decoder", Type = "Fly", FileExtensions = [".HEIC", ".HEIF", ".HIF", ".AVIF"] }
+        };
         return list;
     }
 

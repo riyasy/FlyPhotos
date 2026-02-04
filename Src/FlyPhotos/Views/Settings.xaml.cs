@@ -153,11 +153,7 @@ internal sealed partial class Settings
         TextBoxCodecsChanged();
 
         // Initialize codec list view
-        try
-        {
-            ListViewCodecs.ItemsSource = Util.GetAllCodecs();
-        }
-        catch { }
+        ListViewCodecs.ItemsSource = Util.GetAllCodecs();
 
         if (ComboMouseWheelBehaviourInfo.Description is string desc)
             ComboMouseWheelBehaviourInfo.Description = desc.Replace("%%", Environment.NewLine);

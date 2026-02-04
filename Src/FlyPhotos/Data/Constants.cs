@@ -1,5 +1,4 @@
-﻿using FlyPhotos.Utils;
-using System;
+﻿using System;
 
 namespace FlyPhotos.Data
 {
