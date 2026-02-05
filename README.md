@@ -29,13 +29,14 @@ Watch Fly Photos in action [Old Video]:
 | -- | -- | -- |
 | **Price** | 🪙 Paid | 🆓 Free |
 | **Updates** | ✅ Seamless auto-updates | ❌ User-managed |
-| **Bug Fixes** | ✅ Available as soon as fixed | ❌ Available in official releases only |
+| **Bug Fixes** | ✅ Can be available faster | ❌ Available in official releases only |
+| **Security** | ✅ Signed and certified by Microsoft | ❌ Not signed |
 
 ---
 ## 📥 Installation
 
 - Option 1 : [**Install from Microsoft Store**](https://apps.microsoft.com/detail/9pmsk128v1qt?launch=true&cid=GitHubRelease&mode=full)
-- Option 2 : Download and install MSI from Github [**Releases Page**](https://github.com/riyasy/FlyPhotos/releases).  
+- Option 2 : Download and install MSI from Github [**Releases Page**](https://github.com/riyasy/FlyPhotos/releases)
 
 
 ## 🚀 Getting Started
