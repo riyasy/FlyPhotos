@@ -16,7 +16,7 @@ public class AppSettings
         set => ThemeAsString = value.ToString();
     }
 
-    [JsonPropertyName("WindowBackdrop")] public string WindowBackdropAsString { get; set; } = "Default";
+    [JsonPropertyName("WindowBackdrop")] public string WindowBackdropAsString { get; set; } = "Transparent";
 
     [JsonIgnore]
     public WindowBackdropType WindowBackdrop

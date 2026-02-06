@@ -10,8 +10,8 @@
 		
 		<PublishProfile>Properties\PublishProfiles\win-$(Platform).pubxml</PublishProfile>
 		<UseWinUI>true</UseWinUI>
-		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>		
-		
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<!-- WindowsPackageType>None</WindowsPackageType -->
 		
@@ -100,7 +100,7 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="FlyContextMenuHelper.exe">
-		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="NLog.config">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -141,6 +141,7 @@
 	<Target Name="FlattenDllsOnPublish" AfterTargets="Publish" Condition="'$(WindowsPackageType)'=='None'">
 		<Copy SourceFiles="@(ExternalDlls)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
 	</Target>
+
 
 	<!-- 
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution 
