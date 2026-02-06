@@ -7,9 +7,9 @@ Built with **WinUI 3, WinRT, and Win2D**, it delivers smooth animations, instant
 
 ---
 
-Watch Fly Photos in action [Old Video]:  
+Watch Fly Photos in action:  
 
-[![Fly Photos](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DQkL2-WYY2Ic%26t)](https://www.youtube.com/watch?v=QkL2-WYY2Ic&t)
+[![Fly Photos](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DHi0H9k67kvA)](https://www.youtube.com/watch?v=Hi0H9k67kvA)
 
 ---
 
