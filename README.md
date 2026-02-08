@@ -1,4 +1,4 @@
-# Fly Photos
+# Fly Photos [![Github All Releases](https://img.shields.io/github/downloads/riyasy/Flyphotos/total.svg)]()
 
 Fly Photos is one of the fastest photo viewers for Windows, designed as a modern replacement for the now-discontinued Google Picasa Photo Viewer.  
 Built with **WinUI 3, WinRT, and Win2D**, it delivers smooth animations, instant startup, and an efficient viewing experience.  
@@ -7,9 +7,9 @@ Built with **WinUI 3, WinRT, and Win2D**, it delivers smooth animations, instant
 
 ---
 
-Watch Fly Photos in action [Old Video]:  
+Watch Fly Photos in action:  
 
-[![Fly Photos](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DQkL2-WYY2Ic%26t)](https://www.youtube.com/watch?v=QkL2-WYY2Ic&t)
+[![Fly Photos](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DncWzt-ZoIq4)](https://www.youtube.com/watch?v=ncWzt-ZoIq4)
 
 ---
 
@@ -29,7 +29,6 @@ Watch Fly Photos in action [Old Video]:
 | -- | -- | -- |
 | **Price** | 🪙 Paid | 🆓 Free |
 | **Updates** | ✅ Seamless auto-updates | ❌ User-managed |
-| **Bug Fixes** | ✅ Can be available faster | ❌ Available in official releases only |
 | **Security** | ✅ Signed and certified by Microsoft | ❌ Not signed |
 
 ---
