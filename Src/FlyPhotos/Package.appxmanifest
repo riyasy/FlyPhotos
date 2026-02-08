@@ -25,9 +25,11 @@
     <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
   </Dependencies>
 
-  <Resources>
-    <Resource Language="x-generate"/>
-  </Resources>
+	<Resources>
+	  <Resource Language="en-US"/>
+	  <Resource Language="ml-IN"/>
+	  <Resource Language="de-DE"/>
+	</Resources>
 
   <Applications>
     <Application Id="App"

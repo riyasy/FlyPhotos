@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="TitleTextBlock.Text" xml:space="preserve">
+    <value>Fly Photos - ഫോട്ടോ തിരഞ്ഞെടുക്കുക</value>
+  </data>
+  <data name="DropAreaRun.Text" xml:space="preserve">
+    <value>ഒരു ചിത്രം വലിച്ചിടുക (Drag &amp; Drop), അല്ലെങ്കിൽ</value>
+  </data>
+  <data name="OpenFileHyperlink.Text" xml:space="preserve">
+    <value>ഫയൽ തുറക്കുക</value>
+  </data>
+  <data name="RightClickInstruction.Text" xml:space="preserve">
+    <value>ഒരു ചിത്രത്തിൽ റൈറ്റ് ക്ലിക്ക് (Right-click) ചെയ്ത് "Open With" &gt; "Fly Photos" തിരഞ്ഞെടുത്ത് ഈ ആപ്പ് ഉപയോഗിക്കാവുന്നതാണ്.</value>
+  </data>
+  <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
+    <value>ഒരു ചിത്രത്തിൽ റൈറ്റ് ക്ലിക്ക് ചെയ്ത് "Open With" &gt; "Choose another app" തിരഞ്ഞെടുത്ത്, "Fly Photos" സെലക്ട് ചെയ്ത ശേഷം "Always" ബട്ടൺ അമർത്തി FlyPhotos-നെ ഡിഫോൾട്ട് വ്യൂവർ ആയി ക്രമീകരിക്കാം.</value>
+  </data>
+  <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
+    <value>Windows 11-ലെ "Settings" ആപ്പിലുള്ള "Apps &gt; Default Apps" പേജ് വഴിയും FlyPhotos-നെ ഡിഫോൾട്ട് വ്യൂവർ ആയി ക്രമീകരിക്കാം.</value>
+  </data>
+  <data name="ButtonBackToolTip.Content" xml:space="preserve">
+    <value>മുൻപത്തെ ഫോട്ടോ</value>
+  </data>
+  <data name="ButtonRotateToolTip.Content" xml:space="preserve">
+    <value>ഫോട്ടോ തിരിക്കുക</value>
+  </data>
+  <data name="ButtonNextToolTip.Content" xml:space="preserve">
+    <value>അടുത്ത ഫോട്ടോ</value>
+  </data>
+  <data name="ButtonPrevPageToolTip.Content" xml:space="preserve">
+    <value>മുൻപത്തെ പേജ്</value>
+  </data>
+  <data name="ButtonNextPageToolTip.Content" xml:space="preserve">
+    <value>അടുത്ത പേജ്</value>
+  </data>
+  <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
+    <value>പ്രദർശന സ്ഥലത്തിന് അനുയോജ്യമാക്കുക</value>
+  </data>
+  <data name="ButtonOneIsToOneToolTip.Content" xml:space="preserve">
+    <value>1:1 ലേക്ക് സൂം ചെയ്യുക</value>
+  </data>
+  <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
+    <value>ക്രമീകരണങ്ങൾ</value>
+  </data>
+  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
+    <value>മറ്റ് ആപ്പുകളിൽ തുറക്കുക</value>
+  </data>
+  <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
+    <value>കാഷെ നില കാണുക</value>
+  </data>
+  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
+    <value>പൊതുവായവ</value>
+  </data>
+  <data name="SettingsCardDeveloperSupport.Header" xml:space="preserve">
+    <value>FlyPhotos-നെ പിന്തുണയ്ക്കുക</value>
+  </data>
+  <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
+    <value>Fly-യെ കൂടുതൽ മികച്ചതാക്കാൻ സഹായിക്കൂ.</value>
+  </data>
+  <data name="DonateButton.Content" xml:space="preserve">
+    <value>സംഭാവന നൽകുക</value>
+  </data>
+  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
+    <value>കീബോർഡ് കുറുക്കുവഴികൾ</value>
+  </data>
+  <data name="TextBlockTheming.Text" xml:space="preserve">
+    <value>തീമിംഗ്</value>
+  </data>
+  <data name="SettingsCardTheme.Header" xml:space="preserve">
+    <value>വിൻഡോ തീം</value>
+  </data>
+  <data name="SettingsCardTheme.Description" xml:space="preserve">
+    <value>ആപ്പ് തീം തിരഞ്ഞെടുക്കുക.</value>
+  </data>
+  <data name="ComboThemeItemDefault.Content" xml:space="preserve">
+    <value>ഡിഫോൾട്ട്</value>
+  </data>
+  <data name="ComboThemeItemDark.Content" xml:space="preserve">
+    <value>ഡാർക്ക്</value>
+  </data>
+  <data name="ComboThemeItemLight.Content" xml:space="preserve">
+    <value>ലൈറ്റ്</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
+    <value>വിൻഡോ പശ്ചാത്തലം</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
+    <value>വിൻഡോ പശ്ചാത്തലം ക്രമീകരിക്കുക.</value>
+  </data>
+  <data name="ComboBackgroundItemTransparent.Content" xml:space="preserve">
+    <value>ട്രാൻസ്പരന്റ്</value>
+  </data>
+  <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
+    <value>ഫ്രോസൺ</value>
+  </data>
+  <data name="ComboBackgroundItemAcrylic.Content" xml:space="preserve">
+    <value>അക്രിലിക്</value>
+  </data>
+  <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
+    <value>അക്രിലിക് തിൻ</value>
+  </data>
+  <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
+    <value>മൈക്ക</value>
+  </data>
+  <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
+    <value>മൈക്ക ആൾട്ട്</value>
+  </data>
+  <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
+    <value>ഒന്നുമില്ല</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
+    <value>സുതാര്യത % ക്രമീകരിക്കുക</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
+    <value>ട്രാൻസ്പരന്റ് വിൻഡോ പശ്ചാത്തലത്തിന് മാത്രം ബാധകം.</value>
+  </data>
+  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
+    <value>ഫോട്ടോ പ്രദർശനം</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
+    <value>പാൻ, സൂം ക്രമീകരണങ്ങൾ</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
+    <value>പാൻ, സൂം പ്രവർത്തി രീതികൾ ക്രമീകരിക്കുക.</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
+    <value>ഫയൽ തുറക്കുമ്പോൾ സൂം ഇൻ, പുറത്തുകടക്കുമ്പോൾ സൂം ഔട്ട്</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
+    <value>⚠ സ്റ്റാർട്ടപ്പ് വൈകിയേക്കാം: പ്രിവ്യൂവിന് പകരം മുഴുവൻ ഇമേജ് ലോഡ് ചെയ്യാൻ Fly കാത്തിരിക്കും.</value>
+  </data>
+  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
+    <value>സൂം ചെയ്യുമ്പോൾ ഉയർന്ന ഗുണനിലവാരമുള്ള ഇന്റർപോളേഷൻ ഉപയോഗിക്കുക</value>
+  </data>
+  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
+    <value>മൂർച്ചയുള്ള പിക്സൽ അറ്റങ്ങൾക്കായി ഇത് പ്രവർത്തനരഹിതമാക്കുക (പിക്സൽ ആർട്ടിന് ഉപകരിക്കും).</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
+    <value>നാവിഗേഷനിലെ പാൻ, സൂം, റൊട്ടേഷൻ രീതികൾ</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
+    <value>⚠ ഒരേ വലിപ്പമുള്ള ഫോട്ടോകളുള്ള ഫോൾഡറിൽ മാത്രം "Retain" ഓപ്ഷൻ ഉപയോഗിക്കുക.</value>
+  </data>
+  <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
+    <value>പാൻ/സൂം/റൊട്ടേഷൻ റീസെറ്റ് ചെയ്യുക</value>
+  </data>
+  <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
+    <value>ഓരോ ഫോട്ടോയ്ക്കും പാൻ/സൂം/റൊട്ടേഷൻ ഓർമ്മിക്കുക</value>
+  </data>
+  <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
+    <value>മുൻ ഫോട്ടോയിൽ നിന്നുള്ള പാൻ/സൂം നിലനിർത്തുക</value>
+  </data>
+  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
+    <value>സൂം ശതമാനം സ്ക്രീനിൽ കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
+    <value>സ്ക്രീനിലേക്കുള്ള ഇമേജ് ഫിറ്റ്</value>
+  </data>
+  <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
+    <value>ഇമേജ് സ്ക്രീനിന്റെ എത്ര % നിറയ്ക്കണമെന്ന് തിരഞ്ഞെടുക്കുക</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
+    <value>ചെക്കേർഡ് പശ്ചാത്തലം കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
+    <value>സുതാര്യമായ ചിത്രങ്ങൾക്കായി ചെക്കേർഡ് പശ്ചാത്തലം കാണിക്കുക. ⚠ Fly-യുടെ പ്രവർത്തനക്ഷമത കുറച്ചേക്കാം.</value>
+  </data>
+  <data name="SettingsCardRememberLastMonitor.Header" xml:space="preserve">
+    <value>അവസാനം ഉപയോഗിച്ച മോണിറ്റർ ഓർമ്മിക്കുക</value>
+  </data>
+  <data name="SettingsCardRememberLastMonitor.Description" xml:space="preserve">
+    <value>അവസാനം ഉപയോഗിച്ച മോണിറ്ററിൽ Fly തുറക്കും. ഒരു മോണിറ്റർ മാത്രമേ ഉള്ളൂവെങ്കിൽ ഇത് പ്രവർത്തനക്ഷമമാക്കരുത്.</value>
+  </data>
+  <data name="TextBlockUIControls.Text" xml:space="preserve">
+    <value>UI നിയന്ത്രണങ്ങൾ</value>
+  </data>
+  <data name="SettingsExpanderAutoFade.Header" xml:space="preserve">
+    <value>ഓട്ടോ ഫേഡ് / ഹൈഡ് ക്രമീകരണങ്ങൾ</value>
+  </data>
+  <data name="SettingsCardFadeControls.Header" xml:space="preserve">
+    <value>UI നിയന്ത്രണങ്ങൾ ഓട്ടോ ഫേഡ് ചെയ്യുക</value>
+  </data>
+  <data name="SettingsCardFadeControls.Description" xml:space="preserve">
+    <value>മൗസ് നീിക്കുമ്പോൾ UI നിയന്ത്രണങ്ങൾ മങ്ങിക്കുക.</value>
+  </data>
+  <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
+    <value>ഓട്ടോ ഫേഡ് തീവ്രത %</value>
+  </data>
+  <data name="SettingsCardFadeIntensity.Description" xml:space="preserve">
+    <value>ഓട്ടോ-ഫേഡ് ഇഫക്റ്റിന്റെ ശക്തി ക്രമീകരിക്കുക.</value>
+  </data>
+  <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
+    <value>മൗസ് കർസർ ഓട്ടോ ഹൈഡ് ചെയ്യുക</value>
+  </data>
+  <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
+    <value>മൗസ് നിഷ്ക്രിയമാണെങ്കിൽ കർസർ മറയ്ക്കുക.</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
+    <value>മൗസ് വീൽ</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
+    <value>ഡിഫോൾട്ട് മൗസ് വീൽ പ്രവർത്തി രീതി തിരഞ്ഞെടുക്കുക.</value>
+  </data>
+  <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
+    <value>സൂം ഇൻ അല്ലെങ്കിൽ ഔട്ട്</value>
+  </data>
+  <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
+    <value>അടുത്തത് അല്ലെങ്കിൽ മുൻപത്തേത് കാണുക</value>
+  </data>
+  <data name="ComboMouseWheelBehaviourInfo.Description" xml:space="preserve">
+    <value>👉 Ctrl + മൗസ് വീൽ എപ്പോഴും സൂം ഇൻ അല്ലെങ്കിൽ ഔട്ട് ചെയ്യുന്നു.
+👉 Alt + മൗസ് വീൽ എപ്പോഴും അടുത്തതിലേക്കോ മുൻപത്തേതിലേക്കോ പോകുന്നു.</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
+    <value>തമ്പ്‌നെയിൽ സ്ട്രിപ്പ് കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
+    <value>വിൻഡോയുടെ താഴെ തമ്പ്‌നെയിൽ സ്ട്രിപ്പ് കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
+    <value>തമ്പ്‌നെയിൽ വലിപ്പം</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
+    <value>വ്യൂവറിലെ തമ്പ്‌നെയിലുകളുടെ വലിപ്പം ക്രമീകരിക്കുക.</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
+    <value>തമ്പ്‌നെയിൽ സെലക്ഷൻ നിറം</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
+    <value>തിരഞ്ഞെടുത്ത തമ്പ്‌നെയിലുകൾക്കുള്ള ഹൈലൈറ്റ് നിറം സജ്ജമാക്കുക.</value>
+  </data>
+  <data name="SettingsCardExternalShorcuts.Header" xml:space="preserve">
+    <value>എക്സ്റ്റേണൽ ആപ്പുകളിലേക്കുള്ള കുറുക്കുവഴികൾ കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardExternalShorcuts.Description" xml:space="preserve">
+    <value>നിലവിലെ ഫോട്ടോ മറ്റ് ആപ്പുകളിൽ തുറക്കുക</value>
+  </data>
+  <data name="SettingsCardExternalApps.Header" xml:space="preserve">
+    <value>എക്സ്റ്റേണൽ ആപ്പുകൾ തിരഞ്ഞെടുക്കുക</value>
+  </data>
+  <data name="SettingsCardExternalApps.Description" xml:space="preserve">
+    <value>കുറുക്കുവഴികളായി ചേർക്കാൻ exe-കൾ ബ്രൗസ് ചെയ്യുക.</value>
+  </data>
+  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
+    <value>സ്ക്രീനിൽ ഫയൽ നാമം കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
+    <value>നിലവിൽ തുറന്നിരിക്കുന്ന ഫയലിന്റെ പേര് പ്രദർശിപ്പിക്കുക</value>
+  </data>
+  <data name="SettingsCardConfirmBeforeDelete.Header" xml:space="preserve">
+    <value>ഫയൽ ഡിലീറ്റ് ചെയ്യുമ്പോൾ സ്ഥിരീകരണ ഡയലോഗ് കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
+    <value>ഫയൽ ഡിലീറ്റ് ചെയ്യുന്നതിന് മുൻമ്പ് സ്ഥിരീകരണം ചോദിക്കുക.</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
+    <value>കാഷെ നില കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
+    <value>ബട്ടൺ പാനലിൽ കാഷെ സ്റ്റാറ്റസ് എക്സ്പാൻഡർ കാണിക്കുക.</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
+    <value>ഫോട്ടോയുടെ അളവുകൾ കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
+    <value>ഫയൽ നാമത്തിന് സമീപം ഫോട്ടോയുടെ വീതിയും ഉയരവും കാണിക്കുക.</value>
+  </data>
+  <data name="TextBlockCaching.Text" xml:space="preserve">
+    <value>കാഷിംഗ്</value>
+  </data>
+  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
+    <value>കാഷിംഗ്</value>
+  </data>
+  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
+    <value>Fly ഫോട്ടോ കാഷിംഗ് കൈകാര്യം ചെയ്യുന്ന രീതി ക്രമീകരിക്കുക.</value>
+  </data>
+  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
+    <value>ലോ-റെസ് കാഷെ</value>
+  </data>
+  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
+    <value>ഓരോ വശത്തും കാഷെ ചെയ്ത ലോ-റെസല്യൂഷൻ ഫോട്ടോകളുടെ എണ്ണം സജ്ജമാക്കുക.</value>
+  </data>
+  <data name="SettingsCardHighResCache.Header" xml:space="preserve">
+    <value>ഹൈ-റെസ് കാഷെ</value>
+  </data>
+  <data name="SettingsCardHighResCache.Description" xml:space="preserve">
+    <value>ഓരോ വശത്തും കാഷെ ചെയ്ത ഹൈ-റെസല്യൂഷൻ ഫോട്ടോകളുടെ എണ്ണം സജ്ജമാക്കുക.</value>
+  </data>
+  <data name="TextBlockLog.Text" xml:space="preserve">
+    <value>ലോഗ്</value>
+  </data>
+  <data name="SettingsCardLog.Header" xml:space="preserve">
+    <value>ലോഗ് ഫയൽ</value>
+  </data>
+  <data name="SettingsCardLog.Description" xml:space="preserve">
+    <value>ലോഗ് ഫയൽ കാണാൻ തുറക്കുക</value>
+  </data>
+  <data name="ButtonOpenLog.Content" xml:space="preserve">
+    <value>ലോഗ് തുറക്കുക</value>
+  </data>
+  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
+    <value>കോഡെക്കുകൾ</value>
+  </data>
+  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
+    <value>Fly പ്രധാനമായും വിൻഡോസ് ഇൻബിൽറ്റ് ഇമേജിംഗ് കമ്പോണന്റ് (WIC) കോഡെക്കുകളാണ് ഉപയോഗിക്കുന്നത്.</value>
+  </data>
+  <data name="HeaderCodec.Text" xml:space="preserve">
+    <value>കോഡെക്</value>
+  </data>
+  <data name="HeaderType.Text" xml:space="preserve">
+    <value>തരം</value>
+  </data>
+  <data name="HeaderExtensions.Text" xml:space="preserve">
+    <value>എക്സ്റ്റൻഷനുകൾ</value>
+  </data>
+  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
+    <value>എബൗട്ട്</value>
+  </data>
+  <data name="SettingsCardVersion.Header" xml:space="preserve">
+    <value>നിലവിലെ പതിപ്പ്</value>
+  </data>
+  <data name="BtnCheckVersion.Content" xml:space="preserve">
+    <value>ഏറ്റവും പുതിയ പതിപ്പ് പരിശോധിക്കുക</value>
+  </data>
+  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
+    <value>Github റെപ്പോസിറ്ററി</value>
+  </data>
+  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
+    <value>Fly Photos ഓപ്പൺ സോഴ്‌സ് ആണ്, Github-ൽ ലഭ്യമാണ്</value>
+  </data>
+  <data name="BtnGithubRepo.Content" xml:space="preserve">
+    <value>Github റെപ്പോസിറ്ററിയിലേക്ക് പോകുക</value>
+  </data>
+  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
+    <value>ബഗുകളും പ്രശ്നങ്ങളും</value>
+  </data>
+  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
+    <value>പ്രശ്നങ്ങൾ Github-ൽ റിപ്പോർട്ട് ചെയ്യുക അല്ലെങ്കിൽ ryftools@outlook.com-ലേക്ക് മെയിൽ ചെയ്യുക</value>
+  </data>
+  <data name="BtnReportBugs.Content" xml:space="preserve">
+    <value>റെപ്പോയിലെ ബഗ് പേജിലേക്ക് പോകുക</value>
+  </data>
+  <data name="SettingsCardCredits.Header" xml:space="preserve">
+    <value>കടപ്പാടുകൾ</value>
+  </data>
+  <data name="SettingsCardCredits.Description" xml:space="preserve">
+    <value>Fly Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog, WinUIEx എന്നിവയോട് നന്ദി പറയുന്നു.</value>
+  </data>
+  <data name="BtnThirdPartyLicenses.Content" xml:space="preserve">
+    <value>തേർഡ് പാർട്ടി ലൈസൻസുകൾ കാണുക</value>
+  </data>
+  <data name="SettingsCardVersion.Description" xml:space="preserve">
+    <value>നിലവിലെ പതിപ്പ് : 2.5.14</value>
+  </data>
+</root>

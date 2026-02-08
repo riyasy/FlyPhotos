@@ -103,6 +103,7 @@
                         PointerWheelChanged="ButtonBackNext_PointerWheelChanged">
                         <ToolTipService.ToolTip>
                             <ToolTip
+                                x:Uid="ButtonBackToolTip"
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
                                 Content="Previous Photo"
                                 Placement="Right" />
@@ -118,6 +119,7 @@
                         PointerWheelChanged="ButtonRotate_PointerWheelChanged">
                         <ToolTipService.ToolTip>
                             <ToolTip
+                                x:Uid="ButtonRotateToolTip"
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
                                 Content="Rotate Photo"
                                 Placement="Right" />
@@ -134,6 +136,7 @@
                         PointerWheelChanged="ButtonBackNext_PointerWheelChanged">
                         <ToolTipService.ToolTip>
                             <ToolTip
+                                x:Uid="ButtonNextToolTip"
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
                                 Content="Next Photo"
                                 Placement="Right" />
@@ -150,6 +153,7 @@
                         Visibility="Collapsed">
                         <ToolTipService.ToolTip>
                             <ToolTip
+                                x:Uid="ButtonPrevPageToolTip"
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
                                 Content="Prev Page"
                                 Placement="Right" />
@@ -167,6 +171,7 @@
                         Visibility="Collapsed">
                         <ToolTipService.ToolTip>
                             <ToolTip
+                                x:Uid="ButtonNextPageToolTip"
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
                                 Content="Next Page"
                                 Placement="Right" />
@@ -181,6 +186,7 @@
                         FontSize="16">
                         <ToolTipService.ToolTip>
                             <ToolTip
+                                x:Uid="ButtonScaleSetToolTip"
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
                                 Content="Fit to display area"
                                 Placement="Right" />
@@ -195,6 +201,7 @@
                         FontSize="12">
                         <ToolTipService.ToolTip>
                             <ToolTip
+                                x:Uid="ButtonOneIsToOneToolTip"
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
                                 Content="Zoom to 1:1"
                                 Placement="Right" />
@@ -209,6 +216,7 @@
                         FontSize="16">
                         <ToolTipService.ToolTip>
                             <ToolTip
+                                x:Uid="ButtonSettingsToolTip"
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
                                 Content="Settings"
                                 Placement="Right" />
@@ -224,6 +232,7 @@
                         FontSize="16">
                         <ToolTipService.ToolTip>
                             <ToolTip
+                                x:Uid="ButtonShortcutsToolTip"
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
                                 Content="Open in other apps"
                                 Placement="Right" />
@@ -235,6 +244,7 @@
                         Click="ButtonExpander_Click">
                         <ToolTipService.ToolTip>
                             <ToolTip
+                                x:Uid="ButtonExpanderToolTip"
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
                                 Content="View Cache Status"
                                 Placement="Right" />

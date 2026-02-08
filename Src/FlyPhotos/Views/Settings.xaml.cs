@@ -11,10 +11,8 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -33,48 +31,6 @@ internal sealed partial class Settings
     public event Action<Setting>? SettingChanged;
 
     private readonly SystemBackdropConfiguration _configurationSource;
-
-    // Backdrop translator
-    private readonly EnumStringTranslator<WindowBackdropType> _backdropTranslator = new(
-        new Dictionary<WindowBackdropType, string>
-        {
-            { WindowBackdropType.Transparent, "Transparent" },
-            { WindowBackdropType.Frozen, "Frozen" },
-            { WindowBackdropType.Acrylic, "Acrylic" },
-            { WindowBackdropType.AcrylicThin, "Acrylic Thin" },
-            { WindowBackdropType.Mica, "Mica" },
-            { WindowBackdropType.MicaAlt, "Mica Alt" },
-            { WindowBackdropType.None, "None" }
-        }
-    );
-
-    // Theme translator
-    private readonly EnumStringTranslator<ElementTheme> _themeTranslator = new(
-        new Dictionary<ElementTheme, string>
-        {
-            { ElementTheme.Default, "Default" },
-            { ElementTheme.Dark, "Dark" },
-            { ElementTheme.Light, "Light" }
-        }
-    );
-
-    private readonly EnumStringTranslator<DefaultMouseWheelBehavior> _mouseWheelBehaviourTranslator = new(
-        new Dictionary<DefaultMouseWheelBehavior, string>
-        {
-            { DefaultMouseWheelBehavior.Zoom, "Zoom In or Out" },
-            { DefaultMouseWheelBehavior.Navigate, "View Next or Previous" }
-        }
-    );
-
-    // Pan/Zoom Navigation Behavior translator
-    private readonly EnumStringTranslator<PanZoomBehaviourOnNavigation> _panZoomBehaviourTranslator = new(
-        new Dictionary<PanZoomBehaviourOnNavigation, string>
-        {
-            { PanZoomBehaviourOnNavigation.Reset, "Reset Pan/Zoom/Rotation" },
-            { PanZoomBehaviourOnNavigation.RememberPerPhoto, "Remember Pan/Zoom/Rotation per photo" },
-            { PanZoomBehaviourOnNavigation.RetainFromLastPhoto, "Retain Pan/Zoom from previous photo" }
-        }
-    );
 
     internal Settings()
     {
@@ -101,9 +57,10 @@ internal sealed partial class Settings
 
         SliderHighResCacheSize.Value = AppConfig.Settings.CacheSizeOneSideHqImages;
         SliderLowResCacheSize.Value = AppConfig.Settings.CacheSizeOneSidePreviews;
-        ComboTheme.SelectedIndex = FindIndexOfItemInComboBox(ComboTheme, _themeTranslator.ToString(AppConfig.Settings.Theme));
-        ComboBackGround.SelectedIndex = FindIndexOfItemInComboBox(ComboBackGround, _backdropTranslator.ToString(AppConfig.Settings.WindowBackdrop));
-        ComboMouseWheelBehaviour.SelectedIndex = FindIndexOfItemInComboBox(ComboMouseWheelBehaviour, _mouseWheelBehaviourTranslator.ToString(AppConfig.Settings.DefaultMouseWheelBehavior));
+        // Use index-based mapping for localized combo box items. Settings are still saved as enum names in AppSettings.
+        ComboTheme.SelectedIndex = GetIndexForTheme(AppConfig.Settings.Theme);
+        ComboBackGround.SelectedIndex = GetIndexForBackdrop(AppConfig.Settings.WindowBackdrop);
+        ComboMouseWheelBehaviour.SelectedIndex = GetIndexForMouseWheelBehaviour(AppConfig.Settings.DefaultMouseWheelBehavior);
         ButtonShowThumbnail.IsOn = AppConfig.Settings.ShowThumbnails;
         ButtonEnableAutoFade.IsOn = AppConfig.Settings.AutoFade;
         ButtonOpenExitZoom.IsOn = AppConfig.Settings.OpenExitZoom;
@@ -120,7 +77,7 @@ internal sealed partial class Settings
         ButtonShowFileName.IsOn = AppConfig.Settings.ShowFileName;
         ButtonShowCacheStatusExpander.IsOn = AppConfig.Settings.ShowCacheStatus;
         ButtonShowImageDimensions.IsOn = AppConfig.Settings.ShowImageDimensions;
-        ComboPanZoomNavBehaviour.SelectedIndex = FindIndexOfItemInComboBox(ComboPanZoomNavBehaviour, _panZoomBehaviourTranslator.ToString(AppConfig.Settings.PanZoomBehaviourOnNavigation));
+        ComboPanZoomNavBehaviour.SelectedIndex = GetIndexForPanZoomBehaviour(AppConfig.Settings.PanZoomBehaviourOnNavigation);
         ButtonEnableAutoHideMouse.IsOn = AppConfig.Settings.AutoHideMouse;
         ButtonEnableExternalShortcut.IsOn = AppConfig.Settings.ShowExternalAppShortcuts;
 
@@ -194,9 +151,7 @@ internal sealed partial class Settings
 
     private async void ComboPanZoomNavBehaviour_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if ((ComboPanZoomNavBehaviour.SelectedItem as ComboBoxItem)?.Content is not string comboSelectionAsString) return;
-
-        var panZoomEnum = _panZoomBehaviourTranslator.ToEnum(comboSelectionAsString);
+        var panZoomEnum = GetPanZoomForIndex(ComboPanZoomNavBehaviour.SelectedIndex);
         AppConfig.Settings.PanZoomBehaviourOnNavigation = panZoomEnum;
         await AppConfig.SaveAsync();
     }
@@ -292,17 +247,9 @@ internal sealed partial class Settings
         await AppConfig.SaveAsync();
     }
 
-    private static int FindIndexOfItemInComboBox(Selector comboBox, string value)
-    {
-        var comboBoxItem = comboBox.Items.OfType<ComboBoxItem>()
-            .FirstOrDefault(x => x.Content.ToString() == value);
-        return comboBox.SelectedIndex = comboBox.Items.IndexOf(comboBoxItem);
-    }
-
     private async void ComboTheme_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        var themeDisplayName = (ComboTheme.SelectedItem as ComboBoxItem)?.Content as string;
-        var themeEnum = _themeTranslator.ToEnum(themeDisplayName);
+        var themeEnum = GetThemeForIndex(ComboTheme.SelectedIndex);
         AppConfig.Settings.Theme = themeEnum;
 
         SetWindowTheme(themeEnum);
@@ -312,16 +259,14 @@ internal sealed partial class Settings
 
     private async void ComboBackGround_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        var backGroundDisplayName = (ComboBackGround.SelectedItem as ComboBoxItem)?.Content as string;
-        var backGroundEnum = _backdropTranslator.ToEnum(backGroundDisplayName);
+        var backGroundEnum = GetBackdropForIndex(ComboBackGround.SelectedIndex);
         AppConfig.Settings.WindowBackdrop = backGroundEnum;
         SettingChanged?.Invoke(Setting.BackDrop);
         await AppConfig.SaveAsync();
     }
     private async void ComboMouseWheel_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        var comboSelectionAsString = (ComboMouseWheelBehaviour.SelectedItem as ComboBoxItem)?.Content as string;
-        var mouseWheelEnum = _mouseWheelBehaviourTranslator.ToEnum(comboSelectionAsString);
+        var mouseWheelEnum = GetMouseWheelForIndex(ComboMouseWheelBehaviour.SelectedIndex);
         AppConfig.Settings.DefaultMouseWheelBehavior = mouseWheelEnum;
         await AppConfig.SaveAsync();
     }
@@ -381,6 +326,93 @@ internal sealed partial class Settings
     private bool ShouldEnableTransparencySlider(int index)
     {
         return index == 0;
+    }
+
+    // Mapping helpers to use index-based combo box handling while keeping AppSettings stored as enum names
+    private static int GetIndexForTheme(ElementTheme theme)
+    {
+        return theme switch
+        {
+            ElementTheme.Default => 0,
+            ElementTheme.Dark => 1,
+            ElementTheme.Light => 2,
+            _ => 0
+        };
+    }
+
+    private static ElementTheme GetThemeForIndex(int index)
+    {
+        return index switch
+        {
+            1 => ElementTheme.Dark,
+            2 => ElementTheme.Light,
+            _ => ElementTheme.Default,
+        };
+    }
+
+    private static int GetIndexForBackdrop(WindowBackdropType backdrop)
+    {
+        return backdrop switch
+        {
+            WindowBackdropType.Transparent => 0,
+            WindowBackdropType.Frozen => 1,
+            WindowBackdropType.Acrylic => 2,
+            WindowBackdropType.AcrylicThin => 3,
+            WindowBackdropType.Mica => 4,
+            WindowBackdropType.MicaAlt => 5,
+            WindowBackdropType.None => 6,
+            _ => 0
+        };
+    }
+
+    private static WindowBackdropType GetBackdropForIndex(int index)
+    {
+        return index switch
+        {
+            1 => WindowBackdropType.Frozen,
+            2 => WindowBackdropType.Acrylic,
+            3 => WindowBackdropType.AcrylicThin,
+            4 => WindowBackdropType.Mica,
+            5 => WindowBackdropType.MicaAlt,
+            6 => WindowBackdropType.None,
+            _ => WindowBackdropType.Transparent,
+        };
+    }
+
+    private static int GetIndexForMouseWheelBehaviour(DefaultMouseWheelBehavior behaviour)
+    {
+        return behaviour switch
+        {
+            DefaultMouseWheelBehavior.Zoom => 0,
+            DefaultMouseWheelBehavior.Navigate => 1,
+            _ => 0
+        };
+    }
+
+    private static DefaultMouseWheelBehavior GetMouseWheelForIndex(int index)
+    {
+        return index == 1 ? DefaultMouseWheelBehavior.Navigate : DefaultMouseWheelBehavior.Zoom;
+    }
+
+    private static int GetIndexForPanZoomBehaviour(PanZoomBehaviourOnNavigation behaviour)
+    {
+        return behaviour switch
+        {
+            PanZoomBehaviourOnNavigation.Reset => 0,
+            PanZoomBehaviourOnNavigation.RememberPerPhoto => 1,
+            PanZoomBehaviourOnNavigation.RetainFromLastPhoto => 2,
+            _ => 0
+        };
+    }
+
+    private static PanZoomBehaviourOnNavigation GetPanZoomForIndex(int index)
+    {
+        return index switch
+        {
+            1 => PanZoomBehaviourOnNavigation.RememberPerPhoto,
+            2 => PanZoomBehaviourOnNavigation.RetainFromLastPhoto,
+            _ => PanZoomBehaviourOnNavigation.Reset,
+        };
     }
 
     private async void ColorFlyOutOkButton_Click(object sender, RoutedEventArgs e)

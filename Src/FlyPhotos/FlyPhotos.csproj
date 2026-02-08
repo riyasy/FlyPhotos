@@ -18,7 +18,7 @@
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
 		<PublishAot>true</PublishAot>
-		<SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
+        <SatelliteResourceLanguages>en-US;ml-IN;de-DE</SatelliteResourceLanguages>
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<GenerateTestArtifacts>False</GenerateTestArtifacts>
 		<NoWarn>$(NoWarn);CA1416</NoWarn>

@@ -13,7 +13,7 @@
     </Window.SystemBackdrop>
     <Grid x:Name="MainLayout" Background="Transparent">
         <Pivot Title="Fly Photos - Settings">
-            <PivotItem Header="General">
+            <PivotItem x:Uid="SettingsPivotItemGeneral">
                 <ScrollViewer>
                     <ScrollViewer.Resources>
                         <Flyout x:Name="ColorPickerFlyout" Placement="Right">
@@ -38,63 +38,59 @@
                     <StackPanel Margin="0,5,15,0" Orientation="Vertical">
                         <controls:SettingsCard
                             x:Name="SettingsCardDeveloperSupport"
+                            x:Uid="SettingsCardDeveloperSupport"
                             Margin="0,5,0,0"
-                            Description="Make Fly more awesome."
-                            Header="Support Flyphotos"
                             HeaderIcon="{ui:FontIcon Glyph=&#xEB51;}">
-                            <HyperlinkButton Content="Donate" NavigateUri="https://github.com/sponsors/riyasy" />
+                            <HyperlinkButton x:Uid="DonateButton" NavigateUri="https://github.com/sponsors/riyasy" />
                         </controls:SettingsCard>
                         <controls:SettingsExpander
+                            x:Uid="SettingsExpanderKeyboardShortcuts"
                             Margin="0,5,0,0"
-                            Header="KeyBoard Shortcuts"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE765;}">
                             <controls:SettingsExpander.Items>
                                 <controls:SettingsCard x:Name="SettingsCardKeyboardShortCuts" Description="" />
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
                         <TextBlock
+                            x:Uid="TextBlockTheming"
                             Margin="0,20,0,0"
-                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                            Text="Theming" />
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
                         <controls:SettingsCard
                             x:Name="SettingsCardTheme"
+                            x:Uid="SettingsCardTheme"
                             Margin="0,5,0,0"
-                            Description="Select the app theme."
-                            Header="Window Theme"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE790;}">
                             <ComboBox
                                 x:Name="ComboTheme"
                                 MinWidth="150"
                                 SelectedIndex="0">
-                                <ComboBoxItem>Default</ComboBoxItem>
-                                <ComboBoxItem>Dark</ComboBoxItem>
-                                <ComboBoxItem>Light</ComboBoxItem>
+                                <ComboBoxItem x:Uid="ComboThemeItemDefault" />
+                                <ComboBoxItem x:Uid="ComboThemeItemDark" />
+                                <ComboBoxItem x:Uid="ComboThemeItemLight" />
                             </ComboBox>
                         </controls:SettingsCard>
                         <controls:SettingsExpander
                             x:Name="SettingsCardWindowBackground"
+                            x:Uid="SettingsCardWindowBackground"
                             Margin="0,5,0,0"
-                            Description="Set the window background."
-                            Header="Window Background"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE70A;}">
                             <ComboBox
                                 x:Name="ComboBackGround"
                                 MinWidth="150"
                                 HorizontalAlignment="Right"
                                 SelectedIndex="0">
-                                <ComboBoxItem>Transparent</ComboBoxItem>
-                                <ComboBoxItem>Frozen</ComboBoxItem>
-                                <ComboBoxItem>Acrylic</ComboBoxItem>
-                                <ComboBoxItem>Acrylic Thin</ComboBoxItem>
-                                <ComboBoxItem>Mica</ComboBoxItem>
-                                <ComboBoxItem>Mica Alt</ComboBoxItem>
-                                <ComboBoxItem>None</ComboBoxItem>
+                                <ComboBoxItem x:Uid="ComboBackgroundItemTransparent" />
+                                <ComboBoxItem x:Uid="ComboBackgroundItemFrozen" />
+                                <ComboBoxItem x:Uid="ComboBackgroundItemAcrylic" />
+                                <ComboBoxItem x:Uid="ComboBackgroundItemAcrylicThin" />
+                                <ComboBoxItem x:Uid="ComboBackgroundItemMica" />
+                                <ComboBoxItem x:Uid="ComboBackgroundItemMicaAlt" />
+                                <ComboBoxItem x:Uid="ComboBackgroundItemNone" />
                             </ComboBox>
                             <controls:SettingsExpander.Items>
                                 <controls:SettingsCard
                                     x:Name="SettingsCardTransparentBackgroundIntensity"
-                                    Description="Applicable only for Transparent Window Background."
-                                    Header="Set transparency %"
+                                    x:Uid="SettingsCardTransparentBackgroundIntensity"
                                     IsEnabled="{x:Bind ShouldEnableTransparencySlider(ComboBackGround.SelectedIndex), Mode=OneWay}">
                                     <Slider
                                         x:Name="SliderTransparentBackgroundIntensity"
@@ -108,50 +104,39 @@
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
                         <TextBlock
+                            x:Uid="TextBlockPhotoDisplay"
                             Margin="0,20,0,0"
-                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                            Text="Photo Display" />
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
                         <controls:SettingsExpander
+                            x:Uid="SettingsExpanderPanZoom"
                             Margin="0,5,0,0"
-                            Description="Customize Pan and Zoom behaviour."
-                            Header="Pan and Zoom Settings"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE71E;}">
                             <controls:SettingsExpander.Items>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardOpenExitZoom"
-                                    Description="⚠ May slowdown startup: Fly waits to load full image instead of preview during startup."
-                                    Header="Zoom in on file Open, Zoom out on exit">
+                                <controls:SettingsCard x:Name="SettingsCardOpenExitZoom" x:Uid="SettingsCardOpenExitZoom">
                                     <ToggleSwitch x:Name="ButtonOpenExitZoom" />
                                 </controls:SettingsCard>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardHighQualityInterpolation"
-                                    Description="Disable for sharper pixel edges (useful for pixel art)."
-                                    Header="Use high quality interpolation when zooming">
+                                <controls:SettingsCard x:Name="SettingsCardHighQualityInterpolation" x:Uid="SettingsCardHighQualityInterpolation">
                                     <ToggleSwitch x:Name="ButtonHighQualityInterpolation" />
                                 </controls:SettingsCard>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardPanZoomNavBehaviour"
-                                    Description="⚠ Use Retain option only in folder with same size photos"
-                                    Header="Pan, Zoom &amp; Rotation behaviour during navigation">
+                                <controls:SettingsCard x:Name="SettingsCardPanZoomNavBehaviour" x:Uid="SettingsCardPanZoomNavBehaviour">
                                     <ComboBox
                                         x:Name="ComboPanZoomNavBehaviour"
                                         MinWidth="150"
                                         HorizontalAlignment="Right">
-                                        <ComboBoxItem>Reset Pan/Zoom/Rotation</ComboBoxItem>
-                                        <ComboBoxItem>Remember Pan/Zoom/Rotation per photo</ComboBoxItem>
-                                        <ComboBoxItem>Retain Pan/Zoom from previous photo</ComboBoxItem>
+                                        <ComboBoxItem x:Uid="ComboPanZoomItemReset" />
+                                        <ComboBoxItem x:Uid="ComboPanZoomItemRemember" />
+                                        <ComboBoxItem x:Uid="ComboPanZoomItemRetain" />
                                     </ComboBox>
                                 </controls:SettingsCard>
-                                <controls:SettingsCard x:Name="SettingsCardShowZoomPercent" Header="Show Zoom percentage on screen">
+                                <controls:SettingsCard x:Name="SettingsCardShowZoomPercent" x:Uid="SettingsCardShowZoomPercent">
                                     <ToggleSwitch x:Name="ButtonShowZoomPercent" />
                                 </controls:SettingsCard>
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
                         <controls:SettingsCard
                             x:Name="SettingsCardImageFitPercentage"
+                            x:Uid="SettingsCardImageFitPercentage"
                             Margin="0,5,0,0"
-                            Description="Choose how much screen % to fill with image"
-                            Header="Image to Screen Fit"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE9A6;}">
                             <Slider
                                 x:Name="SliderImageFitPercentage"
@@ -163,39 +148,33 @@
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardShowCheckeredBackground"
+                            x:Uid="SettingsCardShowCheckeredBackground"
                             Margin="0,5,0,0"
-                            Description="Show checkered background for transparent images. ⚠ May reduce Fly performance."
-                            Header="Show Checkered Background"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE80A;}">
                             <ToggleSwitch x:Name="ButtonShowCheckeredBackground" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardRememberLastMonitor"
+                            x:Uid="SettingsCardRememberLastMonitor"
                             Margin="0,5,0,0"
-                            Description="Fly will open on last used monitor. Don't enable if you have only one monitor."
-                            Header="Remember last used monitor"
                             HeaderIcon="{ui:FontIcon Glyph=&#xEC77;}">
                             <ToggleSwitch x:Name="ButtonRememberLastMonitor" />
                         </controls:SettingsCard>
                         <TextBlock
+                            x:Uid="TextBlockUIControls"
                             Margin="0,20,0,0"
-                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                            Text="UI Controls" />
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
                         <controls:SettingsExpander
+                            x:Uid="SettingsExpanderAutoFade"
                             Margin="0,5,0,0"
-                            Header="Auto Fade / Hide Settings"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE754;}">
                             <controls:SettingsExpander.Items>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardFadeControls"
-                                    Description="Fade UI controls when mouse moves away."
-                                    Header="Auto Fade UI controls">
+                                <controls:SettingsCard x:Name="SettingsCardFadeControls" x:Uid="SettingsCardFadeControls">
                                     <ToggleSwitch x:Name="ButtonEnableAutoFade" HorizontalAlignment="Right" />
                                 </controls:SettingsCard>
                                 <controls:SettingsCard
                                     x:Name="SettingsCardFadeIntensity"
-                                    Description="Adjust strength of auto-fade effect."
-                                    Header="Auto Fade intensity %"
+                                    x:Uid="SettingsCardFadeIntensity"
                                     IsEnabled="{x:Bind ButtonEnableAutoFade.IsOn, Mode=OneWay}">
                                     <Slider
                                         x:Name="SliderFadeIntensity"
@@ -206,43 +185,37 @@
                                         StepFrequency="10"
                                         Value="50" />
                                 </controls:SettingsCard>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardAutoHideMouse"
-                                    Description="Hide mouse cursor if mouse is inactive."
-                                    Header="Auto Hide mouse cursor">
+                                <controls:SettingsCard x:Name="SettingsCardAutoHideMouse" x:Uid="SettingsCardAutoHideMouse">
                                     <ToggleSwitch x:Name="ButtonEnableAutoHideMouse" HorizontalAlignment="Right" />
                                 </controls:SettingsCard>
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
                         <controls:SettingsExpander
                             x:Name="SettingsCardMouseWheelBehaviour"
+                            x:Uid="SettingsCardMouseWheelBehaviour"
                             Margin="0,5,0,0"
-                            Description="Choose default mouse wheel behaviour."
-                            Header="Mouse Wheel"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE962;}">
                             <ComboBox
                                 x:Name="ComboMouseWheelBehaviour"
                                 MinWidth="150"
                                 SelectedIndex="0">
-                                <ComboBoxItem>Zoom In or Out</ComboBoxItem>
-                                <ComboBoxItem>View Next or Previous</ComboBoxItem>
+                                <ComboBoxItem x:Uid="ComboMouseWheelItemZoom" />
+                                <ComboBoxItem x:Uid="ComboMouseWheelItemNav" />
                             </ComboBox>
                             <controls:SettingsExpander.Items>
-                                <controls:SettingsCard x:Name="ComboMouseWheelBehaviourInfo" Description="👉 Ctrl + Mouse wheel always zooms in or out.%%👉 Alt + Mouse wheel always navigates to next or previous" />
+                                <controls:SettingsCard x:Name="ComboMouseWheelBehaviourInfo" x:Uid="ComboMouseWheelBehaviourInfo" />
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
                         <controls:SettingsExpander
                             x:Name="SettingsCardShowThumbnail"
+                            x:Uid="SettingsCardShowThumbnail"
                             Margin="0,5,0,0"
-                            Description="Show thumbnail strip at the bottom of window"
-                            Header="Show thumbnail strip"
                             HeaderIcon="{ui:FontIcon Glyph=&#xF597;}">
                             <ToggleSwitch x:Name="ButtonShowThumbnail" HorizontalAlignment="Right" />
                             <controls:SettingsExpander.Items>
                                 <controls:SettingsCard
                                     x:Name="SettingsCardThumbnailSize"
-                                    Description="Adjust the size of the thumbnails in the viewer."
-                                    Header="Thumbnail size"
+                                    x:Uid="SettingsCardThumbnailSize"
                                     HeaderIcon="{ui:FontIcon Glyph=&#xE620;}"
                                     IsEnabled="{x:Bind ButtonShowThumbnail.IsOn, Mode=OneWay}">
                                     <Slider
@@ -256,8 +229,7 @@
                                 </controls:SettingsCard>
                                 <controls:SettingsCard
                                     x:Name="SettingsCardThumbnailSelectionColor"
-                                    Description="Set the highlight color used for selected thumbnails."
-                                    Header="Thumbnail selection color"
+                                    x:Uid="SettingsCardThumbnailSelectionColor"
                                     HeaderIcon="{ui:FontIcon Glyph=&#xE790;}"
                                     IsEnabled="{x:Bind ButtonShowThumbnail.IsOn, Mode=OneWay}">
                                     <Button
@@ -279,16 +251,14 @@
                         </controls:SettingsExpander>
                         <controls:SettingsExpander
                             x:Name="SettingsCardExternalShorcuts"
+                            x:Uid="SettingsCardExternalShorcuts"
                             Margin="0,5,0,0"
-                            Description="Open the current photo in other apps"
-                            Header="Show Shortcuts to external apps"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE8A7;}">
                             <ToggleSwitch x:Name="ButtonEnableExternalShortcut" HorizontalAlignment="Right" />
                             <controls:SettingsExpander.Items>
                                 <controls:SettingsCard
                                     x:Name="SettingsCardExternalApps"
-                                    Description="Browse exes to add as shortcuts."
-                                    Header="Select external apps"
+                                    x:Uid="SettingsCardExternalApps"
                                     IsEnabled="{x:Bind ButtonEnableExternalShortcut.IsOn, Mode=OneWay}">
                                     <StackPanel Orientation="Horizontal">
                                         <Button
@@ -325,49 +295,41 @@
                         </controls:SettingsExpander>
                         <controls:SettingsCard
                             x:Name="SettingsCardShowFileName"
+                            x:Uid="SettingsCardShowFileName"
                             Margin="0,5,0,0"
-                            Description="Display file name of currently opened file"
-                            Header="Show file name on screen"
                             HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
                             <ToggleSwitch x:Name="ButtonShowFileName" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardConfirmBeforeDelete"
+                            x:Uid="SettingsCardConfirmBeforeDelete"
                             Margin="0,5,0,0"
-                            Description="Ask for confirmation before deleting any file."
-                            Header="Show confirmation dialog for file delete"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE74D;}">
                             <ToggleSwitch x:Name="ButtonConfirmBeforeDelete" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardShowCacheStatusExpander"
-                            Description="Show cache status expander in the button panel."
-                            Header="Show cache status"
+                            x:Uid="SettingsCardShowCacheStatusExpander"
                             HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
                             <ToggleSwitch x:Name="ButtonShowCacheStatusExpander" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardShowImageDimensions"
-                            Description="Show width and height of photo next to file name."
-                            Header="Show photo dimensions"
+                            x:Uid="SettingsCardShowImageDimensions"
                             HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
                             <ToggleSwitch x:Name="ButtonShowImageDimensions" />
                         </controls:SettingsCard>
                         <TextBlock
+                            x:Uid="TextBlockCaching"
                             Margin="0,20,0,0"
-                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                            Text="Caching" />
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
                         <controls:SettingsExpander
                             x:Name="SettingsExpanderCaching"
+                            x:Uid="SettingsExpanderCaching"
                             Margin="0,5,0,0"
-                            Description="Configure how Fly handles photo caching."
-                            Header="Caching"
                             HeaderIcon="{ui:FontIcon Glyph=&#xF16A;}">
                             <controls:SettingsExpander.Items>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardLowResCache"
-                                    Description="Set the number of low-resolution photos cached on each side."
-                                    Header="Low-res cache">
+                                <controls:SettingsCard x:Name="SettingsCardLowResCache" x:Uid="SettingsCardLowResCache">
                                     <Slider
                                         x:Name="SliderLowResCacheSize"
                                         MinWidth="150"
@@ -377,10 +339,7 @@
                                         StepFrequency="10"
                                         Value="300" />
                                 </controls:SettingsCard>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardHighResCache"
-                                    Description="Set the number of high-resolution photos cached on each side."
-                                    Header="High-res cache">
+                                <controls:SettingsCard x:Name="SettingsCardHighResCache" x:Uid="SettingsCardHighResCache">
                                     <Slider
                                         x:Name="SliderHighResCacheSize"
                                         MinWidth="150"
@@ -394,42 +353,44 @@
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
                         <TextBlock
+                            x:Uid="TextBlockLog"
                             Margin="0,20,0,0"
-                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                            Text="Log" />
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
                         <controls:SettingsCard
                             x:Name="SettingsCardLog"
+                            x:Uid="SettingsCardLog"
                             Margin="0,5,0,30"
-                            Description="Open to see the log file"
-                            Header="Log File"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE81C;}">
                             <StackPanel Orientation="Vertical">
-                                <Button x:Name="ButtonOpenLog" Click="ButtonOpenLog_OnClick">Open Log</Button>
+                                <Button
+                                    x:Name="ButtonOpenLog"
+                                    x:Uid="ButtonOpenLog"
+                                    Click="ButtonOpenLog_OnClick" />
                             </StackPanel>
                         </controls:SettingsCard>
                     </StackPanel>
                 </ScrollViewer>
             </PivotItem>
-            <PivotItem Header="Codecs">
+            <PivotItem x:Uid="SettingsPivotItemCodecs">
                 <ScrollViewer>
                     <StackPanel Margin="0,5,15,0" Orientation="Vertical">
                         <TextBlock
+                            x:Uid="TextBlockCodecsInfo"
                             Margin="0,10,0,0"
-                            Style="{StaticResource BodyTextBlockStyle}"
-                            Text="Fly uses Windows Inbuilt Imaging Component (WIC) codecs mostly." />
+                            Style="{StaticResource BodyTextBlockStyle}" />
                         <ListView x:Name="ListViewCodecs" Margin="0,10,0,0">
                             <ListView.HeaderTemplate>
                                 <DataTemplate>
                                     <Grid Padding="16,0,12,0" ColumnDefinitions="*,120,2*">
-                                        <TextBlock FontWeight="Bold" Text="Codec" />
+                                        <TextBlock x:Uid="HeaderCodec" FontWeight="Bold" />
                                         <TextBlock
+                                            x:Uid="HeaderType"
                                             Grid.Column="1"
-                                            FontWeight="Bold"
-                                            Text="Type" />
+                                            FontWeight="Bold" />
                                         <TextBlock
+                                            x:Uid="HeaderExtensions"
                                             Grid.Column="2"
-                                            FontWeight="Bold"
-                                            Text="Extensions" />
+                                            FontWeight="Bold" />
                                     </Grid>
                                 </DataTemplate>
                             </ListView.HeaderTemplate>
@@ -450,42 +411,38 @@
                     </StackPanel>
                 </ScrollViewer>
             </PivotItem>
-            <PivotItem Header="About">
+            <PivotItem x:Uid="SettingsPivotItemAbout">
                 <StackPanel Orientation="Vertical">
                     <controls:SettingsCard
                         x:Name="SettingsCardVersion"
+                        x:Uid="SettingsCardVersion"
                         Margin="0,5,0,0"
-                        Description="Current version is 2.5.14"
-                        Header="Current Version"
                         HeaderIcon="{ui:FontIcon Glyph=&#xF133;}">
                         <HyperlinkButton
                             x:Name="BtnCheckVersion"
-                            Content="Check latest version"
+                            x:Uid="BtnCheckVersion"
                             NavigateUri="https://github.com/riyasy/FlyPhotos/releases" />
                     </controls:SettingsCard>
                     <controls:SettingsCard
                         x:Name="SettingsCardSourceCode"
+                        x:Uid="SettingsCardSourceCode"
                         Margin="0,5,0,0"
-                        Description="Fly Photos is open source and hosted in Github"
-                        Header="Github Repository"
                         HeaderIcon="{ui:BitmapIcon Source=/Assets/Images/github-mark.png}">
-                        <HyperlinkButton Content="Go to Github repository" NavigateUri="https://github.com/riyasy/FlyPhotos" />
+                        <HyperlinkButton x:Uid="BtnGithubRepo" NavigateUri="https://github.com/riyasy/FlyPhotos" />
                     </controls:SettingsCard>
                     <controls:SettingsCard
                         x:Name="SettingsCardReportBugs"
+                        x:Uid="SettingsCardReportBugs"
                         Margin="0,5,0,0"
-                        Description="Report issues in Github or mail to ryftools@outlook.com"
-                        Header="Bugs and issues"
                         HeaderIcon="{ui:FontIcon Glyph=&#xE730;}">
-                        <HyperlinkButton Content="Go to bug page in repo" NavigateUri="https://github.com/riyasy/FlyPhotos/issues" />
+                        <HyperlinkButton x:Uid="BtnReportBugs" NavigateUri="https://github.com/riyasy/FlyPhotos/issues" />
                     </controls:SettingsCard>
                     <controls:SettingsCard
                         x:Name="SettingsCardCredits"
+                        x:Uid="SettingsCardCredits"
                         Margin="0,5,0,0"
-                        Description="Fly thanks Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog, and WinUIEx."
-                        Header="Credits"
                         HeaderIcon="{ui:FontIcon Glyph=&#xE728;}">
-                        <HyperlinkButton Click="ButtonThirdPartyLicenses_Click" Content="View 3rd party licenses" />
+                        <HyperlinkButton x:Uid="BtnThirdPartyLicenses" Click="ButtonThirdPartyLicenses_Click" />
                     </controls:SettingsCard>
                 </StackPanel>
             </PivotItem>
