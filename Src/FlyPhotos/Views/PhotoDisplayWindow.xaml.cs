@@ -941,9 +941,13 @@ public sealed partial class PhotoDisplayWindow
     private void SetBackColorAsPerThemeAndBackdrop()
     {
         var actualTheme = ((FrameworkElement)Content).ActualTheme;
-        var gridColor = _currentBackdropType == WindowBackdropType.None
-            ? (actualTheme == ElementTheme.Light ? Colors.White : Colors.Black)
-            : Colors.Transparent;
+        Color gridColor;
+        if (_currentBackdropType == WindowBackdropType.None)
+            gridColor = actualTheme == ElementTheme.Light ? Colors.White : Colors.Black;
+        else if (_currentBackdropType == WindowBackdropType.Frozen)
+            gridColor = actualTheme == ElementTheme.Light ? Colors.Transparent : ColorHelper.FromArgb(0x60, 0x00, 0x00, 0x00); 
+        else
+            gridColor = Colors.Transparent;
         ((Grid)Content).Background = new SolidColorBrush(gridColor);
     }
 
