@@ -29,7 +29,6 @@ Watch Fly Photos in action:
 | -- | -- | -- |
 | **Price** | 🪙 Paid | 🆓 Free |
 | **Updates** | ✅ Seamless auto-updates | ❌ User-managed |
-| **Bug Fixes** | ✅ Can be available faster | ❌ Available in official releases only |
 | **Security** | ✅ Signed and certified by Microsoft | ❌ Not signed |
 
 ---
