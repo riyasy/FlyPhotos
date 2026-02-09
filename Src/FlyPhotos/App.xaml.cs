@@ -35,8 +35,8 @@ public partial class App
     public App()
     {
         GlobalDiagnosticsContext.Set("LogPath", PathResolver.GetLogFolderPath());
-
         KillOtherFlys();
+        // Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "ml-IN";
         InitializeComponent();
     }
 

@@ -469,4 +469,31 @@
   <data name="SettingsCardVersion.Description" xml:space="preserve">
     <value>Current version is 2.5.14</value>
   </data>
+  <data name="ConfirmDeletion.Title" xml:space="preserve">
+    <value>Confirm Deletion</value>
+  </data>
+  <data name="ConfirmDeletion.Message" xml:space="preserve">
+    <value>Are you sure you want to delete this file?</value>
+  </data>
+  <data name="ConfirmDeletion.DeleteButton" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="DeletionFailed.Title" xml:space="preserve">
+    <value>Deletion Failed</value>
+  </data>
+  <data name="DeletionFailed.Message" xml:space="preserve">
+    <value>The application could not delete the file.</value>
+  </data>
+  <data name="DeletionFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="NoShortcutsCreated.Message" xml:space="preserve">
+    <value>No shortcuts created. Configure in settings.</value>
+  </data>
+  <data name="LoadingHighQuality.Message" xml:space="preserve">
+    <value>Loading high quality version. Try after some time</value>
+  </data>
 </root>

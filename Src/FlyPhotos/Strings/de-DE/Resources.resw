@@ -225,6 +225,15 @@
   <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
     <value>Keiner</value>
   </data>
+  <data name="DeletionFailed.Title" xml:space="preserve">
+    <value>Löschen fehlgeschlagen</value>
+  </data>
+  <data name="DeletionFailed.Message" xml:space="preserve">
+    <value>Die Anwendung konnte die Datei nicht löschen.</value>
+  </data>
+  <data name="DeletionFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
     <value>Transparenz % einstellen</value>
   </data>
@@ -468,5 +477,23 @@
   </data>
   <data name="SettingsCardVersion.Description" xml:space="preserve">
     <value>Aktuelle Version : 2.5.14</value>
+  </data>
+  <data name="ConfirmDeletion.Title" xml:space="preserve">
+    <value>Löschen bestätigen</value>
+  </data>
+  <data name="ConfirmDeletion.Message" xml:space="preserve">
+    <value>Sind Sie sicher, dass Sie diese Datei löschen möchten?</value>
+  </data>
+  <data name="ConfirmDeletion.DeleteButton" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
+  <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="NoShortcutsCreated.Message" xml:space="preserve">
+    <value>Keine Verknüpfungen erstellt. In den Einstellungen konfigurieren.</value>
+  </data>
+  <data name="LoadingHighQuality.Message" xml:space="preserve">
+    <value>Lade hochauflösende Version. Versuchen Sie es später erneut.</value>
   </data>
 </root>

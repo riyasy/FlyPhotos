@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.System;
 using Windows.UI;
+using Windows.ApplicationModel.Resources;
 using WinRT;
 using WinRT.Interop;
 using WinUIEx;
@@ -327,7 +328,8 @@ public sealed partial class PhotoDisplayWindow
             }
         }
 
-        UIElement content = stackPanel.Children.Any() ? stackPanel : new TextBlock { Text = "No shortcuts created. Configure in settings." };
+        var rl = new Microsoft.Windows.ApplicationModel.Resources.ResourceLoader();
+        UIElement content = stackPanel.Children.Any() ? stackPanel : new TextBlock { Text = rl.GetString("NoShortcutsCreated/Message") };
         var flyout = new Flyout { Content = content };        
         FlyoutBase.SetAttachedFlyout(senderButton, flyout);
         FlyoutBase.ShowAttachedFlyout(senderButton);
@@ -599,9 +601,11 @@ public sealed partial class PhotoDisplayWindow
 
     private async Task DeleteCurrentlyDisplayedPhoto()
     {
+        var rl = new Microsoft.Windows.ApplicationModel.Resources.ResourceLoader();
+
         if (!_photoController.CanDeleteCurrentPhoto())
         {
-            TxtZoom.Text = "Loading high quality version. Try after some time";
+            TxtZoom.Text = rl.GetString("LoadingHighQuality/Message");
             _inactivityFader.ReportActivity();
             _canvasController.Shrug();
             return;
@@ -612,10 +616,10 @@ public sealed partial class PhotoDisplayWindow
             var confirmDialog = new ContentDialog
             {
                 XamlRoot = this.Content.XamlRoot,
-                Title = "Confirm Deletion",
-                Content = "Are you sure you want to delete this file?",
-                PrimaryButtonText = "Delete",
-                CloseButtonText = "Cancel",
+                Title = rl.GetString("ConfirmDeletion/Title"),
+                Content = rl.GetString("ConfirmDeletion/Message"),
+                PrimaryButtonText = rl.GetString("ConfirmDeletion/DeleteButton"),
+                CloseButtonText = rl.GetString("ConfirmDeletion/CancelButton"),
                 DefaultButton = ContentDialogButton.Close
             };
             var result = await confirmDialog.ShowAsync();
@@ -642,9 +646,9 @@ public sealed partial class PhotoDisplayWindow
             var errorDialog = new ContentDialog
             {
                 XamlRoot = this.Content.XamlRoot,
-                Title = "Deletion Failed",
-                Content = $"The application could not delete the file.{Environment.NewLine}{delResult.FailMessage}",
-                CloseButtonText = "OK"
+                Title = rl.GetString("DeletionFailed/Title"),
+                Content = $"{rl.GetString("DeletionFailed/Message")}{Environment.NewLine}{delResult.FailMessage}",
+                CloseButtonText = rl.GetString("DeletionFailed/CloseButton")
             };
             await errorDialog.ShowAsync();
         }

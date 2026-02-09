@@ -19,7 +19,7 @@
 		<ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
 		<PublishAot>true</PublishAot>
         <SatelliteResourceLanguages>en-US;ml-IN;de-DE</SatelliteResourceLanguages>
-		<InvariantGlobalization>true</InvariantGlobalization>
+		<!-- InvariantGlobalization>true</InvariantGlobalization -->
 		<GenerateTestArtifacts>False</GenerateTestArtifacts>
 		<NoWarn>$(NoWarn);CA1416</NoWarn>
 		
