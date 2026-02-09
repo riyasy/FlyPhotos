@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="TitleTextBlock.Text" xml:space="preserve">
-    <value>Fly Photos - ഫോട്ടോ തിരഞ്ഞെടുക്കുക</value>
+    <value>FlyPhotos - ഫോട്ടോ തിരഞ്ഞെടുക്കുക</value>
   </data>
   <data name="DropAreaRun.Text" xml:space="preserve">
     <value>ഒരു ചിത്രം വലിച്ചിടുക (Drag &amp; Drop), അല്ലെങ്കിൽ</value>
@@ -127,10 +127,10 @@
     <value>ഫയൽ തുറക്കുക</value>
   </data>
   <data name="RightClickInstruction.Text" xml:space="preserve">
-    <value>ഒരു ചിത്രത്തിൽ റൈറ്റ് ക്ലിക്ക് (Right-click) ചെയ്ത് "Open With" &gt; "Fly Photos" തിരഞ്ഞെടുത്ത് ഈ ആപ്പ് ഉപയോഗിക്കാവുന്നതാണ്.</value>
+    <value>ഒരു ചിത്രത്തിൽ റൈറ്റ് ക്ലിക്ക് (Right-click) ചെയ്ത് "Open With" &gt; "FlyPhotos" തിരഞ്ഞെടുത്ത് ഈ ആപ്പ് ഉപയോഗിക്കാവുന്നതാണ്.</value>
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
-    <value>ഒരു ചിത്രത്തിൽ റൈറ്റ് ക്ലിക്ക് ചെയ്ത് "Open With" &gt; "Choose another app" തിരഞ്ഞെടുത്ത്, "Fly Photos" സെലക്ട് ചെയ്ത ശേഷം "Always" ബട്ടൺ അമർത്തി FlyPhotos-നെ ഡിഫോൾട്ട് വ്യൂവർ ആയി ക്രമീകരിക്കാം.</value>
+    <value>ഒരു ചിത്രത്തിൽ റൈറ്റ് ക്ലിക്ക് ചെയ്ത് "Open With" &gt; "Choose another app" തിരഞ്ഞെടുത്ത്, "FlyPhotos" സെലക്ട് ചെയ്ത ശേഷം "Always" ബട്ടൺ അമർത്തി FlyPhotos-നെ ഡിഫോൾട്ട് വ്യൂവർ ആയി ക്രമീകരിക്കാം.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
     <value>Windows 11-ലെ "Settings" ആപ്പിലുള്ള "Apps &gt; Default Apps" പേജ് വഴിയും FlyPhotos-നെ ഡിഫോൾട്ട് വ്യൂവർ ആയി ക്രമീകരിക്കാം.</value>
@@ -464,7 +464,7 @@
     <value>Github റെപ്പോസിറ്ററി</value>
   </data>
   <data name="SettingsCardSourceCode.Description" xml:space="preserve">
-    <value>Fly Photos ഓപ്പൺ സോഴ്‌സ് ആണ്, Github-ൽ ലഭ്യമാണ്</value>
+    <value>FlyPhotos ഓപ്പൺ സോഴ്‌സ് ആണ്, Github-ൽ ലഭ്യമാണ്</value>
   </data>
   <data name="BtnGithubRepo.Content" xml:space="preserve">
     <value>Github റെപ്പോസിറ്ററിയിലേക്ക് പോകുക</value>
@@ -482,7 +482,7 @@
     <value>കടപ്പാടുകൾ</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>Fly Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog, WinUIEx എന്നിവയോട് നന്ദി പറയുന്നു.</value>
+    <value>FlyPhotos Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog, WinUIEx എന്നിവയോട് നന്ദി പറയുന്നു.</value>
   </data>
   <data name="BtnThirdPartyLicenses.Content" xml:space="preserve">
     <value>തേർഡ് പാർട്ടി ലൈസൻസുകൾ കാണുക</value>

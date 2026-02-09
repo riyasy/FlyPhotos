@@ -12,7 +12,7 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
     <Grid x:Name="MainLayout" Background="Transparent">
-        <Pivot Title="Fly Photos - Settings">
+        <Pivot Title="FlyPhotos - Settings">
             <PivotItem x:Uid="SettingsPivotItemGeneral">
                 <ScrollViewer>
                     <ScrollViewer.Resources>

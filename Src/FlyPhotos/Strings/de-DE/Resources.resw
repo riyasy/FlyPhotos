@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="TitleTextBlock.Text" xml:space="preserve">
-    <value>Fly Photos - Foto auswählen</value>
+    <value>FlyPhotos - Foto auswählen</value>
   </data>
   <data name="DropAreaRun.Text" xml:space="preserve">
     <value>Bild hierher ziehen oder</value>
@@ -127,10 +127,10 @@
     <value>Datei öffnen</value>
   </data>
   <data name="RightClickInstruction.Text" xml:space="preserve">
-    <value>FlyPhotos wird verwendet, indem Sie mit der rechten Maustaste auf ein Bild klicken und „Öffnen mit“ &gt; „Fly Photos“ auswählen.</value>
+    <value>FlyPhotos wird verwendet, indem Sie mit der rechten Maustaste auf ein Bild klicken und „Öffnen mit“ &gt; „FlyPhotos“ auswählen.</value>
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
-    <value>Sie können FlyPhotos als Standardanzeige festlegen: Rechtsklick auf ein Bild &gt; „Öffnen mit“ &gt; „Andere App auswählen“. Wählen Sie „Fly Photos“ und klicken Sie auf den Button „Immer“.</value>
+    <value>Sie können FlyPhotos als Standardanzeige festlegen: Rechtsklick auf ein Bild &gt; „Öffnen mit“ &gt; „Andere App auswählen“. Wählen Sie „FlyPhotos“ und klicken Sie auf den Button „Immer“.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
     <value>FlyPhotos kann auch in den Windows 11-Einstellungen unter „Apps &gt; Standard-Apps“ als Standardanzeige eingerichtet werden.</value>
@@ -452,7 +452,7 @@
     <value>Github-Repository</value>
   </data>
   <data name="SettingsCardSourceCode.Description" xml:space="preserve">
-    <value>Fly Photos ist Open Source und wird auf Github gehostet</value>
+    <value>FlyPhotos ist Open Source und wird auf Github gehostet</value>
   </data>
   <data name="BtnGithubRepo.Content" xml:space="preserve">
     <value>Zum Github-Repository gehen</value>
@@ -470,7 +470,7 @@
     <value>Danksagung</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>Fly dankt Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog und WinUIEx.</value>
+    <value>FlyPhotos dankt Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog und WinUIEx.</value>
   </data>
   <data name="BtnThirdPartyLicenses.Content" xml:space="preserve">
     <value>Lizenzen von Drittanbietern anzeigen</value>

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="TitleTextBlock.Text" xml:space="preserve">
-    <value>Fly Photos - Select Photo</value>
+    <value>FlyPhotos - Select Photo</value>
   </data>
   <data name="DropAreaRun.Text" xml:space="preserve">
     <value>Drag and drop an image or</value>
@@ -127,10 +127,10 @@
     <value>Open file</value>
   </data>
   <data name="RightClickInstruction.Text" xml:space="preserve">
-    <value>FlyPhotos is intended to be used by right-clicking an image and then selecting Open With "Fly Photos".</value>
+    <value>FlyPhotos is intended to be used by right-clicking an image and then selecting Open With "FlyPhotos".</value>
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
-    <value>FlyPhotos can also be set as the default viewer for an extension by right-clicking an image and selecting "Open With" and then "Choose another app" and then select "Fly Photos" and press the "Always" button.</value>
+    <value>FlyPhotos can also be set as the default viewer for an extension by right-clicking an image and selecting "Open With" and then "Choose another app" and then select "FlyPhotos" and press the "Always" button.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
     <value>FlyPhotos can also be set as the default viewer for an extension in "Apps &gt; Default Apps" page in "Settings" app of Windows 11.</value>
@@ -443,7 +443,7 @@
     <value>Github Repository</value>
   </data>
   <data name="SettingsCardSourceCode.Description" xml:space="preserve">
-    <value>Fly Photos is open source and hosted in Github</value>
+    <value>FlyPhotos is open source and hosted in Github</value>
   </data>
   <data name="BtnGithubRepo.Content" xml:space="preserve">
     <value>Go to Github repository</value>
@@ -461,7 +461,7 @@
     <value>Credits</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>Fly thanks Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog, and WinUIEx.</value>
+    <value>FlyPhotos thanks Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog, and WinUIEx.</value>
   </data>
   <data name="BtnThirdPartyLicenses.Content" xml:space="preserve">
     <value>View 3rd party licenses</value>
