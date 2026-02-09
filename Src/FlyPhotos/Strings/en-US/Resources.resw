@@ -225,6 +225,15 @@
   <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
     <value>None</value>
   </data>
+  <data name="DeletionFailed.Title" xml:space="preserve">
+    <value>Deletion Failed</value>
+  </data>
+  <data name="DeletionFailed.Message" xml:space="preserve">
+    <value>The application could not delete the file.</value>
+  </data>
+  <data name="DeletionFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
     <value>Set transparency %</value>
   </data>
@@ -419,7 +428,7 @@
     <value>Codecs</value>
   </data>
   <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
-    <value>Fly uses Windows Inbuilt Imaging Component (WIC) codecs mostly.</value>
+    <value>FlyPhotos uses Windows Inbuilt Imaging Component (WIC) codecs mostly.</value>
   </data>
   <data name="HeaderCodec.Text" xml:space="preserve">
     <value>Codec</value>
@@ -481,19 +490,19 @@
   <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
     <value>Cancel</value>
   </data>
-  <data name="DeletionFailed.Title" xml:space="preserve">
-    <value>Deletion Failed</value>
-  </data>
-  <data name="DeletionFailed.Message" xml:space="preserve">
-    <value>The application could not delete the file.</value>
-  </data>
-  <data name="DeletionFailed.CloseButton" xml:space="preserve">
-    <value>OK</value>
-  </data>
   <data name="NoShortcutsCreated.Message" xml:space="preserve">
     <value>No shortcuts created. Configure in settings.</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Loading high quality version. Try after some time</value>
+  </data>
+  <data name="SettingsPage.Title" xml:space="preserve">
+    <value>FlyPhotos - Settings</value>
+  </data>
+  <data name="ColorPickerFlyoutOkButton.Content" xml:space="preserve">
+    <value>Ok</value>
+  </data>
+  <data name="ColorPickerFlyoutCancelButton.Content" xml:space="preserve">
+    <value>Cancel</value>
   </data>
 </root>

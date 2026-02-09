@@ -35,7 +35,7 @@ internal sealed partial class Settings
     internal Settings()
     {
         InitializeComponent();
-        Title = "FlyPhotos - Settings";
+        //Title = "FlyPhotos - Settings";
 
         var titleBar = AppWindow.TitleBar;
         titleBar.ExtendsContentIntoTitleBar = true;

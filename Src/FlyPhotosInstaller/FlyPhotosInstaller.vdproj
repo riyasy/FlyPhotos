@@ -6089,7 +6089,7 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:Fly"
+        "ProductName" = "8:FlyPhotos"
         "ProductCode" = "8:{21FEBB4D-CACE-44C1-A265-B7C2A0619A04}"
         "PackageCode" = "8:{C7FEFEE4-194B-43AF-8718-CD43FDCE1F96}"
         "UpgradeCode" = "8:{5565DCCD-EEED-45A0-93FF-4BABC468C2A7}"
@@ -6102,7 +6102,7 @@
         "Manufacturer" = "8:RYFTools"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://github.com/riyasy/FlyPhotos"
-        "Title" = "8:Fly Installer"
+        "Title" = "8:FlyPhotos Installer"
         "Subject" = "8:"
         "ARPCONTACT" = "8:RYFTools"
         "Keywords" = "8:"

@@ -12,7 +12,7 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
     <Grid x:Name="MainLayout" Background="Transparent">
-        <Pivot Title="FlyPhotos - Settings">
+        <Pivot x:Uid="SettingsPage">
             <PivotItem x:Uid="SettingsPivotItemGeneral">
                 <ScrollViewer>
                     <ScrollViewer.Resources>
@@ -29,8 +29,8 @@
                                     HorizontalAlignment="Right"
                                     Orientation="Horizontal"
                                     Spacing="10">
-                                    <Button Click="ColorFlyOutOkButton_Click" Content="Ok" />
-                                    <Button Click="ColorFlyOutCancelButton_Click" Content="Cancel" />
+                                    <Button x:Uid="ColorPickerFlyoutOkButton" Click="ColorFlyOutOkButton_Click" />
+                                    <Button x:Uid="ColorPickerFlyoutCancelButton" Click="ColorFlyOutCancelButton_Click" />
                                 </StackPanel>
                             </StackPanel>
                         </Flyout>

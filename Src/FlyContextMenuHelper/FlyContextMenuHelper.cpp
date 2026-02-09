@@ -31,7 +31,7 @@
 static TCHAR szWindowClass[] = _T("context_menu_helper_fly");
 
 // The string that appears in the application's title bar.
-static TCHAR szTitle[] = _T("Context Menu Helper for Fly Photos");
+static TCHAR szTitle[] = _T("Context Menu Helper for FlyPhotos");
 
 // Stored instance handle for use in Win32 API calls such as FindResource
 HINSTANCE hInst;
@@ -226,7 +226,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
     HDC hdc;
-    TCHAR greeting[] = _T("Context Menu Helper for Fly Photos");
+    TCHAR greeting[] = _T("Context Menu Helper for FlyPhotos");
 
     // Try to let the active Shell Context Menu handle the message first.
     // This ensures icons, submenus, and "Open With" work correctly.

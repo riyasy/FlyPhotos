@@ -198,27 +198,6 @@
   <data name="ComboThemeItemLight.Content" xml:space="preserve">
     <value>ലൈറ്റ്</value>
   </data>
-  <data name="ConfirmDeletion.Title" xml:space="preserve">
-    <value>ഡിലീറ്റ് സ്ഥിരീകരിക്കുക</value>
-  </data>
-  <data name="ConfirmDeletion.Message" xml:space="preserve">
-    <value>ഈ ഫയൽ നീക്കം ചെയ്യാൻ നിങ്ങൾക്ക് ഉറപ്പാണോ?</value>
-  </data>
-  <data name="ConfirmDeletion.DeleteButton" xml:space="preserve">
-    <value>ഡിലീറ്റ്</value>
-  </data>
-  <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
-    <value>റദ്ദാക്കുക</value>
-  </data>
-  <data name="DeletionFailed.Title" xml:space="preserve">
-    <value>ഡിലീറ്റ് പരാജയപ്പെട്ടു</value>
-  </data>
-  <data name="DeletionFailed.Message" xml:space="preserve">
-    <value>അപ്ലിക്കേഷൻ ഫയൽ ഡിലീറ്റ് ചെയ്യാൻ കഴിഞ്ഞില്ല.</value>
-  </data>
-  <data name="DeletionFailed.CloseButton" xml:space="preserve">
-    <value>ശരി</value>
-  </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>വിൻഡോ പശ്ചാത്തലം</value>
   </data>
@@ -245,6 +224,15 @@
   </data>
   <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
     <value>ഒന്നുമില്ല</value>
+  </data>
+  <data name="DeletionFailed.Title" xml:space="preserve">
+    <value>ഡിലീറ്റ് പരാജയപ്പെട്ടു</value>
+  </data>
+  <data name="DeletionFailed.Message" xml:space="preserve">
+    <value>അപ്ലിക്കേഷൻ ഫയൽ ഡിലീറ്റ് ചെയ്യാൻ കഴിഞ്ഞില്ല.</value>
+  </data>
+  <data name="DeletionFailed.CloseButton" xml:space="preserve">
+    <value>ശരി</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
     <value>സുതാര്യത % ക്രമീകരിക്കുക</value>
@@ -440,7 +428,7 @@
     <value>കോഡെക്കുകൾ</value>
   </data>
   <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
-    <value>Fly പ്രധാനമായും വിൻഡോസ് ഇൻബിൽറ്റ് ഇമേജിംഗ് കമ്പോണന്റ് (WIC) കോഡെക്കുകളാണ് ഉപയോഗിക്കുന്നത്.</value>
+    <value>FlyPhotos പ്രധാനമായും വിൻഡോസ് ഇൻബിൽറ്റ് ഇമേജിംഗ് കമ്പോണന്റ് (WIC) കോഡെക്കുകളാണ് ഉപയോഗിക്കുന്നത്.</value>
   </data>
   <data name="HeaderCodec.Text" xml:space="preserve">
     <value>കോഡെക്</value>
@@ -490,10 +478,31 @@
   <data name="SettingsCardVersion.Description" xml:space="preserve">
     <value>നിലവിലെ പതിപ്പ് : 2.5.14</value>
   </data>
+  <data name="ConfirmDeletion.Title" xml:space="preserve">
+    <value>ഡിലീറ്റ് സ്ഥിരീകരിക്കുക</value>
+  </data>
+  <data name="ConfirmDeletion.Message" xml:space="preserve">
+    <value>ഈ ഫയൽ നീക്കം ചെയ്യാൻ നിങ്ങൾക്ക് ഉറപ്പാണോ?</value>
+  </data>
+  <data name="ConfirmDeletion.DeleteButton" xml:space="preserve">
+    <value>ഡിലീറ്റ്</value>
+  </data>
+  <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
+    <value>റദ്ദാക്കുക</value>
+  </data>
   <data name="NoShortcutsCreated.Message" xml:space="preserve">
     <value>എന്ത് ശോർട്ട്കട്ടുകളും സൃഷ്ടിച്ചിട്ടില്ല. ക്രമീകരണങ്ങളിൽ ക്രമീകരിക്കുക.</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>ഉയർന്ന ഗുണമേൻമയുള്ള പതിപ്പ് ലോഡ് ചെയ്യുന്നു. കുറച്ചുകാലം കഴിഞ്ഞ് ശ്രമിക്കുക</value>
+  </data>
+  <data name="SettingsPage.Title" xml:space="preserve">
+    <value>FlyPhotos - ക്രമീകരണങ്ങൾ</value>
+  </data>
+  <data name="ColorPickerFlyoutOkButton.Content" xml:space="preserve">
+    <value>ശരി</value>
+  </data>
+  <data name="ColorPickerFlyoutCancelButton.Content" xml:space="preserve">
+    <value>റദ്ദാക്കുക</value>
   </data>
 </root>
