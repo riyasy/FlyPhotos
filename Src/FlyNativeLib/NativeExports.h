@@ -9,15 +9,16 @@
 #pragma once
 
 #include <Windows.h>
-
- // This defines the function signature for a callback that we will pass from C# to C++.
- // It will be called for each file found.
-typedef void(__stdcall* FileListCallback)(const wchar_t* filePath);
+#include <cstdint>  
 
 // We define our exported functions inside extern "C" to prevent C++ name mangling.
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+    // This defines the function signature for a callback that we will pass from C# to C++.
+    // It will be called for each file found.
+    typedef void(__stdcall* FileListCallback)(const wchar_t* filePath);
 
     /// @brief Gets the full paths of all items in the active Windows Explorer window.
     /// @param callback A pointer to a callback function that will be invoked for each file path found.
@@ -41,6 +42,15 @@ extern "C" {
     /// @return An HRESULT indicating success (S_OK) or an error code.
     /// @note The callback function will be called multiple times, once for each decoder.
     __declspec(dllexport) HRESULT GetWicDecoders(CodecInfoCallback callback);
+
+    // Callback for enumerating StartMenuShortcuts
+    typedef void(__stdcall* ShortcutCallback)(const wchar_t* name, const wchar_t* path,
+        const uint8_t* pixels, int size, int width, int height);
+
+    /// @brief Enumerates Start Menu shortcuts, resolves targets, and extracts icons.
+    /// @param callback A pointer to a callback function.
+    /// @return S_OK on success.
+    __declspec(dllexport) HRESULT EnumerateStartMenuShortcuts(ShortcutCallback callback);
 
 #ifdef __cplusplus
 }

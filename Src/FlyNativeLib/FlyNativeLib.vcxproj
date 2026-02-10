@@ -111,6 +111,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -129,6 +130,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -142,6 +144,7 @@
     <ClInclude Include="NativeExports.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ShellContextMenu.h" />
+    <ClInclude Include="ShellProgramScanner.h" />
     <ClInclude Include="ShellUtility.h" />
     <ClInclude Include="WicUtility.h" />
   </ItemGroup>
@@ -155,6 +158,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ShellContextMenu.cpp" />
+    <ClCompile Include="ShellProgramScanner.cpp" />
     <ClCompile Include="ShellUtility.cpp" />
     <ClCompile Include="WicUtility.cpp" />
   </ItemGroup>

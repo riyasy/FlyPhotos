@@ -19,6 +19,7 @@
 #include <atlcoll.h>
 #include "DllGlobals.h"
 #include "ShellContextMenu.h"
+#include "ShellProgramScanner.h"
 
 /**
  * @brief Implementation of the GetFileListFromExplorer exported function.
@@ -126,4 +127,23 @@ HRESULT GetWicDecoders(CodecInfoCallback callback)
         }
     }
     return hr;
+}
+
+/// @brief Enumerates Start Menu shortcuts, resolves targets, and extracts icons.
+/// @param callback A pointer to a callback function.
+/// @return S_OK on success.
+HRESULT EnumerateStartMenuShortcuts(ShortcutCallback callback)
+{
+    if (!callback)
+        return E_POINTER;
+
+    ShellProgramScanner scanner;
+    scanner.Scan();
+
+    for (const auto& item : scanner.GetResults())
+    {
+        callback(item.Name.c_str(), item.Path.c_str(), item.Pixels.data(), 
+            (int)item.Pixels.size(), item.Width, item.Height);
+    }
+    return S_OK;
 }
