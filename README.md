@@ -15,7 +15,7 @@ Watch Fly Photos in action:
 
 ## 📥 Download
 
-<a href="https://get.microsoft.com/installer/download/9pmsk128v1qt?referrer=appbadge" target="_self" >
+<a href="https://apps.microsoft.com/detail/9pmsk128v1qt?referrer=appbadge&mode=full" target="_blank"  rel="noopener noreferrer">
 	<img src="https://get.microsoft.com/images/en-us%20light.svg" width="200"/>
 </a>
 
