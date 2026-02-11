@@ -8,7 +8,7 @@ using Microsoft.UI;
 using Microsoft.UI.Input;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using NLog;
 using System;
@@ -182,35 +182,63 @@ internal static class Util
         }
     }
 
-    public static async Task SetButtonIconFromExeAsync(Button button, string exePath)
+    /// <summary>
+    /// Extracts an icon from an executable file and converts it to an <see cref="ImageSource"/>.
+    /// </summary>
+    /// <param name="exePath">The path to the executable.</param>
+    /// <returns>A task returning the <see cref="ImageSource"/> or null if extraction fails.</returns>
+    public static async Task<ImageSource?> ExtractIconFromExe(string exePath)
     {
         if (string.IsNullOrEmpty(exePath) || !File.Exists(exePath))
-            return;
+            return null;
 
-        IntPtr[] iconPtr = new IntPtr[1];
-        Win32Methods.ExtractIconEx(exePath, 0, iconPtr, null, 1);
-        BitmapImage? bmp = null;
-
-        if (iconPtr[0] != IntPtr.Zero)
+        byte[]? iconBytes = await Task.Run(() =>
         {
             try
             {
-                using var icon = Icon.FromHandle(iconPtr[0]);
+                using var icon = Icon.ExtractAssociatedIcon(exePath);
+                if (icon == null) return null;
+
                 using var bitmap = icon.ToBitmap();
                 using var ms = new MemoryStream();
                 bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                ms.Position = 0;
-                bmp = new BitmapImage();
-                await bmp.SetSourceAsync(ms.AsRandomAccessStream());
+                return ms.ToArray();
             }
-            finally
+            catch (Exception ex)
             {
-                Win32Methods.DestroyIcon(iconPtr[0]);
+                Logger.Error(ex, "ExtractIconFromExe Error Error");
+                return null;
             }
+        });
+
+        if (iconBytes == null) return null;
+
+        var bmp = new BitmapImage();
+        using var ms = new MemoryStream(iconBytes);
+        await bmp.SetSourceAsync(ms.AsRandomAccessStream());
+        return bmp;
+    }
+
+    /// <summary>
+    /// Extracts the icon data from a store app list entry.
+    /// </summary>
+    /// <param name="entry">The app list entry.</param>
+    /// <returns>A task returning the byte array of the icon.</returns>
+    public static async Task<byte[]> ExtractIconFromAppListEntryAsync(Windows.ApplicationModel.Core.AppListEntry entry)
+    {
+        try
+        {
+            var logo = entry.DisplayInfo.GetLogo(new Windows.Foundation.Size(50, 50));
+            using var stream = await logo.OpenReadAsync();
+            await using var input = stream.AsStreamForRead();
+            using var ms = new MemoryStream();
+            await input.CopyToAsync(ms);
+            return ms.ToArray();
         }
-        if (bmp != null)
-            button.Content = new Microsoft.UI.Xaml.Controls.Image { Source = bmp, Width = 32, Height = 32 };
-        else
-            button.Content = new FontIcon { Glyph = "\uED35", FontSize = 32 }; // Default icon
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "ExtractIconFromAppListEntryAsync Error");
+            return [];
+        }
     }
 }

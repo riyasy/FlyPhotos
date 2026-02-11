@@ -2,6 +2,7 @@
 using FlyPhotos.AppSettings;
 using FlyPhotos.Controllers;
 using FlyPhotos.Data;
+using FlyPhotos.ExternalApps;
 using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
@@ -22,10 +23,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.System;
 using Windows.UI;
-using Windows.ApplicationModel.Resources;
 using WinRT;
 using WinRT.Interop;
 using WinUIEx;
@@ -315,17 +316,24 @@ public sealed partial class PhotoDisplayWindow
         var senderButton = sender as Button;
         if (senderButton == null) return;
         var stackPanel = new StackPanel { Spacing = 4, };
-        var appPaths = new List<string> { AppConfig.Settings.ExternalApp1, AppConfig.Settings.ExternalApp2, AppConfig.Settings.ExternalApp3, AppConfig.Settings.ExternalApp4 };
+        var appShortCuts = new List<string> { AppConfig.Settings.ExternalApp1, AppConfig.Settings.ExternalApp2, AppConfig.Settings.ExternalApp3, AppConfig.Settings.ExternalApp4 };
 
-        foreach (var path in appPaths)
+        foreach (var shortCut in appShortCuts)
         {
-            if (!string.IsNullOrEmpty(path) && File.Exists(path))
-            {
-                var flyoutButton = new Button { Width = 60, Height = 50, Tag = path };
-                await Util.SetButtonIconFromExeAsync(flyoutButton, path);
-                flyoutButton.Click += FlyoutButton_OnClick;
-                stackPanel.Children.Add(flyoutButton);
-            }
+            if (string.IsNullOrEmpty(shortCut)) continue;
+            
+            var app = await AppProvider.GetAppAsync(shortCut);
+
+            if (app == null) continue;
+
+            var flyoutButton = new Button { Width = 60, Height = 50, Tag = shortCut };
+            var bmp = app.Icon;
+            flyoutButton.Content = bmp != null
+                ? new Microsoft.UI.Xaml.Controls.Image { Source = bmp, Width = 32, Height = 32 }
+                : new FontIcon { Glyph = "\uED35", FontSize = 32 }; // Default icon
+            flyoutButton.Tag = app;
+            flyoutButton.Click += FlyoutButton_OnClick;
+            stackPanel.Children.Add(flyoutButton);
         }
 
         var rl = new Microsoft.Windows.ApplicationModel.Resources.ResourceLoader();
@@ -335,27 +343,18 @@ public sealed partial class PhotoDisplayWindow
         FlyoutBase.ShowAttachedFlyout(senderButton);
     }
 
+
+
     /// <summary>
     /// This event handler is for the buttons INSIDE the flyout.
     /// It launches the application path stored in the button's Tag property.
     /// </summary>
     private void FlyoutButton_OnClick(object sender, RoutedEventArgs e)
     {
+		string filePathArgument = _photoController.GetFullPathCurrentFile();
         var clickedButton = sender as Button;
-        var exeToLaunch = clickedButton?.Tag as string;
-
-        if (string.IsNullOrEmpty(exeToLaunch)) { return; }
-
-        string filePathArgument = _photoController.GetFullPathCurrentFile();
-        try
-        {
-            var startInfo = new ProcessStartInfo { FileName = exeToLaunch, Arguments = $"\"{filePathArgument}\"", UseShellExecute = true };
-            Process.Start(startInfo);
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Failed to launch '{exeToLaunch}' with argument '{filePathArgument}': {ex.Message}");
-        }
+        if (clickedButton?.Tag is InstalledApp appToLaunch)
+            _ = appToLaunch.LaunchAsync(filePathArgument); // Fire and forget the launch, we don't need to await it here
     }
 
     private void SettingWindow_Closed(object sender, WindowEventArgs args)

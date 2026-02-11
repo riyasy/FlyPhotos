@@ -1,9 +1,12 @@
-﻿using System;
+﻿using FlyPhotos.Data;
+using FlyPhotos.ExternalApps;
+using NLog;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using FlyPhotos.Data;
-using NLog;
+using System.Threading.Tasks;
 
 // Required for CallConvStdcall
 
@@ -73,9 +76,39 @@ internal static partial class NativeBridge
     [LibraryImport(DllName, StringMarshalling = StringMarshalling.Utf16)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
     internal static partial int ShowExplorerContextMenu(IntPtr ownerHwnd, string filePath, int x, int y);
+
+    /// <summary>
+    /// Callback delegate for receiving shortcut information from native code.
+    /// </summary>
+    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+    public delegate void ShortcutCallback(
+        [MarshalAs(UnmanagedType.LPWStr)] string name,
+        [MarshalAs(UnmanagedType.LPWStr)] string path,
+        IntPtr iconData, int iconSize, int width, int height
+    );
+
+    /// <summary>
+    /// Enumerates Start Menu shortcuts using the native library.
+    /// </summary>
+    /// <param name="callback">The callback to invoke for each shortcut found.</param>
+    /// <returns>Wait status or error code.</returns>
+    [LibraryImport(DllName)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    public static partial int EnumerateStartMenuShortcuts(ShortcutCallback callback);
 }
 
 #endregion
+
+/// <summary>
+/// Data Transfer Object for application shortcuts.
+/// </summary>
+public record AppShortcutDto(
+    string Name,
+    string Path,
+    byte[] IconPixels,
+    int Width,
+    int Height,
+    AppType Type, string aumid);
 
 /// <summary>
 /// Provides a high-level, managed wrapper for native functionalities exposed by `FlyNativeLib.dll`.
@@ -163,4 +196,36 @@ public static class NativeWrapper
             Logger.Error(ex, "NativeBridge - ShowContextMenu failed with exception");
         }
     }
+
+    /// <summary>
+    /// Blocking call to scan Start Menu. Run this on a background thread.
+    /// </summary>
+    public static List<AppShortcutDto> LoadAllWin32ProgramShortcuts()
+    {
+        var rawDataList = new List<AppShortcutDto>(100);
+        try
+        {
+            // Keep delegate alive for entire native call
+            NativeBridge.ShortcutCallback callback = CallbackDelegate;
+            NativeBridge.EnumerateStartMenuShortcuts(callback);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "NativeBridge - Error scanning shortcuts");
+        }
+        return rawDataList;
+        void CallbackDelegate(string name, string path, IntPtr iconData, int iconSize, int width, int height)
+        {
+            // 10MB limit for icon seems plenty safe
+            if (iconSize <= 0 || iconSize > 10 * 1024 * 1024 || width <= 0 || height <= 0)
+                return;
+            // BGRA 32bpp → managed byte[]
+            byte[] pixels = new byte[iconSize];
+            Marshal.Copy(iconData, pixels, 0, iconSize);
+            rawDataList.Add(new AppShortcutDto(name, path, pixels, width, height, AppType.Win32, string.Empty));
+        }
+    }
 }
+
+
+

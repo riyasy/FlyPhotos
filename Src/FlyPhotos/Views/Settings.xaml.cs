@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using FlyPhotos.AppSettings;
 using FlyPhotos.Data;
+using FlyPhotos.ExternalApps;
 using FlyPhotos.Utils;
 using Microsoft.UI;
 using Microsoft.UI.Composition.SystemBackdrops;
@@ -10,6 +11,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Shapes;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -17,6 +19,7 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.System;
+using Path = System.IO.Path;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -137,10 +140,22 @@ internal sealed partial class Settings
 
     private async void Settings_Loaded(object sender, RoutedEventArgs e)
     {
-        await Util.SetButtonIconFromExeAsync(BtnShortcut1, AppConfig.Settings.ExternalApp1);
-        await Util.SetButtonIconFromExeAsync(BtnShortcut2, AppConfig.Settings.ExternalApp2);
-        await Util.SetButtonIconFromExeAsync(BtnShortcut3, AppConfig.Settings.ExternalApp3);
-        await Util.SetButtonIconFromExeAsync(BtnShortcut4, AppConfig.Settings.ExternalApp4);
+        await SetButtonIconFromAppData(BtnShortcut1, AppConfig.Settings.ExternalApp1);
+        await SetButtonIconFromAppData(BtnShortcut2, AppConfig.Settings.ExternalApp2);
+        await SetButtonIconFromAppData(BtnShortcut3, AppConfig.Settings.ExternalApp3);
+        await SetButtonIconFromAppData(BtnShortcut4, AppConfig.Settings.ExternalApp4);
+    }
+
+    private async Task SetButtonIconFromAppData(Button btnShortcut, string appShortCut)
+    {
+        var app = await AppProvider.GetAppAsync(appShortCut);
+        if (app != null)
+        {
+            var bmp = app.Icon;
+            btnShortcut.Content = bmp != null
+                ? new Microsoft.UI.Xaml.Controls.Image { Source = bmp, Width = 32, Height = 32 }
+                : new FontIcon { Glyph = "\uED35", FontSize = 32 }; // Default icon
+        }
     }
 
     private async void ButtonEnableAutoHideMouse_OnToggled(object sender, RoutedEventArgs e)
@@ -439,31 +454,42 @@ internal sealed partial class Settings
 
     private async void OnShortcutButtonClick(object sender, RoutedEventArgs e)
     {
-        var button = (Button)sender;
-        var exe = await PickExeAsync();
-        if (exe != null)
+        var dialog = new AppSelectionDialog(this)
         {
-            SetShortCutSettingForButton(button, exe);
-            await AppConfig.SaveAsync();
-            await Util.SetButtonIconFromExeAsync(button, exe);
-        }
+            XamlRoot = this.Content.XamlRoot,
+            Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
+            RequestedTheme = ((FrameworkElement)Content).ActualTheme
+        };
+
+        await dialog.ShowAsync();
+
+        if (dialog.SelectedApp == null) return;
+
+        var button = (Button)sender;
+        SetShortCutSettingForButton(button, dialog.SelectedApp.GetSerializedState());
+        await AppConfig.SaveAsync();
+
+        var bmp = dialog.SelectedApp.Icon;
+        button.Content = bmp != null
+            ? new Microsoft.UI.Xaml.Controls.Image { Source = bmp, Width = 32, Height = 32 }
+            : new FontIcon { Glyph = "\uED35", FontSize = 32 };
     }
 
-    private static void SetShortCutSettingForButton(Button button, string exe)
+    private static void SetShortCutSettingForButton(Button button, string shortCut)
     {
         switch (button.Name)
         {
             case "BtnShortcut1":
-                AppConfig.Settings.ExternalApp1 = exe;
+                AppConfig.Settings.ExternalApp1 = shortCut;
                 break;
             case "BtnShortcut2":
-                AppConfig.Settings.ExternalApp2 = exe;
+                AppConfig.Settings.ExternalApp2 = shortCut;
                 break;
             case "BtnShortcut3":
-                AppConfig.Settings.ExternalApp3 = exe;
+                AppConfig.Settings.ExternalApp3 = shortCut;
                 break;
             case "BtnShortcut4":
-                AppConfig.Settings.ExternalApp4 = exe;
+                AppConfig.Settings.ExternalApp4 = shortCut;
                 break;
         }
     }
