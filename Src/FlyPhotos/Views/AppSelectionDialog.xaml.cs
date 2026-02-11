@@ -4,6 +4,7 @@ using FlyPhotos.ExternalApps;
 using FlyPhotos.Utils;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -47,9 +48,21 @@ public sealed partial class AppSelectionDialog : ContentDialog
         _parentWindow = parentWindow;
         InitializeComponent();
         AppListView.ItemsSource = Apps;
+        AppListView.DoubleTapped += AppListView_DoubleTapped;
         Loaded += AppSelectionDialog_Loaded;
         PrimaryButtonClick += AppSelectionDialog_PrimaryButtonClick;
         SecondaryButtonClick += AppSelectionDialog_SecondaryButtonClick;
+    }
+
+    private void AppListView_DoubleTapped(object? sender, DoubleTappedRoutedEventArgs e)
+    {
+        // If an app is selected in the list, treat double-tap as confirm/select
+        if (AppListView.SelectedItem is InstalledApp app)
+        {
+            _pendingSelection = app;
+            SelectedApp = _pendingSelection;
+            Hide();
+        }
     }
 
     private async void AppSelectionDialog_Loaded(object sender, RoutedEventArgs e)

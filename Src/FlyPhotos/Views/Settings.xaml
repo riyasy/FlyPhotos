@@ -310,12 +310,14 @@
                         <controls:SettingsCard
                             x:Name="SettingsCardShowCacheStatusExpander"
                             x:Uid="SettingsCardShowCacheStatusExpander"
+                            Margin="0,5,0,0"
                             HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
                             <ToggleSwitch x:Name="ButtonShowCacheStatusExpander" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardShowImageDimensions"
                             x:Uid="SettingsCardShowImageDimensions"
+                            Margin="0,5,0,0"
                             HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
                             <ToggleSwitch x:Name="ButtonShowImageDimensions" />
                         </controls:SettingsCard>

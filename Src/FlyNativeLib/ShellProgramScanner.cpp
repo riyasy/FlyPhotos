@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file ShellProgramScanner.cpp
  * @brief Implements ShellProgramScanner - enumerates Start Menu shortcuts and extracts 32bpp icon bitmaps.
  *
@@ -42,7 +42,7 @@ ShellProgramScanner::ShellProgramScanner()
 /**
  * @brief Destructor.
  *
- * Releases any remaining COM pointers (if Scan failed partway) � the destructor intentionally
+ * Releases any remaining COM pointers (if Scan failed partway) — the destructor intentionally
  * does not call CoUninitialize because Scan manages COM initialization itself.
  */
 ShellProgramScanner::~ShellProgramScanner()
@@ -233,6 +233,21 @@ void ShellProgramScanner::ExtractIcon(const std::wstring& exePath, const std::ws
     DeleteObject(ii.hbmColor);
     DeleteObject(ii.hbmMask);
     DestroyIcon(hIcon);
+
+    // Premultiply alpha (BGRA → BGRA premultiplied)
+    uint8_t* p = pixels.data();
+    size_t count = width * height;
+    for (size_t i = 0; i < count; i++)
+    {
+        uint8_t a = p[3];
+        if (a != 255) // small optimization
+        {
+            p[0] = (p[0] * a + 127) / 255; // B
+            p[1] = (p[1] * a + 127) / 255; // G
+            p[2] = (p[2] * a + 127) / 255; // R
+        }
+        p += 4;
+    }
 
     ShortcutData data;
     data.Name = displayName;
