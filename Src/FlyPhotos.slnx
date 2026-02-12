@@ -1,0 +1,27 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="FlyContextMenuHelper/FlyContextMenuHelper.vcxproj" Id="9e3501eb-d536-4837-8707-dd4732ed3f48">
+    <Platform Solution="*|ARM64" Project="x64" />
+  </Project>
+  <Project Path="FlyNativeLib/FlyNativeLib.vcxproj" Id="36109967-4dd0-4c5e-8668-26a0b60c6beb">
+    <Platform Solution="*|ARM64" Project="x64" />
+  </Project>
+  <Project Path="FlyNativeLibHeif/FlyNativeLibHeif.vcxproj" Id="962401e3-d795-4b90-95e8-fac78bdf728c">
+    <Platform Solution="*|ARM64" Project="x64" />
+  </Project>
+  <Project Path="FlyPhotos/FlyPhotos.csproj">
+    <Platform Solution="*|Any CPU" Project="x64" />
+    <Platform Solution="*|ARM64" Project="ARM64" />
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="*|x86" Project="x86" />
+    <Deploy />
+  </Project>
+  <Project Path="FlyPhotosInstaller/FlyPhotosInstaller.vdproj" Type="Installer">
+    <Build />
+  </Project>
+</Solution>
