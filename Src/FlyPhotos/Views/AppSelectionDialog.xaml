@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:flyExtApp="using:FlyPhotos.ExternalApps"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Uid="AppSelectionDialog"
     Title="Select an Application"
     DefaultButton="Primary"
     IsPrimaryButtonEnabled="False"
@@ -22,15 +23,17 @@
         <StackPanel Margin="0,0,0,10">
             <TextBox
                 x:Name="SearchBox"
+                x:Uid="SearchBox"
                 PlaceholderText="Search apps..."
                 TextChanged="SearchBox_TextChanged" />
 
             <Button
                 x:Name="BrowseBtn"
+                x:Uid="BrowseBtn"
                 Margin="0,6,0,0"
                 HorizontalAlignment="Stretch"
                 Click="BrowseBtn_Click"
-                Content="Browse for EXE..." />
+                Content="Browse for app..." />
         </StackPanel>
 
         <!--  Progress Ring while loading  -->
@@ -41,7 +44,7 @@
             VerticalAlignment="Center"
             Spacing="10">
             <ProgressRing IsActive="True" />
-            <TextBlock Text="Scanning apps..." />
+            <TextBlock x:Uid="ScanningTextBlock" Text="Scanning apps..." />
         </StackPanel>
 
         <!--  App List  -->

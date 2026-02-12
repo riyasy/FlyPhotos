@@ -505,4 +505,22 @@
   <data name="ColorPickerFlyoutCancelButton.Content" xml:space="preserve">
     <value>റദ്ദാക്കുക</value>
   </data>
+  <data name="AppSelectionDialog.Title" xml:space="preserve">
+    <value>ഒരു അപ്ലിക്കേഷൻ തിരഞ്ഞെടുക്കുക</value>
+  </data>
+  <data name="AppSelectionDialog.PrimaryButtonText" xml:space="preserve">
+    <value>തിരഞ്ഞെടുക്കുക</value>
+  </data>
+  <data name="AppSelectionDialog.SecondaryButtonText" xml:space="preserve">
+    <value>റദ്ദാക്കുക</value>
+  </data>
+  <data name="BrowseBtn.Content" xml:space="preserve">
+    <value>ആപ്പിനായി ബ്രൗസ് ചെയ്യുക...</value>
+  </data>
+  <data name="ScanningTextBlock.Text" xml:space="preserve">
+    <value>ആപ്പുകൾ സ്കാൻ ചെയ്യുന്നു...</value>
+  </data>
+  <data name="SearchBox.PlaceholderText" xml:space="preserve">
+    <value>ആപ്പുകൾ തിരയുക...</value>
+  </data>
 </root>

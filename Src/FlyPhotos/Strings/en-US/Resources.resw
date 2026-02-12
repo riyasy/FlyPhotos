@@ -505,4 +505,22 @@
   <data name="ColorPickerFlyoutCancelButton.Content" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="AppSelectionDialog.Title" xml:space="preserve">
+    <value>Select an Application</value>
+  </data>
+  <data name="AppSelectionDialog.PrimaryButtonText" xml:space="preserve">
+    <value>Select</value>
+  </data>
+  <data name="AppSelectionDialog.SecondaryButtonText" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="BrowseBtn.Content" xml:space="preserve">
+    <value>Browse for app...</value>
+  </data>
+  <data name="ScanningTextBlock.Text" xml:space="preserve">
+    <value>Scanning apps...</value>
+  </data>
+  <data name="SearchBox.PlaceholderText" xml:space="preserve">
+    <value>Search apps...</value>
+  </data>
 </root>
