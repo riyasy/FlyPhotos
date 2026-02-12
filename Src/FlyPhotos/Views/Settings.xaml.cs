@@ -40,6 +40,9 @@ internal sealed partial class Settings
         InitializeComponent();
         //Title = "FlyPhotos - Settings";
 
+        if (!PathResolver.IsPackagedApp)
+            Util.SetUnpackagedAppIcon(this);
+
         var titleBar = AppWindow.TitleBar;
         titleBar.ExtendsContentIntoTitleBar = true;
         titleBar.ButtonBackgroundColor = Colors.Transparent;

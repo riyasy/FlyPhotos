@@ -19,19 +19,14 @@ using Microsoft.UI.Xaml.Media;
 using NLog;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.System;
 using Windows.UI;
 using WinRT;
-using WinRT.Interop;
 using WinUIEx;
-using Icon = System.Drawing.Icon;
-using Win32Methods = FlyPhotos.NativeWrappers.Win32Methods;
 
 namespace FlyPhotos.Views;
 
@@ -82,7 +77,7 @@ public sealed partial class PhotoDisplayWindow
 
         Title = "FlyPhotos";
         if (!PathResolver.IsPackagedApp)
-            SetUnpackagedAppIcon();
+            Util.SetUnpackagedAppIcon(this);
 
         SetupTransparentTitleBar();
 
@@ -835,17 +830,6 @@ public sealed partial class PhotoDisplayWindow
         titleBar.ButtonBackgroundColor = Colors.Transparent;
         titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
         titleBar.ButtonForegroundColor = Colors.Gray;
-    }
-
-    private void SetUnpackagedAppIcon()
-    {
-        var hWnd = WindowNative.GetWindowHandle(this);
-        var processModule = Process.GetCurrentProcess().MainModule;
-        if (processModule == null) return;
-        var sExe = processModule.FileName;
-        var ico = Icon.ExtractAssociatedIcon(sExe);
-        if (ico == null) return;
-        Win32Methods.SendMessage(hWnd, Win32Methods.WM_SETICON, new IntPtr(1), ico.Handle);
     }
 
     private void SetWindowBackdropTransparency(int transparencyIntensity)

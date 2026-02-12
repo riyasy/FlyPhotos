@@ -59,23 +59,6 @@ internal static partial class Win32Methods
     internal const uint WM_SETICON = 0x0080;
 
     /// <summary>
-    /// Imports the `SendMessageW` function from `user32.dll`.
-    /// This function sends the specified message to a window or windows.
-    /// The 'W' suffix indicates the Unicode version.
-    /// </summary>
-    /// <param name="hWnd">A handle to the window whose window procedure will receive the message.</param>
-    /// <param name="Msg">The message to be sent.</param>
-    /// <param name="wParam">Additional message-specific information.</param>
-    /// <param name="lParam">Additional message-specific information.</param>
-    /// <returns>The return value specifies the result of the message processing; its value depends on the message sent.</returns>
-    /// <remarks>
-    /// <paramref name="wParam"/> and <paramref name="lParam"/> are typically `IntPtr` to accommodate various message parameters.
-    /// To get extended error information, call <see cref="Marshal.GetLastWin32Error"/>.
-    /// </remarks>
-    [LibraryImport("user32.dll", EntryPoint = "SendMessageW", SetLastError = true)]
-    internal static partial IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-
-    /// <summary>
     /// Performs an operation on a specified file, such as opening a file or showing its properties.
     /// This is an extended version of ShellExecute and is recommended for new applications.
     /// </summary>

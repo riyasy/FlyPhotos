@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using Windows.Graphics;
 using Windows.System;
 using Windows.UI.Core;
+using WinRT.Interop;
 using Color = Windows.UI.Color;
 
 namespace FlyPhotos.Utils;
@@ -240,5 +241,16 @@ internal static class Util
             Logger.Error(ex, "ExtractIconFromAppListEntryAsync Error");
             return [];
         }
+    }
+
+    public static void SetUnpackagedAppIcon(Window window)
+    {
+        // 1. Get the AppWindow for the current Window
+        var hWnd = WindowNative.GetWindowHandle(window);
+        var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
+        AppWindow appWindow = AppWindow.GetFromWindowId(windowId);
+        string iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "app-icon.ico");
+        if (File.Exists(iconPath))
+            appWindow.SetIcon(iconPath);
     }
 }
