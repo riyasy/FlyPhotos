@@ -27,7 +27,7 @@ namespace FlyPhotos.Controllers.Renderers
         private int _currentPageIndex;
         private readonly bool _supportsTransparency;
 
-        public MultiPageRenderer(CanvasControl canvas, CanvasViewState canvasViewState,  byte[] fileBytes, int initialPageIndex, CanvasImageBrush checkeredBrush, bool supportsTransparency, Action invalidate)
+        public MultiPageRenderer(CanvasControl canvas,  byte[] fileBytes, int initialPageIndex, CanvasImageBrush checkeredBrush, bool supportsTransparency, Action invalidate)
         {
             _canvas = canvas;
             _supportsTransparency = supportsTransparency;

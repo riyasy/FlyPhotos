@@ -4,7 +4,6 @@ using FlyPhotos.Utils;
 using NLog;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Management.Deployment;
 

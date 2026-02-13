@@ -141,7 +141,7 @@ public sealed partial class PhotoDisplayWindow
         _mouseAutoHider = new MouseAutoHider(MainLayout, TimeSpan.FromSeconds(1));
     }
 
-    private void D2dCanvas_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
+    private void D2dCanvas_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
     {
         var point = e.GetPosition(D2dCanvas).AdjustForDpi(D2dCanvas);
         // Only handle double click if inside image bounds
@@ -324,7 +324,7 @@ public sealed partial class PhotoDisplayWindow
             var flyoutButton = new Button { Width = 60, Height = 50, Tag = shortCut };
             var bmp = app.Icon;
             flyoutButton.Content = bmp != null
-                ? new Microsoft.UI.Xaml.Controls.Image { Source = bmp, Width = 32, Height = 32 }
+                ? new Image { Source = bmp, Width = 32, Height = 32 }
                 : new FontIcon { Glyph = "\uED35", FontSize = 32 }; // Default icon
             flyoutButton.Tag = app;
             flyoutButton.Click += FlyoutButton_OnClick;

@@ -157,27 +157,6 @@ public class StoreApp : InstalledApp
     /// </summary>
     public byte[]? IconData { get; set; }
 
-    public Task LaunchAsync_Old(string filePath)
-    {
-        if (string.IsNullOrEmpty(AppUserModelId)) return Task.CompletedTask;
-
-        try
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "explorer.exe",
-                Arguments = $"shell:AppsFolder\\{AppUserModelId}",
-                UseShellExecute = false,
-                CreateNoWindow = true
-            });
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"StoreApp Launch Error: {ex}");
-        }
-        return Task.CompletedTask;
-    }
-
     public override async Task LaunchAsync(string filePath)
     {
         if (string.IsNullOrEmpty(AppUserModelId) || string.IsNullOrEmpty(filePath))

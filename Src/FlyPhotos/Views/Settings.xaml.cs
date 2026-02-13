@@ -11,13 +11,11 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Shapes;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Storage;
-using Windows.Storage.Pickers;
 using Windows.System;
 using Path = System.IO.Path;
 
@@ -156,7 +154,7 @@ internal sealed partial class Settings
         {
             var bmp = app.Icon;
             btnShortcut.Content = bmp != null
-                ? new Microsoft.UI.Xaml.Controls.Image { Source = bmp, Width = 32, Height = 32 }
+                ? new Image { Source = bmp, Width = 32, Height = 32 }
                 : new FontIcon { Glyph = "\uED35", FontSize = 32 }; // Default icon
         }
     }
@@ -474,7 +472,7 @@ internal sealed partial class Settings
 
         var bmp = dialog.SelectedApp.Icon;
         button.Content = bmp != null
-            ? new Microsoft.UI.Xaml.Controls.Image { Source = bmp, Width = 32, Height = 32 }
+            ? new Image { Source = bmp, Width = 32, Height = 32 }
             : new FontIcon { Glyph = "\uED35", FontSize = 32 };
     }
 
@@ -503,16 +501,6 @@ internal sealed partial class Settings
         var file = await StorageFile.GetFileFromPathAsync(filePath);
         await Launcher.LaunchFileAsync(file);
     }
-
-    private async Task<string?> PickExeAsync()
-    {
-        var picker = new FileOpenPicker();
-        WinRT.Interop.InitializeWithWindow.Initialize(picker,
-            WinRT.Interop.WindowNative.GetWindowHandle(this));
-        picker.FileTypeFilter.Add(".exe");
-        var file = await picker.PickSingleFileAsync();
-        return file?.Path;
-    }    
 }
 
 internal static class ColorConverter

@@ -111,12 +111,6 @@ public static partial class Win32CursorMethods
     [LibraryImport("user32.dll", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
     private static partial nint LoadCursorFromFileW(string name);
 
-    /// <summary>Destroys a cursor handle created by functions like CreateCursor.
-    /// Note: Do not use this on handles from LoadCursorFromFileW, as they are shared system resources.</summary>
-    [LibraryImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool DestroyCursor(nint hCursor);
-
     /// <summary>Creates a native WinRT HSTRING from a .NET string.</summary>
     [LibraryImport("api-ms-win-core-winrt-string-l1-1-0.dll", StringMarshalling = StringMarshalling.Utf16)]
     private static partial int WindowsCreateString(string? sourceString, int length, out nint @string);

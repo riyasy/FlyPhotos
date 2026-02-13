@@ -204,7 +204,7 @@ internal class CanvasController : ICanvasController
     private void HandleHqMultiPageDisplayItem(Photo photo, MultiPageHqDisplayItem multiDispItem,
         bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
     {
-        var renderer = new MultiPageRenderer(_d2dCanvas, _canvasViewState, multiDispItem.FileAsByteArray, 0, _checkeredBrush, photo.SupportsTransparency, RequestInvalidate);
+        var renderer = new MultiPageRenderer(_d2dCanvas, multiDispItem.FileAsByteArray, 0, _checkeredBrush, photo.SupportsTransparency, RequestInvalidate);
         SetupNewRenderer(renderer, _imageSize, multiDispItem.Rotation, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, true);
     }
 

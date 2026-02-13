@@ -1,6 +1,5 @@
 using FlyPhotos.NativeWrappers;
 using FlyPhotos.Utils;
-using NLog;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
