@@ -523,4 +523,13 @@
   <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>ആപ്പുകൾ തിരയുക...</value>
   </data>
+  <data name="TrialExpiredMessage.Title" xml:space="preserve">
+    <value>പരീക്ഷണ കാലാവധി അവസാനിച്ചു</value>
+  </data>
+  <data name="TrialExpiredMessage.Content" xml:space="preserve">
+    <value>നിങ്ങളുടെ സൗജന്യ പരീക്ഷണ കാലാവധി അവസാനിച്ചു. ദയവായി Microsoft Store-ൽ നിന്ന് ആപ്പ് വാങ്ങുക.</value>
+  </data>
+  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
+    <value>ശരി</value>
+  </data>
 </root>

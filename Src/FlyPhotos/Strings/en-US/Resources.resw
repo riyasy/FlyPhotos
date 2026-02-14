@@ -523,4 +523,13 @@
   <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>Search apps...</value>
   </data>
+  <data name="TrialExpiredMessage.Title" xml:space="preserve">
+    <value>Trial Expired</value>
+  </data>
+  <data name="TrialExpiredMessage.Content" xml:space="preserve">
+    <value>Your free trial is over. Please purchase from the Microsoft Store.</value>
+  </data>
+  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
 </root>

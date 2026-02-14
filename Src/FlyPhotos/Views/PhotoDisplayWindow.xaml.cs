@@ -97,6 +97,7 @@ public sealed partial class PhotoDisplayWindow
         _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, photoSessionState);
         _photoController.CacheStatusChanged += PhotoController_CacheStatusChanged;
         _photoController.FileNameOrDetailsChanged += PhotoController_FileNameOrDetailsChanged;
+        _photoController.FirstPhotoLoaded += () => { DispatcherQueue.TryEnqueue(CheckLicense); };
         _canvasController.OnZoomChanged += CanvasController_OnZoomChanged;
         _canvasController.OnFitToScreenStateChanged += CanvasController_OnFitToScreenStateChanged;  
         _canvasController.OnOneToOneStateChanged += CanvasController_OnOneToOneStateChanged;
@@ -134,6 +135,20 @@ public sealed partial class PhotoDisplayWindow
         _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
         _mouseAutoHider = new MouseAutoHider(MainLayout, TimeSpan.FromSeconds(1));
+    }
+
+    private async void CheckLicense()
+    {
+        if (LicenseService.Instance.IsActive) return;
+        var dialog = new ContentDialog
+        {
+            Title = L.Get("TrialExpiredMessage/Title"), 
+            Content = L.Get("TrialExpiredMessage/Content"),
+            CloseButtonText = L.Get("TrialExpiredMessage/CloseButton"),
+            XamlRoot = this.Content.XamlRoot
+        };
+        await dialog.ShowAsync();
+        await AnimatePhotoDisplayWindowClose();
     }
 
     private void D2dCanvas_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)

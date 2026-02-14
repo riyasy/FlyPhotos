@@ -21,6 +21,7 @@ internal partial class PhotoDisplayController
 {
     public event Action<string>? CacheStatusChanged;
     public event Action<string>? FileNameOrDetailsChanged;
+    public event Action? FirstPhotoLoaded;
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -126,6 +127,9 @@ internal partial class PhotoDisplayController
 
             UpdateCacheLists();
             UpdateFileNameAndDetails();
+
+            FirstPhotoLoaded?.Invoke();
+            if (!LicenseService.Instance.IsActive) return;
 
             var previewCachingThread = new Thread(() => PreviewCacheBuilderDoWork(_cts.Token)) { IsBackground = true };
             previewCachingThread.Start();
