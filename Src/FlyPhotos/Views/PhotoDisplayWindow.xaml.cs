@@ -326,8 +326,7 @@ public sealed partial class PhotoDisplayWindow
             stackPanel.Children.Add(flyoutButton);
         }
 
-        var rl = new Microsoft.Windows.ApplicationModel.Resources.ResourceLoader();
-        UIElement content = stackPanel.Children.Any() ? stackPanel : new TextBlock { Text = rl.GetString("NoShortcutsCreated/Message") };
+        UIElement content = stackPanel.Children.Any() ? stackPanel : new TextBlock { Text = L.Get("NoShortcutsCreated/Message") };
         var flyout = new Flyout { Content = content };        
         FlyoutBase.SetAttachedFlyout(senderButton, flyout);
         FlyoutBase.ShowAttachedFlyout(senderButton);
@@ -590,11 +589,9 @@ public sealed partial class PhotoDisplayWindow
 
     private async Task DeleteCurrentlyDisplayedPhoto()
     {
-        var rl = new Microsoft.Windows.ApplicationModel.Resources.ResourceLoader();
-
         if (!_photoController.CanDeleteCurrentPhoto())
         {
-            TxtZoom.Text = rl.GetString("LoadingHighQuality/Message");
+            TxtZoom.Text = L.Get("LoadingHighQuality/Message");
             _inactivityFader.ReportActivity();
             _canvasController.Shrug();
             return;
@@ -604,11 +601,11 @@ public sealed partial class PhotoDisplayWindow
         {
             var confirmDialog = new ContentDialog
             {
-                XamlRoot = this.Content.XamlRoot,
-                Title = rl.GetString("ConfirmDeletion/Title"),
-                Content = rl.GetString("ConfirmDeletion/Message"),
-                PrimaryButtonText = rl.GetString("ConfirmDeletion/DeleteButton"),
-                CloseButtonText = rl.GetString("ConfirmDeletion/CancelButton"),
+                XamlRoot = Content.XamlRoot,
+                Title = L.Get("ConfirmDeletion/Title"),
+                Content = L.Get("ConfirmDeletion/Message"),
+                PrimaryButtonText = L.Get("ConfirmDeletion/DeleteButton"),
+                CloseButtonText = L.Get("ConfirmDeletion/CancelButton"),
                 DefaultButton = ContentDialogButton.Close
             };
             var result = await confirmDialog.ShowAsync();
@@ -635,9 +632,9 @@ public sealed partial class PhotoDisplayWindow
             var errorDialog = new ContentDialog
             {
                 XamlRoot = this.Content.XamlRoot,
-                Title = rl.GetString("DeletionFailed/Title"),
-                Content = $"{rl.GetString("DeletionFailed/Message")}{Environment.NewLine}{delResult.FailMessage}",
-                CloseButtonText = rl.GetString("DeletionFailed/CloseButton")
+                Title = L.Get("DeletionFailed/Title"),
+                Content = $"{L.Get("DeletionFailed/Message")}{Environment.NewLine}{delResult.FailMessage}",
+                CloseButtonText = L.Get("DeletionFailed/CloseButton")
             };
             await errorDialog.ShowAsync();
         }
