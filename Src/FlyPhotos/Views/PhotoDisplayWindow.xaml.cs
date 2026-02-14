@@ -83,12 +83,7 @@ public sealed partial class PhotoDisplayWindow
 
         //(AppWindow.Presenter as OverlappedPresenter)?.SetBorderAndTitleBar(false, false);
 
-        _configurationSource = new SystemBackdropConfiguration
-        {
-            IsHighContrast = ThemeSettings.CreateForWindowId(this.AppWindow.Id).HighContrast,
-            IsInputActive = true
-        };
-
+        _configurationSource = new SystemBackdropConfiguration { IsInputActive = true };
 
         ((FrameworkElement)Content).ActualThemeChanged += PhotoDisplayWindow_ActualThemeChanged;
         SetConfigurationSourceTheme();

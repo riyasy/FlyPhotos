@@ -47,11 +47,8 @@ internal sealed partial class Settings
         titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
         titleBar.ButtonForegroundColor = Colors.Gray;
 
-        _configurationSource = new SystemBackdropConfiguration
-        {
-            IsHighContrast = ThemeSettings.CreateForWindowId(this.AppWindow.Id).HighContrast,
-            IsInputActive = true
-        };
+        _configurationSource = new SystemBackdropConfiguration { IsInputActive = true };
+
         this.Activated += Settings_Activated;
         MainLayout.Loaded += Settings_Loaded;
         ((FrameworkElement)Content).ActualThemeChanged += Settings_ActualThemeChanged;
