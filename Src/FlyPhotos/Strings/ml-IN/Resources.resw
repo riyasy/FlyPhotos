@@ -565,4 +565,16 @@ Del : ഫോട്ടോ ഡിലീറ്റ് ചെയ്യാൻ
 
 Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാൻ അല്ലെങ്കിൽ ആപ്പിൽ നിന്ന് പുറത്തുകടക്കാൻ</value>
   </data>
+  <data name="Status_FileNotFound" xml:space="preserve">
+    <value>ഫയൽ കണ്ടെത്തിയില്ല</value>
+  </data>
+  <data name="Status_PreviewFailed" xml:space="preserve">
+    <value>പ്രിവ്യൂ ലോഡ് ചെയ്യുന്നതിൽ പരാജയം</value>
+  </data>
+  <data name="Status_InvalidFile" xml:space="preserve">
+    <value>അസാധുവായ ഫയൽ</value>
+  </data>
+  <data name="Status_Loading" xml:space="preserve">
+    <value>ലോഡ് ചെയ്യുന്നു...</value>
+  </data>
 </root>

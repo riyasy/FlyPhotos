@@ -565,4 +565,16 @@ Entf (Del) : Foto löschen
 
 Esc : Einstellungen schließen oder App beenden</value>
   </data>
+  <data name="Status_FileNotFound" xml:space="preserve">
+    <value>Datei nicht gefunden</value>
+  </data>
+  <data name="Status_PreviewFailed" xml:space="preserve">
+    <value>Vorschau konnte nicht geladen werden</value>
+  </data>
+  <data name="Status_InvalidFile" xml:space="preserve">
+    <value>Ungültige Datei</value>
+  </data>
+  <data name="Status_Loading" xml:space="preserve">
+    <value>Wird geladen...</value>
+  </data>
 </root>

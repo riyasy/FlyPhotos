@@ -1,5 +1,5 @@
 ﻿#nullable enable
-using FlyPhotos.Utils;
+using FlyPhotos.Readers;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using System;
 using System.Collections.Generic;
@@ -51,7 +51,7 @@ internal partial class Photo : IDisposable
 
         async Task GetInitialPreview()
         {
-            firstDisplay = await ImageUtil.GetFirstPreviewSpecialHandlingAsync(device, FileName);
+            firstDisplay = await ImageReader.GetFirstPreviewSpecialHandlingAsync(device, FileName);
         }
     }
 
@@ -59,14 +59,14 @@ internal partial class Photo : IDisposable
     {
         async Task GetHqImage()
         {
-            Hq = await ImageUtil.GetHqImage(device, FileName);
+            Hq = await ImageReader.GetHqImage(device, FileName);
         }
         await Task.Run(GetHqImage);
     }
 
     public async Task LoadHq(CanvasControl device)
     {
-        Hq ??= await ImageUtil.GetHqImage(device, FileName);
+        Hq ??= await ImageReader.GetHqImage(device, FileName);
     }
 
     public async Task LoadPreview(CanvasControl device)
@@ -74,7 +74,7 @@ internal partial class Photo : IDisposable
         if (Preview == null || Preview.Origin == Origin.ErrorScreen ||
             Preview.Origin == Origin.Undefined)
         {
-            Preview = await ImageUtil.GetPreview(device, FileName);
+            Preview = await ImageReader.GetPreview(device, FileName);
         }
     }
 
@@ -84,7 +84,7 @@ internal partial class Photo : IDisposable
         {
             DisplayLevel.Preview => Preview,
             DisplayLevel.Hq => Hq,
-            DisplayLevel.PlaceHolder => ImageUtil.GetLoadingIndicator(),
+            DisplayLevel.PlaceHolder => ImageReader.GetLoadingIndicator(),
             _ => null
         };
     }
@@ -109,7 +109,7 @@ internal partial class Photo : IDisposable
 
     public static DisplayItem GetLoadingIndicator()
     {
-        return ImageUtil.GetLoadingIndicator();
+        return ImageReader.GetLoadingIndicator();
     }
 
     private static readonly HashSet<string> FormatsSupportingTransparency =

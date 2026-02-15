@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using FlyPhotos.AppSettings;
 using FlyPhotos.Data;
+using FlyPhotos.Readers;
 using FlyPhotos.Utils;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
@@ -83,7 +84,7 @@ internal partial class PhotoDisplayController
 
     public async Task LoadFirstPhoto()
     {
-        await ImageUtil.Initialize(_d2dCanvas);
+        await ImageReader.Initialize(_d2dCanvas);
 
         _firstPhoto = new Photo(_photoSessionState.FirstPhotoPath);
         bool continueLoadingHq = await _firstPhoto.LoadPreviewFirstPhoto(_d2dCanvas);
