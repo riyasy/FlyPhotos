@@ -532,4 +532,37 @@
   <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
     <value>OK</value>
   </data>
+  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
+    <value>Pfeiltaste Links/Rechts : Durch Fotos navigieren
+Pfeiltaste Auf/Ab : Vergrößern oder Verkleinern (Zoom)
+Linke Maustaste + Ziehen : Ausschnitt verschieben (Pan)
+
+Mausrad : Zoomen / Navigieren (je nach Einstellung)
+Strg + Mausrad : Vergrößern oder Verkleinern
+Alt + Mausrad : Durch Fotos navigieren
+Mausrad nach links/rechts neigen : Durch Fotos navigieren
+
+Strg + Pfeiltasten : Ausschnitt verschieben
+Strg + + : Vergrößern
+Strg + - : Verkleinern
+
+Alt + Pfeiltaste Links/Rechts : Seiten in mehrseitigen TIFFs wechseln
+
+Bild Auf / Bild Ab : Zoom zum nächsten Preset (100%, 400%, Einpassen)
+Pos1 (Home) : Zum ersten Foto
+Ende (End) : Zum letzten Foto
+
+Mausrad auf der Vorschauleiste : Durch Fotos navigieren
+Mausrad auf Bildschirmtasten Links/Rechts : Durch Fotos navigieren
+Mausrad auf der Drehen-Schaltfläche : Foto drehen
+
+Touchpad Zweifinger-Wischgeste Links/Rechts : Durch Fotos navigieren
+Touchpad Zweifinger-Wischgeste Auf/Ab : Zoomen / Navigieren (je nach Einstellung)
+Touchpad Auf- oder Zuziehen (Pinch) : Vergrößern oder Verkleinern
+
+D : Dateieigenschaften anzeigen
+Entf (Del) : Foto löschen
+
+Esc : Einstellungen schließen oder App beenden</value>
+  </data>
 </root>

@@ -110,7 +110,6 @@ internal sealed partial class Settings
         ButtonEnableAutoHideMouse.Toggled += ButtonEnableAutoHideMouse_OnToggled;
         ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
 
-        SettingsCardKeyboardShortCuts.Description = Constants.ShortCuts;
         TextBoxCodecsChanged();
 
         // Initialize codec list view

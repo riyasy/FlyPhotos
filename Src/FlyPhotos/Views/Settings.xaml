@@ -48,7 +48,10 @@
                             Margin="0,5,0,0"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE765;}">
                             <controls:SettingsExpander.Items>
-                                <controls:SettingsCard x:Name="SettingsCardKeyboardShortCuts" Description="" />
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardKeyboardShortCuts"
+                                    x:Uid="SettingsCardKeyboardShortCuts"
+                                    Description="" />
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
                         <TextBlock
