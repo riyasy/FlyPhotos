@@ -476,7 +476,7 @@
     <value>തേർഡ് പാർട്ടി ലൈസൻസുകൾ കാണുക</value>
   </data>
   <data name="SettingsCardVersion.Description" xml:space="preserve">
-    <value>നിലവിലെ പതിപ്പ് : 2.5.14</value>
+    <value>നിലവിലെ പതിപ്പ് {0} ആണ്</value>
   </data>
   <data name="ConfirmDeletion.Title" xml:space="preserve">
     <value>ഡിലീറ്റ് സ്ഥിരീകരിക്കുക</value>

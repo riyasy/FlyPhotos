@@ -476,7 +476,7 @@
     <value>Lizenzen von Drittanbietern anzeigen</value>
   </data>
   <data name="SettingsCardVersion.Description" xml:space="preserve">
-    <value>Aktuelle Version : 2.5.14</value>
+    <value>Aktuelle Version ist {0}</value>
   </data>
   <data name="ConfirmDeletion.Title" xml:space="preserve">
     <value>Löschen bestätigen</value>

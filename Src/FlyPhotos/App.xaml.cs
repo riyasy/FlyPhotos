@@ -36,7 +36,7 @@ public partial class App
     {
         GlobalDiagnosticsContext.Set("LogPath", PathResolver.GetLogFolderPath());
         KillOtherFlys();
-        // Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "ml-IN";
+        Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "en-US";
         InitializeComponent();
     }
 
@@ -46,15 +46,9 @@ public partial class App
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        if (PathResolver.IsPackagedApp)
-        {
-            var activationArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
-            _selectedFileName = GetFileNameFromArgsPackaged(activationArgs.Data as IFileActivatedEventArgs);
-        }
-        else
-        {
-            _selectedFileName = GetFileNameFromCommandLine();
-        }
+        _selectedFileName = PathResolver.IsPackagedApp ? 
+            GetFileNameFromArgsPackaged(AppInstance.GetCurrent().GetActivatedEventArgs().Data as IFileActivatedEventArgs) : 
+            GetFileNameFromCommandLine();
 
         AppConfig.Initialize();
 

@@ -38,6 +38,9 @@ internal sealed partial class Settings
         InitializeComponent();
         //Title = "FlyPhotos - Settings";
 
+        SettingsCardVersion.Description = 
+            string.Format(L.Get("SettingsCardVersion/Description"), Constants.AppVersion);
+
         if (!PathResolver.IsPackagedApp)
             Util.SetUnpackagedAppIcon(this);
 

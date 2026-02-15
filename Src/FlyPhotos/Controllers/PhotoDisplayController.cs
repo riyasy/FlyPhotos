@@ -129,7 +129,7 @@ internal partial class PhotoDisplayController
             UpdateFileNameAndDetails();
 
             FirstPhotoLoaded?.Invoke();
-            if (!LicenseService.Instance.IsActive) return;
+            if (LicenseService.Instance.State == LicenseState.TrialExpired) return;
 
             var previewCachingThread = new Thread(() => PreviewCacheBuilderDoWork(_cts.Token)) { IsBackground = true };
             previewCachingThread.Start();

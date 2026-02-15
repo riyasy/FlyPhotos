@@ -10,7 +10,7 @@
   <Identity
     Name="RYFTools.FlyPhotos"
     Publisher="CN=44A50C10-C1BE-4575-B17F-07954C8C2229"
-    Version="2.5.14.0" />
+    Version="2.5.15.0" />
 
   <mp:PhoneIdentity PhoneProductId="e339cc4b-62cb-4c55-8824-4d81b3d4c0b6" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

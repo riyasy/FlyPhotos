@@ -123,6 +123,7 @@ public sealed partial class PhotoDisplayWindow
 
         D2dCanvasThumbNail.PointerWheelChanged += ThumbNail_PointerWheelChanged;
 
+        MainLayout.Loaded += async (_, _) => { await LicenseService.Instance.RefreshLicenseStateAsync(); };
         MainLayout.KeyDown += HandleKeyDown;
         MainLayout.KeyUp += HandleKeyUp;
 
@@ -139,10 +140,10 @@ public sealed partial class PhotoDisplayWindow
 
     private async void CheckLicense()
     {
-        if (LicenseService.Instance.IsActive) return;
+        if (LicenseService.Instance.State != LicenseState.TrialExpired) return;
         var dialog = new ContentDialog
         {
-            Title = L.Get("TrialExpiredMessage/Title"), 
+            Title = L.Get("TrialExpiredMessage/Title"),
             Content = L.Get("TrialExpiredMessage/Content"),
             CloseButtonText = L.Get("TrialExpiredMessage/CloseButton"),
             XamlRoot = this.Content.XamlRoot
