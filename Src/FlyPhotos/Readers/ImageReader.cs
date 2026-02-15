@@ -112,7 +112,6 @@ internal static class ImageReader
 
         try
         {
-            Thread.Sleep(1000);
             var (cachedBmp, actualWidth, actualHeight) = await DiskCacherWithSqlite.Instance.ReturnFromCache(d2dCanvas, path);
             if (null != cachedBmp)
             {
