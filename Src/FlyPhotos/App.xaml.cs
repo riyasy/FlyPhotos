@@ -1,14 +1,15 @@
-﻿using FlyPhotos.AppSettings;
-using FlyPhotos.Utils;
-using FlyPhotos.Views;
-using Microsoft.Windows.AppLifecycle;
-using NLog;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using Windows.ApplicationModel.Activation;
+using FlyPhotos.Infra.Configuration;
+using FlyPhotos.Infra.Utils;
+using FlyPhotos.Services;
+using FlyPhotos.UI.Views;
+using Microsoft.Windows.AppLifecycle;
+using NLog;
 using WinUIEx;
 using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 

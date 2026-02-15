@@ -1,0 +1,67 @@
+<Window
+    x:Class="FlyPhotos.UI.Views.InitWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+    <Grid x:Name="MainLayout" Background="Transparent">
+        <StackPanel Margin="20,10,20,20" Spacing="15">
+            <!--  Title  -->
+            <TextBlock x:Uid="TitleTextBlock" Style="{StaticResource TitleTextBlockStyle}" />
+            <!--  File Interaction Area  -->
+            <Border
+                x:Name="DropArea"
+                Height="150"
+                Margin="0,30,0,0"
+                AllowDrop="True"
+                Background="Transparent"
+                DragOver="DropArea_DragOver"
+                Drop="DropArea_Drop">
+                <Grid>
+                    <!--  Dashed outline effect  -->
+                    <Rectangle
+                        RadiusX="8"
+                        RadiusY="8"
+                        Stroke="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+                        StrokeDashArray="4 2"
+                        StrokeThickness="3" />
+                    <!--  Content: Text runs are now empty tags, populated by x:Uid  -->
+                    <TextBlock
+                        x:Uid="DropAreaTextBlock"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource SystemControlPageTextBaseHighBrush}"
+                        TextAlignment="Center">
+                        <Run x:Uid="DropAreaRun" />
+                        <Hyperlink Click="OpenFileHyperlink_Click">
+                            <Run x:Uid="OpenFileHyperlink" />
+                        </Hyperlink>
+                    </TextBlock>
+                </Grid>
+            </Border>
+            <!--  Instructions  -->
+            <TextBlock
+                x:Uid="RightClickInstruction"
+                Margin="0,10,0,0"
+                TextWrapping="Wrap" />
+            <Border
+                Margin="0,5"
+                BorderBrush="Gray"
+                BorderThickness="0,1,0,0" />
+            <TextBlock x:Uid="DefaultViewerInstruction1" TextWrapping="Wrap" />
+            <Border
+                Margin="0,5"
+                BorderBrush="Gray"
+                BorderThickness="0,1,0,0" />
+            <TextBlock x:Uid="DefaultViewerInstruction2" TextWrapping="Wrap" />
+            <Border
+                Margin="0,5"
+                BorderBrush="Gray"
+                BorderThickness="0,1,0,0" />
+        </StackPanel>
+    </Grid>
+</Window>

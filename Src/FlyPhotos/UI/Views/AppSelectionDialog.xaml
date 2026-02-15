@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="FlyPhotos.UI.Views.AppSelectionDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:flyExtApp="using:FlyPhotos.Services.ExternalAppListing"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Uid="AppSelectionDialog"
+    Title="Select an Application"
+    DefaultButton="Primary"
+    IsPrimaryButtonEnabled="False"
+    PrimaryButtonText="Select"
+    SecondaryButtonText="Cancel"
+    mc:Ignorable="d">
+
+    <Grid
+        Width="400"
+        Height="500"
+        RowDefinitions="Auto,*,Auto">
+
+        <!--  Search + Browse  -->
+        <StackPanel Margin="0,0,0,10">
+            <TextBox
+                x:Name="SearchBox"
+                x:Uid="SearchBox"
+                PlaceholderText="Search apps..."
+                TextChanged="SearchBox_TextChanged" />
+
+            <Button
+                x:Name="BrowseBtn"
+                x:Uid="BrowseBtn"
+                Margin="0,6,0,0"
+                HorizontalAlignment="Stretch"
+                Click="BrowseBtn_Click"
+                Content="Browse for app..." />
+        </StackPanel>
+
+        <!--  Progress Ring while loading  -->
+        <StackPanel
+            x:Name="LoadingPanel"
+            Grid.Row="1"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Spacing="10">
+            <ProgressRing IsActive="True" />
+            <TextBlock x:Uid="ScanningTextBlock" Text="Scanning apps..." />
+        </StackPanel>
+
+        <!--  App List  -->
+        <ListView
+            x:Name="AppListView"
+            Grid.Row="1"
+            SelectionChanged="AppListView_SelectionChanged"
+            SelectionMode="Single">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="flyExtApp:InstalledApp">
+                    <Grid Padding="5" ColumnDefinitions="40,*">
+                        <Image
+                            Width="32"
+                            Height="32"
+                            VerticalAlignment="Center"
+                            Source="{x:Bind Icon}" />
+                        <TextBlock
+                            Grid.Column="1"
+                            Margin="12,0,0,0"
+                            VerticalAlignment="Center"
+                            FontWeight="SemiBold"
+                            Text="{x:Bind DisplayName}" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</ContentDialog>

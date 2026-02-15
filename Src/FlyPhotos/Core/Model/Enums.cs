@@ -1,0 +1,75 @@
+﻿namespace FlyPhotos.Core.Model
+{
+    public enum DisplayLevel
+    {
+        PlaceHolder,
+        Preview,
+        Hq
+    }
+
+    public enum NavDirection
+    {
+        Next,
+        Prev
+    }
+
+    public enum Origin
+    {
+        DiskCache,
+        Disk,
+        ErrorScreen,
+        Undefined
+    }
+
+    public enum WindowBackdropType
+    {
+        None,
+        Mica,
+        MicaAlt,
+        Acrylic,
+        AcrylicThin,
+        Transparent,
+        Frozen
+    }
+
+    public enum ZoomDirection
+    {
+        In,
+        Out
+    }
+
+    public enum DefaultMouseWheelBehavior
+    {
+        Zoom,
+        Navigate
+    }
+
+    public enum Setting
+    {
+        ThumbnailShowHide,
+        ThumbnailSelectionColor,
+        ThumbnailSizeSize,
+        CheckeredBackgroundShowHide,
+        Theme,
+        BackDrop,
+        BackDropTransparency,
+        FileNameShowHide,
+        CacheStatusShowHide,
+        ExtShortcutsShowHide,
+        ImageDimensionsShowHide
+    }
+
+    public enum ScrollDirection
+    {
+        Horizontal,
+        Vertical
+    }
+
+    public enum PanZoomBehaviourOnNavigation
+    {
+        Reset,
+        RememberPerPhoto,
+        RetainFromLastPhoto
+    }
+
+}
