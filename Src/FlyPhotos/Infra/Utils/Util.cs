@@ -238,7 +238,7 @@ internal static class Util
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "ExtractIconFromAppListEntryAsync Error");
+            Logger.Error(ex, $"ExtractIconFromAppListEntryAsync Error for {entry.DisplayInfo.DisplayName}");
             return [];
         }
     }

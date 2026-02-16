@@ -343,6 +343,7 @@ public sealed partial class PhotoDisplayWindow
             flyoutButton.Content = bmp != null
                 ? new Image { Source = bmp, Width = 32, Height = 32 }
                 : new FontIcon { Glyph = "\uED35", FontSize = 32 }; // Default icon
+            ToolTipService.SetToolTip(flyoutButton, app.DisplayName);
             flyoutButton.Tag = app;
             flyoutButton.Click += FlyoutButton_OnClick;
             stackPanel.Children.Add(flyoutButton);

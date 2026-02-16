@@ -106,7 +106,7 @@ public class Win32App : InstalledApp
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Win32App Launch Error");
+            Logger.Error(ex, $"Win32App Launch Error for {DisplayName}");
         }
         return Task.CompletedTask;
     }
@@ -180,24 +180,31 @@ public class StoreApp : InstalledApp
 
             if (!success)
             {
-                Logger.Error("StoreApp Launch failed");
+                Logger.Error($"StoreApp Launch failed for {DisplayName}");
             }
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "StoreApp Launch Error");
+            Logger.Error(ex, $"StoreApp Launch Error for {DisplayName}");
         }
     }
 
     public override async Task DecodeIconAsync()
     {
-        if (IconData == null)
+        if (IconData == null || IconData.Length == 0)
             return;
+        try
+        {
+            var image = new BitmapImage();
+            using var ms = new MemoryStream(IconData);
+            await image.SetSourceAsync(ms.AsRandomAccessStream());
+            Icon = image;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, $"StoreApp DecodeIcon Error for {DisplayName}");
+        }
 
-        var image = new BitmapImage();
-        using var ms = new MemoryStream(IconData);
-        await image.SetSourceAsync(ms.AsRandomAccessStream());
-        Icon = image;
     }
 
     public override string GetSerializedState()
