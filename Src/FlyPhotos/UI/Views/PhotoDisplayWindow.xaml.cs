@@ -17,7 +17,6 @@ using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
 using FlyPhotos.Services.ExternalAppListing;
 using FlyPhotos.UI.Behaviors;
-using FlyPhotos.UI.Screens;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
