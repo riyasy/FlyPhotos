@@ -37,6 +37,23 @@
                     </ScrollViewer.Resources>
                     <StackPanel Margin="0,5,15,0" Orientation="Vertical">
                         <controls:SettingsCard
+                            x:Name="SettingsCardLanguage"
+                            x:Uid="SettingsCardLanguage"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE774;}">
+                            <ComboBox
+                                x:Name="ComboLanguage"
+                                MinWidth="200"
+                                HorizontalAlignment="Right"
+                                SelectionChanged="ComboLanguage_SelectionChanged">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="model:LanguageInfo">
+                                        <TextBlock Text="{x:Bind DisplayName}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
                             x:Name="SettingsCardDeveloperSupport"
                             x:Uid="SettingsCardDeveloperSupport"
                             Margin="0,5,0,0"

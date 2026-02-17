@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Windows.ApplicationModel.Activation;
+using FlyPhotos.Core;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
@@ -37,7 +38,14 @@ public partial class App
     {
         GlobalDiagnosticsContext.Set("LogPath", PathResolver.GetLogFolderPath());
         KillOtherFlys();
-        Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "en-US";
+
+        AppConfig.Initialize();
+
+        if (AppConfig.Settings.Language != null && 
+            AppConfig.Settings.Language != "Default" &&
+            Constants.SupportedLanguages.Contains(AppConfig.Settings.Language))
+            Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = AppConfig.Settings.Language;
+
         InitializeComponent();
     }
 
@@ -50,8 +58,6 @@ public partial class App
         _selectedFilePath = PathResolver.IsPackagedApp ? 
             GetFilePathFromArgsPackaged(AppInstance.GetCurrent().GetActivatedEventArgs().Data as IFileActivatedEventArgs) : 
             GetFilePathFromCommandLine();
-
-        AppConfig.Initialize();
 
         if (string.IsNullOrEmpty(_selectedFilePath))
         {

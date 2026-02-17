@@ -526,6 +526,9 @@
   <data name="TrialExpiredMessage.Title" xml:space="preserve">
     <value>Trial Expired</value>
   </data>
+  <data name="SettingsCardLanguage.Header" xml:space="preserve">
+    <value>Choose Language</value>
+  </data>
   <data name="TrialExpiredMessage.Content" xml:space="preserve">
     <value>Your free trial is over. Please purchase from the Microsoft Store.</value>
   </data>

@@ -9,6 +9,8 @@ public class AppSettings
 {
     [JsonPropertyName("Theme")] public string ThemeAsString { get; set; } = "Default";
 
+    [JsonPropertyName("Language")] public string Language { get; set; } = "Default";
+
     [JsonIgnore]
     public ElementTheme Theme
     {

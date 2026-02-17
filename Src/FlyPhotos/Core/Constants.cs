@@ -1,4 +1,6 @@
-﻿namespace FlyPhotos.Core;
+﻿using System.Collections.Generic;
+
+namespace FlyPhotos.Core;
 
 internal static class Constants
 {
@@ -21,4 +23,11 @@ internal static class Constants
 
     // Others
     public const int CheckerSize = 10;
+
+    public static readonly List<string> SupportedLanguages =
+    [
+        "en-US",
+        "de-DE",
+        "ml-IN"
+    ];
 }

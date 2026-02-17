@@ -1,10 +1,4 @@
 ﻿#nullable enable
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
-using Windows.Storage;
-using Windows.System;
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
@@ -20,6 +14,15 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Windows.Storage;
+using Windows.System;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -32,6 +35,8 @@ namespace FlyPhotos.UI.Views;
 internal sealed partial class Settings
 {
     public event Action<Setting>? SettingChanged;
+
+    private readonly List<LanguageInfo> _supportedLanguages = [];
 
     private readonly SystemBackdropConfiguration _configurationSource;
 
@@ -114,25 +119,18 @@ internal sealed partial class Settings
         ButtonEnableAutoHideMouse.Toggled += ButtonEnableAutoHideMouse_OnToggled;
         ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
 
-        TextBoxCodecsChanged();
-
         // Initialize codec list view
         ListViewCodecs.ItemsSource = Util.GetAllCodecs();
 
-        if (ComboMouseWheelBehaviourInfo.Description is string desc)
-            ComboMouseWheelBehaviourInfo.Description = desc.Replace("%%", Environment.NewLine);
+        PopulateSupportedLanguages();
+        ComboLanguage.ItemsSource = _supportedLanguages;
+        ComboLanguage.SelectedItem = _supportedLanguages.FirstOrDefault(l => l.LanguageCode == AppConfig.Settings.Language);
 
         if (PathResolver.IsPackagedApp)
         {
             SettingsCardDeveloperSupport.Visibility = Visibility.Collapsed;
             BtnCheckVersion.Visibility = Visibility.Collapsed;
         }
-
-    }
-
-    private void TextBoxCodecsChanged()
-    {
-        // keep the disclaimer in case it's used elsewhere; nothing to do here now
     }
 
     private async void ButtonEnableExternalShortcut_OnToggled(object sender, RoutedEventArgs e)
@@ -150,7 +148,7 @@ internal sealed partial class Settings
         await SetButtonIconFromAppData(BtnShortcut4, AppConfig.Settings.ExternalApp4);
     }
 
-    private async Task SetButtonIconFromAppData(Button btnShortcut, string appShortCut)
+    private static async Task SetButtonIconFromAppData(Button btnShortcut, string appShortCut)
     {
         var app = await AppProvider.GetAppAsync(appShortCut);
         if (app != null)
@@ -503,6 +501,33 @@ internal sealed partial class Settings
         var filePath = Path.Combine(AppContext.BaseDirectory, "ThirdPartyNotices.txt");
         var file = await StorageFile.GetFileFromPathAsync(filePath);
         await Launcher.LaunchFileAsync(file);
+    }
+
+    private async void ComboLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ComboLanguage.SelectedValue is LanguageInfo info)
+            AppConfig.Settings.Language = info.LanguageCode;
+        await AppConfig.SaveAsync();
+    }
+    private void PopulateSupportedLanguages()
+    {
+        _supportedLanguages.Clear();
+        foreach (var code in Constants.SupportedLanguages)
+        {
+            try
+            {
+                var culture = new CultureInfo(code);
+                // Use Parent to get the neutral culture name (e.g., "German" instead of "German (Germany)")
+                var neutral = culture.Parent?.Name is { Length: > 0 } ? culture.Parent : culture;
+                var display = neutral.DisplayName;
+                var native = neutral.NativeName;
+                _supportedLanguages.Add(new LanguageInfo($"{display} [{native}]", native, code));
+            }
+            catch (CultureNotFoundException)
+            {
+                Debug.WriteLine($"Invalid culture code: {code}");
+            }
+        }
     }
 }
 

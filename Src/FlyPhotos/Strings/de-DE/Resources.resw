@@ -526,6 +526,9 @@
   <data name="TrialExpiredMessage.Title" xml:space="preserve">
     <value>Testversion abgelaufen</value>
   </data>
+  <data name="SettingsCardLanguage.Header" xml:space="preserve">
+    <value>Sprache auswählen</value>
+  </data>
   <data name="TrialExpiredMessage.Content" xml:space="preserve">
     <value>Ihre kostenlose Testversion ist abgelaufen. Bitte kaufen Sie die App im Microsoft Store.</value>
   </data>
