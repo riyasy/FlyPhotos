@@ -39,19 +39,21 @@ internal sealed partial class Settings
     internal Settings()
     {
         InitializeComponent();
-        //Title = "FlyPhotos - Settings";
 
-        SettingsCardVersion.Description = 
-            string.Format(L.Get("SettingsCardVersion/Description"), Constants.AppVersion);
-
-        if (!PathResolver.IsPackagedApp)
-            Util.SetUnpackagedAppIcon(this);
+        // Title property is used only by TaskBar label. Actual TitleBar is customized using AppWindow.TitleBar.
+        Title = L.Get("SettingsPage/Title").Replace("FlyPhotos - ", string.Empty);
 
         var titleBar = AppWindow.TitleBar;
         titleBar.ExtendsContentIntoTitleBar = true;
         titleBar.ButtonBackgroundColor = Colors.Transparent;
         titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
         titleBar.ButtonForegroundColor = Colors.Gray;
+
+        SettingsCardVersion.Description = 
+            string.Format(L.Get("SettingsCardVersion/Description"), Constants.AppVersion);
+
+        if (!PathResolver.IsPackagedApp)
+            Util.SetUnpackagedAppIcon(this);
 
         _configurationSource = new SystemBackdropConfiguration { IsInputActive = true };
 

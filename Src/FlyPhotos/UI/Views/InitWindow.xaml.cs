@@ -1,18 +1,19 @@
 // InitWindow.xaml.cs
 
-using System;
-using System.Threading.Tasks;
-using Windows.ApplicationModel.DataTransfer;
-using Windows.Storage;
-using Windows.Storage.Pickers;
-using Windows.System;
 using FlyPhotos.Infra.Configuration;
+using FlyPhotos.Infra.Localization;
 using FlyPhotos.Infra.Utils;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
+using System;
+using System.Threading.Tasks;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
+using Windows.Storage.Pickers;
+using Windows.System;
 
 namespace FlyPhotos.UI.Views
 {
@@ -21,6 +22,10 @@ namespace FlyPhotos.UI.Views
         public InitWindow()
         {
             InitializeComponent();
+
+            // Title property is used only by TaskBar label. Actual TitleBar is customized using AppWindow.TitleBar.
+            Title = L.Get("TitleTextBlock/Text").Replace("FlyPhotos - ", string.Empty);
+
             var titleBar = AppWindow.TitleBar;
             titleBar.ExtendsContentIntoTitleBar = true;
             titleBar.ButtonBackgroundColor = Colors.Transparent;

@@ -691,9 +691,13 @@ public sealed partial class PhotoDisplayWindow
 
     #region callbacks
 
-    private void PhotoController_FileNameOrDetailsChanged(string fileNameAndDetails)
+    private void PhotoController_FileNameOrDetailsChanged(FileDisplayDetails fileDisplayDetails)
     {
-        DispatcherQueue.TryEnqueue(() => { TxtFileName.Text = fileNameAndDetails; });
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            TxtFileName.Text = fileDisplayDetails.DisplayText;
+            Title = fileDisplayDetails.FileName;
+        });
     }
 
     private void PhotoController_CacheStatusChanged(string cacheProgressStatus)

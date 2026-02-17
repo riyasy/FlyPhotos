@@ -24,7 +24,7 @@ namespace FlyPhotos.Display.Controllers;
 internal partial class PhotoDisplayController
 {
     public event Action<string>? CacheStatusChanged;
-    public event Action<string>? FileNameOrDetailsChanged;
+    public event Action<FileDisplayDetails>? FileNameOrDetailsChanged;
     public event Action? FirstPhotoLoaded;
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -363,14 +363,16 @@ internal partial class PhotoDisplayController
 
             if (photo == null) return;
 
-            var fileNameAndDetails = Path.GetFileName(photo.FileName);
+            string? positionText = null;
+            var fileName = Path.GetFileName(photo.FileName);
+            string? dimensionText = null;
 
             if (initialFileListingCompleted)
             {
                 var currentPosition = _photoSessionState.CurrentPhotoListPosition;
                 if (currentPosition < 0) return;
                 var totalFileCount = _sortedPhotoKeys.Count;
-                fileNameAndDetails = $"[{currentPosition + 1}/{totalFileCount}] {fileNameAndDetails}";
+                positionText = $"[{currentPosition + 1}/{totalFileCount}]";
             }
 
             var hideDimension = !AppConfig.Settings.ShowImageDimensions ||
@@ -381,10 +383,10 @@ internal partial class PhotoDisplayController
             if (!hideDimension)
             {
                 var dimension = photo.GetActualSize();
-                fileNameAndDetails = $"{fileNameAndDetails} ({dimension.Item1} x {dimension.Item2})";
+                dimensionText = $"({dimension.Item1} x {dimension.Item2})";
             }
 
-            FileNameOrDetailsChanged?.Invoke(fileNameAndDetails);
+            FileNameOrDetailsChanged?.Invoke(new FileDisplayDetails(positionText, fileName, dimensionText));
         }
         catch (Exception ex)
         {
