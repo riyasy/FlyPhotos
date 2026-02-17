@@ -8,6 +8,7 @@ using FlyPhotos.Core.Model;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.UI.Screens;
+using FlyPhotos.UI.Views;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Geometry;
 using Microsoft.Graphics.Canvas.UI.Xaml;

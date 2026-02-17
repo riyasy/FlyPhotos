@@ -1,75 +1,73 @@
-﻿namespace FlyPhotos.Core.Model
+﻿namespace FlyPhotos.Core.Model;
+
+public enum DisplayLevel
 {
-    public enum DisplayLevel
-    {
-        PlaceHolder,
-        Preview,
-        Hq
-    }
+    PlaceHolder,
+    Preview,
+    Hq
+}
 
-    public enum NavDirection
-    {
-        Next,
-        Prev
-    }
+public enum NavDirection
+{
+    Next,
+    Prev
+}
 
-    public enum Origin
-    {
-        DiskCache,
-        Disk,
-        ErrorScreen,
-        Undefined
-    }
+public enum Origin
+{
+    DiskCache,
+    Disk,
+    ErrorScreen,
+    Undefined
+}
 
-    public enum WindowBackdropType
-    {
-        None,
-        Mica,
-        MicaAlt,
-        Acrylic,
-        AcrylicThin,
-        Transparent,
-        Frozen
-    }
+public enum WindowBackdropType
+{
+    None,
+    Mica,
+    MicaAlt,
+    Acrylic,
+    AcrylicThin,
+    Transparent,
+    Frozen
+}
 
-    public enum ZoomDirection
-    {
-        In,
-        Out
-    }
+public enum ZoomDirection
+{
+    In,
+    Out
+}
 
-    public enum DefaultMouseWheelBehavior
-    {
-        Zoom,
-        Navigate
-    }
+public enum DefaultMouseWheelBehavior
+{
+    Zoom,
+    Navigate
+}
 
-    public enum Setting
-    {
-        ThumbnailShowHide,
-        ThumbnailSelectionColor,
-        ThumbnailSizeSize,
-        CheckeredBackgroundShowHide,
-        Theme,
-        BackDrop,
-        BackDropTransparency,
-        FileNameShowHide,
-        CacheStatusShowHide,
-        ExtShortcutsShowHide,
-        ImageDimensionsShowHide
-    }
+public enum Setting
+{
+    ThumbnailShowHide,
+    ThumbnailSelectionColor,
+    ThumbnailSizeSize,
+    CheckeredBackgroundShowHide,
+    Theme,
+    BackDrop,
+    BackDropTransparency,
+    FileNameShowHide,
+    CacheStatusShowHide,
+    ExtShortcutsShowHide,
+    ImageDimensionsShowHide
+}
 
-    public enum ScrollDirection
-    {
-        Horizontal,
-        Vertical
-    }
+public enum ScrollDirection
+{
+    Horizontal,
+    Vertical
+}
 
-    public enum PanZoomBehaviourOnNavigation
-    {
-        Reset,
-        RememberPerPhoto,
-        RetainFromLastPhoto
-    }
-
+public enum PanZoomBehaviourOnNavigation
+{
+    Reset,
+    RememberPerPhoto,
+    RetainFromLastPhoto
 }

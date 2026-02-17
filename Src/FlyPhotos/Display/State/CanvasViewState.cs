@@ -2,72 +2,72 @@
 using System.Numerics;
 using Windows.Foundation;
 
-namespace FlyPhotos.Display.State
+namespace FlyPhotos.Display.State;
+
+internal class CanvasViewState
 {
-    internal class CanvasViewState
+    public Rect ImageRect;
+    public Point ImagePos = new(0, 0);
+    public Matrix3x2 Mat;
+    public Matrix3x2 MatInv;
+
+    public float Scale = 1.0f;
+    public float LastScaleTo = 1.0f;
+
+    public int Rotation = 0;
+
+    /// <summary>
+    /// Applies the core view properties from another state object to this one.
+    /// </summary>
+    public void Apply(CanvasViewState source)
     {
-        public Rect ImageRect;
-        public Point ImagePos = new(0, 0);
-        public Matrix3x2 Mat;
-        public Matrix3x2 MatInv;
+        Scale = source.Scale;
+        LastScaleTo = source.LastScaleTo;
+        ImagePos = source.ImagePos;
+        Rotation = source.Rotation;
+    }
 
-        public float Scale = 1.0f;
-        public float LastScaleTo = 1.0f;
-
-        public int Rotation = 0;
-
-        /// <summary>
-        /// Applies the core view properties from another state object to this one.
-        /// </summary>
-        public void Apply(CanvasViewState source)
+    /// <summary>
+    /// Creates a new CanvasViewState instance with a copy of the core view properties.
+    /// </summary>
+    public CanvasViewState Clone()
+    {
+        return new CanvasViewState
         {
-            Scale = source.Scale;
-            LastScaleTo = source.LastScaleTo;
-            ImagePos = source.ImagePos;
-            Rotation = source.Rotation;
-        }
+            Scale = Scale,
+            LastScaleTo = LastScaleTo,
+            ImagePos = ImagePos,
+            Rotation = Rotation
+        };
+    }
 
-        /// <summary>
-        /// Creates a new CanvasViewState instance with a copy of the core view properties.
-        /// </summary>
-        public CanvasViewState Clone()
-        {
-            return new CanvasViewState
-            {
-                Scale = Scale,
-                LastScaleTo = LastScaleTo,
-                ImagePos = ImagePos,
-                Rotation = Rotation
-            };
-        }
+    public void UpdateTransform()
+    {
+        Mat = Matrix3x2.Identity;
 
-        public void UpdateTransform()
-        {
-            Mat = Matrix3x2.Identity;
+        // Round the first translation to nearest integer to avoid subpixel rendering
+        float translateX1 = MathF.Round((float)(-ImageRect.Width * 0.5f));
+        float translateY1 = MathF.Round((float)(-ImageRect.Height * 0.5f));
+        Mat *= Matrix3x2.CreateTranslation(translateX1, translateY1);
 
-            // Round the first translation to nearest integer to avoid subpixel rendering
-            float translateX1 = MathF.Round((float)(-ImageRect.Width * 0.5f));
-            float translateY1 = MathF.Round((float)(-ImageRect.Height * 0.5f));
-            Mat *= Matrix3x2.CreateTranslation(translateX1, translateY1);
+        // Scale operation remains unchanged
+        Mat *= Matrix3x2.CreateScale(Scale, Scale);
 
-            // Scale operation remains unchanged
-            Mat *= Matrix3x2.CreateScale(Scale, Scale);
+        // Rotation remains unchanged
+        Mat *= Matrix3x2.CreateRotation((float)(Math.PI * Rotation / 180f));
 
-            // Rotation remains unchanged
-            Mat *= Matrix3x2.CreateRotation((float)(Math.PI * Rotation / 180f));
+        // Round the second translation to nearest integer to avoid subpixel rendering
+        float translateX2 = MathF.Round((float)ImagePos.X);
+        float translateY2 = MathF.Round((float)ImagePos.Y);
+        Mat *= Matrix3x2.CreateTranslation(translateX2, translateY2);
 
-            // Round the second translation to nearest integer to avoid subpixel rendering
-            float translateX2 = MathF.Round((float)ImagePos.X);
-            float translateY2 = MathF.Round((float)ImagePos.Y);
-            Mat *= Matrix3x2.CreateTranslation(translateX2, translateY2);
+        // Calculate inverse transform
+        Matrix3x2.Invert(Mat, out MatInv);
+    }
 
-            // Calculate inverse transform
-            Matrix3x2.Invert(Mat, out MatInv);
-        }
-
-        public string GetAsString()
-        {
-            return $@"
+    public string GetAsString()
+    {
+        return $@"
 --Image Rect Properties--
 Bitmap is scaled if its 1:1 is greater than display area.
 Display Area is canvas control minus the padding set in settings.
@@ -84,6 +84,5 @@ Step3: Rotate := {Rotation:00}deg
 Step4: Translate to ImagePos := [x={ImagePos.X:0.00}, y={ImagePos.Y:0.00}]
 
 ";
-        }
     }
 }

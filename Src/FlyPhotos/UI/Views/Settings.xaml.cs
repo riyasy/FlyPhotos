@@ -12,7 +12,6 @@ using FlyPhotos.Infra.Localization;
 using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
 using FlyPhotos.Services.ExternalAppListing;
-using FlyPhotos.UI.Views;
 using Microsoft.UI;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.System;
@@ -25,7 +24,7 @@ using Microsoft.UI.Xaml.Media;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace FlyPhotos.UI.Screens;
+namespace FlyPhotos.UI.Views;
 
 /// <summary>
 /// An empty window that can be used on its own or navigated to within a Frame.
