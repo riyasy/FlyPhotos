@@ -104,11 +104,11 @@ internal partial class PhotoDisplayController
         _firstPhotoLoadedTcs.SetResult(true);
     }
 
-    private void DoStartupActivities(string selectedFileName, CancellationToken token)
+    private void DoStartupActivities(string selectedFilePath, CancellationToken token)
     {
         try
         {
-            var files = FileDiscoveryService.DiscoverFiles(selectedFileName, _photoSessionState.FlyLaunchedExternally);
+            var files = FileDiscoveryService.DiscoverFiles(selectedFilePath, _photoSessionState.FlyLaunchedExternally);
 
             _photoSessionState.PhotosCount = files.Count;
 
@@ -120,7 +120,7 @@ internal partial class PhotoDisplayController
 
             _firstPhotoLoadedTcs.Task.Wait(token);
 
-            var currentDisplayIndex = Util.FindSelectedFileIndex(selectedFileName, files);
+            var currentDisplayIndex = Util.FindSelectedFileIndex(selectedFilePath, files);
             // In the starting Keys and Index will be same as the keys are continous.
             _photoSessionState.SetCurrentPhotoKeyAndListPosition(currentDisplayIndex, currentDisplayIndex);
 
@@ -255,7 +255,7 @@ internal partial class PhotoDisplayController
                             image.Preview?.Origin == Origin.Disk)
                         {
                             var (actualWidth, actualHeight) = image.GetActualSize();
-                            await DiskCacherWithSqlite.Instance.PutInCache(image.FileName, image.Preview.Bitmap, (int)Math.Round(actualWidth), (int)Math.Round(actualHeight));
+                            await DiskCacherWithSqlite.Instance.PutInCache(image.FilePath, image.Preview.Bitmap, (int)Math.Round(actualWidth), (int)Math.Round(actualHeight));
                         }
                     }
                     finally { _diskCacheTaskThrottler.Release(); }
@@ -364,7 +364,7 @@ internal partial class PhotoDisplayController
             if (photo == null) return;
 
             string? positionText = null;
-            var fileName = Path.GetFileName(photo.FileName);
+            var fileName = Path.GetFileName(photo.FilePath);
             string? dimensionText = null;
 
             if (initialFileListingCompleted)
@@ -426,7 +426,7 @@ internal partial class PhotoDisplayController
         try
         {
             var photo = _photos[_photoSessionState.CurrentPhotoKey];
-            var filePath = photo.FileName;
+            var filePath = photo.FilePath;
 
             if (!File.Exists(filePath)) return;
 
@@ -560,7 +560,7 @@ internal partial class PhotoDisplayController
             Logger.Error($"DeleteFileFromDiskAsync failed: Key {keyToDelete} not found in the collection.");
             return new DeleteResult(false, false, "App - Inconsistent State");
         }
-        var filePath = photo.FileName;
+        var filePath = photo.FilePath;
         try
         {
             var file = await StorageFile.GetFileFromPathAsync(filePath);
@@ -614,7 +614,7 @@ internal partial class PhotoDisplayController
 
     public string GetFullPathCurrentFile()
     {
-        return _photos[_photoSessionState.CurrentPhotoKey].FileName;
+        return _photos[_photoSessionState.CurrentPhotoKey].FilePath;
     }
 
     public void Dispose()

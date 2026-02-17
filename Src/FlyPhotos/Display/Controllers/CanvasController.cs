@@ -112,14 +112,14 @@ internal class CanvasController : ICanvasController
         var currentOperationId = ++_latestSetSourceOperationId;
         var isFirstPhotoEver = string.IsNullOrEmpty(_currentPhotoPath);
 
-        var isNewPhoto = photo.FileName != _currentPhotoPath;
+        var isNewPhoto = photo.FilePath != _currentPhotoPath;
         if (isNewPhoto)
         {
             // If switching to a new photo, cache the view state of the old photo first.
             if (!string.IsNullOrEmpty(_currentPhotoPath))
                 _canvasViewManager.CacheCurrentViewState(_currentPhotoPath, _d2dCanvas.GetSize());
             
-            _currentPhotoPath = photo.FileName;
+            _currentPhotoPath = photo.FilePath;
             _realImageDisplayedForCurrentPhoto = false;
         }
 
@@ -131,7 +131,7 @@ internal class CanvasController : ICanvasController
         var size = photo.GetActualSize();
         _imageSize = new Size(size.Item1, size.Item2);
 
-        Debug.WriteLine($"Displaying {photo.FileName} at level {displayLevel} with size {_imageSize.Width}x{_imageSize.Height}");
+        Debug.WriteLine($"Displaying {photo.FilePath} at level {displayLevel} with size {_imageSize.Width}x{_imageSize.Height}");
 
         if (displayItem == null) return;
 
@@ -169,7 +169,7 @@ internal class CanvasController : ICanvasController
 
             // Asynchronously create the appropriate animator (GIF or APNG).
             IAnimator newAnimator =
-                string.Equals(Path.GetExtension(photo.FileName), ".gif", StringComparison.OrdinalIgnoreCase)
+                string.Equals(Path.GetExtension(photo.FilePath), ".gif", StringComparison.OrdinalIgnoreCase)
                     ? await GifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas)
                     : await PngAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas);
 

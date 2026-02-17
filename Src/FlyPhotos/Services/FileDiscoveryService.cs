@@ -12,16 +12,16 @@ internal static class FileDiscoveryService
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public static List<string> DiscoverFiles(string selectedFileName, bool flyLaunchedExternally)
+    public static List<string> DiscoverFiles(string selectedFilePath, bool flyLaunchedExternally)
     {
         var sw = System.Diagnostics.Stopwatch.StartNew();
-        var files = ListFiles(selectedFileName, flyLaunchedExternally);
+        var files = ListFiles(selectedFilePath, flyLaunchedExternally);
         sw.Stop();
         Logger.Trace($"Discovered {files.Count} files in {sw.ElapsedMilliseconds} ms");
         return files;
     }
 
-    private static List<string> ListFiles(string selectedFileName, bool flyLaunchedExternally)
+    private static List<string> ListFiles(string selectedFilePath, bool flyLaunchedExternally)
     {
         
         List<string> files = [];
@@ -35,7 +35,7 @@ internal static class FileDiscoveryService
         if (files.Count == 0)
         {
             // Path.GetDirectoryName can return null if the path is a root directory.
-            string? directory = Path.GetDirectoryName(selectedFileName);
+            string? directory = Path.GetDirectoryName(selectedFilePath);
             if (directory != null)
             {
                 files = FindAllFilesFromDirectory(directory);
@@ -51,7 +51,7 @@ internal static class FileDiscoveryService
             var extension = Path.GetExtension(file);
             // Check if the file meets either of the criteria for inclusion.
             if ((!string.IsNullOrEmpty(extension) && Util.SupportedExtensions.Contains(extension)) ||
-                (string.Equals(file, selectedFileName, StringComparison.OrdinalIgnoreCase)))
+                (string.Equals(file, selectedFilePath, StringComparison.OrdinalIgnoreCase)))
                 filteredFiles.Add(file);
         }
 
@@ -59,7 +59,7 @@ internal static class FileDiscoveryService
         //    if the initial 'files' list was empty or didn't contain the selected file),
         //    add the selected file to ensure we have at least one item.
         if (filteredFiles.Count == 0)
-            filteredFiles.Add(selectedFileName);
+            filteredFiles.Add(selectedFilePath);
 
         return filteredFiles;
     }

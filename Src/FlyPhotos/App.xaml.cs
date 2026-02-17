@@ -23,7 +23,7 @@ namespace FlyPhotos;
 /// </summary>
 public partial class App
 {
-    private string _selectedFileName;
+    private string _selectedFilePath;
     private static Mutex _mutex;
     private PhotoDisplayWindow _photoDisplayWindow;
 
@@ -47,13 +47,13 @@ public partial class App
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        _selectedFileName = PathResolver.IsPackagedApp ? 
-            GetFileNameFromArgsPackaged(AppInstance.GetCurrent().GetActivatedEventArgs().Data as IFileActivatedEventArgs) : 
-            GetFileNameFromCommandLine();
+        _selectedFilePath = PathResolver.IsPackagedApp ? 
+            GetFilePathFromArgsPackaged(AppInstance.GetCurrent().GetActivatedEventArgs().Data as IFileActivatedEventArgs) : 
+            GetFilePathFromCommandLine();
 
         AppConfig.Initialize();
 
-        if (string.IsNullOrEmpty(_selectedFileName))
+        if (string.IsNullOrEmpty(_selectedFilePath))
         {
             var initWindow = new InitWindow();
             initWindow.SetWindowSize(600, 600);
@@ -68,13 +68,13 @@ public partial class App
         }
         else
         {
-            LaunchPhotoDisplayWindow(_selectedFileName, true);
+            LaunchPhotoDisplayWindow(_selectedFilePath, true);
         }
     }
 
-    private void LaunchPhotoDisplayWindow(string selectedFileName, bool extLaunch)
+    private void LaunchPhotoDisplayWindow(string selectedFilePath, bool extLaunch)
     {
-        _photoDisplayWindow = new PhotoDisplayWindow(selectedFileName, extLaunch);        
+        _photoDisplayWindow = new PhotoDisplayWindow(selectedFilePath, extLaunch);        
         if (AppConfig.Settings.RememberLastMonitor) 
             Util.MoveWindowToMonitor(_photoDisplayWindow, AppConfig.Settings.LastUsedMonitorId);
         _photoDisplayWindow.Maximize();
@@ -92,12 +92,12 @@ public partial class App
                 process.Kill();
     }
 
-    private static string GetFileNameFromCommandLine()
+    private static string GetFilePathFromCommandLine()
     {
         return Environment.GetCommandLineArgs().Skip(1).FirstOrDefault();
     }
 
-    private static string GetFileNameFromArgsPackaged(IFileActivatedEventArgs fileArgs)
+    private static string GetFilePathFromArgsPackaged(IFileActivatedEventArgs fileArgs)
     {
         if (fileArgs == null || fileArgs.Files.Count <= 0)
             return string.Empty;

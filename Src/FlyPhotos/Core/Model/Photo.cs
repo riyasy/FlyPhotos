@@ -10,7 +10,7 @@ namespace FlyPhotos.Core.Model;
 
 internal partial class Photo : IDisposable
 {
-    public readonly string FileName;
+    public readonly string FilePath;
     public HqDisplayItem? Hq { get; private set; }
     public PreviewDisplayItem? Preview { get; private set; }
 
@@ -18,10 +18,10 @@ internal partial class Photo : IDisposable
 
     public bool IsVector { get; }
 
-    public Photo(string selectedFileName)
+    public Photo(string selectedFilePath)
     {
-        FileName = selectedFileName;
-        string extension = Path.GetExtension(FileName);
+        FilePath = selectedFilePath;
+        string extension = Path.GetExtension(FilePath);
         SupportsTransparency = !string.IsNullOrEmpty(extension) && FormatsSupportingTransparency.Contains(extension);
         IsVector = extension.Contains(".svg", StringComparison.OrdinalIgnoreCase);
     }
@@ -51,7 +51,7 @@ internal partial class Photo : IDisposable
 
         async Task GetInitialPreview()
         {
-            firstDisplay = await ImageReader.GetFirstPreviewSpecialHandlingAsync(device, FileName);
+            firstDisplay = await ImageReader.GetFirstPreviewSpecialHandlingAsync(device, FilePath);
         }
     }
 
@@ -59,14 +59,14 @@ internal partial class Photo : IDisposable
     {
         async Task GetHqImage()
         {
-            Hq = await ImageReader.GetHqImage(device, FileName);
+            Hq = await ImageReader.GetHqImage(device, FilePath);
         }
         await Task.Run(GetHqImage);
     }
 
     public async Task LoadHq(CanvasControl device)
     {
-        Hq ??= await ImageReader.GetHqImage(device, FileName);
+        Hq ??= await ImageReader.GetHqImage(device, FilePath);
     }
 
     public async Task LoadPreview(CanvasControl device)
@@ -74,7 +74,7 @@ internal partial class Photo : IDisposable
         if (Preview == null || Preview.Origin == Origin.ErrorScreen ||
             Preview.Origin == Origin.Undefined)
         {
-            Preview = await ImageReader.GetPreview(device, FileName);
+            Preview = await ImageReader.GetPreview(device, FilePath);
         }
     }
 

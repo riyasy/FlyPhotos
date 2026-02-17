@@ -40,11 +40,11 @@ internal static class Util
             SupportedExtensions.UnionWith(codecInfo.FileExtensions);
     }
 
-    public static int FindSelectedFileIndex(string selectedFileName, List<string> files)
+    public static int FindSelectedFileIndex(string selectedFilePath, List<string> files)
     {
         var curIdx = 0;
         for (var i = 0; i < files.Count; i++)
-            if (string.Equals(Path.GetFileName(selectedFileName), Path.GetFileName(files[i]),
+            if (string.Equals(Path.GetFileName(selectedFilePath), Path.GetFileName(files[i]),
                     StringComparison.OrdinalIgnoreCase))
             {
                 curIdx = i;
