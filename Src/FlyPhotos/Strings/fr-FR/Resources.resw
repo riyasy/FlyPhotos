@@ -13,82 +13,82 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AppSelectionDialog.PrimaryButtonText">
-    <value>Auswählen</value>
+    <value>Sélectionner</value>
   </data>
   <data name="AppSelectionDialog.SecondaryButtonText">
-    <value>Abbrechen</value>
+    <value>Annuler</value>
   </data>
   <data name="AppSelectionDialog.Title">
-    <value>Anwendung auswählen</value>
+    <value>Sélectionner une application</value>
   </data>
   <data name="BrowseBtn.Content">
-    <value>Nach App durchsuchen…</value>
+    <value>Parcourir les applications…</value>
   </data>
   <data name="BtnCheckVersion.Content">
-    <value>Nach Updates suchen</value>
+    <value>Rechercher des mises à jour</value>
   </data>
   <data name="BtnGitHubRepo.Content">
-    <value>GitHub-Repository öffnen</value>
+    <value>Ouvrir le dépôt GitHub</value>
   </data>
   <data name="BtnReportBugs.Content">
-    <value>Problem auf GitHub melden</value>
+    <value>Signaler un problème sur GitHub</value>
   </data>
   <data name="BtnThirdPartyLicenses.Content">
-    <value>Lizenzen von Drittanbietern anzeigen</value>
+    <value>Afficher les licences tierces</value>
   </data>
   <data name="ButtonBackToolTip.Content">
-    <value>Vorheriges Foto</value>
+    <value>Photo précédente</value>
   </data>
   <data name="ButtonExpanderToolTip.Content">
-    <value>Cache-Status anzeigen</value>
+    <value>Afficher l'état du cache</value>
   </data>
   <data name="ButtonNextPageToolTip.Content">
-    <value>Nächste Seite</value>
+    <value>Page suivante</value>
   </data>
   <data name="ButtonNextToolTip.Content">
-    <value>Nächstes Foto</value>
+    <value>Photo suivante</value>
   </data>
   <data name="ButtonOneIsToOneToolTip.Content">
-    <value>Auf Originalgröße zoomen</value>
+    <value>Zoomer à la taille réelle</value>
   </data>
   <data name="ButtonOpenLog.Content">
-    <value>Protokoll öffnen</value>
+    <value>Ouvrir le journal</value>
   </data>
   <data name="ButtonPrevPageToolTip.Content">
-    <value>Vorherige Seite</value>
+    <value>Page précédente</value>
   </data>
   <data name="ButtonRotateToolTip.Content">
-    <value>Foto drehen</value>
+    <value>Pivoter la photo</value>
   </data>
   <data name="ButtonScaleSetToolTip.Content">
-    <value>An Anzeigebereich anpassen</value>
+    <value>Ajuster à la fenêtre</value>
   </data>
   <data name="ButtonSettingsToolTip.Content">
-    <value>Einstellungen</value>
+    <value>Paramètres</value>
   </data>
   <data name="ButtonShortcutsToolTip.Content">
-    <value>In anderen Apps öffnen</value>
+    <value>Ouvrir dans d'autres applications</value>
   </data>
   <data name="ChangeLanguageAlert.Description">
-    <value>Die App muss neu gestartet werden, um die Anzeigesprache zu ändern.</value>
+    <value>L'application doit être redémarrée pour changer la langue d'affichage.</value>
   </data>
   <data name="ChangeLanguageAlert.Title">
-    <value>Sprache ändern</value>
+    <value>Changer la langue</value>
   </data>
   <data name="ColorPickerFlyoutCancelButton.Content">
-    <value>Abbrechen</value>
+    <value>Annuler</value>
   </data>
   <data name="ColorPickerFlyoutOkButton.Content">
     <value>OK</value>
   </data>
   <data name="ComboBackgroundItemAcrylic.Content">
-    <value>Acryl</value>
+    <value>Acrylique</value>
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content">
-    <value>Acryl Schwach</value>
+    <value>Acrylique Fin</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content">
-    <value>Gefroren</value>
+    <value>Gelé</value>
   </data>
   <data name="ComboBackgroundItemMica.Content">
     <value>Mica</value>
@@ -97,401 +97,401 @@
     <value>Mica Alt</value>
   </data>
   <data name="ComboBackgroundItemNone.Content">
-    <value>Keiner</value>
+    <value>Aucun</value>
   </data>
   <data name="ComboBackgroundItemTransparent.Content">
     <value>Transparent</value>
   </data>
   <data name="ComboMouseWheelItemNav.Content">
-    <value>Nächstes oder Vorheriges ansehen</value>
+    <value>Afficher Suivant ou Précédent</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content">
-    <value>Vergrößern oder Verkleinern</value>
+    <value>Zoomer avant ou arrière</value>
   </data>
   <data name="ComboPanZoomItemRemember.Content">
-    <value>Schwenken/Zoomen/Drehen pro Foto merken</value>
+    <value>Mémoriser Pan/Zoom/Rotation par photo</value>
   </data>
   <data name="ComboPanZoomItemReset.Content">
-    <value>Schwenken/Zoomen/Drehen zurücksetzen</value>
+    <value>Réinitialiser Pan/Zoom/Rotation</value>
   </data>
   <data name="ComboPanZoomItemRetain.Content">
-    <value>Schwenken/Zoomen vom vorherigen Foto beibehalten</value>
+    <value>Conserver Pan/Zoom de la photo précédente</value>
   </data>
   <data name="ComboThemeItemDark.Content">
-    <value>Dunkel</value>
+    <value>Sombre</value>
   </data>
   <data name="ComboThemeItemDefault.Content">
-    <value>Standard</value>
+    <value>Par défaut</value>
   </data>
   <data name="ComboThemeItemLight.Content">
-    <value>Hell</value>
+    <value>Clair</value>
   </data>
   <data name="ConfirmDeletion.CancelButton">
-    <value>Abbrechen</value>
+    <value>Annuler</value>
   </data>
   <data name="ConfirmDeletion.DeleteButton">
-    <value>Löschen</value>
+    <value>Supprimer</value>
   </data>
   <data name="ConfirmDeletion.Message">
-    <value>Sind Sie sicher, dass Sie diese Datei löschen möchten?</value>
+    <value>Voulez-vous vraiment supprimer ce fichier ?</value>
   </data>
   <data name="ConfirmDeletion.Title">
-    <value>Löschen bestätigen</value>
+    <value>Confirmer la suppression</value>
   </data>
   <data name="DefaultViewerInstruction1.Text">
-    <value>Um FlyPhotos als Standard-App festzulegen:
-Rechtsklick auf ein Bild &gt; „Öffnen mit“ &gt; „Andere App auswählen“.
-FlyPhotos auswählen und „Immer“ wählen.</value>
+    <value>Pour définir FlyPhotos comme application par défaut : 
+Cliquez avec le bouton droit sur une photo &gt; Ouvrir avec &gt; Choisir une autre application. 
+Sélectionnez FlyPhotos et choisissez Toujours.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text">
-    <value>Unter Windows 11 können Sie FlyPhotos auch als Standard-App festlegen unter
-Einstellungen &gt; Apps &gt; Standard-Apps.</value>
+    <value>Sous Windows 11, vous pouvez également définir FlyPhotos comme application par défaut dans 
+Paramètres &gt; Applications &gt; Applications par défaut.</value>
   </data>
   <data name="DeletionFailed.CloseButton">
     <value>OK</value>
   </data>
   <data name="DeletionFailed.Message">
-    <value>Die Datei konnte nicht gelöscht werden.</value>
+    <value>Le fichier n'a pas pu être supprimé.</value>
   </data>
   <data name="DeletionFailed.Title">
-    <value>Löschen fehlgeschlagen</value>
+    <value>Échec de la suppression</value>
   </data>
   <data name="DonateButton.Content">
-    <value>Spenden</value>
+    <value>Faire un don</value>
   </data>
   <data name="DropAreaRun.Text">
-    <value>Bild hierher ziehen oder</value>
+    <value>Glisser-déposer une photo ici ou</value>
   </data>
   <data name="HeaderCodec.Text">
     <value>Codec</value>
   </data>
   <data name="HeaderExtensions.Text">
-    <value>Erweiterungen</value>
+    <value>Extensions</value>
   </data>
   <data name="HeaderType.Text">
-    <value>Typ</value>
+    <value>Type</value>
   </data>
   <data name="LoadingHighQuality.Message">
-    <value>Hochauflösende Version wird geladen. Bitte warten…</value>
+    <value>Chargement de la version haute résolution. Veuillez patienter…</value>
   </data>
   <data name="MessageClose_Ok">
     <value>OK</value>
   </data>
   <data name="NoShortcutsCreated.Message">
-    <value>Keine Verknüpfungen gefunden. Konfigurieren Sie diese in den Einstellungen.</value>
+    <value>Aucun raccourci créé. Configurez-les dans les Paramètres.</value>
   </data>
   <data name="OpenFileHyperlink.Text">
-    <value>Datei öffnen</value>
+    <value>Ouvrir le fichier</value>
   </data>
   <data name="RightClickInstruction.Text">
-    <value>Um FlyPhotos zu verwenden, klicken Sie mit der rechten Maustaste auf ein Foto und wählen Sie Öffnen mit &gt; FlyPhotos.</value>
+    <value>Pour utiliser FlyPhotos, faites un clic droit sur une photo et sélectionnez Ouvrir avec &gt; FlyPhotos.</value>
   </data>
   <data name="ScanningTextBlock.Text">
-    <value>Apps werden gescannt…</value>
+    <value>Analyse des applications…</value>
   </data>
   <data name="SearchBox.PlaceholderText">
-    <value>Apps suchen…</value>
+    <value>Rechercher des applications…</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description">
-    <value>Mauszeiger ausblenden, wenn die Maus inaktiv ist.</value>
+    <value>Masquer le pointeur de la souris si la souris est inactive.</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Header">
-    <value>Mauszeiger automatisch ausblenden</value>
+    <value>Masquer automatiquement le pointeur de la souris</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Description">
-    <value>Vor dem Löschen einer Datei um Bestätigung bitten.</value>
+    <value>Demander confirmation avant de supprimer un fichier.</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Header">
-    <value>Bestätigungsdialog zum Löschen von Dateien anzeigen</value>
+    <value>Confirmer avant de supprimer des fichiers</value>
   </data>
   <data name="SettingsCardCredits.Description">
-    <value>FlyPhotos dankt Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog und WinUIEx.</value>
+    <value>FlyPhotos remercie Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog et WinUIEx.</value>
   </data>
   <data name="SettingsCardCredits.Header">
-    <value>Danksagung</value>
+    <value>Crédits</value>
   </data>
   <data name="SettingsCardDeveloperSupport.Description">
-    <value>Helfen Sie, Fly noch besser zu machen.</value>
+    <value>Rendez Fly encore plus génial.</value>
   </data>
   <data name="SettingsCardDeveloperSupport.Header">
-    <value>FlyPhotos unterstützen</value>
+    <value>Soutenir FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description">
-    <value>Wählen Sie externe Programme aus, um sie als Verknüpfungen hinzuzufügen.</value>
+    <value>Sélectionner des applications externes à ajouter comme raccourcis.</value>
   </data>
   <data name="SettingsCardExternalApps.Header">
-    <value>Externe Apps auswählen</value>
+    <value>Sélectionner des applications externes</value>
   </data>
   <data name="SettingsCardExternalShorcuts.Description">
-    <value>Das aktuelle Foto in anderen Apps öffnen</value>
+    <value>Ouvrir la photo actuelle dans d'autres applications</value>
   </data>
   <data name="SettingsCardExternalShorcuts.Header">
-    <value>Verknüpfungen zu externen Apps anzeigen</value>
+    <value>Afficher les raccourcis vers des applications externes</value>
   </data>
   <data name="SettingsCardFadeControls.Description">
-    <value>UI-Steuerelemente ausblenden, wenn sich die Maus wegbewegt.</value>
+    <value>Estomper les contrôles lorsque la souris s'éloigne.</value>
   </data>
   <data name="SettingsCardFadeControls.Header">
-    <value>UI-Steuerelemente automatisch ausblenden</value>
+    <value>Estomper automatiquement les contrôles d'interface</value>
   </data>
   <data name="SettingsCardFadeIntensity.Description">
-    <value>Stärke des automatischen Ausblendeffekts anpassen.</value>
+    <value>Ajuster la force de l'effet d'estompage automatique.</value>
   </data>
   <data name="SettingsCardFadeIntensity.Header">
-    <value>Intensität des automatischen Ausblendens %</value>
+    <value>Intensité d'estompage automatique (%)</value>
   </data>
   <data name="SettingsCardHighQualityInterpolation.Description">
-    <value>Deaktivieren Sie diese Funktion für schärfere Pixelkanten (hilfreich für Pixelkunst).</value>
+    <value>Désactiver pour des bords de pixels plus nets (utile pour le pixel art).</value>
   </data>
   <data name="SettingsCardHighQualityInterpolation.Header">
-    <value>Hochwertige Interpolation beim Zoomen verwenden</value>
+    <value>Utiliser une interpolation de haute qualité lors du zoom</value>
   </data>
   <data name="SettingsCardHighResCache.Description">
-    <value>Legen Sie die Anzahl der auf jeder Seite zwischengespeicherten hochauflösenden Fotos fest.</value>
+    <value>Définir le nombre de photos haute résolution mises en cache de chaque côté.</value>
   </data>
   <data name="SettingsCardHighResCache.Header">
-    <value>Cache mit hoher Auflösung</value>
+    <value>Cache haute résolution</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description">
-    <value>Legt fest, wie viel % des Bildschirms das Foto ausfüllt.</value>
+    <value>Choisir la quantité d'écran que la photo remplit. (%)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header">
-    <value>Bild an Bildschirm anpassen</value>
+    <value>Ajustement Image à l'écran</value>
   </data>
   <data name="SettingsCardLanguage.Header">
-    <value>Sprache auswählen</value>
+    <value>Choisir la langue</value>
   </data>
   <data name="SettingsCardLog.Description">
-    <value>Öffnen, um die Protokolldatei anzuzeigen</value>
+    <value>Ouvrir pour voir le fichier journal</value>
   </data>
   <data name="SettingsCardLog.Header">
-    <value>Protokolldatei</value>
+    <value>Fichier journal</value>
   </data>
   <data name="SettingsCardLowResCache.Description">
-    <value>Legen Sie die Anzahl der auf jeder Seite zwischengespeicherten Fotos mit niedriger Auflösung fest.</value>
+    <value>Définir le nombre de photos basse résolution mises en cache de chaque côté.</value>
   </data>
   <data name="SettingsCardLowResCache.Header">
-    <value>Cache mit niedriger Auflösung</value>
+    <value>Cache basse résolution</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description">
-    <value>Wählen Sie das Standardverhalten des Mausrads.</value>
+    <value>Choisir le comportement par défaut de la molette de la souris.</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header">
-    <value>Mausrad</value>
+    <value>Molette de la souris</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviourInfo.Description">
-    <value>👉 Strg + Mausrad zoomt immer hinein oder heraus.
-👉 Alt + Mausrad navigiert immer zum nächsten oder Vorherigen.</value>
+    <value>👉 Ctrl + Molette de la souris zoome toujours. 
+👉 Alt + Molette de la souris navigue toujours.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description">
-    <value>⚠ Kann den Start verlangsamen: Fly wartet beim Start auf das Laden des vollständigen Bildes statt die Vorschau zu verwenden.</value>
+    <value>⚠ Peut ralentir le démarrage. Fly attend pour charger la photo pleine résolution au lancement.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header">
-    <value>Animationseffekt: Beim Öffnen vergrößern, beim Beenden verkleinern</value>
+    <value>Zoomer à l'ouverture d'un fichier et dézoomer à la sortie</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description">
-    <value>⚠ Verwenden Sie die Option „Beibehalten“ nur in Ordnern mit gleich großen Fotos.</value>
+    <value>⚠ N'utilisez l'option Conserver que pour les dossiers contenant des photos de taille similaire.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header">
-    <value>Schwenk-, Zoom- und Drehverhalten bei der Navigation</value>
+    <value>Comportement Pan, Zoom et Rotation pendant la navigation</value>
   </data>
   <data name="SettingsCardRememberLastMonitor.Description">
-    <value>Fly wird auf dem zuletzt verwendeten Monitor geöffnet. Nur aktivieren, wenn mehrere Monitore verwendet werden.</value>
+    <value>Fly s'ouvre sur le dernier moniteur utilisé. Activer uniquement si vous utilisez plusieurs moniteurs.</value>
   </data>
   <data name="SettingsCardRememberLastMonitor.Header">
-    <value>Zuletzt verwendeten Monitor merken</value>
+    <value>Mémoriser le dernier moniteur utilisé</value>
   </data>
   <data name="SettingsCardReportBugs.Description">
-    <value>Melden Sie Probleme auf GitHub oder per E-Mail an ryftools@outlook.com</value>
+    <value>Signaler des problèmes sur GitHub ou envoyer un mail à ryftools@outlook.com</value>
   </data>
   <data name="SettingsCardReportBugs.Header">
-    <value>Fehler und Probleme</value>
+    <value>Bugs et problèmes</value>
   </data>
   <data name="SettingsCardShowCacheStatusExpander.Description">
-    <value>Cache-Status-Expander im Tastenfeld anzeigen.</value>
+    <value>Afficher l'état du cache dans le panneau inférieur.</value>
   </data>
   <data name="SettingsCardShowCacheStatusExpander.Header">
-    <value>Cache-Status anzeigen</value>
+    <value>Afficher l'état du cache</value>
   </data>
   <data name="SettingsCardShowCheckeredBackground.Description">
-    <value>Karierten Hintergrund für transparente Bilder anzeigen. 
-⚠ Kann die Leistung beeinträchtigen.</value>
+    <value>Afficher l'arrière-plan en damier pour les images transparentes. 
+⚠ Peut affecter les performances.</value>
   </data>
   <data name="SettingsCardShowCheckeredBackground.Header">
-    <value>Karierten Hintergrund anzeigen</value>
+    <value>Afficher l'arrière-plan en damier</value>
   </data>
   <data name="SettingsCardShowFileName.Description">
-    <value>Dateinamen der aktuell geöffneten Datei anzeigen</value>
+    <value>Afficher le nom du fichier actuellement ouvert</value>
   </data>
   <data name="SettingsCardShowFileName.Header">
-    <value>Dateinamen anzeigen</value>
+    <value>Afficher le nom du fichier</value>
   </data>
   <data name="SettingsCardShowImageDimensions.Description">
-    <value>Breite und Höhe des Fotos neben dem Dateinamen anzeigen.</value>
+    <value>Afficher la largeur et la hauteur de la photo à côté du nom du fichier.</value>
   </data>
   <data name="SettingsCardShowImageDimensions.Header">
-    <value>Fotoabmessungen anzeigen</value>
+    <value>Afficher les dimensions de la photo</value>
   </data>
   <data name="SettingsCardShowThumbnail.Description">
-    <value>Miniaturansichtleiste am unteren Fensterrand anzeigen</value>
+    <value>Afficher la bande de miniatures en bas de la fenêtre</value>
   </data>
   <data name="SettingsCardShowThumbnail.Header">
-    <value>Miniaturansichtleiste anzeigen</value>
+    <value>Afficher la bande de miniatures</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Header">
-    <value>Zoomprozentsatz anzeigen</value>
+    <value>Afficher le pourcentage de zoom</value>
   </data>
   <data name="SettingsCardSourceCode.Description">
-    <value>FlyPhotos ist Open Source und wird auf GitHub gehostet</value>
+    <value>FlyPhotos est open source et hébergé sur GitHub</value>
   </data>
   <data name="SettingsCardSourceCode.Header">
-    <value>GitHub-Repository</value>
+    <value>Dépôt GitHub</value>
   </data>
   <data name="SettingsCardTheme.Description">
-    <value>Wählen Sie das App-Design.</value>
+    <value>Sélectionner le thème de l'application.</value>
   </data>
   <data name="SettingsCardTheme.Header">
-    <value>Fensterdesign</value>
+    <value>Thème de la fenêtre</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Description">
-    <value>Legen Sie die Hervorhebungsfarbe für ausgewählte Miniaturansichten fest.</value>
+    <value>Définir la couleur de surbrillance utilisée pour les miniatures sélectionnées.</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Header">
-    <value>Auswahlfarbe für Miniaturansichten</value>
+    <value>Couleur de sélection des miniatures</value>
   </data>
   <data name="SettingsCardThumbnailSize.Description">
-    <value>Passen Sie die Größe der Miniaturansichten im Viewer an.</value>
+    <value>Ajuster la taille des miniatures dans la visionneuse.</value>
   </data>
   <data name="SettingsCardThumbnailSize.Header">
-    <value>Größe der Miniaturansicht</value>
+    <value>Taille des miniatures</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description">
-    <value>Nur für transparenten Fensterhintergrund anwendbar.</value>
+    <value>Applicable uniquement pour l'arrière-plan de fenêtre transparent.</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Header">
-    <value>Transparenz (%)</value>
+    <value>Transparence (%)</value>
   </data>
   <data name="SettingsCardVersion.Description">
-    <value>Aktuelle Version: {0}</value>
+    <value>La version actuelle est {0}</value>
   </data>
   <data name="SettingsCardVersion.Header">
-    <value>Aktuelle Version</value>
+    <value>Version actuelle</value>
   </data>
   <data name="SettingsCardWindowBackground.Description">
-    <value>Legen Sie den Fensterhintergrund fest.</value>
+    <value>Choisir l'arrière-plan de la fenêtre.</value>
   </data>
   <data name="SettingsCardWindowBackground.Header">
-    <value>Fensterhintergrund</value>
+    <value>Arrière-plan de la fenêtre</value>
   </data>
   <data name="SettingsExpanderAutoFade.Header">
-    <value>Einstellungen für automatisches Ein- und Ausblenden</value>
+    <value>Paramètres d'estompage et de masquage automatiques</value>
   </data>
   <data name="SettingsExpanderCaching.Description">
-    <value>Konfigurieren Sie, wie Fly das Foto-Caching handhabt.</value>
+    <value>Configurer la façon dont Fly gère la mise en cache des photos.</value>
   </data>
   <data name="SettingsExpanderCaching.Header">
-    <value>Caching</value>
+    <value>Mise en cache</value>
   </data>
   <data name="SettingsExpanderKeyboardShortcuts.Header">
-    <value>Tastaturkürzel</value>
+    <value>Raccourcis clavier</value>
   </data>
   <data name="SettingsExpanderPanZoom.Description">
-    <value>Passen Sie das Schwenk- und Zoomverhalten an.</value>
+    <value>Personnaliser le comportement de Panoramique et Zoom.</value>
   </data>
   <data name="SettingsExpanderPanZoom.Header">
-    <value>Schwenk- und Zoom-Einstellungen</value>
+    <value>Panoramique et Zoom</value>
   </data>
   <data name="SettingsPage.Title">
-    <value>FlyPhotos - Einstellungen</value>
+    <value>FlyPhotos - Paramètres</value>
   </data>
   <data name="SettingsPivotItemAbout.Header">
-    <value>Über</value>
+    <value>À propos</value>
   </data>
   <data name="SettingsPivotItemCodecs.Header">
     <value>Codecs</value>
   </data>
   <data name="SettingsPivotItemGeneral.Header">
-    <value>Allgemein</value>
+    <value>Général</value>
   </data>
   <data name="Status_FileNotFound">
-    <value>Datei nicht gefunden</value>
+    <value>Fichier introuvable</value>
   </data>
   <data name="Status_InvalidFile">
-    <value>Ungültige Datei</value>
+    <value>Fichier invalide</value>
   </data>
   <data name="Status_Loading">
-    <value>Wird geladen…</value>
+    <value>Chargement…</value>
   </data>
   <data name="Status_PreviewFailed">
-    <value>Vorschau konnte nicht geladen werden</value>
+    <value>Échec du chargement de l'aperçu</value>
   </data>
   <data name="TextBlockCaching.Text">
-    <value>Caching</value>
+    <value>Mise en cache</value>
   </data>
   <data name="TextBlockCodecsInfo.Text">
-    <value>FlyPhotos verwendet hauptsächlich integrierte Windows Imaging Component (WIC) Codecs.</value>
+    <value>FlyPhotos utilise principalement les codecs Windows Imaging Component (WIC).</value>
   </data>
   <data name="TextBlockLog.Text">
-    <value>Protokoll</value>
+    <value>Journal</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text">
-    <value>Fotoanzeige</value>
+    <value>Affichage des photos</value>
   </data>
   <data name="TextBlockTheming.Text">
-    <value>Design</value>
+    <value>Apparence</value>
   </data>
   <data name="TextBlockUIControls.Text">
-    <value>UI-Steuerelemente</value>
+    <value>Contrôles d'interface</value>
   </data>
   <data name="TitleTextBlock.Text">
-    <value>FlyPhotos - Foto öffnen</value>
+    <value>FlyPhotos - Ouvrir la photo</value>
   </data>
   <data name="TrialExpiredMessage.CloseButton">
     <value>OK</value>
   </data>
   <data name="TrialExpiredMessage.Content">
-    <value>Ihre kostenlose Testversion ist abgelaufen. Bitte erwerben Sie die Vollversion im Microsoft Store.</value>
+    <value>Votre essai gratuit a expiré. Veuillez acheter la version complète sur le Microsoft Store.</value>
   </data>
   <data name="TrialExpiredMessage.Title">
-    <value>Testversion abgelaufen</value>
+    <value>Essai expiré</value>
   </data>
   <data name="UnsupportedFileAlert.Description">
-    <value>Die abgelegte Datei wird nicht als unterstütztes Bildformat erkannt.</value>
+    <value>Le fichier déposé n'est pas un type d'image pris en charge.</value>
   </data>
   <data name="UnsupportedFileAlert.Title">
-    <value>Nicht unterstützte Datei</value>
+    <value>Fichier non pris en charge</value>
   </data>
   <data name="SettingsCardKeyboardShortCuts.Description">
-    <value>Pfeiltasten Links/Rechts : Durch Fotos blättern
-Pfeiltasten Oben/Unten : Vergrößern oder Verkleinern (Zoom)
-Linke Maustaste + Ziehen : Ausschnitt verschieben
+    <value>Flèches Gauche/Droite : Naviguer entre les photos
+Flèches Haut/Bas : Zoom avant ou arrière
+Clic gauche + Glisser : Déplacer la photo (Pan)
 
-Mausrad : Zoomen / Blättern (je nach Einstellung)
-Strg + Mausrad : Vergrößern oder Verkleinern
-Alt + Mausrad : Durch Fotos blättern
-Mausrad nach links/rechts neigen : Durch Fotos blättern
+Molette de la souris : Zoomer / Naviguer (selon paramètres)
+Ctrl + Molette : Zoom avant ou arrière
+Alt + Molette : Naviguer entre les photos
+Incliner la molette (Gauche/Droite) : Naviguer entre les photos
 
-Strg + Pfeiltasten : Ausschnitt verschieben
-Strg + + : Vergrößern
-Strg + - : Verkleinern
+Ctrl + Flèches : Déplacer la photo
+Ctrl + + : Zoom avant
+Ctrl + - : Zoom arrière
 
-Alt + Pfeiltasten Links/Rechts : Seiten in mehrseitigen TIFFs wechseln
+Alt + Flèches Gauche/Droite : Naviguer dans les TIFF multipages
 
-Bild Auf / Bild Ab : Zur nächsten Zoomstufe (100%, 400%, Einpassen)
-Pos1 : Zum ersten Foto
-Ende : Zum letzten Foto
+Page Préc. / Page Suiv. : Zoomer au prochain préréglage (100%, 400%, Ajuster)
+Origine (Home) : Aller à la première photo
+Fin (End) : Aller à la dernière photo
 
-Mausrad auf der Vorschauleiste : Durch Fotos blättern
-Mausrad auf Bildschirmtasten Links/Rechts : Durch Fotos blättern
-Mausrad auf der Drehen-Schaltfläche : Foto drehen
+Molette sur la bande de miniatures : Naviguer entre les photos
+Molette sur les boutons écran Gauche/Droite : Naviguer entre les photos
+Molette sur le bouton Rotation : Faire pivoter la photo
 
-Touchpad Zweifinger-Wischen Links/Rechts : Durch Fotos blättern
-Touchpad Zweifinger-Wischen Oben/Unten : Zoomen / Blättern (je nach Einstellung)
-Touchpad Auf- oder Zuziehen (Pinch) : Vergrößern oder Verkleinern
+Touchpad balayage 2 doigts Gauche/Droite : Naviguer entre les photos
+Touchpad balayage 2 doigts Haut/Bas : Zoomer / Naviguer (selon paramètres)
+Touchpad pincement : Zoom avant ou arrière
 
-D : Dateieigenschaften anzeigen
-Entf : Foto löschen
+D : Propriétés du fichier
+Suppr (Del) : Supprimer la photo
 
-Esc : Einstellungen schließen oder App beenden</value>
+Esc : Fermer les paramètres ou Quitter</value>
   </data>
 </root>

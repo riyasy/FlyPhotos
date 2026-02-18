@@ -65,7 +65,7 @@ public sealed partial class InitWindow
         if (file != null && Util.SupportedExtensions.Contains(file.FileType))
             ProcessSelectedFile(file);
         else
-            await ShowMessageDialog("Unsupported File", "The dragged file is not a supported image type.");
+            await ShowMessageDialog(L.Get("UnsupportedFileAlert/Title"), L.Get("UnsupportedFileAlert/Description"));
     }
 
 
@@ -102,7 +102,7 @@ public sealed partial class InitWindow
         {
             Title = title,
             Content = content,
-            CloseButtonText = "OK",
+            CloseButtonText = L.Get("MessageClose_Ok"),
             XamlRoot = Content.XamlRoot
         };
         await dialog.ShowAsync();

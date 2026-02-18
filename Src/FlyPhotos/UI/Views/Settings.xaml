@@ -44,8 +44,7 @@
                             <ComboBox
                                 x:Name="ComboLanguage"
                                 MinWidth="200"
-                                HorizontalAlignment="Right"
-                                SelectionChanged="ComboLanguage_SelectionChanged">
+                                HorizontalAlignment="Right">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate x:DataType="model:LanguageInfo">
                                         <TextBlock Text="{x:Bind DisplayName}" />
@@ -223,7 +222,7 @@
                                 <ComboBoxItem x:Uid="ComboMouseWheelItemNav" />
                             </ComboBox>
                             <controls:SettingsExpander.Items>
-                                <controls:SettingsCard x:Name="ComboMouseWheelBehaviourInfo" x:Uid="ComboMouseWheelBehaviourInfo" />
+                                <controls:SettingsCard x:Name="SettingsCardMouseWheelBehaviourInfo" x:Uid="SettingsCardMouseWheelBehaviourInfo" />
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
                         <controls:SettingsExpander

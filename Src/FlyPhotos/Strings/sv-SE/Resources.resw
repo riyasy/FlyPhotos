@@ -13,82 +13,82 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AppSelectionDialog.PrimaryButtonText">
-    <value>Auswählen</value>
+    <value>Välj</value>
   </data>
   <data name="AppSelectionDialog.SecondaryButtonText">
-    <value>Abbrechen</value>
+    <value>Avbryt</value>
   </data>
   <data name="AppSelectionDialog.Title">
-    <value>Anwendung auswählen</value>
+    <value>Välj ett program</value>
   </data>
   <data name="BrowseBtn.Content">
-    <value>Nach App durchsuchen…</value>
+    <value>Bläddra efter app…</value>
   </data>
   <data name="BtnCheckVersion.Content">
-    <value>Nach Updates suchen</value>
+    <value>Sök efter uppdateringar</value>
   </data>
   <data name="BtnGitHubRepo.Content">
-    <value>GitHub-Repository öffnen</value>
+    <value>Öppna GitHub-lagringsplats</value>
   </data>
   <data name="BtnReportBugs.Content">
-    <value>Problem auf GitHub melden</value>
+    <value>Rapportera ett problem på GitHub</value>
   </data>
   <data name="BtnThirdPartyLicenses.Content">
-    <value>Lizenzen von Drittanbietern anzeigen</value>
+    <value>Visa licenser från tredje part</value>
   </data>
   <data name="ButtonBackToolTip.Content">
-    <value>Vorheriges Foto</value>
+    <value>Föregående foto</value>
   </data>
   <data name="ButtonExpanderToolTip.Content">
-    <value>Cache-Status anzeigen</value>
+    <value>Visa cachestatus</value>
   </data>
   <data name="ButtonNextPageToolTip.Content">
-    <value>Nächste Seite</value>
+    <value>Nästa sida</value>
   </data>
   <data name="ButtonNextToolTip.Content">
-    <value>Nächstes Foto</value>
+    <value>Nästa foto</value>
   </data>
   <data name="ButtonOneIsToOneToolTip.Content">
-    <value>Auf Originalgröße zoomen</value>
+    <value>Zooma till faktisk storlek</value>
   </data>
   <data name="ButtonOpenLog.Content">
-    <value>Protokoll öffnen</value>
+    <value>Öppna logg</value>
   </data>
   <data name="ButtonPrevPageToolTip.Content">
-    <value>Vorherige Seite</value>
+    <value>Föregående sida</value>
   </data>
   <data name="ButtonRotateToolTip.Content">
-    <value>Foto drehen</value>
+    <value>Rotera foto</value>
   </data>
   <data name="ButtonScaleSetToolTip.Content">
-    <value>An Anzeigebereich anpassen</value>
+    <value>Anpassa till fönster</value>
   </data>
   <data name="ButtonSettingsToolTip.Content">
-    <value>Einstellungen</value>
+    <value>Inställningar</value>
   </data>
   <data name="ButtonShortcutsToolTip.Content">
-    <value>In anderen Apps öffnen</value>
+    <value>Öppna i andra appar</value>
   </data>
   <data name="ChangeLanguageAlert.Description">
-    <value>Die App muss neu gestartet werden, um die Anzeigesprache zu ändern.</value>
+    <value>Appen måste startas om för att ändra visningsspråk.</value>
   </data>
   <data name="ChangeLanguageAlert.Title">
-    <value>Sprache ändern</value>
+    <value>Ändra språk</value>
   </data>
   <data name="ColorPickerFlyoutCancelButton.Content">
-    <value>Abbrechen</value>
+    <value>Avbryt</value>
   </data>
   <data name="ColorPickerFlyoutOkButton.Content">
     <value>OK</value>
   </data>
   <data name="ComboBackgroundItemAcrylic.Content">
-    <value>Acryl</value>
+    <value>Akryl</value>
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content">
-    <value>Acryl Schwach</value>
+    <value>Tunn akryl</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content">
-    <value>Gefroren</value>
+    <value>Frusen</value>
   </data>
   <data name="ComboBackgroundItemMica.Content">
     <value>Mica</value>
@@ -97,401 +97,401 @@
     <value>Mica Alt</value>
   </data>
   <data name="ComboBackgroundItemNone.Content">
-    <value>Keiner</value>
+    <value>Ingen</value>
   </data>
   <data name="ComboBackgroundItemTransparent.Content">
     <value>Transparent</value>
   </data>
   <data name="ComboMouseWheelItemNav.Content">
-    <value>Nächstes oder Vorheriges ansehen</value>
+    <value>Visa nästa eller föregående</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content">
-    <value>Vergrößern oder Verkleinern</value>
+    <value>Zooma in eller ut</value>
   </data>
   <data name="ComboPanZoomItemRemember.Content">
-    <value>Schwenken/Zoomen/Drehen pro Foto merken</value>
+    <value>Kom ihåg Pan/Zoom/Rotation per foto</value>
   </data>
   <data name="ComboPanZoomItemReset.Content">
-    <value>Schwenken/Zoomen/Drehen zurücksetzen</value>
+    <value>Återställ Pan/Zoom/Rotation</value>
   </data>
   <data name="ComboPanZoomItemRetain.Content">
-    <value>Schwenken/Zoomen vom vorherigen Foto beibehalten</value>
+    <value>Behåll Pan/Zoom från föregående foto</value>
   </data>
   <data name="ComboThemeItemDark.Content">
-    <value>Dunkel</value>
+    <value>Mörk</value>
   </data>
   <data name="ComboThemeItemDefault.Content">
     <value>Standard</value>
   </data>
   <data name="ComboThemeItemLight.Content">
-    <value>Hell</value>
+    <value>Ljus</value>
   </data>
   <data name="ConfirmDeletion.CancelButton">
-    <value>Abbrechen</value>
+    <value>Avbryt</value>
   </data>
   <data name="ConfirmDeletion.DeleteButton">
-    <value>Löschen</value>
+    <value>Ta bort</value>
   </data>
   <data name="ConfirmDeletion.Message">
-    <value>Sind Sie sicher, dass Sie diese Datei löschen möchten?</value>
+    <value>Är du säker på att du vill ta bort den här filen?</value>
   </data>
   <data name="ConfirmDeletion.Title">
-    <value>Löschen bestätigen</value>
+    <value>Bekräfta borttagning</value>
   </data>
   <data name="DefaultViewerInstruction1.Text">
-    <value>Um FlyPhotos als Standard-App festzulegen:
-Rechtsklick auf ein Bild &gt; „Öffnen mit“ &gt; „Andere App auswählen“.
-FlyPhotos auswählen und „Immer“ wählen.</value>
+    <value>Så här ställer du in FlyPhotos som standardapp: 
+Högerklicka på ett foto &gt; Öppna med &gt; Välj en annan app. 
+Välj FlyPhotos och välj Alltid.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text">
-    <value>Unter Windows 11 können Sie FlyPhotos auch als Standard-App festlegen unter
-Einstellungen &gt; Apps &gt; Standard-Apps.</value>
+    <value>I Windows 11 kan du också ställa in FlyPhotos som standardapp i 
+Inställningar &gt; Appar &gt; Standardappar.</value>
   </data>
   <data name="DeletionFailed.CloseButton">
     <value>OK</value>
   </data>
   <data name="DeletionFailed.Message">
-    <value>Die Datei konnte nicht gelöscht werden.</value>
+    <value>Filen kunde inte tas bort.</value>
   </data>
   <data name="DeletionFailed.Title">
-    <value>Löschen fehlgeschlagen</value>
+    <value>Borttagning misslyckades</value>
   </data>
   <data name="DonateButton.Content">
-    <value>Spenden</value>
+    <value>Donera</value>
   </data>
   <data name="DropAreaRun.Text">
-    <value>Bild hierher ziehen oder</value>
+    <value>Dra och släpp ett foto här eller</value>
   </data>
   <data name="HeaderCodec.Text">
     <value>Codec</value>
   </data>
   <data name="HeaderExtensions.Text">
-    <value>Erweiterungen</value>
+    <value>Tillägg</value>
   </data>
   <data name="HeaderType.Text">
     <value>Typ</value>
   </data>
   <data name="LoadingHighQuality.Message">
-    <value>Hochauflösende Version wird geladen. Bitte warten…</value>
+    <value>Laddar högupplöst version. Vänta…</value>
   </data>
   <data name="MessageClose_Ok">
     <value>OK</value>
   </data>
   <data name="NoShortcutsCreated.Message">
-    <value>Keine Verknüpfungen gefunden. Konfigurieren Sie diese in den Einstellungen.</value>
+    <value>Inga genvägar skapades. Konfigurera dem i Inställningar.</value>
   </data>
   <data name="OpenFileHyperlink.Text">
-    <value>Datei öffnen</value>
+    <value>Öppna fil</value>
   </data>
   <data name="RightClickInstruction.Text">
-    <value>Um FlyPhotos zu verwenden, klicken Sie mit der rechten Maustaste auf ein Foto und wählen Sie Öffnen mit &gt; FlyPhotos.</value>
+    <value>För att använda FlyPhotos, högerklicka på ett foto och välj Öppna med &gt; FlyPhotos.</value>
   </data>
   <data name="ScanningTextBlock.Text">
-    <value>Apps werden gescannt…</value>
+    <value>Skannar appar…</value>
   </data>
   <data name="SearchBox.PlaceholderText">
-    <value>Apps suchen…</value>
+    <value>Sök appar…</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description">
-    <value>Mauszeiger ausblenden, wenn die Maus inaktiv ist.</value>
+    <value>Dölj muspekaren om musen är inaktiv.</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Header">
-    <value>Mauszeiger automatisch ausblenden</value>
+    <value>Dölj muspekaren automatiskt</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Description">
-    <value>Vor dem Löschen einer Datei um Bestätigung bitten.</value>
+    <value>Fråga om bekräftelse innan du tar bort någon fil.</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Header">
-    <value>Bestätigungsdialog zum Löschen von Dateien anzeigen</value>
+    <value>Bekräfta innan du tar bort filer</value>
   </data>
   <data name="SettingsCardCredits.Description">
-    <value>FlyPhotos dankt Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog und WinUIEx.</value>
+    <value>FlyPhotos tackar Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog och WinUIEx.</value>
   </data>
   <data name="SettingsCardCredits.Header">
-    <value>Danksagung</value>
+    <value>Bidrag</value>
   </data>
   <data name="SettingsCardDeveloperSupport.Description">
-    <value>Helfen Sie, Fly noch besser zu machen.</value>
+    <value>Gör Fly ännu bättre.</value>
   </data>
   <data name="SettingsCardDeveloperSupport.Header">
-    <value>FlyPhotos unterstützen</value>
+    <value>Stöd FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description">
-    <value>Wählen Sie externe Programme aus, um sie als Verknüpfungen hinzuzufügen.</value>
+    <value>Välj externa appar att lägga till som genvägar.</value>
   </data>
   <data name="SettingsCardExternalApps.Header">
-    <value>Externe Apps auswählen</value>
+    <value>Välj externa appar</value>
   </data>
   <data name="SettingsCardExternalShorcuts.Description">
-    <value>Das aktuelle Foto in anderen Apps öffnen</value>
+    <value>Öppna det aktuella fotot i andra appar</value>
   </data>
   <data name="SettingsCardExternalShorcuts.Header">
-    <value>Verknüpfungen zu externen Apps anzeigen</value>
+    <value>Visa genvägar till externa appar</value>
   </data>
   <data name="SettingsCardFadeControls.Description">
-    <value>UI-Steuerelemente ausblenden, wenn sich die Maus wegbewegt.</value>
+    <value>Tona ut kontrollerna när musen flyttas bort.</value>
   </data>
   <data name="SettingsCardFadeControls.Header">
-    <value>UI-Steuerelemente automatisch ausblenden</value>
+    <value>Tona ut användargränssnittskontroller automatiskt</value>
   </data>
   <data name="SettingsCardFadeIntensity.Description">
-    <value>Stärke des automatischen Ausblendeffekts anpassen.</value>
+    <value>Justera styrkan på auto-toningseffekten.</value>
   </data>
   <data name="SettingsCardFadeIntensity.Header">
-    <value>Intensität des automatischen Ausblendens %</value>
+    <value>Automatisk toningintensitet (%)</value>
   </data>
   <data name="SettingsCardHighQualityInterpolation.Description">
-    <value>Deaktivieren Sie diese Funktion für schärfere Pixelkanten (hilfreich für Pixelkunst).</value>
+    <value>Inaktivera för skarpare pixelkanter (användbart för pixelkonst).</value>
   </data>
   <data name="SettingsCardHighQualityInterpolation.Header">
-    <value>Hochwertige Interpolation beim Zoomen verwenden</value>
+    <value>Använd högkvalitativ interpolation vid zoomning</value>
   </data>
   <data name="SettingsCardHighResCache.Description">
-    <value>Legen Sie die Anzahl der auf jeder Seite zwischengespeicherten hochauflösenden Fotos fest.</value>
+    <value>Ställ in antalet högupplösta foton som cachas på varje sida.</value>
   </data>
   <data name="SettingsCardHighResCache.Header">
-    <value>Cache mit hoher Auflösung</value>
+    <value>Högupplöst cache</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description">
-    <value>Legt fest, wie viel % des Bildschirms das Foto ausfüllt.</value>
+    <value>Välj hur stor del av skärmen fotot fyller. (%)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header">
-    <value>Bild an Bildschirm anpassen</value>
+    <value>Bild till skärmpassning</value>
   </data>
   <data name="SettingsCardLanguage.Header">
-    <value>Sprache auswählen</value>
+    <value>Välj språk</value>
   </data>
   <data name="SettingsCardLog.Description">
-    <value>Öffnen, um die Protokolldatei anzuzeigen</value>
+    <value>Öppna för att se loggfilen</value>
   </data>
   <data name="SettingsCardLog.Header">
-    <value>Protokolldatei</value>
+    <value>Loggfil</value>
   </data>
   <data name="SettingsCardLowResCache.Description">
-    <value>Legen Sie die Anzahl der auf jeder Seite zwischengespeicherten Fotos mit niedriger Auflösung fest.</value>
+    <value>Ställ in antalet lågupplösta foton som cachas på varje sida.</value>
   </data>
   <data name="SettingsCardLowResCache.Header">
-    <value>Cache mit niedriger Auflösung</value>
+    <value>Lågupplöst cache</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description">
-    <value>Wählen Sie das Standardverhalten des Mausrads.</value>
+    <value>Välj standardbeteende för mushjulet.</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header">
-    <value>Mausrad</value>
+    <value>Mushjul</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviourInfo.Description">
-    <value>👉 Strg + Mausrad zoomt immer hinein oder heraus.
-👉 Alt + Mausrad navigiert immer zum nächsten oder Vorherigen.</value>
+    <value>👉 Ctrl + Mushjul zoomar alltid. 
+👉 Alt + Mushjul navigerar alltid.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description">
-    <value>⚠ Kann den Start verlangsamen: Fly wartet beim Start auf das Laden des vollständigen Bildes statt die Vorschau zu verwenden.</value>
+    <value>⚠ Kan sakta ner starten. Fly väntar med att ladda fotot i full upplösning vid start.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header">
-    <value>Animationseffekt: Beim Öffnen vergrößern, beim Beenden verkleinern</value>
+    <value>Zooma in vid öppning av en fil och zooma ut vid stängning</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description">
-    <value>⚠ Verwenden Sie die Option „Beibehalten“ nur in Ordnern mit gleich großen Fotos.</value>
+    <value>⚠ Använd endast alternativet Behåll för mappar med liknande storlek på foton.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header">
-    <value>Schwenk-, Zoom- und Drehverhalten bei der Navigation</value>
+    <value>Pan, Zoom &amp; Rotation-beteende under navigering</value>
   </data>
   <data name="SettingsCardRememberLastMonitor.Description">
-    <value>Fly wird auf dem zuletzt verwendeten Monitor geöffnet. Nur aktivieren, wenn mehrere Monitore verwendet werden.</value>
+    <value>Fly öppnas på den senast använda bildskärmen. Aktivera endast om du använder flera bildskärmar.</value>
   </data>
   <data name="SettingsCardRememberLastMonitor.Header">
-    <value>Zuletzt verwendeten Monitor merken</value>
+    <value>Kom ihåg senast använda bildskärm</value>
   </data>
   <data name="SettingsCardReportBugs.Description">
-    <value>Melden Sie Probleme auf GitHub oder per E-Mail an ryftools@outlook.com</value>
+    <value>Rapportera problem på GitHub eller maila till ryftools@outlook.com</value>
   </data>
   <data name="SettingsCardReportBugs.Header">
-    <value>Fehler und Probleme</value>
+    <value>Buggar och problem</value>
   </data>
   <data name="SettingsCardShowCacheStatusExpander.Description">
-    <value>Cache-Status-Expander im Tastenfeld anzeigen.</value>
+    <value>Visa cachestatus i det nedre panelen.</value>
   </data>
   <data name="SettingsCardShowCacheStatusExpander.Header">
-    <value>Cache-Status anzeigen</value>
+    <value>Visa cachestatus</value>
   </data>
   <data name="SettingsCardShowCheckeredBackground.Description">
-    <value>Karierten Hintergrund für transparente Bilder anzeigen. 
-⚠ Kann die Leistung beeinträchtigen.</value>
+    <value>Visa rutig bakgrund för transparenta bilder. 
+⚠ Kan påverka prestandan.</value>
   </data>
   <data name="SettingsCardShowCheckeredBackground.Header">
-    <value>Karierten Hintergrund anzeigen</value>
+    <value>Visa rutig bakgrund</value>
   </data>
   <data name="SettingsCardShowFileName.Description">
-    <value>Dateinamen der aktuell geöffneten Datei anzeigen</value>
+    <value>Visa filnamnet på det aktuella fotot</value>
   </data>
   <data name="SettingsCardShowFileName.Header">
-    <value>Dateinamen anzeigen</value>
+    <value>Visa filnamn</value>
   </data>
   <data name="SettingsCardShowImageDimensions.Description">
-    <value>Breite und Höhe des Fotos neben dem Dateinamen anzeigen.</value>
+    <value>Visa fotots bredd och höjd bredvid filnamnet.</value>
   </data>
   <data name="SettingsCardShowImageDimensions.Header">
-    <value>Fotoabmessungen anzeigen</value>
+    <value>Visa fotodimensioner</value>
   </data>
   <data name="SettingsCardShowThumbnail.Description">
-    <value>Miniaturansichtleiste am unteren Fensterrand anzeigen</value>
+    <value>Visa miniatyrbildsremsan längst ned i fönstret.</value>
   </data>
   <data name="SettingsCardShowThumbnail.Header">
-    <value>Miniaturansichtleiste anzeigen</value>
+    <value>Visa miniatyrbildsremsa</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Header">
-    <value>Zoomprozentsatz anzeigen</value>
+    <value>Visa zoomprocent</value>
   </data>
   <data name="SettingsCardSourceCode.Description">
-    <value>FlyPhotos ist Open Source und wird auf GitHub gehostet</value>
+    <value>FlyPhotos är öppen källkod och finns på GitHub.</value>
   </data>
   <data name="SettingsCardSourceCode.Header">
-    <value>GitHub-Repository</value>
+    <value>GitHub-lagringsplats</value>
   </data>
   <data name="SettingsCardTheme.Description">
-    <value>Wählen Sie das App-Design.</value>
+    <value>Välj apptemat.</value>
   </data>
   <data name="SettingsCardTheme.Header">
-    <value>Fensterdesign</value>
+    <value>Fönstertema</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Description">
-    <value>Legen Sie die Hervorhebungsfarbe für ausgewählte Miniaturansichten fest.</value>
+    <value>Ställ in markeringsfärgen som används för valda miniatyrer.</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Header">
-    <value>Auswahlfarbe für Miniaturansichten</value>
+    <value>Färg för miniatyrval</value>
   </data>
   <data name="SettingsCardThumbnailSize.Description">
-    <value>Passen Sie die Größe der Miniaturansichten im Viewer an.</value>
+    <value>Justera storleken på miniatyrerna i visningsprogrammet.</value>
   </data>
   <data name="SettingsCardThumbnailSize.Header">
-    <value>Größe der Miniaturansicht</value>
+    <value>Miniatyrstorlek</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description">
-    <value>Nur für transparenten Fensterhintergrund anwendbar.</value>
+    <value>Gäller endast för transparent fönsterbakgrund.</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Header">
-    <value>Transparenz (%)</value>
+    <value>Transparens (%)</value>
   </data>
   <data name="SettingsCardVersion.Description">
-    <value>Aktuelle Version: {0}</value>
+    <value>Nuvarande version är {0}</value>
   </data>
   <data name="SettingsCardVersion.Header">
-    <value>Aktuelle Version</value>
+    <value>Nuvarande version</value>
   </data>
   <data name="SettingsCardWindowBackground.Description">
-    <value>Legen Sie den Fensterhintergrund fest.</value>
+    <value>Välj fönsterbakgrund.</value>
   </data>
   <data name="SettingsCardWindowBackground.Header">
-    <value>Fensterhintergrund</value>
+    <value>Fönsterbakgrund</value>
   </data>
   <data name="SettingsExpanderAutoFade.Header">
-    <value>Einstellungen für automatisches Ein- und Ausblenden</value>
+    <value>Inställningar för automatisk toning och dölj</value>
   </data>
   <data name="SettingsExpanderCaching.Description">
-    <value>Konfigurieren Sie, wie Fly das Foto-Caching handhabt.</value>
+    <value>Konfigurera hur Fly hanterar fotocache.</value>
   </data>
   <data name="SettingsExpanderCaching.Header">
-    <value>Caching</value>
+    <value>Cache</value>
   </data>
   <data name="SettingsExpanderKeyboardShortcuts.Header">
-    <value>Tastaturkürzel</value>
+    <value>Tangentbordsgenvägar</value>
   </data>
   <data name="SettingsExpanderPanZoom.Description">
-    <value>Passen Sie das Schwenk- und Zoomverhalten an.</value>
+    <value>Anpassa Pan och Zoom-beteende.</value>
   </data>
   <data name="SettingsExpanderPanZoom.Header">
-    <value>Schwenk- und Zoom-Einstellungen</value>
+    <value>Panorera och zooma</value>
   </data>
   <data name="SettingsPage.Title">
-    <value>FlyPhotos - Einstellungen</value>
+    <value>FlyPhotos - Inställningar</value>
   </data>
   <data name="SettingsPivotItemAbout.Header">
-    <value>Über</value>
+    <value>Om</value>
   </data>
   <data name="SettingsPivotItemCodecs.Header">
-    <value>Codecs</value>
+    <value>Codec</value>
   </data>
   <data name="SettingsPivotItemGeneral.Header">
-    <value>Allgemein</value>
+    <value>Allmänt</value>
   </data>
   <data name="Status_FileNotFound">
-    <value>Datei nicht gefunden</value>
+    <value>Filen hittades inte</value>
   </data>
   <data name="Status_InvalidFile">
-    <value>Ungültige Datei</value>
+    <value>Ogiltig fil</value>
   </data>
   <data name="Status_Loading">
-    <value>Wird geladen…</value>
+    <value>Laddar…</value>
   </data>
   <data name="Status_PreviewFailed">
-    <value>Vorschau konnte nicht geladen werden</value>
+    <value>Förhandsgranskning kunde inte laddas</value>
   </data>
   <data name="TextBlockCaching.Text">
-    <value>Caching</value>
+    <value>Cache</value>
   </data>
   <data name="TextBlockCodecsInfo.Text">
-    <value>FlyPhotos verwendet hauptsächlich integrierte Windows Imaging Component (WIC) Codecs.</value>
+    <value>FlyPhotos använder främst inbyggda Windows Imaging Component (WIC) codecs.</value>
   </data>
   <data name="TextBlockLog.Text">
-    <value>Protokoll</value>
+    <value>Logg</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text">
-    <value>Fotoanzeige</value>
+    <value>Fotovisning</value>
   </data>
   <data name="TextBlockTheming.Text">
-    <value>Design</value>
+    <value>Utseende</value>
   </data>
   <data name="TextBlockUIControls.Text">
-    <value>UI-Steuerelemente</value>
+    <value>Användargränssnittskontroller</value>
   </data>
   <data name="TitleTextBlock.Text">
-    <value>FlyPhotos - Foto öffnen</value>
+    <value>FlyPhotos - Öppna foto</value>
   </data>
   <data name="TrialExpiredMessage.CloseButton">
     <value>OK</value>
   </data>
   <data name="TrialExpiredMessage.Content">
-    <value>Ihre kostenlose Testversion ist abgelaufen. Bitte erwerben Sie die Vollversion im Microsoft Store.</value>
+    <value>Din kostnadsfria provperiod har löpt ut. Köp den fullständiga versionen från Microsoft Store.</value>
   </data>
   <data name="TrialExpiredMessage.Title">
-    <value>Testversion abgelaufen</value>
+    <value>Provperioden har löpt ut</value>
   </data>
   <data name="UnsupportedFileAlert.Description">
-    <value>Die abgelegte Datei wird nicht als unterstütztes Bildformat erkannt.</value>
+    <value>Den släppta filen är inte en stödd bildtyp.</value>
   </data>
   <data name="UnsupportedFileAlert.Title">
-    <value>Nicht unterstützte Datei</value>
+    <value>Filtyp stöds inte</value>
   </data>
   <data name="SettingsCardKeyboardShortCuts.Description">
-    <value>Pfeiltasten Links/Rechts : Durch Fotos blättern
-Pfeiltasten Oben/Unten : Vergrößern oder Verkleinern (Zoom)
-Linke Maustaste + Ziehen : Ausschnitt verschieben
+    <value>Vänster/Höger Pil : Bläddra bland bilder
+Upp/Ner Pil : Zooma in eller ut
+Vänsterklick och dra : Panorera bild
 
-Mausrad : Zoomen / Blättern (je nach Einstellung)
-Strg + Mausrad : Vergrößern oder Verkleinern
-Alt + Mausrad : Durch Fotos blättern
-Mausrad nach links/rechts neigen : Durch Fotos blättern
+Mushjul : Zooma / Bläddra (beroende på inställning)
+Ctrl + Mushjul : Zooma in eller ut
+Alt + Mushjul : Bläddra bland bilder
+Luta mushjul Vänster/Höger : Bläddra bland bilder
 
-Strg + Pfeiltasten : Ausschnitt verschieben
-Strg + + : Vergrößern
-Strg + - : Verkleinern
+Ctrl + Piltangenter : Panorera bild
+Ctrl + + : Zooma in
+Ctrl + - : Zooma ut
 
-Alt + Pfeiltasten Links/Rechts : Seiten in mehrseitigen TIFFs wechseln
+Alt + Vänster/Höger Pil : Bläddra sidor i flersidig TIFF
 
-Bild Auf / Bild Ab : Zur nächsten Zoomstufe (100%, 400%, Einpassen)
-Pos1 : Zum ersten Foto
-Ende : Zum letzten Foto
+Page Up / Page Down : Zooma till nästa förinställning (100%, 400%, Anpassa)
+Home : Gå till första bilden
+End : Gå till sista bilden
 
-Mausrad auf der Vorschauleiste : Durch Fotos blättern
-Mausrad auf Bildschirmtasten Links/Rechts : Durch Fotos blättern
-Mausrad auf der Drehen-Schaltfläche : Foto drehen
+Mushjul på miniatyrfält : Bläddra bland bilder
+Mushjul på skärmknappar Vänster/Höger : Bläddra bland bilder
+Mushjul på roteringsknapp : Rotera bild
 
-Touchpad Zweifinger-Wischen Links/Rechts : Durch Fotos blättern
-Touchpad Zweifinger-Wischen Oben/Unten : Zoomen / Blättern (je nach Einstellung)
-Touchpad Auf- oder Zuziehen (Pinch) : Vergrößern oder Verkleinern
+Pekplatta tvåfingerssvep Vänster/Höger : Bläddra bland bilder
+Pekplatta tvåfingerssvep Upp/Ner : Zooma / Bläddra (beroende på inställning)
+Pekplatta nyp (Pinch) : Zooma in eller ut
 
-D : Dateieigenschaften anzeigen
-Entf : Foto löschen
+D : Visa filegenskaper
+Del : Ta bort bild
 
-Esc : Einstellungen schließen oder App beenden</value>
+Esc : Stäng inställningar eller Avsluta</value>
   </data>
 </root>

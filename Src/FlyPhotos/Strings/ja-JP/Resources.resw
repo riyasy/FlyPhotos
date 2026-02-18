@@ -1,0 +1,496 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppSelectionDialog.PrimaryButtonText">
+    <value>選択</value>
+  </data>
+  <data name="AppSelectionDialog.SecondaryButtonText">
+    <value>キャンセル</value>
+  </data>
+  <data name="AppSelectionDialog.Title">
+    <value>アプリケーションを選択</value>
+  </data>
+  <data name="BrowseBtn.Content">
+    <value>アプリを参照…</value>
+  </data>
+  <data name="BtnCheckVersion.Content">
+    <value>更新を確認</value>
+  </data>
+  <data name="BtnGitHubRepo.Content">
+    <value>GitHubリポジトリを開く</value>
+  </data>
+  <data name="BtnReportBugs.Content">
+    <value>GitHubで問題を報告</value>
+  </data>
+  <data name="BtnThirdPartyLicenses.Content">
+    <value>サードパーティライセンスを表示</value>
+  </data>
+  <data name="ButtonBackToolTip.Content">
+    <value>前の写真</value>
+  </data>
+  <data name="ButtonExpanderToolTip.Content">
+    <value>キャッシュの状態を表示</value>
+  </data>
+  <data name="ButtonNextPageToolTip.Content">
+    <value>次のページ</value>
+  </data>
+  <data name="ButtonNextToolTip.Content">
+    <value>次の写真</value>
+  </data>
+  <data name="ButtonOneIsToOneToolTip.Content">
+    <value>実際のサイズにズーム</value>
+  </data>
+  <data name="ButtonOpenLog.Content">
+    <value>ログを開く</value>
+  </data>
+  <data name="ButtonPrevPageToolTip.Content">
+    <value>前のページ</value>
+  </data>
+  <data name="ButtonRotateToolTip.Content">
+    <value>写真を回転</value>
+  </data>
+  <data name="ButtonScaleSetToolTip.Content">
+    <value>ウィンドウに合わせる</value>
+  </data>
+  <data name="ButtonSettingsToolTip.Content">
+    <value>設定</value>
+  </data>
+  <data name="ButtonShortcutsToolTip.Content">
+    <value>他のアプリで開く</value>
+  </data>
+  <data name="ChangeLanguageAlert.Description">
+    <value>表示言語を変更するには、アプリを再起動する必要があります。</value>
+  </data>
+  <data name="ChangeLanguageAlert.Title">
+    <value>言語の変更</value>
+  </data>
+  <data name="ColorPickerFlyoutCancelButton.Content">
+    <value>キャンセル</value>
+  </data>
+  <data name="ColorPickerFlyoutOkButton.Content">
+    <value>OK</value>
+  </data>
+  <data name="ComboBackgroundItemAcrylic.Content">
+    <value>アクリル</value>
+  </data>
+  <data name="ComboBackgroundItemAcrylicThin.Content">
+    <value>アクリル 薄型</value>
+  </data>
+  <data name="ComboBackgroundItemFrozen.Content">
+    <value>フローズン</value>
+  </data>
+  <data name="ComboBackgroundItemMica.Content">
+    <value>マイカ</value>
+  </data>
+  <data name="ComboBackgroundItemMicaAlt.Content">
+    <value>マイカ Alt</value>
+  </data>
+  <data name="ComboBackgroundItemNone.Content">
+    <value>なし</value>
+  </data>
+  <data name="ComboBackgroundItemTransparent.Content">
+    <value>透明</value>
+  </data>
+  <data name="ComboMouseWheelItemNav.Content">
+    <value>次/前の表示</value>
+  </data>
+  <data name="ComboMouseWheelItemZoom.Content">
+    <value>ズームインまたはズームアウト</value>
+  </data>
+  <data name="ComboPanZoomItemRemember.Content">
+    <value>写真ごとのパン/ズーム/回転を記憶</value>
+  </data>
+  <data name="ComboPanZoomItemReset.Content">
+    <value>パン/ズーム/回転をリセット</value>
+  </data>
+  <data name="ComboPanZoomItemRetain.Content">
+    <value>前の写真のパン/ズームを維持</value>
+  </data>
+  <data name="ComboThemeItemDark.Content">
+    <value>ダーク</value>
+  </data>
+  <data name="ComboThemeItemDefault.Content">
+    <value>規定</value>
+  </data>
+  <data name="ComboThemeItemLight.Content">
+    <value>ライト</value>
+  </data>
+  <data name="ConfirmDeletion.CancelButton">
+    <value>キャンセル</value>
+  </data>
+  <data name="ConfirmDeletion.DeleteButton">
+    <value>削除</value>
+  </data>
+  <data name="ConfirmDeletion.Message">
+    <value>このファイルを削除してもよろしいですか？</value>
+  </data>
+  <data name="ConfirmDeletion.Title">
+    <value>削除の確認</value>
+  </data>
+  <data name="DefaultViewerInstruction1.Text">
+    <value>FlyPhotosを既定のアプリに設定するには: 
+写真を右クリック &gt; プログラムから開く &gt; 別のアプリを選択。
+FlyPhotosを選択し、「常に」を選択します。</value>
+  </data>
+  <data name="DefaultViewerInstruction2.Text">
+    <value>Windows 11では、設定 &gt; アプリ &gt; 既定のアプリでFlyPhotosを既定のアプリとして設定することもできます。</value>
+  </data>
+  <data name="DeletionFailed.CloseButton">
+    <value>OK</value>
+  </data>
+  <data name="DeletionFailed.Message">
+    <value>ファイルを削除できませんでした。</value>
+  </data>
+  <data name="DeletionFailed.Title">
+    <value>削除に失敗しました</value>
+  </data>
+  <data name="DonateButton.Content">
+    <value>寄付</value>
+  </data>
+  <data name="DropAreaRun.Text">
+    <value>ここに写真をドラッグアンドドロップまたは</value>
+  </data>
+  <data name="HeaderCodec.Text">
+    <value>コーデック</value>
+  </data>
+  <data name="HeaderExtensions.Text">
+    <value>拡張機能</value>
+  </data>
+  <data name="HeaderType.Text">
+    <value>種類</value>
+  </data>
+  <data name="LoadingHighQuality.Message">
+    <value>高解像度バージョンを読み込み中。お待ちください…</value>
+  </data>
+  <data name="MessageClose_Ok">
+    <value>OK</value>
+  </data>
+  <data name="NoShortcutsCreated.Message">
+    <value>ショートカットが作成されませんでした。設定で構成してください。</value>
+  </data>
+  <data name="OpenFileHyperlink.Text">
+    <value>ファイルを開く</value>
+  </data>
+  <data name="RightClickInstruction.Text">
+    <value>FlyPhotosを使用するには、写真を右クリックし、プログラムから開く &gt; FlyPhotosを選択します。</value>
+  </data>
+  <data name="ScanningTextBlock.Text">
+    <value>アプリケーションをスキャン中…</value>
+  </data>
+  <data name="SearchBox.PlaceholderText">
+    <value>アプリケーションを検索…</value>
+  </data>
+  <data name="SettingsCardAutoHideMouse.Description">
+    <value>マウスが非アクティブな場合、マウスポインターを非表示にします。</value>
+  </data>
+  <data name="SettingsCardAutoHideMouse.Header">
+    <value>マウスポインターを自動的に非表示にする</value>
+  </data>
+  <data name="SettingsCardConfirmBeforeDelete.Description">
+    <value>ファイルを削除する前に確認を求めます。</value>
+  </data>
+  <data name="SettingsCardConfirmBeforeDelete.Header">
+    <value>ファイル削除前の確認</value>
+  </data>
+  <data name="SettingsCardCredits.Description">
+    <value>FlyPhotosは、Svg.Skia、SkiaSharp、Magick.NET、MagicScaler、NLog、およびWinUIExに感謝します。</value>
+  </data>
+  <data name="SettingsCardCredits.Header">
+    <value>著作権情報</value>
+  </data>
+  <data name="SettingsCardDeveloperSupport.Description">
+    <value>Flyをさらに素晴らしくしましょう。</value>
+  </data>
+  <data name="SettingsCardDeveloperSupport.Header">
+    <value>FlyPhotosをサポート</value>
+  </data>
+  <data name="SettingsCardExternalApps.Description">
+    <value>ショートカットとして追加する外部アプリを選択します。</value>
+  </data>
+  <data name="SettingsCardExternalApps.Header">
+    <value>外部アプリを選択</value>
+  </data>
+  <data name="SettingsCardExternalShorcuts.Description">
+    <value>現在の写真を他のアプリで開く</value>
+  </data>
+  <data name="SettingsCardExternalShorcuts.Header">
+    <value>外部アプリへのショートカットを表示</value>
+  </data>
+  <data name="SettingsCardFadeControls.Description">
+    <value>マウスが離れるとコントロールをフェードさせます。</value>
+  </data>
+  <data name="SettingsCardFadeControls.Header">
+    <value>UIコントロールを自動的にフェード</value>
+  </data>
+  <data name="SettingsCardFadeIntensity.Description">
+    <value>自動フェード効果の強度を調整します。</value>
+  </data>
+  <data name="SettingsCardFadeIntensity.Header">
+    <value>自動フェードの強度 (%)</value>
+  </data>
+  <data name="SettingsCardHighQualityInterpolation.Description">
+    <value>よりシャープなピクセルエッジのために無効にします (ピクセルアートに役立ちます)。</value>
+  </data>
+  <data name="SettingsCardHighQualityInterpolation.Header">
+    <value>ズーム時に高品質な補間を使用</value>
+  </data>
+  <data name="SettingsCardHighResCache.Description">
+    <value>各側にキャッシュされる高解像度写真の数を設定します。</value>
+  </data>
+  <data name="SettingsCardHighResCache.Header">
+    <value>高解像度キャッシュ</value>
+  </data>
+  <data name="SettingsCardImageFitPercentage.Description">
+    <value>写真が画面を占める割合を選択します。(%)</value>
+  </data>
+  <data name="SettingsCardImageFitPercentage.Header">
+    <value>画面への画像フィット</value>
+  </data>
+  <data name="SettingsCardLanguage.Header">
+    <value>言語を選択</value>
+  </data>
+  <data name="SettingsCardLog.Description">
+    <value>ログファイルを表示するために開きます</value>
+  </data>
+  <data name="SettingsCardLog.Header">
+    <value>ログファイル</value>
+  </data>
+  <data name="SettingsCardLowResCache.Description">
+    <value>各側にキャッシュされる低解像度写真の数を設定します。</value>
+  </data>
+  <data name="SettingsCardLowResCache.Header">
+    <value>低解像度キャッシュ</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviour.Description">
+    <value>既定のマウスホイールの動作を選択します。</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviour.Header">
+    <value>マウスホイール</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviourInfo.Description">
+    <value>👉 Ctrl + マウスホイールは常にズームします。 
+👉 Alt + マウスホイールは常にナビゲートします。</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Description">
+    <value>⚠ 起動が遅くなる可能性があります。Flyは起動時にフル解像度の写真のロードを待ちます。</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Header">
+    <value>ファイルを開くときにズームイン、終了時にズームアウト</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Description">
+    <value>⚠ サイズが類似した写真を含むフォルダーでのみ「保持」オプションを使用してください。</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Header">
+    <value>ナビゲーション中のパン、ズーム、回転の動作</value>
+  </data>
+  <data name="SettingsCardRememberLastMonitor.Description">
+    <value>Flyは最後に使用したモニターで開きます。複数のモニターを使用している場合にのみ有効にしてください。</value>
+  </data>
+  <data name="SettingsCardRememberLastMonitor.Header">
+    <value>最後に使用したモニターを記憶</value>
+  </data>
+  <data name="SettingsCardReportBugs.Description">
+    <value>GitHubで問題を報告するか、ryftools@outlook.comにメールしてください</value>
+  </data>
+  <data name="SettingsCardReportBugs.Header">
+    <value>バグと問題</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Description">
+    <value>下部パネルにキャッシュの状態を表示します。</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Header">
+    <value>キャッシュの状態を表示</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Description">
+    <value>透明な画像にチェック柄の背景を表示します。
+⚠ パフォーマンスに影響を与える可能性があります。</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Header">
+    <value>チェック柄の背景を表示</value>
+  </data>
+  <data name="SettingsCardShowFileName.Description">
+    <value>現在開いているファイルの名前を表示</value>
+  </data>
+  <data name="SettingsCardShowFileName.Header">
+    <value>ファイル名を表示</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Description">
+    <value>ファイル名の横に写真の幅と高さを表示します。</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Header">
+    <value>写真の寸法を表示</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Description">
+    <value>ウィンドウの下部にサムネイルストリップを表示</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Header">
+    <value>サムネイルストリップを表示</value>
+  </data>
+  <data name="SettingsCardShowZoomPercent.Header">
+    <value>ズーム率を表示</value>
+  </data>
+  <data name="SettingsCardSourceCode.Description">
+    <value>FlyPhotosはオープンソースであり、GitHubでホストされています</value>
+  </data>
+  <data name="SettingsCardSourceCode.Header">
+    <value>GitHubリポジトリ</value>
+  </data>
+  <data name="SettingsCardTheme.Description">
+    <value>アプリのテーマを選択します。</value>
+  </data>
+  <data name="SettingsCardTheme.Header">
+    <value>ウィンドウのテーマ</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Description">
+    <value>選択したサムネイルに使用する強調表示色を設定します。</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Header">
+    <value>サムネイルの選択色</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Description">
+    <value>ビューアーのサムネイルのサイズを調整します。</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Header">
+    <value>サムネイルサイズ</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Description">
+    <value>透明なウィンドウの背景にのみ適用されます。</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Header">
+    <value>透明度 (%)</value>
+  </data>
+  <data name="SettingsCardVersion.Description">
+    <value>現在のバージョンは {0} です</value>
+  </data>
+  <data name="SettingsCardVersion.Header">
+    <value>現在のバージョン</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Description">
+    <value>ウィンドウの背景を選択します。</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Header">
+    <value>ウィンドウの背景</value>
+  </data>
+  <data name="SettingsExpanderAutoFade.Header">
+    <value>自動フェードと非表示の設定</value>
+  </data>
+  <data name="SettingsExpanderCaching.Description">
+    <value>Flyが写真のキャッシュをどのように処理するかを設定します。</value>
+  </data>
+  <data name="SettingsExpanderCaching.Header">
+    <value>キャッシュ</value>
+  </data>
+  <data name="SettingsExpanderKeyboardShortcuts.Header">
+    <value>キーボードショートカット</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Description">
+    <value>パンとズームの動作をカスタマイズします。</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Header">
+    <value>パンとズーム</value>
+  </data>
+  <data name="SettingsPage.Title">
+    <value>FlyPhotos - 設定</value>
+  </data>
+  <data name="SettingsPivotItemAbout.Header">
+    <value>バージョン情報</value>
+  </data>
+  <data name="SettingsPivotItemCodecs.Header">
+    <value>コーデック</value>
+  </data>
+  <data name="SettingsPivotItemGeneral.Header">
+    <value>一般</value>
+  </data>
+  <data name="Status_FileNotFound">
+    <value>ファイルが見つかりません</value>
+  </data>
+  <data name="Status_InvalidFile">
+    <value>無効なファイル</value>
+  </data>
+  <data name="Status_Loading">
+    <value>読み込み中…</value>
+  </data>
+  <data name="Status_PreviewFailed">
+    <value>プレビューの読み込みに失敗しました</value>
+  </data>
+  <data name="TextBlockCaching.Text">
+    <value>キャッシュ</value>
+  </data>
+  <data name="TextBlockCodecsInfo.Text">
+    <value>FlyPhotosは主にWindows Imaging Component (WIC) コーデックを使用します。</value>
+  </data>
+  <data name="TextBlockLog.Text">
+    <value>ログ</value>
+  </data>
+  <data name="TextBlockPhotoDisplay.Text">
+    <value>写真の表示</value>
+  </data>
+  <data name="TextBlockTheming.Text">
+    <value>外観</value>
+  </data>
+  <data name="TextBlockUIControls.Text">
+    <value>UIコントロール</value>
+  </data>
+  <data name="TitleTextBlock.Text">
+    <value>FlyPhotos - 写真を開く</value>
+  </data>
+  <data name="TrialExpiredMessage.CloseButton">
+    <value>OK</value>
+  </data>
+  <data name="TrialExpiredMessage.Content">
+    <value>無料トライアル期間が終了しました。Microsoft Storeからフルバージョンを購入してください。</value>
+  </data>
+  <data name="TrialExpiredMessage.Title">
+    <value>トライアル期限切れ</value>
+  </data>
+  <data name="UnsupportedFileAlert.Description">
+    <value>ドロップされたファイルはサポートされている画像タイプではありません。</value>
+  </data>
+  <data name="UnsupportedFileAlert.Title">
+    <value>サポートされていないファイル</value>
+  </data>
+  <data name="SettingsCardKeyboardShortCuts.Description">
+    <value>左右の矢印キー : 写真を切り替え
+上下の矢印キー : ズームイン / アウト
+マウスの左クリック + ドラッグ : 写真を移動 (Pan)
+
+マウスホイール : ズーム / 切り替え (設定による)
+Ctrl + マウスホイール : ズームイン / アウト
+Alt + マウスホイール : 写真を切り替え
+マウスホイールを左右に倒す : 写真を切り替え
+
+Ctrl + 矢印キー : 写真を移動 (Pan)
+Ctrl + + : ズームイン
+Ctrl + - : ズームアウト
+
+Alt + 左右の矢印キー : マルチページTIFFのページ切り替え
+
+Page Up / Page Down : 次のプリセットにズーム (100%, 400%, 画面に合わせる)
+Home : 最初の写真へ移動
+End : 最後の写真へ移動
+
+サムネイル帯でホイール操作 : 写真を切り替え
+画面上の左右ボタンでホイール操作 : 写真を切り替え
+画面上の回転ボタンでホイール操作 : 写真を回転
+
+タッチパッド 2本指で左右にスワイプ : 写真を切り替え
+タッチパッド 2本指で上下にスワイプ : ズーム / 切り替え (設定による)
+タッチパッド ピンチ操作 (開く/閉じる) : ズームイン / アウト
+
+D : ファイルのプロパティを表示
+Del : 写真を削除
+
+Esc : 設定を閉じる / アプリを終了</value>
+  </data>
+</root>

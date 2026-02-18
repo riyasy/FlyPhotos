@@ -1,110 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
-    Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
-    associated with the data types.
-    
-    Example:
-    
-    ... ado.net/XML headers & schema ...
-    <resheader name="resmimetype">text/microsoft-resx</resheader>
-    <resheader name="version">2.0</resheader>
-    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
-                
-    There are any number of "resheader" rows that contain simple 
-    name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
-    mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
-    extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
-    read any of the formats listed below.
-    
-    mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            : and then encoded with base64 encoding.
-    
-    mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-            : and then encoded with base64 encoding.
-
-    mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
-            : using a System.ComponentModel.TypeConverter
-            : and then encoded with base64 encoding.
-    -->
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="data">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="resheader">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
-            </xsd:complexType>
-          </xsd:element>
-        </xsd:choice>
-      </xsd:complexType>
-    </xsd:element>
-  </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -117,467 +12,483 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="TitleTextBlock.Text" xml:space="preserve">
-    <value>FlyPhotos - ഫോട്ടോ തിരഞ്ഞെടുക്കുക</value>
-  </data>
-  <data name="DropAreaRun.Text" xml:space="preserve">
-    <value>ഒരു ചിത്രം വലിച്ചിടുക (Drag &amp; Drop), അല്ലെങ്കിൽ</value>
-  </data>
-  <data name="OpenFileHyperlink.Text" xml:space="preserve">
-    <value>ഫയൽ തുറക്കുക</value>
-  </data>
-  <data name="RightClickInstruction.Text" xml:space="preserve">
-    <value>ഒരു ചിത്രത്തിൽ റൈറ്റ് ക്ലിക്ക് (Right-click) ചെയ്ത് "Open With" &gt; "FlyPhotos" തിരഞ്ഞെടുത്ത് ഈ ആപ്പ് ഉപയോഗിക്കാവുന്നതാണ്.</value>
-  </data>
-  <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
-    <value>ഒരു ചിത്രത്തിൽ റൈറ്റ് ക്ലിക്ക് ചെയ്ത് "Open With" &gt; "Choose another app" തിരഞ്ഞെടുത്ത്, "FlyPhotos" സെലക്ട് ചെയ്ത ശേഷം "Always" ബട്ടൺ അമർത്തി FlyPhotos-നെ ഡിഫോൾട്ട് വ്യൂവർ ആയി ക്രമീകരിക്കാം.</value>
-  </data>
-  <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
-    <value>Windows 11-ലെ "Settings" ആപ്പിലുള്ള "Apps &gt; Default Apps" പേജ് വഴിയും FlyPhotos-നെ ഡിഫോൾട്ട് വ്യൂവർ ആയി ക്രമീകരിക്കാം.</value>
-  </data>
-  <data name="ButtonBackToolTip.Content" xml:space="preserve">
-    <value>മുൻപത്തെ ഫോട്ടോ</value>
-  </data>
-  <data name="ButtonRotateToolTip.Content" xml:space="preserve">
-    <value>ഫോട്ടോ തിരിക്കുക</value>
-  </data>
-  <data name="ButtonNextToolTip.Content" xml:space="preserve">
-    <value>അടുത്ത ഫോട്ടോ</value>
-  </data>
-  <data name="ButtonPrevPageToolTip.Content" xml:space="preserve">
-    <value>മുൻപത്തെ പേജ്</value>
-  </data>
-  <data name="ButtonNextPageToolTip.Content" xml:space="preserve">
-    <value>അടുത്ത പേജ്</value>
-  </data>
-  <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
-    <value>പ്രദർശന സ്ഥലത്തിന് അനുയോജ്യമാക്കുക</value>
-  </data>
-  <data name="ButtonOneIsToOneToolTip.Content" xml:space="preserve">
-    <value>1:1 ലേക്ക് സൂം ചെയ്യുക</value>
-  </data>
-  <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
-    <value>ക്രമീകരണങ്ങൾ</value>
-  </data>
-  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
-    <value>മറ്റ് ആപ്പുകളിൽ തുറക്കുക</value>
-  </data>
-  <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
-    <value>കാഷെ നില കാണുക</value>
-  </data>
-  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
-    <value>പൊതുവായവ</value>
-  </data>
-  <data name="SettingsCardDeveloperSupport.Header" xml:space="preserve">
-    <value>FlyPhotos-നെ പിന്തുണയ്ക്കുക</value>
-  </data>
-  <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
-    <value>Fly-യെ കൂടുതൽ മികച്ചതാക്കാൻ സഹായിക്കൂ.</value>
-  </data>
-  <data name="DonateButton.Content" xml:space="preserve">
-    <value>സംഭാവന നൽകുക</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>കീബോർഡ് കുറുക്കുവഴികൾ</value>
-  </data>
-  <data name="TextBlockTheming.Text" xml:space="preserve">
-    <value>തീമിംഗ്</value>
-  </data>
-  <data name="SettingsCardTheme.Header" xml:space="preserve">
-    <value>വിൻഡോ തീം</value>
-  </data>
-  <data name="SettingsCardTheme.Description" xml:space="preserve">
-    <value>ആപ്പ് തീം തിരഞ്ഞെടുക്കുക.</value>
-  </data>
-  <data name="ComboThemeItemDefault.Content" xml:space="preserve">
-    <value>ഡിഫോൾട്ട്</value>
-  </data>
-  <data name="ComboThemeItemDark.Content" xml:space="preserve">
-    <value>ഡാർക്ക്</value>
-  </data>
-  <data name="ComboThemeItemLight.Content" xml:space="preserve">
-    <value>ലൈറ്റ്</value>
-  </data>
-  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
-    <value>വിൻഡോ പശ്ചാത്തലം</value>
-  </data>
-  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
-    <value>വിൻഡോ പശ്ചാത്തലം ക്രമീകരിക്കുക.</value>
-  </data>
-  <data name="ComboBackgroundItemTransparent.Content" xml:space="preserve">
-    <value>ട്രാൻസ്പരന്റ്</value>
-  </data>
-  <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>ഫ്രോസൺ</value>
-  </data>
-  <data name="ComboBackgroundItemAcrylic.Content" xml:space="preserve">
-    <value>അക്രിലിക്</value>
-  </data>
-  <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
-    <value>അക്രിലിക് തിൻ</value>
-  </data>
-  <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
-    <value>മൈക്ക</value>
-  </data>
-  <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
-    <value>മൈക്ക ആൾട്ട്</value>
-  </data>
-  <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
-    <value>ഒന്നുമില്ല</value>
-  </data>
-  <data name="DeletionFailed.Title" xml:space="preserve">
-    <value>ഡിലീറ്റ് പരാജയപ്പെട്ടു</value>
-  </data>
-  <data name="DeletionFailed.Message" xml:space="preserve">
-    <value>അപ്ലിക്കേഷൻ ഫയൽ ഡിലീറ്റ് ചെയ്യാൻ കഴിഞ്ഞില്ല.</value>
-  </data>
-  <data name="DeletionFailed.CloseButton" xml:space="preserve">
-    <value>ശരി</value>
-  </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
-    <value>സുതാര്യത % ക്രമീകരിക്കുക</value>
-  </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
-    <value>ട്രാൻസ്പരന്റ് വിൻഡോ പശ്ചാത്തലത്തിന് മാത്രം ബാധകം.</value>
-  </data>
-  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
-    <value>ഫോട്ടോ പ്രദർശനം</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>പാൻ, സൂം ക്രമീകരണങ്ങൾ</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>പാൻ, സൂം പ്രവർത്തി രീതികൾ ക്രമീകരിക്കുക.</value>
-  </data>
-  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
-    <value>ഫയൽ തുറക്കുമ്പോൾ സൂം ഇൻ, പുറത്തുകടക്കുമ്പോൾ സൂം ഔട്ട്</value>
-  </data>
-  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
-    <value>⚠ സ്റ്റാർട്ടപ്പ് വൈകിയേക്കാം: പ്രിവ്യൂവിന് പകരം മുഴുവൻ ഇമേജ് ലോഡ് ചെയ്യാൻ Fly കാത്തിരിക്കും.</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>സൂം ചെയ്യുമ്പോൾ ഉയർന്ന ഗുണനിലവാരമുള്ള ഇന്റർപോളേഷൻ ഉപയോഗിക്കുക</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>മൂർച്ചയുള്ള പിക്സൽ അറ്റങ്ങൾക്കായി ഇത് പ്രവർത്തനരഹിതമാക്കുക (പിക്സൽ ആർട്ടിന് ഉപകരിക്കും).</value>
-  </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
-    <value>നാവിഗേഷനിലെ പാൻ, സൂം, റൊട്ടേഷൻ രീതികൾ</value>
-  </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ ഒരേ വലിപ്പമുള്ള ഫോട്ടോകളുള്ള ഫോൾഡറിൽ മാത്രം "Retain" ഓപ്ഷൻ ഉപയോഗിക്കുക.</value>
-  </data>
-  <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
-    <value>പാൻ/സൂം/റൊട്ടേഷൻ റീസെറ്റ് ചെയ്യുക</value>
-  </data>
-  <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
-    <value>ഓരോ ഫോട്ടോയ്ക്കും പാൻ/സൂം/റൊട്ടേഷൻ ഓർമ്മിക്കുക</value>
-  </data>
-  <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
-    <value>മുൻ ഫോട്ടോയിൽ നിന്നുള്ള പാൻ/സൂം നിലനിർത്തുക</value>
-  </data>
-  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
-    <value>സൂം ശതമാനം സ്ക്രീനിൽ കാണിക്കുക</value>
-  </data>
-  <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
-    <value>സ്ക്രീനിലേക്കുള്ള ഇമേജ് ഫിറ്റ്</value>
-  </data>
-  <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
-    <value>ഇമേജ് സ്ക്രീനിന്റെ എത്ര % നിറയ്ക്കണമെന്ന് തിരഞ്ഞെടുക്കുക</value>
-  </data>
-  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
-    <value>ചെക്കേർഡ് പശ്ചാത്തലം കാണിക്കുക</value>
-  </data>
-  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
-    <value>സുതാര്യമായ ചിത്രങ്ങൾക്കായി ചെക്കേർഡ് പശ്ചാത്തലം കാണിക്കുക. ⚠ Fly-യുടെ പ്രവർത്തനക്ഷമത കുറച്ചേക്കാം.</value>
-  </data>
-  <data name="SettingsCardRememberLastMonitor.Header" xml:space="preserve">
-    <value>അവസാനം ഉപയോഗിച്ച മോണിറ്റർ ഓർമ്മിക്കുക</value>
-  </data>
-  <data name="SettingsCardRememberLastMonitor.Description" xml:space="preserve">
-    <value>അവസാനം ഉപയോഗിച്ച മോണിറ്ററിൽ Fly തുറക്കും. ഒരു മോണിറ്റർ മാത്രമേ ഉള്ളൂവെങ്കിൽ ഇത് പ്രവർത്തനക്ഷമമാക്കരുത്.</value>
-  </data>
-  <data name="TextBlockUIControls.Text" xml:space="preserve">
-    <value>UI നിയന്ത്രണങ്ങൾ</value>
-  </data>
-  <data name="SettingsExpanderAutoFade.Header" xml:space="preserve">
-    <value>ഓട്ടോ ഫേഡ് / ഹൈഡ് ക്രമീകരണങ്ങൾ</value>
-  </data>
-  <data name="SettingsCardFadeControls.Header" xml:space="preserve">
-    <value>UI നിയന്ത്രണങ്ങൾ ഓട്ടോ ഫേഡ് ചെയ്യുക</value>
-  </data>
-  <data name="SettingsCardFadeControls.Description" xml:space="preserve">
-    <value>മൗസ് നീിക്കുമ്പോൾ UI നിയന്ത്രണങ്ങൾ മങ്ങിക്കുക.</value>
-  </data>
-  <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
-    <value>ഓട്ടോ ഫേഡ് തീവ്രത %</value>
-  </data>
-  <data name="SettingsCardFadeIntensity.Description" xml:space="preserve">
-    <value>ഓട്ടോ-ഫേഡ് ഇഫക്റ്റിന്റെ ശക്തി ക്രമീകരിക്കുക.</value>
-  </data>
-  <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
-    <value>മൗസ് കർസർ ഓട്ടോ ഹൈഡ് ചെയ്യുക</value>
-  </data>
-  <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
-    <value>മൗസ് നിഷ്ക്രിയമാണെങ്കിൽ കർസർ മറയ്ക്കുക.</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
-    <value>മൗസ് വീൽ</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
-    <value>ഡിഫോൾട്ട് മൗസ് വീൽ പ്രവർത്തി രീതി തിരഞ്ഞെടുക്കുക.</value>
-  </data>
-  <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
-    <value>സൂം ഇൻ അല്ലെങ്കിൽ ഔട്ട്</value>
-  </data>
-  <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
-    <value>അടുത്തത് അല്ലെങ്കിൽ മുൻപത്തേത് കാണുക</value>
-  </data>
-  <data name="ComboMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + മൗസ് വീൽ എപ്പോഴും സൂം ഇൻ അല്ലെങ്കിൽ ഔട്ട് ചെയ്യുന്നു.
-👉 Alt + മൗസ് വീൽ എപ്പോഴും അടുത്തതിലേക്കോ മുൻപത്തേതിലേക്കോ പോകുന്നു.</value>
-  </data>
-  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
-    <value>തമ്പ്‌നെയിൽ സ്ട്രിപ്പ് കാണിക്കുക</value>
-  </data>
-  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
-    <value>വിൻഡോയുടെ താഴെ തമ്പ്‌നെയിൽ സ്ട്രിപ്പ് കാണിക്കുക</value>
-  </data>
-  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
-    <value>തമ്പ്‌നെയിൽ വലിപ്പം</value>
-  </data>
-  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
-    <value>വ്യൂവറിലെ തമ്പ്‌നെയിലുകളുടെ വലിപ്പം ക്രമീകരിക്കുക.</value>
-  </data>
-  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
-    <value>തമ്പ്‌നെയിൽ സെലക്ഷൻ നിറം</value>
-  </data>
-  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
-    <value>തിരഞ്ഞെടുത്ത തമ്പ്‌നെയിലുകൾക്കുള്ള ഹൈലൈറ്റ് നിറം സജ്ജമാക്കുക.</value>
-  </data>
-  <data name="SettingsCardExternalShorcuts.Header" xml:space="preserve">
-    <value>എക്സ്റ്റേണൽ ആപ്പുകളിലേക്കുള്ള കുറുക്കുവഴികൾ കാണിക്കുക</value>
-  </data>
-  <data name="SettingsCardExternalShorcuts.Description" xml:space="preserve">
-    <value>നിലവിലെ ഫോട്ടോ മറ്റ് ആപ്പുകളിൽ തുറക്കുക</value>
-  </data>
-  <data name="SettingsCardExternalApps.Header" xml:space="preserve">
-    <value>എക്സ്റ്റേണൽ ആപ്പുകൾ തിരഞ്ഞെടുക്കുക</value>
-  </data>
-  <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>കുറുക്കുവഴികളായി ചേർക്കാൻ exe-കൾ ബ്രൗസ് ചെയ്യുക.</value>
-  </data>
-  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
-    <value>സ്ക്രീനിൽ ഫയൽ നാമം കാണിക്കുക</value>
-  </data>
-  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
-    <value>നിലവിൽ തുറന്നിരിക്കുന്ന ഫയലിന്റെ പേര് പ്രദർശിപ്പിക്കുക</value>
-  </data>
-  <data name="SettingsCardConfirmBeforeDelete.Header" xml:space="preserve">
-    <value>ഫയൽ ഡിലീറ്റ് ചെയ്യുമ്പോൾ സ്ഥിരീകരണ ഡയലോഗ് കാണിക്കുക</value>
-  </data>
-  <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
-    <value>ഫയൽ ഡിലീറ്റ് ചെയ്യുന്നതിന് മുൻമ്പ് സ്ഥിരീകരണം ചോദിക്കുക.</value>
-  </data>
-  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
-    <value>കാഷെ നില കാണിക്കുക</value>
-  </data>
-  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
-    <value>ബട്ടൺ പാനലിൽ കാഷെ സ്റ്റാറ്റസ് എക്സ്പാൻഡർ കാണിക്കുക.</value>
-  </data>
-  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
-    <value>ഫോട്ടോയുടെ അളവുകൾ കാണിക്കുക</value>
-  </data>
-  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
-    <value>ഫയൽ നാമത്തിന് സമീപം ഫോട്ടോയുടെ വീതിയും ഉയരവും കാണിക്കുക.</value>
-  </data>
-  <data name="TextBlockCaching.Text" xml:space="preserve">
-    <value>കാഷിംഗ്</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>കാഷിംഗ്</value>
-  </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>Fly ഫോട്ടോ കാഷിംഗ് കൈകാര്യം ചെയ്യുന്ന രീതി ക്രമീകരിക്കുക.</value>
-  </data>
-  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>ലോ-റെസ് കാഷെ</value>
-  </data>
-  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>ഓരോ വശത്തും കാഷെ ചെയ്ത ലോ-റെസല്യൂഷൻ ഫോട്ടോകളുടെ എണ്ണം സജ്ജമാക്കുക.</value>
-  </data>
-  <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>ഹൈ-റെസ് കാഷെ</value>
-  </data>
-  <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>ഓരോ വശത്തും കാഷെ ചെയ്ത ഹൈ-റെസല്യൂഷൻ ഫോട്ടോകളുടെ എണ്ണം സജ്ജമാക്കുക.</value>
-  </data>
-  <data name="TextBlockLog.Text" xml:space="preserve">
-    <value>ലോഗ്</value>
-  </data>
-  <data name="SettingsCardLog.Header" xml:space="preserve">
-    <value>ലോഗ് ഫയൽ</value>
-  </data>
-  <data name="SettingsCardLog.Description" xml:space="preserve">
-    <value>ലോഗ് ഫയൽ കാണാൻ തുറക്കുക</value>
-  </data>
-  <data name="ButtonOpenLog.Content" xml:space="preserve">
-    <value>ലോഗ് തുറക്കുക</value>
-  </data>
-  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
-    <value>കോഡെക്കുകൾ</value>
-  </data>
-  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
-    <value>FlyPhotos പ്രധാനമായും വിൻഡോസ് ഇൻബിൽറ്റ് ഇമേജിംഗ് കമ്പോണന്റ് (WIC) കോഡെക്കുകളാണ് ഉപയോഗിക്കുന്നത്.</value>
-  </data>
-  <data name="HeaderCodec.Text" xml:space="preserve">
-    <value>കോഡെക്</value>
-  </data>
-  <data name="HeaderType.Text" xml:space="preserve">
-    <value>തരം</value>
-  </data>
-  <data name="HeaderExtensions.Text" xml:space="preserve">
-    <value>എക്സ്റ്റൻഷനുകൾ</value>
-  </data>
-  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
-    <value>എബൗട്ട്</value>
-  </data>
-  <data name="SettingsCardVersion.Header" xml:space="preserve">
-    <value>നിലവിലെ പതിപ്പ്</value>
-  </data>
-  <data name="BtnCheckVersion.Content" xml:space="preserve">
-    <value>ഏറ്റവും പുതിയ പതിപ്പ് പരിശോധിക്കുക</value>
-  </data>
-  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
-    <value>Github റെപ്പോസിറ്ററി</value>
-  </data>
-  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
-    <value>FlyPhotos ഓപ്പൺ സോഴ്‌സ് ആണ്, Github-ൽ ലഭ്യമാണ്</value>
-  </data>
-  <data name="BtnGithubRepo.Content" xml:space="preserve">
-    <value>Github റെപ്പോസിറ്ററിയിലേക്ക് പോകുക</value>
-  </data>
-  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
-    <value>ബഗുകളും പ്രശ്നങ്ങളും</value>
-  </data>
-  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
-    <value>പ്രശ്നങ്ങൾ Github-ൽ റിപ്പോർട്ട് ചെയ്യുക അല്ലെങ്കിൽ ryftools@outlook.com-ലേക്ക് മെയിൽ ചെയ്യുക</value>
-  </data>
-  <data name="BtnReportBugs.Content" xml:space="preserve">
-    <value>റെപ്പോയിലെ ബഗ് പേജിലേക്ക് പോകുക</value>
-  </data>
-  <data name="SettingsCardCredits.Header" xml:space="preserve">
-    <value>കടപ്പാടുകൾ</value>
-  </data>
-  <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>FlyPhotos Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog, WinUIEx എന്നിവയോട് നന്ദി പറയുന്നു.</value>
-  </data>
-  <data name="BtnThirdPartyLicenses.Content" xml:space="preserve">
-    <value>തേർഡ് പാർട്ടി ലൈസൻസുകൾ കാണുക</value>
-  </data>
-  <data name="SettingsCardVersion.Description" xml:space="preserve">
-    <value>നിലവിലെ പതിപ്പ് {0} ആണ്</value>
-  </data>
-  <data name="ConfirmDeletion.Title" xml:space="preserve">
-    <value>ഡിലീറ്റ് സ്ഥിരീകരിക്കുക</value>
-  </data>
-  <data name="ConfirmDeletion.Message" xml:space="preserve">
-    <value>ഈ ഫയൽ നീക്കം ചെയ്യാൻ നിങ്ങൾക്ക് ഉറപ്പാണോ?</value>
-  </data>
-  <data name="ConfirmDeletion.DeleteButton" xml:space="preserve">
-    <value>ഡിലീറ്റ്</value>
-  </data>
-  <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
-    <value>റദ്ദാക്കുക</value>
-  </data>
-  <data name="NoShortcutsCreated.Message" xml:space="preserve">
-    <value>എന്ത് ശോർട്ട്കട്ടുകളും സൃഷ്ടിച്ചിട്ടില്ല. ക്രമീകരണങ്ങളിൽ ക്രമീകരിക്കുക.</value>
-  </data>
-  <data name="LoadingHighQuality.Message" xml:space="preserve">
-    <value>ഉയർന്ന ഗുണമേൻമയുള്ള പതിപ്പ് ലോഡ് ചെയ്യുന്നു. കുറച്ചുകാലം കഴിഞ്ഞ് ശ്രമിക്കുക</value>
-  </data>
-  <data name="SettingsPage.Title" xml:space="preserve">
-    <value>FlyPhotos - ക്രമീകരണങ്ങൾ</value>
-  </data>
-  <data name="ColorPickerFlyoutOkButton.Content" xml:space="preserve">
-    <value>ശരി</value>
-  </data>
-  <data name="ColorPickerFlyoutCancelButton.Content" xml:space="preserve">
-    <value>റദ്ദാക്കുക</value>
-  </data>
-  <data name="AppSelectionDialog.Title" xml:space="preserve">
-    <value>ഒരു അപ്ലിക്കേഷൻ തിരഞ്ഞെടുക്കുക</value>
-  </data>
-  <data name="AppSelectionDialog.PrimaryButtonText" xml:space="preserve">
+  <data name="AppSelectionDialog.PrimaryButtonText">
     <value>തിരഞ്ഞെടുക്കുക</value>
   </data>
-  <data name="AppSelectionDialog.SecondaryButtonText" xml:space="preserve">
+  <data name="AppSelectionDialog.SecondaryButtonText">
     <value>റദ്ദാക്കുക</value>
   </data>
-  <data name="BrowseBtn.Content" xml:space="preserve">
-    <value>ആപ്പിനായി ബ്രൗസ് ചെയ്യുക...</value>
+  <data name="AppSelectionDialog.Title">
+    <value>ഒരു അപ്ലിക്കേഷൻ തിരഞ്ഞെടുക്കുക</value>
   </data>
-  <data name="ScanningTextBlock.Text" xml:space="preserve">
-    <value>ആപ്പുകൾ സ്കാൻ ചെയ്യുന്നു...</value>
+  <data name="BrowseBtn.Content">
+    <value>ആപ്പിനായി ബ്രൗസ് ചെയ്യുക…</value>
   </data>
-  <data name="SearchBox.PlaceholderText" xml:space="preserve">
-    <value>ആപ്പുകൾ തിരയുക...</value>
+  <data name="BtnCheckVersion.Content">
+    <value>പുതിയ പതിപ്പുണ്ടോ എന്ന് പരിശോധിക്കുക</value>
   </data>
-  <data name="TrialExpiredMessage.Title" xml:space="preserve">
-    <value>പരീക്ഷണ കാലാവധി അവസാനിച്ചു</value>
+  <data name="BtnGitHubRepo.Content">
+    <value>GitHub റിപ്പോ തുറക്കുക</value>
   </data>
-  <data name="SettingsCardLanguage.Header" xml:space="preserve">
-    <value>ഭാഷ തിരഞ്ഞെടുക്കുക</value>
+  <data name="BtnReportBugs.Content">
+    <value>GitHub ഇൽ ബഗ്ഗ്‌ അറിയിക്കുക</value>
   </data>
-  <data name="TrialExpiredMessage.Content" xml:space="preserve">
-    <value>നിങ്ങളുടെ സൗജന്യ പരീക്ഷണ കാലാവധി അവസാനിച്ചു. ദയവായി Microsoft Store-ൽ നിന്ന് ആപ്പ് വാങ്ങുക.</value>
+  <data name="BtnThirdPartyLicenses.Content">
+    <value>തേർഡ് പാർട്ടി ലൈസൻസുകൾ കാണുക</value>
   </data>
-  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
+  <data name="ButtonBackToolTip.Content">
+    <value>മുൻപത്തെ ഫോട്ടോ</value>
+  </data>
+  <data name="ButtonExpanderToolTip.Content">
+    <value>കാഷെ നില കാണുക</value>
+  </data>
+  <data name="ButtonNextPageToolTip.Content">
+    <value>അടുത്ത പേജ്</value>
+  </data>
+  <data name="ButtonNextToolTip.Content">
+    <value>അടുത്ത ഫോട്ടോ</value>
+  </data>
+  <data name="ButtonOneIsToOneToolTip.Content">
+    <value>യഥാർത്ഥ വലിപ്പത്തിലേക്ക് സൂം ചെയ്യുക</value>
+  </data>
+  <data name="ButtonOpenLog.Content">
+    <value>ലോഗ് തുറക്കുക</value>
+  </data>
+  <data name="ButtonPrevPageToolTip.Content">
+    <value>മുൻപത്തെ പേജ്</value>
+  </data>
+  <data name="ButtonRotateToolTip.Content">
+    <value>ഫോട്ടോ കറക്കുക</value>
+  </data>
+  <data name="ButtonScaleSetToolTip.Content">
+    <value>സ്‌ക്രീനിൽ നിറക്കുക</value>
+  </data>
+  <data name="ButtonSettingsToolTip.Content">
+    <value>ക്രമീകരണങ്ങൾ</value>
+  </data>
+  <data name="ButtonShortcutsToolTip.Content">
+    <value>മറ്റ് ആപ്പുകളിൽ തുറക്കുക</value>
+  </data>
+  <data name="ChangeLanguageAlert.Description">
+    <value>ഭാഷ മാറ്റാൻ ആപ്പ് റീസ്റ്റാർട് ചെയ്യുക</value>
+  </data>
+  <data name="ChangeLanguageAlert.Title">
+    <value>ഭാഷ മാറ്റുക</value>
+  </data>
+  <data name="ColorPickerFlyoutCancelButton.Content">
+    <value>റദ്ദാക്കുക</value>
+  </data>
+  <data name="ColorPickerFlyoutOkButton.Content">
     <value>ശരി</value>
   </data>
-  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
-    <value>Left/Right ആരോ കീകൾ : ഫോട്ടോകൾ മാറ്റാൻ
-Up/Down ആരോ കീകൾ : സൂം ഇൻ അഥവാ ഔട്ട് ചെയ്യാൻ
+  <data name="ComboBackgroundItemAcrylic.Content">
+    <value>അക്രിലിക്</value>
+  </data>
+  <data name="ComboBackgroundItemAcrylicThin.Content">
+    <value>അക്രിലിക് തിൻ</value>
+  </data>
+  <data name="ComboBackgroundItemFrozen.Content">
+    <value>ഫ്രോസൺ</value>
+  </data>
+  <data name="ComboBackgroundItemMica.Content">
+    <value>മൈക്ക</value>
+  </data>
+  <data name="ComboBackgroundItemMicaAlt.Content">
+    <value>മൈക്ക ആൾട്ട്</value>
+  </data>
+  <data name="ComboBackgroundItemNone.Content">
+    <value>ഒന്നുമില്ല</value>
+  </data>
+  <data name="ComboBackgroundItemTransparent.Content">
+    <value>ട്രാൻസ്പരന്റ്</value>
+  </data>
+  <data name="ComboMouseWheelItemNav.Content">
+    <value>അടുത്തത് അല്ലെങ്കിൽ മുൻപത്തേത് കാണുക</value>
+  </data>
+  <data name="ComboMouseWheelItemZoom.Content">
+    <value>സൂം ഇൻ അല്ലെങ്കിൽ സൂം ഔട്ട്</value>
+  </data>
+  <data name="ComboPanZoomItemRemember.Content">
+    <value>ഓരോ ഫോട്ടോയ്ക്കും പാൻ/സൂം/റൊട്ടേഷൻ ഓർമ്മിക്കുക</value>
+  </data>
+  <data name="ComboPanZoomItemReset.Content">
+    <value>പാൻ/സൂം/റൊട്ടേഷൻ റീസെറ്റ് ചെയ്യുക</value>
+  </data>
+  <data name="ComboPanZoomItemRetain.Content">
+    <value>മുൻ ഫോട്ടോയിൽ നിന്നുള്ള പാൻ/സൂം നിലനിർത്തുക</value>
+  </data>
+  <data name="ComboThemeItemDark.Content">
+    <value>ഡാർക്ക്</value>
+  </data>
+  <data name="ComboThemeItemDefault.Content">
+    <value>ഡിഫോൾട്ട്</value>
+  </data>
+  <data name="ComboThemeItemLight.Content">
+    <value>ലൈറ്റ്</value>
+  </data>
+  <data name="ConfirmDeletion.CancelButton">
+    <value>റദ്ദാക്കുക</value>
+  </data>
+  <data name="ConfirmDeletion.DeleteButton">
+    <value>ഡിലീറ്റ്</value>
+  </data>
+  <data name="ConfirmDeletion.Message">
+    <value>ഉറപ്പായും ഫയൽ ഡിലീറ്റ് ചെയ്യണോ ? </value>
+  </data>
+  <data name="ConfirmDeletion.Title">
+    <value>ഡിലീറ്റ് സ്ഥിരീകരണം</value>
+  </data>
+  <data name="DefaultViewerInstruction1.Text">
+    <value>ഒരു ചിത്രത്തിൽ റൈറ്റ് ക്ലിക്ക് ചെയ്ത് "Open With" &gt; "Choose another app" തിരഞ്ഞെടുത്ത്, "FlyPhotos" സെലക്ട് ചെയ്ത ശേഷം "Always" ബട്ടൺ അമർത്തി FlyPhotos-നെ ഡിഫോൾട്ട് വ്യൂവർ ആയി ക്രമീകരിക്കാം.</value>
+  </data>
+  <data name="DefaultViewerInstruction2.Text">
+    <value>Windows 11-ലെ "Settings" ആപ്പിലുള്ള "Apps &gt; Default Apps" പേജ് വഴിയും FlyPhotos-നെ ഡിഫോൾട്ട് വ്യൂവർ ആയി ക്രമീകരിക്കാം.</value>
+  </data>
+  <data name="DeletionFailed.CloseButton">
+    <value>ശരി</value>
+  </data>
+  <data name="DeletionFailed.Message">
+    <value>ഫയൽ ഡിലീറ്റ് ചെയ്യാൻ കഴിഞ്ഞില്ല.</value>
+  </data>
+  <data name="DeletionFailed.Title">
+    <value>ഡിലീറ്റ് പരാജയപ്പെട്ടു</value>
+  </data>
+  <data name="DonateButton.Content">
+    <value>സംഭാവന നൽകുക</value>
+  </data>
+  <data name="DropAreaRun.Text">
+    <value>ഒരു ചിത്രം വലിച്ചിടുക (Drag &amp; Drop), അല്ലെങ്കിൽ</value>
+  </data>
+  <data name="HeaderCodec.Text">
+    <value>കോഡെക്</value>
+  </data>
+  <data name="HeaderExtensions.Text">
+    <value>എക്സ്റ്റൻഷനുകൾ</value>
+  </data>
+  <data name="HeaderType.Text">
+    <value>തരം</value>
+  </data>
+  <data name="LoadingHighQuality.Message">
+    <value>കൂടുതൽ വ്യക്തതയുള്ള ചിത്രം ലോഡ് ചെയ്യുന്നു. കുറച്ചു കഴിഞ്ഞ് ശ്രമിക്കുക</value>
+  </data>
+  <data name="MessageClose_Ok">
+    <value>ശരി</value>
+  </data>
+  <data name="NoShortcutsCreated.Message">
+    <value>ഒരു കുറുക്കുവഴികളും സൃഷ്ടിച്ചിട്ടില്ല. ക്രമീകരണങ്ങളിൽ നോക്കുക.</value>
+  </data>
+  <data name="OpenFileHyperlink.Text">
+    <value>ഫയൽ തുറക്കുക</value>
+  </data>
+  <data name="RightClickInstruction.Text">
+    <value>ഒരു ചിത്രത്തിൽ റൈറ്റ് ക്ലിക്ക് (Right-click) ചെയ്ത് "Open With" &gt; "FlyPhotos" തിരഞ്ഞെടുത്ത് ഈ ആപ്പ് ഉപയോഗിക്കാവുന്നതാണ്.</value>
+  </data>
+  <data name="ScanningTextBlock.Text">
+    <value>ആപ്പുകൾ സ്കാൻ ചെയ്യുന്നു…</value>
+  </data>
+  <data name="SearchBox.PlaceholderText">
+    <value>ആപ്പുകൾ തിരയുക…</value>
+  </data>
+  <data name="SettingsCardAutoHideMouse.Description">
+    <value>മൗസ് നിഷ്ക്രിയമാണെങ്കിൽ പോയിന്റർ മായ്ക്കുക.</value>
+  </data>
+  <data name="SettingsCardAutoHideMouse.Header">
+    <value>മൗസ് പോയിന്റർ ഓട്ടോ ഹൈഡ് ചെയ്യുക</value>
+  </data>
+  <data name="SettingsCardConfirmBeforeDelete.Description">
+    <value>ഫയൽ ഡിലീറ്റ് ചെയ്യുന്നതിന് മുൻമ്പ് സ്ഥിരീകരണം ചോദിക്കുക.</value>
+  </data>
+  <data name="SettingsCardConfirmBeforeDelete.Header">
+    <value>ഫയൽ ഡിലീറ്റ് ചെയ്യുമ്പോൾ സ്ഥിരീകരണ ഡയലോഗ് കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardCredits.Description">
+    <value>ഫ്ലൈ Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog, WinUIEx എന്നിവയോട് നന്ദി പറയുന്നു.</value>
+  </data>
+  <data name="SettingsCardCredits.Header">
+    <value>കടപ്പാടുകൾ</value>
+  </data>
+  <data name="SettingsCardDeveloperSupport.Description">
+    <value>Fly-യെ കൂടുതൽ മികച്ചതാക്കാൻ സഹായിക്കൂ.</value>
+  </data>
+  <data name="SettingsCardDeveloperSupport.Header">
+    <value>FlyPhotos-നെ പിന്തുണയ്ക്കുക</value>
+  </data>
+  <data name="SettingsCardExternalApps.Description">
+    <value>കുറുക്കുവഴികളായി ചേർക്കാൻ ആപ്പുകൾ ബ്രൗസ് ചെയ്യുക.</value>
+  </data>
+  <data name="SettingsCardExternalApps.Header">
+    <value>മറ്റുള്ള ആപ്പുകൾ തിരഞ്ഞെടുക്കുക</value>
+  </data>
+  <data name="SettingsCardExternalShorcuts.Description">
+    <value>നിലവിലെ ഫോട്ടോ മറ്റ് ആപ്പുകളിൽ തുറക്കുക</value>
+  </data>
+  <data name="SettingsCardExternalShorcuts.Header">
+    <value>മറ്റുള്ള ആപ്പുകളിലേക്കുള്ള കുറുക്കുവഴികൾ കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardFadeControls.Description">
+    <value>മൗസ് അകലുമ്പോൾ ബട്ടണുകൾ/തമ്പ്നെയിൽ സ്ട്രിപ്പ് മങ്ങിക്കുക </value>
+  </data>
+  <data name="SettingsCardFadeControls.Header">
+    <value>ബട്ടണുകൾ/തമ്പ്നെയിൽ ഓട്ടോ ഫേഡ് ചെയ്യുക</value>
+  </data>
+  <data name="SettingsCardFadeIntensity.Description">
+    <value>മംഗലിന്റെ ശക്തി ക്രമീകരിക്കുക.</value>
+  </data>
+  <data name="SettingsCardFadeIntensity.Header">
+    <value>മങ്ങൽ തീവ്രത %</value>
+  </data>
+  <data name="SettingsCardHighQualityInterpolation.Description">
+    <value>വ്യക്തമായ പിക്സൽ അറ്റങ്ങൾക്കായി ഇത് ഓഫ് ആക്കുക (പിക്സൽ ആർട്ടിന് ഉപകരിക്കും).</value>
+  </data>
+  <data name="SettingsCardHighQualityInterpolation.Header">
+    <value>സൂം ചെയ്യുമ്പോൾ ഉയർന്ന ഗുണനിലവാരമുള്ള ഇന്റർപോളേഷൻ ഉപയോഗിക്കുക</value>
+  </data>
+  <data name="SettingsCardHighResCache.Description">
+    <value>ഓരോ വശത്തും കാഷെ ചെയ്ത ഹൈ-റെസല്യൂഷൻ ഫോട്ടോകളുടെ എണ്ണം സജ്ജമാക്കുക.</value>
+  </data>
+  <data name="SettingsCardHighResCache.Header">
+    <value>ഹൈ-റെസ് കാഷെ</value>
+  </data>
+  <data name="SettingsCardImageFitPercentage.Description">
+    <value>ഇമേജ് സ്ക്രീനിന്റെ എത്ര % നിറയ്ക്കണമെന്ന് തിരഞ്ഞെടുക്കുക</value>
+  </data>
+  <data name="SettingsCardImageFitPercentage.Header">
+    <value>സ്ക്രീനിലേക്കുള്ള ഇമേജ് ഫിറ്റ്</value>
+  </data>
+  <data name="SettingsCardLanguage.Header">
+    <value>ഭാഷ തിരഞ്ഞെടുക്കുക</value>
+  </data>
+  <data name="SettingsCardLog.Description">
+    <value>ലോഗ് ഫയൽ കാണാൻ തുറക്കുക</value>
+  </data>
+  <data name="SettingsCardLog.Header">
+    <value>ലോഗ് ഫയൽ</value>
+  </data>
+  <data name="SettingsCardLowResCache.Description">
+    <value>ഓരോ വശത്തും കാഷെ ചെയ്ത ലോ-റെസല്യൂഷൻ ഫോട്ടോകളുടെ എണ്ണം സജ്ജമാക്കുക.</value>
+  </data>
+  <data name="SettingsCardLowResCache.Header">
+    <value>ലോ-റെസ് കാഷെ</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviour.Description">
+    <value>ഡിഫോൾട്ട് മൗസ് വീൽ പ്രവർത്തി രീതി തിരഞ്ഞെടുക്കുക.</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviour.Header">
+    <value>മൗസ് വീൽ</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviourInfo.Description">
+    <value>👉 Ctrl + മൗസ് വീൽ എപ്പോഴും സൂം ഇൻ/ഔട്ട് ചെയ്യുന്നു.
+👉 Alt + മൗസ് വീൽ ഫോട്ടോകൾ അടുത്തതിലേക്കോ മുൻപത്തേതിലേക്കോ മാറ്റുന്നു.</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Description">
+    <value>⚠ സ്റ്റാർട്ടപ്പ് വൈകിയേക്കാം: പൂർണ വ്യക്തതയുള്ള ഇമേജ് ലോഡ് ചെയ്യാൻ Fly കാത്തിരിക്കും.</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Header">
+    <value>ഫയൽ തുറക്കുമ്പോൾ സൂം ഇൻ, എക്സിറ്റ് ചെയ്യുമ്പോൾ സൂം ഔട്ട്</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Description">
+    <value>⚠ ഒരേ വലിപ്പമുള്ള ഫോട്ടോകളുള്ള ഫോൾഡറിൽ മാത്രം "നിലനിർത്തൽ" ഓപ്ഷൻ ഉപയോഗിക്കുക.</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Header">
+    <value>നാവിഗേഷനിലെ പാൻ, സൂം, റൊട്ടേഷൻ രീതികൾ</value>
+  </data>
+  <data name="SettingsCardRememberLastMonitor.Description">
+    <value>അവസാനം ഉപയോഗിച്ച മോണിറ്ററിൽ Fly തുറക്കും. ഒരു മോണിറ്റർ മാത്രമേ ഉള്ളൂവെങ്കിൽ ഇത് വേണ്ട.</value>
+  </data>
+  <data name="SettingsCardRememberLastMonitor.Header">
+    <value>അവസാനം ഉപയോഗിച്ച മോണിറ്റർ ഓർമ്മിക്കുക</value>
+  </data>
+  <data name="SettingsCardReportBugs.Description">
+    <value>പ്രശ്നങ്ങൾ GitHub-ൽ റിപ്പോർട്ട് ചെയ്യുക അല്ലെങ്കിൽ ryftools@outlook.com-ലേക്ക് മെയിൽ ചെയ്യുക</value>
+  </data>
+  <data name="SettingsCardReportBugs.Header">
+    <value>ബഗുകളും പ്രശ്നങ്ങളും</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Description">
+    <value>ബട്ടൺ പാനലിൽ കാഷെ നില എക്സ്പാൻഡർ കാണിക്കുക.</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Header">
+    <value>കാഷെ നില കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Description">
+    <value>സുതാര്യമായ ചിത്രങ്ങൾക്ക് ചെക്കേർഡ് പശ്ചാത്തലം കാണിക്കുക. 
+⚠ Fly-യുടെ പ്രവർത്തനക്ഷമത കുറച്ചേക്കാം.</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Header">
+    <value>ചെക്കേർഡ് പശ്ചാത്തലം കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardShowFileName.Description">
+    <value>നിലവിൽ തുറന്നിരിക്കുന്ന ഫയലിന്റെ പേര് പ്രദർശിപ്പിക്കുക</value>
+  </data>
+  <data name="SettingsCardShowFileName.Header">
+    <value>സ്ക്രീനിൽ ഫയൽ നാമം കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Description">
+    <value>ഫയൽ നാമത്തിന് സമീപം ഫോട്ടോയുടെ വീതിയും ഉയരവും കാണിക്കുക.</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Header">
+    <value>ഫോട്ടോയുടെ അളവുകൾ കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Description">
+    <value>വിൻഡോയുടെ താഴെ തമ്പ്‌നെയിൽ സ്ട്രിപ്പ് കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Header">
+    <value>തമ്പ്‌നെയിൽ സ്ട്രിപ്പ് കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardShowZoomPercent.Header">
+    <value>സൂം ശതമാനം സ്ക്രീനിൽ കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardSourceCode.Description">
+    <value>FlyPhotos ഓപ്പൺ സോഴ്‌സ് ആണ്, GitHub-ൽ ലഭ്യമാണ്</value>
+  </data>
+  <data name="SettingsCardSourceCode.Header">
+    <value>GitHub റെപ്പോസിറ്ററി</value>
+  </data>
+  <data name="SettingsCardTheme.Description">
+    <value>ആപ്പ് തീം തിരഞ്ഞെടുക്കുക.</value>
+  </data>
+  <data name="SettingsCardTheme.Header">
+    <value>വിൻഡോ തീം</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Description">
+    <value>തിരഞ്ഞെടുത്ത തമ്പ്‌നെയിലിനുള്ള ഹൈലൈറ്റ് നിറം സജ്ജമാക്കുക.</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Header">
+    <value>തമ്പ്‌നെയിൽ സെലക്ഷൻ നിറം</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Description">
+    <value>വ്യൂവറിലെ തമ്പ്‌നെയിലുകളുടെ വലിപ്പം ക്രമീകരിക്കുക.</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Header">
+    <value>തമ്പ്‌നെയിൽ വലിപ്പം</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Description">
+    <value>ട്രാൻസ്പരന്റ് വിൻഡോ പശ്ചാത്തലത്തിന് മാത്രം ബാധകം.</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Header">
+    <value>സുതാര്യത (%)</value>
+  </data>
+  <data name="SettingsCardVersion.Description">
+    <value>നിലവിലെ പതിപ്പ് {0} ആണ്</value>
+  </data>
+  <data name="SettingsCardVersion.Header">
+    <value>നിലവിലെ പതിപ്പ്</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Description">
+    <value>വിൻഡോ പശ്ചാത്തലം ക്രമീകരിക്കുക.</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Header">
+    <value>വിൻഡോ പശ്ചാത്തലം</value>
+  </data>
+  <data name="SettingsExpanderAutoFade.Header">
+    <value>ഓട്ടോ ഫേഡ് / ഹൈഡ് ക്രമീകരണങ്ങൾ</value>
+  </data>
+  <data name="SettingsExpanderCaching.Description">
+    <value>Fly ഫോട്ടോ കാഷിംഗ് കൈകാര്യം ചെയ്യുന്ന രീതി ക്രമീകരിക്കുക.</value>
+  </data>
+  <data name="SettingsExpanderCaching.Header">
+    <value>കാഷിംഗ്</value>
+  </data>
+  <data name="SettingsExpanderKeyboardShortcuts.Header">
+    <value>കീബോർഡ് കുറുക്കുവഴികൾ</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Description">
+    <value>പാൻ, സൂം പ്രവർത്തി രീതികൾ ക്രമീകരിക്കുക.</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Header">
+    <value>പാൻ, സൂം ക്രമീകരണങ്ങൾ</value>
+  </data>
+  <data name="SettingsPage.Title">
+    <value>FlyPhotos - ക്രമീകരണങ്ങൾ</value>
+  </data>
+  <data name="SettingsPivotItemAbout.Header">
+    <value>എബൗട്ട്</value>
+  </data>
+  <data name="SettingsPivotItemCodecs.Header">
+    <value>കോഡെക്കുകൾ</value>
+  </data>
+  <data name="SettingsPivotItemGeneral.Header">
+    <value>പൊതുവായവ</value>
+  </data>
+  <data name="Status_FileNotFound">
+    <value>ഫയൽ കണ്ടെത്തിയില്ല</value>
+  </data>
+  <data name="Status_InvalidFile">
+    <value>അസാധുവായ ഫയൽ</value>
+  </data>
+  <data name="Status_Loading">
+    <value>ലോഡ് ചെയ്യുന്നു…</value>
+  </data>
+  <data name="Status_PreviewFailed">
+    <value>പ്രിവ്യൂ ലോഡ് ചെയ്യുന്നതിൽ പരാജയം</value>
+  </data>
+  <data name="TextBlockCaching.Text">
+    <value>കാഷിംഗ്</value>
+  </data>
+  <data name="TextBlockCodecsInfo.Text">
+    <value>FlyPhotos പ്രധാനമായും വിൻഡോസ് ഇൻബിൽറ്റ് ഇമേജിംഗ് കമ്പോണന്റ് (WIC) കോഡെക്കുകളാണ് ഉപയോഗിക്കുന്നത്.</value>
+  </data>
+  <data name="TextBlockLog.Text">
+    <value>ലോഗ്</value>
+  </data>
+  <data name="TextBlockPhotoDisplay.Text">
+    <value>ഫോട്ടോ പ്രദർശനം</value>
+  </data>
+  <data name="TextBlockTheming.Text">
+    <value>തീമിംഗ്</value>
+  </data>
+  <data name="TextBlockUIControls.Text">
+    <value>യൂസർ ഇന്റർഫേസ് എലമെൻറ്സ്</value>
+  </data>
+  <data name="TitleTextBlock.Text">
+    <value>FlyPhotos - ഫോട്ടോ തുറക്കുക</value>
+  </data>
+  <data name="TrialExpiredMessage.CloseButton">
+    <value>ശരി</value>
+  </data>
+  <data name="TrialExpiredMessage.Content">
+    <value>നിങ്ങളുടെ സൗജന്യ പരീക്ഷണ കാലാവധി അവസാനിച്ചു. ദയവായി Microsoft Store-ൽ നിന്ന് ആപ്പ് വാങ്ങുക.</value>
+  </data>
+  <data name="TrialExpiredMessage.Title">
+    <value>പരീക്ഷണ കാലാവധി അവസാനിച്ചു</value>
+  </data>
+  <data name="UnsupportedFileAlert.Description">
+    <value>വലിച്ചിടപ്പെട്ട ഫയൽ ഫ്ലൈ പിന്തുണക്കുന്നില്ല</value>
+  </data>
+  <data name="UnsupportedFileAlert.Title">
+    <value>പിന്തുണയ്ക്കാത്ത ഫയൽ</value>
+  </data>
+  <data name="SettingsCardKeyboardShortCuts.Description">
+    <value>Left/Right ആരോ കീകൾ : ഫോട്ടോകൾ മാറ്റാൻ (Navigate)
+Up/Down ആരോ കീകൾ : സൂം ഇൻ / ഔട്ട് ചെയ്യാൻ
 മൗസ് ലെഫ്റ്റ് ക്ലിക്ക് ചെയ്ത് നീക്കുക : ഫോട്ടോ നീക്കാൻ (Pan)
 
 മൗസ് വീൽ : സൂം ചെയ്യാൻ / ഫോട്ടോകൾ മാറ്റാൻ (ക്രമീകരണം അനുസരിച്ച്)
-Ctrl + മൗസ് വീൽ : സൂം ഇൻ അഥവാ ഔട്ട് ചെയ്യാൻ
+Ctrl + മൗസ് വീൽ : സൂം ഇൻ / ഔട്ട് ചെയ്യാൻ
 Alt + മൗസ് വീൽ : ഫോട്ടോകൾ മാറ്റാൻ
-മൗസ് വീൽ ഇടത്തോട്ട് അല്ലെങ്കിൽ വലത്തോട്ട് ചരിക്കുക : ഫോട്ടോകൾ മാറ്റാൻ
+മൗസ് വീൽ ഇടത്തോട്ട് / വലത്തോട്ട് ചരിക്കുക : ഫോട്ടോകൾ മാറ്റാൻ
 
 Ctrl + ആരോ കീകൾ : ഫോട്ടോ നീക്കാൻ (Pan)
 Ctrl + + : സൂം ഇൻ
 Ctrl + - : സൂം ഔട്ട്
 
-Alt + Left/Right ആരോ കീകൾ : മൾട്ടി-പേജ് TIFF പേജുകൾ മാറ്റാൻ
+Alt + Left/Right ആരോ കീകൾ : മൾട്ടി-പേജ് TIFF-ൽ പേജുകൾ മാറ്റാൻ
 
-Page Up/Page Down : അടുത്ത പ്രീസെറ്റിലേക്ക് സൂം ചെയ്യാൻ (100%, 400%, Fit)
+Page Up / Page Down : അടുത്ത പ്രീസെറ്റിലേക്ക് സൂം ചെയ്യാൻ (100%, 400%, Fit)
 Home : ആദ്യത്തെ ഫോട്ടോയിലേക്ക് പോകാൻ
 End : അവസാനത്തെ ഫോട്ടോയിലേക്ക് പോകാൻ
 
-തമ്പ്‌നെയിൽ സ്ട്രിപ്പിൽ മൗസ് വീൽ ചെയ്യുമ്പോൾ : ഫോട്ടോകൾ മാറ്റാൻ
-സ്‌ക്രീനിലെ Left/Right ബട്ടണിൽ മൗസ് വീൽ ചെയ്യുമ്പോൾ : ഫോട്ടോകൾ മാറ്റാൻ
-സ്‌ക്രീനിലെ റൊട്ടേറ്റ് ബട്ടണിൽ മൗസ് വീൽ ചെയ്യുമ്പോൾ : ഫോട്ടോ തിരിക്കാൻ (Rotate)
+തമ്പ്‌നെയിൽ സ്ട്രിപ്പിൽ മൗസ് വീൽ : ഫോട്ടോകൾ മാറ്റാൻ
+സ്‌ക്രീനിലെ Left/Right ബട്ടണിൽ മൗസ് വീൽ : ഫോട്ടോകൾ മാറ്റാൻ
+സ്‌ക്രീനിലെ റൊട്ടേറ്റ് ബട്ടണിൽ മൗസ് വീൽ : ഫോട്ടോ തിരിക്കാൻ (Rotate)
 
-ടച്ച്‌പാഡിൽ രണ്ട് വിരൽ കൊണ്ട് ഇടത്തോട്ട്/വലത്തോട്ട് സ്വൈപ്പ് : ഫോട്ടോകൾ മാറ്റാൻ
-ടച്ച്‌പാഡിൽ രണ്ട് വിരൽ കൊണ്ട് മുകളിലോട്ട്/താഴോട്ട് സ്വൈപ്പ് : സൂം ചെയ്യാൻ / ഫോട്ടോകൾ മാറ്റാൻ
-ടച്ച്‌പാഡിൽ പിഞ്ച് (Pinch) ചെയ്യുക : സൂം ഇൻ അഥവാ ഔട്ട് ചെയ്യാൻ
+ടച്ച്‌പാഡിൽ രണ്ട് വിരൽ കൊണ്ട് ഇടത്തോട്ട് / വലത്തോട്ട് സ്വൈപ്പ് : ഫോട്ടോകൾ മാറ്റാൻ
+ടച്ച്‌പാഡിൽ രണ്ട് വിരൽ കൊണ്ട് മുകളിലോട്ട് / താഴോട്ട് സ്വൈപ്പ് : സൂം ചെയ്യാൻ / ഫോട്ടോകൾ മാറ്റാൻ
+ടച്ച്‌പാഡിൽ പിഞ്ച് (Pinch) ചെയ്യുക : സൂം ഇൻ / ഔട്ട് ചെയ്യാൻ
 
 D : ഫയൽ വിവരങ്ങൾ (Properties) കാണാൻ
 Del : ഫോട്ടോ ഡിലീറ്റ് ചെയ്യാൻ
 
-Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാൻ അല്ലെങ്കിൽ ആപ്പിൽ നിന്ന് പുറത്തുകടക്കാൻ</value>
-  </data>
-  <data name="Status_FileNotFound" xml:space="preserve">
-    <value>ഫയൽ കണ്ടെത്തിയില്ല</value>
-  </data>
-  <data name="Status_PreviewFailed" xml:space="preserve">
-    <value>പ്രിവ്യൂ ലോഡ് ചെയ്യുന്നതിൽ പരാജയം</value>
-  </data>
-  <data name="Status_InvalidFile" xml:space="preserve">
-    <value>അസാധുവായ ഫയൽ</value>
-  </data>
-  <data name="Status_Loading" xml:space="preserve">
-    <value>ലോഡ് ചെയ്യുന്നു...</value>
+Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാൻ / ആപ്പിൽ നിന്ന് പുറത്തുകടക്കാൻ</value>
   </data>
 </root>

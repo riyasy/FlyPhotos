@@ -13,485 +13,485 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AppSelectionDialog.PrimaryButtonText">
-    <value>Auswählen</value>
+    <value>Valitse</value>
   </data>
   <data name="AppSelectionDialog.SecondaryButtonText">
-    <value>Abbrechen</value>
+    <value>Peruuta</value>
   </data>
   <data name="AppSelectionDialog.Title">
-    <value>Anwendung auswählen</value>
+    <value>Valitse sovellus</value>
   </data>
   <data name="BrowseBtn.Content">
-    <value>Nach App durchsuchen…</value>
+    <value>Selaa sovelluksia…</value>
   </data>
   <data name="BtnCheckVersion.Content">
-    <value>Nach Updates suchen</value>
+    <value>Tarkista päivitykset</value>
   </data>
   <data name="BtnGitHubRepo.Content">
-    <value>GitHub-Repository öffnen</value>
+    <value>Avaa GitHub-arkisto</value>
   </data>
   <data name="BtnReportBugs.Content">
-    <value>Problem auf GitHub melden</value>
+    <value>Ilmoita ongelmasta GitHubissa</value>
   </data>
   <data name="BtnThirdPartyLicenses.Content">
-    <value>Lizenzen von Drittanbietern anzeigen</value>
+    <value>Näytä kolmannen osapuolen lisenssit</value>
   </data>
   <data name="ButtonBackToolTip.Content">
-    <value>Vorheriges Foto</value>
+    <value>Edellinen kuva</value>
   </data>
   <data name="ButtonExpanderToolTip.Content">
-    <value>Cache-Status anzeigen</value>
+    <value>Näytä välimuistin tila</value>
   </data>
   <data name="ButtonNextPageToolTip.Content">
-    <value>Nächste Seite</value>
+    <value>Seuraava sivu</value>
   </data>
   <data name="ButtonNextToolTip.Content">
-    <value>Nächstes Foto</value>
+    <value>Seuraava kuva</value>
   </data>
   <data name="ButtonOneIsToOneToolTip.Content">
-    <value>Auf Originalgröße zoomen</value>
+    <value>Zoomaa todelliseen kokoon</value>
   </data>
   <data name="ButtonOpenLog.Content">
-    <value>Protokoll öffnen</value>
+    <value>Avaa loki</value>
   </data>
   <data name="ButtonPrevPageToolTip.Content">
-    <value>Vorherige Seite</value>
+    <value>Edellinen sivu</value>
   </data>
   <data name="ButtonRotateToolTip.Content">
-    <value>Foto drehen</value>
+    <value>Kierrä kuvaa</value>
   </data>
   <data name="ButtonScaleSetToolTip.Content">
-    <value>An Anzeigebereich anpassen</value>
+    <value>Sovita ikkunaan</value>
   </data>
   <data name="ButtonSettingsToolTip.Content">
-    <value>Einstellungen</value>
+    <value>Asetukset</value>
   </data>
   <data name="ButtonShortcutsToolTip.Content">
-    <value>In anderen Apps öffnen</value>
+    <value>Avaa muissa sovelluksissa</value>
   </data>
   <data name="ChangeLanguageAlert.Description">
-    <value>Die App muss neu gestartet werden, um die Anzeigesprache zu ändern.</value>
+    <value>Sovellus on käynnistettävä uudelleen näytön kielen vaihtamiseksi.</value>
   </data>
   <data name="ChangeLanguageAlert.Title">
-    <value>Sprache ändern</value>
+    <value>Vaihda kieli</value>
   </data>
   <data name="ColorPickerFlyoutCancelButton.Content">
-    <value>Abbrechen</value>
+    <value>Peruuta</value>
   </data>
   <data name="ColorPickerFlyoutOkButton.Content">
     <value>OK</value>
   </data>
   <data name="ComboBackgroundItemAcrylic.Content">
-    <value>Acryl</value>
+    <value>Akryyli</value>
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content">
-    <value>Acryl Schwach</value>
+    <value>Ohut akryyli</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content">
-    <value>Gefroren</value>
+    <value>Jäätynyt</value>
   </data>
   <data name="ComboBackgroundItemMica.Content">
-    <value>Mica</value>
+    <value>Kiille</value>
   </data>
   <data name="ComboBackgroundItemMicaAlt.Content">
-    <value>Mica Alt</value>
+    <value>Kiille Alt</value>
   </data>
   <data name="ComboBackgroundItemNone.Content">
-    <value>Keiner</value>
+    <value>Ei mitään</value>
   </data>
   <data name="ComboBackgroundItemTransparent.Content">
-    <value>Transparent</value>
+    <value>Läpinäkyvä</value>
   </data>
   <data name="ComboMouseWheelItemNav.Content">
-    <value>Nächstes oder Vorheriges ansehen</value>
+    <value>Näytä seuraava tai edellinen</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content">
-    <value>Vergrößern oder Verkleinern</value>
+    <value>Lähennä tai loitonna</value>
   </data>
   <data name="ComboPanZoomItemRemember.Content">
-    <value>Schwenken/Zoomen/Drehen pro Foto merken</value>
+    <value>Muista panorointi/zoomi/kierto kuvaa kohti</value>
   </data>
   <data name="ComboPanZoomItemReset.Content">
-    <value>Schwenken/Zoomen/Drehen zurücksetzen</value>
+    <value>Palauta panorointi/zoomi/kierto</value>
   </data>
   <data name="ComboPanZoomItemRetain.Content">
-    <value>Schwenken/Zoomen vom vorherigen Foto beibehalten</value>
+    <value>Säilytä panorointi/zoomi edellisestä kuvasta</value>
   </data>
   <data name="ComboThemeItemDark.Content">
-    <value>Dunkel</value>
+    <value>Tumma</value>
   </data>
   <data name="ComboThemeItemDefault.Content">
-    <value>Standard</value>
+    <value>Oletus</value>
   </data>
   <data name="ComboThemeItemLight.Content">
-    <value>Hell</value>
+    <value>Vaalea</value>
   </data>
   <data name="ConfirmDeletion.CancelButton">
-    <value>Abbrechen</value>
+    <value>Peruuta</value>
   </data>
   <data name="ConfirmDeletion.DeleteButton">
-    <value>Löschen</value>
+    <value>Poista</value>
   </data>
   <data name="ConfirmDeletion.Message">
-    <value>Sind Sie sicher, dass Sie diese Datei löschen möchten?</value>
+    <value>Haluatko varmasti poistaa tämän tiedoston?</value>
   </data>
   <data name="ConfirmDeletion.Title">
-    <value>Löschen bestätigen</value>
+    <value>Vahvista poisto</value>
   </data>
   <data name="DefaultViewerInstruction1.Text">
-    <value>Um FlyPhotos als Standard-App festzulegen:
-Rechtsklick auf ein Bild &gt; „Öffnen mit“ &gt; „Andere App auswählen“.
-FlyPhotos auswählen und „Immer“ wählen.</value>
+    <value>Voit asettaa FlyPhotosin oletussovellukseksi: 
+Napsauta kuvaa hiiren kakkospainikkeella &gt; Avaa sovelluksessa &gt; Valitse toinen sovellus. 
+Valitse FlyPhotos ja valitse Aina.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text">
-    <value>Unter Windows 11 können Sie FlyPhotos auch als Standard-App festlegen unter
-Einstellungen &gt; Apps &gt; Standard-Apps.</value>
+    <value>Windows 11:ssä voit myös asettaa FlyPhotosin oletussovellukseksi kohdassa 
+Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   </data>
   <data name="DeletionFailed.CloseButton">
     <value>OK</value>
   </data>
   <data name="DeletionFailed.Message">
-    <value>Die Datei konnte nicht gelöscht werden.</value>
+    <value>Tiedostoa ei voitu poistaa.</value>
   </data>
   <data name="DeletionFailed.Title">
-    <value>Löschen fehlgeschlagen</value>
+    <value>Poisto epäonnistui</value>
   </data>
   <data name="DonateButton.Content">
-    <value>Spenden</value>
+    <value>Lahjoita</value>
   </data>
   <data name="DropAreaRun.Text">
-    <value>Bild hierher ziehen oder</value>
+    <value>Vedä ja pudota kuva tähän tai</value>
   </data>
   <data name="HeaderCodec.Text">
-    <value>Codec</value>
+    <value>Koodekki</value>
   </data>
   <data name="HeaderExtensions.Text">
-    <value>Erweiterungen</value>
+    <value>Tiedostopäätteet</value>
   </data>
   <data name="HeaderType.Text">
-    <value>Typ</value>
+    <value>Tyyppi</value>
   </data>
   <data name="LoadingHighQuality.Message">
-    <value>Hochauflösende Version wird geladen. Bitte warten…</value>
+    <value>Ladataan korkearesoluutioista versiota. Odota hetki…</value>
   </data>
   <data name="MessageClose_Ok">
     <value>OK</value>
   </data>
   <data name="NoShortcutsCreated.Message">
-    <value>Keine Verknüpfungen gefunden. Konfigurieren Sie diese in den Einstellungen.</value>
+    <value>Pikanäppäimiä ei luotu. Määritä ne Asetuksissa.</value>
   </data>
   <data name="OpenFileHyperlink.Text">
-    <value>Datei öffnen</value>
+    <value>Avaa tiedosto</value>
   </data>
   <data name="RightClickInstruction.Text">
-    <value>Um FlyPhotos zu verwenden, klicken Sie mit der rechten Maustaste auf ein Foto und wählen Sie Öffnen mit &gt; FlyPhotos.</value>
+    <value>Käytä FlyPhotosia napsauttamalla kuvaa hiiren kakkospainikkeella ja valitsemalla Avaa sovelluksessa &gt; FlyPhotos.</value>
   </data>
   <data name="ScanningTextBlock.Text">
-    <value>Apps werden gescannt…</value>
+    <value>Skannataan sovelluksia…</value>
   </data>
   <data name="SearchBox.PlaceholderText">
-    <value>Apps suchen…</value>
+    <value>Etsi sovelluksia…</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description">
-    <value>Mauszeiger ausblenden, wenn die Maus inaktiv ist.</value>
+    <value>Piilota hiiren osoitin, jos hiiri on käyttämättömänä.</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Header">
-    <value>Mauszeiger automatisch ausblenden</value>
+    <value>Piilota hiiren osoitin automaattisesti</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Description">
-    <value>Vor dem Löschen einer Datei um Bestätigung bitten.</value>
+    <value>Pyydä vahvistus ennen tiedoston poistamista.</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Header">
-    <value>Bestätigungsdialog zum Löschen von Dateien anzeigen</value>
+    <value>Vahvista ennen tiedostojen poistamista</value>
   </data>
   <data name="SettingsCardCredits.Description">
-    <value>FlyPhotos dankt Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog und WinUIEx.</value>
+    <value>FlyPhotos kiittää Svg.Skiaa, SkiaSharpia, Magick.NETiä, MagicScaleria, NLogia ja WinUIExiä.</value>
   </data>
   <data name="SettingsCardCredits.Header">
-    <value>Danksagung</value>
+    <value>Kiitokset</value>
   </data>
   <data name="SettingsCardDeveloperSupport.Description">
-    <value>Helfen Sie, Fly noch besser zu machen.</value>
+    <value>Tee Flystä entistäkin mahtavampi.</value>
   </data>
   <data name="SettingsCardDeveloperSupport.Header">
-    <value>FlyPhotos unterstützen</value>
+    <value>Tue FlyPhotosia</value>
   </data>
   <data name="SettingsCardExternalApps.Description">
-    <value>Wählen Sie externe Programme aus, um sie als Verknüpfungen hinzuzufügen.</value>
+    <value>Valitse ulkoisia sovelluksia lisättäväksi pikanäppäimiksi.</value>
   </data>
   <data name="SettingsCardExternalApps.Header">
-    <value>Externe Apps auswählen</value>
+    <value>Valitse ulkoiset sovellukset</value>
   </data>
   <data name="SettingsCardExternalShorcuts.Description">
-    <value>Das aktuelle Foto in anderen Apps öffnen</value>
+    <value>Avaa nykyinen kuva muissa sovelluksissa</value>
   </data>
   <data name="SettingsCardExternalShorcuts.Header">
-    <value>Verknüpfungen zu externen Apps anzeigen</value>
+    <value>Näytä pikakuvakkeet ulkoisiin sovelluksiin</value>
   </data>
   <data name="SettingsCardFadeControls.Description">
-    <value>UI-Steuerelemente ausblenden, wenn sich die Maus wegbewegt.</value>
+    <value>Häivytä ohjaimet, kun hiiri liikkuu pois.</value>
   </data>
   <data name="SettingsCardFadeControls.Header">
-    <value>UI-Steuerelemente automatisch ausblenden</value>
+    <value>Häivytä käyttöliittymän ohjaimet automaattisesti</value>
   </data>
   <data name="SettingsCardFadeIntensity.Description">
-    <value>Stärke des automatischen Ausblendeffekts anpassen.</value>
+    <value>Säädä automaattisen häivytyksen voimakkuutta.</value>
   </data>
   <data name="SettingsCardFadeIntensity.Header">
-    <value>Intensität des automatischen Ausblendens %</value>
+    <value>Automaattisen häivytyksen voimakkuus (%)</value>
   </data>
   <data name="SettingsCardHighQualityInterpolation.Description">
-    <value>Deaktivieren Sie diese Funktion für schärfere Pixelkanten (hilfreich für Pixelkunst).</value>
+    <value>Poista käytöstä terävämpien pikselireunojen saamiseksi (hyödyllinen pikselitaiteelle).</value>
   </data>
   <data name="SettingsCardHighQualityInterpolation.Header">
-    <value>Hochwertige Interpolation beim Zoomen verwenden</value>
+    <value>Käytä korkealaatuista interpolointia zoomatessa</value>
   </data>
   <data name="SettingsCardHighResCache.Description">
-    <value>Legen Sie die Anzahl der auf jeder Seite zwischengespeicherten hochauflösenden Fotos fest.</value>
+    <value>Aseta kummallekin puolelle välimuistiin tallennettujen korkearesoluutioisten kuvien määrä.</value>
   </data>
   <data name="SettingsCardHighResCache.Header">
-    <value>Cache mit hoher Auflösung</value>
+    <value>Korkearesoluutioinen välimuisti</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description">
-    <value>Legt fest, wie viel % des Bildschirms das Foto ausfüllt.</value>
+    <value>Valitse kuinka paljon näytöstä kuva täyttää. (%)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header">
-    <value>Bild an Bildschirm anpassen</value>
+    <value>Kuvan sovittaminen näyttöön</value>
   </data>
   <data name="SettingsCardLanguage.Header">
-    <value>Sprache auswählen</value>
+    <value>Valitse kieli</value>
   </data>
   <data name="SettingsCardLog.Description">
-    <value>Öffnen, um die Protokolldatei anzuzeigen</value>
+    <value>Avaa nähdäksesi lokitiedoston</value>
   </data>
   <data name="SettingsCardLog.Header">
-    <value>Protokolldatei</value>
+    <value>Lokitiedosto</value>
   </data>
   <data name="SettingsCardLowResCache.Description">
-    <value>Legen Sie die Anzahl der auf jeder Seite zwischengespeicherten Fotos mit niedriger Auflösung fest.</value>
+    <value>Aseta kummallekin puolelle välimuistiin tallennettujen matalaresoluutioisten kuvien määrä.</value>
   </data>
   <data name="SettingsCardLowResCache.Header">
-    <value>Cache mit niedriger Auflösung</value>
+    <value>Matalaresoluutioinen välimuisti</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description">
-    <value>Wählen Sie das Standardverhalten des Mausrads.</value>
+    <value>Valitse hiiren vierityspyörän oletustoiminto.</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header">
-    <value>Mausrad</value>
+    <value>Hiiren vierityspyörä</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviourInfo.Description">
-    <value>👉 Strg + Mausrad zoomt immer hinein oder heraus.
-👉 Alt + Mausrad navigiert immer zum nächsten oder Vorherigen.</value>
+    <value>👉 Ctrl + hiiren vierityspyörä zoomaa aina. 
+👉 Alt + hiiren vierityspyörä selaa aina.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description">
-    <value>⚠ Kann den Start verlangsamen: Fly wartet beim Start auf das Laden des vollständigen Bildes statt die Vorschau zu verwenden.</value>
+    <value>⚠ Voi hidastaa käynnistystä. Fly odottaa täyden resoluution kuvan latautumista käynnistyksessä.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header">
-    <value>Animationseffekt: Beim Öffnen vergrößern, beim Beenden verkleinern</value>
+    <value>Lähennä tiedostoa avattaessa ja loitonna poistuttaessa</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description">
-    <value>⚠ Verwenden Sie die Option „Beibehalten“ nur in Ordnern mit gleich großen Fotos.</value>
+    <value>⚠ Käytä Säilytä-vaihtoehtoa vain kansioissa, joissa on samankokoisia kuvia.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header">
-    <value>Schwenk-, Zoom- und Drehverhalten bei der Navigation</value>
+    <value>Panoroinnin, zoomin ja kierron käyttäytyminen navigoinnin aikana</value>
   </data>
   <data name="SettingsCardRememberLastMonitor.Description">
-    <value>Fly wird auf dem zuletzt verwendeten Monitor geöffnet. Nur aktivieren, wenn mehrere Monitore verwendet werden.</value>
+    <value>Fly avautuu viimeksi käytetyssä näytössä. Ota käyttöön vain, jos käytät useita näyttöjä.</value>
   </data>
   <data name="SettingsCardRememberLastMonitor.Header">
-    <value>Zuletzt verwendeten Monitor merken</value>
+    <value>Muista viimeksi käytetty näyttö</value>
   </data>
   <data name="SettingsCardReportBugs.Description">
-    <value>Melden Sie Probleme auf GitHub oder per E-Mail an ryftools@outlook.com</value>
+    <value>Ilmoita ongelmista GitHubissa tai lähetä sähköpostia osoitteeseen ryftools@outlook.com</value>
   </data>
   <data name="SettingsCardReportBugs.Header">
-    <value>Fehler und Probleme</value>
+    <value>Virheet ja ongelmat</value>
   </data>
   <data name="SettingsCardShowCacheStatusExpander.Description">
-    <value>Cache-Status-Expander im Tastenfeld anzeigen.</value>
+    <value>Näytä välimuistin tila alapaneelissa.</value>
   </data>
   <data name="SettingsCardShowCacheStatusExpander.Header">
-    <value>Cache-Status anzeigen</value>
+    <value>Näytä välimuistin tila</value>
   </data>
   <data name="SettingsCardShowCheckeredBackground.Description">
-    <value>Karierten Hintergrund für transparente Bilder anzeigen. 
-⚠ Kann die Leistung beeinträchtigen.</value>
+    <value>Näytä ruututausta läpinäkyville kuville. 
+⚠ Saattaa vaikuttaa suorituskykyyn.</value>
   </data>
   <data name="SettingsCardShowCheckeredBackground.Header">
-    <value>Karierten Hintergrund anzeigen</value>
+    <value>Näytä ruututausta</value>
   </data>
   <data name="SettingsCardShowFileName.Description">
-    <value>Dateinamen der aktuell geöffneten Datei anzeigen</value>
+    <value>Näytä avoinna olevan tiedoston nimi</value>
   </data>
   <data name="SettingsCardShowFileName.Header">
-    <value>Dateinamen anzeigen</value>
+    <value>Näytä tiedostonimi</value>
   </data>
   <data name="SettingsCardShowImageDimensions.Description">
-    <value>Breite und Höhe des Fotos neben dem Dateinamen anzeigen.</value>
+    <value>Näytä kuvan leveys ja korkeus tiedostonimen vieressä.</value>
   </data>
   <data name="SettingsCardShowImageDimensions.Header">
-    <value>Fotoabmessungen anzeigen</value>
+    <value>Näytä kuvan mitat</value>
   </data>
   <data name="SettingsCardShowThumbnail.Description">
-    <value>Miniaturansichtleiste am unteren Fensterrand anzeigen</value>
+    <value>Näytä pikkukuvapalkki ikkunan alareunassa.</value>
   </data>
   <data name="SettingsCardShowThumbnail.Header">
-    <value>Miniaturansichtleiste anzeigen</value>
+    <value>Näytä pikkukuvapalkki</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Header">
-    <value>Zoomprozentsatz anzeigen</value>
+    <value>Näytä zoomausprosentti</value>
   </data>
   <data name="SettingsCardSourceCode.Description">
-    <value>FlyPhotos ist Open Source und wird auf GitHub gehostet</value>
+    <value>FlyPhotos on avoimen lähdekoodin ohjelmisto, jota isännöidään GitHubissa.</value>
   </data>
   <data name="SettingsCardSourceCode.Header">
-    <value>GitHub-Repository</value>
+    <value>GitHub-arkisto</value>
   </data>
   <data name="SettingsCardTheme.Description">
-    <value>Wählen Sie das App-Design.</value>
+    <value>Valitse sovelluksen teema.</value>
   </data>
   <data name="SettingsCardTheme.Header">
-    <value>Fensterdesign</value>
+    <value>Ikkunan teema</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Description">
-    <value>Legen Sie die Hervorhebungsfarbe für ausgewählte Miniaturansichten fest.</value>
+    <value>Aseta valittuihin pikkukuviin käytettävä korostusväri.</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Header">
-    <value>Auswahlfarbe für Miniaturansichten</value>
+    <value>Pikkukuvan valintaväri</value>
   </data>
   <data name="SettingsCardThumbnailSize.Description">
-    <value>Passen Sie die Größe der Miniaturansichten im Viewer an.</value>
+    <value>Säädä pikkukuvien kokoa katseluohjelmassa.</value>
   </data>
   <data name="SettingsCardThumbnailSize.Header">
-    <value>Größe der Miniaturansicht</value>
+    <value>Pikkukuvan koko</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description">
-    <value>Nur für transparenten Fensterhintergrund anwendbar.</value>
+    <value>Soveltuu vain läpinäkyvälle ikkunan taustalle.</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Header">
-    <value>Transparenz (%)</value>
+    <value>Läpinäkyvyys (%)</value>
   </data>
   <data name="SettingsCardVersion.Description">
-    <value>Aktuelle Version: {0}</value>
+    <value>Nykyinen versio on {0}</value>
   </data>
   <data name="SettingsCardVersion.Header">
-    <value>Aktuelle Version</value>
+    <value>Nykyinen versio</value>
   </data>
   <data name="SettingsCardWindowBackground.Description">
-    <value>Legen Sie den Fensterhintergrund fest.</value>
+    <value>Valitse ikkunan tausta.</value>
   </data>
   <data name="SettingsCardWindowBackground.Header">
-    <value>Fensterhintergrund</value>
+    <value>Ikkunan tausta</value>
   </data>
   <data name="SettingsExpanderAutoFade.Header">
-    <value>Einstellungen für automatisches Ein- und Ausblenden</value>
+    <value>Automaattinen häivytys ja piilotus asetukset</value>
   </data>
   <data name="SettingsExpanderCaching.Description">
-    <value>Konfigurieren Sie, wie Fly das Foto-Caching handhabt.</value>
+    <value>Määritä, miten Fly käsittelee valokuvien välimuistiin tallennusta.</value>
   </data>
   <data name="SettingsExpanderCaching.Header">
-    <value>Caching</value>
+    <value>Välimuistiin tallennus</value>
   </data>
   <data name="SettingsExpanderKeyboardShortcuts.Header">
-    <value>Tastaturkürzel</value>
+    <value>Näppäinoikotiet</value>
   </data>
   <data name="SettingsExpanderPanZoom.Description">
-    <value>Passen Sie das Schwenk- und Zoomverhalten an.</value>
+    <value>Mukauta panoroinnin ja zoomin toimintaa.</value>
   </data>
   <data name="SettingsExpanderPanZoom.Header">
-    <value>Schwenk- und Zoom-Einstellungen</value>
+    <value>Panorointi ja zoomaus</value>
   </data>
   <data name="SettingsPage.Title">
-    <value>FlyPhotos - Einstellungen</value>
+    <value>FlyPhotos - Asetukset</value>
   </data>
   <data name="SettingsPivotItemAbout.Header">
-    <value>Über</value>
+    <value>Tietoja</value>
   </data>
   <data name="SettingsPivotItemCodecs.Header">
-    <value>Codecs</value>
+    <value>Koodekit</value>
   </data>
   <data name="SettingsPivotItemGeneral.Header">
-    <value>Allgemein</value>
+    <value>Yleinen</value>
   </data>
   <data name="Status_FileNotFound">
-    <value>Datei nicht gefunden</value>
+    <value>Tiedostoa ei löydy</value>
   </data>
   <data name="Status_InvalidFile">
-    <value>Ungültige Datei</value>
+    <value>Virheellinen tiedosto</value>
   </data>
   <data name="Status_Loading">
-    <value>Wird geladen…</value>
+    <value>Ladataan…</value>
   </data>
   <data name="Status_PreviewFailed">
-    <value>Vorschau konnte nicht geladen werden</value>
+    <value>Esikatselun lataus epäonnistui</value>
   </data>
   <data name="TextBlockCaching.Text">
-    <value>Caching</value>
+    <value>Välimuistiin tallennus</value>
   </data>
   <data name="TextBlockCodecsInfo.Text">
-    <value>FlyPhotos verwendet hauptsächlich integrierte Windows Imaging Component (WIC) Codecs.</value>
+    <value>FlyPhotos käyttää enimmäkseen Windows Imaging Component (WIC) -koodekkeja.</value>
   </data>
   <data name="TextBlockLog.Text">
-    <value>Protokoll</value>
+    <value>Loki</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text">
-    <value>Fotoanzeige</value>
+    <value>Kuvan näyttö</value>
   </data>
   <data name="TextBlockTheming.Text">
-    <value>Design</value>
+    <value>Ulkoasu</value>
   </data>
   <data name="TextBlockUIControls.Text">
-    <value>UI-Steuerelemente</value>
+    <value>Käyttöliittymän ohjaimet</value>
   </data>
   <data name="TitleTextBlock.Text">
-    <value>FlyPhotos - Foto öffnen</value>
+    <value>FlyPhotos - Avaa kuva</value>
   </data>
   <data name="TrialExpiredMessage.CloseButton">
     <value>OK</value>
   </data>
   <data name="TrialExpiredMessage.Content">
-    <value>Ihre kostenlose Testversion ist abgelaufen. Bitte erwerben Sie die Vollversion im Microsoft Store.</value>
+    <value>Ilmainen kokeilujaksosi on päättynyt. Osta täysversio Microsoft Storesta.</value>
   </data>
   <data name="TrialExpiredMessage.Title">
-    <value>Testversion abgelaufen</value>
+    <value>Kokeilujakso päättynyt</value>
   </data>
   <data name="UnsupportedFileAlert.Description">
-    <value>Die abgelegte Datei wird nicht als unterstütztes Bildformat erkannt.</value>
+    <value>Pudotettu tiedosto ei ole tuettu kuvatyyppi.</value>
   </data>
   <data name="UnsupportedFileAlert.Title">
-    <value>Nicht unterstützte Datei</value>
+    <value>Ei tuettu tiedosto</value>
   </data>
   <data name="SettingsCardKeyboardShortCuts.Description">
-    <value>Pfeiltasten Links/Rechts : Durch Fotos blättern
-Pfeiltasten Oben/Unten : Vergrößern oder Verkleinern (Zoom)
-Linke Maustaste + Ziehen : Ausschnitt verschieben
+    <value>Vasen/Oikea Nuolinäppäin : Selaa kuvia
+Ylös/Alas Nuolinäppäin : Zoomaa sisään tai ulos
+Hiiren vasen painike ja veto : Panoroi kuvaa
 
-Mausrad : Zoomen / Blättern (je nach Einstellung)
-Strg + Mausrad : Vergrößern oder Verkleinern
-Alt + Mausrad : Durch Fotos blättern
-Mausrad nach links/rechts neigen : Durch Fotos blättern
+Hiiren rulla : Zoomaa / Selaa (asetuksesta riippuen)
+Ctrl + Hiiren rulla : Zoomaa sisään tai ulos
+Alt + Hiiren rulla : Selaa kuvia
+Hiiren rullan kallistus Vasen/Oikea : Selaa kuvia
 
-Strg + Pfeiltasten : Ausschnitt verschieben
-Strg + + : Vergrößern
-Strg + - : Verkleinern
+Ctrl + Nuolinäppäimet : Panoroi kuvaa
+Ctrl + + : Zoomaa sisään
+Ctrl + - : Zoomaa ulos
 
-Alt + Pfeiltasten Links/Rechts : Seiten in mehrseitigen TIFFs wechseln
+Alt + Vasen/Oikea Nuolinäppäin : Vaihda sivua monisivuisessa TIFF:ssä
 
-Bild Auf / Bild Ab : Zur nächsten Zoomstufe (100%, 400%, Einpassen)
-Pos1 : Zum ersten Foto
-Ende : Zum letzten Foto
+Page Up / Page Down : Zoomaa seuraavaan esiasetukseen (100%, 400%, Sovita)
+Home : Siirry ensimmäiseen kuvaan
+End : Siirry viimeiseen kuvaan
 
-Mausrad auf der Vorschauleiste : Durch Fotos blättern
-Mausrad auf Bildschirmtasten Links/Rechts : Durch Fotos blättern
-Mausrad auf der Drehen-Schaltfläche : Foto drehen
+Hiiren rulla pikkukuvanauhalla : Selaa kuvia
+Hiiren rulla näytön Vasen/Oikea-painikkeilla : Selaa kuvia
+Hiiren rulla kiertopainikkeella : Kierrä kuvaa
 
-Touchpad Zweifinger-Wischen Links/Rechts : Durch Fotos blättern
-Touchpad Zweifinger-Wischen Oben/Unten : Zoomen / Blättern (je nach Einstellung)
-Touchpad Auf- oder Zuziehen (Pinch) : Vergrößern oder Verkleinern
+Kosketuslevy kahden sormen pyyhkäisy : Selaa kuvia (Vasen/Oikea)
+Kosketuslevy kahden sormen pyyhkäisy (Ylös/Alas) : Zoomaa / Selaa
+Kosketuslevy nipistys (Pinch) : Zoomaa sisään tai ulos
 
-D : Dateieigenschaften anzeigen
-Entf : Foto löschen
+D : Näytä tiedoston ominaisuudet
+Del : Poista kuva
 
-Esc : Einstellungen schließen oder App beenden</value>
+Esc : Sulje asetukset tai Poistu</value>
   </data>
 </root>

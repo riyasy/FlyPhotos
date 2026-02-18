@@ -125,6 +125,7 @@ internal sealed partial class Settings
         PopulateSupportedLanguages();
         ComboLanguage.ItemsSource = _supportedLanguages;
         ComboLanguage.SelectedItem = _supportedLanguages.FirstOrDefault(l => l.LanguageCode == AppConfig.Settings.Language);
+        ComboLanguage.SelectionChanged += ComboLanguage_SelectionChanged;
 
         if (PathResolver.IsPackagedApp)
         {
@@ -508,6 +509,7 @@ internal sealed partial class Settings
         if (ComboLanguage.SelectedValue is LanguageInfo info)
             AppConfig.Settings.Language = info.LanguageCode;
         await AppConfig.SaveAsync();
+        await ShowMessageDialog(L.Get("ChangeLanguageAlert/Title"), L.Get("ChangeLanguageAlert/Description"));
     }
     private void PopulateSupportedLanguages()
     {
@@ -528,6 +530,18 @@ internal sealed partial class Settings
                 Debug.WriteLine($"Invalid culture code: {code}");
             }
         }
+    }
+
+    private async Task ShowMessageDialog(string title, string content)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = title,
+            Content = content,
+            CloseButtonText = L.Get("MessageClose_Ok"),
+            XamlRoot = Content.XamlRoot
+        };
+        await dialog.ShowAsync();
     }
 }
 

@@ -10,7 +10,7 @@
   <Identity
     Name="RYFTools.FlyPhotos"
     Publisher="CN=44A50C10-C1BE-4575-B17F-07954C8C2229"
-    Version="2.5.15.0" />
+    Version="2.5.16.0" />
 
   <mp:PhoneIdentity PhoneProductId="e339cc4b-62cb-4c55-8824-4d81b3d4c0b6" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
@@ -25,11 +25,20 @@
     <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
   </Dependencies>
 
-	<Resources>
-	  <Resource Language="en-US"/>
-	  <Resource Language="ml-IN"/>
-	  <Resource Language="de-DE"/>
-	</Resources>
+<Resources>
+  <Resource Language="en-US"/>
+  <Resource Language="de-DE"/>
+  <Resource Language="fr-FR"/>
+  <Resource Language="es-ES"/>
+  <Resource Language="ja-JP"/>
+  <Resource Language="ko-KR"/>
+  <Resource Language="it-IT"/>
+  <Resource Language="pl-PL"/>
+  <Resource Language="nl-NL"/>
+  <Resource Language="sv-SE"/>
+  <Resource Language="fi-FI"/>
+  <Resource Language="ml-IN"/>
+</Resources>
 
   <Applications>
     <Application Id="App"
