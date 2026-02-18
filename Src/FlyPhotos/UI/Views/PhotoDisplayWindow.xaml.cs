@@ -81,8 +81,7 @@ public sealed partial class PhotoDisplayWindow
         D2dCanvasThumbNail.Height = AppConfig.Settings.ThumbnailSize;
 
         Title = "FlyPhotos";
-        if (!PathResolver.IsPackagedApp)
-            Util.SetUnpackagedAppIcon(this);
+        Util.SetWindowIcon(this);
 
         SetupTransparentTitleBar();
 

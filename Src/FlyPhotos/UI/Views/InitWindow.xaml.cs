@@ -23,6 +23,8 @@ public sealed partial class InitWindow
     {
         InitializeComponent();
 
+        Util.SetWindowIcon(this);
+
         // Title property is used only by TaskBar label. Actual TitleBar is customized using AppWindow.TitleBar.
         Title = L.Get("TitleTextBlock/Text").Replace("FlyPhotos - ", string.Empty);
 

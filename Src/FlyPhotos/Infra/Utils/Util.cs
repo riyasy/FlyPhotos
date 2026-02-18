@@ -243,14 +243,10 @@ internal static class Util
         }
     }
 
-    public static void SetUnpackagedAppIcon(Window window)
+    public static void SetWindowIcon(Window window)
     {
-        // 1. Get the AppWindow for the current Window
-        var hWnd = WindowNative.GetWindowHandle(window);
-        var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
-        AppWindow appWindow = AppWindow.GetFromWindowId(windowId);
         string iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "app-icon.ico");
         if (File.Exists(iconPath))
-            appWindow.SetIcon(iconPath);
+            window.AppWindow.SetIcon(iconPath);
     }
 }
