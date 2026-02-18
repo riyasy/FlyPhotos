@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Windows.ApplicationModel.Activation;
-using FlyPhotos.Core;
 using FlyPhotos.Infra.Configuration;
+using FlyPhotos.Infra.Localization;
 using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
 using FlyPhotos.UI.Views;
@@ -28,8 +28,6 @@ public partial class App
     private static Mutex _mutex;
     private PhotoDisplayWindow _photoDisplayWindow;
 
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -41,10 +39,12 @@ public partial class App
 
         AppConfig.Initialize();
 
-        if (AppConfig.Settings.Language != null && 
-            AppConfig.Settings.Language != "Default" &&
-            Constants.SupportedLanguages.Contains(AppConfig.Settings.Language))
-            Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = AppConfig.Settings.Language;
+        var appliedLanguage = Localizer.ApplyLanguage(AppConfig.Settings.Language);
+        if (appliedLanguage != AppConfig.Settings.Language)
+        {
+            AppConfig.Settings.Language = appliedLanguage;
+            _ = AppConfig.SaveAsync();
+        }
 
         InitializeComponent();
     }

@@ -9,8 +9,6 @@ public class AppSettings
 {
     [JsonPropertyName("Theme")] public string ThemeAsString { get; set; } = "Default";
 
-    [JsonPropertyName("Language")] public string Language { get; set; } = "Default";
-
     [JsonIgnore]
     public ElementTheme Theme
     {
@@ -77,4 +75,6 @@ public class AppSettings
     public string ExternalApp4 { get; set; } = string.Empty;
     // Show zoom percentage overlay in the center of the photo display
     public bool ShowZoomPercent { get; set; } = true;
+
+    [JsonPropertyName("Language")] public string Language { get; set; } = "Default";
 }
