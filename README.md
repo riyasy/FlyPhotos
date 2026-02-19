@@ -43,8 +43,7 @@ Watch Fly Photos in action:
 Once installed, these are the ways to use Fly to view photos
 
 ### 1. Context Menu (Right-Click)
-- **MSI / GitHub Version:** Right-click an image and select **"Open with Fly"** (located in the classic context menu).
-- **Store Version:** Right-click an image, select **"Open with"**, and choose **Fly Photos** from the list.
+Right-click an image, select **"Open with"**, and choose **Fly Photos** from the list.
 
 ### 2. Standalone Mode
 Launch **Fly Photos** directly from the Start menu. You can then use the file picker to browse and select a folder or image to view.
