@@ -19,10 +19,9 @@ Watch Fly Photos in action:
 	<img src="https://get.microsoft.com/images/en-us%20light.svg" width="200"/>
 </a>
 
-### Fly Photos is available in the Microsoft Store
+
 - Purchasing Fly Photos from the Microsoft Store is the best way to support the ongoing development of the project.
-- You can also support via a donation at [♥ GitHub Sponsors](https://github.com/sponsors/riyasy). After donating, please email **ryftools@outlook.com**, and I will send you a Store promo code
-- The Store version offers fast, easy installation across all your Windows devices and includes fully automatic, behind-the-scenes updates for the latest features and fixes.
+- You can also support via a donation at [![](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/riyasy) . After donating, please email **ryftools@outlook.com**, and I will send you a Store promo code
 
 ### Difference Between GitHub Release and Store Release
 |  | [Microsoft Store](https://apps.microsoft.com/detail/9pmsk128v1qt?launch=true&cid=GitHubRelease&mode=full) | GitHub MSI | 
