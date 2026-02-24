@@ -56,10 +56,9 @@
 	  <Extensions>
 	  <uap:Extension Category="windows.fileTypeAssociation">
 		<uap:FileTypeAssociation Name="flyphotos-images">
-		  <!-- Display Name and Logo are shown in the Open With menu -->
-		  <uap:DisplayName>FlyPhotos</uap:DisplayName>
+		  <!--uap:DisplayName>FlyPhotos</uap:DisplayName-->
+		  <!--uap:InfoTip>Open with FlyPhotos app</uap:InfoTip-->
 		  <uap:Logo>Assets\Square44x44Logo.png</uap:Logo>
-		  <uap:InfoTip>Open with FlyPhotos app</uap:InfoTip>
 		  <!-- Add all the file types you want to support -->
 		<uap:SupportedFileTypes>
         
