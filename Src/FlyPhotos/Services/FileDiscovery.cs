@@ -3,12 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using FlyPhotos.Infra.Interop;
-using FlyPhotos.Infra.Utils;
 using NLog;
 
 namespace FlyPhotos.Services;
 
-internal static class FileDiscoveryService
+internal static class FileDiscovery
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -19,6 +18,20 @@ internal static class FileDiscoveryService
         sw.Stop();
         Logger.Trace($"Discovered {files.Count} files in {sw.ElapsedMilliseconds} ms");
         return files;
+    }
+
+    public static int FindSelectedFileIndex(string selectedFilePath, List<string> files)
+    {
+        var targetName = Path.GetFileName(selectedFilePath.AsSpan());
+        for (var i = 0; i < files.Count; i++)
+        {
+            var currentName = Path.GetFileName(files[i].AsSpan());
+            if (targetName.Equals(currentName, StringComparison.OrdinalIgnoreCase))
+            {
+                return i;
+            }
+        }
+        return 0;
     }
 
     private static List<string> ListFiles(string selectedFilePath, bool flyLaunchedExternally)
@@ -50,7 +63,7 @@ internal static class FileDiscoveryService
             // Get the file extension once.
             var extension = Path.GetExtension(file);
             // Check if the file meets either of the criteria for inclusion.
-            if ((!string.IsNullOrEmpty(extension) && Util.SupportedExtensions.Contains(extension)) ||
+            if ((!string.IsNullOrEmpty(extension) && CodecDiscovery.SupportedExtensions.Contains(extension)) ||
                 (string.Equals(file, selectedFilePath, StringComparison.OrdinalIgnoreCase)))
                 filteredFiles.Add(file);
         }

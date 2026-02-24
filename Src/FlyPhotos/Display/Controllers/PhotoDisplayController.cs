@@ -13,7 +13,6 @@ using FlyPhotos.Core.Model;
 using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
-using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
@@ -108,7 +107,7 @@ internal partial class PhotoDisplayController
     {
         try
         {
-            var files = FileDiscoveryService.DiscoverFiles(selectedFilePath, _photoSessionState.FlyLaunchedExternally);
+            var files = FileDiscovery.DiscoverFiles(selectedFilePath, _photoSessionState.FlyLaunchedExternally);
 
             _photoSessionState.PhotosCount = files.Count;
 
@@ -120,7 +119,7 @@ internal partial class PhotoDisplayController
 
             _firstPhotoLoadedTcs.Task.Wait(token);
 
-            var currentDisplayIndex = Util.FindSelectedFileIndex(selectedFilePath, files);
+            var currentDisplayIndex = FileDiscovery.FindSelectedFileIndex(selectedFilePath, files);
             // In the starting Keys and Index will be same as the keys are continous.
             _photoSessionState.SetCurrentPhotoKeyAndListPosition(currentDisplayIndex, currentDisplayIndex);
 
