@@ -54,8 +54,6 @@ public sealed partial class PhotoDisplayWindow
     };
     private readonly BlurredBackdrop _frozenBackdrop = new();
 
-    private OverlappedPresenterState _lastWindowState;
-
     private readonly VirtualKey _plusVk = Util.GetKeyThatProduces('+');
     private readonly VirtualKey _minusVk = Util.GetKeyThatProduces('-');
 
@@ -85,7 +83,8 @@ public sealed partial class PhotoDisplayWindow
 
         SetupTransparentTitleBar();
 
-        //(AppWindow.Presenter as OverlappedPresenter)?.SetBorderAndTitleBar(false, false);
+        (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumWidth = 400;
+        (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumHeight = 300;
 
         _configurationSource = new SystemBackdropConfiguration { IsInputActive = true };
 
@@ -114,7 +113,6 @@ public sealed partial class PhotoDisplayWindow
         ButtonShortcuts.Visibility = AppConfig.Settings.ShowExternalAppShortcuts ? Visibility.Visible : Visibility.Collapsed;
 
         Activated += PhotoDisplayWindow_Activated;
-        SizeChanged += PhotoDisplayWindow_SizeChanged;
         AppWindow.Closing += PhotoDisplayWindow_Closing;
         Closed += PhotoDisplayWindow_Closed;
 
@@ -135,7 +133,6 @@ public sealed partial class PhotoDisplayWindow
         _wheelScrollBrakeTimer.Tick += WheelScrollBrakeTimer_Tick;
 
         //this.Maximize(); // Maximise will be called from App.xaml.cs
-        _lastWindowState = OverlappedPresenterState.Maximized;
 
         _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
@@ -176,13 +173,6 @@ public sealed partial class PhotoDisplayWindow
     }
 
     #region Event Handlers
-
-    private void PhotoDisplayWindow_SizeChanged(object sender, WindowSizeChangedEventArgs args)
-    {
-        var presenter = (AppWindow.Presenter as OverlappedPresenter);
-        if (presenter != null && presenter.State != _lastWindowState)
-            _lastWindowState = presenter.State;
-    }
 
     private async void PhotoDisplayWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {
@@ -439,10 +429,21 @@ public sealed partial class PhotoDisplayWindow
                         if (!_canvasController.IsPressedOnImage(dpiAdjustedPosition))
                         {
                             var pointerY = e.GetCurrentPoint(D2dCanvas).Position.Y;
-                            if (_lastWindowState == OverlappedPresenterState.Maximized && pointerY >= AppTitlebar.ActualHeight)
+                            
+                            if (pointerY >= AppTitlebar.ActualHeight)
                             {
-                                this.Restore();
+                                if (AppWindow.Presenter is OverlappedPresenter overlappedPresenter)
+                                {
+                                    if (overlappedPresenter.State == OverlappedPresenterState.Maximized)
+                                        overlappedPresenter.Restore();
+                                }
+                                //else if (AppWindow.Presenter is FullScreenPresenter)
+                                //{
+                                //    AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
+                                //    (AppWindow.Presenter as OverlappedPresenter)?.Restore();
+                                //}
                             }
+
                         }
                     }
                     break;
@@ -526,6 +527,10 @@ public sealed partial class PhotoDisplayWindow
                     await AnimatePhotoDisplayWindowClose();
                     break;
 
+                //case VirtualKey.Space:
+                //    await ToggleFullScreen();
+                //    break;
+
                 case VirtualKey.Delete:
                     await DeleteCurrentlyDisplayedPhoto();
                     break;
@@ -607,6 +612,20 @@ public sealed partial class PhotoDisplayWindow
             Logger.Error(ex);
         }
     }
+
+    //private async Task ToggleFullScreen()
+    //{
+    //    if (this.AppWindow.Presenter is OverlappedPresenter overlappedPresenter)
+    //    {
+    //        if (overlappedPresenter.State == OverlappedPresenterState.Maximized) 
+    //            AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+    //    }
+    //    else if (this.AppWindow.Presenter is FullScreenPresenter)
+    //    {
+    //        AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
+    //        (AppWindow.Presenter as OverlappedPresenter)?.Maximize();
+    //    }
+    //}
 
     private async Task DeleteCurrentlyDisplayedPhoto()
     {

@@ -9,6 +9,7 @@ using FlyPhotos.Services.ExternalAppListing;
 using Microsoft.UI;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.System;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -131,6 +132,9 @@ internal sealed partial class Settings
             SettingsCardDeveloperSupport.Visibility = Visibility.Collapsed;
             BtnCheckVersion.Visibility = Visibility.Collapsed;
         }
+
+        (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumWidth = 600;
+        (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumHeight = 600;
     }
 
     private async void ButtonEnableExternalShortcut_OnToggled(object sender, RoutedEventArgs e)

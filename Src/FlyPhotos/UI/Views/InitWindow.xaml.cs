@@ -5,6 +5,7 @@ using FlyPhotos.Infra.Localization;
 using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
 using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
@@ -41,6 +42,9 @@ public sealed partial class InitWindow
         {
             if (args.Key == VirtualKey.Escape) Close();
         };
+
+        (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumWidth = 400;
+        (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumHeight = 600;
     }
 
     public string SelectedFile { get; private set; }
