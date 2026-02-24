@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.System;
@@ -83,6 +82,9 @@ public sealed partial class PhotoDisplayWindow
 
         SetupTransparentTitleBar();
 
+        if (AppConfig.Settings.RememberLastWindowState)
+            SetUpWindowStatePersistence();
+
         (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumWidth = 400;
         (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumHeight = 300;
 
@@ -139,6 +141,20 @@ public sealed partial class PhotoDisplayWindow
         _mouseAutoHider = new MouseAutoHider(MainLayout, TimeSpan.FromSeconds(1));
     }
 
+    private void SetUpWindowStatePersistence()
+    {
+        var manager = WindowManager.Get(this);
+        if (!PathResolver.IsPackagedApp)
+            WindowManager.PersistenceStorage = new WindowStatePersistence(AppConfig.Settings.WindowState, SaveWindowState);
+        manager.PersistenceId = "Fly_PhotoDisplayWindow";
+    }
+
+    private static void SaveWindowState(string data)
+    {
+        AppConfig.Settings.WindowState = data;
+        AppConfig.Save();
+    }
+
     private async void CheckLicense()
     {
         if (LicenseService.Instance.State != LicenseState.TrialExpired) return;
@@ -177,7 +193,6 @@ public sealed partial class PhotoDisplayWindow
     private async void PhotoDisplayWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {
         args.Cancel = true;
-        await SaveLastUsedMonitorInfo();
         await AnimatePhotoDisplayWindowClose();
     }
 
@@ -337,7 +352,7 @@ public sealed partial class PhotoDisplayWindow
             stackPanel.Children.Add(flyoutButton);
         }
 
-        UIElement content = stackPanel.Children.Any() ? stackPanel : new TextBlock { Text = L.Get("NoShortcutsCreated/Message") };
+        UIElement content = stackPanel.Children.Count != 0 ? stackPanel : new TextBlock { Text = L.Get("NoShortcutsCreated/Message") };
         var flyout = new Flyout { Content = content };        
         FlyoutBase.SetAttachedFlyout(senderButton, flyout);
         FlyoutBase.ShowAttachedFlyout(senderButton);
@@ -623,7 +638,6 @@ public sealed partial class PhotoDisplayWindow
     //    else if (this.AppWindow.Presenter is FullScreenPresenter)
     //    {
     //        AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
-    //        (AppWindow.Presenter as OverlappedPresenter)?.Maximize();
     //    }
     //}
 
@@ -834,14 +848,6 @@ public sealed partial class PhotoDisplayWindow
         _wheelScrollBrakeTimer.Start();
     }
 
-    private async Task SaveLastUsedMonitorInfo()
-    {
-        // Save monitor information before closing
-        if (!AppConfig.Settings.RememberLastMonitor) return;
-        AppConfig.Settings.LastUsedMonitorId = Util.GetMonitorForWindow(this);
-        await AppConfig.SaveAsync();
-    }
-
     private async Task AnimatePhotoDisplayWindowClose()
     {
         _settingWindow?.Close();
@@ -880,11 +886,9 @@ public sealed partial class PhotoDisplayWindow
     private void SetWindowBackdrop(WindowBackdropType backdropType)
     {
         _currentBackdropType = backdropType;
-        if (_backdropController != null)
-        {
-            _backdropController.RemoveSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
-            _backdropController = null;
-        }
+        _backdropController?.RemoveSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
+        _backdropController = null;
+
         SystemBackdrop = null;
 
         switch (backdropType)

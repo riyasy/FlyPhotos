@@ -56,8 +56,6 @@ public class AppSettings
     public int ImageFitPercentage { get; set; } = 100;
     public int TransparentBackgroundIntensity { get; set; } = 40;
     public int ThumbnailSize { get; set; } = 40;
-    public ulong LastUsedMonitorId { get; set; } = 0;
-    public bool RememberLastMonitor { get; set; } = false;
     public int ScrollThreshold { get; set; } = 60;
     public bool UseMouseFwdBackForStepZoom { get; set; } = false;
     public bool ConfirmForDelete { get; set; } = true;
@@ -75,6 +73,7 @@ public class AppSettings
     public string ExternalApp4 { get; set; } = string.Empty;
     // Show zoom percentage overlay in the center of the photo display
     public bool ShowZoomPercent { get; set; } = true;
-
-    [JsonPropertyName("Language")] public string Language { get; set; } = "Default";
+    public string Language { get; set; } = "Default";
+    public bool RememberLastWindowState { get; set; } = false;
+    public string WindowState { get; set; } = "";
 }

@@ -85,7 +85,7 @@ internal sealed partial class Settings
         SliderTransparentBackgroundIntensity.Value = AppConfig.Settings.TransparentBackgroundIntensity;
         RectThumbnailSelection.Stroke = new SolidColorBrush(ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor));
         SliderThumbnailSize.Value = AppConfig.Settings.ThumbnailSize;
-        ButtonRememberLastMonitor.IsOn = AppConfig.Settings.RememberLastMonitor;
+        ButtonRememberLastWindowState.IsOn = AppConfig.Settings.RememberLastWindowState;
         ButtonConfirmBeforeDelete.IsOn = AppConfig.Settings.ConfirmForDelete;
         ButtonShowFileName.IsOn = AppConfig.Settings.ShowFileName;
         ButtonShowCacheStatusExpander.IsOn = AppConfig.Settings.ShowCacheStatus;
@@ -110,7 +110,7 @@ internal sealed partial class Settings
         SliderImageFitPercentage.ValueChanged += SliderImageFitPercentage_ValueChanged;
         SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
         SliderThumbnailSize.ValueChanged += SliderThumbnailSize_ValueChanged;
-        ButtonRememberLastMonitor.Toggled += ButtonRememberLastMonitor_OnToggled;
+        ButtonRememberLastWindowState.Toggled += ButtonRememberLastWindowState_OnToggled;
         ButtonConfirmBeforeDelete.Toggled += ButtonConfirmBeforeDelete_OnToggled;
         ButtonShowFileName.Toggled += ButtonShowFileName_OnToggled;
         ButtonShowImageDimensions.Toggled += ButtonShowImageDimensions_OnToggled;
@@ -205,9 +205,9 @@ internal sealed partial class Settings
     }
 
 
-    private async void ButtonRememberLastMonitor_OnToggled(object sender, RoutedEventArgs e)
+    private async void ButtonRememberLastWindowState_OnToggled(object sender, RoutedEventArgs e)
     {
-        AppConfig.Settings.RememberLastMonitor = ButtonRememberLastMonitor.IsOn;
+        AppConfig.Settings.RememberLastWindowState = ButtonRememberLastWindowState.IsOn;
         await AppConfig.SaveAsync();
     }
 
@@ -554,13 +554,13 @@ internal static class ColorConverter
     {
         hex = hex.TrimStart('#');
         byte a = 255; // Default alpha value
-        byte r = byte.Parse(hex[..2], System.Globalization.NumberStyles.HexNumber);
-        byte g = byte.Parse(hex[2..4], System.Globalization.NumberStyles.HexNumber);
-        byte b = byte.Parse(hex[4..6], System.Globalization.NumberStyles.HexNumber);
+        byte r = byte.Parse(hex[..2], NumberStyles.HexNumber);
+        byte g = byte.Parse(hex[2..4], NumberStyles.HexNumber);
+        byte b = byte.Parse(hex[4..6], NumberStyles.HexNumber);
 
         if (hex.Length == 8)
         {
-            a = byte.Parse(hex.Substring(6, 2), System.Globalization.NumberStyles.HexNumber);
+            a = byte.Parse(hex.Substring(6, 2), NumberStyles.HexNumber);
         }
         return Windows.UI.Color.FromArgb(a, r, g, b);
     }

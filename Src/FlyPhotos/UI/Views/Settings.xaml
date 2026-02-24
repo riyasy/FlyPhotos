@@ -173,11 +173,11 @@
                             <ToggleSwitch x:Name="ButtonShowCheckeredBackground" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
-                            x:Name="SettingsCardRememberLastMonitor"
-                            x:Uid="SettingsCardRememberLastMonitor"
+                            x:Name="SettingsCardRememberLastWindowState"
+                            x:Uid="SettingsCardRememberLastWindowState"
                             Margin="0,5,0,0"
                             HeaderIcon="{ui:FontIcon Glyph=&#xEC77;}">
-                            <ToggleSwitch x:Name="ButtonRememberLastMonitor" />
+                            <ToggleSwitch x:Name="ButtonRememberLastWindowState" />
                         </controls:SettingsCard>
                         <TextBlock
                             x:Uid="TextBlockUIControls"

@@ -88,4 +88,21 @@ public static class AppConfig
             System.Diagnostics.Debug.WriteLine($"Error saving settings: {ex.Message}");
         }
     }
+
+    public static void Save()
+    {
+        try
+        {
+            var settingsWrapper = new SettingsWrapper { Settings = Settings };
+            var json = JsonSerializer.Serialize(
+                settingsWrapper,
+                JsonSourceGenerationContext.Default.SettingsWrapper // Get the pre-generated info for our type
+            );
+            File.WriteAllText(_userSettingsPath, json);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error saving settings: {ex.Message}");
+        }
+    }
 }

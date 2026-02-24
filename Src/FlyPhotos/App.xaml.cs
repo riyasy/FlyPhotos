@@ -6,7 +6,6 @@ using System.Threading;
 using Windows.ApplicationModel.Activation;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Localization;
-using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
 using FlyPhotos.UI.Views;
 using Microsoft.Windows.AppLifecycle;
@@ -43,7 +42,7 @@ public partial class App
         if (appliedLanguage != AppConfig.Settings.Language)
         {
             AppConfig.Settings.Language = appliedLanguage;
-            _ = AppConfig.SaveAsync();
+            AppConfig.Save();
         }
 
         InitializeComponent();
@@ -81,9 +80,8 @@ public partial class App
     private void LaunchPhotoDisplayWindow(string selectedFilePath, bool extLaunch)
     {
         _photoDisplayWindow = new PhotoDisplayWindow(selectedFilePath, extLaunch);        
-        if (AppConfig.Settings.RememberLastMonitor) 
-            Util.MoveWindowToMonitor(_photoDisplayWindow, AppConfig.Settings.LastUsedMonitorId);
-        _photoDisplayWindow.Maximize();
+        if (!AppConfig.Settings.RememberLastWindowState)
+            _photoDisplayWindow.Maximize();
         _photoDisplayWindow.Activate();
     }
 
