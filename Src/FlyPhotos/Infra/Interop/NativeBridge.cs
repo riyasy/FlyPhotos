@@ -148,22 +148,29 @@ public static class NativeWrapper
     {
         var codecs = new List<CodecInfo>();
         var hresult = NativeBridge.GetWicDecoders(CodecInfoCallback);
-
-
-        if (hresult >= 0) 
+        if (hresult >= 0)
             return codecs;
-
         Logger.Error($"GetWicDecoders failed with HRESULT: {hresult}");
         return [];
 
         void CodecInfoCallback(string friendlyName, string extensions)
         {
+            var fileExtensions = new List<string>();
+            // Create a ReadOnlySpan to slice the string without allocating memory
+            ReadOnlySpan<char> span = extensions;
+
+            foreach (Range range in span.Split(','))
+            {
+                ReadOnlySpan<char> part = span[range];
+                if (part.Length > 0)
+                    fileExtensions.Add(part.ToString());
+            }
+
             var codec = new CodecInfo
             {
                 FriendlyName = friendlyName,
                 Type = "WIC",
-                // The extensions string from C++ is comma-separated (e.g., ".jpg,.jpeg,.jpe").// Split it and convert to uppercase for consistency.
-                FileExtensions = [.. extensions.ToUpperInvariant().Split([','], StringSplitOptions.RemoveEmptyEntries)]
+                FileExtensions = fileExtensions
             };
             codecs.Add(codec);
         }

@@ -1,6 +1,5 @@
 ﻿#nullable enable
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -8,7 +7,6 @@ using System.Threading.Tasks;
 using Windows.Graphics;
 using Windows.System;
 using Windows.UI.Core;
-using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
@@ -20,7 +18,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using NLog;
-using WinRT.Interop;
 using Color = Windows.UI.Color;
 
 namespace FlyPhotos.Infra.Utils;
@@ -28,52 +25,6 @@ namespace FlyPhotos.Infra.Utils;
 internal static class Util
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-    private static readonly List<CodecInfo>? _codecInfoList;
-
-    public static HashSet<string> SupportedExtensions { get; } = new(StringComparer.OrdinalIgnoreCase);
-
-    static Util()
-    {
-        _codecInfoList = GetWicCodecs();
-        _codecInfoList.AddRange(GetFlyCodecs());
-        foreach (var codecInfo in _codecInfoList) 
-            SupportedExtensions.UnionWith(codecInfo.FileExtensions);
-    }
-
-    public static int FindSelectedFileIndex(string selectedFilePath, List<string> files)
-    {
-        var curIdx = 0;
-        for (var i = 0; i < files.Count; i++)
-            if (string.Equals(Path.GetFileName(selectedFilePath), Path.GetFileName(files[i]),
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                curIdx = i;
-                break;
-            }
-
-        return curIdx;
-    }
-
-    public static IReadOnlyList<CodecInfo> GetAllCodecs()
-    {
-        return _codecInfoList ?? [];
-    }
-
-    private static List<CodecInfo> GetWicCodecs()
-    {
-        return NativeWrapper.GetWicDecoders() ?? [];
-    }
-
-    private static List<CodecInfo> GetFlyCodecs()
-    {
-        var list = new List<CodecInfo>
-        {
-            new CodecInfo { FriendlyName = "PSD Decoder", Type = "Fly", FileExtensions = [".PSD"] },
-            new CodecInfo { FriendlyName = "SVG Decoder", Type = "Fly", FileExtensions = [".SVG"] },
-            new CodecInfo { FriendlyName = "HEIC Decoder", Type = "Fly", FileExtensions = [".HEIC", ".HEIF", ".HIF", ".AVIF"] }
-        };
-        return list;
-    }
 
     public static VirtualKey GetKeyThatProduces(char character)
     {

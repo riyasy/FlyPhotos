@@ -12,7 +12,6 @@ namespace FlyPhotos.Display.ImageReading;
 internal static class ImageReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
     private static IndicatorFactory _indicators;
 
     public static void Initialize(CanvasControl d2dCanvas)
@@ -46,55 +45,62 @@ internal static class ImageReader
                 case ".HEIF":
                 case ".HIF":
                 case ".AVIF":
-                {
-                    if (!AppConfig.Settings.OpenExitZoom)
-                        if (NativeHeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
-                    if (NativeHeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                    if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return (retBmp3);
-                    if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp4)) return retBmp4;
-                    return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
-                }
+                    {
+                        if (!AppConfig.Settings.OpenExitZoom)
+                            if (NativeHeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                        if (NativeHeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                        if (CodecDiscovery.HasWicSupport(extension))
+                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return (retBmp3);
+                        if (CodecDiscovery.HasImageMagickSupport(extension))
+                            if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp4)) return retBmp4;
+                        return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
+                    }
                 case ".PSD":
-                {
-                    if (await PsdReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
-                    if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
-                    return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
-                }
+                    {
+                        if (await PsdReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                        if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
+                        return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
+                    }
                 case ".SVG":
-                {
-                    if (await SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
-                    return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
-                }
+                    {
+                        if (await SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
+                        return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
+                    }
                 case ".GIF":
-                {
-                    if (await GifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
-                    return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
-                }
+                    {
+                        if (await GifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                        return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
+                    }
                 case ".PNG":
-                {
-                    if (await PngReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
-                    return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
-                }
+                    {
+                        if (await PngReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                        return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
+                    }
                 case ".ICO":
                 case ".ICON":
                     {
-                    if (await IcoReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
-                    return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
-                }
+                        if (await IcoReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                        return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
+                    }
                 case ".TIF":
                 case ".TIFF":
-                {
-                    if (await TiffReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
-                    return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
-                }
+                    {
+                        if (await TiffReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                        return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
+                    }
                 default:
-                {
-                    if (!AppConfig.Settings.OpenExitZoom)
-                        if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
-                    if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
-                    if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
-                    return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
-                }
+                    {
+                        if (CodecDiscovery.HasWicSupport(extension))
+                        {
+                            if (!AppConfig.Settings.OpenExitZoom)
+                                if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
+                        }
+                        if (CodecDiscovery.HasImageMagickSupport(extension))
+                            if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+
+                        return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
+                    }
             }
         }
         catch (Exception ex)
@@ -106,7 +112,7 @@ internal static class ImageReader
 
     public static async Task<PreviewDisplayItem> GetPreview(CanvasControl d2dCanvas, string path)
     {
-        if (!File.Exists(path)) 
+        if (!File.Exists(path))
             return new PreviewDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen);
 
         try
@@ -126,47 +132,52 @@ internal static class ImageReader
                 case ".HIF":
                 case ".AVIF":
                     {
-                    if (NativeHeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    if (await MagickNetWrap.GetResized(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
-                    return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
-                }
+                        if (NativeHeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (CodecDiscovery.HasImageMagickSupport(extension))
+                            if (await MagickNetWrap.GetResized(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                        return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
+                    }
                 case ".PSD":
-                {
-                    if (await PsdReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
-                }
+                    {
+                        if (await PsdReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
+                    }
                 case ".SVG":
-                {
-                    if (await SvgReader.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
-                }
+                    {
+                        if (await SvgReader.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
+                    }
                 case ".GIF":
                 case ".PNG":
-                {
-                    if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
-                }
+                    {
+                        if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
+                    }
                 case ".ICO":
                 case ".ICON":
-                {
-                    if (await IcoReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
-                    return (new PreviewDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
-                }
-                case ".TIF":
-                case ".TIFF":
-                {
-                    if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                    if (await TiffReader.GetFirstFrameFullSize(d2dCanvas, path) is (true, { } retBmp3)) return (retBmp3);
-                    return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
-                }
+                    {
+                        if (await IcoReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                        return (new PreviewDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
+                    }
+                //case ".TIF":
+                //case ".TIFF":
+                //{
+                //    if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                //    if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                //    if (await TiffReader.GetFirstFrameFullSize(d2dCanvas, path) is (true, { } retBmp3)) return (retBmp3);
+                //    return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
+                //}
                 default:
-                {
-                    if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                    if (await MagickNetWrap.GetResized(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
-                    return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
-                }
+                    {
+                        if (CodecDiscovery.HasWicSupport(extension))
+                        {
+                            if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                            if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                        }
+                        if (CodecDiscovery.HasImageMagickSupport(extension))
+                            if (await MagickNetWrap.GetResized(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                        return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
+                    }
             }
         }
         catch (Exception ex)
@@ -178,7 +189,7 @@ internal static class ImageReader
 
     public static async Task<HqDisplayItem> GetHqImage(CanvasControl d2dCanvas, string path)
     {
-        if (!File.Exists(path)) 
+        if (!File.Exists(path))
             return new StaticHqDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen);
 
         //var sw = Stopwatch.StartNew();
@@ -194,49 +205,53 @@ internal static class ImageReader
                 case ".HIF":
                 case ".AVIF":
                     {
-                    if (NativeHeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
-                    if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
-                    return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                }
+                        if (NativeHeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (CodecDiscovery.HasWicSupport(extension))
+                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
+                        if (CodecDiscovery.HasImageMagickSupport(extension))
+                            if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
+                    }
                 case ".PSD":
-                {
-                    if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
+                    {
+                        if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
                 case ".SVG":
-                {
-                    if (await SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                }
+                    {
+                        if (await SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
+                    }
                 case ".GIF":
-                {
-                    if (await GifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                }
+                    {
+                        if (await GifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
+                    }
                 case ".PNG":
-                {
-                    if (await PngReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                }
+                    {
+                        if (await PngReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
+                    }
                 case ".ICO":
                 case ".ICON":
-                {
-                    if (await IcoReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
-                    return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
-                }
+                    {
+                        if (await IcoReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
+                        return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
+                    }
                 case ".TIF":
                 case ".TIFF":
-                {
-                    if (await TiffReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                }
+                    {
+                        if (await TiffReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
+                    }
                 default:
-                {
-                    if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                    if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
-                    return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                }
+                    {
+                        if (CodecDiscovery.HasWicSupport(extension))
+                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (CodecDiscovery.HasImageMagickSupport(extension))
+                            if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
+                    }
             }
         }
         catch (Exception ex)

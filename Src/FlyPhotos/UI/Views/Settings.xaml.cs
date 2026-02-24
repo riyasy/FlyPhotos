@@ -119,7 +119,7 @@ internal sealed partial class Settings
         ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
 
         // Initialize codec list view
-        ListViewCodecs.ItemsSource = Util.GetAllCodecs();
+        ListViewCodecs.ItemsSource = CodecDiscovery.GetAllCodecs();
 
         PopulateSupportedLanguages();
         ComboLanguage.ItemsSource = _supportedLanguages;

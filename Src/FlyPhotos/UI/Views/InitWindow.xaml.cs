@@ -3,6 +3,7 @@
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Localization;
 using FlyPhotos.Infra.Utils;
+using FlyPhotos.Services;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -64,7 +65,7 @@ public sealed partial class InitWindow
         var items = await e.DataView.GetStorageItemsAsync();
         if (items.Count == 0) return;
         var file = items[0] as StorageFile;
-        if (file != null && Util.SupportedExtensions.Contains(file.FileType))
+        if (file != null && CodecDiscovery.SupportedExtensions.Contains(file.FileType))
             ProcessSelectedFile(file);
         else
             await ShowMessageDialog(L.Get("UnsupportedFileAlert/Title"), L.Get("UnsupportedFileAlert/Description"));
@@ -82,7 +83,7 @@ public sealed partial class InitWindow
         filePicker.ViewMode = PickerViewMode.Thumbnail;
         filePicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
 
-        foreach (var ext in Util.SupportedExtensions)
+        foreach (var ext in CodecDiscovery.SupportedExtensions)
             filePicker.FileTypeFilter.Add(ext);
 
 
