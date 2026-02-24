@@ -1,7 +1,5 @@
 ﻿#nullable enable
 
-
-#nullable enable
 using FlyPhotos.Core.Model;
 
 namespace FlyPhotos.Display.State;

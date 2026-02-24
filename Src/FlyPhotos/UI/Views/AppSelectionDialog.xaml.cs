@@ -19,7 +19,7 @@ namespace FlyPhotos.UI.Views;
 /// Dialog for selecting an application from the list of installed apps.
 /// </summary>
 [SupportedOSPlatform("windows")]
-public sealed partial class AppSelectionDialog : ContentDialog
+public sealed partial class AppSelectionDialog
 {
     /// <summary>
     /// Logger instance for logging errors.
