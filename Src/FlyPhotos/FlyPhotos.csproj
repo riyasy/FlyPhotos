@@ -54,7 +54,8 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.DotNet.ILCompiler" Version="10.0.3" />
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
-		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.10.2" />
+		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.10.2" Condition="'$(Platform)' != 'ARM64'" />
+		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-arm64" Version="14.10.2" Condition="'$(Platform)' == 'ARM64'" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.3" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />

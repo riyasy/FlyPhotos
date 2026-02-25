@@ -38,6 +38,12 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      - name: Cache vcpkg packages
+        uses: actions/cache@v4
+        with:
+          path: Src/build_libheif/vcpkg_installed
+          key: vcpkg-${{ matrix.vcpkg-triplet }}-${{ hashFiles('Src/build_libheif/vcpkg.json', 'Src/build_libheif/vcpkg-configuration.json') }}
+
       - name: Install vcpkg dependencies
         working-directory: Src/build_libheif
         run: |
@@ -76,23 +82,16 @@ jobs:
           $vcpkgBinDir = "Src/build_libheif/vcpkg_installed/$triplet/bin"
           Get-ChildItem "$vcpkgBinDir/*.dll" | Copy-Item -Destination $dllsDir -Force
 
-      - name: Restore .NET dependencies
-        working-directory: Src
-        run: dotnet restore FlyPhotos/FlyPhotos.csproj -r ${{ matrix.rid }}
-
-      - name: Build MSIX
+      - name: Publish and package MSIX
         working-directory: Src
         run: |
-          msbuild FlyPhotos/FlyPhotos.csproj `
-            /p:Configuration=Release `
+          dotnet publish FlyPhotos/FlyPhotos.csproj `
+            -c Release `
+            -r ${{ matrix.rid }} `
             /p:Platform=${{ matrix.platform }} `
-            /p:RuntimeIdentifier=${{ matrix.rid }} `
             /p:WindowsPackageType=MSIX `
             /p:GenerateAppxPackageOnBuild=true `
-            /p:AppxPackageSigningEnabled=false `
-            /p:SelfContained=true `
-            /p:PublishAot=true `
-            /restore
+            /p:AppxPackageSigningEnabled=false
 
       - name: Upload MSIX artifact
         uses: actions/upload-artifact@v4
