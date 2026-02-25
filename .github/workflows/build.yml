@@ -1,0 +1,119 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-latest
+            platform: x64
+            rid: win-x64
+            vcpkg-triplet: x64-windows
+          - runner: windows-11-arm
+            platform: ARM64
+            rid: win-arm64
+            vcpkg-triplet: arm64-windows
+
+    runs-on: ${{ matrix.runner }}
+    name: Build (${{ matrix.platform }})
+
+    env:
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.vcpkg-triplet }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Update vcpkg baseline
+        working-directory: Src/build_libheif
+        run: vcpkg x-update-baseline
+
+      - name: Cache vcpkg packages
+        uses: actions/cache@v4
+        with:
+          path: Src/build_libheif/vcpkg_installed
+          key: vcpkg-${{ matrix.vcpkg-triplet }}-${{ hashFiles('Src/build_libheif/vcpkg.json', 'Src/build_libheif/vcpkg-configuration.json') }}
+
+      - name: Install vcpkg dependencies
+        working-directory: Src/build_libheif
+        run: |
+          vcpkg install --triplet ${{ matrix.vcpkg-triplet }}
+
+      - name: Build FlyNativeLib
+        working-directory: Src/FlyNativeLib
+        run: |
+          msbuild FlyNativeLib.vcxproj /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:PlatformToolset=v143
+
+      - name: Build FlyNativeLibHeif
+        working-directory: Src/FlyNativeLibHeif
+        run: |
+          msbuild FlyNativeLibHeif.vcxproj /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:PlatformToolset=v143
+
+      - name: Build FlyContextMenuHelper
+        working-directory: Src/FlyContextMenuHelper
+        run: |
+          msbuild FlyContextMenuHelper.vcxproj /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:PlatformToolset=v143
+
+      - name: Copy native binaries to DLLs folder
+        shell: pwsh
+        run: |
+          $platform = "${{ matrix.platform }}"
+          $triplet = "${{ matrix.vcpkg-triplet }}"
+          $dllsDir = "Src/FlyPhotos/DLLs"
+
+          # Copy built native DLLs
+          Copy-Item "Src/FlyNativeLib/$platform/Release/FlyNativeLib.dll" $dllsDir -Force
+          Copy-Item "Src/FlyNativeLibHeif/$platform/Release/FlyNativeLibHeif.dll" $dllsDir -Force
+
+          # Copy FlyContextMenuHelper executable
+          Copy-Item "Src/FlyContextMenuHelper/$platform/Release/FlyContextMenuHelper.exe" "Src/FlyPhotos/FlyContextMenuHelper.exe" -Force
+
+          # Copy vcpkg-built DLLs
+          $vcpkgBinDir = "Src/build_libheif/vcpkg_installed/$triplet/bin"
+          Get-ChildItem "$vcpkgBinDir/*.dll" | Copy-Item -Destination $dllsDir -Force
+
+      # - name: Publish and package MSIX
+      #   working-directory: Src
+      #   run: |
+      #     dotnet publish FlyPhotos/FlyPhotos.csproj `
+      #       -c Release `
+      #       -r ${{ matrix.rid }} `
+      #       /p:Platform=${{ matrix.platform }} `
+      #       /p:WindowsPackageType=MSIX `
+      #       /p:GenerateAppxPackageOnBuild=true `
+      #       /p:AppxPackageSigningEnabled=false
+
+      # - name: Upload MSIX artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: FlyPhotos-${{ matrix.platform }}-msix
+      #     path: Src/FlyPhotos/AppPackages/**/*.msix
+
+      - name: Publish
+        working-directory: Src
+        run: |
+          dotnet publish FlyPhotos/FlyPhotos.csproj `
+            -c Release `
+            -r ${{ matrix.rid }} `
+            /p:Platform=${{ matrix.platform }} `
+            -o publish/${{ matrix.rid }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FlyPhotos-${{ matrix.platform }}
+          path: Src/publish/${{ matrix.rid }}/
