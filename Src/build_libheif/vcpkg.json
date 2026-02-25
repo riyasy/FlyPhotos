@@ -3,9 +3,18 @@
     "dav1d",
     {
       "name": "libheif",
+      "default-features": false,
       "features": [
         "aom"
-      ]
+      ],
+      "platform": "arm64"
+    },
+    {
+      "name": "libheif",
+      "features": [
+        "aom"
+      ],
+      "platform": "!arm64"
     },
     "libde265",
     {
