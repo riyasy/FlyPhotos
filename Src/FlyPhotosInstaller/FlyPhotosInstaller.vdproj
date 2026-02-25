@@ -981,12 +981,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_31A5BD4899C24096B0BE30F0EAF817D3"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_31C65AAC7DCC4BAE826FC9AA50B36CBC"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -1647,12 +1641,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_AEB09C081EFC4E4C94B3B8AE01556C01"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_AF42530492F6497084880917FC1AAF2C"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -1726,12 +1714,6 @@
         "Entry"
         {
         "MsmKey" = "8:_BD5A9C5FD78E46868B176BDDC6CBC821"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_BD77BBBB18CC406C8DA49B86D806EA47"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -2104,12 +2086,6 @@
         "Entry"
         {
         "MsmKey" = "8:_E3AE17EACCC546DCA58D4C763C670997"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_E5A8A75F6A43458084F7700E32252403"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -3310,26 +3286,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_31A5BD4899C24096B0BE30F0EAF817D3"
-            {
-            "SourcePath" = "8:..\\FlyPhotos\\Assets\\Images\\HQImageFailed.png"
-            "TargetName" = "8:HQImageFailed.png"
-            "Tag" = "8:"
-            "Folder" = "8:_752CA1FDE6254AB8B0E85E88E0147DAF"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_31C65AAC7DCC4BAE826FC9AA50B36CBC"
             {
             "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\Microsoft.Windows.AI.Text.dll"
@@ -4011,37 +3967,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_73B48229D8E74CF99CF308832E5CAA6B"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Microsoft.Windows.ApplicationModel.Background, Version=255.255.255.255, Culture=neutral"
-                "ScatterAssemblies"
-                {
-                    "_73B48229D8E74CF99CF308832E5CAA6B"
-                    {
-                    "Name" = "8:Microsoft.Windows.ApplicationModel.Background.winmd"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\Microsoft.Windows.ApplicationModel.Background.winmd"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_726BDE84C2CB4860A0DB5E9D0E547B8B"
             {
             "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\Assets\\file-type.ico"
@@ -4062,10 +3987,21 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_75038B3AEF6B412194AA7891F4FA573A"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_73B48229D8E74CF99CF308832E5CAA6B"
             {
-            "SourcePath" = "8:..\\FlyPhotos\\Assets\\app-icon.ico"
-            "TargetName" = "8:missile-icon.ico"
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Microsoft.Windows.ApplicationModel.Background, Version=255.255.255.255, Culture=neutral"
+                "ScatterAssemblies"
+                {
+                    "_73B48229D8E74CF99CF308832E5CAA6B"
+                    {
+                    "Name" = "8:Microsoft.Windows.ApplicationModel.Background.winmd"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\Microsoft.Windows.ApplicationModel.Background.winmd"
+            "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
             "Condition" = "8:"
@@ -4936,26 +4872,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AEB09C081EFC4E4C94B3B8AE01556C01"
-            {
-            "SourcePath" = "8:..\\FlyPhotos\\Assets\\Images\\FileNotFound.png"
-            "TargetName" = "8:FileNotFound.png"
-            "Tag" = "8:"
-            "Folder" = "8:_752CA1FDE6254AB8B0E85E88E0147DAF"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AF42530492F6497084880917FC1AAF2C"
             {
             "SourcePath" = "8:..\\FlyPhotos\\Assets\\transparent.cur"
@@ -5209,52 +5125,12 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_BD25B4B401C34BF9A69A79E90440C21B"
-            {
-            "SourcePath" = "8:..\\FlyPhotos\\Assets\\Images\\missile-icon.ico"
-            "TargetName" = "8:missile-icon.ico"
-            "Tag" = "8:"
-            "Folder" = "8:_752CA1FDE6254AB8B0E85E88E0147DAF"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_BD5A9C5FD78E46868B176BDDC6CBC821"
             {
             "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\dav1d.dll"
             "TargetName" = "8:dav1d.dll"
             "Tag" = "8:"
             "Folder" = "8:_B39DF84F3AED4B16BF16389409AB1549"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_BD77BBBB18CC406C8DA49B86D806EA47"
-            {
-            "SourcePath" = "8:..\\FlyPhotos\\Assets\\Images\\PreviewFailed.png"
-            "TargetName" = "8:PreviewFailed.png"
-            "Tag" = "8:"
-            "Folder" = "8:_752CA1FDE6254AB8B0E85E88E0147DAF"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -5695,26 +5571,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E5A8A75F6A43458084F7700E32252403"
-            {
-            "SourcePath" = "8:..\\FlyPhotos\\Assets\\Images\\Loading.png"
-            "TargetName" = "8:Loading.png"
-            "Tag" = "8:"
-            "Folder" = "8:_752CA1FDE6254AB8B0E85E88E0147DAF"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E62423B326784AC7A96E9AB648AD1D0F"
             {
             "SourcePath" = "8:..\\FlyPhotos\\bin\\win-x64\\publish\\workloads.365.json"
@@ -6111,7 +5967,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:FlyPhotos"
         "ProductCode" = "8:{6061A7DD-751C-4F19-991B-5040DE4EFAEE}"
-        "PackageCode" = "8:{EAFDA46B-4372-4F1F-8885-8622B87A1CD8}"
+        "PackageCode" = "8:{B7B96F64-1719-442C-AFC5-49E44D21A9BD}"
         "UpgradeCode" = "8:{5565DCCD-EEED-45A0-93FF-4BABC468C2A7}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"
@@ -6128,7 +5984,7 @@
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:"
         "ARPURLINFOABOUT" = "8:"
-        "ARPPRODUCTICON" = "8:"
+        "ARPPRODUCTICON" = "8:_A7C2F988FA324370B8D957EAE604F056"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
