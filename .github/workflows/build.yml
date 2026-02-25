@@ -46,17 +46,17 @@ jobs:
       - name: Build FlyNativeLib
         working-directory: Src/FlyNativeLib
         run: |
-          msbuild FlyNativeLib.vcxproj /p:Configuration=Release /p:Platform=${{ matrix.platform }}
+          msbuild FlyNativeLib.vcxproj /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:PlatformToolset=v143
 
       - name: Build FlyNativeLibHeif
         working-directory: Src/FlyNativeLibHeif
         run: |
-          msbuild FlyNativeLibHeif.vcxproj /p:Configuration=Release /p:Platform=${{ matrix.platform }}
+          msbuild FlyNativeLibHeif.vcxproj /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:PlatformToolset=v143
 
       - name: Build FlyContextMenuHelper
         working-directory: Src/FlyContextMenuHelper
         run: |
-          msbuild FlyContextMenuHelper.vcxproj /p:Configuration=Release /p:Platform=${{ matrix.platform }}
+          msbuild FlyContextMenuHelper.vcxproj /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:PlatformToolset=v143
 
       - name: Copy native binaries to DLLs folder
         shell: pwsh
