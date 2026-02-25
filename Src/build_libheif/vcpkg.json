@@ -8,7 +8,10 @@
       ]
     },
     "libde265",
-    "x265",
+    {
+      "name": "x265",
+      "platform": "!arm64"
+    },
     "libpng"
   ]
 }
