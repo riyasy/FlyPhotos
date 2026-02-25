@@ -38,6 +38,10 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      - name: Update vcpkg baseline
+        working-directory: Src/build_libheif
+        run: vcpkg x-update-baseline
+
       - name: Cache vcpkg packages
         uses: actions/cache@v4
         with:
