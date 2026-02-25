@@ -109,10 +109,11 @@ jobs:
           dotnet publish FlyPhotos/FlyPhotos.csproj `
             -c Release `
             -r ${{ matrix.rid }} `
-            /p:Platform=${{ matrix.platform }}
+            /p:Platform=${{ matrix.platform }} `
+            -o publish/${{ matrix.rid }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: FlyPhotos-${{ matrix.platform }}
-          path: Src/FlyPhotos/bin/${{ matrix.platform }}/Release/net10.0-windows10.0.22621.0/${{ matrix.rid }}/publish/
+          path: Src/publish/${{ matrix.rid }}/
