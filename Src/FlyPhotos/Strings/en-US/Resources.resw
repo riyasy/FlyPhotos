@@ -401,8 +401,8 @@ Settings &gt; Apps &gt; Default apps.</value>
     <value>Pan, Zoom &amp; Rotation behavior during navigation</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Saves window position, size and monitor.
-Enabling will start saving start only from next restart.</value>
+    <value>Saves the window position, size, monitor, and maximized state.
+Starts saving after the next app restart.</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
     <value>Remember Window State</value>

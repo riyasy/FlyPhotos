@@ -1,5 +1,110 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -12,456 +117,457 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AppSelectionDialog.PrimaryButtonText">
+  <data name="AppSelectionDialog.PrimaryButtonText" xml:space="preserve">
     <value>Valitse</value>
   </data>
-  <data name="AppSelectionDialog.SecondaryButtonText">
+  <data name="AppSelectionDialog.SecondaryButtonText" xml:space="preserve">
     <value>Peruuta</value>
   </data>
-  <data name="AppSelectionDialog.Title">
+  <data name="AppSelectionDialog.Title" xml:space="preserve">
     <value>Valitse sovellus</value>
   </data>
-  <data name="BrowseBtn.Content">
+  <data name="BrowseBtn.Content" xml:space="preserve">
     <value>Selaa sovelluksia…</value>
   </data>
-  <data name="BtnCheckVersion.Content">
+  <data name="BtnCheckVersion.Content" xml:space="preserve">
     <value>Tarkista päivitykset</value>
   </data>
-  <data name="BtnGitHubRepo.Content">
+  <data name="BtnGitHubRepo.Content" xml:space="preserve">
     <value>Avaa GitHub-arkisto</value>
   </data>
-  <data name="BtnReportBugs.Content">
+  <data name="BtnReportBugs.Content" xml:space="preserve">
     <value>Ilmoita ongelmasta GitHubissa</value>
   </data>
-  <data name="BtnThirdPartyLicenses.Content">
+  <data name="BtnThirdPartyLicenses.Content" xml:space="preserve">
     <value>Näytä kolmannen osapuolen lisenssit</value>
   </data>
-  <data name="ButtonBackToolTip.Content">
+  <data name="ButtonBackToolTip.Content" xml:space="preserve">
     <value>Edellinen kuva</value>
   </data>
-  <data name="ButtonExpanderToolTip.Content">
+  <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
     <value>Näytä välimuistin tila</value>
   </data>
-  <data name="ButtonNextPageToolTip.Content">
+  <data name="ButtonNextPageToolTip.Content" xml:space="preserve">
     <value>Seuraava sivu</value>
   </data>
-  <data name="ButtonNextToolTip.Content">
+  <data name="ButtonNextToolTip.Content" xml:space="preserve">
     <value>Seuraava kuva</value>
   </data>
-  <data name="ButtonOneIsToOneToolTip.Content">
+  <data name="ButtonOneIsToOneToolTip.Content" xml:space="preserve">
     <value>Zoomaa todelliseen kokoon</value>
   </data>
-  <data name="ButtonOpenLog.Content">
+  <data name="ButtonOpenLog.Content" xml:space="preserve">
     <value>Avaa loki</value>
   </data>
-  <data name="ButtonPrevPageToolTip.Content">
+  <data name="ButtonPrevPageToolTip.Content" xml:space="preserve">
     <value>Edellinen sivu</value>
   </data>
-  <data name="ButtonRotateToolTip.Content">
+  <data name="ButtonRotateToolTip.Content" xml:space="preserve">
     <value>Kierrä kuvaa</value>
   </data>
-  <data name="ButtonScaleSetToolTip.Content">
+  <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>Sovita ikkunaan</value>
   </data>
-  <data name="ButtonSettingsToolTip.Content">
+  <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Asetukset</value>
   </data>
-  <data name="ButtonShortcutsToolTip.Content">
+  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
     <value>Avaa muissa sovelluksissa</value>
   </data>
-  <data name="ChangeLanguageAlert.Description">
+  <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>Sovellus on käynnistettävä uudelleen näytön kielen vaihtamiseksi.</value>
   </data>
-  <data name="ChangeLanguageAlert.Title">
+  <data name="ChangeLanguageAlert.Title" xml:space="preserve">
     <value>Vaihda kieli</value>
   </data>
-  <data name="ColorPickerFlyoutCancelButton.Content">
+  <data name="ColorPickerFlyoutCancelButton.Content" xml:space="preserve">
     <value>Peruuta</value>
   </data>
-  <data name="ColorPickerFlyoutOkButton.Content">
+  <data name="ColorPickerFlyoutOkButton.Content" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="ComboBackgroundItemAcrylic.Content">
+  <data name="ComboBackgroundItemAcrylic.Content" xml:space="preserve">
     <value>Akryyli</value>
   </data>
-  <data name="ComboBackgroundItemAcrylicThin.Content">
+  <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Ohut akryyli</value>
   </data>
-  <data name="ComboBackgroundItemFrozen.Content">
+  <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>Jäätynyt</value>
   </data>
-  <data name="ComboBackgroundItemMica.Content">
+  <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Kiille</value>
   </data>
-  <data name="ComboBackgroundItemMicaAlt.Content">
+  <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
     <value>Kiille Alt</value>
   </data>
-  <data name="ComboBackgroundItemNone.Content">
+  <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
     <value>Ei mitään</value>
   </data>
-  <data name="ComboBackgroundItemTransparent.Content">
+  <data name="ComboBackgroundItemTransparent.Content" xml:space="preserve">
     <value>Läpinäkyvä</value>
   </data>
-  <data name="ComboMouseWheelItemNav.Content">
+  <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
     <value>Näytä seuraava tai edellinen</value>
   </data>
-  <data name="ComboMouseWheelItemZoom.Content">
+  <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Lähennä tai loitonna</value>
   </data>
-  <data name="ComboPanZoomItemRemember.Content">
+  <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
     <value>Muista panorointi/zoomi/kierto kuvaa kohti</value>
   </data>
-  <data name="ComboPanZoomItemReset.Content">
+  <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
     <value>Palauta panorointi/zoomi/kierto</value>
   </data>
-  <data name="ComboPanZoomItemRetain.Content">
+  <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
     <value>Säilytä panorointi/zoomi edellisestä kuvasta</value>
   </data>
-  <data name="ComboThemeItemDark.Content">
+  <data name="ComboThemeItemDark.Content" xml:space="preserve">
     <value>Tumma</value>
   </data>
-  <data name="ComboThemeItemDefault.Content">
+  <data name="ComboThemeItemDefault.Content" xml:space="preserve">
     <value>Oletus</value>
   </data>
-  <data name="ComboThemeItemLight.Content">
+  <data name="ComboThemeItemLight.Content" xml:space="preserve">
     <value>Vaalea</value>
   </data>
-  <data name="ConfirmDeletion.CancelButton">
+  <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
     <value>Peruuta</value>
   </data>
-  <data name="ConfirmDeletion.DeleteButton">
+  <data name="ConfirmDeletion.DeleteButton" xml:space="preserve">
     <value>Poista</value>
   </data>
-  <data name="ConfirmDeletion.Message">
+  <data name="ConfirmDeletion.Message" xml:space="preserve">
     <value>Haluatko varmasti poistaa tämän tiedoston?</value>
   </data>
-  <data name="ConfirmDeletion.Title">
+  <data name="ConfirmDeletion.Title" xml:space="preserve">
     <value>Vahvista poisto</value>
   </data>
-  <data name="DefaultViewerInstruction1.Text">
+  <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
     <value>Voit asettaa FlyPhotosin oletussovellukseksi: 
 Napsauta kuvaa hiiren kakkospainikkeella &gt; Avaa sovelluksessa &gt; Valitse toinen sovellus. 
 Valitse FlyPhotos ja valitse Aina.</value>
   </data>
-  <data name="DefaultViewerInstruction2.Text">
+  <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
     <value>Windows 11:ssä voit myös asettaa FlyPhotosin oletussovellukseksi kohdassa 
 Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   </data>
-  <data name="DeletionFailed.CloseButton">
+  <data name="DeletionFailed.CloseButton" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="DeletionFailed.Message">
+  <data name="DeletionFailed.Message" xml:space="preserve">
     <value>Tiedostoa ei voitu poistaa.</value>
   </data>
-  <data name="DeletionFailed.Title">
+  <data name="DeletionFailed.Title" xml:space="preserve">
     <value>Poisto epäonnistui</value>
   </data>
-  <data name="DonateButton.Content">
+  <data name="DonateButton.Content" xml:space="preserve">
     <value>Lahjoita</value>
   </data>
-  <data name="DropAreaRun.Text">
+  <data name="DropAreaRun.Text" xml:space="preserve">
     <value>Vedä ja pudota kuva tähän tai</value>
   </data>
-  <data name="HeaderCodec.Text">
+  <data name="HeaderCodec.Text" xml:space="preserve">
     <value>Koodekki</value>
   </data>
-  <data name="HeaderExtensions.Text">
+  <data name="HeaderExtensions.Text" xml:space="preserve">
     <value>Tiedostopäätteet</value>
   </data>
-  <data name="HeaderType.Text">
+  <data name="HeaderType.Text" xml:space="preserve">
     <value>Tyyppi</value>
   </data>
-  <data name="LoadingHighQuality.Message">
+  <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Ladataan korkearesoluutioista versiota. Odota hetki…</value>
   </data>
-  <data name="MessageClose_Ok">
+  <data name="MessageClose_Ok" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="NoShortcutsCreated.Message">
+  <data name="NoShortcutsCreated.Message" xml:space="preserve">
     <value>Pikanäppäimiä ei luotu. Määritä ne Asetuksissa.</value>
   </data>
-  <data name="OpenFileHyperlink.Text">
+  <data name="OpenFileHyperlink.Text" xml:space="preserve">
     <value>Avaa tiedosto</value>
   </data>
-  <data name="RightClickInstruction.Text">
+  <data name="RightClickInstruction.Text" xml:space="preserve">
     <value>Käytä FlyPhotosia napsauttamalla kuvaa hiiren kakkospainikkeella ja valitsemalla Avaa sovelluksessa &gt; FlyPhotos.</value>
   </data>
-  <data name="ScanningTextBlock.Text">
+  <data name="ScanningTextBlock.Text" xml:space="preserve">
     <value>Skannataan sovelluksia…</value>
   </data>
-  <data name="SearchBox.PlaceholderText">
+  <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>Etsi sovelluksia…</value>
   </data>
-  <data name="SettingsCardAutoHideMouse.Description">
+  <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Piilota hiiren osoitin, jos hiiri on käyttämättömänä.</value>
   </data>
-  <data name="SettingsCardAutoHideMouse.Header">
+  <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
     <value>Piilota hiiren osoitin automaattisesti</value>
   </data>
-  <data name="SettingsCardConfirmBeforeDelete.Description">
+  <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
     <value>Pyydä vahvistus ennen tiedoston poistamista.</value>
   </data>
-  <data name="SettingsCardConfirmBeforeDelete.Header">
+  <data name="SettingsCardConfirmBeforeDelete.Header" xml:space="preserve">
     <value>Vahvista ennen tiedostojen poistamista</value>
   </data>
-  <data name="SettingsCardCredits.Description">
+  <data name="SettingsCardCredits.Description" xml:space="preserve">
     <value>FlyPhotos kiittää Svg.Skiaa, SkiaSharpia, Magick.NETiä, MagicScaleria, NLogia ja WinUIExiä.</value>
   </data>
-  <data name="SettingsCardCredits.Header">
+  <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Kiitokset</value>
   </data>
-  <data name="SettingsCardDeveloperSupport.Description">
+  <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
     <value>Tee Flystä entistäkin mahtavampi.</value>
   </data>
-  <data name="SettingsCardDeveloperSupport.Header">
+  <data name="SettingsCardDeveloperSupport.Header" xml:space="preserve">
     <value>Tue FlyPhotosia</value>
   </data>
-  <data name="SettingsCardExternalApps.Description">
+  <data name="SettingsCardExternalApps.Description" xml:space="preserve">
     <value>Valitse ulkoisia sovelluksia lisättäväksi pikanäppäimiksi.</value>
   </data>
-  <data name="SettingsCardExternalApps.Header">
+  <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Valitse ulkoiset sovellukset</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Description">
+  <data name="SettingsCardExternalShorcuts.Description" xml:space="preserve">
     <value>Avaa nykyinen kuva muissa sovelluksissa</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Header">
+  <data name="SettingsCardExternalShorcuts.Header" xml:space="preserve">
     <value>Näytä pikakuvakkeet ulkoisiin sovelluksiin</value>
   </data>
-  <data name="SettingsCardFadeControls.Description">
+  <data name="SettingsCardFadeControls.Description" xml:space="preserve">
     <value>Häivytä ohjaimet, kun hiiri liikkuu pois.</value>
   </data>
-  <data name="SettingsCardFadeControls.Header">
+  <data name="SettingsCardFadeControls.Header" xml:space="preserve">
     <value>Häivytä käyttöliittymän ohjaimet automaattisesti</value>
   </data>
-  <data name="SettingsCardFadeIntensity.Description">
+  <data name="SettingsCardFadeIntensity.Description" xml:space="preserve">
     <value>Säädä automaattisen häivytyksen voimakkuutta.</value>
   </data>
-  <data name="SettingsCardFadeIntensity.Header">
+  <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Automaattisen häivytyksen voimakkuus (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description">
+  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
     <value>Poista käytöstä terävämpien pikselireunojen saamiseksi (hyödyllinen pikselitaiteelle).</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Header">
+  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
     <value>Käytä korkealaatuista interpolointia zoomatessa</value>
   </data>
-  <data name="SettingsCardHighResCache.Description">
+  <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Aseta kummallekin puolelle välimuistiin tallennettujen korkearesoluutioisten kuvien määrä.</value>
   </data>
-  <data name="SettingsCardHighResCache.Header">
+  <data name="SettingsCardHighResCache.Header" xml:space="preserve">
     <value>Korkearesoluutioinen välimuisti</value>
   </data>
-  <data name="SettingsCardImageFitPercentage.Description">
+  <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Valitse kuinka paljon näytöstä kuva täyttää. (%)</value>
   </data>
-  <data name="SettingsCardImageFitPercentage.Header">
+  <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Kuvan sovittaminen näyttöön</value>
   </data>
-  <data name="SettingsCardLanguage.Header">
+  <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>Valitse kieli</value>
   </data>
-  <data name="SettingsCardLog.Description">
+  <data name="SettingsCardLog.Description" xml:space="preserve">
     <value>Avaa nähdäksesi lokitiedoston</value>
   </data>
-  <data name="SettingsCardLog.Header">
+  <data name="SettingsCardLog.Header" xml:space="preserve">
     <value>Lokitiedosto</value>
   </data>
-  <data name="SettingsCardLowResCache.Description">
+  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
     <value>Aseta kummallekin puolelle välimuistiin tallennettujen matalaresoluutioisten kuvien määrä.</value>
   </data>
-  <data name="SettingsCardLowResCache.Header">
+  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
     <value>Matalaresoluutioinen välimuisti</value>
   </data>
-  <data name="SettingsCardMouseWheelBehaviour.Description">
+  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Valitse hiiren vierityspyörän oletustoiminto.</value>
   </data>
-  <data name="SettingsCardMouseWheelBehaviour.Header">
+  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>Hiiren vierityspyörä</value>
   </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description">
+  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
     <value>👉 Ctrl + hiiren vierityspyörä zoomaa aina. 
 👉 Alt + hiiren vierityspyörä selaa aina.</value>
   </data>
-  <data name="SettingsCardOpenExitZoom.Description">
+  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
     <value>⚠ Voi hidastaa käynnistystä. Fly odottaa täyden resoluution kuvan latautumista käynnistyksessä.</value>
   </data>
-  <data name="SettingsCardOpenExitZoom.Header">
+  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
     <value>Lähennä tiedostoa avattaessa ja loitonna poistuttaessa</value>
   </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Description">
+  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
     <value>⚠ Käytä Säilytä-vaihtoehtoa vain kansioissa, joissa on samankokoisia kuvia.</value>
   </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Header">
+  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Panoroinnin, zoomin ja kierron käyttäytyminen navigoinnin aikana</value>
   </data>
-  <data name="SettingsCardRememberLastMonitor.Description">
-    <value>Fly avautuu viimeksi käytetyssä näytössä. Ota käyttöön vain, jos käytät useita näyttöjä.</value>
+  <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
+    <value>Tallentaa ikkunan sijainnin, koon, näytön ja suurennetun tilan.
+Aloittaa tallentamisen seuraavan sovelluksen uudelleenkäynnistyksen jälkeen.</value>
   </data>
-  <data name="SettingsCardRememberLastMonitor.Header">
-    <value>Muista viimeksi käytetty näyttö</value>
+  <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
+    <value>Muista ikkunan tila</value>
   </data>
-  <data name="SettingsCardReportBugs.Description">
+  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Ilmoita ongelmista GitHubissa tai lähetä sähköpostia osoitteeseen ryftools@outlook.com</value>
   </data>
-  <data name="SettingsCardReportBugs.Header">
+  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
     <value>Virheet ja ongelmat</value>
   </data>
-  <data name="SettingsCardShowCacheStatusExpander.Description">
+  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
     <value>Näytä välimuistin tila alapaneelissa.</value>
   </data>
-  <data name="SettingsCardShowCacheStatusExpander.Header">
+  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
     <value>Näytä välimuistin tila</value>
   </data>
-  <data name="SettingsCardShowCheckeredBackground.Description">
+  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
     <value>Näytä ruututausta läpinäkyville kuville. 
 ⚠ Saattaa vaikuttaa suorituskykyyn.</value>
   </data>
-  <data name="SettingsCardShowCheckeredBackground.Header">
+  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
     <value>Näytä ruututausta</value>
   </data>
-  <data name="SettingsCardShowFileName.Description">
+  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
     <value>Näytä avoinna olevan tiedoston nimi</value>
   </data>
-  <data name="SettingsCardShowFileName.Header">
+  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
     <value>Näytä tiedostonimi</value>
   </data>
-  <data name="SettingsCardShowImageDimensions.Description">
+  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
     <value>Näytä kuvan leveys ja korkeus tiedostonimen vieressä.</value>
   </data>
-  <data name="SettingsCardShowImageDimensions.Header">
+  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
     <value>Näytä kuvan mitat</value>
   </data>
-  <data name="SettingsCardShowThumbnail.Description">
+  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
     <value>Näytä pikkukuvapalkki ikkunan alareunassa.</value>
   </data>
-  <data name="SettingsCardShowThumbnail.Header">
+  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Näytä pikkukuvapalkki</value>
   </data>
-  <data name="SettingsCardShowZoomPercent.Header">
+  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>Näytä zoomausprosentti</value>
   </data>
-  <data name="SettingsCardSourceCode.Description">
+  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
     <value>FlyPhotos on avoimen lähdekoodin ohjelmisto, jota isännöidään GitHubissa.</value>
   </data>
-  <data name="SettingsCardSourceCode.Header">
+  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
     <value>GitHub-arkisto</value>
   </data>
-  <data name="SettingsCardTheme.Description">
+  <data name="SettingsCardTheme.Description" xml:space="preserve">
     <value>Valitse sovelluksen teema.</value>
   </data>
-  <data name="SettingsCardTheme.Header">
+  <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>Ikkunan teema</value>
   </data>
-  <data name="SettingsCardThumbnailSelectionColor.Description">
+  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>Aseta valittuihin pikkukuviin käytettävä korostusväri.</value>
   </data>
-  <data name="SettingsCardThumbnailSelectionColor.Header">
+  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
     <value>Pikkukuvan valintaväri</value>
   </data>
-  <data name="SettingsCardThumbnailSize.Description">
+  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
     <value>Säädä pikkukuvien kokoa katseluohjelmassa.</value>
   </data>
-  <data name="SettingsCardThumbnailSize.Header">
+  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
     <value>Pikkukuvan koko</value>
   </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Description">
+  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
     <value>Soveltuu vain läpinäkyvälle ikkunan taustalle.</value>
   </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Header">
+  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
     <value>Läpinäkyvyys (%)</value>
   </data>
-  <data name="SettingsCardVersion.Description">
+  <data name="SettingsCardVersion.Description" xml:space="preserve">
     <value>Nykyinen versio on {0}</value>
   </data>
-  <data name="SettingsCardVersion.Header">
+  <data name="SettingsCardVersion.Header" xml:space="preserve">
     <value>Nykyinen versio</value>
   </data>
-  <data name="SettingsCardWindowBackground.Description">
+  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
     <value>Valitse ikkunan tausta.</value>
   </data>
-  <data name="SettingsCardWindowBackground.Header">
+  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Ikkunan tausta</value>
   </data>
-  <data name="SettingsExpanderAutoFade.Header">
+  <data name="SettingsExpanderAutoFade.Header" xml:space="preserve">
     <value>Automaattinen häivytys ja piilotus asetukset</value>
   </data>
-  <data name="SettingsExpanderCaching.Description">
+  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
     <value>Määritä, miten Fly käsittelee valokuvien välimuistiin tallennusta.</value>
   </data>
-  <data name="SettingsExpanderCaching.Header">
+  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
     <value>Välimuistiin tallennus</value>
   </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header">
+  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
     <value>Näppäinoikotiet</value>
   </data>
-  <data name="SettingsExpanderPanZoom.Description">
+  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
     <value>Mukauta panoroinnin ja zoomin toimintaa.</value>
   </data>
-  <data name="SettingsExpanderPanZoom.Header">
+  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
     <value>Panorointi ja zoomaus</value>
   </data>
-  <data name="SettingsPage.Title">
+  <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - Asetukset</value>
   </data>
-  <data name="SettingsPivotItemAbout.Header">
+  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
     <value>Tietoja</value>
   </data>
-  <data name="SettingsPivotItemCodecs.Header">
+  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
     <value>Koodekit</value>
   </data>
-  <data name="SettingsPivotItemGeneral.Header">
+  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
     <value>Yleinen</value>
   </data>
-  <data name="Status_FileNotFound">
+  <data name="Status_FileNotFound" xml:space="preserve">
     <value>Tiedostoa ei löydy</value>
   </data>
-  <data name="Status_InvalidFile">
+  <data name="Status_InvalidFile" xml:space="preserve">
     <value>Virheellinen tiedosto</value>
   </data>
-  <data name="Status_Loading">
+  <data name="Status_Loading" xml:space="preserve">
     <value>Ladataan…</value>
   </data>
-  <data name="Status_PreviewFailed">
+  <data name="Status_PreviewFailed" xml:space="preserve">
     <value>Esikatselun lataus epäonnistui</value>
   </data>
-  <data name="TextBlockCaching.Text">
+  <data name="TextBlockCaching.Text" xml:space="preserve">
     <value>Välimuistiin tallennus</value>
   </data>
-  <data name="TextBlockCodecsInfo.Text">
+  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
     <value>FlyPhotos käyttää enimmäkseen Windows Imaging Component (WIC) -koodekkeja.</value>
   </data>
-  <data name="TextBlockLog.Text">
+  <data name="TextBlockLog.Text" xml:space="preserve">
     <value>Loki</value>
   </data>
-  <data name="TextBlockPhotoDisplay.Text">
+  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Kuvan näyttö</value>
   </data>
-  <data name="TextBlockTheming.Text">
+  <data name="TextBlockTheming.Text" xml:space="preserve">
     <value>Ulkoasu</value>
   </data>
-  <data name="TextBlockUIControls.Text">
+  <data name="TextBlockUIControls.Text" xml:space="preserve">
     <value>Käyttöliittymän ohjaimet</value>
   </data>
-  <data name="TitleTextBlock.Text">
+  <data name="TitleTextBlock.Text" xml:space="preserve">
     <value>FlyPhotos - Avaa kuva</value>
   </data>
-  <data name="TrialExpiredMessage.CloseButton">
+  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="TrialExpiredMessage.Content">
+  <data name="TrialExpiredMessage.Content" xml:space="preserve">
     <value>Ilmainen kokeilujaksosi on päättynyt. Osta täysversio Microsoft Storesta.</value>
   </data>
-  <data name="TrialExpiredMessage.Title">
+  <data name="TrialExpiredMessage.Title" xml:space="preserve">
     <value>Kokeilujakso päättynyt</value>
   </data>
-  <data name="UnsupportedFileAlert.Description">
+  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
     <value>Pudotettu tiedosto ei ole tuettu kuvatyyppi.</value>
   </data>
-  <data name="UnsupportedFileAlert.Title">
+  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
     <value>Ei tuettu tiedosto</value>
   </data>
-  <data name="SettingsCardKeyboardShortCuts.Description">
+  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
     <value>Vasen/Oikea Nuolinäppäin : Selaa kuvia
 Ylös/Alas Nuolinäppäin : Zoomaa sisään tai ulos
 Hiiren vasen painike ja veto : Panoroi kuvaa

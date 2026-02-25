@@ -1,5 +1,110 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -12,455 +117,456 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AppSelectionDialog.PrimaryButtonText">
+  <data name="AppSelectionDialog.PrimaryButtonText" xml:space="preserve">
     <value>선택</value>
   </data>
-  <data name="AppSelectionDialog.SecondaryButtonText">
+  <data name="AppSelectionDialog.SecondaryButtonText" xml:space="preserve">
     <value>취소</value>
   </data>
-  <data name="AppSelectionDialog.Title">
+  <data name="AppSelectionDialog.Title" xml:space="preserve">
     <value>애플리케이션 선택</value>
   </data>
-  <data name="BrowseBtn.Content">
+  <data name="BrowseBtn.Content" xml:space="preserve">
     <value>앱 찾아보기…</value>
   </data>
-  <data name="BtnCheckVersion.Content">
+  <data name="BtnCheckVersion.Content" xml:space="preserve">
     <value>업데이트 확인</value>
   </data>
-  <data name="BtnGitHubRepo.Content">
+  <data name="BtnGitHubRepo.Content" xml:space="preserve">
     <value>GitHub 리포지토리 열기</value>
   </data>
-  <data name="BtnReportBugs.Content">
+  <data name="BtnReportBugs.Content" xml:space="preserve">
     <value>GitHub에 문제 보고</value>
   </data>
-  <data name="BtnThirdPartyLicenses.Content">
+  <data name="BtnThirdPartyLicenses.Content" xml:space="preserve">
     <value>타사 라이선스 보기</value>
   </data>
-  <data name="ButtonBackToolTip.Content">
+  <data name="ButtonBackToolTip.Content" xml:space="preserve">
     <value>이전 사진</value>
   </data>
-  <data name="ButtonExpanderToolTip.Content">
+  <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
     <value>캐시 상태 보기</value>
   </data>
-  <data name="ButtonNextPageToolTip.Content">
+  <data name="ButtonNextPageToolTip.Content" xml:space="preserve">
     <value>다음 페이지</value>
   </data>
-  <data name="ButtonNextToolTip.Content">
+  <data name="ButtonNextToolTip.Content" xml:space="preserve">
     <value>다음 사진</value>
   </data>
-  <data name="ButtonOneIsToOneToolTip.Content">
+  <data name="ButtonOneIsToOneToolTip.Content" xml:space="preserve">
     <value>실제 크기로 확대/축소</value>
   </data>
-  <data name="ButtonOpenLog.Content">
+  <data name="ButtonOpenLog.Content" xml:space="preserve">
     <value>로그 열기</value>
   </data>
-  <data name="ButtonPrevPageToolTip.Content">
+  <data name="ButtonPrevPageToolTip.Content" xml:space="preserve">
     <value>이전 페이지</value>
   </data>
-  <data name="ButtonRotateToolTip.Content">
+  <data name="ButtonRotateToolTip.Content" xml:space="preserve">
     <value>사진 회전</value>
   </data>
-  <data name="ButtonScaleSetToolTip.Content">
+  <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>창에 맞춤</value>
   </data>
-  <data name="ButtonSettingsToolTip.Content">
+  <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>설정</value>
   </data>
-  <data name="ButtonShortcutsToolTip.Content">
+  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
     <value>다른 앱에서 열기</value>
   </data>
-  <data name="ChangeLanguageAlert.Description">
+  <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>앱을 다시 시작해야 표시 언어가 변경됩니다.</value>
   </data>
-  <data name="ChangeLanguageAlert.Title">
+  <data name="ChangeLanguageAlert.Title" xml:space="preserve">
     <value>언어 변경</value>
   </data>
-  <data name="ColorPickerFlyoutCancelButton.Content">
+  <data name="ColorPickerFlyoutCancelButton.Content" xml:space="preserve">
     <value>취소</value>
   </data>
-  <data name="ColorPickerFlyoutOkButton.Content">
+  <data name="ColorPickerFlyoutOkButton.Content" xml:space="preserve">
     <value>확인</value>
   </data>
-  <data name="ComboBackgroundItemAcrylic.Content">
+  <data name="ComboBackgroundItemAcrylic.Content" xml:space="preserve">
     <value>아크릴</value>
   </data>
-  <data name="ComboBackgroundItemAcrylicThin.Content">
+  <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>얇은 아크릴</value>
   </data>
-  <data name="ComboBackgroundItemFrozen.Content">
+  <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>고정</value>
   </data>
-  <data name="ComboBackgroundItemMica.Content">
+  <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Mica</value>
   </data>
-  <data name="ComboBackgroundItemMicaAlt.Content">
+  <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
     <value>Mica 대체</value>
   </data>
-  <data name="ComboBackgroundItemNone.Content">
+  <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
     <value>없음</value>
   </data>
-  <data name="ComboBackgroundItemTransparent.Content">
+  <data name="ComboBackgroundItemTransparent.Content" xml:space="preserve">
     <value>투명</value>
   </data>
-  <data name="ComboMouseWheelItemNav.Content">
+  <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
     <value>다음 또는 이전 보기</value>
   </data>
-  <data name="ComboMouseWheelItemZoom.Content">
+  <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>확대 또는 축소</value>
   </data>
-  <data name="ComboPanZoomItemRemember.Content">
+  <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
     <value>사진별 이동/확대/축소/회전 기억</value>
   </data>
-  <data name="ComboPanZoomItemReset.Content">
+  <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
     <value>이동/확대/축소/회전 재설정</value>
   </data>
-  <data name="ComboPanZoomItemRetain.Content">
+  <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
     <value>이전 사진에서 이동/확대/축소 유지</value>
   </data>
-  <data name="ComboThemeItemDark.Content">
+  <data name="ComboThemeItemDark.Content" xml:space="preserve">
     <value>어둡게</value>
   </data>
-  <data name="ComboThemeItemDefault.Content">
+  <data name="ComboThemeItemDefault.Content" xml:space="preserve">
     <value>기본</value>
   </data>
-  <data name="ComboThemeItemLight.Content">
+  <data name="ComboThemeItemLight.Content" xml:space="preserve">
     <value>밝게</value>
   </data>
-  <data name="ConfirmDeletion.CancelButton">
+  <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
     <value>취소</value>
   </data>
-  <data name="ConfirmDeletion.DeleteButton">
+  <data name="ConfirmDeletion.DeleteButton" xml:space="preserve">
     <value>삭제</value>
   </data>
-  <data name="ConfirmDeletion.Message">
+  <data name="ConfirmDeletion.Message" xml:space="preserve">
     <value>이 파일을 삭제하시겠습니까?</value>
   </data>
-  <data name="ConfirmDeletion.Title">
+  <data name="ConfirmDeletion.Title" xml:space="preserve">
     <value>삭제 확인</value>
   </data>
-  <data name="DefaultViewerInstruction1.Text">
+  <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
     <value>FlyPhotos를 기본 앱으로 설정하려면: 
 사진을 마우스 오른쪽 버튼으로 클릭 &gt; 연결 프로그램 &gt; 다른 앱 선택을 선택합니다. 
 FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
   </data>
-  <data name="DefaultViewerInstruction2.Text">
+  <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
     <value>Windows 11에서는 설정 &gt; 앱 &gt; 기본 앱에서도 FlyPhotos를 기본 앱으로 설정할 수 있습니다.</value>
   </data>
-  <data name="DeletionFailed.CloseButton">
+  <data name="DeletionFailed.CloseButton" xml:space="preserve">
     <value>확인</value>
   </data>
-  <data name="DeletionFailed.Message">
+  <data name="DeletionFailed.Message" xml:space="preserve">
     <value>파일을 삭제할 수 없습니다.</value>
   </data>
-  <data name="DeletionFailed.Title">
+  <data name="DeletionFailed.Title" xml:space="preserve">
     <value>삭제 실패</value>
   </data>
-  <data name="DonateButton.Content">
+  <data name="DonateButton.Content" xml:space="preserve">
     <value>기부</value>
   </data>
-  <data name="DropAreaRun.Text">
+  <data name="DropAreaRun.Text" xml:space="preserve">
     <value>여기에 사진을 끌어다 놓거나</value>
   </data>
-  <data name="HeaderCodec.Text">
+  <data name="HeaderCodec.Text" xml:space="preserve">
     <value>코덱</value>
   </data>
-  <data name="HeaderExtensions.Text">
+  <data name="HeaderExtensions.Text" xml:space="preserve">
     <value>확장</value>
   </data>
-  <data name="HeaderType.Text">
+  <data name="HeaderType.Text" xml:space="preserve">
     <value>유형</value>
   </data>
-  <data name="LoadingHighQuality.Message">
+  <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>고해상도 버전을 로드 중입니다. 잠시 기다려 주세요…</value>
   </data>
-  <data name="MessageClose_Ok">
+  <data name="MessageClose_Ok" xml:space="preserve">
     <value>확인</value>
   </data>
-  <data name="NoShortcutsCreated.Message">
+  <data name="NoShortcutsCreated.Message" xml:space="preserve">
     <value>생성된 바로 가기가 없습니다. 설정에서 구성하세요.</value>
   </data>
-  <data name="OpenFileHyperlink.Text">
+  <data name="OpenFileHyperlink.Text" xml:space="preserve">
     <value>파일 열기</value>
   </data>
-  <data name="RightClickInstruction.Text">
+  <data name="RightClickInstruction.Text" xml:space="preserve">
     <value>FlyPhotos를 사용하려면 사진을 마우스 오른쪽 버튼으로 클릭하고 연결 프로그램 &gt; FlyPhotos를 선택하세요.</value>
   </data>
-  <data name="ScanningTextBlock.Text">
+  <data name="ScanningTextBlock.Text" xml:space="preserve">
     <value>앱 스캔 중…</value>
   </data>
-  <data name="SearchBox.PlaceholderText">
+  <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>앱 검색…</value>
   </data>
-  <data name="SettingsCardAutoHideMouse.Description">
+  <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>마우스가 비활성화되면 마우스 포인터를 숨깁니다.</value>
   </data>
-  <data name="SettingsCardAutoHideMouse.Header">
+  <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
     <value>마우스 포인터 자동 숨기기</value>
   </data>
-  <data name="SettingsCardConfirmBeforeDelete.Description">
+  <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
     <value>파일 삭제 전에 확인 요청</value>
   </data>
-  <data name="SettingsCardConfirmBeforeDelete.Header">
+  <data name="SettingsCardConfirmBeforeDelete.Header" xml:space="preserve">
     <value>파일 삭제 전 확인</value>
   </data>
-  <data name="SettingsCardCredits.Description">
+  <data name="SettingsCardCredits.Description" xml:space="preserve">
     <value>FlyPhotos는 Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog, WinUIEx에 감사합니다.</value>
   </data>
-  <data name="SettingsCardCredits.Header">
+  <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>크레딧</value>
   </data>
-  <data name="SettingsCardDeveloperSupport.Description">
+  <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
     <value>Fly를 더욱 멋지게 만드세요.</value>
   </data>
-  <data name="SettingsCardDeveloperSupport.Header">
+  <data name="SettingsCardDeveloperSupport.Header" xml:space="preserve">
     <value>FlyPhotos 지원</value>
   </data>
-  <data name="SettingsCardExternalApps.Description">
+  <data name="SettingsCardExternalApps.Description" xml:space="preserve">
     <value>바로 가기로 추가할 외부 앱 선택</value>
   </data>
-  <data name="SettingsCardExternalApps.Header">
+  <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>외부 앱 선택</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Description">
+  <data name="SettingsCardExternalShorcuts.Description" xml:space="preserve">
     <value>현재 사진을 다른 앱에서 열기</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Header">
+  <data name="SettingsCardExternalShorcuts.Header" xml:space="preserve">
     <value>외부 앱 바로 가기 표시</value>
   </data>
-  <data name="SettingsCardFadeControls.Description">
+  <data name="SettingsCardFadeControls.Description" xml:space="preserve">
     <value>마우스가 멀어지면 컨트롤이 페이드 아웃됩니다.</value>
   </data>
-  <data name="SettingsCardFadeControls.Header">
+  <data name="SettingsCardFadeControls.Header" xml:space="preserve">
     <value>UI 컨트롤 자동 페이드</value>
   </data>
-  <data name="SettingsCardFadeIntensity.Description">
+  <data name="SettingsCardFadeIntensity.Description" xml:space="preserve">
     <value>자동 페이드 효과의 강도 조정</value>
   </data>
-  <data name="SettingsCardFadeIntensity.Header">
+  <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>자동 페이드 강도(%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description">
+  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
     <value>더 선명한 픽셀 모서리를 위해 비활성화합니다(픽셀 아트에 유용).</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Header">
+  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
     <value>확대/축소 시 고품질 보간 사용</value>
   </data>
-  <data name="SettingsCardHighResCache.Description">
+  <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>각 측면에 캐시된 고해상도 사진 수를 설정합니다.</value>
   </data>
-  <data name="SettingsCardHighResCache.Header">
+  <data name="SettingsCardHighResCache.Header" xml:space="preserve">
     <value>고해상도 캐시</value>
   </data>
-  <data name="SettingsCardImageFitPercentage.Description">
+  <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>사진이 화면을 채우는 정도를 선택합니다.(%)</value>
   </data>
-  <data name="SettingsCardImageFitPercentage.Header">
+  <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>이미지 화면 맞춤</value>
   </data>
-  <data name="SettingsCardLanguage.Header">
+  <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>언어 선택</value>
   </data>
-  <data name="SettingsCardLog.Description">
+  <data name="SettingsCardLog.Description" xml:space="preserve">
     <value>로그 파일 보기를 위해 열기</value>
   </data>
-  <data name="SettingsCardLog.Header">
+  <data name="SettingsCardLog.Header" xml:space="preserve">
     <value>로그 파일</value>
   </data>
-  <data name="SettingsCardLowResCache.Description">
+  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
     <value>각 측면에 캐시된 저해상도 사진 수를 설정합니다.</value>
   </data>
-  <data name="SettingsCardLowResCache.Header">
+  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
     <value>저해상도 캐시</value>
   </data>
-  <data name="SettingsCardMouseWheelBehaviour.Description">
+  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>기본 마우스 휠 동작 선택</value>
   </data>
-  <data name="SettingsCardMouseWheelBehaviour.Header">
+  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>마우스 휠</value>
   </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description">
+  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
     <value>👉 Ctrl + 마우스 휠은 항상 확대/축소합니다. 
 👉 Alt + 마우스 휠은 항상 탐색합니다.</value>
   </data>
-  <data name="SettingsCardOpenExitZoom.Description">
+  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
     <value>⚠ 시작이 느려질 수 있습니다. Fly가 실행 시 고해상도 사진을 로드할 때까지 기다립니다.</value>
   </data>
-  <data name="SettingsCardOpenExitZoom.Header">
+  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
     <value>파일 열 때 확대 및 종료 시 축소</value>
   </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Description">
+  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
     <value>⚠ 비슷한 크기의 사진이 있는 폴더에만 '유지' 옵션을 사용하세요.</value>
   </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Header">
+  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>탐색 중 이동, 확대/축소 및 회전 동작</value>
   </data>
-  <data name="SettingsCardRememberLastMonitor.Description">
-    <value>Fly는 마지막으로 사용한 모니터에서 열립니다. 다중 모니터를 사용하는 경우에만 활성화하세요.</value>
+  <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
+    <value>창 위치, 크기, 모니터 및 최대화 상태를 저장합니다.
+다음 앱 재시작 후부터 저장을 시작합니다.</value>
   </data>
-  <data name="SettingsCardRememberLastMonitor.Header">
-    <value>마지막으로 사용한 모니터 기억</value>
+  <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
+    <value>창 상태 기억</value>
   </data>
-  <data name="SettingsCardReportBugs.Description">
+  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>GitHub에서 문제 보고 또는 ryftools@outlook.com으로 이메일 보내기</value>
   </data>
-  <data name="SettingsCardReportBugs.Header">
+  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
     <value>버그 및 문제</value>
   </data>
-  <data name="SettingsCardShowCacheStatusExpander.Description">
+  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
     <value>하단 패널에 캐시 상태 표시</value>
   </data>
-  <data name="SettingsCardShowCacheStatusExpander.Header">
+  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
     <value>캐시 상태 표시</value>
   </data>
-  <data name="SettingsCardShowCheckeredBackground.Description">
+  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
     <value>투명 이미지에 바둑판식 배경 표시. 
 ⚠ 성능에 영향을 줄 수 있습니다.</value>
   </data>
-  <data name="SettingsCardShowCheckeredBackground.Header">
+  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
     <value>바둑판식 배경 표시</value>
   </data>
-  <data name="SettingsCardShowFileName.Description">
+  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
     <value>현재 열린 파일의 파일 이름 표시</value>
   </data>
-  <data name="SettingsCardShowFileName.Header">
+  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
     <value>파일 이름 표시</value>
   </data>
-  <data name="SettingsCardShowImageDimensions.Description">
+  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
     <value>파일 이름 옆에 사진의 너비와 높이 표시</value>
   </data>
-  <data name="SettingsCardShowImageDimensions.Header">
+  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
     <value>사진 크기 표시</value>
   </data>
-  <data name="SettingsCardShowThumbnail.Description">
+  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
     <value>창 하단에 축소판 그림 표시줄 표시</value>
   </data>
-  <data name="SettingsCardShowThumbnail.Header">
+  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>축소판 그림 표시줄 표시</value>
   </data>
-  <data name="SettingsCardShowZoomPercent.Header">
+  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>확대/축소 비율 표시</value>
   </data>
-  <data name="SettingsCardSourceCode.Description">
+  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
     <value>FlyPhotos는 오픈 소스이며 GitHub에서 호스팅됩니다.</value>
   </data>
-  <data name="SettingsCardSourceCode.Header">
+  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
     <value>GitHub 리포지토리</value>
   </data>
-  <data name="SettingsCardTheme.Description">
+  <data name="SettingsCardTheme.Description" xml:space="preserve">
     <value>앱 테마 선택</value>
   </data>
-  <data name="SettingsCardTheme.Header">
+  <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>창 테마</value>
   </data>
-  <data name="SettingsCardThumbnailSelectionColor.Description">
+  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>선택한 축소판 그림에 사용되는 강조 색상 설정</value>
   </data>
-  <data name="SettingsCardThumbnailSelectionColor.Header">
+  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
     <value>축소판 그림 선택 색상</value>
   </data>
-  <data name="SettingsCardThumbnailSize.Description">
+  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
     <value>뷰어에서 축소판 그림 크기 조정</value>
   </data>
-  <data name="SettingsCardThumbnailSize.Header">
+  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
     <value>축소판 그림 크기</value>
   </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Description">
+  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
     <value>투명 창 배경에만 적용 가능</value>
   </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Header">
+  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
     <value>투명도(%)</value>
   </data>
-  <data name="SettingsCardVersion.Description">
+  <data name="SettingsCardVersion.Description" xml:space="preserve">
     <value>현재 버전은 {0}입니다.</value>
   </data>
-  <data name="SettingsCardVersion.Header">
+  <data name="SettingsCardVersion.Header" xml:space="preserve">
     <value>현재 버전</value>
   </data>
-  <data name="SettingsCardWindowBackground.Description">
+  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
     <value>창 배경 선택</value>
   </data>
-  <data name="SettingsCardWindowBackground.Header">
+  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>창 배경</value>
   </data>
-  <data name="SettingsExpanderAutoFade.Header">
+  <data name="SettingsExpanderAutoFade.Header" xml:space="preserve">
     <value>자동 페이드 및 숨기기 설정</value>
   </data>
-  <data name="SettingsExpanderCaching.Description">
+  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
     <value>Fly가 사진 캐싱을 처리하는 방법 구성</value>
   </data>
-  <data name="SettingsExpanderCaching.Header">
+  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
     <value>캐싱</value>
   </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header">
+  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
     <value>키보드 바로 가기</value>
   </data>
-  <data name="SettingsExpanderPanZoom.Description">
+  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
     <value>이동 및 확대/축소 동작 사용자 지정</value>
   </data>
-  <data name="SettingsExpanderPanZoom.Header">
+  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
     <value>이동 및 확대/축소</value>
   </data>
-  <data name="SettingsPage.Title">
+  <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - 설정</value>
   </data>
-  <data name="SettingsPivotItemAbout.Header">
+  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
     <value>정보</value>
   </data>
-  <data name="SettingsPivotItemCodecs.Header">
+  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
     <value>코덱</value>
   </data>
-  <data name="SettingsPivotItemGeneral.Header">
+  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
     <value>일반</value>
   </data>
-  <data name="Status_FileNotFound">
+  <data name="Status_FileNotFound" xml:space="preserve">
     <value>파일을 찾을 수 없음</value>
   </data>
-  <data name="Status_InvalidFile">
+  <data name="Status_InvalidFile" xml:space="preserve">
     <value>잘못된 파일</value>
   </data>
-  <data name="Status_Loading">
+  <data name="Status_Loading" xml:space="preserve">
     <value>로드 중…</value>
   </data>
-  <data name="Status_PreviewFailed">
+  <data name="Status_PreviewFailed" xml:space="preserve">
     <value>미리보기 로드 실패</value>
   </data>
-  <data name="TextBlockCaching.Text">
+  <data name="TextBlockCaching.Text" xml:space="preserve">
     <value>캐싱</value>
   </data>
-  <data name="TextBlockCodecsInfo.Text">
+  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
     <value>FlyPhotos는 주로 Windows Imaging Component(WIC) 코덱을 사용합니다.</value>
   </data>
-  <data name="TextBlockLog.Text">
+  <data name="TextBlockLog.Text" xml:space="preserve">
     <value>로그</value>
   </data>
-  <data name="TextBlockPhotoDisplay.Text">
+  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>사진 표시</value>
   </data>
-  <data name="TextBlockTheming.Text">
+  <data name="TextBlockTheming.Text" xml:space="preserve">
     <value>모양</value>
   </data>
-  <data name="TextBlockUIControls.Text">
+  <data name="TextBlockUIControls.Text" xml:space="preserve">
     <value>UI 컨트롤</value>
   </data>
-  <data name="TitleTextBlock.Text">
+  <data name="TitleTextBlock.Text" xml:space="preserve">
     <value>FlyPhotos - 사진 열기</value>
   </data>
-  <data name="TrialExpiredMessage.CloseButton">
+  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
     <value>확인</value>
   </data>
-  <data name="TrialExpiredMessage.Content">
+  <data name="TrialExpiredMessage.Content" xml:space="preserve">
     <value>무료 체험판이 만료되었습니다. Microsoft Store에서 정식 버전을 구매하세요.</value>
   </data>
-  <data name="TrialExpiredMessage.Title">
+  <data name="TrialExpiredMessage.Title" xml:space="preserve">
     <value>체험판 만료</value>
   </data>
-  <data name="UnsupportedFileAlert.Description">
+  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
     <value>드롭된 파일은 지원되는 이미지 형식이 아닙니다.</value>
   </data>
-  <data name="UnsupportedFileAlert.Title">
+  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
     <value>지원되지 않는 파일</value>
   </data>
-  <data name="SettingsCardKeyboardShortCuts.Description">
+  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
     <value>왼쪽/오른쪽 화살표 : 사진 탐색 (이전/다음)
 위/아래 화살표 : 확대 또는 축소 (Zoom)
 마우스 왼쪽 클릭 후 드래그 : 사진 이동 (Pan)

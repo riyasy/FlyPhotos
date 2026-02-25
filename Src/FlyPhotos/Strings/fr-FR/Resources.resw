@@ -1,5 +1,110 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -12,456 +117,457 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AppSelectionDialog.PrimaryButtonText">
+  <data name="AppSelectionDialog.PrimaryButtonText" xml:space="preserve">
     <value>Sélectionner</value>
   </data>
-  <data name="AppSelectionDialog.SecondaryButtonText">
+  <data name="AppSelectionDialog.SecondaryButtonText" xml:space="preserve">
     <value>Annuler</value>
   </data>
-  <data name="AppSelectionDialog.Title">
+  <data name="AppSelectionDialog.Title" xml:space="preserve">
     <value>Sélectionner une application</value>
   </data>
-  <data name="BrowseBtn.Content">
+  <data name="BrowseBtn.Content" xml:space="preserve">
     <value>Parcourir les applications…</value>
   </data>
-  <data name="BtnCheckVersion.Content">
+  <data name="BtnCheckVersion.Content" xml:space="preserve">
     <value>Rechercher des mises à jour</value>
   </data>
-  <data name="BtnGitHubRepo.Content">
+  <data name="BtnGitHubRepo.Content" xml:space="preserve">
     <value>Ouvrir le dépôt GitHub</value>
   </data>
-  <data name="BtnReportBugs.Content">
+  <data name="BtnReportBugs.Content" xml:space="preserve">
     <value>Signaler un problème sur GitHub</value>
   </data>
-  <data name="BtnThirdPartyLicenses.Content">
+  <data name="BtnThirdPartyLicenses.Content" xml:space="preserve">
     <value>Afficher les licences tierces</value>
   </data>
-  <data name="ButtonBackToolTip.Content">
+  <data name="ButtonBackToolTip.Content" xml:space="preserve">
     <value>Photo précédente</value>
   </data>
-  <data name="ButtonExpanderToolTip.Content">
+  <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
     <value>Afficher l'état du cache</value>
   </data>
-  <data name="ButtonNextPageToolTip.Content">
+  <data name="ButtonNextPageToolTip.Content" xml:space="preserve">
     <value>Page suivante</value>
   </data>
-  <data name="ButtonNextToolTip.Content">
+  <data name="ButtonNextToolTip.Content" xml:space="preserve">
     <value>Photo suivante</value>
   </data>
-  <data name="ButtonOneIsToOneToolTip.Content">
+  <data name="ButtonOneIsToOneToolTip.Content" xml:space="preserve">
     <value>Zoomer à la taille réelle</value>
   </data>
-  <data name="ButtonOpenLog.Content">
+  <data name="ButtonOpenLog.Content" xml:space="preserve">
     <value>Ouvrir le journal</value>
   </data>
-  <data name="ButtonPrevPageToolTip.Content">
+  <data name="ButtonPrevPageToolTip.Content" xml:space="preserve">
     <value>Page précédente</value>
   </data>
-  <data name="ButtonRotateToolTip.Content">
+  <data name="ButtonRotateToolTip.Content" xml:space="preserve">
     <value>Pivoter la photo</value>
   </data>
-  <data name="ButtonScaleSetToolTip.Content">
+  <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>Ajuster à la fenêtre</value>
   </data>
-  <data name="ButtonSettingsToolTip.Content">
+  <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Paramètres</value>
   </data>
-  <data name="ButtonShortcutsToolTip.Content">
+  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
     <value>Ouvrir dans d'autres applications</value>
   </data>
-  <data name="ChangeLanguageAlert.Description">
+  <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>L'application doit être redémarrée pour changer la langue d'affichage.</value>
   </data>
-  <data name="ChangeLanguageAlert.Title">
+  <data name="ChangeLanguageAlert.Title" xml:space="preserve">
     <value>Changer la langue</value>
   </data>
-  <data name="ColorPickerFlyoutCancelButton.Content">
+  <data name="ColorPickerFlyoutCancelButton.Content" xml:space="preserve">
     <value>Annuler</value>
   </data>
-  <data name="ColorPickerFlyoutOkButton.Content">
+  <data name="ColorPickerFlyoutOkButton.Content" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="ComboBackgroundItemAcrylic.Content">
+  <data name="ComboBackgroundItemAcrylic.Content" xml:space="preserve">
     <value>Acrylique</value>
   </data>
-  <data name="ComboBackgroundItemAcrylicThin.Content">
+  <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Acrylique Fin</value>
   </data>
-  <data name="ComboBackgroundItemFrozen.Content">
+  <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>Gelé</value>
   </data>
-  <data name="ComboBackgroundItemMica.Content">
+  <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Mica</value>
   </data>
-  <data name="ComboBackgroundItemMicaAlt.Content">
+  <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
     <value>Mica Alt</value>
   </data>
-  <data name="ComboBackgroundItemNone.Content">
+  <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
     <value>Aucun</value>
   </data>
-  <data name="ComboBackgroundItemTransparent.Content">
+  <data name="ComboBackgroundItemTransparent.Content" xml:space="preserve">
     <value>Transparent</value>
   </data>
-  <data name="ComboMouseWheelItemNav.Content">
+  <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
     <value>Afficher Suivant ou Précédent</value>
   </data>
-  <data name="ComboMouseWheelItemZoom.Content">
+  <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Zoomer avant ou arrière</value>
   </data>
-  <data name="ComboPanZoomItemRemember.Content">
+  <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
     <value>Mémoriser Pan/Zoom/Rotation par photo</value>
   </data>
-  <data name="ComboPanZoomItemReset.Content">
+  <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
     <value>Réinitialiser Pan/Zoom/Rotation</value>
   </data>
-  <data name="ComboPanZoomItemRetain.Content">
+  <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
     <value>Conserver Pan/Zoom de la photo précédente</value>
   </data>
-  <data name="ComboThemeItemDark.Content">
+  <data name="ComboThemeItemDark.Content" xml:space="preserve">
     <value>Sombre</value>
   </data>
-  <data name="ComboThemeItemDefault.Content">
+  <data name="ComboThemeItemDefault.Content" xml:space="preserve">
     <value>Par défaut</value>
   </data>
-  <data name="ComboThemeItemLight.Content">
+  <data name="ComboThemeItemLight.Content" xml:space="preserve">
     <value>Clair</value>
   </data>
-  <data name="ConfirmDeletion.CancelButton">
+  <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
     <value>Annuler</value>
   </data>
-  <data name="ConfirmDeletion.DeleteButton">
+  <data name="ConfirmDeletion.DeleteButton" xml:space="preserve">
     <value>Supprimer</value>
   </data>
-  <data name="ConfirmDeletion.Message">
+  <data name="ConfirmDeletion.Message" xml:space="preserve">
     <value>Voulez-vous vraiment supprimer ce fichier ?</value>
   </data>
-  <data name="ConfirmDeletion.Title">
+  <data name="ConfirmDeletion.Title" xml:space="preserve">
     <value>Confirmer la suppression</value>
   </data>
-  <data name="DefaultViewerInstruction1.Text">
+  <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
     <value>Pour définir FlyPhotos comme application par défaut : 
 Cliquez avec le bouton droit sur une photo &gt; Ouvrir avec &gt; Choisir une autre application. 
 Sélectionnez FlyPhotos et choisissez Toujours.</value>
   </data>
-  <data name="DefaultViewerInstruction2.Text">
+  <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
     <value>Sous Windows 11, vous pouvez également définir FlyPhotos comme application par défaut dans 
 Paramètres &gt; Applications &gt; Applications par défaut.</value>
   </data>
-  <data name="DeletionFailed.CloseButton">
+  <data name="DeletionFailed.CloseButton" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="DeletionFailed.Message">
+  <data name="DeletionFailed.Message" xml:space="preserve">
     <value>Le fichier n'a pas pu être supprimé.</value>
   </data>
-  <data name="DeletionFailed.Title">
+  <data name="DeletionFailed.Title" xml:space="preserve">
     <value>Échec de la suppression</value>
   </data>
-  <data name="DonateButton.Content">
+  <data name="DonateButton.Content" xml:space="preserve">
     <value>Faire un don</value>
   </data>
-  <data name="DropAreaRun.Text">
+  <data name="DropAreaRun.Text" xml:space="preserve">
     <value>Glisser-déposer une photo ici ou</value>
   </data>
-  <data name="HeaderCodec.Text">
+  <data name="HeaderCodec.Text" xml:space="preserve">
     <value>Codec</value>
   </data>
-  <data name="HeaderExtensions.Text">
+  <data name="HeaderExtensions.Text" xml:space="preserve">
     <value>Extensions</value>
   </data>
-  <data name="HeaderType.Text">
+  <data name="HeaderType.Text" xml:space="preserve">
     <value>Type</value>
   </data>
-  <data name="LoadingHighQuality.Message">
+  <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Chargement de la version haute résolution. Veuillez patienter…</value>
   </data>
-  <data name="MessageClose_Ok">
+  <data name="MessageClose_Ok" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="NoShortcutsCreated.Message">
+  <data name="NoShortcutsCreated.Message" xml:space="preserve">
     <value>Aucun raccourci créé. Configurez-les dans les Paramètres.</value>
   </data>
-  <data name="OpenFileHyperlink.Text">
+  <data name="OpenFileHyperlink.Text" xml:space="preserve">
     <value>Ouvrir le fichier</value>
   </data>
-  <data name="RightClickInstruction.Text">
+  <data name="RightClickInstruction.Text" xml:space="preserve">
     <value>Pour utiliser FlyPhotos, faites un clic droit sur une photo et sélectionnez Ouvrir avec &gt; FlyPhotos.</value>
   </data>
-  <data name="ScanningTextBlock.Text">
+  <data name="ScanningTextBlock.Text" xml:space="preserve">
     <value>Analyse des applications…</value>
   </data>
-  <data name="SearchBox.PlaceholderText">
+  <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>Rechercher des applications…</value>
   </data>
-  <data name="SettingsCardAutoHideMouse.Description">
+  <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Masquer le pointeur de la souris si la souris est inactive.</value>
   </data>
-  <data name="SettingsCardAutoHideMouse.Header">
+  <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
     <value>Masquer automatiquement le pointeur de la souris</value>
   </data>
-  <data name="SettingsCardConfirmBeforeDelete.Description">
+  <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
     <value>Demander confirmation avant de supprimer un fichier.</value>
   </data>
-  <data name="SettingsCardConfirmBeforeDelete.Header">
+  <data name="SettingsCardConfirmBeforeDelete.Header" xml:space="preserve">
     <value>Confirmer avant de supprimer des fichiers</value>
   </data>
-  <data name="SettingsCardCredits.Description">
+  <data name="SettingsCardCredits.Description" xml:space="preserve">
     <value>FlyPhotos remercie Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog et WinUIEx.</value>
   </data>
-  <data name="SettingsCardCredits.Header">
+  <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Crédits</value>
   </data>
-  <data name="SettingsCardDeveloperSupport.Description">
+  <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
     <value>Rendez Fly encore plus génial.</value>
   </data>
-  <data name="SettingsCardDeveloperSupport.Header">
+  <data name="SettingsCardDeveloperSupport.Header" xml:space="preserve">
     <value>Soutenir FlyPhotos</value>
   </data>
-  <data name="SettingsCardExternalApps.Description">
+  <data name="SettingsCardExternalApps.Description" xml:space="preserve">
     <value>Sélectionner des applications externes à ajouter comme raccourcis.</value>
   </data>
-  <data name="SettingsCardExternalApps.Header">
+  <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Sélectionner des applications externes</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Description">
+  <data name="SettingsCardExternalShorcuts.Description" xml:space="preserve">
     <value>Ouvrir la photo actuelle dans d'autres applications</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Header">
+  <data name="SettingsCardExternalShorcuts.Header" xml:space="preserve">
     <value>Afficher les raccourcis vers des applications externes</value>
   </data>
-  <data name="SettingsCardFadeControls.Description">
+  <data name="SettingsCardFadeControls.Description" xml:space="preserve">
     <value>Estomper les contrôles lorsque la souris s'éloigne.</value>
   </data>
-  <data name="SettingsCardFadeControls.Header">
+  <data name="SettingsCardFadeControls.Header" xml:space="preserve">
     <value>Estomper automatiquement les contrôles d'interface</value>
   </data>
-  <data name="SettingsCardFadeIntensity.Description">
+  <data name="SettingsCardFadeIntensity.Description" xml:space="preserve">
     <value>Ajuster la force de l'effet d'estompage automatique.</value>
   </data>
-  <data name="SettingsCardFadeIntensity.Header">
+  <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Intensité d'estompage automatique (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description">
+  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
     <value>Désactiver pour des bords de pixels plus nets (utile pour le pixel art).</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Header">
+  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
     <value>Utiliser une interpolation de haute qualité lors du zoom</value>
   </data>
-  <data name="SettingsCardHighResCache.Description">
+  <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Définir le nombre de photos haute résolution mises en cache de chaque côté.</value>
   </data>
-  <data name="SettingsCardHighResCache.Header">
+  <data name="SettingsCardHighResCache.Header" xml:space="preserve">
     <value>Cache haute résolution</value>
   </data>
-  <data name="SettingsCardImageFitPercentage.Description">
+  <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Choisir la quantité d'écran que la photo remplit. (%)</value>
   </data>
-  <data name="SettingsCardImageFitPercentage.Header">
+  <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Ajustement Image à l'écran</value>
   </data>
-  <data name="SettingsCardLanguage.Header">
+  <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>Choisir la langue</value>
   </data>
-  <data name="SettingsCardLog.Description">
+  <data name="SettingsCardLog.Description" xml:space="preserve">
     <value>Ouvrir pour voir le fichier journal</value>
   </data>
-  <data name="SettingsCardLog.Header">
+  <data name="SettingsCardLog.Header" xml:space="preserve">
     <value>Fichier journal</value>
   </data>
-  <data name="SettingsCardLowResCache.Description">
+  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
     <value>Définir le nombre de photos basse résolution mises en cache de chaque côté.</value>
   </data>
-  <data name="SettingsCardLowResCache.Header">
+  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
     <value>Cache basse résolution</value>
   </data>
-  <data name="SettingsCardMouseWheelBehaviour.Description">
+  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Choisir le comportement par défaut de la molette de la souris.</value>
   </data>
-  <data name="SettingsCardMouseWheelBehaviour.Header">
+  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>Molette de la souris</value>
   </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description">
+  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
     <value>👉 Ctrl + Molette de la souris zoome toujours. 
 👉 Alt + Molette de la souris navigue toujours.</value>
   </data>
-  <data name="SettingsCardOpenExitZoom.Description">
+  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
     <value>⚠ Peut ralentir le démarrage. Fly attend pour charger la photo pleine résolution au lancement.</value>
   </data>
-  <data name="SettingsCardOpenExitZoom.Header">
+  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
     <value>Zoomer à l'ouverture d'un fichier et dézoomer à la sortie</value>
   </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Description">
+  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
     <value>⚠ N'utilisez l'option Conserver que pour les dossiers contenant des photos de taille similaire.</value>
   </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Header">
+  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Comportement Pan, Zoom et Rotation pendant la navigation</value>
   </data>
-  <data name="SettingsCardRememberLastMonitor.Description">
-    <value>Fly s'ouvre sur le dernier moniteur utilisé. Activer uniquement si vous utilisez plusieurs moniteurs.</value>
+  <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
+    <value>Enregistre la position, la taille, l’écran et l’état maximisé de la fenêtre.
+Commence à enregistrer après le prochain redémarrage de l’application.</value>
   </data>
-  <data name="SettingsCardRememberLastMonitor.Header">
-    <value>Mémoriser le dernier moniteur utilisé</value>
+  <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
+    <value>Mémoriser l’état de la fenêtre</value>
   </data>
-  <data name="SettingsCardReportBugs.Description">
+  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Signaler des problèmes sur GitHub ou envoyer un mail à ryftools@outlook.com</value>
   </data>
-  <data name="SettingsCardReportBugs.Header">
+  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
     <value>Bugs et problèmes</value>
   </data>
-  <data name="SettingsCardShowCacheStatusExpander.Description">
+  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
     <value>Afficher l'état du cache dans le panneau inférieur.</value>
   </data>
-  <data name="SettingsCardShowCacheStatusExpander.Header">
+  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
     <value>Afficher l'état du cache</value>
   </data>
-  <data name="SettingsCardShowCheckeredBackground.Description">
+  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
     <value>Afficher l'arrière-plan en damier pour les images transparentes. 
 ⚠ Peut affecter les performances.</value>
   </data>
-  <data name="SettingsCardShowCheckeredBackground.Header">
+  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
     <value>Afficher l'arrière-plan en damier</value>
   </data>
-  <data name="SettingsCardShowFileName.Description">
+  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
     <value>Afficher le nom du fichier actuellement ouvert</value>
   </data>
-  <data name="SettingsCardShowFileName.Header">
+  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
     <value>Afficher le nom du fichier</value>
   </data>
-  <data name="SettingsCardShowImageDimensions.Description">
+  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
     <value>Afficher la largeur et la hauteur de la photo à côté du nom du fichier.</value>
   </data>
-  <data name="SettingsCardShowImageDimensions.Header">
+  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
     <value>Afficher les dimensions de la photo</value>
   </data>
-  <data name="SettingsCardShowThumbnail.Description">
+  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
     <value>Afficher la bande de miniatures en bas de la fenêtre</value>
   </data>
-  <data name="SettingsCardShowThumbnail.Header">
+  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Afficher la bande de miniatures</value>
   </data>
-  <data name="SettingsCardShowZoomPercent.Header">
+  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>Afficher le pourcentage de zoom</value>
   </data>
-  <data name="SettingsCardSourceCode.Description">
+  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
     <value>FlyPhotos est open source et hébergé sur GitHub</value>
   </data>
-  <data name="SettingsCardSourceCode.Header">
+  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
     <value>Dépôt GitHub</value>
   </data>
-  <data name="SettingsCardTheme.Description">
+  <data name="SettingsCardTheme.Description" xml:space="preserve">
     <value>Sélectionner le thème de l'application.</value>
   </data>
-  <data name="SettingsCardTheme.Header">
+  <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>Thème de la fenêtre</value>
   </data>
-  <data name="SettingsCardThumbnailSelectionColor.Description">
+  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>Définir la couleur de surbrillance utilisée pour les miniatures sélectionnées.</value>
   </data>
-  <data name="SettingsCardThumbnailSelectionColor.Header">
+  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
     <value>Couleur de sélection des miniatures</value>
   </data>
-  <data name="SettingsCardThumbnailSize.Description">
+  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
     <value>Ajuster la taille des miniatures dans la visionneuse.</value>
   </data>
-  <data name="SettingsCardThumbnailSize.Header">
+  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
     <value>Taille des miniatures</value>
   </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Description">
+  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
     <value>Applicable uniquement pour l'arrière-plan de fenêtre transparent.</value>
   </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Header">
+  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
     <value>Transparence (%)</value>
   </data>
-  <data name="SettingsCardVersion.Description">
+  <data name="SettingsCardVersion.Description" xml:space="preserve">
     <value>La version actuelle est {0}</value>
   </data>
-  <data name="SettingsCardVersion.Header">
+  <data name="SettingsCardVersion.Header" xml:space="preserve">
     <value>Version actuelle</value>
   </data>
-  <data name="SettingsCardWindowBackground.Description">
+  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
     <value>Choisir l'arrière-plan de la fenêtre.</value>
   </data>
-  <data name="SettingsCardWindowBackground.Header">
+  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Arrière-plan de la fenêtre</value>
   </data>
-  <data name="SettingsExpanderAutoFade.Header">
+  <data name="SettingsExpanderAutoFade.Header" xml:space="preserve">
     <value>Paramètres d'estompage et de masquage automatiques</value>
   </data>
-  <data name="SettingsExpanderCaching.Description">
+  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
     <value>Configurer la façon dont Fly gère la mise en cache des photos.</value>
   </data>
-  <data name="SettingsExpanderCaching.Header">
+  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
     <value>Mise en cache</value>
   </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header">
+  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
     <value>Raccourcis clavier</value>
   </data>
-  <data name="SettingsExpanderPanZoom.Description">
+  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
     <value>Personnaliser le comportement de Panoramique et Zoom.</value>
   </data>
-  <data name="SettingsExpanderPanZoom.Header">
+  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
     <value>Panoramique et Zoom</value>
   </data>
-  <data name="SettingsPage.Title">
+  <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - Paramètres</value>
   </data>
-  <data name="SettingsPivotItemAbout.Header">
+  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
     <value>À propos</value>
   </data>
-  <data name="SettingsPivotItemCodecs.Header">
+  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
     <value>Codecs</value>
   </data>
-  <data name="SettingsPivotItemGeneral.Header">
+  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
     <value>Général</value>
   </data>
-  <data name="Status_FileNotFound">
+  <data name="Status_FileNotFound" xml:space="preserve">
     <value>Fichier introuvable</value>
   </data>
-  <data name="Status_InvalidFile">
+  <data name="Status_InvalidFile" xml:space="preserve">
     <value>Fichier invalide</value>
   </data>
-  <data name="Status_Loading">
+  <data name="Status_Loading" xml:space="preserve">
     <value>Chargement…</value>
   </data>
-  <data name="Status_PreviewFailed">
+  <data name="Status_PreviewFailed" xml:space="preserve">
     <value>Échec du chargement de l'aperçu</value>
   </data>
-  <data name="TextBlockCaching.Text">
+  <data name="TextBlockCaching.Text" xml:space="preserve">
     <value>Mise en cache</value>
   </data>
-  <data name="TextBlockCodecsInfo.Text">
+  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
     <value>FlyPhotos utilise principalement les codecs Windows Imaging Component (WIC).</value>
   </data>
-  <data name="TextBlockLog.Text">
+  <data name="TextBlockLog.Text" xml:space="preserve">
     <value>Journal</value>
   </data>
-  <data name="TextBlockPhotoDisplay.Text">
+  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Affichage des photos</value>
   </data>
-  <data name="TextBlockTheming.Text">
+  <data name="TextBlockTheming.Text" xml:space="preserve">
     <value>Apparence</value>
   </data>
-  <data name="TextBlockUIControls.Text">
+  <data name="TextBlockUIControls.Text" xml:space="preserve">
     <value>Contrôles d'interface</value>
   </data>
-  <data name="TitleTextBlock.Text">
+  <data name="TitleTextBlock.Text" xml:space="preserve">
     <value>FlyPhotos - Ouvrir la photo</value>
   </data>
-  <data name="TrialExpiredMessage.CloseButton">
+  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="TrialExpiredMessage.Content">
+  <data name="TrialExpiredMessage.Content" xml:space="preserve">
     <value>Votre essai gratuit a expiré. Veuillez acheter la version complète sur le Microsoft Store.</value>
   </data>
-  <data name="TrialExpiredMessage.Title">
+  <data name="TrialExpiredMessage.Title" xml:space="preserve">
     <value>Essai expiré</value>
   </data>
-  <data name="UnsupportedFileAlert.Description">
+  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
     <value>Le fichier déposé n'est pas un type d'image pris en charge.</value>
   </data>
-  <data name="UnsupportedFileAlert.Title">
+  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
     <value>Fichier non pris en charge</value>
   </data>
-  <data name="SettingsCardKeyboardShortCuts.Description">
+  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
     <value>Flèches Gauche/Droite : Naviguer entre les photos
 Flèches Haut/Bas : Zoom avant ou arrière
 Clic gauche + Glisser : Déplacer la photo (Pan)
