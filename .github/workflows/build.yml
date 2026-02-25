@@ -86,19 +86,33 @@ jobs:
           $vcpkgBinDir = "Src/build_libheif/vcpkg_installed/$triplet/bin"
           Get-ChildItem "$vcpkgBinDir/*.dll" | Copy-Item -Destination $dllsDir -Force
 
-      - name: Publish and package MSIX
+      # - name: Publish and package MSIX
+      #   working-directory: Src
+      #   run: |
+      #     dotnet publish FlyPhotos/FlyPhotos.csproj `
+      #       -c Release `
+      #       -r ${{ matrix.rid }} `
+      #       /p:Platform=${{ matrix.platform }} `
+      #       /p:WindowsPackageType=MSIX `
+      #       /p:GenerateAppxPackageOnBuild=true `
+      #       /p:AppxPackageSigningEnabled=false
+
+      # - name: Upload MSIX artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: FlyPhotos-${{ matrix.platform }}-msix
+      #     path: Src/FlyPhotos/AppPackages/**/*.msix
+
+      - name: Publish
         working-directory: Src
         run: |
           dotnet publish FlyPhotos/FlyPhotos.csproj `
             -c Release `
             -r ${{ matrix.rid }} `
-            /p:Platform=${{ matrix.platform }} `
-            /p:WindowsPackageType=MSIX `
-            /p:GenerateAppxPackageOnBuild=true `
-            /p:AppxPackageSigningEnabled=false
+            /p:Platform=${{ matrix.platform }}
 
-      - name: Upload MSIX artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FlyPhotos-${{ matrix.platform }}-msix
-          path: Src/FlyPhotos/AppPackages/**/*.msix
+          name: FlyPhotos-${{ matrix.platform }}
+          path: Src/FlyPhotos/bin/${{ matrix.platform }}/Release/net10.0-windows10.0.22621.0/${{ matrix.rid }}/publish/
