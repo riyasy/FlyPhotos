@@ -5,73 +5,175 @@
 
 #include "pch.h"
 #include "WicUtility.h"
+#include <vector>
+#include <future>
 
- /**
-  * @brief The core enumeration function that retrieves information for a specific type of WIC component.
-  * @param pImagingFactory A pointer to an initialized IWICImagingFactory.
-  * @param type The type of component to enumerate (WICDecoder or WICEncoder).
-  * @param listCodecInfo A reference to a CAtlList to be populated with the results.
-  * @return An HRESULT indicating success or failure.
-  */
+/**
+ * @brief The core enumeration function that retrieves information for a specific type of WIC component.
+ *
+ * @details
+ * Performance strategy (replaces the original serial CoCreateInstance-per-codec approach):
+ *
+ *  Phase 1 — Whitelist built-in codecs.
+ *    Re-enumerate with WICComponentEnumerateBuiltInOnly to obtain the set of CLSIDs that
+ *    ship with Windows (BMP, GIF, JPEG, PNG, TIFF, DDS, WMPhoto, DNG, HEIF, WebP, Raw, etc.).
+ *    These are guaranteed to be instantiable — no CoCreateInstance check needed.
+ *
+ *  Phase 2 — Enumerate all codecs and classify.
+ *    Built-in match  → add to list immediately (zero CoCreateInstance overhead).
+ *    Non-built-in    → if bProbeNonBuiltIn is true, launch a thread-pool task
+ *                      via std::async to test CoCreateInstance concurrently.
+ *                      If false (default), add non-built-ins directly without validation.
+ *
+ *  Phase 3 — Collect parallel results and add passing non-built-ins (only when probing).
+ */
 HRESULT WicUtility::EnumCodecs(IWICImagingFactory* pImagingFactory,
 	const WICComponentType type,
-	CAtlList<CCodecInfo>& listCodecInfo)
+	CAtlList<CCodecInfo>& listCodecInfo,
+	bool bProbeNonBuiltIn /*= false*/)
 {
-	// Assert that preconditions are met.
 	ATLASSERT(pImagingFactory);
 	ATLASSERT((type == WICDecoder) || (type == WICEncoder));
-	listCodecInfo.RemoveAll(); // Clear any existing data in the list.
+	listCodecInfo.RemoveAll();
 
-	// Create an enumerator for the specified component type.
-	CComPtr<IEnumUnknown> pEnum;
-	constexpr DWORD dwOptions = WICComponentEnumerateDefault;
-	HRESULT hr = pImagingFactory->CreateComponentEnumerator(type, dwOptions, &pEnum);
-
-	if (SUCCEEDED(hr))
+	// -------------------------------------------------------------------------
+	// Phase 1: Collect CLSIDs of built-in codecs.
+	// -------------------------------------------------------------------------
+	std::vector<CLSID> builtInClsids;
 	{
-		ULONG cbActual = 0;
-		CComPtr<IUnknown> pElement; // CComPtr for the generic component.
-
-		// Loop through all the components found by the enumerator.
-		// CComPtr's operator& is designed for this, it will manage the pointer correctly.
-		while (S_OK == pEnum->Next(1, &pElement, &cbActual))
+		CComPtr<IEnumUnknown> pBuiltInEnum;
+		if (SUCCEEDED(pImagingFactory->CreateComponentEnumerator(
+			type, WICComponentEnumerateBuiltInOnly, &pBuiltInEnum)))
 		{
-			// --- FIX IS HERE ---
-			// Each component is an IUnknown; we need to query for the specific info interface.
-			// Instead of CComQIPtr, use a CComPtr and do the QI manually.
-			CComPtr<IWICBitmapCodecInfo> pCodecInfo;
-			hr = pElement->QueryInterface(IID_PPV_ARGS(&pCodecInfo));
-
-			if (SUCCEEDED(hr) && pCodecInfo) // Check that QI succeeded and pointer is not null
+			ULONG nFetched = 0;
+			CComPtr<IUnknown> pBI;
+			while (S_OK == pBuiltInEnum->Next(1, &pBI, &nFetched))
 			{
-				constexpr UINT cbBuffer = 256; // Define a reasonable buffer size for strings.
-				CCodecInfo codecInfo;
-				UINT cbActual2 = 0;
-
-				// Retrieve the codec's friendly name.
-				// Use the new pCodecInfo pointer
-				pCodecInfo->GetFriendlyName(cbBuffer,
-					codecInfo.m_strFriendlyName.GetBufferSetLength(cbBuffer),
-					&cbActual2);
-				codecInfo.m_strFriendlyName.ReleaseBufferSetLength(cbActual2);
-
-				// Retrieve the codec's associated file extensions.
-				pCodecInfo->GetFileExtensions(cbBuffer,
-					codecInfo.m_strFileExtensions.GetBufferSetLength(cbBuffer),
-					&cbActual2);
-				codecInfo.m_strFileExtensions.ReleaseBufferSetLength(cbActual2);
-
-				// Add the retrieved information to our output list.
-				listCodecInfo.AddTail(codecInfo);
+				CComPtr<IWICBitmapCodecInfo> pBIInfo;
+				if (SUCCEEDED(pBI->QueryInterface(IID_PPV_ARGS(&pBIInfo))))
+				{
+					CLSID biClsid;
+					if (SUCCEEDED(pBIInfo->GetCLSID(&biClsid)))
+						builtInClsids.push_back(biClsid);
+				}
+				pBI.Release();
 			}
-
-			// Reset the pElement smart pointer for the next loop iteration.
-			// This releases the current IUnknown and prepares the CComPtr for the next call to Next().
-			pElement.Release();
 		}
 	}
-	return hr;
+
+	auto IsBuiltIn = [&builtInClsids](const CLSID& clsid) -> bool
+	{
+		for (const CLSID& bi : builtInClsids)
+			if (IsEqualCLSID(bi, clsid)) return true;
+		return false;
+	};
+
+	// Helper: extract CCodecInfo strings from IWICBitmapCodecInfo.
+	auto ExtractCodecInfo = [](IWICBitmapCodecInfo* pInfo) -> CCodecInfo
+	{
+		CCodecInfo ci;
+		UINT cb = 0;
+
+		pInfo->GetFriendlyName(0, nullptr, &cb);
+		if (cb > 0)
+		{
+			pInfo->GetFriendlyName(cb, ci.m_strFriendlyName.GetBufferSetLength(cb), &cb);
+			ci.m_strFriendlyName.ReleaseBuffer();
+		}
+
+		cb = 0;
+		pInfo->GetFileExtensions(0, nullptr, &cb);
+		if (cb > 0)
+		{
+			pInfo->GetFileExtensions(cb, ci.m_strFileExtensions.GetBufferSetLength(cb), &cb);
+			ci.m_strFileExtensions.ReleaseBuffer();
+		}
+		return ci;
+	};
+
+	// -------------------------------------------------------------------------
+	// Phase 2: Enumerate all codecs. Built-ins are added immediately;
+	//          non-built-ins get a concurrent CoCreateInstance probe.
+	// -------------------------------------------------------------------------
+	CComPtr<IEnumUnknown> pEnum;
+	HRESULT hr = pImagingFactory->CreateComponentEnumerator(
+		type, WICComponentEnumerateDefault, &pEnum);
+	if (FAILED(hr))
+		return hr;
+
+	struct PendingCodec
+	{
+		CCodecInfo           info;
+		std::future<HRESULT> testResult;
+	};
+	std::vector<PendingCodec> pending;
+
+	ULONG cbActual = 0;
+	CComPtr<IUnknown> pElement;
+	while (S_OK == pEnum->Next(1, &pElement, &cbActual))
+	{
+		CComPtr<IWICBitmapCodecInfo> pCodecInfo;
+		if (SUCCEEDED(pElement->QueryInterface(IID_PPV_ARGS(&pCodecInfo))) && pCodecInfo)
+		{
+			CLSID clsid;
+			if (SUCCEEDED(pCodecInfo->GetCLSID(&clsid)))
+			{
+				if (IsBuiltIn(clsid))
+				{
+					// Built-in: guaranteed valid — add directly, no test needed.
+					listCodecInfo.AddTail(ExtractCodecInfo(pCodecInfo));
+				}
+				else
+				{
+					if (!bProbeNonBuiltIn)
+					{
+						// Probe skipped — caller accepts all non-built-in codecs as-is.
+						listCodecInfo.AddTail(ExtractCodecInfo(pCodecInfo));
+					}
+					else
+					{
+						// Non-built-in (Store extension, third-party):
+						// Probe CoCreateInstance on a thread-pool thread so all probes
+						// run concurrently instead of serially.
+						PendingCodec pc;
+						pc.info = ExtractCodecInfo(pCodecInfo);
+						pc.testResult = std::async(std::launch::async, [clsid]() -> HRESULT
+							{
+								// Thread-pool threads need their own COM apartment.
+								HRESULT hrCom = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+								HRESULT hrInst = E_FAIL;
+
+								{ // Scope so CComPtr releases before CoUninitialize
+									CComPtr<IUnknown> pTest;
+									hrInst = CoCreateInstance(clsid, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pTest));
+								}
+
+								if (SUCCEEDED(hrCom))
+									CoUninitialize();
+
+								return hrInst;
+							});
+						pending.push_back(std::move(pc));
+					}
+				}
+			}
+		}
+		pElement.Release();
+	}
+
+	// -------------------------------------------------------------------------
+	// Phase 3: Collect concurrent results.
+	// By the time the main loop finishes, most async tasks are already done.
+	// -------------------------------------------------------------------------
+	for (auto& pc : pending)
+	{
+		if (SUCCEEDED(pc.testResult.get()))
+			listCodecInfo.AddTail(pc.info);
+	}
+
+	return S_OK;
 }
+
 
 /**
  * @brief A convenience wrapper to enumerate only decoders.

@@ -12,8 +12,6 @@
 #include <atlcoll.h>
 #include <Wincodec.h>
 
-using namespace std;
-
 #pragma comment(lib, "Windowscodecs.lib")
 
 /// @brief Holds information about a single WIC codec.
@@ -51,8 +49,12 @@ private:
 	/// @param pImagingFactory A pointer to the IWICImagingFactory interface.
 	/// @param type The type of component to enumerate (WICDecoder or WICEncoder).
 	/// @param listCodecInfo A reference to the list to be populated with codec info.
+	/// @param bProbeNonBuiltIn If true, non-built-in codecs are tested with
+	///        CoCreateInstance in parallel to filter out uninstalled Store extensions.
+	///        If false, all enumerated codecs are accepted without probing (fastest path).
 	/// @return An HRESULT indicating the result of the enumeration.
 	static HRESULT EnumCodecs(IWICImagingFactory* pImagingFactory,
 		WICComponentType type,
-		CAtlList<CCodecInfo>& listCodecInfo);
+		CAtlList<CCodecInfo>& listCodecInfo,
+		bool bProbeNonBuiltIn = false);
 };
