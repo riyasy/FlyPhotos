@@ -74,7 +74,9 @@ internal static partial class Win32Methods
     /// </remarks>
     [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
+#pragma warning disable SYSLIB1054
     internal static extern bool ShellExecuteEx(ref SHELLEXECUTEINFO pExecInfo);
+#pragma warning restore SYSLIB1054
 
     /// <summary>
     /// Contains information used by the <see cref="ShellExecuteEx"/> function.
@@ -169,4 +171,96 @@ internal static partial class Win32Methods
     /// </returns>
     [LibraryImport("user32.dll", EntryPoint = "SendMessageW")]
     internal static partial IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, ref COPYDATASTRUCT lParam);
+
+#pragma warning disable SYSLIB1054
+    /// <summary>
+    /// Retrieves the show state and the restored, minimized, and maximized positions of the specified window.
+    /// This is a managed declaration of the Win32 <c>GetWindowPlacement</c> function from <c>user32.dll</c>.
+    /// </summary>
+    /// <param name="hWnd">A handle to the window.</param>
+    /// <param name="lpwndpl">A <see cref="WINDOWPLACEMENT"/> structure that receives the show state and position information.</param>
+    /// <returns>
+    /// <see langword="true"/> if the function succeeds; otherwise, <see langword="false"/>.
+    /// </returns>
+    [DllImport("user32.dll")]
+    internal static extern bool GetWindowPlacement(nint hWnd, out WINDOWPLACEMENT lpwndpl);
+
+    /// <summary>
+    /// Sets the show state and the restored, minimized, and maximized positions of the specified window.
+    /// This is a managed declaration of the Win32 <c>SetWindowPlacement</c> function from <c>user32.dll</c>.
+    /// </summary>
+    /// <param name="hWnd">A handle to the window.</param>
+    /// <param name="lpwndpl">A reference to a <see cref="WINDOWPLACEMENT"/> structure that specifies the new show state and window positions.</param>
+    /// <returns>
+    /// <see langword="true"/> if the function succeeds; otherwise, <see langword="false"/>.
+    /// </returns>
+    [DllImport("user32.dll")]
+    internal static extern bool SetWindowPlacement(nint hWnd, in WINDOWPLACEMENT lpwndpl);
+#pragma warning restore SYSLIB1054
+
+    //[StructLayout(LayoutKind.Sequential)]
+    //private struct POINT { public int X, Y; }
+
+    /// <summary>
+    /// Defines a rectangle by the coordinates of its upper-left and lower-right corners.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct RECT
+    {
+        /// <summary>Specifies the x-coordinate of the upper-left corner of the rectangle.</summary>
+        public int Left;
+
+        /// <summary>Specifies the y-coordinate of the upper-left corner of the rectangle.</summary>
+        public int Top;
+
+        /// <summary>Specifies the x-coordinate of the lower-right corner of the rectangle.</summary>
+        public int Right;
+
+        /// <summary>Specifies the y-coordinate of the lower-right corner of the rectangle.</summary>
+        public int Bottom;
+    }
+
+    /// <summary>
+    /// Contains information about the placement of a window on the screen.
+    /// Used by the <see cref="GetWindowPlacement"/> and <see cref="SetWindowPlacement"/> functions.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct WINDOWPLACEMENT
+    {
+        /// <summary>
+        /// The length of the structure, in bytes. Before calling the placement functions, set this member to <c>Marshal.SizeOf(typeof(WINDOWPLACEMENT))</c>.
+        /// </summary>
+        public uint length;
+
+        /// <summary>
+        /// Specifies flags that control the position of the minimized window and the method by which the window is restored.
+        /// </summary>
+        public uint flags;
+
+        /// <summary>
+        /// The current show state of the window.
+        /// </summary>
+        public uint showCmd;
+
+        /// <summary>
+        /// The coordinates of the window's upper-left corner when the window is minimized.
+        /// </summary>
+        public POINT ptMinPosition;
+
+        /// <summary>
+        /// The coordinates of the window's upper-left corner when the window is maximized.
+        /// </summary>
+        public POINT ptMaxPosition;
+
+        /// <summary>
+        /// The window's coordinates when the window is in the restored position.
+        /// </summary>
+        public RECT rcNormalPosition;
+    }
+
+    /// <summary>
+    /// Activates the window and displays it as a maximized window.
+    /// This is one of the command flags used in the <see cref="WINDOWPLACEMENT.showCmd"/> member.
+    /// </summary>
+    internal const uint SW_SHOWMAXIMIZED = 3;
 }

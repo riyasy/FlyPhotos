@@ -29,7 +29,9 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using NLog;
+using FlyPhotos.Infra.Interop;
 using WinRT;
+using WinRT.Interop;
 using WinUIEx;
 
 namespace FlyPhotos.UI.Views;
@@ -452,11 +454,11 @@ public sealed partial class PhotoDisplayWindow
                                     if (overlappedPresenter.State == OverlappedPresenterState.Maximized)
                                         overlappedPresenter.Restore();
                                 }
-                                //else if (AppWindow.Presenter is FullScreenPresenter)
-                                //{
-                                //    AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
-                                //    (AppWindow.Presenter as OverlappedPresenter)?.Restore();
-                                //}
+                                else if (AppWindow.Presenter is FullScreenPresenter)
+                                {
+                                    AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
+                                    (AppWindow.Presenter as OverlappedPresenter)?.Restore();
+                                }
                             }
 
                         }
@@ -542,9 +544,9 @@ public sealed partial class PhotoDisplayWindow
                     await AnimatePhotoDisplayWindowClose();
                     break;
 
-                //case VirtualKey.Space:
-                //    await ToggleFullScreen();
-                //    break;
+                case VirtualKey.Space:
+                    await ToggleFullScreen();
+                    break;
 
                 case VirtualKey.Delete:
                     await DeleteCurrentlyDisplayedPhoto();
@@ -628,18 +630,35 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
-    //private async Task ToggleFullScreen()
-    //{
-    //    if (this.AppWindow.Presenter is OverlappedPresenter overlappedPresenter)
-    //    {
-    //        if (overlappedPresenter.State == OverlappedPresenterState.Maximized) 
-    //            AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
-    //    }
-    //    else if (this.AppWindow.Presenter is FullScreenPresenter)
-    //    {
-    //        AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
-    //    }
-    //}
+    private async Task ToggleFullScreen()
+    {
+        // Use .Kind (a plain enum) instead of `is OverlappedPresenter` / `is FullScreenPresenter`
+        // type-pattern checks. The `is T` form goes through WinRT COM QueryInterface, which the
+        // Release-build trimmer strips — causing the check to silently return false in Release.
+        if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped
+            && AppWindow.Presenter is OverlappedPresenter op
+            && op.State == OverlappedPresenterState.Maximized)
+        {
+            AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+        }
+        else if (AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen)
+        {
+            var hwnd = WindowNative.GetWindowHandle(this);
+
+            // Prime the Win32 window placement to SW_SHOWMAXIMIZED *before* switching
+            // the presenter. The OverlappedPresenter.State goes to Restored the moment
+            // FullScreen is activated (it's a live reference), so we can't rely on
+            // caching it. Instead, setting the WINDOWPLACEMENT here tells Windows the
+            // desired show-state so that when SetPresenter(Overlapped) releases the
+            // FullScreen mode, the window restores directly to Maximized with no
+            // intermediate Restored flash.
+            Win32Methods.GetWindowPlacement(hwnd, out var placement);
+            placement.showCmd = Win32Methods.SW_SHOWMAXIMIZED;
+            Win32Methods.SetWindowPlacement(hwnd, in placement);
+            await Task.Delay(200); // Ensure the placement change takes effect before switching presenter
+            AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
+        }
+    }
 
     private async Task DeleteCurrentlyDisplayedPhoto()
     {
