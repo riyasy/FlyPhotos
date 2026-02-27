@@ -98,7 +98,10 @@ internal static class CodecDiscovery
 
     public static bool HasImageMagickRawFileSupport(string extension) => _imageMagickRawExtensions.Contains(extension);
 
-    public static IReadOnlyList<CodecInfo> GetAllCodecs() => _codecInfoList;
+    public static IReadOnlyList<CodecInfo> GetAllCodecs()
+    {
+        return _codecInfoList;
+    }
 
     private static List<CodecInfo> GetWicCodecs() => NativeWrapper.GetWicDecoders() ?? [];
 
