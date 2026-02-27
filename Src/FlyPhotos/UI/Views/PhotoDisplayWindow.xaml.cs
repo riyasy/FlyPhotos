@@ -136,8 +136,6 @@ public sealed partial class PhotoDisplayWindow
         _repeatButtonReleaseCheckTimer.Tick += RepeatButtonReleaseCheckTimer_Tick;
         _wheelScrollBrakeTimer.Tick += WheelScrollBrakeTimer_Tick;
 
-        //this.Maximize(); // Maximise will be called from App.xaml.cs
-
         _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
         _mouseAutoHider = new MouseAutoHider(MainLayout, TimeSpan.FromSeconds(1));
@@ -449,12 +447,15 @@ public sealed partial class PhotoDisplayWindow
                             
                             if (pointerY >= AppTitlebar.ActualHeight)
                             {
-                                if (AppWindow.Presenter is OverlappedPresenter overlappedPresenter)
+                                // Use .Kind (a plain enum) instead of `is OverlappedPresenter` / `is FullScreenPresenter`
+                                // type-pattern checks. The `is T` form goes through WinRT COM QueryInterface, which the
+                                // Release-build trimmer strips — causing the check to silently return false in Release.
+                                if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped)
                                 {
-                                    if (overlappedPresenter.State == OverlappedPresenterState.Maximized)
-                                        overlappedPresenter.Restore();
+                                    if (AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Maximized } op) 
+                                        op.Restore();
                                 }
-                                else if (AppWindow.Presenter is FullScreenPresenter)
+                                else if (AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen)
                                 {
                                     AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
                                     (AppWindow.Presenter as OverlappedPresenter)?.Restore();
