@@ -39,6 +39,22 @@
                 Opacity="0" />
         </Grid>
         <win2d:CanvasControl x:Name="D2dCanvas" />
+        <Button
+            x:Name="ButtonFullScreenClose"
+            Width="30"
+            Height="30"
+            Padding="0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Background="#66000000"
+            BorderBrush="Transparent"
+            Click="ButtonFullScreenClose_Click"
+            Content="&#xE8BB;"
+            CornerRadius="0,0,0,15"
+            FontFamily="{StaticResource FluentIcons}"
+            FontSize="10"
+            Foreground="White"
+            Visibility="Collapsed" />
         <Border
             x:Name="BorderTxtZoom"
             Padding="10,5,10,5"

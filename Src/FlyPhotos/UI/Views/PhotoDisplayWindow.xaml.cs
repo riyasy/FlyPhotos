@@ -196,6 +196,11 @@ public sealed partial class PhotoDisplayWindow
         await AnimatePhotoDisplayWindowClose();
     }
 
+    private async void ButtonFullScreenClose_Click(object sender, RoutedEventArgs e)
+    {
+        await AnimatePhotoDisplayWindowClose();
+    }
+
     private async void PhotoDisplayWindow_Closed(object sender, WindowEventArgs args)
     {
         _repeatButtonReleaseCheckTimer.Stop();
@@ -457,6 +462,7 @@ public sealed partial class PhotoDisplayWindow
                                 }
                                 else if (AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen)
                                 {
+                                    ButtonFullScreenClose.Visibility = Visibility.Collapsed;
                                     AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
                                     (AppWindow.Presenter as OverlappedPresenter)?.Restore();
                                 }
@@ -641,9 +647,11 @@ public sealed partial class PhotoDisplayWindow
             && op.State == OverlappedPresenterState.Maximized)
         {
             AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+            ButtonFullScreenClose.Visibility = Visibility.Visible;
         }
         else if (AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen)
         {
+            ButtonFullScreenClose.Visibility = Visibility.Collapsed;
             var hwnd = WindowNative.GetWindowHandle(this);
 
             // Prime the Win32 window placement to SW_SHOWMAXIMIZED *before* switching
