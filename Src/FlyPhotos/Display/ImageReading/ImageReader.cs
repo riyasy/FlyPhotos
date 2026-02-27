@@ -170,12 +170,13 @@ internal static class ImageReader
                 default:
                     {
                         if (CodecDiscovery.HasWicSupport(extension))
-                        {
                             if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (CodecDiscovery.HasImageMagickRawFileSupport(extension))
+                            if (await MagickNetWrap.GetEmbeddedForRawFile(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                        if (CodecDiscovery.HasWicSupport(extension))
                             if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                        }
                         if (CodecDiscovery.HasImageMagickSupport(extension))
-                            if (await MagickNetWrap.GetResized(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                            if (await MagickNetWrap.GetResized(d2dCanvas, path) is (true, { } retBmp4)) return retBmp4;
                         return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
                     }
             }

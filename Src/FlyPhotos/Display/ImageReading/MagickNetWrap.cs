@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 using FlyPhotos.Core.Model;
 using ImageMagick;
+using ImageMagick.Formats;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
@@ -59,6 +60,57 @@ internal static class MagickNetWrap
         }
     }
         
+    public static async Task<(bool, PreviewDisplayItem)> GetEmbeddedForRawFile(ICanvasResourceCreator resourceCreator, string path, int targetLongestSide = 800)
+    {
+        try
+        {
+            // Setup DNG read defines to request the embedded thumbnail
+            var defines = new DngReadDefines
+            {
+                ReadThumbnail = true
+            };
+
+            using var image = new MagickImage();
+
+            // Apply defines before pinging
+            image.Settings.SetDefines(defines);
+
+            // Ping reads only metadata — much faster than a full decode
+            image.Ping(path);
+
+            var metadata = new ImageMetadata(image.Width, image.Height);
+
+            // Extract embedded thumbnail bytes from the dng:thumbnail profile
+            var thumbnailData = image.GetProfile("dng:thumbnail")?.ToByteArray();
+
+            if (thumbnailData == null)
+                return (false, PreviewDisplayItem.Empty());
+
+            // Load the thumbnail JPEG into a MagickImage for optional resizing
+            using var thumbnail = new MagickImage(thumbnailData);
+
+            //if (thumbnail.Width > targetLongestSide || thumbnail.Height > targetLongestSide)
+            //{
+            //    var geometry = new MagickGeometry($"{targetLongestSide}x{targetLongestSide}>");
+            //    thumbnail.Resize(geometry);
+            //}
+
+            using var stream = new MemoryStream();
+            thumbnail.Format = MagickFormat.Jpeg;
+            thumbnail.Quality = 95;
+            await thumbnail.WriteAsync(stream);
+            stream.Position = 0;
+
+            var bitmap = await CanvasBitmap.LoadAsync(resourceCreator, stream.AsRandomAccessStream());
+            return (true, new PreviewDisplayItem(bitmap, Origin.Disk, metadata));
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, $"Failed to extract embedded thumbnail with ImageMagick: {path}");
+            return (false, PreviewDisplayItem.Empty());
+        }
+    }
+
     public static (bool, HqDisplayItem) GetHq(CanvasControl d2dCanvas, string path)
     {
         try
