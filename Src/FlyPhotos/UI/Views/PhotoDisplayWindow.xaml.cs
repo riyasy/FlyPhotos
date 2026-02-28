@@ -551,7 +551,7 @@ public sealed partial class PhotoDisplayWindow
                     await AnimatePhotoDisplayWindowClose();
                     break;
 
-                case VirtualKey.Space:
+                case VirtualKey.F11:
                     await ToggleFullScreen();
                     break;
 
