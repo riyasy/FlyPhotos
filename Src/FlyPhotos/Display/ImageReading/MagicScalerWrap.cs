@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Services;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
@@ -40,7 +41,7 @@ internal static class MagicScalerWrap
                 if (originalWidth <= 800 && originalHeight <= 800)
                 {
                     // Load directly from file path without resizing
-                    using var stream = await ReaderUtil.GetWin2DPerformantStream(inputPath);
+                    using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
                     canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
                 }
                 else

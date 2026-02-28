@@ -5,6 +5,7 @@ using FlyPhotos.Core.Model;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
+using FlyPhotos.Services;
 
 namespace FlyPhotos.Display.ImageReading;
 
@@ -21,7 +22,7 @@ internal static class TiffReader
     {
         try
         {
-            using var stream = await ReaderUtil.GetWin2DPerformantStream(inputPath);
+            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
             var metaData = new ImageMetadata(canvasBitmap.SizeInPixels.Width, canvasBitmap.SizeInPixels.Height);
             return (true, new PreviewDisplayItem(canvasBitmap, Origin.Disk, metaData));
@@ -37,14 +38,14 @@ internal static class TiffReader
     {
         try
         {
-            using var stream = await ReaderUtil.GetWin2DPerformantStream(inputPath);
+            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
             var firstFrame = await CanvasBitmap.LoadAsync(ctrl, stream);
             stream.Seek(0);
             var decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.TiffDecoderId, stream);
 
             if (decoder.FrameCount > 1) // Multi-page TIFF
             {
-                var bytes = await ReaderUtil.GetInMemByteArray(stream);
+                var bytes = await StorageOps.GetInMemByteArray(stream);
                 return (true, new MultiPageHqDisplayItem(firstFrame, Origin.Disk, bytes));
             }
             else

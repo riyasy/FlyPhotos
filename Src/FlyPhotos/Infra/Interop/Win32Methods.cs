@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Runtime.InteropServices;
 
 namespace FlyPhotos.Infra.Interop;
@@ -263,4 +264,107 @@ internal static partial class Win32Methods
     /// This is one of the command flags used in the <see cref="WINDOWPLACEMENT.showCmd"/> member.
     /// </summary>
     internal const uint SW_SHOWMAXIMIZED = 3;
+
+    // -------------------------------------------------------------------------
+    // shcore.dll — Native stream access (bypasses Windows Storage Broker)
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// The interface ID (IID) for <c>Windows.Storage.Streams.IRandomAccessStream</c>.
+    /// Required as the <c>riid</c> argument to <see cref="CreateRandomAccessStreamOnFile"/>.
+    /// </summary>
+    internal static Guid IID_IRandomAccessStream = new("905A0FE1-BC53-11DF-8C49-001E4FC686DA");
+
+    /// <summary>
+    /// Creates a native <c>IRandomAccessStream</c> on the specified file, bypassing the Windows
+    /// Storage Broker. Unlike <c>StorageFile.GetFileFromPathAsync</c>, this function accesses
+    /// the file handle directly and therefore succeeds for hidden and system files.
+    /// </summary>
+    /// <param name="filePath">The full path to the file to open.</param>
+    /// <param name="accessMode">The desired access mode. Pass <c>0</c> for read-only.</param>
+    /// <param name="riid">
+    /// A reference to the IID of the requested interface.
+    /// Pass <see cref="IID_IRandomAccessStream"/>.
+    /// </param>
+    /// <param name="stream">
+    /// On success, receives the raw COM pointer to the opened stream. The caller must call
+    /// <see cref="System.Runtime.InteropServices.Marshal.Release"/> on this pointer after use.
+    /// </param>
+    /// <returns>
+    /// An HRESULT. Pass to <see cref="System.Runtime.InteropServices.Marshal.ThrowExceptionForHR"/>
+    /// to convert failures into managed exceptions.
+    /// </returns>
+    [LibraryImport("shcore.dll", StringMarshalling = StringMarshalling.Utf16)]
+    internal static partial int CreateRandomAccessStreamOnFile(
+        string filePath, uint accessMode, ref Guid riid, out IntPtr stream);
+
+    // -------------------------------------------------------------------------
+    // shell32.dll — Shell file operations (copy, move, delete to Recycle Bin)
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Contains information used by <see cref="SHFileOperation"/> to perform file system
+    /// operations such as copy, move, delete, and rename.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    internal struct SHFILEOPSTRUCT
+    {
+        /// <summary>Handle to the parent window for any dialogs. Set to <see cref="IntPtr.Zero"/> for no parent.</summary>
+        public IntPtr hwnd;
+
+        /// <summary>The operation to perform. Use a <c>FO_*</c> constant such as <see cref="FO_DELETE"/>.</summary>
+        public uint wFunc;
+
+        /// <summary>
+        /// The source path. Must be double-null terminated (<c>path + '\0' + '\0'</c>)
+        /// even for a single file.
+        /// </summary>
+        [MarshalAs(UnmanagedType.LPWStr)] public string pFrom;
+
+        /// <summary>The destination path. Not used for delete operations; leave as <see langword="null"/>.</summary>
+        [MarshalAs(UnmanagedType.LPWStr)] public string? pTo;
+
+        /// <summary>Behaviour flags. Combine <c>FOF_*</c> constants such as <see cref="FOF_ALLOWUNDO"/>.</summary>
+        public ushort fFlags;
+
+        /// <summary>Set to <see langword="true"/> by the shell if any operations were aborted by the user.</summary>
+        public bool fAnyOperationsAborted;
+
+        /// <summary>Handle to a name-mapping object. Typically <see cref="IntPtr.Zero"/>.</summary>
+        public IntPtr hNameMappings;
+
+        /// <summary>Title for the progress dialog. Only used when <c>FOF_SIMPLEPROGRESS</c> is set.</summary>
+        [MarshalAs(UnmanagedType.LPWStr)] public string? lpszProgressTitle;
+    }
+
+    /// <summary>Operation code for <see cref="SHFILEOPSTRUCT.wFunc"/>: delete the specified files.</summary>
+    internal const uint FO_DELETE = 0x0003;
+
+    /// <summary>Flag for <see cref="SHFILEOPSTRUCT.fFlags"/>: allows the operation to be undone, sending the file to the Recycle Bin.</summary>
+    internal const ushort FOF_ALLOWUNDO = 0x0040;
+
+    /// <summary>Flag for <see cref="SHFILEOPSTRUCT.fFlags"/>: suppresses all confirmation dialogs.</summary>
+    internal const ushort FOF_NOCONFIRMATION = 0x0010;
+
+    /// <summary>Flag for <see cref="SHFILEOPSTRUCT.fFlags"/>: suppresses the progress dialog box.</summary>
+    internal const ushort FOF_SILENT = 0x0004;
+
+    /// <summary>
+    /// Copies, moves, renames, or deletes a file system object. Used here to send files
+    /// to the Recycle Bin for hidden and system files that the Storage Broker rejects.
+    /// </summary>
+    /// <param name="op">
+    /// A reference to a <see cref="SHFILEOPSTRUCT"/> that describes the operation to perform.
+    /// </param>
+    /// <returns>Zero on success; a non-zero Shell error code on failure.</returns>
+    /// <remarks>
+    /// This function uses <c>[DllImport]</c> instead of <c>[LibraryImport]</c> because its
+    /// struct parameter (<see cref="SHFILEOPSTRUCT"/>) is non-blittable (contains strings) and
+    /// is passed by reference (<c>ref</c>). This specific scenario is not yet supported by the
+    /// <c>[LibraryImport]</c> source generator, making <c>[DllImport]</c> the correct choice here.
+    /// </remarks>
+#pragma warning disable SYSLIB1054
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    internal static extern int SHFileOperation(ref SHFILEOPSTRUCT op);
+#pragma warning restore SYSLIB1054
 }

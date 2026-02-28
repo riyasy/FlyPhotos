@@ -6,6 +6,7 @@ using FlyPhotos.Core.Model;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
+using FlyPhotos.Services;
 
 
 namespace FlyPhotos.Display.ImageReading;
@@ -57,7 +58,7 @@ internal static class IcoReader
     {
         try
         {
-            using var stream = await ReaderUtil.GetWin2DPerformantStream(filePath);
+            using var stream = await StorageOps.GetWin2DPerformantStream(filePath);
 
             // The BitmapDecoder is essential for inspecting multi-frame images.
             var decoder = await BitmapDecoder.CreateAsync(stream);

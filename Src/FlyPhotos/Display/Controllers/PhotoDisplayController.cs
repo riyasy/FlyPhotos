@@ -429,32 +429,46 @@ internal partial class PhotoDisplayController
 
             if (!File.Exists(filePath)) return;
 
-            var sourceFile = await StorageFile.GetFileFromPathAsync(filePath);
             var dataPackage = new DataPackage();
-            if (sourceFile != null)
-                dataPackage.SetStorageItems((List<IStorageItem>)[sourceFile]);
 
+            // 1. FILE REFERENCE (with hidden/system file bypass)
+            var sourceFile = await StorageOps.GetStorageFileOrVirtualFile(filePath);
+            dataPackage.SetStorageItems((List<IStorageItem>)[sourceFile]);
+
+            // 2. IN-MEMORY BITMAP (for paste-as-image targets)
             var canvasBitmap = _photoSessionState.CurrentDisplayLevel switch
             {
                 DisplayLevel.Hq => photo.Hq?.Bitmap,
                 DisplayLevel.Preview => photo.Preview?.Bitmap,
                 _ => null
             };
-
             if (canvasBitmap != null)
             {
-                var memoryStream = new InMemoryRandomAccessStream();
-                await canvasBitmap.SaveAsync(memoryStream, CanvasBitmapFileFormat.Png);
-                memoryStream.Seek(0);
-                var streamReference = RandomAccessStreamReference.CreateFromStream(memoryStream);
+                var streamReference = await GetCanvasBitmapAsAccessStream(canvasBitmap);
                 dataPackage.SetBitmap(streamReference);
             }
+
+            // 3. Set Everything to Clipboard
             Clipboard.SetContent(dataPackage);
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Failed to copy CanvasBitmap to clipboard.");
+            Logger.Error(ex, "Failed to copy file to clipboard.");
         }
+    }
+
+    private static async Task<RandomAccessStreamReference> GetCanvasBitmapAsAccessStream(CanvasBitmap canvasBitmap)
+    {
+        // NOTE: memoryStream is intentionally NOT disposed here.
+        // RandomAccessStreamReference holds a COM reference to the stream, and the
+        // clipboard reads from it lazily at paste-time (e.g. when the user pastes
+        // into Word or Paint). Disposing early would corrupt the paste.
+        // The WinRT runtime releases it when the clipboard content is replaced.
+        var memoryStream = new InMemoryRandomAccessStream();
+        await canvasBitmap.SaveAsync(memoryStream, CanvasBitmapFileFormat.Png);
+        memoryStream.Seek(0);
+        var streamReference = RandomAccessStreamReference.CreateFromStream(memoryStream);
+        return streamReference;
     }
 
     public async Task Fly(NavDirection direction)
@@ -521,7 +535,13 @@ internal partial class PhotoDisplayController
             return new DeleteResult(false, false, "App - Inconsistent State");
         }
 
-        var delResult = await DeleteFileFromDisk(keyToDelete);
+        if (!_photos.TryGetValue(keyToDelete, out var photo))
+        {
+            Logger.Error($"DeleteFileFromDiskAsync failed: Key {keyToDelete} not found in the collection.");
+            return new DeleteResult(false, false, "App - Inconsistent State");
+        }
+
+        var delResult = await StorageOps.DeleteFileFromDisk(photo.FilePath);
         if (!delResult.DeleteSuccess) return delResult;
 
         // --- Step 2: Determine the Next Photo to Display ---
@@ -549,27 +569,6 @@ internal partial class PhotoDisplayController
             // TODO - Cleanup properly. If we call dispose now, the zoom out animation during
             // app close will crash as the draw call will try to display disposed canvas bitmaps.
             return new DeleteResult(true, true);            
-        }
-    }
-
-    private async Task<DeleteResult> DeleteFileFromDisk(int keyToDelete)
-    {
-        if (!_photos.TryGetValue(keyToDelete, out var photo))
-        {
-            Logger.Error($"DeleteFileFromDiskAsync failed: Key {keyToDelete} not found in the collection.");
-            return new DeleteResult(false, false, "App - Inconsistent State");
-        }
-        var filePath = photo.FilePath;
-        try
-        {
-            var file = await StorageFile.GetFileFromPathAsync(filePath);
-            await file.DeleteAsync(StorageDeleteOption.Default);
-            Logger.Info($"Successfully deleted file: {filePath}");
-            return new DeleteResult(true, false);
-        }
-        catch (Exception ex)
-        {
-            return new DeleteResult(false, false, $"Exeption : {ex.Message}");
         }
     }
 
@@ -637,11 +636,4 @@ internal partial class PhotoDisplayController
 
         Logger.Info("PhotoDisplayController disposed.");
     }
-}
-
-internal class DeleteResult(bool deleteSuccess, bool isLastPhoto, string failMessage = "")
-{
-    public bool DeleteSuccess { get; } = deleteSuccess;
-    public bool IsLastPhoto { get; } = isLastPhoto;
-    public string FailMessage { get; } = failMessage;
 }

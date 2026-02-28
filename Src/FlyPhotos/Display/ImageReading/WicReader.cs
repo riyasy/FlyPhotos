@@ -7,6 +7,7 @@ using FlyPhotos.Core.Model;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
+using FlyPhotos.Services;
 
 namespace FlyPhotos.Display.ImageReading;
 
@@ -27,7 +28,7 @@ internal static class WicReader
     {
         try
         {
-            using var stream = await ReaderUtil.GetWin2DPerformantStream(inputPath);
+            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
             return (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk));
         }
@@ -42,7 +43,7 @@ internal static class WicReader
     {
         try
         {
-            using var stream = await ReaderUtil.GetWin2DPerformantStream(inputPath);
+            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
             var decoder = await BitmapDecoder.CreateAsync(stream);
             // Get the full, original dimensions from the decoder
             var rotation = await GetRotationFromMetaData(decoder.BitmapProperties);
