@@ -63,7 +63,7 @@ internal static class ImageReader
                     }
                 case ".SVG":
                     {
-                        if (await SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
+                        if (SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return (retBmp2);
                         return (new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
                     }
                 case ".GIF":
@@ -144,13 +144,13 @@ internal static class ImageReader
                     }
                 case ".SVG":
                     {
-                        if (await SvgReader.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (SvgReader.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
                     }
                 case ".GIF":
                 case ".PNG":
                     {
-                        if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (await WicReader.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
                     }
                 case ".ICO":
@@ -159,14 +159,13 @@ internal static class ImageReader
                         if (await IcoReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return (retBmp);
                         return (new PreviewDisplayItem(_indicators.HqFailed, Origin.ErrorScreen));
                     }
-                //case ".TIF":
-                //case ".TIFF":
-                //{
-                //    if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                //    if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                //    if (await TiffReader.GetFirstFrameFullSize(d2dCanvas, path) is (true, { } retBmp3)) return (retBmp3);
-                //    return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
-                //}
+                case ".TIF":
+                case ".TIFF":
+                    {
+                        if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (await WicReader.GetResized(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                        return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
+                    }
                 default:
                     {
                         if (CodecDiscovery.HasWicSupport(extension))
@@ -220,7 +219,7 @@ internal static class ImageReader
                     }
                 case ".SVG":
                     {
-                        if (await SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
                 case ".GIF":

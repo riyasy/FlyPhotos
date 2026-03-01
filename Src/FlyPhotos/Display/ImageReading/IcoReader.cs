@@ -63,9 +63,7 @@ internal static class IcoReader
             // The BitmapDecoder is essential for inspecting multi-frame images.
             var decoder = await BitmapDecoder.CreateAsync(stream);
             // Find the index of the frame with the most pixels.
-            var bestFrameIndex = await FindLargestFrameIndexAsync(decoder);
-            // Retrieve the specific frame we identified as the largest.
-            var bestFrame = await decoder.GetFrameAsync(bestFrameIndex);
+            var bestFrame = await FindLargestFrameAsync(decoder);
 
             // Get the raw pixel data from that frame.
             var pixelProvider = await bestFrame.GetPixelDataAsync(
@@ -95,19 +93,17 @@ internal static class IcoReader
     }
 
     /// <summary>
-    /// Iterates through all frames in a BitmapDecoder to find the one with the largest area (width * height).
+    /// Iterates through all frames in a BitmapDecoder to find the one with the largest area.
+    /// Returns the frame itself to avoid a redundant GetFrameAsync call by the caller.
     /// </summary>
-    /// <param name="decoder">The BitmapDecoder for the image file.</param>
-    /// <returns>The index of the largest frame.</returns>
-    private static async Task<uint> FindLargestFrameIndexAsync(BitmapDecoder decoder)
+    private static async Task<BitmapFrame> FindLargestFrameAsync(BitmapDecoder decoder)
     {
-        // If there's only one frame, no need to search.
-        if (decoder.FrameCount <= 1) return 0;
+        var bestFrame = await decoder.GetFrameAsync(0);
+        if (decoder.FrameCount <= 1) return bestFrame;
 
-        uint bestFrameIndex = 0;
-        uint maxPixelCount = 0;
+        uint maxPixelCount = bestFrame.PixelWidth * bestFrame.PixelHeight;
 
-        for (uint i = 0; i < decoder.FrameCount; i++)
+        for (uint i = 1; i < decoder.FrameCount; i++)
         {
             var frame = await decoder.GetFrameAsync(i);
             var pixelCount = frame.PixelWidth * frame.PixelHeight;
@@ -115,9 +111,9 @@ internal static class IcoReader
             if (pixelCount > maxPixelCount)
             {
                 maxPixelCount = pixelCount;
-                bestFrameIndex = i;
+                bestFrame = frame;
             }
         }
-        return bestFrameIndex;
+        return bestFrame;
     }
 }

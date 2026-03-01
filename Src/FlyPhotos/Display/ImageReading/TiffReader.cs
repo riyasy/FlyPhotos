@@ -6,6 +6,7 @@ using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 using FlyPhotos.Services;
+using Windows.Graphics.DirectX;
 
 namespace FlyPhotos.Display.ImageReading;
 
@@ -39,19 +40,37 @@ internal static class TiffReader
         try
         {
             using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
-            var firstFrame = await CanvasBitmap.LoadAsync(ctrl, stream);
-            stream.Seek(0);
+
+            // One decoder, one stream read.
+            // GetPixelDataAsync extracts frame 0 pixels directly from the decoder we already
+            // have — no second BitmapDecoder or second CanvasBitmap.LoadAsync needed.
             var decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.TiffDecoderId, stream);
+            var frame0 = await decoder.GetFrameAsync(0);
+            var pixelProvider = await frame0.GetPixelDataAsync(
+                BitmapPixelFormat.Bgra8,
+                BitmapAlphaMode.Premultiplied,
+                new BitmapTransform(),
+                ExifOrientationMode.RespectExifOrientation,
+                ColorManagementMode.ColorManageToSRgb);
+            var pixels = pixelProvider.DetachPixelData();
+
+            // OrientedPixelWidth/Height account for any EXIF rotation applied above.
+            var firstFrame = CanvasBitmap.CreateFromBytes(
+                ctrl, pixels,
+                (int)decoder.OrientedPixelWidth,
+                (int)decoder.OrientedPixelHeight,
+                DirectXPixelFormat.B8G8R8A8UIntNormalized);
 
             if (decoder.FrameCount > 1) // Multi-page TIFF
             {
+                // Seeking back to read the raw bytes is a simple memcpy — far cheaper
+                // than a second pixel decode pass.
+                stream.Seek(0);
                 var bytes = await StorageOps.GetInMemByteArray(stream);
                 return (true, new MultiPageHqDisplayItem(firstFrame, Origin.Disk, bytes));
             }
-            else
-            {
-                return (true, new StaticHqDisplayItem(firstFrame, Origin.Disk));
-            }
+
+            return (true, new StaticHqDisplayItem(firstFrame, Origin.Disk));
         }
         catch (Exception ex)
         {

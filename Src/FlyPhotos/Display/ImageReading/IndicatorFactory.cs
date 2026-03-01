@@ -10,7 +10,7 @@ using Microsoft.UI;
 
 namespace FlyPhotos.Display.ImageReading;
 
-internal sealed class IndicatorFactory(CanvasControl canvas)
+internal sealed class IndicatorFactory(CanvasControl canvas) : IDisposable
 {
     private const float IndicatorSize = 600f;
 
@@ -100,4 +100,11 @@ internal sealed class IndicatorFactory(CanvasControl canvas)
     //        ? await CanvasBitmap.LoadAsync(d2dCanvas, new Uri(path))
     //        : await CanvasBitmap.LoadAsync(d2dCanvas, path);
     //}
+    public void Dispose()
+    {
+        _iconFormat?.Dispose();
+        _iconFormat = null;
+        _textFormat?.Dispose();
+        _textFormat = null;
+    }
 }

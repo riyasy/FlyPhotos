@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
@@ -153,12 +154,12 @@ internal static class PsdReader
         return -1; // Pattern not found
     }
 
-    // Helper method for reading a Big-Endian 32-bit integer
+    // Reads a big-endian uint32 using a stack-allocated buffer — no heap allocation per call.
     private static uint ReadBigEndianUInt32(BinaryReader reader)
     {
-        var bytes = reader.ReadBytes(4);
-        if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
-        return BitConverter.ToUInt32(bytes, 0);
+        Span<byte> buf = stackalloc byte[4];
+        reader.Read(buf);
+        return BinaryPrimitives.ReadUInt32BigEndian(buf);
     }
 
 }

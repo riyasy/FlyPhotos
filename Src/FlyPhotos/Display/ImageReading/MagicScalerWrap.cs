@@ -36,6 +36,9 @@ internal static class MagicScalerWrap
                 int originalHeight = fileInfo.Frames[0].Height;
                 var metadata = new ImageMetadata(originalWidth, originalHeight);
                 var settings = new ProcessImageSettings { Width = 800, Height = 800, ResizeMode = CropScaleMode.Max, HybridMode = HybridScaleMode.Turbo };
+                // Force JPEG output — a static format cannot carry animation, so MagicScaler
+                // processes only frame 0 instead of all frames of an animated GIF.
+                settings.TrySetEncoderFormat(ImageMimeTypes.Jpeg);
 
                 CanvasBitmap canvasBitmap;
                 if (originalWidth <= 800 && originalHeight <= 800)
@@ -48,7 +51,7 @@ internal static class MagicScalerWrap
                 {
                     // Create pipeline for resizing
                     using var pipeline = MagicImageProcessor.BuildPipeline(inputPath, settings);
-                    using var ms = new MemoryStream();
+                    using var ms = new MemoryStream(256 * 1024); // pre-size to avoid repeated buffer doublings
                     pipeline.WriteOutput(ms);
                     canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());
                 }

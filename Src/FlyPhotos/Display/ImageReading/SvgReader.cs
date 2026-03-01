@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
 using Microsoft.Graphics.Canvas;
@@ -7,6 +6,7 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 using SkiaSharp;
 using Svg.Skia;
+using Windows.Graphics.DirectX;
 
 namespace FlyPhotos.Display.ImageReading;
 
@@ -14,13 +14,13 @@ internal static class SvgReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public static async Task<(bool, PreviewDisplayItem)> GetResized(CanvasControl ctrl, string inputPath)
+    public static (bool, PreviewDisplayItem) GetResized(CanvasControl ctrl, string inputPath)
     {
-        var (bmp, width, height) = await LoadSvgViaSkia(ctrl, inputPath, 800);
+        var (bmp, width, height) = LoadSvgViaSkia(ctrl, inputPath, 800);
         if (bmp == null) return (false, PreviewDisplayItem.Empty());
 
-        // Since both use the same function, scale 800 to 2000 to calculate
-        // width and height for the hq image.
+        // Scale the rendered 800px dimensions up to what the HQ render would be,
+        // so the metadata reflects the full-resolution SVG size.
         int maxCurrent = Math.Max(width, height);
         double scale = 2000.0 / maxCurrent;
         int metaWidth = (int)Math.Round(width * scale);
@@ -30,14 +30,14 @@ internal static class SvgReader
         return (true, new PreviewDisplayItem(bmp, Origin.Disk, metadata));
     }
 
-    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
+    public static (bool, HqDisplayItem) GetHq(CanvasControl ctrl, string inputPath)
     {
-        var (bmp, _, _) = await LoadSvgViaSkia(ctrl, inputPath, 2000);
-        if (bmp == null) return (false, HqDisplayItem.Empty());
-        return (true, new StaticHqDisplayItem(bmp, Origin.Disk));
+        var (bmp, _, _) = LoadSvgViaSkia(ctrl, inputPath, 2000);
+        if (bmp == null) return ((false, HqDisplayItem.Empty()));
+        return ((true, (HqDisplayItem)new StaticHqDisplayItem(bmp, Origin.Disk)));
     }
 
-    private static async Task<(CanvasBitmap Bitmap, int Width, int Height)> LoadSvgViaSkia(
+    private static (CanvasBitmap? Bitmap, int Width, int Height) LoadSvgViaSkia(
         CanvasControl ctrl, string inputPath, int maxDimension)
     {
         try
@@ -78,38 +78,31 @@ internal static class SvgReader
                 renderWidth = (int)Math.Round(maxDimension * (svgWidth / svgHeight));
             }
 
-            // Create a SkiaSharp bitmap with the newly calculated dimensions
-            using var surface = SKSurface.Create(new SKImageInfo(renderWidth, renderHeight));
-            var canvas = surface.Canvas;
+            // Render SVG directly into an SKBitmap (Bgra8888 premultiplied).
+            // This avoids the previous SKSurface → Snapshot → PNG encode → MemoryStream → PNG decode
+            // round-trip: two full-frame codec passes and a MemoryStream allocation are eliminated.
+            // SKBitmap.Bytes in Bgra8888/Premul maps exactly to DirectX B8G8R8A8UIntNormalized.
+            var imageInfo = new SKImageInfo(renderWidth, renderHeight, SKColorType.Bgra8888, SKAlphaType.Premul);
+            using var bitmap = new SKBitmap(imageInfo);
+            using var skCanvas = new SKCanvas(bitmap);
 
-            canvas.Clear(SKColors.Transparent);
+            skCanvas.Clear(SKColors.Transparent);
+            skCanvas.Scale(renderWidth / svgWidth);
+            skCanvas.DrawPicture(svg.Picture);
+            skCanvas.Flush();
 
-            // --- SCALING CALCULATION ---
-            // The canvas now has the same aspect ratio as the SVG, so we can calculate
-            // a single scale factor to make the SVG fill the canvas perfectly.
-            var scale = renderWidth / svgWidth;
-            canvas.Scale(scale);
+            var canvasBitmap = CanvasBitmap.CreateFromBytes(
+                ctrl,
+                bitmap.Bytes,
+                renderWidth,
+                renderHeight,
+                DirectXPixelFormat.B8G8R8A8UIntNormalized);
 
-            // Draw the SVG picture onto the canvas
-            canvas.DrawPicture(svg.Picture);
-            canvas.Flush();
-
-            // Get image as PNG stream
-            using var image = surface.Snapshot();
-            using var data = image.Encode(SKEncodedImageFormat.Png, 90);
-            using var ms = new MemoryStream();
-            data.SaveTo(ms);
-            ms.Position = 0;
-
-            // Load into CanvasBitmap
-            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());
-
-            // Return the final bitmap and its actual dimensions
             return (canvasBitmap, renderWidth, renderHeight);
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, $"Failed to load SVG: {inputPath}"); // Added context to logger
+            Logger.Error(ex, $"Failed to load SVG: {inputPath}");
             return (null, 0, 0);
         }
     }
