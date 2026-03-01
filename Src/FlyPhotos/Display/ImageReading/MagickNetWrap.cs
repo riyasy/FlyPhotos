@@ -23,6 +23,7 @@ internal static class MagickNetWrap
         try
         {
             using var image = new MagickImage(path);
+            image.AutoOrient();
 
             var metadata = new ImageMetadata(image.Width, image.Height);
 
@@ -64,21 +65,24 @@ internal static class MagickNetWrap
     {
         try
         {
-            // Setup DNG read defines to request the embedded thumbnail
-            var defines = new DngReadDefines
-            {
-                ReadThumbnail = true
-            };
-
             using var image = new MagickImage();
-
+            // Setup DNG read defines to request the embedded thumbnail
+            var defines = new DngReadDefines { ReadThumbnail = true };
             // Apply defines before pinging
             image.Settings.SetDefines(defines);
 
             // Ping reads only metadata — much faster than a full decode
             image.Ping(path);
 
-            var metadata = new ImageMetadata(image.Width, image.Height);
+            var verticalOrientation = image.Orientation == OrientationType.RightTop ||
+                                      image.Orientation == OrientationType.LeftBottom ||
+                                      image.Orientation == OrientationType.RightBottom ||
+                                      image.Orientation == OrientationType.LeftTop;
+
+            var width = verticalOrientation ? image.Height : image.Width;
+            var height = verticalOrientation ? image.Width : image.Height;
+
+            var metadata = new ImageMetadata(width, height);
 
             // Extract embedded thumbnail bytes from the dng:thumbnail profile
             var thumbnailData = image.GetProfile("dng:thumbnail")?.ToByteArray();
@@ -117,6 +121,7 @@ internal static class MagickNetWrap
         {
             // --- 1. Decode PSD/HEIF at full resolution ---
             using var image = new MagickImage(path);
+            image.AutoOrient();
             // Ensure 8-bit depth for compatibility with SoftwareBitmap (BGRA8)
             image.Depth = 8;
             // Ensure alpha channel is included (force RGBA format internally for transparency)
