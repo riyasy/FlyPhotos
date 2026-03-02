@@ -41,19 +41,10 @@
 	<Target Name="CopyYourFolderAfterPublish" AfterTargets="Publish">
 		<Exec Command="XCOPY $(ProjectDir)Assets\*.* $(PublishDir)\Assets\ /S /Y" />
 	</Target>
-  <ItemGroup>
-    <Content Include="Assets\SplashScreen.scale-200.png" />
-    <Content Include="Assets\LockScreenLogo.scale-200.png" />
-    <Content Include="Assets\Square150x150Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="Assets\StoreLogo.scale-200.png" />
-    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
-  </ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
-		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.10.2" Condition="'$(Platform)' != 'ARM64'" />
+		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.10.3" Condition="'$(Platform)' != 'ARM64'" />
 		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-arm64" Version="14.10.2" Condition="'$(Platform)' == 'ARM64'" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.3" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
@@ -82,25 +73,8 @@
 		<ProjectCapability Include="Msix" />
 	</ItemGroup>
 	<ItemGroup>
-		<Content Update="Assets\Images\FileNotFound.png">
-			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
-		</Content>
-		<Content Update="Assets\Images\HQImageFailed.png">
-			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
-		</Content>
-		<Content Update="Assets\Images\Loading.png">
-			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
-		</Content>
-		<Content Update="Assets\Images\PreviewFailed.png">
-			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
-	<ItemGroup>
 		<None Update="appsettings.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="Assets\transparent.cur">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="FlyContextMenuHelper.exe">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -111,9 +85,6 @@
 		<None Update="ThirdPartyNotices.txt">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-	</ItemGroup>
-	<ItemGroup>
-		<Content Remove="Assets\transparent.cur" />
 	</ItemGroup>
 
 	<!-- 1. Define the source files once so we don't repeat the path -->
