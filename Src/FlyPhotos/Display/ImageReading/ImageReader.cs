@@ -27,7 +27,6 @@ internal static class ImageReader
             if (!File.Exists(path))
                 return new StaticHqDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen);
 
-
             if (!AppConfig.Settings.OpenExitZoom)
             {
                 var (cachedBmp, actualWidth, actualHeight) = await DiskCacherWithSqlite.Instance.ReturnFromCache(d2dCanvas, path);
@@ -97,13 +96,12 @@ internal static class ImageReader
                             if (CodecDiscovery.HasImageMagickRawFileSupport(extension))
                                 if (await MagickNetWrap.GetEmbeddedForRawFile(d2dCanvas, path) is (true, { } retBmp1)) return retBmp1;
                         }
-                        else
-                        {
-                            if (CodecDiscovery.HasWicSupport(extension))
-                                if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                            if (CodecDiscovery.HasImageMagickSupport(extension))
-                                if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp1)) return retBmp1;
-                        }
+
+                        if (CodecDiscovery.HasWicSupport(extension))
+                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (CodecDiscovery.HasImageMagickSupport(extension))
+                            if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp1)) return retBmp1;
+                        
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
             }

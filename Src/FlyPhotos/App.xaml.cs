@@ -54,6 +54,11 @@ public partial class App
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        //var profiler = new FlyProfilerWindow();
+        //profiler.Activate();
+        //return;
+
+
         _selectedFilePath = PathResolver.IsPackagedApp ? 
             GetFilePathFromArgsPackaged(AppInstance.GetCurrent().GetActivatedEventArgs().Data as IFileActivatedEventArgs) : 
             GetFilePathFromCommandLine();
