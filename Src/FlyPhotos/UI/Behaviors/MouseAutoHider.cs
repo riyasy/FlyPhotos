@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Timers;
 using FlyPhotos.Infra.Configuration;
@@ -40,15 +39,19 @@ public partial class MouseAutoHider : IDisposable
 
     // State flags.
     private bool _isCursorShown = true;
-    private bool _isIgnoringActivity = false;
+    // volatile: written by System.Timers.Timer callback (thread pool), read by PointerMoved (UI thread).
+    private volatile bool _isIgnoringActivity;
 
     // The pre-loaded invisible cursor resource.
     private readonly InputCursor _transparentCursor;
     // The pre-loaded visible cursor resource.
     private readonly InputCursor _defaultCursor = InputSystemCursor.Create(InputSystemCursorShape.Arrow);
 
+    // Stored handler so it can be unsubscribed in Dispose.
+    private readonly RoutedEventHandler _onHostLoaded;
+
     // Flag for implementing the IDisposable pattern.
-    private bool _disposed = false;
+    private bool _disposed;
 
     /// <summary>
     /// Initializes a new instance of the MouseInactivityHelper.
@@ -80,7 +83,10 @@ public partial class MouseAutoHider : IDisposable
         _host.PointerPressed += OnPointerActivity;
         _host.PointerReleased += OnPointerActivity;
         _host.PointerWheelChanged += OnPointerActivity;
-        _host.Loaded += (_, _) => { ResetInactivityTimer(); };
+
+        // Store the handler so it can be unsubscribed later.
+        _onHostLoaded = (_, _) => ResetInactivityTimer();
+        _host.Loaded += _onHostLoaded;
     }
 
     /// <summary>
@@ -128,13 +134,11 @@ public partial class MouseAutoHider : IDisposable
     {
         if (visible)
         {
-            Debug.WriteLine("MOUSE VISIBLE");
             _host.PublicCursor = _defaultCursor;
             _isCursorShown = true;
         }
         else
         {
-            Debug.WriteLine("MOUSE HIDDEN");
             _host.PublicCursor = _transparentCursor;
             _isCursorShown = false;
         }
@@ -170,6 +174,11 @@ public partial class MouseAutoHider : IDisposable
         _host.PointerPressed -= OnPointerActivity;
         _host.PointerReleased -= OnPointerActivity;
         _host.PointerWheelChanged -= OnPointerActivity;
+        _host.Loaded -= _onHostLoaded;
+
+        // Dispose cursor resources.
+        _transparentCursor?.Dispose();
+        _defaultCursor?.Dispose();
 
         // Ensure the cursor is visible when the helper is disposed.
         if (!_isCursorShown)

@@ -175,8 +175,7 @@ public partial class OpacityFader : IDisposable
                 }
                 catch (ArgumentException)
                 {
-                    // Log if the element's transform is not ready, keeping the default "outside" position.
-                    System.Diagnostics.Debug.WriteLine("OpacityFader: _trackingElement not fully rendered for initial position calculation.");
+                    // Element's transform not ready — keep the default "outside" position.
                 }
             }
         }
@@ -228,11 +227,7 @@ public partial class OpacityFader : IDisposable
         var bottomThreshold = Math.Max(100, windowHeight * 0.30);
         var isPointerInHotZone = pos.Y >= windowHeight - bottomThreshold;
 
-        // Debug output to monitor fader status.
-        System.Diagnostics.Debug.WriteLine(
-            $"FADER STATUS :: FADED : {_isFaded}, WindowHeight = {windowHeight}, Mouse Y Position = {pos.Y}, In Hot Zone: {isPointerInHotZone}");
 
-        // Logic to fade in or out based on current state and pointer position.
         if (_isFaded && isPointerInHotZone)
         {
             // If currently faded and pointer entered the hot zone, fade controls in.

@@ -60,6 +60,7 @@ public partial class InactivityFader(UIElement element, int hideDelayMs = 500, i
 
         // Cancel any previous hide request and create a new one.
         _cts?.Cancel();
+        _cts?.Dispose(); // Dispose the old source — cancelling alone doesn't release its WaitHandle.
         _cts = new CancellationTokenSource();
 
         // Show the element immediately.
@@ -158,6 +159,8 @@ public partial class InactivityFader(UIElement element, int hideDelayMs = 500, i
         _cts?.Cancel();
         _cts?.Dispose();
         _cts = null;
+        _fadeOutStoryboard?.Stop(); // Stop any in-progress animation and release its Completed closure.
+        _fadeOutStoryboard = null;
         _isDisposed = true;
         GC.SuppressFinalize(this);
     }
