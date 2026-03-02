@@ -22,7 +22,7 @@ jobs:
     name: Build (${{ matrix.platform }})
 
     env:
-      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+      VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/vcpkg_cache,readwrite"
 
     steps:
       - name: Checkout
@@ -36,6 +36,13 @@ jobs:
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
+
+      # Cache vcpkg binary cache (small, compressed packages only)
+      - name: Cache vcpkg binary cache
+        uses: actions/cache@v4
+        with:
+          path: vcpkg_cache
+          key: vcpkg-${{ matrix.vcpkg-triplet }}-${{ hashFiles('Src/build_libheif/vcpkg.json', 'Src/build_libheif/vcpkg-configuration.json') }}
 
       # Install vcpkg dependencies (manifest mode)
       - name: Install vcpkg dependencies
