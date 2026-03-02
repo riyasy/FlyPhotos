@@ -1,5 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿#nullable enable
+using System;
 using FlyPhotos.Core.Model;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
@@ -33,8 +33,8 @@ internal static class SvgReader
     public static (bool, HqDisplayItem) GetHq(CanvasControl ctrl, string inputPath)
     {
         var (bmp, _, _) = LoadSvgViaSkia(ctrl, inputPath, 2000);
-        if (bmp == null) return ((false, HqDisplayItem.Empty()));
-        return ((true, (HqDisplayItem)new StaticHqDisplayItem(bmp, Origin.Disk)));
+        if (bmp == null) return (false, HqDisplayItem.Empty());
+        return (true, new StaticHqDisplayItem(bmp, Origin.Disk));
     }
 
     private static (CanvasBitmap? Bitmap, int Width, int Height) LoadSvgViaSkia(

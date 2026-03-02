@@ -2,7 +2,6 @@
 using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
-using FlyPhotos.Services;
 using ImageMagick;
 using ImageMagick.Formats;
 using Microsoft.Graphics.Canvas;

@@ -158,7 +158,8 @@ internal static class PsdReader
     private static uint ReadBigEndianUInt32(BinaryReader reader)
     {
         Span<byte> buf = stackalloc byte[4];
-        reader.Read(buf);
+        if (reader.Read(buf) < 4)
+            throw new EndOfStreamException("Unexpected end of stream reading PSD uint32.");
         return BinaryPrimitives.ReadUInt32BigEndian(buf);
     }
 
