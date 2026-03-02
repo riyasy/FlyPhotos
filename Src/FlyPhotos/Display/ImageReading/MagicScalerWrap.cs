@@ -23,7 +23,7 @@ internal static class MagicScalerWrap
         });
     }
 
-    public static async Task<(bool, PreviewDisplayItem)> GetResized(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetResized(CanvasControl ctrl, string inputPath, int maxDimension = 800)
     {
         if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA) return await Task.Run(Action);
         return await Action();
@@ -35,13 +35,13 @@ internal static class MagicScalerWrap
                 int originalWidth = fileInfo.Frames[0].Width;
                 int originalHeight = fileInfo.Frames[0].Height;
                 var metadata = new ImageMetadata(originalWidth, originalHeight);
-                var settings = new ProcessImageSettings { Width = 800, Height = 800, ResizeMode = CropScaleMode.Max, HybridMode = HybridScaleMode.Turbo };
+                var settings = new ProcessImageSettings { Width = maxDimension, Height = maxDimension, ResizeMode = CropScaleMode.Max, HybridMode = HybridScaleMode.Turbo };
                 // Force JPEG output — a static format cannot carry animation, so MagicScaler
                 // processes only frame 0 instead of all frames of an animated GIF.
                 settings.TrySetEncoderFormat(ImageMimeTypes.Jpeg);
 
                 CanvasBitmap canvasBitmap;
-                if (originalWidth <= 800 && originalHeight <= 800)
+                if (originalWidth <= maxDimension && originalHeight <= maxDimension)
                 {
                     // Load directly from file path without resizing
                     using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);

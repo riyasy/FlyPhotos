@@ -16,7 +16,7 @@ internal static class MagickNetWrap
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 
-    public static async Task<(bool, PreviewDisplayItem)> GetResized(ICanvasResourceCreator resourceCreator, string path, uint targetLongestSide = 800)
+    public static async Task<(bool, PreviewDisplayItem)> GetResized(ICanvasResourceCreator resourceCreator, string path, uint maxDimension = 800)
     {
         try
         {
@@ -27,7 +27,7 @@ internal static class MagickNetWrap
             var metadata = new ImageMetadata(image.Width, image.Height);
 
             CanvasBitmap bitmap;
-            if (image.Width <= targetLongestSide && image.Height <= targetLongestSide)
+            if (image.Width <= maxDimension && image.Height <= maxDimension)
             {
                 // Small image: pixels are already decoded in memory.
                 // No alpha preservation needed — output is cached as JPEG.
@@ -43,7 +43,7 @@ internal static class MagickNetWrap
                 // Large image: resize first, then encode to a compact JPEG stream.
                 // Q80 is indistinguishable from Q95 at thumbnail sizes and produces
                 // a much smaller buffer for CanvasBitmap.LoadAsync to decode.
-                var geometry = new MagickGeometry(targetLongestSide, targetLongestSide) { Greater = true };
+                var geometry = new MagickGeometry(maxDimension, maxDimension) { Greater = true };
                 image.Resize(geometry);
 
                 using var stream = new MemoryStream(256 * 1024); // pre-size to avoid repeated doublings

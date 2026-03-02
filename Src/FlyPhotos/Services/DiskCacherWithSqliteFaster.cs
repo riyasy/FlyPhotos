@@ -278,11 +278,11 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
         double width = bitmap.Size.Width;
         double height = bitmap.Size.Height;
 
-        // Skip resizing if both dimensions are <= 800
-        if (width <= 800 && height <= 800)
+        // Skip resizing if both dimensions are less than ThumbMaxSize
+        if (width <= ThumbMaxSize && height <= ThumbMaxSize)
             return inputStream.ToArray();
 
-        // Resize if either dimension exceeds 800
+        // Resize if either dimension exceeds ThumbMaxSize
         using var outputStream = new MemoryStream();
         var settings = new ProcessImageSettings
         {
