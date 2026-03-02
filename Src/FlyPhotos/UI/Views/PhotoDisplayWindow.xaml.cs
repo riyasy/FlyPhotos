@@ -420,8 +420,9 @@ public sealed partial class PhotoDisplayWindow
 
     private async void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
-        var properties = e.GetCurrentPoint(D2dCanvas).Properties;
-        var dpiAdjustedPosition = e.GetCurrentPoint(D2dCanvas).Position.AdjustForDpi(D2dCanvas);
+        var currentPoint = e.GetCurrentPoint(D2dCanvas);
+        var properties = currentPoint.Properties;
+        var dpiAdjustedPosition = currentPoint.Position.AdjustForDpi(D2dCanvas);
 
         switch (properties.PointerUpdateKind)
         {
@@ -448,7 +449,7 @@ public sealed partial class PhotoDisplayWindow
                     {
                         if (!_canvasController.IsPressedOnImage(dpiAdjustedPosition))
                         {
-                            var pointerY = e.GetCurrentPoint(D2dCanvas).Position.Y;
+                            var pointerY = currentPoint.Position.Y;
                             
                             if (pointerY >= AppTitlebar.ActualHeight)
                             {
