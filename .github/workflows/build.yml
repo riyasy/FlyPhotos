@@ -1,6 +1,6 @@
 name: Build
 
-on:  
+on:
   workflow_dispatch:
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
     name: Build (${{ matrix.platform }})
 
     env:
-      VCPKG_DEFAULT_TRIPLET: ${{ matrix.vcpkg-triplet }}
+      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
 
     steps:
       - name: Checkout
@@ -37,21 +37,13 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Update vcpkg baseline
-        working-directory: Src/build_libheif
-        run: vcpkg x-update-baseline
-
-      - name: Cache vcpkg packages
-        uses: actions/cache@v4
-        with:
-          path: Src/build_libheif/vcpkg_installed
-          key: vcpkg-${{ matrix.vcpkg-triplet }}-${{ hashFiles('Src/build_libheif/vcpkg.json', 'Src/build_libheif/vcpkg-configuration.json') }}
-
+      # Install vcpkg dependencies (manifest mode)
       - name: Install vcpkg dependencies
         working-directory: Src/build_libheif
         run: |
-          vcpkg install --triplet ${{ matrix.vcpkg-triplet }}
+          vcpkg install --triplet ${{ matrix.vcpkg-triplet }} --x-manifest-root=.
 
+      # Build native projects
       - name: Build FlyNativeLib
         working-directory: Src/FlyNativeLib
         run: |
@@ -67,24 +59,37 @@ jobs:
         run: |
           msbuild FlyContextMenuHelper.vcxproj /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:PlatformToolset=v143
 
-      - name: Copy native binaries to DLLs folder
+      # Copy native outputs
+      - name: Copy native binaries
         shell: pwsh
         run: |
           $platform = "${{ matrix.platform }}"
-          $triplet = "${{ matrix.vcpkg-triplet }}"
-          $dllsDir = "Src/FlyPhotos/DLLs"
+          $triplet  = "${{ matrix.vcpkg-triplet }}"
 
-          # Copy built native DLLs
-          Copy-Item "Src/FlyNativeLib/$platform/Release/FlyNativeLib.dll" $dllsDir -Force
-          Copy-Item "Src/FlyNativeLibHeif/$platform/Release/FlyNativeLibHeif.dll" $dllsDir -Force
+          $externalDir = "Src/FlyPhotos/External/$platform"
 
-          # Copy FlyContextMenuHelper executable
-          Copy-Item "Src/FlyContextMenuHelper/$platform/Release/FlyContextMenuHelper.exe" "Src/FlyPhotos/FlyContextMenuHelper.exe" -Force
+          New-Item -ItemType Directory -Path $externalDir -Force | Out-Null
 
-          # Copy vcpkg-built DLLs
+          Get-ChildItem $externalDir -File -ErrorAction SilentlyContinue |
+            Remove-Item -Force
+
+          Copy-Item "Src/FlyNativeLib/$platform/Release/FlyNativeLib.dll" `
+            -Destination $externalDir -Force
+
+          Copy-Item "Src/FlyNativeLibHeif/$platform/Release/FlyNativeLibHeif.dll" `
+            -Destination $externalDir -Force
+
+          Copy-Item "Src/FlyContextMenuHelper/$platform/Release/FlyContextMenuHelper.exe" `
+            -Destination $externalDir -Force
+
           $vcpkgBinDir = "Src/build_libheif/vcpkg_installed/$triplet/bin"
-          Get-ChildItem "$vcpkgBinDir/*.dll" | Copy-Item -Destination $dllsDir -Force
 
+          if (Test-Path $vcpkgBinDir) {
+            Get-ChildItem "$vcpkgBinDir/*.dll" |
+              Copy-Item -Destination $externalDir -Force
+          }
+  
+      # # Publish and Package MSIX
       # - name: Publish and package MSIX
       #   working-directory: Src
       #   run: |
@@ -95,13 +100,14 @@ jobs:
       #       /p:WindowsPackageType=MSIX `
       #       /p:GenerateAppxPackageOnBuild=true `
       #       /p:AppxPackageSigningEnabled=false
-
+    
       # - name: Upload MSIX artifact
       #   uses: actions/upload-artifact@v4
       #   with:
       #     name: FlyPhotos-${{ matrix.platform }}-msix
       #     path: Src/FlyPhotos/AppPackages/**/*.msix
 
+      # Publish
       - name: Publish
         working-directory: Src
         run: |
@@ -116,3 +122,4 @@ jobs:
         with:
           name: FlyPhotos-${{ matrix.platform }}
           path: Src/publish/${{ matrix.rid }}/
+
