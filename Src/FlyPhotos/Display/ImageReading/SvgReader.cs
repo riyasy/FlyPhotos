@@ -47,6 +47,12 @@ internal static class SvgReader
             svg.Load(inputPath);
 
             // Get the original dimensions from the SVG's viewbox/content
+            if (svg.Picture == null)
+            {
+                Logger.Warn($"Failed to load SVG (no picture): {inputPath}");
+                return (null, 0, 0);
+            }
+
             float svgWidth = svg.Picture.CullRect.Width;
             float svgHeight = svg.Picture.CullRect.Height;
 
