@@ -14,7 +14,8 @@ namespace FlyPhotos.Display.ImageReading;
 internal static class WicReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-    private static readonly string[] OrientationKey = ["System.Photo.Orientation"];
+
+    //private static readonly string[] OrientationKey = ["System.Photo.Orientation"];
 
     public static async Task<(bool, PreviewDisplayItem)> GetEmbedded(CanvasControl ctrl, string inputPath)
     {
@@ -116,11 +117,10 @@ internal static class WicReader
         {
             using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
             var decoder = await BitmapDecoder.CreateAsync(stream);
-            // Get the full, original dimensions from the decoder
-            var rotation = await GetRotationFromMetaData(decoder.BitmapProperties);
-            var verticalOrientation = rotation is 90 or 270;
-            var originalWidth = verticalOrientation ? (int)decoder.PixelHeight : (int)decoder.PixelWidth;
-            var originalHeight = verticalOrientation ? (int)decoder.PixelWidth : (int)decoder.PixelHeight;
+            // OrientedPixelWidth/Height account for EXIF rotation automatically —
+            // no need to read the property bag and swap manually.
+            var originalWidth = (int)decoder.OrientedPixelWidth;
+            var originalHeight = (int)decoder.OrientedPixelHeight;
             using var preview = await decoder.GetThumbnailAsync();
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
 
@@ -132,18 +132,18 @@ internal static class WicReader
         }
     }
 
-    private static async Task<int> GetRotationFromMetaData(BitmapPropertiesView bmpProps)
-    {
-        // OrientationKey is static readonly — avoids allocating a new string[] on every call.
-        var result = await bmpProps.GetPropertiesAsync(OrientationKey);
+    //private static async Task<int> GetRotationFromMetaData(BitmapPropertiesView bmpProps)
+    //{
+    //    // OrientationKey is static readonly — avoids allocating a new string[] on every call.
+    //    var result = await bmpProps.GetPropertiesAsync(OrientationKey);
 
-        if (!result.TryGetValue("System.Photo.Orientation", out var orientation)) return 0;
-        return (ushort)orientation.Value switch
-        {
-            6 => 90,
-            3 => 180,
-            8 => 270,
-            _ => 0
-        };
-    }
+    //    if (!result.TryGetValue("System.Photo.Orientation", out var orientation)) return 0;
+    //    return (ushort)orientation.Value switch
+    //    {
+    //        6 => 90,
+    //        3 => 180,
+    //        8 => 270,
+    //        _ => 0
+    //    };
+    //}
 }

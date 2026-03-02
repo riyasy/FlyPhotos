@@ -90,15 +90,20 @@ internal static class ImageReader
                     }
                 default:
                     {
-                        if (CodecDiscovery.HasWicSupport(extension))
+                        if (!AppConfig.Settings.OpenExitZoom)
                         {
-                            if (!AppConfig.Settings.OpenExitZoom)
+                            if (CodecDiscovery.HasWicSupport(extension))
                                 if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                            if (CodecDiscovery.HasImageMagickRawFileSupport(extension))
+                                if (await MagickNetWrap.GetEmbeddedForRawFile(d2dCanvas, path) is (true, { } retBmp1)) return retBmp1;
                         }
-                        if (CodecDiscovery.HasImageMagickSupport(extension))
-                            if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
-
+                        else
+                        {
+                            if (CodecDiscovery.HasWicSupport(extension))
+                                if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                            if (CodecDiscovery.HasImageMagickSupport(extension))
+                                if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp1)) return retBmp1;
+                        }
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
             }
@@ -149,6 +154,7 @@ internal static class ImageReader
                     }
                 case ".GIF":
                 case ".PNG":
+                case ".BMP":
                     {
                         if (await WicReader.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
