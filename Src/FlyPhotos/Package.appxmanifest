@@ -58,7 +58,7 @@
 		<uap:FileTypeAssociation Name="flyphotos-images">
 		  <!--uap:DisplayName>FlyPhotos</uap:DisplayName-->
 		  <!--uap:InfoTip>Open with FlyPhotos app</uap:InfoTip-->
-		  <uap:Logo>Assets\Square44x44Logo.png</uap:Logo>
+		  <uap:Logo>Assets\FileType_Square44x44Logo.png</uap:Logo>
 		  <!-- Add all the file types you want to support -->
 		<uap:SupportedFileTypes>
         
