@@ -74,6 +74,9 @@ public sealed partial class PhotoDisplayWindow
     private Point _lastPoint;
     private bool _isDragging;
 
+
+    private bool _wasMaximizedBeforeFullScreen = false;
+
     public PhotoDisplayWindow(string firstPhotoPath, bool extLaunch)
     {
         InitializeComponent();
@@ -553,7 +556,7 @@ public sealed partial class PhotoDisplayWindow
                     break;
 
                 case VirtualKey.F11:
-                    await ToggleFullScreen();
+                    ToggleFullScreen();
                     break;
 
                 case VirtualKey.Delete:
@@ -638,36 +641,45 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
-    private async Task ToggleFullScreen()
+    private void ToggleFullScreen()
     {
         // Use .Kind (a plain enum) instead of `is OverlappedPresenter` / `is FullScreenPresenter`
         // type-pattern checks. The `is T` form goes through WinRT COM QueryInterface, which the
         // Release-build trimmer strips — causing the check to silently return false in Release.
-        if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped
-            && AppWindow.Presenter is OverlappedPresenter op
-            && op.State == OverlappedPresenterState.Maximized)
+        if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped)
         {
+            _wasMaximizedBeforeFullScreen = AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Maximized };
             AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
             ButtonFullScreenClose.Visibility = Visibility.Visible;
         }
         else if (AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen)
         {
             ButtonFullScreenClose.Visibility = Visibility.Collapsed;
-            var hwnd = WindowNative.GetWindowHandle(this);
-
-            // Prime the Win32 window placement to SW_SHOWMAXIMIZED *before* switching
-            // the presenter. The OverlappedPresenter.State goes to Restored the moment
-            // FullScreen is activated (it's a live reference), so we can't rely on
-            // caching it. Instead, setting the WINDOWPLACEMENT here tells Windows the
-            // desired show-state so that when SetPresenter(Overlapped) releases the
-            // FullScreen mode, the window restores directly to Maximized with no
-            // intermediate Restored flash.
-            Win32Methods.GetWindowPlacement(hwnd, out var placement);
-            placement.showCmd = Win32Methods.SW_SHOWMAXIMIZED;
-            Win32Methods.SetWindowPlacement(hwnd, in placement);
-            await Task.Delay(200); // Ensure the placement change takes effect before switching presenter
+            // When exiting full screen, and the window was previously maximized,
+            // the window will briefly go to restored window state and
+            // then go to maximized. This causes a flicker. This happens because 
+            // the OverlappedPresenter goes to Restored state internally
+            // when we go fullscreen instead of keeping state as maximized.
+            if (_wasMaximizedBeforeFullScreen)
+                NoFlickerMaximize(this);
             AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
+            _wasMaximizedBeforeFullScreen = false;
         }
+    }
+
+    /// <summary>
+    /// Maximizes the specified window using Win32 PInvoke, minimizing visual flicker during the transition.
+    /// </summary>
+    /// <remarks>This method applies the maximized window placement and includes a brief delay to ensure the
+    /// change is fully applied before any subsequent actions. This helps provide a smoother visual experience when
+    /// maximizing the window.</remarks>
+    /// <param name="window">The window to maximize. This parameter cannot be null.</param>
+    private static void NoFlickerMaximize(Window window)
+    {
+        var hwnd = WindowNative.GetWindowHandle(window);
+        Win32Methods.GetWindowPlacement(hwnd, out var placement);
+        placement.showCmd = Win32Methods.SW_SHOWMAXIMIZED;
+        Win32Methods.SetWindowPlacement(hwnd, in placement);
     }
 
     private async Task DeleteCurrentlyDisplayedPhoto()
