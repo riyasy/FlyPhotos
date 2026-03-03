@@ -4,7 +4,7 @@ namespace FlyPhotos.Core;
 
 internal static class Constants
 {
-    public const string AppVersion = "2.5.16";
+    public const string AppVersion = "2.5.17";
 
     // Pan Zoom Animation Related
     public const int PanZoomAnimationDurationForExit = 200;

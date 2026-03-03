@@ -2484,21 +2484,16 @@
         "CertificateFile" = "8:"
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
-        "InstallerBootstrapper" = "3:2"
+        "InstallerBootstrapper" = "3:1"
             "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
             {
-            "Enabled" = "11:TRUE"
+            "Enabled" = "11:FALSE"
             "PromptEnabled" = "11:TRUE"
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
                 "Items"
                 {
-                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
-                    {
-                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
-                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
-                    }
                 }
             }
         }
@@ -2516,21 +2511,16 @@
         "CertificateFile" = "8:"
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
-        "InstallerBootstrapper" = "3:2"
+        "InstallerBootstrapper" = "3:1"
             "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
             {
-            "Enabled" = "11:TRUE"
+            "Enabled" = "11:FALSE"
             "PromptEnabled" = "11:TRUE"
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
                 "Items"
                 {
-                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
-                    {
-                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
-                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
-                    }
                 }
             }
         }
@@ -2550,17 +2540,7 @@
         {
             "LaunchCondition"
             {
-                "{A06ECF26-33A3-4562-8140-9B0E340D4F24}:_2A7D4D70A6B343FB95B69BCBE744562E"
-                {
-                "Name" = "8:.NET Core"
-                "Message" = "8:[VSDNETCOREMSG]"
-                "AllowLaterVersions" = "11:FALSE"
-                "InstallUrl" = "8:https://dotnet.microsoft.com/download/dotnet-core/[NetCoreVerMajorDotMinor]"
-                "IsNETCore" = "11:TRUE"
-                "Architecture" = "2:0"
-                "Runtime" = "2:0"
-                }
-                "{A06ECF26-33A3-4562-8140-9B0E340D4F24}:_9585F233B0A34340A94BFEB40A95BE94"
+                "{A06ECF26-33A3-4562-8140-9B0E340D4F24}:_BF8EF942B22A4FA683712971D2266100"
                 {
                 "Name" = "8:.NET Framework"
                 "Message" = "8:[VSDNETMSG]"
@@ -5966,15 +5946,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:FlyPhotos"
-        "ProductCode" = "8:{6061A7DD-751C-4F19-991B-5040DE4EFAEE}"
-        "PackageCode" = "8:{B7B96F64-1719-442C-AFC5-49E44D21A9BD}"
+        "ProductCode" = "8:{33A739CB-6BE6-45A7-9A80-C5CBECF75E4D}"
+        "PackageCode" = "8:{A1936B58-47DB-4602-BB24-7C48A43BB004}"
         "UpgradeCode" = "8:{5565DCCD-EEED-45A0-93FF-4BABC468C2A7}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:2.5.16"
+        "ProductVersion" = "8:2.5.17"
         "Manufacturer" = "8:RYFTools"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://github.com/riyasy/FlyPhotos"
