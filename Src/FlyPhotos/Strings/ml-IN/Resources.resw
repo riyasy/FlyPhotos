@@ -398,8 +398,7 @@
     <value>നാവിഗേഷനിലെ പാൻ, സൂം, റൊട്ടേഷൻ രീതികൾ</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>വിൻഡോയുടെ സ്ഥാനം, വലുപ്പം, മോണിറ്റർ എന്നിവ സംരക്ഷിക്കുന്നു.
-അടുത്ത ആപ്പ് റീസ്റ്റാർട്ടിന് ശേഷം മാത്രമേ ആരംഭിക്കൂ.</value>
+    <value>വിൻഡോയുടെ സ്ഥാനം, വലുപ്പം, മോണിറ്റർ എന്നിവ സംരക്ഷിക്കുന്നു.</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
     <value>വിൻഡോ നില ഓർമ്മിക്കുക</value>

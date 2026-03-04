@@ -401,8 +401,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Schwenk-, Zoom- und Drehverhalten bei der Navigation</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Speichert Fensterposition, -größe, Monitor und Maximierungsstatus.
-Beginnt nach dem nächsten App-Neustart zu speichern.</value>
+    <value>Speichert Fensterposition, -größe, Monitor und Maximierungsstatus.</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
     <value>Fensterstatus merken</value>

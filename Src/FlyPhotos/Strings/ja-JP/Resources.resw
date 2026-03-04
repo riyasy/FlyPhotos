@@ -400,8 +400,7 @@ FlyPhotosを選択し、「常に」を選択します。</value>
     <value>ナビゲーション中のパン、ズーム、回転の動作</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>ウィンドウの位置、サイズ、モニター、および最大化状態を保存します。
-次回アプリの再起動後から保存を開始します。</value>
+    <value>ウィンドウの位置、サイズ、モニター、および最大化状態を保存します。</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
     <value>ウィンドウの状態を記憶</value>

@@ -401,8 +401,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Pan, Zoom &amp; Rotation-beteende under navigering</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Sparar fönstrets position, storlek, skärm och maximerat läge.
-Börjar spara efter nästa omstart av appen.</value>
+    <value>Sparar fönstrets position, storlek, skärm och maximerat läge.</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
     <value>Kom ihåg fönsterstatus</value>

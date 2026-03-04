@@ -33,6 +33,7 @@ using FlyPhotos.Infra.Interop;
 using WinRT;
 using WinRT.Interop;
 using WinUIEx;
+using WindowManager = FlyPhotos.UI.Behaviors.WindowManager;
 
 namespace FlyPhotos.UI.Views;
 
@@ -74,8 +75,9 @@ public sealed partial class PhotoDisplayWindow
     private Point _lastPoint;
     private bool _isDragging;
 
-
+    // FullScreen/Maximized/Restored state related
     private bool _wasMaximizedBeforeFullScreen = false;
+    private readonly WindowManager _windManager;    
 
     public PhotoDisplayWindow(string firstPhotoPath, bool extLaunch)
     {
@@ -86,9 +88,6 @@ public sealed partial class PhotoDisplayWindow
         Util.SetWindowIcon(this);
 
         SetupTransparentTitleBar();
-
-        if (AppConfig.Settings.RememberLastWindowState)
-            SetUpWindowStatePersistence();
 
         (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumWidth = 400;
         (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumHeight = 300;
@@ -142,14 +141,7 @@ public sealed partial class PhotoDisplayWindow
         _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
         _mouseAutoHider = new MouseAutoHider(MainLayout, TimeSpan.FromSeconds(1));
-    }
-
-    private void SetUpWindowStatePersistence()
-    {
-        var manager = WindowManager.Get(this);
-        if (!PathResolver.IsPackagedApp)
-            WindowManager.PersistenceStorage = new WindowStatePersistence(AppConfig.Settings.WindowState, SaveWindowState);
-        manager.PersistenceId = "Fly_PhotoDisplayWindow";
+        _windManager = new WindowManager(this, AppConfig.Settings.WindowState);
     }
 
     private static void SaveWindowState(string data)
@@ -228,6 +220,7 @@ public sealed partial class PhotoDisplayWindow
         _backdropController?.RemoveSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
         _backdropController?.Dispose();
         _backdropController = null;
+        _windManager.Dispose();
     }
 
     private async void ButtonBack_OnClick(object sender, RoutedEventArgs e)
@@ -648,12 +641,14 @@ public sealed partial class PhotoDisplayWindow
         // Release-build trimmer strips — causing the check to silently return false in Release.
         if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped)
         {
+            _windManager.PauseTracking = true;
             _wasMaximizedBeforeFullScreen = AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Maximized };
             AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
             ButtonFullScreenClose.Visibility = Visibility.Visible;
         }
         else if (AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen)
         {
+            _windManager.PauseTracking = true;
             ButtonFullScreenClose.Visibility = Visibility.Collapsed;
             // When exiting full screen, and the window was previously maximized,
             // the window will briefly go to restored window state and
@@ -898,8 +893,18 @@ public sealed partial class PhotoDisplayWindow
             _canvasController.ZoomOutOnExit(Constants.PanZoomAnimationDurationForExit);
             await Task.Delay(Constants.PanZoomAnimationDurationForExit);
         }
+        SaveLastWindowState();
         this.Hide();
         Close();
+    }
+
+    private void SaveLastWindowState()
+    {
+        if (AppConfig.Settings.RememberLastWindowState)
+        {
+            AppConfig.Settings.WindowState = _windManager.Data;
+            AppConfig.Save();
+        }
     }
 
     #endregion

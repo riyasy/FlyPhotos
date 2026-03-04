@@ -400,8 +400,7 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
     <value>탐색 중 이동, 확대/축소 및 회전 동작</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>창 위치, 크기, 모니터 및 최대화 상태를 저장합니다.
-다음 앱 재시작 후부터 저장을 시작합니다.</value>
+    <value>창 위치, 크기, 모니터 및 최대화 상태를 저장합니다.</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
     <value>창 상태 기억</value>

@@ -401,8 +401,7 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Pan-, Zoom- en Rotatiegedrag tijdens navigeren</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Slaat de vensterpositie, grootte, monitor en gemaximaliseerde status op.
-Begint met opslaan na de volgende herstart van de app.</value>
+    <value>Slaat de vensterpositie, grootte, monitor en gemaximaliseerde status op.</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
     <value>Vensterstatus onthouden</value>

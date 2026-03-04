@@ -401,8 +401,7 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Panoroinnin, zoomin ja kierron käyttäytyminen navigoinnin aikana</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Tallentaa ikkunan sijainnin, koon, näytön ja suurennetun tilan.
-Aloittaa tallentamisen seuraavan sovelluksen uudelleenkäynnistyksen jälkeen.</value>
+    <value>Tallentaa ikkunan sijainnin, koon, näytön ja suurennetun tilan.</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
     <value>Muista ikkunan tila</value>

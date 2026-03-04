@@ -401,8 +401,7 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Comportamento di Pan, Zoom e Rotazione durante la navigazione</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Salva posizione, dimensione, monitor e stato massimizzato della finestra.
-Inizia a salvare dopo il prossimo riavvio dell’app.</value>
+    <value>Salva posizione, dimensione, monitor e stato massimizzato della finestra.</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
     <value>Ricorda stato finestra</value>

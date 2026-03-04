@@ -401,8 +401,7 @@ Configuración &gt; Aplicaciones &gt; Aplicaciones predeterminadas.</value>
     <value>Comportamiento de Panorámica, Zoom y Rotación durante la navegación</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Guarda la posición, el tamaño, el monitor y el estado maximizado de la ventana.
-Comienza a guardar después del próximo reinicio de la aplicación.</value>
+    <value>Guarda la posición, el tamaño, el monitor y el estado maximizado de la ventana.</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
     <value>Recordar estado de la ventana</value>

@@ -401,8 +401,7 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Comportement Pan, Zoom et Rotation pendant la navigation</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Enregistre la position, la taille, l’écran et l’état maximisé de la fenêtre.
-Commence à enregistrer après le prochain redémarrage de l’application.</value>
+    <value>Enregistre la position, la taille, l’écran et l’état maximisé de la fenêtre.</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
     <value>Mémoriser l’état de la fenêtre</value>

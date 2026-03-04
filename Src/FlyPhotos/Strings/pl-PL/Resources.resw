@@ -401,8 +401,7 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Zachowanie przesuwania, powiększania i obracania podczas nawigacji</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Zapisuje pozycję, rozmiar, monitor oraz stan zmaksymalizowany okna.
-Zacznie zapisywać po następnym uruchomieniu aplikacji.</value>
+    <value>Zapisuje pozycję, rozmiar, monitor oraz stan zmaksymalizowany okna.</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
     <value>Zapamiętaj stan okna</value>
