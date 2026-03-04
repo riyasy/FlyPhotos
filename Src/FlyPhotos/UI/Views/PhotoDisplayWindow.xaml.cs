@@ -144,45 +144,6 @@ public sealed partial class PhotoDisplayWindow
         _windManager = new WindowManager(this, AppConfig.Settings.WindowState);
     }
 
-    private static void SaveWindowState(string data)
-    {
-        AppConfig.Settings.WindowState = data;
-        AppConfig.Save();
-    }
-
-    private async void CheckLicense()
-    {
-        if (LicenseService.Instance.State != LicenseState.TrialExpired) return;
-        var dialog = new ContentDialog
-        {
-            Title = L.Get("TrialExpiredMessage/Title"),
-            Content = L.Get("TrialExpiredMessage/Content"),
-            CloseButtonText = L.Get("TrialExpiredMessage/CloseButton"),
-            XamlRoot = Content.XamlRoot
-        };
-        await dialog.ShowAsync();
-        await AnimatePhotoDisplayWindowClose();
-    }
-
-    private void D2dCanvas_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
-    {
-        var point = e.GetPosition(D2dCanvas).AdjustForDpi(D2dCanvas);
-        // Only handle double click if inside image bounds
-        if (!_canvasController.IsPressedOnImage(point)) return;
-
-        // Toggle between 1:1 and Fit
-        // If currently one-to-one, then fit. Otherwise zoom to 100%.
-        // CanvasController raises events to update button states.
-        if (ButtonOneIsToOne.IsChecked == true)
-        {
-            _canvasController.FitToScreen(true);
-        }
-        else
-        {
-            _canvasController.ZoomToHundred(point);
-        }
-    }
-
     #region Event Handlers
 
     private async void PhotoDisplayWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
@@ -518,6 +479,25 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
+    private void D2dCanvas_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+        var point = e.GetPosition(D2dCanvas).AdjustForDpi(D2dCanvas);
+        // Only handle double click if inside image bounds
+        if (!_canvasController.IsPressedOnImage(point)) return;
+
+        // Toggle between 1:1 and Fit
+        // If currently one-to-one, then fit. Otherwise zoom to 100%.
+        // CanvasController raises events to update button states.
+        if (ButtonOneIsToOne.IsChecked == true)
+        {
+            _canvasController.FitToScreen(true);
+        }
+        else
+        {
+            _canvasController.ZoomToHundred(point);
+        }
+    }
+
     private async void Thumbnail_Clicked(int shiftIndex)
     {
         await _photoController.FlyBy(shiftIndex);
@@ -631,102 +611,6 @@ public sealed partial class PhotoDisplayWindow
         catch (Exception ex)
         {
             Logger.Error(ex);
-        }
-    }
-
-    private void ToggleFullScreen()
-    {
-        // Use .Kind (a plain enum) instead of `is OverlappedPresenter` / `is FullScreenPresenter`
-        // type-pattern checks. The `is T` form goes through WinRT COM QueryInterface, which the
-        // Release-build trimmer strips — causing the check to silently return false in Release.
-        if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped)
-        {
-            _windManager.PauseTracking = true;
-            _wasMaximizedBeforeFullScreen = AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Maximized };
-            AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
-            ButtonFullScreenClose.Visibility = Visibility.Visible;
-        }
-        else if (AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen)
-        {
-            _windManager.PauseTracking = true;
-            ButtonFullScreenClose.Visibility = Visibility.Collapsed;
-            // When exiting full screen, and the window was previously maximized,
-            // the window will briefly go to restored window state and
-            // then go to maximized. This causes a flicker. This happens because 
-            // the OverlappedPresenter goes to Restored state internally
-            // when we go fullscreen instead of keeping state as maximized.
-            if (_wasMaximizedBeforeFullScreen)
-                NoFlickerMaximize(this);
-            AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
-            _wasMaximizedBeforeFullScreen = false;
-        }
-    }
-
-    /// <summary>
-    /// Maximizes the specified window using Win32 PInvoke, minimizing visual flicker during the transition.
-    /// </summary>
-    /// <remarks>This method applies the maximized window placement and includes a brief delay to ensure the
-    /// change is fully applied before any subsequent actions. This helps provide a smoother visual experience when
-    /// maximizing the window.</remarks>
-    /// <param name="window">The window to maximize. This parameter cannot be null.</param>
-    private static void NoFlickerMaximize(Window window)
-    {
-        var hwnd = WindowNative.GetWindowHandle(window);
-        Win32Methods.GetWindowPlacement(hwnd, out var placement);
-        placement.showCmd = Win32Methods.SW_SHOWMAXIMIZED;
-        Win32Methods.SetWindowPlacement(hwnd, in placement);
-    }
-
-    private async Task DeleteCurrentlyDisplayedPhoto()
-    {
-        if (!_photoController.CanDeleteCurrentPhoto())
-        {
-            TxtZoom.Text = L.Get("LoadingHighQuality/Message");
-            _inactivityFader.ReportActivity();
-            _canvasController.Shrug();
-            return;
-        }
-
-        if (AppConfig.Settings.ConfirmForDelete)
-        {
-            var confirmDialog = new ContentDialog
-            {
-                XamlRoot = Content.XamlRoot,
-                Title = L.Get("ConfirmDeletion/Title"),
-                Content = L.Get("ConfirmDeletion/Message"),
-                PrimaryButtonText = L.Get("ConfirmDeletion/DeleteButton"),
-                CloseButtonText = L.Get("ConfirmDeletion/CancelButton"),
-                DefaultButton = ContentDialogButton.Close
-            };
-            var result = await confirmDialog.ShowAsync();
-            if (result != ContentDialogResult.Primary)
-            {
-                Logger.Info("User cancelled file deletion.");
-                return;
-            }
-        }
-
-        var delResult = await _photoController.DeleteCurrentPhoto();
-
-        if (delResult.DeleteSuccess)
-        {
-            if (delResult.IsLastPhoto)
-            {
-                await AnimatePhotoDisplayWindowClose();
-            }
-        }
-        else
-        {
-            _canvasController.Shrug();
-            Logger.Error("Failed to delete file");
-            var errorDialog = new ContentDialog
-            {
-                XamlRoot = Content.XamlRoot,
-                Title = L.Get("DeletionFailed/Title"),
-                Content = $"{L.Get("DeletionFailed/Message")}{Environment.NewLine}{delResult.FailMessage}",
-                CloseButtonText = L.Get("DeletionFailed/CloseButton")
-            };
-            await errorDialog.ShowAsync();
         }
     }
 
@@ -904,6 +788,116 @@ public sealed partial class PhotoDisplayWindow
         {
             AppConfig.Settings.WindowState = _windManager.Data;
             AppConfig.Save();
+        }
+    }
+
+    private async void CheckLicense()
+    {
+        if (LicenseService.Instance.State != LicenseState.TrialExpired) return;
+        var dialog = new ContentDialog
+        {
+            Title = L.Get("TrialExpiredMessage/Title"),
+            Content = L.Get("TrialExpiredMessage/Content"),
+            CloseButtonText = L.Get("TrialExpiredMessage/CloseButton"),
+            XamlRoot = Content.XamlRoot
+        };
+        await dialog.ShowAsync();
+        await AnimatePhotoDisplayWindowClose();
+    }
+
+    private void ToggleFullScreen()
+    {
+        // Use .Kind (a plain enum) instead of `is OverlappedPresenter` / `is FullScreenPresenter`
+        // type-pattern checks. The `is T` form goes through WinRT COM QueryInterface, which the
+        // Release-build trimmer strips — causing the check to silently return false in Release.
+        if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped)
+        {
+            _windManager.PauseTracking = true;
+            _wasMaximizedBeforeFullScreen = AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Maximized };
+            AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+            ButtonFullScreenClose.Visibility = Visibility.Visible;
+        }
+        else if (AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen)
+        {
+            _windManager.PauseTracking = true;
+            ButtonFullScreenClose.Visibility = Visibility.Collapsed;
+            // When exiting full screen, and the window was previously maximized,
+            // the window will briefly go to restored window state and
+            // then go to maximized. This causes a flicker. This happens because 
+            // the OverlappedPresenter goes to Restored state internally
+            // when we go fullscreen instead of keeping state as maximized.
+            if (_wasMaximizedBeforeFullScreen)
+                NoFlickerMaximize(this);
+            AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
+            _wasMaximizedBeforeFullScreen = false;
+        }
+    }
+
+    /// <summary>
+    /// Maximizes the specified window using Win32 PInvoke, minimizing visual flicker during the transition.
+    /// </summary>
+    /// <remarks>This method applies the maximized window placement and includes a brief delay to ensure the
+    /// change is fully applied before any subsequent actions. This helps provide a smoother visual experience when
+    /// maximizing the window.</remarks>
+    /// <param name="window">The window to maximize. This parameter cannot be null.</param>
+    private static void NoFlickerMaximize(Window window)
+    {
+        var hwnd = WindowNative.GetWindowHandle(window);
+        Win32Methods.GetWindowPlacement(hwnd, out var placement);
+        placement.showCmd = Win32Methods.SW_SHOWMAXIMIZED;
+        Win32Methods.SetWindowPlacement(hwnd, in placement);
+    }
+
+    private async Task DeleteCurrentlyDisplayedPhoto()
+    {
+        if (!_photoController.CanDeleteCurrentPhoto())
+        {
+            TxtZoom.Text = L.Get("LoadingHighQuality/Message");
+            _inactivityFader.ReportActivity();
+            _canvasController.Shrug();
+            return;
+        }
+
+        if (AppConfig.Settings.ConfirmForDelete)
+        {
+            var confirmDialog = new ContentDialog
+            {
+                XamlRoot = Content.XamlRoot,
+                Title = L.Get("ConfirmDeletion/Title"),
+                Content = L.Get("ConfirmDeletion/Message"),
+                PrimaryButtonText = L.Get("ConfirmDeletion/DeleteButton"),
+                CloseButtonText = L.Get("ConfirmDeletion/CancelButton"),
+                DefaultButton = ContentDialogButton.Close
+            };
+            var result = await confirmDialog.ShowAsync();
+            if (result != ContentDialogResult.Primary)
+            {
+                Logger.Info("User cancelled file deletion.");
+                return;
+            }
+        }
+
+        var delResult = await _photoController.DeleteCurrentPhoto();
+
+        if (delResult.DeleteSuccess)
+        {
+            if (delResult.IsLastPhoto)
+            {
+                await AnimatePhotoDisplayWindowClose();
+            }
+        }
+        else
+        {
+            _canvasController.Shrug();
+            Logger.Error("Failed to delete file");
+            var errorDialog = new ContentDialog
+            {
+                XamlRoot = Content.XamlRoot,
+                Title = L.Get("DeletionFailed/Title"),
+                Content = $"{L.Get("DeletionFailed/Message")}{Environment.NewLine}{delResult.FailMessage}",
+                CloseButtonText = L.Get("DeletionFailed/CloseButton")
+            };
+            await errorDialog.ShowAsync();
         }
     }
 
