@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+    Microsoft ResX Schema
+
+    Version 2.0
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
+    associated with the data types.
+
+    Example:
+
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+
+    There are any number of "resheader" rows that contain simple
+    name/value pairs.
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
+    mimetype set.
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
+    extensible. For a given mimetype the value must be set accordingly:
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
+    read any of the formats listed below.
+
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppSelectionDialog.PrimaryButtonText" xml:space="preserve">
+    <value>選取</value>
+  </data>
+  <data name="AppSelectionDialog.SecondaryButtonText" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="AppSelectionDialog.Title" xml:space="preserve">
+    <value>選取應用程式</value>
+  </data>
+  <data name="BrowseBtn.Content" xml:space="preserve">
+    <value>瀏覽應用程式…</value>
+  </data>
+  <data name="BtnCheckVersion.Content" xml:space="preserve">
+    <value>檢查更新</value>
+  </data>
+  <data name="BtnGitHubRepo.Content" xml:space="preserve">
+    <value>開啟 GitHub 儲存庫</value>
+  </data>
+  <data name="BtnReportBugs.Content" xml:space="preserve">
+    <value>在 GitHub 回報問題</value>
+  </data>
+  <data name="BtnThirdPartyLicenses.Content" xml:space="preserve">
+    <value>查看第三方授權</value>
+  </data>
+  <data name="ButtonBackToolTip.Content" xml:space="preserve">
+    <value>上一張照片</value>
+  </data>
+  <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
+    <value>查看快取狀態</value>
+  </data>
+  <data name="ButtonNextPageToolTip.Content" xml:space="preserve">
+    <value>下一頁</value>
+  </data>
+  <data name="ButtonNextToolTip.Content" xml:space="preserve">
+    <value>下一張照片</value>
+  </data>
+  <data name="ButtonOneIsToOneToolTip.Content" xml:space="preserve">
+    <value>以實際大小縮放</value>
+  </data>
+  <data name="ButtonOpenLog.Content" xml:space="preserve">
+    <value>開啟記錄檔</value>
+  </data>
+  <data name="ButtonPrevPageToolTip.Content" xml:space="preserve">
+    <value>上一頁</value>
+  </data>
+  <data name="ButtonRotateToolTip.Content" xml:space="preserve">
+    <value>旋轉照片</value>
+  </data>
+  <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
+    <value>使照片符合視窗大小</value>
+  </data>
+  <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
+    <value>以其他應用程式開啟</value>
+  </data>
+  <data name="ChangeLanguageAlert.Description" xml:space="preserve">
+    <value>變更顯示語言需要重新啟動應用程式。</value>
+  </data>
+  <data name="ChangeLanguageAlert.Title" xml:space="preserve">
+    <value>變更語言</value>
+  </data>
+  <data name="ColorPickerFlyoutCancelButton.Content" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="ColorPickerFlyoutOkButton.Content" xml:space="preserve">
+    <value>確定</value>
+  </data>
+  <data name="ComboBackgroundItemAcrylic.Content" xml:space="preserve">
+    <value>壓克力（Acrylic）</value>
+  </data>
+  <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
+    <value>薄壓克力（Acrylic Thin）</value>
+  </data>
+  <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
+    <value>霧面</value>
+  </data>
+  <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
+    <value>雲母（Mica）</value>
+  </data>
+  <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
+    <value>雲母替代版（Mica Alt）</value>
+  </data>
+  <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
+    <value>無</value>
+  </data>
+  <data name="ComboBackgroundItemTransparent.Content" xml:space="preserve">
+    <value>透明</value>
+  </data>
+  <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
+    <value>查看上一張或下一張</value>
+  </data>
+  <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
+    <value>放大或縮小</value>
+  </data>
+  <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
+    <value>記住每張照片的平移／縮放／旋轉</value>
+  </data>
+  <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
+    <value>重設平移／縮放／旋轉</value>
+  </data>
+  <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
+    <value>沿用上一張照片的平移／縮放</value>
+  </data>
+  <data name="ComboThemeItemDark.Content" xml:space="preserve">
+    <value>深色</value>
+  </data>
+  <data name="ComboThemeItemDefault.Content" xml:space="preserve">
+    <value>預設</value>
+  </data>
+  <data name="ComboThemeItemLight.Content" xml:space="preserve">
+    <value>淺色</value>
+  </data>
+  <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="ConfirmDeletion.DeleteButton" xml:space="preserve">
+    <value>刪除</value>
+  </data>
+  <data name="ConfirmDeletion.Message" xml:space="preserve">
+    <value>確定要刪除此檔案嗎？</value>
+  </data>
+  <data name="ConfirmDeletion.Title" xml:space="preserve">
+    <value>確認刪除</value>
+  </data>
+  <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
+    <value>若要將 FlyPhotos 設為預設應用程式：
+在照片上按右鍵＞使用其他應用程式開啟＞選擇其他應用程式。
+選擇 FlyPhotos 並勾選「一律使用」。</value>
+  </data>
+  <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
+    <value>在 Windows 11 中，你也可以前往設定＞應用程式＞預設應用程式，
+將 FlyPhotos 設為預設。</value>
+  </data>
+  <data name="DeletionFailed.CloseButton" xml:space="preserve">
+    <value>確定</value>
+  </data>
+  <data name="DeletionFailed.Message" xml:space="preserve">
+    <value>無法刪除檔案。</value>
+  </data>
+  <data name="DeletionFailed.Title" xml:space="preserve">
+    <value>刪除失敗</value>
+  </data>
+  <data name="DonateButton.Content" xml:space="preserve">
+    <value>捐助</value>
+  </data>
+  <data name="DropAreaRun.Text" xml:space="preserve">
+    <value>將照片拖曳到此處，或</value>
+  </data>
+  <data name="HeaderCodec.Text" xml:space="preserve">
+    <value>編解碼器</value>
+  </data>
+  <data name="HeaderExtensions.Text" xml:space="preserve">
+    <value>副檔名</value>
+  </data>
+  <data name="HeaderType.Text" xml:space="preserve">
+    <value>類型</value>
+  </data>
+  <data name="LoadingHighQuality.Message" xml:space="preserve">
+    <value>正在載入高解析度版本，請稍候…</value>
+  </data>
+  <data name="MessageClose_Ok" xml:space="preserve">
+    <value>確定</value>
+  </data>
+  <data name="NoShortcutsCreated.Message" xml:space="preserve">
+    <value>未建立任何捷徑。請在設定中進行配置。</value>
+  </data>
+  <data name="OpenFileHyperlink.Text" xml:space="preserve">
+    <value>開啟檔案</value>
+  </data>
+  <data name="RightClickInstruction.Text" xml:space="preserve">
+    <value>若要使用 FlyPhotos，請在照片上按右鍵並選擇「使用其他應用程式開啟＞FlyPhotos」。</value>
+  </data>
+  <data name="ScanningTextBlock.Text" xml:space="preserve">
+    <value>正在掃描應用程式…</value>
+  </data>
+  <data name="SearchBox.PlaceholderText" xml:space="preserve">
+    <value>搜尋應用程式…</value>
+  </data>
+  <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
+    <value>當滑鼠未使用時，隱藏滑鼠指標。</value>
+  </data>
+  <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
+    <value>自動隱藏滑鼠指標</value>
+  </data>
+  <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
+    <value>刪除檔案前先詢問確認。</value>
+  </data>
+  <data name="SettingsCardConfirmBeforeDelete.Header" xml:space="preserve">
+    <value>刪除前確認</value>
+  </data>
+  <data name="SettingsCardCredits.Description" xml:space="preserve">
+    <value>FlyPhotos 感謝 Svg.Skia、SkiaSharp、Magick.NET、MagicScaler、NLog 和 WinUIEx。</value>
+  </data>
+  <data name="SettingsCardCredits.Header" xml:space="preserve">
+    <value>致謝</value>
+  </data>
+  <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
+    <value>讓 Fly 變得更棒。</value>
+  </data>
+  <data name="SettingsCardDeveloperSupport.Header" xml:space="preserve">
+    <value>支援 FlyPhotos</value>
+  </data>
+  <data name="SettingsCardExternalApps.Description" xml:space="preserve">
+    <value>選擇要加入捷徑的外部應用程式。</value>
+  </data>
+  <data name="SettingsCardExternalApps.Header" xml:space="preserve">
+    <value>選取外部應用程式</value>
+  </data>
+  <data name="SettingsCardExternalShorcuts.Description" xml:space="preserve">
+    <value>以其他應用程式開啟目前的照片</value>
+  </data>
+  <data name="SettingsCardExternalShorcuts.Header" xml:space="preserve">
+    <value>顯示外部應用程式捷徑</value>
+  </data>
+  <data name="SettingsCardFadeControls.Description" xml:space="preserve">
+    <value>當滑鼠移開時淡出控制項。</value>
+  </data>
+  <data name="SettingsCardFadeControls.Header" xml:space="preserve">
+    <value>自動淡出介面控制項</value>
+  </data>
+  <data name="SettingsCardFadeIntensity.Description" xml:space="preserve">
+    <value>調整自動淡出效果的強度。</value>
+  </data>
+  <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
+    <value>淡出強度（％）</value>
+  </data>
+  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
+    <value>停用以獲得更銳利的像素邊緣（可用於像素藝術）。</value>
+  </data>
+  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
+    <value>縮放時使用高品質插值</value>
+  </data>
+  <data name="SettingsCardHighResCache.Description" xml:space="preserve">
+    <value>設定每側快取的高解析度照片數量。</value>
+  </data>
+  <data name="SettingsCardHighResCache.Header" xml:space="preserve">
+    <value>高解析度快取</value>
+  </data>
+  <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
+    <value>選擇照片在螢幕中所佔的比例（％）。</value>
+  </data>
+  <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
+    <value>圖片適應螢幕</value>
+  </data>
+  <data name="SettingsCardLanguage.Header" xml:space="preserve">
+    <value>選擇語言</value>
+  </data>
+  <data name="SettingsCardLog.Description" xml:space="preserve">
+    <value>開啟以查看記錄檔</value>
+  </data>
+  <data name="SettingsCardLog.Header" xml:space="preserve">
+    <value>記錄檔</value>
+  </data>
+  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
+    <value>設定每側快取的低解析度照片數量。</value>
+  </data>
+  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
+    <value>低解析度快取</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
+    <value>選擇預設的滑鼠滾輪行為。</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
+    <value>滑鼠滾輪</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
+    <value>👉 Ctrl + 滑鼠滾輪：永遠縮放。
+👉 Alt + 滑鼠滾輪：永遠切換照片。</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
+    <value>⚠ 可能會使啟動變慢。Fly 會在啟動時等待完整解析度的照片載入。</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
+    <value>開啟檔案時放大、離開時縮小</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
+    <value>⚠ 僅在包含相似尺寸照片的資料夾中使用「沿用」選項。</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
+    <value>瀏覽時的平移、縮放與旋轉行為</value>
+  </data>
+  <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
+    <value>儲存視窗的位置、大小、顯示器與最大化狀態。</value>
+  </data>
+  <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
+    <value>記住視窗狀態</value>
+  </data>
+  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
+    <value>在 GitHub 回報問題，或寄信至 ryftools@outlook.com</value>
+  </data>
+  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
+    <value>錯誤與問題</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
+    <value>在底部面板顯示快取狀態。</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
+    <value>顯示快取狀態</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
+    <value>為透明圖片顯示棋盤格背景。
+⚠ 可能影響效能。</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
+    <value>顯示棋盤格背景</value>
+  </data>
+  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
+    <value>顯示目前開啟檔案的檔名。</value>
+  </data>
+  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
+    <value>顯示檔名</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
+    <value>在檔名旁顯示照片的寬度與高度。</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
+    <value>顯示照片尺寸</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
+    <value>在視窗底部顯示縮圖列。</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
+    <value>顯示縮圖列</value>
+  </data>
+  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
+    <value>顯示縮放百分比</value>
+  </data>
+  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
+    <value>FlyPhotos 是開源專案，並託管於 GitHub。</value>
+  </data>
+  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
+    <value>GitHub 儲存庫</value>
+  </data>
+  <data name="SettingsCardTheme.Description" xml:space="preserve">
+    <value>選擇應用程式的主題。</value>
+  </data>
+  <data name="SettingsCardTheme.Header" xml:space="preserve">
+    <value>視窗主題</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
+    <value>設定選取縮圖時使用的強調色。</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
+    <value>縮圖選取顏色</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
+    <value>調整檢視器中縮圖的大小。</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
+    <value>縮圖大小</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
+    <value>僅適用於透明視窗背景。</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
+    <value>透明度（％）</value>
+  </data>
+  <data name="SettingsCardVersion.Description" xml:space="preserve">
+    <value>目前版本為 {0}</value>
+  </data>
+  <data name="SettingsCardVersion.Header" xml:space="preserve">
+    <value>目前版本</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
+    <value>選擇視窗背景。</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
+    <value>視窗背景</value>
+  </data>
+  <data name="SettingsExpanderAutoFade.Header" xml:space="preserve">
+    <value>自動淡出與隱藏設定</value>
+  </data>
+  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
+    <value>設定 Fly 如何處理照片快取。</value>
+  </data>
+  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
+    <value>快取</value>
+  </data>
+  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
+    <value>鍵盤快速鍵</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
+    <value>自訂平移與縮放行為。</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
+    <value>平移與縮放</value>
+  </data>
+  <data name="SettingsPage.Title" xml:space="preserve">
+    <value>FlyPhotos - 設定</value>
+  </data>
+  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
+    <value>關於</value>
+  </data>
+  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
+    <value>編解碼器</value>
+  </data>
+  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
+    <value>一般</value>
+  </data>
+  <data name="Status_FileNotFound" xml:space="preserve">
+    <value>找不到檔案</value>
+  </data>
+  <data name="Status_InvalidFile" xml:space="preserve">
+    <value>無效的檔案</value>
+  </data>
+  <data name="Status_Loading" xml:space="preserve">
+    <value>載入中…</value>
+  </data>
+  <data name="Status_PreviewFailed" xml:space="preserve">
+    <value>預覽載入失敗</value>
+  </data>
+  <data name="TextBlockCaching.Text" xml:space="preserve">
+    <value>快取</value>
+  </data>
+  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
+    <value>FlyPhotos 主要使用 Windows 內建的 WIC 編解碼器。</value>
+  </data>
+  <data name="TextBlockLog.Text" xml:space="preserve">
+    <value>記錄</value>
+  </data>
+  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
+    <value>照片顯示</value>
+  </data>
+  <data name="TextBlockTheming.Text" xml:space="preserve">
+    <value>外觀</value>
+  </data>
+  <data name="TextBlockUIControls.Text" xml:space="preserve">
+    <value>介面控制項</value>
+  </data>
+  <data name="TitleTextBlock.Text" xml:space="preserve">
+    <value>FlyPhotos - 開啟照片</value>
+  </data>
+  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
+    <value>確定</value>
+  </data>
+  <data name="TrialExpiredMessage.Content" xml:space="preserve">
+    <value>免費試用已到期。請從 Microsoft Store 購買完整版本。</value>
+  </data>
+  <data name="TrialExpiredMessage.Title" xml:space="preserve">
+    <value>試用已到期</value>
+  </data>
+  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
+    <value>拖曳的檔案不是支援的圖片格式。</value>
+  </data>
+  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
+    <value>不支援的檔案</value>
+  </data>
+  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
+    <value>左／右方向鍵：切換照片
+上／下方向鍵：放大或縮小
+滑鼠左鍵拖曳：平移照片
+
+滑鼠滾輪：放大或縮小／切換照片（依設定）
+Ctrl + 滑鼠滾輪：放大或縮小
+Alt + 滑鼠滾輪：切換照片
+滑鼠滾輪左右傾斜：切換照片
+
+Ctrl + 方向鍵：平移照片
+Ctrl + +：放大
+Ctrl + -：縮小
+
+Alt + 左／右方向鍵：切換多頁 TIFF 的頁面
+
+Page Up/Page Down：切換至下一個縮放預設（100%、400%、符合視窗）
+Home：前往第一張照片
+End：前往最後一張照片
+
+縮圖列上滾輪：切換照片
+螢幕左右按鈕上滾輪：切換照片
+螢幕旋轉按鈕上滾輪：旋轉照片
+
+觸控板雙指左右滑動：切換照片
+觸控板雙指上下滑動：放大或縮小／切換照片（依設定）
+觸控板雙指開合：放大或縮小
+
+F11：全螢幕
+D：顯示檔案內容
+Del：刪除照片
+
+Esc：關閉設定或離開應用程式</value>
+  </data>
+</root>
