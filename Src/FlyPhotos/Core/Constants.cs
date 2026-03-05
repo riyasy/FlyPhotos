@@ -37,6 +37,7 @@ internal static class Constants
         "nl-NL", // Dutch
         "sv-SE", // Swedish
         "fi-FI",  // Finnish
+        "zh-TW", // Chinese (Traditional, Taiwan)
         "ml-IN" // Malayalam
     ];
 }

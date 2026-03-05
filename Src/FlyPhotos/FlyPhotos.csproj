@@ -20,7 +20,7 @@
 		<ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
 		<PublishAot>true</PublishAot>
 		<DefaultLanguage>en-US</DefaultLanguage>
-		<SatelliteResourceLanguages>en-US;de-DE;fr-FR;es-ES;ja-JP;ko-KR;it-IT;pl-PL;nl-NL;sv-SE;fi-FI;ml-IN</SatelliteResourceLanguages>
+		<SatelliteResourceLanguages>en-US;de-DE;fr-FR;es-ES;ja-JP;ko-KR;it-IT;pl-PL;nl-NL;sv-SE;fi-FI;zh-TW;ml-IN</SatelliteResourceLanguages>
 		<!-- InvariantGlobalization>true</InvariantGlobalization -->
 		<GenerateTestArtifacts>False</GenerateTestArtifacts>
 		<NoWarn>$(NoWarn);CA1416</NoWarn>
@@ -104,6 +104,10 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Visible>false</Visible>
 		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Strings\zh-TW\" />
 	</ItemGroup>
 
 	<!-- 4. PUBLISH LOGIC (Unpackaged):
