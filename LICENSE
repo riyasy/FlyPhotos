@@ -3,7 +3,7 @@ FlyPhotos Licensing Information
 
 This file describes the licensing terms for 
 1) FlyPhotos source code (GPLv3),
-2) official binaries (restricted), 
+2) FlyPhotos Binaries (restricted), 
 3) trademarks, and 
 4) third-party components.
 
@@ -692,17 +692,16 @@ Public License instead of this License.  But first, please read
 <https://www.gnu.org/licenses/why-not-lgpl.html>.
 
 ------------------------------------------------------------
-SECTION 2 — OFFICIAL BINARY DISTRIBUTION TERMS
+SECTION 2 — BINARY DISTRIBUTION TERMS
 ------------------------------------------------------------
 
-Official precompiled binaries of FlyPhotos are distributed under the
-following terms:
+Binaries of FlyPhotos are subject to the following terms:
 
-- Redistribution of official FlyPhotos binaries is not permitted.
-- Publishing official builds on application stores or marketplaces,
-  including the Microsoft Store, is not permitted without explicit
-  written permission from the copyright holder.
-- These terms apply only to official binaries and do not limit rights
+- Redistribution of FlyPhotos binaries is not permitted.
+- Publishing of builds/ forked builds on application stores or 
+  marketplaces, including the Microsoft Store, is not permitted without 
+  explicit written permission from the copyright holder.
+- These terms apply only to binaries and do not limit rights
   granted by the GPL to the source code.
 
 ------------------------------------------------------------
