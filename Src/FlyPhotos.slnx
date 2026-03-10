@@ -14,4 +14,7 @@
   <Project Path="FlyPhotosInstaller/FlyPhotosInstaller.vdproj" Type="Installer">
     <Build />
   </Project>
+  <Project Path="FlyPhotosInstaller_ARM64/FlyPhotosInstaller_ARM64.vdproj" Type="Installer">
+    <Build />
+  </Project>
 </Solution>
