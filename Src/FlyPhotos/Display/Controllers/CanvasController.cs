@@ -37,7 +37,7 @@ internal class CanvasController : ICanvasController
     private bool _invalidatePending;
     private int _latestSetSourceOperationId;
 
-    // For GIF and APNG File handling
+    // For GIF, WebP, and APNG File handling
     private readonly SemaphoreSlim _animatorLock = new(1, 1);
 
     // For Checkered Background
@@ -167,11 +167,12 @@ internal class CanvasController : ICanvasController
             IRenderer firstFrameRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, animDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency, RequestInvalidate, false);
             SetupNewRenderer(firstFrameRenderer, _imageSize, animDispItem.Rotation, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, true);
 
-            // Asynchronously create the appropriate animator (GIF or APNG).
+            // Asynchronously create the appropriate animator (GIF, WebP, or APNG).
+            var ext = Path.GetExtension(photo.FilePath);
             IAnimator newAnimator =
-                string.Equals(Path.GetExtension(photo.FilePath), ".gif", StringComparison.OrdinalIgnoreCase)
-                    ? await GifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas)
-                    : await PngAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas);
+                string.Equals(ext, ".gif",  StringComparison.OrdinalIgnoreCase) ? await GifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas)  :
+                string.Equals(ext, ".webp", StringComparison.OrdinalIgnoreCase) ? await WebpAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas) :
+                                                                                   await PngAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas);
 
             // RACE CONDITION CHECK: If another SetSource call has started while we were creating the
             // animator, this operation is now obsolete. We should discard the result and clean up.

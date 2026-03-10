@@ -70,6 +70,11 @@ internal static class ImageReader
                         if (await GifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
+                case ".WEBP":
+                    {
+                        if (await WebpReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
+                    }
                 case ".PNG":
                     {
                         if (await PngReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
@@ -153,6 +158,7 @@ internal static class ImageReader
                 case ".GIF":
                 case ".PNG":
                 case ".BMP":
+                case ".WEBP":
                     {
                         if (await WicReader.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
@@ -229,6 +235,11 @@ internal static class ImageReader
                 case ".GIF":
                     {
                         if (await GifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
+                    }
+                case ".WEBP":
+                    {
+                        if (await WebpReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
                 case ".PNG":
