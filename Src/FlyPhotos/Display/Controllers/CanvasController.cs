@@ -358,7 +358,7 @@ internal class CanvasController : ICanvasController
     private void D2dCanvas_SizeChanged(object sender, SizeChangedEventArgs args)
     {
         if (IsScreenEmpty()) return;
-        _canvasViewManager.HandleSizeChange(Size.FromFoundationSize(args.NewSize), Size.FromFoundationSize(args.PreviousSize));
+        _canvasViewManager.HandleSizeChange(args.NewSize.AdjustForDpi(_d2dCanvas), args.PreviousSize.AdjustForDpi(_d2dCanvas));
     }
 
     #endregion

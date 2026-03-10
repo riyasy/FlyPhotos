@@ -27,4 +27,16 @@ internal static class DpiExtensions
         double scale = canvasControl.Dpi / 96.0;
         return val * scale;
     }
+
+    public static Size AdjustForDpi(this Size logicalSize, CanvasControl canvasControl)
+    {
+        double scale = canvasControl.Dpi / 96.0;
+        return new Size(logicalSize.Width * scale, logicalSize.Height * scale);
+    }
+
+    public static Size AdjustForDpi(this Windows.Foundation.Size foundationSize, CanvasControl canvasControl)
+    {
+        double scale = canvasControl.Dpi / 96.0;
+        return new Size(foundationSize.Width * scale, foundationSize.Height * scale);
+    }
 }
