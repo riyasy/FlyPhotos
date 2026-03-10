@@ -2540,14 +2540,6 @@
         {
             "LaunchCondition"
             {
-                "{A06ECF26-33A3-4562-8140-9B0E340D4F24}:_BF8EF942B22A4FA683712971D2266100"
-                {
-                "Name" = "8:.NET Framework"
-                "Message" = "8:[VSDNETMSG]"
-                "FrameworkVersion" = "8:.NETFramework,Version=v4.7.2"
-                "AllowLaterVersions" = "11:FALSE"
-                "InstallUrl" = "8:http://go.microsoft.com/fwlink/?LinkId=863262"
-                }
             }
         }
         "File"
@@ -5946,15 +5938,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:FlyPhotos"
-        "ProductCode" = "8:{33A739CB-6BE6-45A7-9A80-C5CBECF75E4D}"
-        "PackageCode" = "8:{A1936B58-47DB-4602-BB24-7C48A43BB004}"
+        "ProductCode" = "8:{C62DA21B-75FD-46FE-A531-7D693605A489}"
+        "PackageCode" = "8:{A098099C-AE95-439F-BD79-7382FBE002CF}"
         "UpgradeCode" = "8:{5565DCCD-EEED-45A0-93FF-4BABC468C2A7}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:2.5.17"
+        "ProductVersion" = "8:2.5.18"
         "Manufacturer" = "8:RYFTools"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://github.com/riyasy/FlyPhotos"
@@ -6710,7 +6702,7 @@
                                             "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_1722A68433C34E0CAB89C3140CCA1E10"
                                             {
                                             "Name" = "8:Icon"
-                                            "Condition" = "8:"
+                                            "Condition" = "8:CHECKBOXA1=1"
                                             "Transitive" = "11:FALSE"
                                             "ValueTypes" = "3:1"
                                             "Value" = "8:\"[TARGETDIR]Assets\\app-icon.ico\""
