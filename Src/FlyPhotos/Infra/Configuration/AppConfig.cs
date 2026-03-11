@@ -17,6 +17,7 @@ public static class AppConfig
 {
     private static string _userSettingsPath;
     public static AppSettings Settings { get; private set; }
+    public static AppVolatileState Volatile { get; } = new();
 
     // This method reads the config files when the app starts.
     public static void Initialize()

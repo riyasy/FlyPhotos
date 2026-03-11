@@ -76,4 +76,5 @@ public class AppSettings
     public string Language { get; set; } = "Default";
     public bool RememberLastWindowState { get; set; } = false;
     public string WindowState { get; set; } = "";
+    public bool AllowMultiInstance { get; set; } = false;
 }

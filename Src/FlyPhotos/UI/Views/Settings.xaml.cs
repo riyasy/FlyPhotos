@@ -86,6 +86,7 @@ internal sealed partial class Settings
         RectThumbnailSelection.Stroke = new SolidColorBrush(ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor));
         SliderThumbnailSize.Value = AppConfig.Settings.ThumbnailSize;
         ButtonRememberLastWindowState.IsOn = AppConfig.Settings.RememberLastWindowState;
+        ButtonAllowMultiInstance.IsOn = AppConfig.Settings.AllowMultiInstance;
         ButtonConfirmBeforeDelete.IsOn = AppConfig.Settings.ConfirmForDelete;
         ButtonShowFileName.IsOn = AppConfig.Settings.ShowFileName;
         ButtonShowCacheStatusExpander.IsOn = AppConfig.Settings.ShowCacheStatus;
@@ -111,6 +112,7 @@ internal sealed partial class Settings
         SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
         SliderThumbnailSize.ValueChanged += SliderThumbnailSize_ValueChanged;
         ButtonRememberLastWindowState.Toggled += ButtonRememberLastWindowState_OnToggled;
+        ButtonAllowMultiInstance.Toggled += ButtonAllowMultiInstance_OnToggled;
         ButtonConfirmBeforeDelete.Toggled += ButtonConfirmBeforeDelete_OnToggled;
         ButtonShowFileName.Toggled += ButtonShowFileName_OnToggled;
         ButtonShowImageDimensions.Toggled += ButtonShowImageDimensions_OnToggled;
@@ -208,6 +210,12 @@ internal sealed partial class Settings
     private async void ButtonRememberLastWindowState_OnToggled(object sender, RoutedEventArgs e)
     {
         AppConfig.Settings.RememberLastWindowState = ButtonRememberLastWindowState.IsOn;
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ButtonAllowMultiInstance_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.AllowMultiInstance = ButtonAllowMultiInstance.IsOn;
         await AppConfig.SaveAsync();
     }
 

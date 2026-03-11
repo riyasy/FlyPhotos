@@ -77,7 +77,7 @@ public sealed partial class PhotoDisplayWindow
 
     // FullScreen/Maximized/Restored state related
     private bool _wasMaximizedBeforeFullScreen = false;
-    private readonly WindowManager _windManager;    
+    private readonly WindowManager _windManager;
 
     public PhotoDisplayWindow(string firstPhotoPath, bool extLaunch)
     {
@@ -117,6 +117,13 @@ public sealed partial class PhotoDisplayWindow
         BorderTxtFileName.Visibility = AppConfig.Settings.ShowFileName ? Visibility.Visible : Visibility.Collapsed;
         ButtonExpander.Visibility = AppConfig.Settings.ShowCacheStatus ? Visibility.Visible : Visibility.Collapsed;
         ButtonShortcuts.Visibility = AppConfig.Settings.ShowExternalAppShortcuts ? Visibility.Visible : Visibility.Collapsed;
+
+        // Secondary instances are restricted: no Settings, no cache status.
+        if (AppConfig.Volatile.IsSecondaryInstance)
+        {
+            ButtonSettings.Visibility = Visibility.Collapsed;
+            ButtonExpander.Visibility = Visibility.Collapsed;
+        }
 
         Activated += PhotoDisplayWindow_Activated;
         AppWindow.Closing += PhotoDisplayWindow_Closing;
@@ -533,7 +540,8 @@ public sealed partial class PhotoDisplayWindow
                     break;
 
                 case VirtualKey.Delete:
-                    await DeleteCurrentlyDisplayedPhoto();
+                    if (!AppConfig.Volatile.IsSecondaryInstance)
+                        await DeleteCurrentlyDisplayedPhoto();
                     break;
 
                 case VirtualKey.Home:

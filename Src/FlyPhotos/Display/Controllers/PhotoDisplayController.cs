@@ -107,7 +107,18 @@ internal partial class PhotoDisplayController
     {
         try
         {
-            var files = FileDiscovery.DiscoverFiles(selectedFilePath, _photoSessionState.FlyLaunchedExternally);
+            List<string> files;
+
+            if (AppConfig.Volatile.IsSecondaryInstance)
+            {
+                // Secondary instances only display the single opened image.
+                // No folder or Explorer-window discovery is performed.
+                files = [selectedFilePath];
+            }
+            else
+            {
+                files = FileDiscovery.DiscoverFiles(selectedFilePath, _photoSessionState.FlyLaunchedExternally);
+            }
 
             _photoSessionState.PhotosCount = files.Count;
 
@@ -132,6 +143,10 @@ internal partial class PhotoDisplayController
             UpdateFileNameAndDetails();
 
             FirstPhotoLoaded?.Invoke();
+
+            // Secondary instances skip all background caching threads.
+            if (AppConfig.Volatile.IsSecondaryInstance) return;
+
             if (LicenseService.Instance.State == LicenseState.TrialExpired) return;
 
             var previewCachingThread = new Thread(() => PreviewCacheBuilderDoWork(_cts.Token)) { IsBackground = true };

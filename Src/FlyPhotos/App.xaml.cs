@@ -34,9 +34,11 @@ public partial class App
     public App()
     {
         GlobalDiagnosticsContext.Set("LogPath", PathResolver.GetLogFolderPath());
-        KillOtherFlys();
 
+        // Must call Initialize before reading AllowMultiInstance setting.
         AppConfig.Initialize();
+
+        HandleInstanceManagement();
 
         var appliedLanguage = Localizer.ApplyLanguage(AppConfig.Settings.Language);
         if (appliedLanguage != AppConfig.Settings.Language)
@@ -90,15 +92,34 @@ public partial class App
         _photoDisplayWindow.Activate();
     }
 
-    private static void KillOtherFlys()
+    /// <summary>
+    /// Handles single/multi-instance startup logic.
+    /// When AllowMultiInstance is false (default): kills any existing FlyPhotos processes (original behavior).
+    /// When AllowMultiInstance is true: the first instance acquires the mutex and is the full-featured primary.
+    /// Subsequent instances become secondary — they launch with restricted mode (no folder scan, no Settings, no Delete).
+    /// </summary>
+    private void HandleInstanceManagement()
     {
         const string appName = "FlyPhotosFlyPhotosWinUI";
         _mutex = new Mutex(true, appName, out var createdNew);
-        if (createdNew) return;
-        var current = Process.GetCurrentProcess();
-        foreach (var process in Process.GetProcessesByName(current.ProcessName))
-            if (process.Id != current.Id)
-                process.Kill();
+
+        if (AppConfig.Settings.AllowMultiInstance)
+        {
+            // Multi-instance mode: first instance is primary, others are secondary.
+            AppConfig.Volatile.IsSecondaryInstance = !createdNew;
+        }
+        else
+        {
+            // Single-instance mode (default): kill any other running instances.
+            if (!createdNew)
+            {
+                var current = Process.GetCurrentProcess();
+                foreach (var process in Process.GetProcessesByName(current.ProcessName))
+                    if (process.Id != current.Id)
+                        process.Kill();
+            }
+            AppConfig.Volatile.IsSecondaryInstance = false;
+        }
     }
 
     private static string GetFilePathFromCommandLine()

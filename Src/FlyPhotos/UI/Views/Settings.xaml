@@ -340,6 +340,13 @@
                             HeaderIcon="{ui:FontIcon Glyph=&#xEC77;}">
                             <ToggleSwitch x:Name="ButtonRememberLastWindowState" />
                         </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardAllowMultiInstance"
+                            x:Uid="SettingsCardAllowMultiInstance"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE8A7;}">
+                            <ToggleSwitch x:Name="ButtonAllowMultiInstance" />
+                        </controls:SettingsCard>
                         <TextBlock
                             x:Uid="TextBlockCaching"
                             Margin="0,20,0,0"
