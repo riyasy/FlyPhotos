@@ -43,14 +43,47 @@ extern "C" {
     /// @note The callback function will be called multiple times, once for each decoder.
     __declspec(dllexport) HRESULT GetWicDecoders(CodecInfoCallback callback);
 
-    // Callback for enumerating StartMenuShortcuts
-    typedef void(__stdcall* ShortcutCallback)(const wchar_t* name, const wchar_t* path,
-        const uint8_t* pixels, int size, int width, int height);
+    /// @brief Callback for enumerating installed apps (Win32 and UWP) from FOLDERID_AppsFolder.
+    /// @param name      Display name of the application.
+    /// @param path      Full .exe path for Win32 apps; empty string for UWP apps.
+    /// @param aumid     Application User Model ID for UWP apps; empty string for Win32 apps.
+    /// @param isUwp     Non-zero if the entry is a UWP/packaged app, zero if Win32.
+    /// @param pixels    Pointer to the 32bpp BGRA (premultiplied-alpha) icon pixel data.
+    /// @param pixelSize Byte length of the pixel buffer (width * height * 4).
+    /// @param width     Icon width in pixels.
+    /// @param height    Icon height in pixels.
+    typedef void(__stdcall* ShortcutCallback)(
+        const wchar_t* name,
+        const wchar_t* path,
+        const wchar_t* aumid,
+        int            isUwp,
+        const uint8_t* pixels,
+        int            pixelSize,
+        int            width,
+        int            height);
 
-    /// @brief Enumerates Start Menu shortcuts, resolves targets, and extracts icons.
-    /// @param callback A pointer to a callback function.
-    /// @return S_OK on success.
+    /// @brief Enumerates all installed apps (Win32 and UWP) from the Apps virtual folder.
+    ///        For each app the callback is invoked once with icon data and type information.
+    /// @param callback A pointer to a callback function to receive each entry.
+    /// @return S_OK on success, or an HRESULT error code.
     __declspec(dllexport) HRESULT EnumerateStartMenuShortcuts(ShortcutCallback callback);
+
+    /// @brief Callback for receiving a single extracted icon.
+    /// @param pixels    Pointer to the 32bpp BGRA (premultiplied-alpha) icon pixel data.
+    /// @param pixelSize Byte length of the pixel buffer.
+    /// @param width     Icon width in pixels.
+    /// @param height    Icon height in pixels.
+    typedef void(__stdcall* SingleIconCallback)(
+        const uint8_t* pixels,
+        int            pixelSize,
+        int            width,
+        int            height);
+
+    /// @brief Extracts the icon for a single UWP app using its AUMID.
+    /// @param aumid    The Application User Model ID of the UWP app.
+    /// @param callback A pointer to a callback function to receive the icon data.
+    /// @return S_OK on success, or an error code.
+    __declspec(dllexport) HRESULT GetUwpAppIcon(const wchar_t* aumid, SingleIconCallback callback);
 
 #ifdef __cplusplus
 }

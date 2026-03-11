@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -72,19 +72,9 @@ public sealed partial class AppSelectionDialog
             LoadingPanel.Visibility = Visibility.Visible;
             AppListView.Visibility = Visibility.Collapsed;
 
-            var win32Provider = new Win32AppProvider();
-            var storeProvider = new StoreAppProvider();
-
-            var tasks = new List<Task<IEnumerable<InstalledApp>>>
-            {
-                win32Provider.GetAppsAsync(),
-                storeProvider.GetAppsAsync()
-            };
-
-            var results = await Task.WhenAll(tasks);
-
-            foreach (var result in results)
-                _allApps.AddRange(result);
+            var provider = new ShellAppProvider();
+            var allApps = await provider.GetAppsAsync();
+            _allApps.AddRange(allApps);
 
             var iconTasks = new List<Task>();
             foreach (var app in _allApps)

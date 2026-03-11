@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -74,12 +74,14 @@ internal static partial class NativeBridge
     internal static partial int ShowExplorerContextMenu(IntPtr ownerHwnd, string filePath, int x, int y);
 
     /// <summary>
-    /// Callback delegate for receiving shortcut information from native code.
+    /// Callback delegate for receiving app entry information (Win32 or UWP) from native code.
     /// </summary>
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
     public delegate void ShortcutCallback(
         [MarshalAs(UnmanagedType.LPWStr)] string name,
         [MarshalAs(UnmanagedType.LPWStr)] string path,
+        [MarshalAs(UnmanagedType.LPWStr)] string aumid,
+        int isUwp,
         IntPtr iconData, int iconSize, int width, int height
     );
 
@@ -91,20 +93,34 @@ internal static partial class NativeBridge
     [LibraryImport(DllName)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int EnumerateStartMenuShortcuts(ShortcutCallback callback);
+
+    /// <summary>
+    /// Callback delegate for receiving a single extracted icon from native code.
+    /// </summary>
+    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+    public delegate void SingleIconCallback(IntPtr iconData, int iconSize, int width, int height);
+
+    /// <summary>
+    /// Extracts the icon for a single UWP app using its AUMID.
+    /// </summary>
+    [LibraryImport(DllName, StringMarshalling = StringMarshalling.Utf16)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int GetUwpAppIcon(string aumid, SingleIconCallback callback);
 }
 
 #endregion
 
 /// <summary>
-/// Data Transfer Object for application shortcuts.
+/// Data Transfer Object for an installed application entry (Win32 or UWP).
 /// </summary>
 public record AppShortcutDto(
     string Name,
     string Path,
+    string Aumid,
+    bool IsUwp,
     byte[] IconPixels,
     int Width,
-    int Height,
-    AppType Type, string aumid);
+    int Height);
 
 /// <summary>
 /// Provides a high-level, managed wrapper for native functionalities exposed by `FlyNativeLib.dll`.
@@ -201,31 +217,71 @@ public static class NativeWrapper
     }
 
     /// <summary>
-    /// Blocking call to scan Start Menu. Run this on a background thread.
+    /// Blocking call to scan the Apps virtual folder for all installed apps (Win32 + UWP).
+    /// Run this on a background thread. Replaces the old LoadAllWin32ProgramShortcuts method.
     /// </summary>
-    public static List<AppShortcutDto> LoadAllWin32ProgramShortcuts()
+    public static List<AppShortcutDto> LoadAllApps()
     {
-        var rawDataList = new List<AppShortcutDto>(100);
+        var rawDataList = new List<AppShortcutDto>(256);
         try
         {
-            // Keep delegate alive for entire native call
+            // Keep the delegate alive for the entire duration of the native call.
             NativeBridge.ShortcutCallback callback = CallbackDelegate;
             NativeBridge.EnumerateStartMenuShortcuts(callback);
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "NativeBridge - Error scanning shortcuts");
+            Logger.Error(ex, "NativeBridge - Error scanning apps");
         }
         return rawDataList;
-        void CallbackDelegate(string name, string path, IntPtr iconData, int iconSize, int width, int height)
+
+        void CallbackDelegate(string name, string path, string aumid, int isUwp,
+                              IntPtr iconData, int iconSize, int width, int height)
         {
-            // 10MB limit for icon seems plenty safe
+            // Sanity-check pixel buffer before allocating.
             if (iconSize <= 0 || iconSize > 10 * 1024 * 1024 || width <= 0 || height <= 0)
                 return;
-            // BGRA 32bpp → managed byte[]
+
             byte[] pixels = new byte[iconSize];
             Marshal.Copy(iconData, pixels, 0, iconSize);
-            rawDataList.Add(new AppShortcutDto(name, path, pixels, width, height, AppType.Win32, string.Empty));
+
+            rawDataList.Add(new AppShortcutDto(
+                Name:       name,
+                Path:       path,
+                Aumid:      aumid,
+                IsUwp:      isUwp != 0,
+                IconPixels: pixels,
+                Width:      width,
+                Height:     height));
+        }
+    }
+
+    /// <summary>
+    /// Extracts the raw BGRA icon for a single UWP app via its AUMID, matching the scan quality.
+    /// </summary>
+    public static FlyPhotos.Services.ExternalAppListing.RawIconData? GetUwpAppIcon(string aumid)
+    {
+        FlyPhotos.Services.ExternalAppListing.RawIconData? result = null;
+        try
+        {
+            NativeBridge.SingleIconCallback callback = CallbackDelegate;
+            NativeBridge.GetUwpAppIcon(aumid, callback);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, $"NativeBridge - Error extracting UWP icon for {aumid}");
+        }
+        return result;
+
+        void CallbackDelegate(IntPtr iconData, int iconSize, int width, int height)
+        {
+            if (iconSize <= 0 || iconSize > 10 * 1024 * 1024 || width <= 0 || height <= 0)
+                return;
+
+            byte[] pixels = new byte[iconSize];
+            Marshal.Copy(iconData, pixels, 0, iconSize);
+
+            result = new FlyPhotos.Services.ExternalAppListing.RawIconData(pixels, width, height);
         }
     }
 }

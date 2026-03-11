@@ -129,7 +129,7 @@ HRESULT GetWicDecoders(CodecInfoCallback callback)
     return hr;
 }
 
-/// @brief Enumerates Start Menu shortcuts, resolves targets, and extracts icons.
+/// @brief Enumerates all installed apps (Win32 and UWP) from FOLDERID_AppsFolder.
 /// @param callback A pointer to a callback function.
 /// @return S_OK on success.
 HRESULT EnumerateStartMenuShortcuts(ShortcutCallback callback)
@@ -138,12 +138,37 @@ HRESULT EnumerateStartMenuShortcuts(ShortcutCallback callback)
         return E_POINTER;
 
     ShellProgramScanner scanner;
-    scanner.Scan();
+    auto results = scanner.Scan();
 
-    for (const auto& item : scanner.GetResults())
+    for (const auto& item : results)
     {
-        callback(item.Name.c_str(), item.Path.c_str(), item.Pixels.data(), 
-            (int)item.Pixels.size(), item.Width, item.Height);
+        callback(
+            item.Name.c_str(),
+            item.IsUwp ? L"" : item.Path.c_str(),
+            item.IsUwp ? item.Aumid.c_str() : L"",
+            item.IsUwp ? 1 : 0,
+            item.Pixels.data(),
+            (int)item.Pixels.size(),
+            item.Width,
+            item.Height);
     }
     return S_OK;
+}
+
+/// @brief Extracts the icon for a single UWP app using its AUMID.
+HRESULT GetUwpAppIcon(const wchar_t* aumid, SingleIconCallback callback)
+{
+    if (!aumid || !callback)
+        return E_POINTER;
+
+    std::vector<uint8_t> pixels;
+    int width = 0, height = 0;
+
+    if (ShellProgramScanner::GetUwpIconByAumid(aumid, pixels, width, height))
+    {
+        callback(pixels.data(), (int)pixels.size(), width, height);
+        return S_OK;
+    }
+
+    return E_FAIL;
 }

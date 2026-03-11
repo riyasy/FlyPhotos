@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using System;
 using System.Diagnostics;
@@ -70,12 +70,12 @@ public abstract class InstalledApp
 }
 
 /// <summary>
-/// Represents the raw icon pixels and dimensions for a Win32 app.
+/// Represents the raw icon pixels and dimensions for an app icon.
 /// </summary>
 /// <param name="IconPixels">The raw pixel data (BGRA32).</param>
 /// <param name="Width">The width of the icon.</param>
 /// <param name="Height">The height of the icon.</param>
-public record Win32IconData(byte[] IconPixels, int Width, int Height);
+public record RawIconData(byte[] IconPixels, int Width, int Height);
 
 /// <summary>
 /// Represents a Win32 desktop application.
@@ -95,7 +95,7 @@ public class Win32App : InstalledApp
     /// <summary>
     /// Gets or sets the icon data extracted from native code.
     /// </summary>
-    public Win32IconData? IconData { get; set; }
+    public RawIconData? IconData { get; set; }
 
     public override Task LaunchAsync(string filePath)
     {
@@ -119,6 +119,9 @@ public class Win32App : InstalledApp
             using var stream = bmp.PixelBuffer.AsStream();
             stream.Write(IconData.IconPixels, 0, IconData.IconPixels.Length);
             Icon = bmp;
+            
+            // Allow garbage collection of the raw byte array now that the texture is created.
+            IconData = null;
         }
         return Task.CompletedTask;
     }
@@ -153,9 +156,14 @@ public class StoreApp : InstalledApp
     public string? PackageFamilyName { get; set; }
 
     /// <summary>
-    /// Gets or sets the raw icon data (bytes).
+    /// Gets or sets the generic image icon data (bytes). Used for falling back to PNG bytes during restore.
     /// </summary>
     public byte[]? IconData { get; set; }
+
+    /// <summary>
+    /// Gets or sets the BGRA pixel icon data extracted from native code.
+    /// </summary>
+    public RawIconData? RawIconData { get; set; }
 
     public override async Task LaunchAsync(string filePath)
     {
@@ -191,6 +199,18 @@ public class StoreApp : InstalledApp
 
     public override async Task DecodeIconAsync()
     {
+        if (RawIconData != null)
+        {
+            var bmp = new WriteableBitmap(RawIconData.Width, RawIconData.Height);
+            using var stream = bmp.PixelBuffer.AsStream();
+            stream.Write(RawIconData.IconPixels, 0, RawIconData.IconPixels.Length);
+            Icon = bmp;
+            
+            // Allow garbage collection
+            RawIconData = null;
+            return;
+        }
+
         if (IconData == null || IconData.Length == 0)
             return;
         try
@@ -199,6 +219,9 @@ public class StoreApp : InstalledApp
             using var ms = new MemoryStream(IconData);
             await image.SetSourceAsync(ms.AsRandomAccessStream());
             Icon = image;
+            
+            // Allow garbage collection
+            IconData = null;
         }
         catch (Exception ex)
         {
