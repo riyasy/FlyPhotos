@@ -592,8 +592,8 @@ public partial class WebpAnimator : IAnimator
                     // RIFF pads odd-sized chunks to even boundaries with one padding byte.
                     // All arithmetic is done in long to prevent uint.MaxValue+1 wrap-around,
                     // and the result is range-checked before truncating to int.
-                    long nextOffset = (long)dataOffset + (((long)chunkSize + 1) & ~1L);
-                    if (nextOffset > data.Length || nextOffset > int.MaxValue) break;
+                    long nextOffset = dataOffset + (((long)chunkSize + 1) & ~1L);
+                    if (nextOffset > data.Length) break;
                     offset = (int)nextOffset;
                 }
             }

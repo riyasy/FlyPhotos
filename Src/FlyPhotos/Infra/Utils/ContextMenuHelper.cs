@@ -4,11 +4,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using Windows.Storage;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Interop;
-using FlyPhotos.Services;
 using Microsoft.UI.Xaml;
 using NLog;
 using WinRT.Interop;
@@ -162,57 +159,5 @@ internal class ContextMenuHelper
         {
             Logger.Error(ex, "ShowContextMenuUsingExternalProcess failed with exception");
         }
-    }
-
-    /// <summary>
-    /// Resolves the full file system path to the context menu helper executable, adapting to whether the
-    /// application is running as a packaged app or not.
-    /// </summary>
-    /// <remarks>If the application is running as a packaged app, the helper executable is copied to
-    /// the application's local storage before returning the path. This method ensures the returned path is valid
-    /// and accessible for launching the helper process in both packaged and non-packaged deployment
-    /// scenarios.</remarks>
-    /// <returns>The absolute path to the context menu helper executable. The path points to the application's local storage
-    /// if running as a packaged app; otherwise, it points to the application's base directory.</returns>
-    private static string ResolveHelperExePath()
-    {
-        // TODO - This can cause version issues if uses in this form.
-        // Your code checks if the file exists in LocalFolder and returns immediately if it does.
-        // If you update your app (and the helper EXE inside it) via the Store or MSIX, your code
-        // will see the old EXE in LocalFolder and launch that instead of the new one.
-
-        if (PathResolver.IsPackagedApp)
-        {
-            CopyExeToLocalStorage().GetAwaiter().GetResult();
-            var directory = ApplicationData.Current.LocalFolder.Path;
-            return $@"{directory}\{ContextMenuHelperProcessName}";
-        }
-        else
-        {
-            return Path.Combine(AppContext.BaseDirectory, ContextMenuHelperProcessName);
-        }
-    }
-
-    /// <summary>
-    /// Copies the specified executable file to the application's local storage folder if it does not already exist.
-    /// </summary>
-    /// <remarks>If the executable file is already present in local storage, no action is taken. This
-    /// method is typically used to ensure that required resources are available in the local storage for subsequent
-    /// operations.</remarks>
-    /// <returns>A task that represents the asynchronous copy operation.</returns>
-    private static async Task CopyExeToLocalStorage()
-    {
-        try
-        {
-            await ApplicationData.Current.LocalFolder.GetFileAsync(ContextMenuHelperProcessName);
-            return;
-        }
-        catch (FileNotFoundException)
-        {
-        }
-
-        var stopfile = await StorageFile.GetFileFromApplicationUriAsync(new Uri($"ms-appx:///{ContextMenuHelperProcessName}"));
-        await stopfile.CopyAsync(ApplicationData.Current.LocalFolder);
-        Logger.Trace($"Copied {ContextMenuHelperProcessName} to local storage");
     }
 }

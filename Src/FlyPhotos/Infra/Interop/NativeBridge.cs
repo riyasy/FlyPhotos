@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -259,9 +260,9 @@ public static class NativeWrapper
     /// <summary>
     /// Extracts the raw BGRA icon for a single UWP app via its AUMID, matching the scan quality.
     /// </summary>
-    public static FlyPhotos.Services.ExternalAppListing.RawIconData? GetUwpAppIcon(string aumid)
+    public static RawIconData? GetUwpAppIcon(string aumid)
     {
-        FlyPhotos.Services.ExternalAppListing.RawIconData? result = null;
+        RawIconData? result = null;
         try
         {
             NativeBridge.SingleIconCallback callback = CallbackDelegate;
@@ -281,7 +282,7 @@ public static class NativeWrapper
             byte[] pixels = new byte[iconSize];
             Marshal.Copy(iconData, pixels, 0, iconSize);
 
-            result = new FlyPhotos.Services.ExternalAppListing.RawIconData(pixels, width, height);
+            result = new RawIconData(pixels, width, height);
         }
     }
 }

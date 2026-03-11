@@ -531,7 +531,7 @@ internal sealed partial class Settings
             {
                 var culture = new CultureInfo(code);
                 // Use Parent to get the neutral culture name (e.g., "German" instead of "German (Germany)")
-                var neutral = culture.Parent?.Name is { Length: > 0 } ? culture.Parent : culture;
+                var neutral = culture.Parent.Name is { Length: > 0 } ? culture.Parent : culture;
                 var display = neutral.DisplayName;
                 var native = neutral.NativeName;
                 _supportedLanguages.Add(new LanguageInfo($"{display} [{native}]", native, code));

@@ -109,16 +109,12 @@ internal partial class PhotoDisplayController
         {
             List<string> files;
 
-            if (AppConfig.Volatile.IsSecondaryInstance)
-            {
-                // Secondary instances only display the single opened image.
-                // No folder or Explorer-window discovery is performed.
-                files = [selectedFilePath];
-            }
-            else
-            {
-                files = FileDiscovery.DiscoverFiles(selectedFilePath, _photoSessionState.FlyLaunchedExternally);
-            }
+            // Secondary instances only display the single opened image.
+            // No folder or Explorer-window discovery is performed.
+            files = AppConfig.Volatile.IsSecondaryInstance ? 
+                [selectedFilePath] : 
+                FileDiscovery.DiscoverFiles(selectedFilePath, _photoSessionState.FlyLaunchedExternally);
+            
 
             _photoSessionState.PhotosCount = files.Count;
 

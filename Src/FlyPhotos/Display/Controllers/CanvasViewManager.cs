@@ -69,7 +69,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     /// Key: Photo file path. Value: A clone of the photo's CanvasViewState.
     /// The ImagePos in the cached state is a *normalized* offset from the center, not absolute pixels.
     /// </summary>
-    private readonly Dictionary<string, CanvasViewState> _perPhotoStateCache = new();
+    private readonly Dictionary<string, CanvasViewState> _perPhotoStateCache = [];
 
     /// <summary>
     /// Tracks if the view state has been modified by user input (pan, zoom, rotate).

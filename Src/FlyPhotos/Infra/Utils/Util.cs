@@ -171,29 +171,6 @@ internal static class Util
         return bmp;
     }
 
-    /// <summary>
-    /// Extracts the icon data from a store app list entry.
-    /// </summary>
-    /// <param name="entry">The app list entry.</param>
-    /// <returns>A task returning the byte array of the icon.</returns>
-    public static async Task<byte[]> ExtractIconFromAppListEntryAsync(Windows.ApplicationModel.Core.AppListEntry entry)
-    {
-        try
-        {
-            var logo = entry.DisplayInfo.GetLogo(new Windows.Foundation.Size(50, 50));
-            using var stream = await logo.OpenReadAsync();
-            await using var input = stream.AsStreamForRead();
-            using var ms = new MemoryStream();
-            await input.CopyToAsync(ms);
-            return ms.ToArray();
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, $"ExtractIconFromAppListEntryAsync Error for {entry.DisplayInfo.DisplayName}");
-            return [];
-        }
-    }
-
     public static void SetWindowIcon(Window window)
     {
         string iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "app-icon.ico");

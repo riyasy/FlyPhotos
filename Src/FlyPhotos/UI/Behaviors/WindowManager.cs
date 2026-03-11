@@ -121,7 +121,7 @@ sealed record WindowStateData(
 /// discarded to prevent off-screen windows.
 /// </para>
 /// </remarks>
-public sealed class WindowManager : IDisposable
+public sealed partial class WindowManager : IDisposable
 {
     // Fields
 

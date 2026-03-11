@@ -202,8 +202,8 @@ public class StoreApp : InstalledApp
         if (RawIconData != null)
         {
             var bmp = new WriteableBitmap(RawIconData.Width, RawIconData.Height);
-            using var stream = bmp.PixelBuffer.AsStream();
-            stream.Write(RawIconData.IconPixels, 0, RawIconData.IconPixels.Length);
+            await using var stream = bmp.PixelBuffer.AsStream();
+            await stream.WriteAsync(RawIconData.IconPixels, 0, RawIconData.IconPixels.Length);
             Icon = bmp;
             
             // Allow garbage collection

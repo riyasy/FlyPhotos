@@ -32,7 +32,7 @@ public class ShellAppProvider : AppProvider
             catch (System.Exception ex)
             {
                 Logger.Error(ex, "ShellAppProvider - LoadAllApps failed");
-                return (IEnumerable<InstalledApp>)results;
+                return results;
             }
 
             Logger.Info($"ShellAppProvider: loaded {rawApps.Count} apps from native scan.");

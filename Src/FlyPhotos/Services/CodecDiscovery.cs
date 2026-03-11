@@ -9,7 +9,6 @@ namespace FlyPhotos.Services;
 
 internal static class CodecDiscovery
 {
-    private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
     private static readonly List<CodecInfo> _codecInfoList;
     private static readonly HashSet<string> _wicExtensions = new(StringComparer.OrdinalIgnoreCase);
     private static readonly HashSet<string> _flyExtensions = new(StringComparer.OrdinalIgnoreCase);
@@ -103,15 +102,15 @@ internal static class CodecDiscovery
         return _codecInfoList;
     }
 
-    private static List<CodecInfo> GetWicCodecs() => NativeWrapper.GetWicDecoders() ?? [];
+    private static List<CodecInfo> GetWicCodecs() => NativeWrapper.GetWicDecoders();
 
     private static List<CodecInfo> GetFlyCodecs()
     {
         var list = new List<CodecInfo>
         {
-            new CodecInfo { FriendlyName = "PSD Decoder", Type = "Fly", FileExtensions = [".psd"] },
-            new CodecInfo { FriendlyName = "SVG Decoder", Type = "Fly", FileExtensions = [".svg"] },
-            new CodecInfo { FriendlyName = "HEIC Decoder", Type = "Fly", FileExtensions = [".heic", ".heif", ".hif", ".avif"] }
+            new() { FriendlyName = "PSD Decoder", Type = "Fly", FileExtensions = [".psd"] },
+            new() { FriendlyName = "SVG Decoder", Type = "Fly", FileExtensions = [".svg"] },
+            new() { FriendlyName = "HEIC Decoder", Type = "Fly", FileExtensions = [".heic", ".heif", ".hif", ".avif"] }
         };
         return list;
     }

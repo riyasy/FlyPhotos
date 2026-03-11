@@ -1,11 +1,8 @@
 #nullable enable
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.Core;
-using Windows.Management.Deployment;
 using FlyPhotos.Infra.Utils;
 using NLog;
 
@@ -98,7 +95,7 @@ public abstract class AppProvider
         };
 
         // Get the unplated, high-quality icon directly from the Windows Shell by AUMID.
-        var rawIcon = await Task.Run(() => FlyPhotos.Infra.Interop.NativeWrapper.GetUwpAppIcon(aumid));
+        var rawIcon = await Task.Run(() => Infra.Interop.NativeWrapper.GetUwpAppIcon(aumid));
         if (rawIcon != null)
         {
             app.RawIconData = rawIcon;
