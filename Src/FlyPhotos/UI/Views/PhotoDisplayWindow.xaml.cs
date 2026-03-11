@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -306,7 +306,7 @@ public sealed partial class PhotoDisplayWindow
         {
             if (string.IsNullOrEmpty(shortCut)) continue;
             
-            var app = await AppProvider.GetAppAsync(shortCut);
+            var app = await ShellAppProvider.GetAppAsync(shortCut);
 
             if (app == null) continue;
 

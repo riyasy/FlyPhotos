@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
@@ -156,14 +156,15 @@ internal sealed partial class Settings
 
     private static async Task SetButtonIconFromAppData(Button btnShortcut, string appShortCut)
     {
-        var app = await AppProvider.GetAppAsync(appShortCut);
-        if (app != null)
-        {
-            var bmp = app.Icon;
-            btnShortcut.Content = bmp != null
-                ? new Image { Source = bmp, Width = 32, Height = 32 }
-                : new FontIcon { Glyph = "\uED35", FontSize = 32 }; // Default icon
-        }
+        if (string.IsNullOrEmpty(appShortCut)) return;
+        var app = await ShellAppProvider.GetAppAsync(appShortCut);
+        if (app == null) return;
+        
+        var bmp = app.Icon;
+        btnShortcut.Content = bmp != null
+            ? new Image { Source = bmp, Width = 32, Height = 32 }
+            : new FontIcon { Glyph = "\uED35", FontSize = 32 }; // Default icon
+        
     }
 
     private async void ButtonEnableAutoHideMouse_OnToggled(object sender, RoutedEventArgs e)
