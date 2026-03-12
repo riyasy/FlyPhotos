@@ -4,7 +4,6 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using System;
 using System.Globalization;
-using System.Text;
 using WinRT.Interop;
 using WinUIEx.Messaging;
 
@@ -15,74 +14,19 @@ namespace FlyPhotos.UI.Behaviors;
 // ---------------------------------------------------------------------------
 
 /// <summary>
-/// Internal snapshot of window placement + monitor-layout fingerprint.
-/// Serialised to/from a compact pipe-delimited string so the caller never
-/// needs to understand the structure.
+/// Internal snapshot of window placement.
 /// </summary>
 /// <param name="X">The X coordinate (left edge) of the window.</param>
 /// <param name="Y">The Y coordinate (top edge) of the window.</param>
 /// <param name="Width">The width of the window.</param>
 /// <param name="Height">The height of the window.</param>
 /// <param name="IsMaximized">Indicates whether the window is currently in a maximized state.</param>
-/// <param name="MonitorLayoutHash">A hash string representing the physical layout and resolution of all connected monitors.</param>
-/// <remarks>
-/// Format: <c>X|Y|W|H|IsMaximized|MonitorHash</c>
-/// Example: <c>100|200|1280|800|False|0,0,1920,1040;</c>
-/// </remarks>
-sealed record WindowStateData(
+readonly record struct WindowStateData(
     int X,
     int Y,
     int Width,
     int Height,
-    bool IsMaximized,
-    string MonitorLayoutHash)
-{
-    /// <summary>
-    /// The separator character used to delimit fields in the serialized string.
-    /// </summary>
-    private const char Sep = '|';
-
-    /// <summary>Serialises this record to a compact string.</summary>
-    /// <returns>A pipe-delimited serialized representation of the window state.</returns>
-    public string Serialize()
-    {
-        return string.Join(Sep,
-            X.ToString(CultureInfo.InvariantCulture),
-            Y.ToString(CultureInfo.InvariantCulture),
-            Width.ToString(CultureInfo.InvariantCulture),
-            Height.ToString(CultureInfo.InvariantCulture),
-            IsMaximized.ToString(CultureInfo.InvariantCulture),
-            MonitorLayoutHash);
-    }
-
-    /// <summary>
-    /// Parses a string produced by <see cref="Serialize"/>.
-    /// </summary>
-    /// <param name="raw">The serialized string data to parse.</param>
-    /// <returns>A deserialized <see cref="WindowStateData"/> object, or <see langword="null"/> on any format error.</returns>
-    public static WindowStateData? Deserialize(string? raw)
-    {
-        if (string.IsNullOrWhiteSpace(raw)) return null;
-        try
-        {
-            var parts = raw.Split(Sep);
-            if (parts.Length < 6) return null;
-
-            return new WindowStateData(
-                X: int.Parse(parts[0], CultureInfo.InvariantCulture),
-                Y: int.Parse(parts[1], CultureInfo.InvariantCulture),
-                Width: int.Parse(parts[2], CultureInfo.InvariantCulture),
-                Height: int.Parse(parts[3], CultureInfo.InvariantCulture),
-                IsMaximized: bool.Parse(parts[4]),
-                // Rejoin in case MonitorHash itself contained a '|' — unlikely but safe
-                MonitorLayoutHash: string.Join(Sep, parts[5..]));
-        }
-        catch
-        {
-            return null;
-        }
-    }
-}
+    bool IsMaximized);
 
 // ---------------------------------------------------------------------------
 // WindowSizeManager
@@ -116,9 +60,8 @@ sealed record WindowStateData(
 /// relaunch the window always opens safely as a normal overlapped window.
 /// </para>
 /// <para>
-/// If the connected monitors have changed (count, bounds, or resolution) since
-/// <paramref name="serialisedData"/> was captured, the saved placement is safely
-/// discarded to prevent off-screen windows.
+/// If the connected monitors have changed (count, bounds, or resolution)
+/// the saved placement is safely discarded to prevent off-screen windows.
 /// </para>
 /// </remarks>
 public sealed partial class WindowSizeManager : IDisposable
@@ -155,11 +98,16 @@ public sealed partial class WindowSizeManager : IDisposable
     private const uint SW_SHOWMINIMIZED = 2;
 
     /// <summary>
+    /// The separator character used to delimit fields in the serialized string.
+    /// </summary>
+    private const char DataSeparator = '|';
+
+    /// <summary>
     /// The current serialised window state, or <see langword="null"/> if no
     /// valid state exists yet.  Serialisation is deferred to this getter so
     /// no string allocation occurs during resize/move tracking.
     /// </summary>
-    public string? Data => _state?.Serialize();
+    public string? Data => Serialize();
 
     /// <summary>
     /// <see langword="true"/> if the monitor layout encoded in the loaded data
@@ -187,19 +135,19 @@ public sealed partial class WindowSizeManager : IDisposable
         _appWindow = window.AppWindow;
         _hwnd = WindowNative.GetWindowHandle(window);
 
-        var loaded = WindowStateData.Deserialize(serialisedData);
+        var (loadedState, loadedHash) = Deserialize(serialisedData);
         var currentHash = BuildMonitorLayoutHash();
 
-        if (loaded != null && loaded.MonitorLayoutHash == currentHash)
+        if (loadedState != null && loadedHash == currentHash)
         {
-            _state = loaded;
+            _state = loadedState;
             MonitorLayoutChanged = false;
         }
         else
         {
             // Placement discarded – monitors differ (or no saved data).
             _state = null;
-            MonitorLayoutChanged = loaded != null; // true only when there WAS data
+            MonitorLayoutChanged = loadedState != null; // true only when there WAS data
         }
 
         // WM_SHOWWINDOW fires before the first paint, so placement is applied
@@ -241,21 +189,21 @@ public sealed partial class WindowSizeManager : IDisposable
     /// </summary>
     private void ApplySavedPlacement()
     {
-        if (_state == null) return;
+        if (_state is not { } state) return;
 
         Win32Methods.GetWindowPlacement(_hwnd, out var wp);
         wp.length = (uint)System.Runtime.InteropServices.Marshal.SizeOf<Win32Methods.WINDOWPLACEMENT>();
 
         wp.rcNormalPosition = new Win32Methods.RECT
         {
-            Left = _state.X,
-            Top = _state.Y,
-            Right = _state.X + _state.Width,
-            Bottom = _state.Y + _state.Height
+            Left = state.X,
+            Top = state.Y,
+            Right = state.X + state.Width,
+            Bottom = state.Y + state.Height
         };
 
         // Always restore as an overlapped window – never back into full-screen.
-        wp.showCmd = _state.IsMaximized
+        wp.showCmd = state.IsMaximized
             ? Win32Methods.SW_SHOWMAXIMIZED
             : SW_SHOWNORMAL;
 
@@ -275,25 +223,11 @@ public sealed partial class WindowSizeManager : IDisposable
     private void OnAppWindowChanged(AppWindow sender, AppWindowChangedEventArgs args)
     {
         if (_isDisposed) return;
-        if (args is { DidPositionChange: false, DidSizeChange: false, DidPresenterChange: false }) return;
-
-        if (args.DidPresenterChange)
-            HandlePresenterChange();
-        else
+        // Capture the new geometry if the size or position changed,
+        // or if the presenter changed is overlapped
+        if (args.DidSizeChange || args.DidPositionChange || 
+            (args.DidPresenterChange && _appWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped))
             CaptureOverlappedGeometry();
-    }
-
-    /// <summary>
-    /// Handles transitions between different window presentation modes (e.g., Overlapped to FullScreen).
-    /// Ensures we do not erroneously save full-screen dimensions as normal window bounds.
-    /// </summary>
-    private void HandlePresenterChange()
-    {
-        if (_appWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped)
-        {
-            // Returned to overlapped: capture fresh geometry.
-            CaptureOverlappedGeometry();
-        }
     }
 
     /// <summary>
@@ -324,10 +258,55 @@ public sealed partial class WindowSizeManager : IDisposable
             Y: rc.Top,
             Width: w,
             Height: h,
-            IsMaximized: isMaximized,
-            MonitorLayoutHash: BuildMonitorLayoutHash());
+            IsMaximized: isMaximized);
 
         _state = newState;
+    }
+
+    /// <summary>
+    /// Serialises the current window state and monitor layout hash to a string.
+    /// </summary>
+    /// <returns>A serialized string representation, or null if no state exists.</returns>
+    private string? Serialize()
+    {
+        if (_state is not { } state) return null;
+        return string.Join(DataSeparator,
+            state.X.ToString(CultureInfo.InvariantCulture),
+            state.Y.ToString(CultureInfo.InvariantCulture),
+            state.Width.ToString(CultureInfo.InvariantCulture),
+            state.Height.ToString(CultureInfo.InvariantCulture),
+            state.IsMaximized.ToString(CultureInfo.InvariantCulture),
+            BuildMonitorLayoutHash());
+    }
+
+    /// <summary>
+    /// Parses a string previously produced by <see cref="Data"/>.
+    /// </summary>
+    /// <param name="raw">The serialized string data to parse.</param>
+    /// <returns>A deserialized <see cref="WindowStateData"/> object and monitor hash, or <see langword="null"/> upon any format error.</returns>
+    private static (WindowStateData? State, string? MonitorHash) Deserialize(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return (null, null);
+        try
+        {
+            var parts = raw.Split(DataSeparator);
+            if (parts.Length < 6) return (null, null);
+
+            var state = new WindowStateData(
+                X: int.Parse(parts[0], CultureInfo.InvariantCulture),
+                Y: int.Parse(parts[1], CultureInfo.InvariantCulture),
+                Width: int.Parse(parts[2], CultureInfo.InvariantCulture),
+                Height: int.Parse(parts[3], CultureInfo.InvariantCulture),
+                IsMaximized: bool.Parse(parts[4]));
+
+            // Rejoin in case MonitorHash itself contained a DataSeparator — unlikely but safe
+            var hash = string.Join(DataSeparator, parts[5..]);
+            return (state, hash);
+        }
+        catch
+        {
+            return (null, null);
+        }
     }
 
     /// <summary>
@@ -349,16 +328,23 @@ public sealed partial class WindowSizeManager : IDisposable
         try
         {
             var allMonitors = DisplayArea.FindAll();
-            var sb = new StringBuilder();
 
+            // Fast path for the 90% case (single monitor)
+            if (allMonitors.Count == 1)
+            {
+                var r = allMonitors[0].OuterBounds;
+                return $"{r.X},{r.Y},{r.Width},{r.Height};";
+            }
+
+            var hash = string.Empty;
             // Do NOT use foreach / LINQ on this list – it can crash.
             // See github.com/microsoft/microsoft-ui-xaml/issues/6454
             for (int i = 0; i < allMonitors.Count; i++)
             {
                 var r = allMonitors[i].OuterBounds;
-                sb.Append($"{r.X},{r.Y},{r.Width},{r.Height};");
+                hash += $"{r.X},{r.Y},{r.Width},{r.Height};";
             }
-            return sb.ToString();
+            return hash;
         }
         catch { return string.Empty; }
     }
