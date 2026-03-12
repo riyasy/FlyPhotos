@@ -101,6 +101,8 @@ public sealed partial class PhotoDisplayWindow
         {
             ButtonSettings.Visibility = Visibility.Collapsed;
             ButtonExpander.Visibility = Visibility.Collapsed;
+            ButtonBack.Visibility = Visibility.Collapsed;
+            ButtonNext.Visibility = Visibility.Collapsed;
         }
         
         AppWindow.Closing += PhotoDisplayWindow_Closing;
