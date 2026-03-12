@@ -15,7 +15,7 @@ public sealed partial class FlyProfilerWindow : Window
 {
     public FlyProfilerWindow()
     {
-        this.InitializeComponent();
+        InitializeComponent();
     }
 
     private async void TestButton_Click(object sender, RoutedEventArgs e)

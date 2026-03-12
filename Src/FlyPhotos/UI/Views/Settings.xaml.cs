@@ -6,9 +6,6 @@ using FlyPhotos.Infra.Localization;
 using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
 using FlyPhotos.Services.ExternalAppListing;
-using Microsoft.UI;
-using Microsoft.UI.Composition.SystemBackdrops;
-using Microsoft.UI.System;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -24,6 +21,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.System;
+using FlyPhotos.UI.Behaviors;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -39,7 +37,7 @@ internal sealed partial class Settings
 
     private readonly List<LanguageInfo> _supportedLanguages = [];
 
-    private readonly SystemBackdropConfiguration _configurationSource;
+    private readonly WindowAppearanceManager _windAppearanceManager;
 
     internal Settings()
     {
@@ -48,25 +46,19 @@ internal sealed partial class Settings
         // Title property is used only by TaskBar label. Actual TitleBar is customized using AppWindow.TitleBar.
         Title = L.Get("SettingsPage/Title").Replace("FlyPhotos - ", string.Empty);
 
-        var titleBar = AppWindow.TitleBar;
-        titleBar.ExtendsContentIntoTitleBar = true;
-        titleBar.ButtonBackgroundColor = Colors.Transparent;
-        titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
-        titleBar.ButtonForegroundColor = Colors.Gray;
+        _windAppearanceManager = new WindowAppearanceManager(this, false);
+        _windAppearanceManager.SetupTransparentTitleBar(null);
 
         SettingsCardVersion.Description = 
             string.Format(L.Get("SettingsCardVersion/Description"), Constants.AppVersion);
 
         Util.SetWindowIcon(this);
 
-        _configurationSource = new SystemBackdropConfiguration { IsInputActive = true };
-
-        Activated += Settings_Activated;
         MainLayout.Loaded += Settings_Loaded;
-        ((FrameworkElement)Content).ActualThemeChanged += Settings_ActualThemeChanged;
-        SetConfigurationSourceTheme();
-        SetWindowTheme(AppConfig.Settings.Theme);
+
         DispatcherQueue.EnsureSystemDispatcherQueue();
+
+        Closed += (_, _) => _windAppearanceManager.Dispose();
 
         SliderHighResCacheSize.Value = AppConfig.Settings.CacheSizeOneSideHqImages;
         SliderLowResCacheSize.Value = AppConfig.Settings.CacheSizeOneSidePreviews;
@@ -282,7 +274,7 @@ internal sealed partial class Settings
         var themeEnum = GetThemeForIndex(ComboTheme.SelectedIndex);
         AppConfig.Settings.Theme = themeEnum;
 
-        SetWindowTheme(themeEnum);
+        _windAppearanceManager.SetWindowTheme(themeEnum);
         SettingChanged?.Invoke(Setting.Theme);
         await AppConfig.SaveAsync();
     }
@@ -330,27 +322,6 @@ internal sealed partial class Settings
     private void MainLayout_OnKeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key == VirtualKey.Escape) Close();
-    }
-
-    private void SetWindowTheme(ElementTheme theme)
-    {
-        ((FrameworkElement)Content).RequestedTheme = theme;
-    }
-
-    private void Settings_ActualThemeChanged(FrameworkElement sender, object args)
-    {
-        SetConfigurationSourceTheme();
-    }
-
-    private void Settings_Activated(object sender, WindowActivatedEventArgs args)
-    {
-        _configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
-    }
-
-    private void SetConfigurationSourceTheme()
-    {
-        _configurationSource.IsHighContrast = ThemeSettings.CreateForWindowId(AppWindow.Id).HighContrast;
-        _configurationSource.Theme = (SystemBackdropTheme)((FrameworkElement)Content).ActualTheme;
     }
 
     private bool ShouldEnableTransparencySlider(int index)

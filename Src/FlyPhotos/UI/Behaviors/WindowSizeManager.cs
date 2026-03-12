@@ -85,7 +85,7 @@ sealed record WindowStateData(
 }
 
 // ---------------------------------------------------------------------------
-// WindowManager
+// WindowSizeManager
 // ---------------------------------------------------------------------------
 
 /// <summary>
@@ -121,7 +121,7 @@ sealed record WindowStateData(
 /// discarded to prevent off-screen windows.
 /// </para>
 /// </remarks>
-public sealed partial class WindowManager : IDisposable
+public sealed partial class WindowSizeManager : IDisposable
 {
     // Fields
 
@@ -181,7 +181,7 @@ public sealed partial class WindowManager : IDisposable
     ///   The opaque string previously received from <see cref="Data"/>,
     ///   or <see langword="null"/> / empty to use OS-default placement.
     /// </param>
-    public WindowManager(Window window, string? serialisedData)
+    public WindowSizeManager(Window window, string? serialisedData)
     {
         var window1 = window ?? throw new ArgumentNullException(nameof(window));
         _appWindow = window.AppWindow;

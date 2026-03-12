@@ -5,7 +5,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.System;
-using Windows.UI;
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Display.Controllers;
@@ -18,22 +17,15 @@ using FlyPhotos.Services.ExternalAppListing;
 using FlyPhotos.UI.Behaviors;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
-using Microsoft.UI;
-using Microsoft.UI.Composition;
-using Microsoft.UI.Composition.SystemBackdrops;
-using Microsoft.UI.System;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using NLog;
 using FlyPhotos.Infra.Interop;
-using WinRT;
 using WinRT.Interop;
 using WinUIEx;
-using WindowManager = FlyPhotos.UI.Behaviors.WindowManager;
 
 namespace FlyPhotos.UI.Views;
 
@@ -50,22 +42,14 @@ public sealed partial class PhotoDisplayWindow
     private readonly DispatcherTimer _repeatButtonReleaseCheckTimer = new() { Interval = new TimeSpan(0, 0, 0, 0, 100) };
     private readonly DispatcherTimer _wheelScrollBrakeTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
 
-    private readonly TransparentTintBackdrop _transparentTintBackdrop = new()
-    {
-        TintColor = Color.FromArgb((byte)(((100 - AppConfig.Settings.TransparentBackgroundIntensity) * 255) / 100), 0, 0, 0)
-    };
-    private readonly BlurredBackdrop _frozenBackdrop = new();
-
     private readonly VirtualKey _plusVk = Util.GetKeyThatProduces('+');
     private readonly VirtualKey _minusVk = Util.GetKeyThatProduces('-');
 
     private readonly OpacityFader _opacityFader;
     private readonly InactivityFader _inactivityFader;
     private readonly MouseAutoHider _mouseAutoHider;
-
-    private WindowBackdropType _currentBackdropType;
-    private ISystemBackdropControllerWithTargets? _backdropController;
-    private readonly SystemBackdropConfiguration _configurationSource;
+    private readonly WindowSizeManager _windSizeManager;
+    private readonly WindowAppearanceManager _windAppearanceManager;
 
     // Accumulators for smooth scrolling
     private int _verticalDeltaAccumulator;
@@ -77,7 +61,6 @@ public sealed partial class PhotoDisplayWindow
 
     // FullScreen/Maximized/Restored state related
     private bool _wasMaximizedBeforeFullScreen = false;
-    private readonly WindowManager _windManager;
 
     public PhotoDisplayWindow(string firstPhotoPath, bool extLaunch)
     {
@@ -87,17 +70,12 @@ public sealed partial class PhotoDisplayWindow
         Title = "FlyPhotos";
         Util.SetWindowIcon(this);
 
-        SetupTransparentTitleBar();
-
         (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumWidth = 400;
         (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumHeight = 300;
 
-        _configurationSource = new SystemBackdropConfiguration { IsInputActive = true };
+        _windAppearanceManager = new WindowAppearanceManager(this);
+        _windAppearanceManager.SetupTransparentTitleBar(AppTitlebar);
 
-        ((FrameworkElement)Content).ActualThemeChanged += PhotoDisplayWindow_ActualThemeChanged;
-        SetConfigurationSourceTheme();
-        SetWindowBackdrop(AppConfig.Settings.WindowBackdrop);
-        SetWindowTheme(AppConfig.Settings.Theme);
         DispatcherQueue.EnsureSystemDispatcherQueue();
 
         var photoSessionState = new PhotoSessionState() { FirstPhotoPath = firstPhotoPath, FlyLaunchedExternally = extLaunch };
@@ -124,8 +102,7 @@ public sealed partial class PhotoDisplayWindow
             ButtonSettings.Visibility = Visibility.Collapsed;
             ButtonExpander.Visibility = Visibility.Collapsed;
         }
-
-        Activated += PhotoDisplayWindow_Activated;
+        
         AppWindow.Closing += PhotoDisplayWindow_Closing;
         Closed += PhotoDisplayWindow_Closed;
 
@@ -148,7 +125,7 @@ public sealed partial class PhotoDisplayWindow
         _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
         _mouseAutoHider = new MouseAutoHider(MainLayout, TimeSpan.FromSeconds(1));
-        _windManager = new WindowManager(this, AppConfig.Settings.WindowState);
+        _windSizeManager = new WindowSizeManager(this, AppConfig.Settings.WindowState);
     }
 
     #region Event Handlers
@@ -175,7 +152,6 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.OnFitToScreenStateChanged -= CanvasController_OnFitToScreenStateChanged;        
         _canvasController.OnOneToOneStateChanged -= CanvasController_OnOneToOneStateChanged;
         D2dCanvas.DoubleTapped -= D2dCanvas_DoubleTapped;
-        ((FrameworkElement)Content).ActualThemeChanged -= PhotoDisplayWindow_ActualThemeChanged;
 
         await _canvasController.DisposeAsync();
         _thumbNailController.Dispose();
@@ -185,10 +161,8 @@ public sealed partial class PhotoDisplayWindow
         _mouseAutoHider.Dispose();
         DiskCacherWithSqlite.Shutdown();
 
-        _backdropController?.RemoveSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
-        _backdropController?.Dispose();
-        _backdropController = null;
-        _windManager.Dispose();
+        _windAppearanceManager.Dispose();
+        _windSizeManager.Dispose();
     }
 
     private async void ButtonBack_OnClick(object sender, RoutedEventArgs e)
@@ -249,7 +223,6 @@ public sealed partial class PhotoDisplayWindow
             _canvasController.FitToScreen(true);        
         else        
             ButtonScaleSet.IsChecked = true;
-         
     }
 
     private void ButtonOneIsToOne_Click(object sender, RoutedEventArgs e)
@@ -258,7 +231,6 @@ public sealed partial class PhotoDisplayWindow
             _canvasController.ZoomToHundred();        
         else        
             ButtonOneIsToOne.IsChecked = true;
-        
     }
 
     private void ButtonExpander_Click(object sender, RoutedEventArgs e)
@@ -327,8 +299,6 @@ public sealed partial class PhotoDisplayWindow
         FlyoutBase.ShowAttachedFlyout(senderButton);
     }
 
-
-
     /// <summary>
     /// This event handler is for the buttons INSIDE the flyout.
     /// It launches the application path stored in the button's Tag property.
@@ -357,7 +327,6 @@ public sealed partial class PhotoDisplayWindow
         //args.TrackAsyncAction(_photoController.LoadFirstPhoto().AsAsyncAction());
         _ = _photoController.LoadFirstPhoto();
     }
-
     private void D2dCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
         var pointerPoint = e.GetCurrentPoint(D2dCanvas);
@@ -367,7 +336,6 @@ public sealed partial class PhotoDisplayWindow
         _lastPoint = pointerPoint.Position;
         _isDragging = true;
     }
-
     private void D2dCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
         if (!_isDragging) return;
@@ -381,7 +349,6 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.Pan(deltaX, deltaY);
         _lastPoint = currentPoint;
     }
-
     private async void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
         var currentPoint = e.GetCurrentPoint(D2dCanvas);
@@ -708,13 +675,13 @@ public sealed partial class PhotoDisplayWindow
                 _canvasController.HandleCheckeredBackgroundChange();
                 break;
             case Setting.Theme:
-                SetWindowTheme(AppConfig.Settings.Theme);
+                _windAppearanceManager.SetWindowTheme(AppConfig.Settings.Theme);
                 break;
             case Setting.BackDrop:
-                SetWindowBackdrop(AppConfig.Settings.WindowBackdrop);
+                _windAppearanceManager.SetWindowBackdrop(AppConfig.Settings.WindowBackdrop);
                 break;
             case Setting.BackDropTransparency:
-                SetWindowBackdropTransparency(AppConfig.Settings.TransparentBackgroundIntensity);
+                _windAppearanceManager.SetWindowBackdropTransparency(AppConfig.Settings.TransparentBackgroundIntensity);
                 break;
             case Setting.FileNameShowHide:
                 BorderTxtFileName.Visibility = AppConfig.Settings.ShowFileName ? Visibility.Visible : Visibility.Collapsed;
@@ -794,7 +761,7 @@ public sealed partial class PhotoDisplayWindow
     {
         if (AppConfig.Settings.RememberLastWindowState)
         {
-            AppConfig.Settings.WindowState = _windManager.Data;
+            AppConfig.Settings.WindowState = _windSizeManager.Data;
             AppConfig.Save();
         }
     }
@@ -820,14 +787,14 @@ public sealed partial class PhotoDisplayWindow
         // Release-build trimmer strips — causing the check to silently return false in Release.
         if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped)
         {
-            _windManager.PauseTracking = true;
+            _windSizeManager.PauseTracking = true;
             _wasMaximizedBeforeFullScreen = AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Maximized };
             AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
             ButtonFullScreenClose.Visibility = Visibility.Visible;
         }
         else if (AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen)
         {
-            _windManager.PauseTracking = true;
+            _windSizeManager.PauseTracking = true;
             ButtonFullScreenClose.Visibility = Visibility.Collapsed;
             // When exiting full screen, and the window was previously maximized,
             // the window will briefly go to restored window state and
@@ -908,131 +875,6 @@ public sealed partial class PhotoDisplayWindow
             await errorDialog.ShowAsync();
         }
     }
-
-    #endregion
-
-    #region Theming and Backdrop
-    private void SetupTransparentTitleBar()
-    {
-        SetTitleBar(AppTitlebar);
-        var titleBar = AppWindow.TitleBar;
-        titleBar.ExtendsContentIntoTitleBar = true;
-        titleBar.ButtonBackgroundColor = Colors.Transparent;
-        titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
-        titleBar.ButtonForegroundColor = Colors.Gray;
-    }
-
-    private void SetWindowBackdropTransparency(int transparencyIntensity)
-    {
-        if (_currentBackdropType == WindowBackdropType.Transparent)
-        {
-            _transparentTintBackdrop.TintColor = Color.FromArgb((byte)(((100 - transparencyIntensity) * 255) / 100), 0, 0, 0);
-            SystemBackdrop = _transparentTintBackdrop;
-        }
-    }
-
-    private void SetWindowBackdrop(WindowBackdropType backdropType)
-    {
-        _currentBackdropType = backdropType;
-        _backdropController?.RemoveSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
-        _backdropController = null;
-
-        SystemBackdrop = null;
-
-        switch (backdropType)
-        {
-            case WindowBackdropType.Transparent:
-                SystemBackdrop = _transparentTintBackdrop;
-                break;
-
-            case WindowBackdropType.Acrylic:
-                TrySetAcrylicBackdrop(false);
-                break;
-
-            case WindowBackdropType.AcrylicThin:
-                TrySetAcrylicBackdrop(true);
-                break;
-
-            case WindowBackdropType.Mica:
-                TrySetMicaBackdrop(false);
-                break;
-
-            case WindowBackdropType.MicaAlt:
-                TrySetMicaBackdrop(true);
-                break;
-
-            case WindowBackdropType.Frozen:
-                SystemBackdrop = _frozenBackdrop;
-                break;
-
-            case WindowBackdropType.None:
-            default:
-                break;
-        }
-        SetBackColorAsPerThemeAndBackdrop();
-    }
-
-    void TrySetMicaBackdrop(bool useMicaAlt)
-    {
-        if (!MicaController.IsSupported()) return;
-        var micaController = new MicaController { Kind = useMicaAlt ? MicaKind.BaseAlt : MicaKind.Base };
-        micaController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
-        micaController.SetSystemBackdropConfiguration(_configurationSource);
-        _backdropController = micaController;
-    }
-
-    void TrySetAcrylicBackdrop(bool useAcrylicThin)
-    {
-        if (!DesktopAcrylicController.IsSupported()) return;
-        var acrylicController = new DesktopAcrylicController
-        { Kind = useAcrylicThin ? DesktopAcrylicKind.Thin : DesktopAcrylicKind.Base };
-        acrylicController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
-        acrylicController.SetSystemBackdropConfiguration(_configurationSource);
-        _backdropController = acrylicController;
-    }
-
-    private void PhotoDisplayWindow_ActualThemeChanged(FrameworkElement sender, object args)
-    {
-        SetConfigurationSourceTheme();
-        SetBackColorAsPerThemeAndBackdrop();
-    }
-
-    private void PhotoDisplayWindow_Activated(object sender, WindowActivatedEventArgs args)
-    {
-        _configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
-    }
-
-    private void SetConfigurationSourceTheme()
-    {
-        _configurationSource.IsHighContrast = ThemeSettings.CreateForWindowId(AppWindow.Id).HighContrast;
-        _configurationSource.Theme = (SystemBackdropTheme)((FrameworkElement)Content).ActualTheme;
-    }
-
-    private void SetWindowTheme(ElementTheme theme)
-    {
-        ((FrameworkElement)Content).RequestedTheme = theme;
-    }
-
-    private void SetBackColorAsPerThemeAndBackdrop()
-    {
-        var actualTheme = ((FrameworkElement)Content).ActualTheme;
-        Color gridColor;
-        if (_currentBackdropType == WindowBackdropType.None)
-            gridColor = actualTheme == ElementTheme.Light ? Colors.White : Colors.Black;
-        else if (_currentBackdropType == WindowBackdropType.Frozen)
-            gridColor = actualTheme == ElementTheme.Light ? Colors.Transparent : ColorHelper.FromArgb(0x60, 0x00, 0x00, 0x00); 
-        else
-            gridColor = Colors.Transparent;
-        ((Grid)Content).Background = new SolidColorBrush(gridColor);
-    }
-
     #endregion
 }
 
-public partial class BlurredBackdrop : CompositionBrushBackdrop
-{
-    protected override Windows.UI.Composition.CompositionBrush CreateBrush(Windows.UI.Composition.Compositor compositor)
-    {
-        return compositor.CreateHostBackdropBrush();
-    }
-}
