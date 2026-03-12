@@ -87,7 +87,7 @@ namespace FlyPhotos.UI.Behaviors
         public void Dispose()
         {
             _window.Activated -= Window_Activated;
-            ((FrameworkElement)_window.Content).ActualThemeChanged -= Window_ActualThemeChanged;
+            //((FrameworkElement)_window.Content).ActualThemeChanged -= Window_ActualThemeChanged;
             _backdropController?.RemoveSystemBackdropTarget(_window.As<ICompositionSupportsSystemBackdrop>());
             _backdropController?.Dispose();
             _backdropController = null;
