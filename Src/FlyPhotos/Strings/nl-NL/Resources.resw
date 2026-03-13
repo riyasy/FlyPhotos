@@ -600,4 +600,11 @@ Del : Foto verwijderen
 
 Esc : Instellingen sluiten of App verlaten</value>
   </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>toestaan
+Extra instanties tonen alleen de geselecteerde afbeelding (geen navigatie, verwijderen of instellingen).</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>Meerdere instanties toestaan (Beta)</value>
+  </data>
 </root>

@@ -600,4 +600,10 @@ Del : Usuń zdjęcie
 
 Esc : Zamknij ustawienia lub Wyjdź</value>
   </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>Dodatkowe instancje pokazują tylko wybrany obraz (bez nawigacji, usuwania ani ustawień).</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>Zezwól na wiele instancji (Beta)</value>
+  </data>
 </root>

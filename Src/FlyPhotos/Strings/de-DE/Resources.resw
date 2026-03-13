@@ -600,4 +600,10 @@ Entf : Foto löschen
 
 Esc : Einstellungen schließen oder App beenden</value>
   </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>Zusätzliche Instanzen zeigen nur das ausgewählte Bild (keine Navigation, kein Löschen, keine Einstellungen).</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>Mehrere Instanzen erlauben (Beta)</value>
+  </data>
 </root>

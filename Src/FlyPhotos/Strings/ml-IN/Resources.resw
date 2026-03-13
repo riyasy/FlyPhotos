@@ -597,4 +597,10 @@ Del : ഫോട്ടോ ഡിലീറ്റ് ചെയ്യാൻ
 
 Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാൻ / ആപ്പിൽ നിന്ന് പുറത്തുകടക്കാൻ</value>
   </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>അധിക ഇൻസ്റ്റൻസുകൾ തിരഞ്ഞെടുത്ത ചിത്രം മാത്രം കാണിക്കും (നാവിഗേഷൻ, ഡിലീറ്റ് , ക്രമീകരണങ്ങൾ ഇല്ല).</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>ഒന്നിലധികം ഇൻസ്റ്റൻസുകൾ അനുവദിക്കുക (Beta)</value>
+  </data>
 </root>

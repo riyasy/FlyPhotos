@@ -599,4 +599,10 @@ Del : 사진 삭제
 
 Esc : 설정 닫기 또는 앱 종료</value>
   </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>추가 인스턴스에서는 선택한 이미지만 표시됩니다 (탐색, 삭제, 설정 사용 불가).</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>여러 인스턴스 허용 (Beta)</value>
+  </data>
 </root>

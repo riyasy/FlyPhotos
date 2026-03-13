@@ -599,4 +599,10 @@ Del : 写真を削除
 
 Esc : 設定を閉じる / アプリを終了</value>
   </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>追加のインスタンスでは選択した画像のみ表示されます（移動・削除・設定は利用できません）。</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>複数インスタンスを許可 (Beta)</value>
+  </data>
 </root>

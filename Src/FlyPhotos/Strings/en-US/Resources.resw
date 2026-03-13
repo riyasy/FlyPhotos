@@ -406,12 +406,6 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
     <value>Remember Window State</value>
   </data>
-  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Allows opening multiple FlyPhotos windows simultaneously. Additional instances only display the selected image (no folder scan, no delete, no settings).</value>
-  </data>
-  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Allow Multiple Instances</value>
-  </data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Report issues in GitHub or mail to ryftools@outlook.com</value>
   </data>
@@ -605,5 +599,11 @@ D : Show File Properties
 Del : Delete Photo
 
 Esc : Close Settings or Exit App</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>Extra instances only show the selected image (no navigation, delete, or settings).</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>Allow Multiple Instances (Beta)</value>
   </data>
 </root>

@@ -344,7 +344,7 @@
                             x:Name="SettingsCardAllowMultiInstance"
                             x:Uid="SettingsCardAllowMultiInstance"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE8A7;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE7AA;}">
                             <ToggleSwitch x:Name="ButtonAllowMultiInstance" />
                         </controls:SettingsCard>
                         <TextBlock

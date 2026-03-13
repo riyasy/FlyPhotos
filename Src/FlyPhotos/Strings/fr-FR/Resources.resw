@@ -600,4 +600,10 @@ Suppr (Del) : Supprimer la photo
 
 Esc : Fermer les paramètres ou Quitter</value>
   </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>Les instances supplémentaires affichent seulement l’image sélectionnée (pas de navigation, suppression ou paramètres).</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>Autoriser plusieurs instances (Beta)</value>
+  </data>
 </root>
