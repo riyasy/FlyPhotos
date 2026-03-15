@@ -162,6 +162,7 @@
     <ClInclude Include="DllGlobals.h" />
     <ClInclude Include="BGRAEncoder.h" />
     <ClInclude Include="HeifReader.h" />
+    <ClInclude Include="AnimatedAvifReader.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="NativeExports.h" />
@@ -170,6 +171,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="BGRAEncoder.cpp" />
     <ClCompile Include="HeifReader.cpp" />
+    <ClCompile Include="AnimatedAvifReader.cpp" />
     <ClCompile Include="NativeExports.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

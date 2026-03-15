@@ -92,3 +92,84 @@ void FreePixelBuffer(PixelBuffer* buffer) {
         buffer->data = nullptr;
     }
 }
+
+// --- AVIF Animation Exports ---
+
+#include "AnimatedAvifReader.h"
+
+/**
+ * @brief Opens an AVIF/HEIF animation file from memory and caches its frame metadata.
+ * @param data Pointer to the file data in memory.
+ * @param size Size of the file data in bytes.
+ * @return An opaque handle to the animation context `AnimatedAvifReader`, or nullptr on failure. This handle must be passed to subsequent Avif export functions.
+ */
+void* OpenAvifAnimation(const uint8_t* data, size_t size) {
+    if (!data || size == 0) return nullptr;
+
+    auto reader = new AnimatedAvifReader();
+    if (!reader->Open(data, size)) {
+        delete reader;
+        return nullptr;
+    }
+    return reader;
+}
+
+/**
+ * @brief Checks quickly if the given context handle holds an animated sequence.
+ * @param handle Opaque handle to the `AnimatedAvifReader` context.
+ * @return True if it contains a sequence track, false otherwise.
+ */
+bool IsAvifAnimated(void* handle) {
+    if (!handle) return false;
+    return static_cast<AnimatedAvifReader*>(handle)->IsAnimated();
+}
+
+/**
+ * @brief Retrieves the width of the animated AVIF canvas.
+ * @param handle Opaque handle to the `AnimatedAvifReader` context.
+ * @return The width in pixels, or 0 if invalid.
+ */
+int GetAvifCanvasWidth(void* handle) {
+    if (!handle) return 0;
+    return static_cast<AnimatedAvifReader*>(handle)->GetWidth();
+}
+
+/**
+ * @brief Retrieves the height of the animated AVIF canvas.
+ * @param handle Opaque handle to the `AnimatedAvifReader` context.
+ * @return The height in pixels, or 0 if invalid.
+ */
+int GetAvifCanvasHeight(void* handle) {
+    if (!handle) return 0;
+    return static_cast<AnimatedAvifReader*>(handle)->GetHeight();
+}
+
+/**
+ * @brief Decodes the next sequence frame into a pre-allocated BGRA buffer and returns its duration in ms.
+ * @param handle Opaque handle to the `AnimatedAvifReader` context.
+ * @param out_bgra_buffer A pre-allocated buffer of size Width * Height * 4. This ensures a 0-allocation decode path.
+ * @return The duration of the decoded frame in ms, or 0 if EOF or an error occurred.
+ */
+int DecodeNextAvifFrame(void* handle, uint8_t* out_bgra_buffer) {
+    if (!handle || !out_bgra_buffer) return 0;
+    return static_cast<AnimatedAvifReader*>(handle)->DecodeNextFrame(out_bgra_buffer);
+}
+
+/**
+ * @brief Resets the animation track to the beginning to loop the animation continuously.
+ * @param handle Opaque handle to the `AnimatedAvifReader` context.
+ */
+void ResetAvifAnimation(void* handle) {
+    if (!handle) return;
+    static_cast<AnimatedAvifReader*>(handle)->Reset();
+}
+
+/**
+ * @brief Closes the animation and releases all libheif associated memory for the given context.
+ * @param handle Opaque handle to the `AnimatedAvifReader` context.
+ */
+void CloseAvifAnimation(void* handle) {
+    if (handle) {
+        delete static_cast<AnimatedAvifReader*>(handle);
+    }
+}

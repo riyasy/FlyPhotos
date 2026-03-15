@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
@@ -43,11 +43,21 @@ internal static class ImageReader
                 case ".HEIC":
                 case ".HEIF":
                 case ".HIF":
-                case ".AVIF":
                     {
                         if (!AppConfig.Settings.OpenExitZoom)
                             if (NativeHeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         if (NativeHeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                        if (CodecDiscovery.HasWicSupport(extension))
+                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                        if (CodecDiscovery.HasImageMagickSupport(extension))
+                            if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp4)) return retBmp4;
+                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
+                    }
+                case ".AVIF":
+                    {
+                        if (!AppConfig.Settings.OpenExitZoom)
+                            if (NativeHeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (await AvifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
                         if (CodecDiscovery.HasWicSupport(extension))
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                         if (CodecDiscovery.HasImageMagickSupport(extension))
@@ -106,7 +116,7 @@ internal static class ImageReader
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         if (CodecDiscovery.HasImageMagickSupport(extension))
                             if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp1)) return retBmp1;
-                        
+
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
             }
@@ -213,9 +223,17 @@ internal static class ImageReader
                 case ".HEIC":
                 case ".HEIF":
                 case ".HIF":
-                case ".AVIF":
                     {
                         if (NativeHeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (CodecDiscovery.HasWicSupport(extension))
+                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                        if (CodecDiscovery.HasImageMagickSupport(extension))
+                            if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
+                    }
+                case ".AVIF":
+                    {
+                        if (await AvifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         if (CodecDiscovery.HasWicSupport(extension))
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
                         if (CodecDiscovery.HasImageMagickSupport(extension))
