@@ -57,7 +57,7 @@ internal static class ImageReader
                     {
                         if (!AppConfig.Settings.OpenExitZoom)
                             if (NativeHeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (await AvifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                        if (await NativeAvifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
                         if (CodecDiscovery.HasWicSupport(extension))
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                         if (CodecDiscovery.HasImageMagickSupport(extension))
@@ -233,7 +233,7 @@ internal static class ImageReader
                     }
                 case ".AVIF":
                     {
-                        if (await AvifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (await NativeAvifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         if (CodecDiscovery.HasWicSupport(extension))
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
                         if (CodecDiscovery.HasImageMagickSupport(extension))

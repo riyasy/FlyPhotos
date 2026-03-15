@@ -93,6 +93,27 @@ void FreePixelBuffer(PixelBuffer* buffer) {
     }
 }
 
+/**
+ * @brief C-API function to extract the primary image into a raw BGRA buffer directly from memory, reporting sequence status.
+ * This function serves as the boundary between managed C# and native C++ memory for in-RAM decodes.
+ */
+HeifError ExtractPrimaryImageAndAnimationStatusFromMemory(const uint8_t* data, size_t size, PixelBuffer* out_buffer, bool* out_is_animated) {
+    if (!data || size == 0 || !out_buffer || !out_is_animated) { return HeifError::InvalidInput; }
+    memset(out_buffer, 0, sizeof(PixelBuffer));
+    *out_is_animated = false;
+
+    HeifReader reader;
+    PixelBuffer cppBuffer;
+
+    HeifError result = reader.ExtractPrimaryImageBGRAMemory(data, size, cppBuffer, *out_is_animated);
+
+    if (result == HeifError::Ok) {
+        *out_buffer = *reinterpret_cast<PixelBuffer*>(&cppBuffer);
+    }
+
+    return result;
+}
+
 // --- AVIF Animation Exports ---
 
 #include "AnimatedAvifReader.h"

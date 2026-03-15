@@ -53,6 +53,9 @@ public:
     /// @brief Extracts the primary image into a raw BGRA pixel buffer.
     HeifError ExtractPrimaryImageBGRA(const std::string& input_filename, PixelBuffer& out_buffer);
 
+    /// @brief Extracts the primary image into a raw BGRA pixel buffer directly from memory, and outputs whether it contains sequence tracks.
+    HeifError ExtractPrimaryImageBGRAMemory(const uint8_t* data, size_t size, PixelBuffer& out_buffer, bool& out_is_animated);
+
 private:
     ///@brief Internal helper to decode any image handle into a BGRA buffer.
     HeifError ExtractImageToBGRA(heif_image_handle* image_handle, PixelBuffer& out_buffer);

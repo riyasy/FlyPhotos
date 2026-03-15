@@ -37,6 +37,15 @@ extern "C" {
     /// @param buffer Pointer to the PixelBuffer whose internal data buffer needs to be freed.
     __declspec(dllexport) void FreePixelBuffer(PixelBuffer* buffer);
 
+    /// @brief Decodes the primary image into a raw BGRA pixel buffer directly from memory, reporting sequence status.
+    /// @param data Pointer to the file data in memory.
+    /// @param size Size of the file data in bytes.
+    /// @param out_buffer Pointer to a struct to receive the decoded image data.
+    /// @param out_is_animated Boolean pointer to receive whether the file contains an animation sequence.
+    /// @return A HeifError code indicating the result.
+    /// @note The caller MUST call FreePixelBuffer() on the out_buffer to prevent a memory leak.
+    __declspec(dllexport) HeifError ExtractPrimaryImageAndAnimationStatusFromMemory(const uint8_t* data, size_t size, PixelBuffer* out_buffer, bool* out_is_animated);
+
     // --- AVIF Animation Exports ---
 
     /// @brief Opens an AVIF/HEIF animation file from memory and caches its frame metadata.

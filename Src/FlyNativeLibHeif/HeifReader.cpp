@@ -5,6 +5,7 @@
 #include <memory>
 #include <cassert>
 #include "BGRAEncoder.h"
+#include <libheif/heif_sequences.h>
 
 
 HeifReader::HeifReader() {
@@ -138,6 +139,37 @@ HeifError HeifReader::ExtractPrimaryImageBGRA(const std::string& input_filename,
 
     // 4. Delegate the decoding and buffer allocation to the shared helper function.
     //    The helper will take ownership of the primary_image_handle.
+    return ExtractImageToBGRA(primary_image_handle, out_buffer);
+}
+
+/**
+ * @brief Extracts the primary image and decodes it into a raw BGRA buffer directly from memory.
+ *        Also outputs a fast check for sequence tracks (animations).
+ */
+HeifError HeifReader::ExtractPrimaryImageBGRAMemory(const uint8_t* data, size_t size, PixelBuffer& out_buffer, bool& out_is_animated) {
+    // 1. Create a memory-mapped context.
+    std::shared_ptr<heif_context> context(heif_context_alloc(), [](heif_context* c) { heif_context_free(c); });
+
+    heif_error err = heif_context_read_from_memory_without_copy(context.get(), data, size, nullptr);
+    if (err.code != 0) {
+        return HeifError::FileReadError;
+    }
+
+    // 2. Quickly check for sequence tracks (Animation check).
+    out_is_animated = heif_context_has_sequence(context.get()) || heif_context_number_of_sequence_tracks(context.get()) > 0;
+
+    // 3. Get the primary image handle.
+    heif_image_handle* primary_image_handle = nullptr;
+    err = heif_context_get_primary_image_handle(context.get(), &primary_image_handle);
+    if (err.code) {
+        return HeifError::NoPrimaryImage;
+    }
+
+    out_buffer.primaryImageWidth = heif_image_handle_get_width(primary_image_handle);
+    out_buffer.primaryImageHeight = heif_image_handle_get_height(primary_image_handle);
+
+    // 4. Delegate the decoding and buffer allocation to the shared helper function.
+    // The ExtractImageToBGRA function takes ownership of primary_image_handle and will release it via its own std::shared_ptr.
     return ExtractImageToBGRA(primary_image_handle, out_buffer);
 }
 

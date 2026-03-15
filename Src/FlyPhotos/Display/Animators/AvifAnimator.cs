@@ -1,7 +1,9 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.Graphics.DirectX;
+using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
@@ -13,67 +15,25 @@ namespace FlyPhotos.Display.Animators;
 ///     This uses the native C++ library stateful context to decode frames directly into a pre-allocated buffer
 ///     to ensure 0-allocation rendering during playback.
 /// </summary>
-public class AvifAnimator : IAnimator
+public partial class AvifAnimator : IAnimator
 {
-    // --- Native C-style exports from FlyNativeLibHeif.dll ---
-    /// <summary>
-    /// Nested class to wrap all P/Invoke declarations to the FlyNativeLibHeif C++ DLL.
-    /// </summary>
-    private static class AvifNative
-    {
-        private const string DllName = "FlyNativeLibHeif.dll";
-
-        /// <summary>
-        /// Opens an AVIF animation given its pinned memory address and size.
-        /// </summary>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr OpenAvifAnimation(IntPtr data, nint size);
-
-        /// <summary>
-        /// Returns whether the provided handle contains a sequence track.
-        /// </summary>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        [return: MarshalAs(UnmanagedType.I1)]
-        public static extern bool IsAvifAnimated(IntPtr handle);
-
-        /// <summary>Gets the pixel width of the canvas for the animation sequence.</summary>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int GetAvifCanvasWidth(IntPtr handle);
-
-        /// <summary>Gets the pixel height of the canvas for the animation sequence.</summary>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int GetAvifCanvasHeight(IntPtr handle);
-
-        /// <summary>
-        /// Decodes the next frame from the track into the provided `outBgraBuffer`.
-        /// Returns the duration of the decoded frame in MS, or 0 on EOF/error.
-        /// </summary>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int DecodeNextAvifFrame(IntPtr handle, [In, Out] byte[] outBgraBuffer);
-
-        /// <summary>Resets the internal decoder to the beginning of the sequence to allow looping.</summary>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void ResetAvifAnimation(IntPtr handle);
-
-        /// <summary>Frees the unmanaged `AnimatedAvifReader` memory from C++.</summary>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void CloseAvifAnimation(IntPtr handle);
-    }
-
     /// <summary>Handle to the unmanaged <c>AnimatedAvifReader</c> C++ instance.</summary>
     private IntPtr _nativeHandle;
+
+    /// <summary>Pointer to the unmanaged memory holding the raw AVIF file bytes.</summary>
+    private IntPtr _unmanagedFileData;
 
     /// <summary>Reusable pixel buffer populated by the native decoder.</summary>
     private readonly byte[] _pixelBuffer;
 
-    /// <summary>Pinned handle to prevent GC from migrating the file memory during native usage.</summary>
-    private GCHandle _pinnedFileData;
-
     /// <summary>The final composited Win2D GPU surface where the frame is drawn.</summary>
     private readonly CanvasRenderTarget _compositedSurface;
 
-    /// <summary>Reused GPU texture to prevent thrashing. Loaded from <see cref="_pixelBuffer"/> per frame.</summary>
+    /// <summary>Reused GPU texture to prevent thrashing. Loaded from <see cref="_pixelBuffer" /> per frame.</summary>
     private readonly CanvasBitmap _frameBitmap;
+
+    /// <summary>Cached bounds for drawing without DPI scaling blur.</summary>
+    private readonly Rect _canvasRect;
 
     /// <summary>The timestamp of the last rendering loop iteration.</summary>
     private TimeSpan _lastElapsedTime = TimeSpan.Zero;
@@ -87,6 +47,9 @@ public class AvifAnimator : IAnimator
     /// <summary>Flag indicating whether the very first frame needs to be drawn.</summary>
     private bool _isFirstFrame = true;
 
+    /// <summary>Tracks if Dispose has already been called.</summary>
+    private bool _isDisposed = false;
+
     /// <summary>The width of the animation canvas in pixels.</summary>
     public uint PixelWidth { get; }
 
@@ -97,27 +60,25 @@ public class AvifAnimator : IAnimator
     public ICanvasImage Surface => _compositedSurface;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AvifAnimator"/> class.
-    /// Private constructor. Use <see cref="CreateAsync"/> to instantiate.
+    ///     Initializes a new instance of the <see cref="AvifAnimator" /> class.
+    ///     Private constructor. Use <see cref="CreateAsync" /> to instantiate.
     /// </summary>
-    /// <param name="handle">The unmanaged handle to the native C++ decoder context.</param>
-    /// <param name="canvas">The Win2D Canvas control associated with the UI.</param>
-    private AvifAnimator(IntPtr handle, CanvasControl canvas)
+    private AvifAnimator(IntPtr handle, IntPtr unmanagedFileData, CanvasControl canvas)
     {
         _nativeHandle = handle;
-        PixelWidth = (uint)AvifNative.GetAvifCanvasWidth(handle);
-        PixelHeight = (uint)AvifNative.GetAvifCanvasHeight(handle);
+        _unmanagedFileData = unmanagedFileData;
+
+        PixelWidth = (uint)NativeAvifBridge.GetAvifCanvasWidth(handle);
+        PixelHeight = (uint)NativeAvifBridge.GetAvifCanvasHeight(handle);
+
+        _canvasRect = new Rect(0, 0, PixelWidth, PixelHeight);
 
         // Pre-allocate the single pixel buffer for 0-allocation rendering loop
         _pixelBuffer = new byte[PixelWidth * PixelHeight * 4];
 
         // Allocate the single GPU texture once. We will update its pixels dynamically rather than destroying/recreating it.
-        _frameBitmap = CanvasBitmap.CreateFromBytes(
-            canvas.Device,
-            _pixelBuffer,
-            (int)PixelWidth,
-            (int)PixelHeight,
-            DirectXPixelFormat.B8G8R8A8UIntNormalized);
+        _frameBitmap = CanvasBitmap.CreateFromBytes(canvas.Device, _pixelBuffer,
+            (int)PixelWidth, (int)PixelHeight, DirectXPixelFormat.B8G8R8A8UIntNormalized);
 
         // Ensure initial surface is fully transparent instead of undefined
         _compositedSurface = new CanvasRenderTarget(canvas, PixelWidth, PixelHeight, 96);
@@ -126,41 +87,39 @@ public class AvifAnimator : IAnimator
     }
 
     /// <summary>
-    /// Associates the pinned <see cref="GCHandle"/> mapping the raw AVIF byte array with this animator.
-    /// </summary>
-    /// <param name="pinnedHandle">The pinned handler that must be freed upon disposal.</param>
-    private void SetPinnedHandle(GCHandle pinnedHandle)
-    {
-        _pinnedFileData = pinnedHandle;
-    }
-
-    /// <summary>
     ///     Asynchronously creates a <see cref="AvifAnimator" /> using a background thread to prevent UI freezing.
-    ///     Expects the AVIF file to be pre-loaded into memory to avoid duplicate GC allocations.
     /// </summary>
     public static async Task<AvifAnimator> CreateAsync(byte[] fileData, CanvasControl canvas)
     {
         return await Task.Run(() =>
         {
-            // PIN the array in memory so the .NET GC does not move it while libheif is reading from it
-            GCHandle pinnedData = GCHandle.Alloc(fileData, GCHandleType.Pinned);
+            // Allocate native memory and copy the array over.
+            // This prevents long-term GC pinning, allowing the .NET garbage collector
+            // to immediately clean up the original byte array and prevent heap fragmentation.
+            IntPtr unmanagedMemory = Marshal.AllocHGlobal(fileData.Length);
             try
             {
-                IntPtr memoryPtr = pinnedData.AddrOfPinnedObject();
-                IntPtr handle = AvifNative.OpenAvifAnimation(memoryPtr, fileData.Length);
-                if (handle == IntPtr.Zero)
-                {
-                    throw new InvalidOperationException("Failed to open Animated AVIF via native decoder from byte array.");
-                }
+                Marshal.Copy(fileData, 0, unmanagedMemory, fileData.Length);
 
-                var animator = new AvifAnimator(handle, canvas);
-                animator.SetPinnedHandle(pinnedData);
-                return animator;
+                IntPtr handle = NativeAvifBridge.OpenAvifAnimation(unmanagedMemory, fileData.Length);
+                if (handle == IntPtr.Zero)
+                    throw new InvalidOperationException("Failed to open Animated AVIF via native decoder from byte array.");
+
+                try
+                {
+                    return new AvifAnimator(handle, unmanagedMemory, canvas);
+                }
+                catch
+                {
+                    NativeAvifBridge.CloseAvifAnimation(handle);
+                    throw;
+                }
             }
             catch
             {
-                if (pinnedData.IsAllocated)
-                    pinnedData.Free();
+                // If anything fails during setup, free the native memory immediately
+                if (unmanagedMemory != IntPtr.Zero)
+                    Marshal.FreeHGlobal(unmanagedMemory);
                 throw;
             }
         });
@@ -172,22 +131,24 @@ public class AvifAnimator : IAnimator
     public static bool IsAnimated(byte[] fileData)
     {
         if (fileData == null || fileData.Length == 0) return false;
-
+        // For a quick, synchronous check, pinning is perfectly fine because it only lasts a few milliseconds.
         GCHandle pinnedData = GCHandle.Alloc(fileData, GCHandleType.Pinned);
         try
         {
             IntPtr memoryPtr = pinnedData.AddrOfPinnedObject();
-
-            IntPtr handle = AvifNative.OpenAvifAnimation(memoryPtr, fileData.Length);
-            if (handle == IntPtr.Zero) 
-            {
+            IntPtr handle = NativeAvifBridge.OpenAvifAnimation(memoryPtr, fileData.Length);
+            if (handle == IntPtr.Zero)
                 return false;
-            }
 
-            bool isAnimated = AvifNative.IsAvifAnimated(handle);
-            AvifNative.CloseAvifAnimation(handle);
-            
-            return isAnimated;
+            try
+            {
+                return NativeAvifBridge.IsAvifAnimated(handle);
+            }
+            finally
+            {
+                // Ensure the handle is always closed, even if IsAvifAnimated throws
+                NativeAvifBridge.CloseAvifAnimation(handle);
+            }
         }
         finally
         {
@@ -197,8 +158,8 @@ public class AvifAnimator : IAnimator
     }
 
     /// <summary>
-    /// Decodes and advances the animation forward based on the elapsed time.
-    /// Synchronously interacts with the native library, as this is invoked on Win2D's dedicated dispatcher.
+    ///     Decodes and advances the animation forward based on the elapsed time.
+    ///     Synchronously interacts with the native library, as this is invoked on Win2D's dedicated dispatcher.
     /// </summary>
     /// <param name="totalElapsedTime">The total running time of the animation loop.</param>
     /// <returns>A completed Task.</returns>
@@ -210,7 +171,7 @@ public class AvifAnimator : IAnimator
         {
             // Win2D Update loop runs on its own background thread, so synchronous C++ decoding here is perfectly safe and
             // eliminates the GC pressure of allocating a Task/Closure per frame.
-            _currentFrameDurationMs = AvifNative.DecodeNextAvifFrame(_nativeHandle, _pixelBuffer);
+            _currentFrameDurationMs = NativeAvifBridge.DecodeNextAvifFrame(_nativeHandle, _pixelBuffer);
             if (_currentFrameDurationMs > 0)
                 RenderBufferToSurface();
             _isFirstFrame = false;
@@ -224,8 +185,8 @@ public class AvifAnimator : IAnimator
         if (delta < TimeSpan.Zero)
         {
             // Clock reset (e.g. animation was restarted)
-            AvifNative.ResetAvifAnimation(_nativeHandle);
-            _currentFrameDurationMs = AvifNative.DecodeNextAvifFrame(_nativeHandle, _pixelBuffer);
+            NativeAvifBridge.ResetAvifAnimation(_nativeHandle);
+            _currentFrameDurationMs = NativeAvifBridge.DecodeNextAvifFrame(_nativeHandle, _pixelBuffer);
             if (_currentFrameDurationMs > 0) RenderBufferToSurface();
             _accumulatedTimeMs = 0;
             return Task.CompletedTask;
@@ -234,16 +195,18 @@ public class AvifAnimator : IAnimator
         _accumulatedTimeMs += delta.TotalMilliseconds;
 
         bool rendered = false;
+
+        // Accumulate intermediate frames without drawing them to Win2D if the loop is running behind
         while (_accumulatedTimeMs >= _currentFrameDurationMs && _currentFrameDurationMs > 0)
         {
             _accumulatedTimeMs -= _currentFrameDurationMs;
 
-            int nextDurationMs = AvifNative.DecodeNextAvifFrame(_nativeHandle, _pixelBuffer);
+            int nextDurationMs = NativeAvifBridge.DecodeNextAvifFrame(_nativeHandle, _pixelBuffer);
             if (nextDurationMs <= 0)
             {
                 // Sequence finished, loop back to the beginning
-                AvifNative.ResetAvifAnimation(_nativeHandle);
-                nextDurationMs = AvifNative.DecodeNextAvifFrame(_nativeHandle, _pixelBuffer);
+                NativeAvifBridge.ResetAvifAnimation(_nativeHandle);
+                nextDurationMs = NativeAvifBridge.DecodeNextAvifFrame(_nativeHandle, _pixelBuffer);
                 if (nextDurationMs <= 0) break; // Error playing
             }
 
@@ -258,8 +221,8 @@ public class AvifAnimator : IAnimator
     }
 
     /// <summary>
-    /// Transmits the latest natively decoded <see cref="_pixelBuffer"/> bytes up to the GPU texture
-    /// and renders it cleanly onto the <see cref="_compositedSurface"/>.
+    ///     Transmits the latest natively decoded <see cref="_pixelBuffer" /> bytes up to the GPU texture
+    ///     and renders it cleanly onto the <see cref="_compositedSurface" />.
     /// </summary>
     private void RenderBufferToSurface()
     {
@@ -271,35 +234,55 @@ public class AvifAnimator : IAnimator
         // Stamp the fully composited frame directly onto the surface
         using var ds = _compositedSurface.CreateDrawingSession();
         ds.Blend = CanvasBlend.Copy;
-        ds.DrawImage(_frameBitmap);
+
+        // Use the Rect overload to guarantee strict 1:1 pixel mapping (Fixes DPI Scaling blur)
+        ds.DrawImage(_frameBitmap, _canvasRect);
     }
 
     /// <summary>
-    /// Disposes the native memory context, GPU textures, and safely unpins the C# file data byte array mapping.
+    ///     Disposes the native memory context, GPU textures, and frees the unmanaged file bytes.
     /// </summary>
     public void Dispose()
     {
-        if (_nativeHandle != IntPtr.Zero)
-        {
-            AvifNative.CloseAvifAnimation(_nativeHandle);
-            _nativeHandle = IntPtr.Zero;
-        }
-
-        if (_pinnedFileData.IsAllocated)
-        {
-            _pinnedFileData.Free();
-        }
-
-        _frameBitmap?.Dispose();
-        _compositedSurface?.Dispose();
+        Dispose(true);
         GC.SuppressFinalize(this);
     }
 
     /// <summary>
-    /// Finalizer to ensure unmanaged memory is cleaned up if <see cref="Dispose"/> is forgotten.
+    ///     Internal disposal logic conforming to the standard IDisposable pattern to prevent Win2D GC finalizer crashes.
+    /// </summary>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_isDisposed) return;
+
+        // 1. Free Unmanaged resources (Always safe to do, even from the Finalizer thread)
+        if (_nativeHandle != IntPtr.Zero)
+        {
+            NativeAvifBridge.CloseAvifAnimation(_nativeHandle);
+            _nativeHandle = IntPtr.Zero;
+        }
+
+        if (_unmanagedFileData != IntPtr.Zero)
+        {
+            Marshal.FreeHGlobal(_unmanagedFileData);
+            _unmanagedFileData = IntPtr.Zero;
+        }
+
+        // 2. Free Managed resources (Only when explicitly disposed, NEVER from the Finalizer thread)
+        if (disposing)
+        {
+            _frameBitmap?.Dispose();
+            _compositedSurface?.Dispose();
+        }
+
+        _isDisposed = true;
+    }
+
+    /// <summary>
+    ///     Finalizer to ensure unmanaged memory is cleaned up if <see cref="Dispose" /> is forgotten.
     /// </summary>
     ~AvifAnimator()
     {
-        Dispose();
+        Dispose(false);
     }
 }

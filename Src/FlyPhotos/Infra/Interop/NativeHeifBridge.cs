@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -125,6 +125,24 @@ internal static partial class NativeHeifBridge
     [LibraryImport(DllName, EntryPoint = "FreePixelBuffer")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void FreePixelBuffer(ref PixelBuffer buffer);
+
+    /// <summary>
+    /// Imports the native `ExtractPrimaryImageAndAnimationStatusFromMemory` function from `FlyNativeLibHeif.dll`.
+    /// This function decodes the primary image from an in-memory byte array into 32-bit BGRA pixel format,
+    /// and simultaneously checks if the file contains an animated sequence track.
+    /// </summary>
+    /// <param name="data">A pointer to the unmanaged memory block containing the raw file bytes.</param>
+    /// <param name="size">The size of the unmanaged memory block in bytes.</param>
+    /// <param name="outBuffer">An output <see cref="PixelBuffer"/> struct containing the pointer to the decoded pixel data and image metadata.</param>
+    /// <param name="outIsAnimated">An output boolean that is true if the file contains an animation sequence.</param>
+    /// <returns>A <see cref="HeifError"/> indicating the success or failure of the operation.</returns>
+    [LibraryImport(DllName, EntryPoint = "ExtractPrimaryImageAndAnimationStatusFromMemory")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial HeifError ExtractPrimaryImageAndAnimationStatusFromMemory(
+        IntPtr data,
+        nuint size,
+        out PixelBuffer outBuffer,
+        out byte outIsAnimated);
 }
 
 #endregion
@@ -243,6 +261,67 @@ public static class NativeHeifWrapper
         finally
         {
             NativeHeifBridge.FreePixelBuffer(ref buffer);
+        }
+    }
+
+    /// <summary>
+    /// Decodes the primary image from an in-memory byte array into a managed <see cref="HeifImage"/> object.
+    /// This skips I/O file locks and performs a simultaneous check for animation sequence tracks.
+    /// </summary>
+    /// <param name="fileData">The raw byte array containing the entire file.</param>
+    /// <param name="isAnimated">Output parameter indicating whether the sequence has animation tracks.</param>
+    /// <returns>A <see cref="HeifImage"/> object containing the decoded BGRA pixel data and dimensions, or null if empty.</returns>
+    public static HeifImage DecodePrimaryImageFromMemory(byte[] fileData, out bool isAnimated)
+    {
+        isAnimated = false;
+        if (fileData == null || fileData.Length == 0) return null;
+
+        // Briefly pin the byte array so we can pass its pointer to C++
+        GCHandle pinnedData = GCHandle.Alloc(fileData, GCHandleType.Pinned);
+        try
+        {
+            IntPtr memoryPtr = pinnedData.AddrOfPinnedObject();
+            HeifError result = NativeHeifBridge.ExtractPrimaryImageAndAnimationStatusFromMemory(
+                memoryPtr,
+                (nuint)fileData.Length,
+                out NativeHeifBridge.PixelBuffer buffer,
+                out byte outIsAnimatedByte);
+
+            isAnimated = outIsAnimatedByte != 0;
+
+            if (result != HeifError.Ok)
+            {
+                // Soft fail if the file is just totally broke. Let the caller deal with null.
+                return null;
+            }
+
+            try
+            {
+                if (buffer.data == IntPtr.Zero || buffer.dataSize == 0)
+                    return null;
+
+                byte[] managedPixels = new byte[buffer.dataSize];
+                Marshal.Copy(buffer.data, managedPixels, 0, buffer.dataSize);
+
+                return new HeifImage
+                {
+                    Pixels = managedPixels,
+                    Width = buffer.width,
+                    Height = buffer.height,
+                    PrimaryImageWidth = buffer.primaryImageWidth,
+                    PrimaryImageHeight = buffer.primaryImageHeight
+                };
+            }
+            finally
+            {
+                // Ensure the C++ allocated pixel buffer memory is always freed.
+                NativeHeifBridge.FreePixelBuffer(ref buffer);
+            }
+        }
+        finally
+        {
+            if (pinnedData.IsAllocated)
+                pinnedData.Free();
         }
     }
 }
