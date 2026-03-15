@@ -6,10 +6,12 @@ using FlyPhotos.Infra.Localization;
 using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
 using FlyPhotos.Services.ExternalAppListing;
+using FlyPhotos.UI.Behaviors;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using System;
@@ -18,10 +20,11 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.System;
-using FlyPhotos.UI.Behaviors;
+using Microsoft.UI.Composition;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -144,6 +147,8 @@ internal sealed partial class Settings
         await SetButtonIconFromAppData(BtnShortcut2, AppConfig.Settings.ExternalApp2);
         await SetButtonIconFromAppData(BtnShortcut3, AppConfig.Settings.ExternalApp3);
         await SetButtonIconFromAppData(BtnShortcut4, AppConfig.Settings.ExternalApp4);
+
+        // StartHeartBeat();
     }
 
     private static async Task SetButtonIconFromAppData(Button btnShortcut, string appShortCut)
@@ -525,6 +530,35 @@ internal sealed partial class Settings
             XamlRoot = Content.XamlRoot
         };
         await dialog.ShowAsync();
+    }
+
+    void StartHeartBeat()
+    {
+        var heartVisual = ElementCompositionPreview.GetElementVisual(HeartIcon);
+        if (heartVisual == null) return;
+        var compositor = heartVisual.Compositor;
+        // Ensure CenterPoint is set correctly. 
+        heartVisual.CenterPoint = new Vector3((float)HeartIcon.ActualWidth / 2, (float)HeartIcon.ActualHeight / 2, 0);
+        // Use a single Vector3 animation instead of two Scalar animations
+        var scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
+        // Set the total duration to 3 seconds
+        scaleAnimation.Duration = TimeSpan.FromSeconds(3);
+        scaleAnimation.IterationBehavior = AnimationIterationBehavior.Forever;
+        // We compress the 1.2s heartbeat into the first 40% of the 3-second timeline.
+        // Scales are adjusted so it maxes out at 1.0f to prevent clipping.
+        scaleAnimation.InsertKeyFrame(0.00f, new Vector3(0.8f, 0.8f, 1f));
+        // First beat (Peak at 1.0f)
+        scaleAnimation.InsertKeyFrame(0.08f, new Vector3(1.0f, 1.0f, 1f));
+        // Recoil
+        scaleAnimation.InsertKeyFrame(0.16f, new Vector3(0.8f, 0.8f, 1f));
+        // Second beat (Smaller peak at 0.92f)
+        scaleAnimation.InsertKeyFrame(0.24f, new Vector3(0.92f, 0.92f, 1f));
+        // End of beat, return to rest
+        scaleAnimation.InsertKeyFrame(0.40f, new Vector3(0.8f, 0.8f, 1f));
+        // Hold at rest for the remaining 60% of the 3-second loop
+        scaleAnimation.InsertKeyFrame(1.00f, new Vector3(0.8f, 0.8f, 1f));
+        // Start the single animation on the "Scale" property
+        heartVisual.StartAnimation("Scale", scaleAnimation);
     }
 }
 

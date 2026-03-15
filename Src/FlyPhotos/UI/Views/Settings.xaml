@@ -8,9 +8,6 @@
     xmlns:model="using:FlyPhotos.Core.Model"
     xmlns:ui="using:CommunityToolkit.WinUI"
     mc:Ignorable="d">
-    <!--<Window.SystemBackdrop>
-        <MicaBackdrop />
-    </Window.SystemBackdrop>-->
     <Grid x:Name="MainLayout" Background="Transparent">
         <Pivot x:Uid="SettingsPage">
             <PivotItem x:Uid="SettingsPivotItemGeneral">
@@ -55,8 +52,13 @@
                         <controls:SettingsCard
                             x:Name="SettingsCardDeveloperSupport"
                             x:Uid="SettingsCardDeveloperSupport"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xEB51;}">
+                            Margin="0,5,0,0">
+                            <controls:SettingsCard.HeaderIcon>
+                                <FontIcon
+                                    x:Name="HeartIcon"
+                                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                    Glyph="&#xEB51;" />
+                            </controls:SettingsCard.HeaderIcon>
                             <HyperlinkButton x:Uid="DonateButton" NavigateUri="https://github.com/sponsors/riyasy" />
                         </controls:SettingsCard>
                         <controls:SettingsExpander
