@@ -3,11 +3,13 @@
 **/.vs/
 **/z_Notes/
 **/z_unUsedReference/
+**/vcpkg_installed/
 **/bin/
 **/Release/
 **/Debug/
 **/obj/
 **/publish/
+**/AppPackages/
 /DeleteTempFiles.bat
 /Src/CLIWrapper/CLIWrapper.vcxproj.user
 /Src/FlyContextMenuHelper/FlyContextMenuHelper.vcxproj.user
@@ -16,3 +18,5 @@
 /Src/FlyPhotos/Properties/PublishProfiles/win-x86.pubxml.user
 /Src/FlyPhotos/RYFTools.pfx
 /Src/WicImageFileReaderNative/WicImageFileReaderNative.vcxproj.user
+global.json
+win-ARM64.pubxml.user

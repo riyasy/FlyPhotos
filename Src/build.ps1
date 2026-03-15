@@ -7,7 +7,7 @@
 
 param(
     [ValidateSet("x64", "ARM64", "Both")]
-    [string]$TargetPlatform = "x64"
+    [string]$TargetPlatform = "Both"
 )
 
 $ErrorActionPreference = "Stop"
