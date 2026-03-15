@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Localization;
@@ -13,13 +14,10 @@ using NLog;
 using WinUIEx;
 using LaunchActivatedEventArgs = Microsoft.UI.Xaml.LaunchActivatedEventArgs;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace FlyPhotos;
 
 /// <summary>
-/// Provides application-specific behavior to supplement the default Application class.
+///     Provides application-specific behavior to supplement the default Application class.
 /// </summary>
 public partial class App
 {
@@ -28,8 +26,8 @@ public partial class App
     private PhotoDisplayWindow _photoDisplayWindow;
 
     /// <summary>
-    /// Initializes the singleton application object.  This is the first line of authored code
-    /// executed, and as such is the logical equivalent of main() or WinMain().
+    ///     Initializes the singleton application object.  This is the first line of authored code
+    ///     executed, and as such is the logical equivalent of main() or WinMain().
     /// </summary>
     public App()
     {
@@ -51,7 +49,7 @@ public partial class App
     }
 
     /// <summary>
-    /// Invoked when the application is launched.
+    ///     Invoked when the application is launched.
     /// </summary>
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
@@ -76,7 +74,6 @@ public partial class App
                 if (File.Exists(initWindow.SelectedFile))
                     LaunchPhotoDisplayWindow(initWindow.SelectedFile, false);
             };
-
         }
         else
         {
@@ -86,17 +83,17 @@ public partial class App
 
     private void LaunchPhotoDisplayWindow(string selectedFilePath, bool extLaunch)
     {
-        _photoDisplayWindow = new PhotoDisplayWindow(selectedFilePath, extLaunch);        
+        _photoDisplayWindow = new PhotoDisplayWindow(selectedFilePath, extLaunch);
         if (!AppConfig.Settings.RememberLastWindowState)
             _photoDisplayWindow.Maximize();
         _photoDisplayWindow.Activate();
     }
 
     /// <summary>
-    /// Handles single/multi-instance startup logic.
-    /// When AllowMultiInstance is false (default): kills any existing FlyPhotos processes (original behavior).
-    /// When AllowMultiInstance is true: the first instance acquires the mutex and is the full-featured primary.
-    /// Subsequent instances become secondary — they launch with restricted mode (no folder scan, no Settings, no Delete).
+    ///     Handles single/multi-instance startup logic.
+    ///     When AllowMultiInstance is false (default): kills any existing FlyPhotos processes (original behavior).
+    ///     When AllowMultiInstance is true: the first instance acquires the mutex and is the full-featured primary.
+    ///     Subsequent instances become secondary — they launch with restricted mode (no folder scan, no Settings, no Delete).
     /// </summary>
     private void HandleInstanceManagement()
     {
@@ -113,13 +110,27 @@ public partial class App
             // Single-instance mode (default): kill any other running instances.
             if (!createdNew)
             {
-                var current = Process.GetCurrentProcess();
-                foreach (var process in Process.GetProcessesByName(current.ProcessName))
-                    if (process.Id != current.Id)
-                        process.Kill();
+	                // If a Fly launches a packaged instance of Fly and if the child kills the parent too quickly,
+	                // the launch broker may consider the launch "Failed" and kill the child itself. 
+	                // Instead, we delay the kill by 0.5 second so that Windows considers the launch "Successful" first.
+                // In unpackaged mode, we can kill other instances immediately since there's no launch broker to worry about.
+                if (PathResolver.IsPackagedApp)
+                    Task.Run(async () => { await Task.Delay(500); KillOtherFlys(); });
+                else
+                    KillOtherFlys();
             }
+
             AppConfig.Volatile.IsSecondaryInstance = false;
         }
+    }
+
+    private static void KillOtherFlys()
+    {
+        var current = Process.GetCurrentProcess();
+        foreach (var process in Process.GetProcessesByName(current.ProcessName))
+            if (process.Id != current.Id)
+                try { process.Kill(); }
+                catch (Exception ex) { Debug.WriteLine($"Failed to kill previous instance {process.Id} {ex.Message}"); }
     }
 
     private static string GetFilePathFromCommandLine()
