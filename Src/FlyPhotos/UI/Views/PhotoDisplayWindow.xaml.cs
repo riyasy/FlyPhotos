@@ -49,6 +49,8 @@ public sealed partial class PhotoDisplayWindow
     private readonly WindowSizeManager _windSizeManager;
     private readonly WindowAppearanceManager _windAppearanceManager;
 
+    private bool _loadingStarted;
+
     // Accumulators for smooth scrolling
     private int _verticalDeltaAccumulator;
     private int _horizontalDeltaAccumulator;
@@ -322,7 +324,15 @@ public sealed partial class PhotoDisplayWindow
         CanvasCreateResourcesEventArgs args)
     {
         //args.TrackAsyncAction(_photoController.LoadFirstPhoto().AsAsyncAction());
-        _ = _photoController.LoadFirstPhoto();
+
+        // This flag is needed to prevent multiple calls to LoadFirstPhoto
+        // CreateResources can be called again after the initial call// if the device is lost
+        // and recreated which can happen when there is a DPI change for example.
+        if (!_loadingStarted)
+        {
+            _loadingStarted = true;
+            _ = _photoController.LoadFirstPhoto();
+        }
     }
     private void D2dCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
