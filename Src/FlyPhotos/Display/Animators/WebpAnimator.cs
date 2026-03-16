@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -12,48 +13,47 @@ using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using NLog;
-using Buffer = System.Buffer;
 
 namespace FlyPhotos.Display.Animators;
 
 /// <summary>
-///     Real-time animator for animated WebP files, implementing <see cref="IAnimator" /> so it
-///     integrates with <c>AnimatedImageRenderer</c> without any format-specific changes there.
+///     Real-time animator for animated WebP files, implementing <see cref="IAnimator" />.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         <b>Why a binary parser?</b>
-///         The Windows WIC WebP codec does not expose per-frame metadata (delay, offset, blend flags)
-///         through <c>BitmapProperties</c>. All timing and layout data is therefore extracted by
-///         <see cref="Parser" />, which walks the raw RIFF container and reads VP8X, ANIM, and ANMF chunks
-///         directly — the same strategy used by <c>PngAnimator</c> for APNG.
+///         <b>Why a binary RIFF parser?</b>
+///         The Windows WIC WebP codec does not expose per-frame metadata (delay, offset, blend
+///         and dispose flags) through <c>BitmapProperties</c>. All timing and layout data is
+///         extracted by <see cref="Parser" />, which walks the raw RIFF container and reads
+///         VP8X, ANIM, and ANMF chunks directly — the same strategy used by
+///         <c>PngAnimator</c> for APNG.
 ///     </para>
 ///     <para>
 ///         <b>Full-canvas vs. sub-region frames.</b>
 ///         Depending on the installed WIC codec version, <c>GetFrameAsync</c> may return either:
 ///         <list type="bullet">
 ///             <item>
-///                 A pre-composited full-canvas bitmap (same size as VP8X canvas) — stamped with
-///                 <c>CanvasBlend.Copy</c> directly onto the compositor surface.
+///                 A pre-composited full-canvas bitmap (dimensions match the VP8X canvas) —
+///                 stamped with <c>CanvasBlend.Copy</c> directly onto the compositor surface.
 ///             </item>
 ///             <item>
-///                 A raw ANMF sub-region patch (same size as the ANMF frame) — composited at the
-///                 parsed pixel offset using the frame's blend mode.
+///                 A raw ANMF sub-region patch (dimensions match the ANMF frame bounds) —
+///                 composited at the parsed pixel offset using the frame's blend mode.
 ///             </item>
 ///         </list>
-///         <see cref="RenderFrameAsync" /> detects which case applies at runtime by comparing the
-///         decoded bitmap dimensions against the parsed ANMF bounds.
+///         <see cref="RenderFrameAsync" /> detects which case applies at runtime by comparing
+///         the decoded frame's pixel dimensions against the canvas dimensions.
 ///     </para>
 ///     <para>
-///         <b>DPI-scaling caveat.</b>
-///         <c>DrawImage(bitmap, x, y)</c> in Win2D triggers DPI-scaling interpolation that causes
-///         sub-pixel cropping when the canvas and bitmap have different logical DPI.
-///         <c>DrawImage(bitmap, Rect)</c> maps pixels exactly and must always be used here.
+///         <b>DPI-scaling.</b>
+///         <c>DrawImage(bitmap, float x, float y)</c> in Win2D applies DPI-scaling interpolation
+///         that causes sub-pixel misalignment when the canvas and bitmap have different logical
+///         DPI. <c>DrawImage(bitmap, Rect)</c> maps pixels exactly and is always used here.
 ///     </para>
 ///     <para>
 ///         <b>Loop count.</b>
-///         The ANIM chunk loop count is parsed and logged but the animator always loops infinitely
-///         (the render loop drives timing via <c>totalElapsedTime % _totalAnimationDuration</c>).
+///         The ANIM chunk loop count is parsed and logged but the animator always loops
+///         infinitely via <c>totalElapsedTime % _totalAnimationDuration</c>.
 ///     </para>
 /// </remarks>
 public partial class WebpAnimator : IAnimator
@@ -61,31 +61,48 @@ public partial class WebpAnimator : IAnimator
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     // -------------------------------------------------------------------------
-    // Frame metadata (pre-loaded from binary parser at construction time)
+    // Nested types
     // -------------------------------------------------------------------------
 
-    /// <summary>Immutable per-frame data produced by <see cref="Parser" /> and stored at startup.</summary>
+    /// <summary>
+    ///     Immutable per-frame data converted from the raw ANMF parser output and stored
+    ///     at construction time. Avoids RIFF re-parsing on the hot render path.
+    /// </summary>
     private class FrameMetadata
     {
-        /// <summary>How long this frame is displayed before advancing to the next one.</summary>
+        /// <summary>
+        ///     How long this frame is displayed before advancing.
+        ///     <para>
+        ///         <b>WebP spec:</b> the raw ANMF duration field is in milliseconds (24-bit LE).
+        ///         Durations strictly less than 10 ms are clamped to 100 ms, matching the
+        ///         behaviour of Chrome and Firefox. This compensates for authoring-tool bugs
+        ///         that encode near-zero delays when converting from GIF.
+        ///     </para>
+        /// </summary>
         public TimeSpan Delay { get; init; }
 
         /// <summary>
         ///     Pixel rectangle of this ANMF frame within the canvas.
-        ///     For full-canvas frames this equals the whole canvas rect.
+        ///     <para>
+        ///         <b>WebP spec:</b> ANMF stores X and Y as (actual / 2); Width and Height as
+        ///         (actual − 1). Both are decoded by <see cref="Parser" /> into pixel values.
+        ///     </para>
+        ///     For full-canvas frames this equals the full canvas rect.
         /// </summary>
         public Rect Bounds { get; init; }
 
         /// <summary>
-        ///     <c>true</c>  = alpha-blend over the compositor surface (SourceOver).<br />
-        ///     <c>false</c> = overwrite the target region completely (do not blend).
+        ///     <c>true</c>  = alpha-blend this frame over the compositor surface (SourceOver).<br />
+        ///     <c>false</c> = replace the region completely without blending.
+        ///     <para><b>WebP spec:</b> ANMF flags byte bit 1; 0 = blend, 1 = do not blend.</para>
         /// </summary>
         public bool UseBlend { get; init; }
 
         /// <summary>
-        ///     When <c>true</c>, the compositor region covered by this frame must be cleared to
-        ///     <c>_backgroundColor</c> <em>after</em> this frame is displayed and before the next
-        ///     frame is drawn. Corresponds to WebP disposal method 1 (dispose to background).
+        ///     <c>true</c> = after this frame is displayed, clear its region to
+        ///     <see cref="WebpAnimator._backgroundColor" /> before the next frame renders.
+        ///     <c>false</c> = leave the region as-is (do not dispose).
+        ///     <para><b>WebP spec:</b> ANMF flags byte bit 0; 0 = do not dispose, 1 = dispose to background.</para>
         /// </summary>
         public bool DisposeToBackground { get; init; }
     }
@@ -104,71 +121,104 @@ public partial class WebpAnimator : IAnimator
     public ICanvasImage Surface => _compositedSurface;
 
     // -------------------------------------------------------------------------
-    // Private state
+    // Private fields
     // -------------------------------------------------------------------------
 
-    /// <summary>The Windows Imaging Component (WIC) decoder used to extract individual WebP frames.</summary>
+    /// <summary>WIC decoder used to extract per-frame pixel data from the WebP stream.</summary>
     private readonly BitmapDecoder _decoder;
 
-    /// <summary>The stream encapsulating the raw WebP file bytes.</summary>
+    /// <summary>
+    ///     Stream wrapping the raw WebP bytes. Kept alive for the lifetime of the animator
+    ///     because <see cref="_decoder" /> reads from it on every <c>GetFrameAsync</c> call.
+    /// </summary>
     private readonly IRandomAccessStream _stream;
 
-    /// <summary>The parsed, ordered metadata for every frame in the sequence.</summary>
+    /// <summary>Pre-converted metadata for every animation frame, indexed by frame order.</summary>
     private readonly List<FrameMetadata> _frameMetadata;
 
-    /// <summary>The cumulative duration of all frames for a single animation loop.</summary>
+    /// <summary>Total wall-clock duration of one complete animation loop.</summary>
     private readonly TimeSpan _totalAnimationDuration;
 
-    /// <summary>The parent CanvasControl context used to create Win2D devices.</summary>
-    private readonly CanvasControl _canvas;
+    /// <summary>
+    ///     Cumulative end-time for each frame. <c>_frameCumulativeTime[i]</c> is the elapsed
+    ///     time at which frame <c>i</c> finishes displaying. Built once at construction.
+    ///     Allows O(log n) frame lookup via <c>Array.BinarySearch</c> in <see cref="UpdateAsync" />.
+    /// </summary>
+    private readonly TimeSpan[] _frameCumulativeTime;
 
-    /// <summary>Off-screen render target where frames are accumulated frame-by-frame.</summary>
+    /// <summary>
+    ///     Off-screen render target where frames are incrementally composited.
+    ///     Exposed as <see cref="Surface" /> for the Win2D render loop.
+    /// </summary>
     private readonly CanvasRenderTarget _compositedSurface;
 
     /// <summary>
-    ///     Cached full-canvas <see cref="Rect" />. Avoids allocating a new struct on every draw
-    ///     call in the common full-canvas-frame path.
+    ///     Cached full-canvas <see cref="Rect" /> pre-computed at construction.
+    ///     Used by <c>DrawImage</c> to guarantee 1:1 pixel mapping, avoiding the
+    ///     DPI-scaling interpolation that the float-coordinate overload applies.
     /// </summary>
     private readonly Rect _canvasRect;
 
     /// <summary>
-    ///     Background color from the ANIM chunk. Used when <see cref="FrameMetadata.DisposeToBackground" />
-    ///     is <c>true</c> to clear the disposed region. Defaults to transparent if the ANIM chunk is absent.
+    ///     Background color from the ANIM chunk, used when a frame's
+    ///     <see cref="FrameMetadata.DisposeToBackground" /> is <c>true</c>.
+    ///     <para>
+    ///         <b>WebP spec:</b> ANIM stores the color as [B, G, R, A] — not RGBA.
+    ///     </para>
+    ///     Defaults to <c>Colors.Transparent</c> when the ANIM chunk is absent.
     /// </summary>
     private readonly Color _backgroundColor;
 
     /// <summary>
-    ///     Index of the last fully rendered frame, or -1 when the compositor surface has been
-    ///     cleared (e.g. at loop restart). Used to detect whether we need to catch-up render
-    ///     intermediate frames in a given <see cref="UpdateAsync" /> call.
+    ///     Reusable GPU staging texture, sized to <c>PixelWidth × PixelHeight</c>.
+    ///     Written via <c>SetPixelBytes</c> each frame, then drawn onto <see cref="_compositedSurface" />.
+    ///     Sized to the full canvas so the GPU texture stride (<c>PixelWidth × 4</c> bytes/row)
+    ///     always matches the tightly-packed CPU buffer layout, regardless of the current
+    ///     frame patch's width.
+    /// </summary>
+    private readonly CanvasBitmap _reusablePatchTexture;
+
+    /// <summary>
+    ///     Persistent CPU-side pixel buffer, sized to the full canvas at construction.
+    ///     Receives decoded frame pixels before upload to <see cref="_reusablePatchTexture" />.
+    ///     Grown defensively if a malformed file reports a patch larger than the canvas; never shrunk.
+    /// </summary>
+    private byte[] _pixelBuffer;
+
+    /// <summary>
+    ///     Pre-pinned <c>IBuffer</c> wrapper over <see cref="_pixelBuffer" />, allocated once
+    ///     at construction. Passed directly to <c>CopyToBuffer</c> on every frame so WIC writes
+    ///     decoded pixels straight into <see cref="_pixelBuffer" /> without a second allocation.
+    ///     Replaced whenever <see cref="_pixelBuffer" /> grows (rare defensive path only).
+    /// </summary>
+    private IBuffer _pinnedBuffer;
+
+    /// <summary>
+    ///     Index of the last fully composited frame, or <c>-1</c> after a surface reset.
+    ///     Drives the catch-up render loop in <see cref="UpdateAsync" />.
     /// </summary>
     private int _currentFrameIndex = -1;
 
-    // Zero-allocation texture updating state
-    /// <summary>A single, reusable shared GPU texture wrapped over the pixel buffer.</summary>
-    private readonly CanvasBitmap _sharedBitmap;
+    /// <summary>
+    ///     Whether the previously rendered frame specified dispose-to-background.
+    ///     Stored as a field (rather than indexing <c>_frameMetadata[frameIndex - 1]</c>)
+    ///     so that the last frame's disposal is correctly applied when rendering frame 0 on
+    ///     loop wrap-around, where <c>frameIndex - 1</c> would be out of range.
+    /// </summary>
+    private bool _previousFrameDisposeToBackground;
 
-    /// <summary>The raw, full-screen byte buffer used to feed the <see cref="_sharedBitmap" />.</summary>
-    private readonly byte[] _pixelBuffer;
-
-    /// <summary>An IBuffer wrapper over <see cref="_pixelBuffer" /> for native interop zero-copy operations.</summary>
-    private readonly IBuffer _pixelIBuffer;
-
-    /// <summary>A temporary buffer used to extract the raw pixel bytes from a decoded <see cref="SoftwareBitmap" /> patch.</summary>
-    private byte[] _patchBuffer;
-
-    /// <summary>An IBuffer wrapper over <see cref="_patchBuffer" /> for faster native interop copying.</summary>
-    private IBuffer _patchIBuffer;
-
-    /// <summary>The rectangle representing the footprint of the last patch drawn, to cleanly clear the buffer region.</summary>
-    private Rect _prevPatchRect = Rect.Empty;
+    /// <summary>
+    ///     Canvas bounds of the previously rendered frame.
+    ///     Used in conjunction with <see cref="_previousFrameDisposeToBackground" /> to clear
+    ///     the correct region when applying disposal before the next frame.
+    /// </summary>
+    private Rect _previousFrameBounds;
 
     // -------------------------------------------------------------------------
     // Construction
     // -------------------------------------------------------------------------
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="WebpAnimator" /> class.
     ///     Private constructor. Use <see cref="CreateAsync" /> to instantiate.
     /// </summary>
     private WebpAnimator(
@@ -180,77 +230,83 @@ public partial class WebpAnimator : IAnimator
         Color backgroundColor,
         List<FrameMetadata> metadata)
     {
-        _canvas = canvas;
         _decoder = decoder;
         _stream = stream;
         _frameMetadata = metadata;
         _backgroundColor = backgroundColor;
-        _totalAnimationDuration = TimeSpan.FromMilliseconds(SumDelays(metadata));
+        _totalAnimationDuration = TimeSpan.FromMilliseconds(metadata.Sum(m => m.Delay.TotalMilliseconds));
 
-        // Prefer the VP8X canvas size from the binary parser — it is the authoritative
-        // canvas dimension per spec. decoder.OrientedPixelWidth may reflect only the
-        // first ANMF frame's size on some codec versions, causing the compositor surface
-        // to be allocated smaller than the canvas → cropping.
+        _frameCumulativeTime = new TimeSpan[metadata.Count];
+        var cumulative = TimeSpan.Zero;
+        for (int i = 0; i < metadata.Count; i++)
+        {
+            cumulative += metadata[i].Delay;
+            _frameCumulativeTime[i] = cumulative;
+        }
+
+        // Prefer canvas dimensions from the binary parser's VP8X chunk — the authoritative
+        // source per the WebP spec. Some WIC codec versions return only the first ANMF frame's
+        // dimensions from OrientedPixelWidth/Height, which would size the compositor surface
+        // smaller than the true canvas and cause cropping on multi-region animations.
         PixelWidth = canvasWidth > 0 ? canvasWidth : decoder.OrientedPixelWidth;
         PixelHeight = canvasHeight > 0 ? canvasHeight : decoder.OrientedPixelHeight;
+        _canvasRect = new Rect(0, 0, PixelWidth, PixelHeight);
 
-        _pixelBuffer = new byte[PixelWidth * PixelHeight * 4];
-        _pixelIBuffer = _pixelBuffer.AsBuffer();
+        _compositedSurface = new CanvasRenderTarget(canvas, PixelWidth, PixelHeight, 96);
 
-        _patchBuffer = new byte[PixelWidth * PixelHeight * 4];
-        _patchIBuffer = _patchBuffer.AsBuffer();
+        int fullCanvasBytes = (int)(PixelWidth * PixelHeight * 4);
+        _pixelBuffer = new byte[fullCanvasBytes];
+        _pinnedBuffer = _pixelBuffer.AsBuffer();
 
-        _sharedBitmap = CanvasBitmap.CreateFromBytes(
+        _reusablePatchTexture = CanvasBitmap.CreateFromBytes(
             canvas.Device,
             _pixelBuffer,
             (int)PixelWidth,
             (int)PixelHeight,
             DirectXPixelFormat.B8G8R8A8UIntNormalized);
 
-        _canvasRect = new Rect(0, 0, PixelWidth, PixelHeight);
-        _compositedSurface = new CanvasRenderTarget(_canvas, PixelWidth, PixelHeight, 96);
+        // Clear the compositor surface to a defined transparent state at construction.
+        // A newly allocated CanvasRenderTarget contains undefined GPU memory; without this
+        // clear, garbage pixels could appear if UpdateAsync is called before the first
+        // RenderFrameAsync completes.
+        using var ds = _compositedSurface.CreateDrawingSession();
+        ds.Clear(Colors.Transparent);
     }
 
     /// <summary>
-    ///     Asynchronously creates a <see cref="WebpAnimator" /> from the raw WebP file bytes.
+    ///     Asynchronously creates a <see cref="WebpAnimator" /> from raw WebP file bytes.
     /// </summary>
-    /// <param name="webpData">
-    ///     Complete raw bytes of the WebP file (typically pre-loaded by <c>WebpReader</c>).
-    /// </param>
-    /// <param name="canvas">
-    ///     The Win2D <see cref="CanvasControl" /> that owns the GPU device used for rendering.
-    /// </param>
-    /// <returns>A fully initialised <see cref="WebpAnimator" /> ready to receive <see cref="UpdateAsync" /> calls.</returns>
-    /// <exception cref="ArgumentException">Thrown if the decoded file contains zero frames.</exception>
+    /// <param name="webpData">Complete raw bytes of the WebP file.</param>
+    /// <param name="canvas">The Win2D <see cref="CanvasControl" /> that owns the GPU device.</param>
+    /// <returns>A fully initialised <see cref="WebpAnimator" /> ready for <see cref="UpdateAsync" /> calls.</returns>
+    /// <exception cref="ArgumentException">Thrown if the WIC decoder finds zero frames.</exception>
     public static async Task<WebpAnimator> CreateAsync(byte[] webpData, CanvasControl canvas)
     {
-        // Parse VP8X canvas dimensions and ANMF frame metadata directly from the raw RIFF
-        // binary. This is the only reliable source for:
-        //   - True canvas size (decoder.OrientedPixelWidth may return first-frame size).
-        //   - Per-frame delay/position/blend (WIC BitmapProperties doesn't expose these).
+        // Parse VP8X/ANIM/ANMF metadata from the raw RIFF binary before opening the WIC decoder.
+        // WIC BitmapProperties does not expose any of these values for WebP.
         var parsed = Parser.Parse(webpData);
 
-        // Wrap the byte array in a stream for the WIC BitmapDecoder.
-        // Using MemoryStream.AsRandomAccessStream() is safe here; the MemoryStream is kept
-        // alive via the stream wrapper and both are owned by the animator instance.
+        // AsRandomAccessStream() wraps but does not own the underlying MemoryStream,
+        // so both must be named locals to ensure both are disposed on the failure path.
         var memStream = new MemoryStream(webpData);
         var stream = memStream.AsRandomAccessStream();
         try
         {
             var decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.WebpDecoderId, stream);
-            if (decoder.FrameCount == 0)
-                throw new ArgumentException("WebP data contains no frames.");
+            if (decoder.FrameCount == 0) throw new ArgumentException("WebP contains no frames.");
 
             var metadata = BuildMetadata(parsed, decoder);
 
             return new WebpAnimator(canvas, decoder, stream,
-                parsed?.CanvasWidth ?? 0, parsed?.CanvasHeight ?? 0,
+                parsed?.CanvasWidth ?? 0,
+                parsed?.CanvasHeight ?? 0,
                 parsed?.BackgroundColor ?? Colors.Transparent,
                 metadata);
         }
-        catch (Exception)
+        catch
         {
             stream.Dispose();
+            memStream.Dispose();
             throw;
         }
     }
@@ -261,50 +317,40 @@ public partial class WebpAnimator : IAnimator
 
     /// <summary>
     ///     Advances the animation to the correct frame for the given elapsed wall-clock time
-    ///     and composites any intermediate frames that were skipped since the last call.
+    ///     and composites any intermediate frames skipped since the last call.
     /// </summary>
     /// <param name="totalElapsedTime">
-    ///     Total time elapsed since the animator was started (from the render loop's stopwatch).
-    ///     The animator maps this to a position within the looping animation automatically.
+    ///     Total time elapsed since the animator was started.
+    ///     Mapped to a loop position via modulo against <see cref="_totalAnimationDuration" />.
     /// </param>
     public async Task UpdateAsync(TimeSpan totalElapsedTime)
     {
         if (_totalAnimationDuration == TimeSpan.Zero) return;
 
-        // Map wall-clock time to a position within a single loop cycle.
-        // The modulo creates a seamless infinite loop regardless of loop count in the file.
         var elapsedInLoop = TimeSpan.FromTicks(totalElapsedTime.Ticks % _totalAnimationDuration.Ticks);
 
-        // Walk the frame list to find which frame corresponds to elapsedInLoop.
-        // A linear scan is fine — frame counts for WebP are typically small (<300).
-        int targetFrameIndex = 0;
-        var accumulatedTime = TimeSpan.Zero;
-        for (int i = 0; i < _frameMetadata.Count; i++)
-        {
-            accumulatedTime += _frameMetadata[i].Delay;
-            if (elapsedInLoop < accumulatedTime)
-            {
-                targetFrameIndex = i;
-                break;
-            }
-        }
+        // O(log n) frame lookup via binary search on the cumulative end-time table.
+        int idx = Array.BinarySearch(_frameCumulativeTime, elapsedInLoop);
+        int targetFrameIndex = idx >= 0
+            ? Math.Min(idx + 1, _frameMetadata.Count - 1)
+            : Math.Min(~idx, _frameMetadata.Count - 1);
 
-        // Detect loop wrap-around: target has gone backwards relative to where we are.
-        // Reset the compositor to a clean transparent state so disposal from the previous
-        // loop cycle doesn't bleed into the new one.
+        // Loop wrap-around: reset compositor and disposal state.
         if (targetFrameIndex < _currentFrameIndex)
         {
             _currentFrameIndex = -1;
+            _previousFrameDisposeToBackground = false;
+            _previousFrameBounds = Rect.Empty;
             using var ds = _compositedSurface.CreateDrawingSession();
             ds.Clear(Colors.Transparent);
         }
 
-        // Render all frames from (_currentFrameIndex + 1) up to targetFrameIndex inclusive.
-        // This catch-up pass ensures disposal side-effects from skipped frames are still
-        // applied correctly even if the render loop ran slower than the animation speed.
+        // Catch-up pass: render any skipped frames in order so their disposal side-effects
+        // are correctly applied before drawing the target frame.
         if (targetFrameIndex > _currentFrameIndex)
             for (int i = _currentFrameIndex + 1; i <= targetFrameIndex; i++)
                 await RenderFrameAsync(i);
+
         _currentFrameIndex = targetFrameIndex;
     }
 
@@ -313,148 +359,105 @@ public partial class WebpAnimator : IAnimator
     // -------------------------------------------------------------------------
 
     /// <summary>
-    ///     Copies the software bitmap patch into the reusable <see cref="_pixelBuffer" /> and pushes it to the GPU via
-    ///     <see cref="_sharedBitmap" />.
-    ///     Eliminates per-frame texture GC and GPU reallocations.
+    ///     Decodes a single WebP frame and composites it onto <see cref="_compositedSurface" />,
+    ///     applying the previous frame's disposal and the current frame's blend mode.
     /// </summary>
-    /// <param name="softwareBitmap">The decoded WIC bitmap frame.</param>
-    /// <param name="bounds">The positional boundaries of the frame patch.</param>
-    private void UpdateSharedBitmap(SoftwareBitmap softwareBitmap, Rect bounds)
-    {
-        int pw = softwareBitmap.PixelWidth;
-        int ph = softwareBitmap.PixelHeight;
-
-        // 1. FAST PATH: If the frame covers the whole canvas, skip CPU mapping entirely.
-        if (pw == PixelWidth && ph == PixelHeight && bounds.X == 0 && bounds.Y == 0)
-        {
-            softwareBitmap.CopyToBuffer(_pixelIBuffer);
-            _sharedBitmap.SetPixelBytes(_pixelBuffer);
-            _prevPatchRect = new Rect(0, 0, PixelWidth, PixelHeight);
-            return;
-        }
-
-        // 2. Safely ensure the patch buffer is large enough (for badly authored WebPs)
-        int requiredPatchSize = pw * ph * 4;
-        if (requiredPatchSize > _patchBuffer.Length)
-        {
-            _patchBuffer = new byte[requiredPatchSize];
-            _patchIBuffer = _patchBuffer.AsBuffer();
-        }
-
-        // Copy pixels into our reusable pre-allocated patch buffer to avoid GC array allocations
-        softwareBitmap.CopyToBuffer(_patchIBuffer);
-
-        int fullStride = (int)PixelWidth * 4;
-        int patchStride = pw * 4;
-
-        // 3. Clear the footprint of the previous patch in the full-screen pixel buffer
-        if (_prevPatchRect.Width > 0 && _prevPatchRect.Height > 0)
-        {
-            int prevW = (int)_prevPatchRect.Width;
-            int prevH = (int)_prevPatchRect.Height;
-            int prevX = (int)_prevPatchRect.X;
-            int prevY = (int)_prevPatchRect.Y;
-            int prevStride = prevW * 4;
-            for (int row = 0; row < prevH; row++)
-                Array.Clear(_pixelBuffer, (prevY + row) * fullStride + prevX * 4, prevStride);
-        }
-
-        // 4. Map the new patch into the correct geometrical location within the full-screen pixel buffer
-        int dstX = (int)bounds.X;
-        int dstY = (int)bounds.Y;
-        int safeW = Math.Min(pw, (int)PixelWidth - dstX);
-        int safeH = Math.Min(ph, (int)PixelHeight - dstY);
-        int safePatchStride = safeW * 4;
-
-        for (int row = 0; row < safeH; row++)
-            Buffer.BlockCopy(_patchBuffer, row * patchStride, _pixelBuffer, (dstY + row) * fullStride + dstX * 4, safePatchStride);
-
-        // 5. One single GPU-transfer 
-        _sharedBitmap.SetPixelBytes(_pixelBuffer);
-
-        // IMPORTANT: Record safeW/safeH so we don't clear out-of-bounds on the next frame
-        _prevPatchRect = new Rect(dstX, dstY, safeW, safeH);
-    }
-
-    /// <summary>
-    ///     Decodes and composites a single frame onto <see cref="_compositedSurface" />.
-    /// </summary>
-    /// <remarks>
-    ///     All async WIC work (decode, pixel extraction) is completed before a
-    ///     <c>CanvasDrawingSession</c> is opened. This avoids holding a GPU drawing session
-    ///     open across <c>await</c> boundaries, which can cause deadlocks on some drivers.
-    /// </remarks>
+    /// <param name="frameIndex">Zero-based index of the frame to render.</param>
     private async Task RenderFrameAsync(int frameIndex)
     {
         var metadata = _frameMetadata[frameIndex];
 
-        // ---- Async decode (no DrawingSession open yet) ----
+        // Decode frame pixels via GetSoftwareBitmapAsync + CopyToBuffer.
+        //
+        // Why not DetachPixelData() + BlockCopy (the previous approach):
+        //   DetachPixelData() returns a new byte[] per frame (allocation #1).
+        //   BlockCopy then copies it into _pixelBuffer (copy #2).
+        //   That is two buffers and two copies per frame.
+        //
+        // Why not PixelDataProvider.CopyToBuffer:
+        //   PixelDataProvider does not expose CopyToBuffer — only SoftwareBitmap does.
+        //
+        // Current approach — SoftwareBitmap + CopyToBuffer into _pinnedBuffer:
+        //   GetSoftwareBitmapAsync allocates one unmanaged WIC buffer (unavoidable).
+        //   CopyToBuffer writes directly into _pixelBuffer via the pre-pinned _pinnedBuffer —
+        //   a single CPU copy with no second managed allocation.
+        //   The SoftwareBitmap is disposed immediately after, freeing the unmanaged buffer.
+        //   Net result: one unmanaged alloc + one copy, versus the previous one managed alloc
+        //   + one unmanaged alloc + one extra copy.
         var frame = await _decoder.GetFrameAsync((uint)frameIndex);
 
+        int frameW = (int)frame.PixelWidth;
+        int frameH = (int)frame.PixelHeight;
+        int requiredBytes = frameW * frameH * 4;
+
+        // Defensive growth only — fires for malformed files reporting a patch larger than canvas.
+        if (_pixelBuffer.Length < requiredBytes)
+        {
+            _pixelBuffer = new byte[requiredBytes];
+            _pinnedBuffer = _pixelBuffer.AsBuffer();
+        }
+
         using var softwareBitmap = await frame.GetSoftwareBitmapAsync(
-            BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
+            BitmapPixelFormat.Bgra8,
+            BitmapAlphaMode.Premultiplied);
 
-        int bmpW = softwareBitmap.PixelWidth;
-        int bmpH = softwareBitmap.PixelHeight;
+        // CopyToBuffer writes WIC pixels directly into _pixelBuffer via the pre-pinned
+        // IBuffer wrapper — no intermediate byte[] allocation, no BlockCopy.
+        // _pinnedBuffer wraps the full _pixelBuffer; SoftwareBitmap.CopyToBuffer fills it
+        // from offset 0 for exactly (frameW * frameH * 4) bytes based on the bitmap's own
+        // dimensions, so no sub-range slice is needed.
+        softwareBitmap.CopyToBuffer(_pinnedBuffer);
+        _reusablePatchTexture.SetPixelBytes(_pixelBuffer, 0, 0, frameW, frameH);
 
-        // Determine whether WIC returned a raw ANMF sub-region patch or a full-canvas
-        // pre-composited frame. A sub-region bitmap has the same dimensions as the ANMF
-        // bounds parsed from the binary; a full-canvas bitmap matches PixelWidth × PixelHeight.
-        bool isRawPatch = bmpW == metadata.Bounds.Width &&
-                          bmpH == metadata.Bounds.Height;
-
-        if (!isRawPatch && bmpW == PixelWidth && bmpH == PixelHeight)
-            UpdateSharedBitmap(softwareBitmap, _canvasRect);
-        else
-            UpdateSharedBitmap(softwareBitmap, metadata.Bounds);
-
-        // ---- GPU compositing (DrawingSession open) ----
         using var ds = _compositedSurface.CreateDrawingSession();
 
-        // Step 1 — Apply the PREVIOUS frame's disposal before drawing the current frame.
-        //
-        // WebP disposal is defined as: "restore the canvas region covered by frame N-1
-        // to the ANIM background color before rendering frame N."  Applying it here
-        // (at the start of rendering frame N) rather than at the end of frame N-1 means
-        // the compositor surface always reflects the correct "before" state when we begin.
-        if (frameIndex > 0)
+        // Step 1 — Apply the PREVIOUS frame's dispose operation.
+        // Disposal state is carried as fields rather than read from _frameMetadata[frameIndex-1]
+        // so that the last frame's disposal is correctly applied when rendering frame 0 on
+        // loop wrap-around.
+        if (_previousFrameDisposeToBackground)
         {
-            var prevMetadata = _frameMetadata[frameIndex - 1];
-            if (prevMetadata.DisposeToBackground)
-            {
-                // CanvasBlend.Copy writes through any existing alpha — equivalent to
-                // a hard clear of that exact region without touching the rest of the canvas.
-                ds.Blend = CanvasBlend.Copy;
-                ds.FillRectangle(prevMetadata.Bounds, _backgroundColor);
-            }
-        }
-
-        // Step 2 — Draw the current frame.
-        if (!isRawPatch && bmpW == PixelWidth && bmpH == PixelHeight)
-        {
-            // Full-canvas pre-composited frame: WIC has already composited everything.
-            // Stamp it wholesale with Copy to replace whatever is on the surface.
+            // CanvasBlend.Copy + FillRectangle clears only the previous frame's region,
+            // writing through any existing alpha to hard-clear the area.
             ds.Blend = CanvasBlend.Copy;
-        }
-        else
-        {
-            // Sub-region ANMF patch
-            if (!metadata.UseBlend)
-            {
-                // Overwrite mode ("do not blend"): punch a transparent hole in the region
-                // before drawing so the patch completely replaces any prior content there.
-                ds.Blend = CanvasBlend.Copy;
-                ds.FillRectangle(metadata.Bounds, Colors.Transparent);
-            }
-
-            // Alpha-blend mode (default): composites the patch over the existing surface.
+            ds.FillRectangle(_previousFrameBounds, _backgroundColor);
             ds.Blend = CanvasBlend.SourceOver;
         }
 
-        // IMPORTANT: DrawImage(image, Rect) ensures exact pixel-to-pixel mapping.
-        // Because _sharedBitmap is mapped safely to exactly the _canvasRect size in memory, 
-        // we always draw it this way, avoiding sub-pixel interpolation (DPI-scaling bug).
-        ds.DrawImage(_sharedBitmap, _canvasRect);
+        // Step 2 — Draw the current frame using the appropriate composite mode.
+        bool isFullCanvas = frameW == PixelWidth && frameH == PixelHeight;
+
+        if (isFullCanvas)
+        {
+            // Full-canvas frame: WIC has already composited everything. Stamp it wholesale
+            // with Copy blend to replace whatever is on the surface. Reset blend to
+            // SourceOver afterwards to leave the session in a clean, predictable state.
+            ds.Blend = CanvasBlend.Copy;
+            ds.DrawImage(_reusablePatchTexture, _canvasRect, new Rect(0, 0, PixelWidth, PixelHeight));
+            ds.Blend = CanvasBlend.SourceOver;
+        }
+        else
+        {
+            // Sub-region ANMF patch: place at the parsed pixel offset.
+            if (!metadata.UseBlend)
+            {
+                // "Do not blend" mode: clear the region first so old content — including its
+                // alpha channel — cannot compound with the new frame's pixels. Then draw with
+                // SourceOver, which is correct for both blend modes:
+                //   UseBlend = true:  standard Porter-Duff "over" onto existing content.
+                //   UseBlend = false: Porter-Duff "over" onto the just-cleared transparent
+                //                     region, equivalent to a pixel-replace without punching
+                //                     holes that CanvasBlend.Copy would cause for alpha < 255.
+                ds.Blend = CanvasBlend.Copy;
+                ds.FillRectangle(metadata.Bounds, Colors.Transparent);
+                ds.Blend = CanvasBlend.SourceOver;
+            }
+
+            ds.DrawImage(_reusablePatchTexture, metadata.Bounds, new Rect(0, 0, frameW, frameH));
+        }
+
+        _previousFrameDisposeToBackground = metadata.DisposeToBackground;
+        _previousFrameBounds = metadata.Bounds;
     }
 
     // -------------------------------------------------------------------------
@@ -462,56 +465,41 @@ public partial class WebpAnimator : IAnimator
     // -------------------------------------------------------------------------
 
     /// <summary>
-    ///     Sums the total animation duration from the metadata list.
-    ///     Uses a plain foreach loop to avoid LINQ overhead on a hot construction path.
+    ///     Converts raw <see cref="Parser.AnmfFrameInfo" /> records into typed
+    ///     <see cref="FrameMetadata" />, applying browser-compatible timing clamping.
+    ///     Falls back to a default set of full-canvas 100 ms frames if the RIFF parser
+    ///     found no ANMF data (e.g. older codec that doesn't expose sub-chunks).
     /// </summary>
-    private static double SumDelays(List<FrameMetadata> metadata)
-    {
-        double sum = 0;
-        foreach (var m in metadata) sum += m.Delay.TotalMilliseconds;
-        return sum;
-    }
-
-    /// <summary>
-    ///     Converts parsed <see cref="Parser.AnmfFrameInfo" /> into <see cref="FrameMetadata" />,
-    ///     applying browser-compatible timing clamping.
-    /// </summary>
-    /// <remarks>
-    ///     Chrome and Firefox clamp any frame duration ≤ 10 ms to 100 ms. This compensates for
-    ///     WebP files that were lossily converted from GIF with incorrectly encoded sub-10 ms
-    ///     delays (a common authoring tool bug). Without this clamp such files would run at
-    ///     hundreds of fps and appear as a blur.
-    /// </remarks>
     private static List<FrameMetadata> BuildMetadata(Parser.WebpData parsed, BitmapDecoder decoder)
     {
         if (parsed?.Frames == null || parsed.Frames.Count == 0)
         {
-            // Parser returned nothing — codec version may not expose ANMF chunks, or the
-            // file is not a valid animated WebP. Fall back to one full-canvas frame per WIC
-            // frame with a safe 100 ms delay.
             Logger.Warn("WebpAnimator: ANMF parser found no frames; using defaults for {0} WIC frames.",
                 decoder.FrameCount);
             var fallbackBounds = new Rect(0, 0, decoder.OrientedPixelWidth, decoder.OrientedPixelHeight);
             var fallback = new List<FrameMetadata>((int)decoder.FrameCount);
             for (int i = 0; i < (int)decoder.FrameCount; i++)
-                fallback.Add(new FrameMetadata { Delay = TimeSpan.FromMilliseconds(100), Bounds = fallbackBounds, UseBlend = true });
+                fallback.Add(new FrameMetadata
+                {
+                    Delay = TimeSpan.FromMilliseconds(100),
+                    Bounds = fallbackBounds,
+                    UseBlend = true
+                });
             return fallback;
         }
 
         var list = new List<FrameMetadata>(parsed.Frames.Count);
         foreach (var f in parsed.Frames)
-        {
-            // Browser timing clamp: durations ≤ 10 ms → 100 ms (matches Chrome/Firefox).
-            double durationMs = f.DurationMs <= 10 ? 100.0 : f.DurationMs;
+            // WebP spec does not mandate a minimum frame duration. Chrome and Firefox clamp
+            // durations strictly less than 10 ms to 100 ms to handle files that were lossily
+            // converted from GIF with near-zero delays. 10 ms itself is valid (100 fps).
             list.Add(new FrameMetadata
             {
-                Delay = TimeSpan.FromMilliseconds(durationMs),
+                Delay = TimeSpan.FromMilliseconds(f.DurationMs < 10 ? 100.0 : f.DurationMs),
                 Bounds = new Rect(f.X, f.Y, f.Width, f.Height),
                 UseBlend = f.UseBlend,
                 DisposeToBackground = f.DisposeToBackground
             });
-        }
-
         return list;
     }
 
@@ -519,16 +507,14 @@ public partial class WebpAnimator : IAnimator
     // IDisposable
     // -------------------------------------------------------------------------
 
-    /// <inheritdoc />
+    /// <summary>Releases all Win2D GPU surfaces, the GPU staging texture, and the file stream.</summary>
     public void Dispose()
     {
-        // _compositedSurface is a Win2D GPU resource — must be explicitly released.
         _compositedSurface?.Dispose();
-        _sharedBitmap?.Dispose();
-        // _stream owns the MemoryStream wrapping the raw WebP bytes — close the COM channel.
+        _reusablePatchTexture?.Dispose();
+        // _stream owns the MemoryStream wrapping the raw WebP bytes. BitmapDecoder does not
+        // implement IDisposable in its C# projection; its COM channel releases when _stream closes.
         _stream?.Dispose();
-        // BitmapDecoder is a WinRT COM object. It does not implement IDisposable in its
-        // C# projection; the underlying COM channel is released when _stream is disposed.
         GC.SuppressFinalize(this);
     }
 
@@ -537,14 +523,9 @@ public partial class WebpAnimator : IAnimator
     // =========================================================================
 
     /// <summary>
-    ///     Parses the RIFF container of an animated WebP file to extract:
-    ///     <list type="bullet">
-    ///         <item>VP8X canvas dimensions (authoritative canvas size).</item>
-    ///         <item>ANIM global animation parameters (background color, loop count).</item>
-    ///         <item>Per-frame ANMF metadata (position, duration, blend/dispose flags).</item>
-    ///     </list>
-    ///     This is necessary because the Windows WIC WebP codec does not expose any of these
-    ///     values through <c>BitmapFrame.BitmapProperties</c>.
+    ///     Self-contained static parser for the WebP RIFF container.
+    ///     Extracts VP8X canvas dimensions, ANIM global parameters, and per-frame ANMF metadata.
+    ///     Performs no rendering and holds no GPU resources.
     /// </summary>
     private static class Parser
     {
@@ -553,66 +534,81 @@ public partial class WebpAnimator : IAnimator
         {
             /// <summary>
             ///     True canvas width in pixels, from the VP8X chunk.
-            ///     More reliable than <c>BitmapDecoder.OrientedPixelWidth</c> for animated files.
+            ///     More reliable than <c>BitmapDecoder.OrientedPixelWidth</c> for animated files
+            ///     on codec versions that return only the first frame's width from that property.
             /// </summary>
             public uint CanvasWidth { get; init; }
 
             /// <summary>
             ///     True canvas height in pixels, from the VP8X chunk.
-            ///     More reliable than <c>BitmapDecoder.OrientedPixelHeight</c> for animated files.
+            ///     Same caveat as <see cref="CanvasWidth" />.
             /// </summary>
             public uint CanvasHeight { get; init; }
 
             /// <summary>
-            ///     Canvas background color from the ANIM chunk (bytes [B, G, R, A] per spec),
-            ///     converted to <see cref="Windows.UI.Color" />. Applied when a frame's
-            ///     <see cref="AnmfFrameInfo.DisposeToBackground" /> is <c>true</c>.
-            ///     Defaults to <c>Colors.Transparent</c> if the ANIM chunk is absent.
+            ///     Canvas background color from the ANIM chunk.
+            ///     <para>
+            ///         <b>WebP spec:</b> stored as [B, G, R, A] — not RGBA or ARGB.
+            ///     </para>
+            ///     Applied when a frame's dispose-to-background flag is set.
+            ///     Defaults to <c>Colors.Transparent</c> when the ANIM chunk is absent.
             /// </summary>
             public Color BackgroundColor { get; init; }
 
             /// <summary>
             ///     Loop count from the ANIM chunk (0 = infinite). Parsed for completeness;
-            ///     the animator always loops infinitely regardless of this value.
+            ///     the animator ignores this value and always loops infinitely.
             /// </summary>
             public ushort LoopCount { get; init; }
 
-            /// <summary>Ordered list of per-frame metadata, one entry per ANMF chunk.</summary>
+            /// <summary>Ordered list of per-frame data, one entry per ANMF chunk.</summary>
             public List<AnmfFrameInfo> Frames { get; init; }
         }
 
         /// <summary>Per-frame data extracted from a single ANMF chunk.</summary>
         public class AnmfFrameInfo
         {
-            /// <summary>Actual X pixel offset of this frame within the canvas (RIFF stores X/2).</summary>
+            /// <summary>
+            ///     Actual X pixel offset within the canvas.
+            ///     <b>WebP spec:</b> stored as X/2 in the ANMF payload; multiplied by 2 here.
+            /// </summary>
             public uint X { get; init; }
 
-            /// <summary>Actual Y pixel offset of this frame within the canvas (RIFF stores Y/2).</summary>
+            /// <summary>
+            ///     Actual Y pixel offset within the canvas.
+            ///     <b>WebP spec:</b> stored as Y/2; multiplied by 2 here.
+            /// </summary>
             public uint Y { get; init; }
 
-            /// <summary>Frame width in pixels (RIFF stores Width−1).</summary>
+            /// <summary>
+            ///     Frame width in pixels.
+            ///     <b>WebP spec:</b> stored as Width−1; incremented by 1 here.
+            /// </summary>
             public uint Width { get; init; }
 
-            /// <summary>Frame height in pixels (RIFF stores Height−1).</summary>
+            /// <summary>
+            ///     Frame height in pixels.
+            ///     <b>WebP spec:</b> stored as Height−1; incremented by 1 here.
+            /// </summary>
             public uint Height { get; init; }
 
-            /// <summary>Display duration of this frame in milliseconds.</summary>
+            /// <summary>Frame display duration in milliseconds (24-bit LE in the ANMF payload).</summary>
             public uint DurationMs { get; init; }
 
             /// <summary>
-            ///     <c>true</c> = alpha-blend over the canvas (SourceOver).<br />
-            ///     <c>false</c> = overwrite (do not blend). ANMF flags byte bit 1.
+            ///     Whether to alpha-blend this frame over the canvas.
+            ///     <b>WebP spec:</b> ANMF flags byte bit 1; 0 = blend (true), 1 = do not blend (false).
             /// </summary>
             public bool UseBlend { get; init; }
 
             /// <summary>
-            ///     <c>true</c> = clear this frame's region to the ANIM background color after display.
-            ///     <c>false</c> = leave the canvas region as-is ("do not dispose"). ANMF flags byte bit 0.
+            ///     Whether to clear this frame's region to the background color after display.
+            ///     <b>WebP spec:</b> ANMF flags byte bit 0; 1 = dispose to background (true).
             /// </summary>
             public bool DisposeToBackground { get; init; }
         }
 
-        // u8 string literals produce ReadOnlySpan<byte> without any heap allocation.
+        // u8 string literals produce stack-allocated ReadOnlySpan<byte> without heap allocation.
         private static ReadOnlySpan<byte> RiffTag => "RIFF"u8;
         private static ReadOnlySpan<byte> WebpTag => "WEBP"u8;
         private static ReadOnlySpan<byte> AnmfTag => "ANMF"u8;
@@ -621,51 +617,49 @@ public partial class WebpAnimator : IAnimator
 
         /// <summary>
         ///     Scans the WebP RIFF container for VP8X, ANIM, and ANMF chunks and returns
-        ///     a <see cref="WebpData" /> with all extracted information.
+        ///     a populated <see cref="WebpData" />.
+        ///     Returns <c>null</c> if the data is not a valid WebP file.
+        ///     Parser failures are caught and logged; a partial result with zero frames is
+        ///     returned rather than throwing, allowing <see cref="BuildMetadata" /> to fall
+        ///     back to WIC-driven defaults.
         /// </summary>
         /// <param name="data">Raw bytes of the WebP file.</param>
-        /// <returns>
-        ///     Parsed <see cref="WebpData" />, or <c>null</c> if <paramref name="data" /> is not
-        ///     a valid WebP file or parsing encounters a fatal error.
-        /// </returns>
         public static WebpData Parse(byte[] data)
         {
             var frames = new List<AnmfFrameInfo>();
             uint canvasW = 0, canvasH = 0;
-            var bgColor = Colors.Transparent; // default: transparent (most common)
-            ushort loopCount = 0; // default: infinite
+            var bgColor = Colors.Transparent;
+            ushort loopCount = 0;
             try
             {
-                // A valid WebP file must begin with "RIFF????WEBP" (12 bytes minimum).
                 if (data.Length < 12) return null;
 
-                // Validate RIFF/WEBP header using zero-alloc span comparisons.
+                // Validate the RIFF/WEBP file header using zero-alloc span comparisons.
                 if (!data.AsSpan(0, 4).SequenceEqual(RiffTag) ||
                     !data.AsSpan(8, 4).SequenceEqual(WebpTag)) return null;
 
-                // RIFF chunk layout: [FourCC 4B][Size 4B][Data …], repeat.
-                // Animated WebP always starts with a VP8X chunk at offset 12.
+                // RIFF container layout: [FourCC 4B][Size 4B][Data …], chunks repeat from offset 12.
                 int offset = 12;
                 while (offset + 8 <= data.Length)
                 {
                     var chunkTag = data.AsSpan(offset, 4);
                     uint chunkSize = ReadUInt32LE(data, offset + 4);
-                    int dataOffset = offset + 8; // byte index of the chunk payload
+                    int dataOffset = offset + 8;
 
                     if (chunkTag.SequenceEqual(Vp8xTag) && dataOffset + 10 <= data.Length)
                     {
-                        // VP8X payload layout (10 bytes):
-                        //   byte  0:   feature flags (bit 1 = animation, etc.)
+                        // VP8X payload (10 bytes):
+                        //   byte  0:   feature flags
                         //   bytes 1-3: reserved
-                        //   bytes 4-6: Canvas Width  − 1 (24-bit LE) → actual = value + 1
-                        //   bytes 7-9: Canvas Height − 1 (24-bit LE) → actual = value + 1
+                        //   bytes 4-6: Canvas Width  − 1 (24-bit LE)
+                        //   bytes 7-9: Canvas Height − 1 (24-bit LE)
                         canvasW = ReadUInt24LE(data, dataOffset + 4) + 1;
                         canvasH = ReadUInt24LE(data, dataOffset + 7) + 1;
                     }
                     else if (chunkTag.SequenceEqual(AnimTag) && dataOffset + 6 <= data.Length)
                     {
-                        // ANIM payload layout (6 bytes):
-                        //   bytes 0-3: Background Color in [B, G, R, A] byte order (note: NOT RGBA)
+                        // ANIM payload (6 bytes):
+                        //   bytes 0-3: Background Color [B, G, R, A]
                         //   bytes 4-5: Loop Count (uint16 LE), 0 = infinite
                         byte b = data[dataOffset];
                         byte g = data[dataOffset + 1];
@@ -678,14 +672,14 @@ public partial class WebpAnimator : IAnimator
                     }
                     else if (chunkTag.SequenceEqual(AnmfTag) && dataOffset + 16 <= data.Length)
                     {
-                        // ANMF payload layout (≥16 bytes, all little-endian):
-                        //   bytes  0- 2: Frame X / 2   (24-bit) → actual pixel X = value * 2
-                        //   bytes  3- 5: Frame Y / 2   (24-bit) → actual pixel Y = value * 2
-                        //   bytes  6- 8: Frame Width  − 1 (24-bit) → actual W = value + 1
-                        //   bytes  9-11: Frame Height − 1 (24-bit) → actual H = value + 1
-                        //   bytes 12-14: Frame Duration in milliseconds (24-bit)
+                        // ANMF payload (≥16 bytes, all little-endian):
+                        //   bytes  0- 2: Frame X / 2        (24-bit) → pixel X = value × 2
+                        //   bytes  3- 5: Frame Y / 2        (24-bit) → pixel Y = value × 2
+                        //   bytes  6- 8: Frame Width  − 1   (24-bit) → pixel W = value + 1
+                        //   bytes  9-11: Frame Height − 1   (24-bit) → pixel H = value + 1
+                        //   bytes 12-14: Frame Duration ms  (24-bit)
                         //   byte  15:   Flags
-                        //     bit 1: BlendingMethod — 0 = alpha-blend, 1 = do not blend
+                        //     bit 1: BlendingMethod — 0 = blend, 1 = do not blend
                         //     bit 0: DisposeMethod  — 0 = do not dispose, 1 = dispose to bg
                         uint frameX = ReadUInt24LE(data, dataOffset) * 2;
                         uint frameY = ReadUInt24LE(data, dataOffset + 3) * 2;
@@ -701,15 +695,13 @@ public partial class WebpAnimator : IAnimator
                             Width = frameW,
                             Height = frameH,
                             DurationMs = durMs,
-                            UseBlend = (flags & 0x02) == 0, // bit 1 = 0 → alpha-blend
-                            DisposeToBackground = (flags & 0x01) != 0 // bit 0 = 1 → dispose to bg
+                            UseBlend = (flags & 0x02) == 0,
+                            DisposeToBackground = (flags & 0x01) != 0
                         });
                     }
 
-                    // Advance to the next chunk.
-                    // RIFF pads odd-sized chunks to even boundaries with one padding byte.
-                    // All arithmetic is done in long to prevent uint.MaxValue+1 wrap-around,
-                    // and the result is range-checked before truncating to int.
+                    // Advance to the next chunk, respecting RIFF even-byte padding.
+                    // Arithmetic is done in long to prevent uint overflow on max-size chunks.
                     long nextOffset = dataOffset + (((long)chunkSize + 1) & ~1L);
                     if (nextOffset > data.Length) break;
                     offset = (int)nextOffset;
@@ -730,13 +722,13 @@ public partial class WebpAnimator : IAnimator
             };
         }
 
-        /// <summary>Reads a 32-bit unsigned integer from <paramref name="d" /> at <paramref name="o" /> (little-endian).</summary>
+        /// <summary>Reads a 32-bit little-endian unsigned integer from <paramref name="d" /> at offset <paramref name="o" />.</summary>
         private static uint ReadUInt32LE(byte[] d, int o)
         {
             return (uint)(d[o] | (d[o + 1] << 8) | (d[o + 2] << 16) | (d[o + 3] << 24));
         }
 
-        /// <summary>Reads a 24-bit unsigned integer from <paramref name="d" /> at <paramref name="o" /> (little-endian).</summary>
+        /// <summary>Reads a 24-bit little-endian unsigned integer from <paramref name="d" /> at offset <paramref name="o" />.</summary>
         private static uint ReadUInt24LE(byte[] d, int o)
         {
             return (uint)(d[o] | (d[o + 1] << 8) | (d[o + 2] << 16));

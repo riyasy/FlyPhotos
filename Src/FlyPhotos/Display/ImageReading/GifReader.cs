@@ -1,19 +1,44 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Windows.Graphics.DirectX;
 using Windows.Graphics.Imaging;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Services;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
-using FlyPhotos.Services;
-using Windows.Graphics.DirectX;
 
 namespace FlyPhotos.Display.ImageReading;
 
+/// <summary>
+///     Handles reading and decoding of GIF image files (both static and animated) into
+///     display items suitable for rendering via Win2D.
+/// </summary>
+/// <remarks>
+///     For static GIF, a <see cref="StaticHqDisplayItem" /> is returned containing a single
+///     <see cref="CanvasBitmap" /> decoded with EXIF orientation applied.
+///     For animated GIF (<see cref="BitmapDecoder.FrameCount" /> &gt; 1), an
+///     <see cref="AnimatedHqDisplayItem" /> is returned, carrying both the first-frame bitmap
+///     (for immediate display before animation begins) and the raw file bytes (consumed by
+///     <see cref="FlyPhotos.Display.Animators.GifAnimator" /> for frame-accurate playback).
+/// </remarks>
 internal static class GifReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    // Identity transform reused across calls — avoids a COM object allocation per decode.
+    private static readonly BitmapTransform IdentityTransform = new();
+
+    /// <summary>
+    ///     Loads the first frame of the GIF file at full resolution as a lightweight preview.
+    ///     Used during initial thumbnail/preview loading before the high-quality decode is ready.
+    /// </summary>
+    /// <param name="ctrl">The Win2D <see cref="CanvasControl" /> that owns the GPU device.</param>
+    /// <param name="inputPath">Absolute path to the .gif file on disk.</param>
+    /// <returns>
+    ///     A tuple of (<c>success</c>, <see cref="PreviewDisplayItem" />).
+    ///     On failure, returns <c>(false, PreviewDisplayItem.Empty())</c> and logs the error.
+    /// </returns>
     public static async Task<(bool, PreviewDisplayItem)> GetFirstFrameFullSize(CanvasControl ctrl, string inputPath)
     {
         try
@@ -30,6 +55,29 @@ internal static class GifReader
         }
     }
 
+    /// <summary>
+    ///     Decodes the GIF file at full quality and returns either a static or animated display item.
+    /// </summary>
+    /// <param name="ctrl">The Win2D <see cref="CanvasControl" /> that owns the GPU device.</param>
+    /// <param name="inputPath">Absolute path to the .gif file on disk.</param>
+    /// <returns>
+    ///     A tuple of (<c>success</c>, <see cref="HqDisplayItem" />):
+    ///     <list type="bullet">
+    ///         <item><see cref="StaticHqDisplayItem" /> — for single-frame GIF files.</item>
+    ///         <item>
+    ///             <see cref="AnimatedHqDisplayItem" /> — for multi-frame (animated) GIF files,
+    ///             carrying the first decoded frame and the raw file bytes for the animator.
+    ///         </item>
+    ///     </list>
+    ///     On failure, returns <c>(false, HqDisplayItem.Empty())</c> and logs the error.
+    /// </returns>
+    /// <remarks>
+    ///     Frame 0 pixels are decoded via <see cref="BitmapFrame.GetPixelDataAsync" /> on the
+    ///     same decoder instance used for the frame-count check — no second decode pass needed.
+    ///     EXIF orientation is applied so the resulting bitmap is always correctly oriented.
+    ///     For animated files, the stream is rewound and re-read as a raw byte array for the
+    ///     animator; this is cheaper than a second full pixel decode.
+    /// </remarks>
     public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
     {
         try
@@ -44,7 +92,7 @@ internal static class GifReader
             var pixelProvider = await frame0.GetPixelDataAsync(
                 BitmapPixelFormat.Bgra8,
                 BitmapAlphaMode.Premultiplied,
-                new BitmapTransform(),
+                IdentityTransform,
                 ExifOrientationMode.RespectExifOrientation,
                 ColorManagementMode.ColorManageToSRgb);
             var pixels = pixelProvider.DetachPixelData();

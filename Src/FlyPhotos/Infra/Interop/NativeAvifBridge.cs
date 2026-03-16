@@ -42,7 +42,7 @@ internal static partial class NativeAvifBridge
     /// </summary>
     [LibraryImport(DllName)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int DecodeNextAvifFrame(IntPtr handle, [In] [Out] byte[] outBgraBuffer);
+    public static partial int DecodeNextAvifFrame(IntPtr handle, IntPtr outBgraBuffer);
 
     /// <summary>Resets the internal decoder to the beginning of the sequence to allow looping.</summary>
     [LibraryImport(DllName)]
