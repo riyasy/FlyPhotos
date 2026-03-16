@@ -14,7 +14,6 @@
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 
 		<EnableMsixTooling>true</EnableMsixTooling>
-		<WindowsPackageType>None</WindowsPackageType>
 		
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
@@ -22,7 +21,7 @@
 		<DefaultLanguage>en-US</DefaultLanguage>
 		<SatelliteResourceLanguages>en-US;de-DE;fr-FR;es-ES;ja-JP;ko-KR;it-IT;pl-PL;nl-NL;sv-SE;fi-FI;zh-TW;ml-IN</SatelliteResourceLanguages>
 		<!-- InvariantGlobalization>true</InvariantGlobalization -->
-		<GenerateTestArtifacts>False</GenerateTestArtifacts>
+		<GenerateTestArtifacts>True</GenerateTestArtifacts>
 		<NoWarn>$(NoWarn);CA1416</NoWarn>
 		
 		<GenerateTemporaryStoreCertificate>True</GenerateTemporaryStoreCertificate>		
