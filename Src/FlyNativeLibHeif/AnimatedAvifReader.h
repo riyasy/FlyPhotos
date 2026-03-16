@@ -78,6 +78,12 @@ private:
 
     /// @brief The duration of the currently extracted frame in milliseconds.
     int current_frame_duration_ms = 0;
+
+    /// @brief Cached pointer to the raw file bytes, used for re-creating the context on Reset.
+    const uint8_t* cached_data = nullptr;
+
+    /// @brief Cached size of the raw file bytes.
+    size_t cached_size = 0;
 };
 
 #endif // ANIMATED_AVIF_READER_H

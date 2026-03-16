@@ -35,6 +35,10 @@ bool AnimatedAvifReader::Open(const uint8_t* data, size_t size) {
         return false;
     }
 
+    // Cache the data for Reset()
+    cached_data = data;
+    cached_size = size;
+
     // Attempt to locate an actual animation sequence track
     int num_seqs = heif_context_number_of_sequence_tracks(context.get());
     if (num_seqs > 0) {
@@ -147,10 +151,21 @@ int AnimatedAvifReader::DecodeNextFrame(uint8_t* out_bgra_buffer) {
 void AnimatedAvifReader::Reset() {
     if (track) {
         heif_track_release(track);
-        track = heif_context_get_track(context.get(), track_id);
+        track = nullptr;
     }
+
     if (current_image) {
         heif_image_release(current_image);
         current_image = nullptr;
+    }
+
+    // Since libheif's decode cursor is tied to the context, we recreate the context
+    // from memory. This is very fast and guarantees a clean start.
+    if (cached_data && cached_size > 0) {
+        context = std::shared_ptr<heif_context>(heif_context_alloc(), [](heif_context* c) { heif_context_free(c); });
+        heif_error err = heif_context_read_from_memory_without_copy(context.get(), cached_data, cached_size, nullptr);
+        if (err.code == 0) {
+            track = heif_context_get_track(context.get(), track_id);
+        }
     }
 }
