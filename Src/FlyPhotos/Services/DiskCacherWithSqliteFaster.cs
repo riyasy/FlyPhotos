@@ -16,17 +16,15 @@ namespace FlyPhotos.Services;
 /// A persistent, LRU-evicting disk cache for photo thumbnails, backed by SQLite.
 /// Thumbnails are stored as resized JPEG blobs alongside their source file's
 /// last-modified timestamp so stale entries are detected and replaced automatically.
-///
 /// <para>
 /// This class is a thread-safe singleton. All database operations are serialised
-/// through a <see cref="SemaphoreSlim"/> because every read also issues a Touch
+/// through a <see cref="SemaphoreSlim" /> because every read also issues a Touch
 /// update (<c>lastAccessed</c>), making true read-only concurrency impossible
 /// without a batched-touch redesign.
 /// </para>
-///
 /// <para>
-/// Callers are responsible for disposing any <see cref="CanvasBitmap"/> returned
-/// by <see cref="ReturnFromCache"/>. Failure to do so will leak GPU memory.
+/// Callers are responsible for disposing any <see cref="CanvasBitmap" /> returned
+/// by <see cref="ReturnFromCache" />. Failure to do so will leak GPU memory.
 /// </para>
 /// </summary>
 public sealed partial class DiskCacherWithSqlite : IDisposable
@@ -48,7 +46,7 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     private const int ThumbMaxSize = 800;
 
     /// <summary>
-    /// Fraction of <see cref="MaxItemCount"/> to evict in a single batch when
+    /// Fraction of <see cref="MaxItemCount" /> to evict in a single batch when
     /// the cache is full. 0.25 removes the 5,000 least-recently-accessed entries.
     /// </summary>
     private const double EvictionFactor = 0.25;
@@ -58,14 +56,14 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     // -------------------------------------------------------------------------
 
     /// <summary>
-    /// Lazily initialised singleton holder. <see cref="Lazy{T}"/> guarantees
+    /// Lazily initialised singleton holder. <see cref="Lazy{T}" /> guarantees
     /// thread-safe construction without an explicit lock.
     /// </summary>
     private static readonly Lazy<DiskCacherWithSqlite> _instance =
         new(() => new DiskCacherWithSqlite());
 
     /// <summary>
-    /// Gets the singleton instance of <see cref="DiskCacherWithSqlite"/>.
+    /// Gets the singleton instance of <see cref="DiskCacherWithSqlite" />.
     /// The instance is created on first access.
     /// </summary>
     public static DiskCacherWithSqlite Instance => _instance.Value;
@@ -99,12 +97,15 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     /// Inserts a new thumbnail or replaces an existing one (upsert).
     /// Parameters: <c>$p</c> filePath, <c>$d</c> imageData, <c>$a</c> lastAccessed,
     /// <c>$m</c> lastModified, <c>$w</c> actualWidth, <c>$h</c> actualHeight.
+    /// The <c>$d</c> parameter uses <see cref="Microsoft.Data.Sqlite.SqliteParameter.Size" />
+    /// to specify how many bytes of the rented buffer are valid, avoiding an
+    /// extra copy into a trimmed array.
     /// </summary>
     private readonly SqliteCommand _cmdUpsert;
 
     /// <summary>
     /// Counts the total number of rows in the <c>images</c> table.
-    /// Used at startup to initialise <see cref="_rowCount"/>. Prefer the cached
+    /// Used at startup to initialise <see cref="_rowCount" />. Prefer the cached
     /// counter for subsequent checks.
     /// </summary>
     private readonly SqliteCommand _cmdCount;
@@ -113,6 +114,9 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     /// Deletes the <c>$limit</c> least-recently-accessed rows from the
     /// <c>images</c> table in a single statement.
     /// Parameter: <c>$limit</c> = number of rows to remove.
+    /// The return value of <c>ExecuteNonQueryAsync</c> gives the actual number of
+    /// rows deleted (which may be less than <c>$limit</c> if the table is smaller),
+    /// and is used to keep <see cref="_rowCount" /> accurate.
     /// </summary>
     private readonly SqliteCommand _cmdEvictBatch;
 
@@ -142,7 +146,7 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     private int _rowCount = -1;
 
     /// <summary>
-    /// Disposal flag. Set atomically via <see cref="Interlocked.Exchange"/> to
+    /// Disposal flag. Set atomically via <see cref="Interlocked.Exchange" /> to
     /// prevent double-disposal races on the singleton.
     /// 0 = live, 1 = disposed.
     /// </summary>
@@ -155,7 +159,7 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     /// <summary>
     /// Initialises the SQLite connection, creates the schema if absent, and
     /// prepares all reusable SQL commands.
-    /// Private — use <see cref="Instance"/> to obtain the singleton.
+    /// Private — use <see cref="Instance" /> to obtain the singleton.
     /// </summary>
     private DiskCacherWithSqlite()
     {
@@ -224,7 +228,7 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
 
     /// <summary>
     /// Safely disposes the singleton ONLY if it has already been instantiated.
-    /// Call this on application shutdown. Accessing <see cref="Instance"/> directly
+    /// Call this on application shutdown. Accessing <see cref="Instance" /> directly
     /// to dispose would force creation of the singleton if it does not yet exist.
     /// </summary>
     public static void Shutdown()
@@ -234,24 +238,22 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     }
 
     /// <summary>
-    /// Attempts to retrieve a cached thumbnail for <paramref name="filePath"/>.
+    /// Attempts to retrieve a cached thumbnail for <paramref name="filePath" />.
     /// Returns the decoded bitmap and the original image dimensions on a cache hit,
     /// or <c>(null, 0, 0)</c> on a miss, a stale entry, or any internal error.
-    ///
     /// <para>
     /// Freshness is determined by comparing the file's current last-write time
     /// against the value stored when the thumbnail was cached. A mismatch causes
     /// the stale entry to be deleted so it is regenerated on the next
-    /// <see cref="PutInCache"/> call.
+    /// <see cref="PutInCache" /> call.
     /// </para>
-    ///
     /// <para>
-    /// <b>Important:</b> the caller owns the returned <see cref="CanvasBitmap"/>
+    /// <b>Important:</b> the caller owns the returned <see cref="CanvasBitmap" />
     /// and must dispose it when it is no longer needed to release GPU memory.
     /// </para>
     /// </summary>
     /// <param name="canvasControl">
-    /// The <see cref="CanvasControl"/> used as the device context for decoding
+    /// The <see cref="CanvasControl" /> used as the device context for decoding
     /// the stored JPEG into a GPU-resident bitmap.
     /// </param>
     /// <param name="filePath">Absolute path of the source photo file.</param>
@@ -341,18 +343,16 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     }
 
     /// <summary>
-    /// Stores a resized JPEG thumbnail for <paramref name="filePath"/> in the
+    /// Stores a resized JPEG thumbnail for <paramref name="filePath" /> in the
     /// cache. If an entry for the same path already exists it is replaced (upsert).
-    ///
     /// <para>
     /// The image is resized via MagicScaler before writing so that stored blobs
-    /// never exceed <see cref="ThumbMaxSize"/> pixels on their longest edge.
+    /// never exceed <see cref="ThumbMaxSize" /> pixels on their longest edge.
     /// Images already within that bound are stored at their original size.
     /// </para>
-    ///
     /// <para>
-    /// When the cache reaches <see cref="MaxItemCount"/> entries, the oldest
-    /// <see cref="EvictionFactor"/> fraction is removed before the new entry is
+    /// When the cache reaches <see cref="MaxItemCount" /> entries, the oldest
+    /// <see cref="EvictionFactor" /> fraction is removed before the new entry is
     /// inserted.
     /// </para>
     /// </summary>
@@ -383,14 +383,17 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
                 {
                     var toRemove = (int)Math.Max(1, _rowCount * EvictionFactor);
                     _cmdEvictBatch.Parameters["$limit"].Value = toRemove;
-                    await _cmdEvictBatch.ExecuteNonQueryAsync().ConfigureAwait(false);
-                    _rowCount -= toRemove;
+                    var rowsDeleted = await _cmdEvictBatch.ExecuteNonQueryAsync().ConfigureAwait(false);
+                    _rowCount -= rowsDeleted;
                 }
 
-                // Pass only the valid portion of the buffer (length may be less
-                // than the rented array's capacity).
+                // Value is the full rented array; Size tells Microsoft.Data.Sqlite
+                // how many bytes are valid, avoiding a copy into a trimmed array.
+                // ArraySegment<byte> is not in the official type mapping table and
+                // may not bind correctly — byte[] + Size is the documented approach.
                 _cmdUpsert.Parameters["$p"].Value = filePath;
-                _cmdUpsert.Parameters["$d"].Value = new ArraySegment<byte>(resizedData, 0, resizedLength);
+                _cmdUpsert.Parameters["$d"].Value = resizedData;
+                _cmdUpsert.Parameters["$d"].Size = resizedLength;
                 _cmdUpsert.Parameters["$a"].Value = now;
                 _cmdUpsert.Parameters["$m"].Value = lastMod;
                 _cmdUpsert.Parameters["$w"].Value = actualWidth;
@@ -425,9 +428,8 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     /// <summary>
     /// Releases all managed resources held by this instance: prepared SQL
     /// commands, the database connection, and the semaphore.
-    ///
     /// <para>
-    /// Use <see cref="Shutdown"/> rather than calling this directly on the
+    /// Use <see cref="Shutdown" /> rather than calling this directly on the
     /// singleton, to avoid accidentally instantiating it during teardown.
     /// </para>
     /// </summary>
@@ -463,15 +465,18 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     /// <summary>
     /// Creates the <c>images</c> table and its index if they do not already
     /// exist, and configures SQLite performance pragmas for the connection.
-    ///
     /// <list type="bullet">
-    ///   <item><c>WAL</c> — reduces write-lock contention.</item>
-    ///   <item><c>synchronous=OFF</c> — safe for a regenerable cache; removes
-    ///   the fsync overhead on every write. A power-loss can corrupt the DB,
-    ///   but the cache is fully disposable and will be recreated.</item>
-    ///   <item><c>temp_store=MEMORY</c> — keeps temp tables in RAM.</item>
-    ///   <item><c>mmap_size</c> — maps up to 256 MB of the DB file into the
-    ///   process address space for faster sequential reads.</item>
+    /// <item><c>WAL</c> — reduces write-lock contention.</item>
+    /// <item>
+    /// <c>synchronous=OFF</c> — safe for a regenerable cache; removes
+    /// the fsync overhead on every write. A power-loss can corrupt the DB,
+    /// but the cache is fully disposable and will be recreated.
+    /// </item>
+    /// <item><c>temp_store=MEMORY</c> — keeps temp tables in RAM.</item>
+    /// <item>
+    /// <c>mmap_size</c> — maps up to 256 MB of the DB file into the
+    /// process address space for faster sequential reads.
+    /// </item>
     /// </list>
     /// </summary>
     private void InitializeDatabase()
@@ -496,9 +501,9 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     }
 
     /// <summary>
-    /// Loads the current row count from the database into <see cref="_rowCount"/>
+    /// Loads the current row count from the database into <see cref="_rowCount" />
     /// if it has not yet been initialised (i.e. is still <c>-1</c>).
-    /// Must be called inside the <see cref="_gate"/> lock.
+    /// Must be called inside the <see cref="_gate" /> lock.
     /// </summary>
     private async Task EnsureRowCountLoadedAsync()
     {
@@ -517,9 +522,8 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     }
 
     /// <summary>
-    /// Returns the last-write time of <paramref name="path"/> as a compact
+    /// Returns the last-write time of <paramref name="path" /> as a compact
     /// UTC string in the format <c>yyyyMMddHHmmss</c>.
-    ///
     /// <para>
     /// This string is stored with each cached thumbnail and compared on every
     /// cache read to detect whether the source file has been modified since the
@@ -580,9 +584,9 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
             return (rawRented, rawLen);
         }
 
-        // Resize path: write MagicScaler output into a MemoryStream backed by a
-        // pooled buffer. GetBuffer() avoids the ToArray() copy — we then copy
-        // only the valid bytes into a right-sized rented array.
+        // Resize path: MagicScaler decodes the input JPEG, resizes, and re-encodes.
+        // GetBuffer() on the output stream avoids the ToArray() copy — we then
+        // copy only the valid bytes into a right-sized rented array.
         using var outputStream = new MemoryStream();
         var settings = new ProcessImageSettings
         {
@@ -601,8 +605,6 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
 
         var outLen = (int)outputStream.Length;
         var rentedOut = ArrayPool<byte>.Shared.Rent(outLen);
-        // GetBuffer() returns the MemoryStream's internal array without copying.
-        // Copy only the valid portion into our rented buffer.
         Buffer.BlockCopy(outputStream.GetBuffer(), 0, rentedOut, 0, outLen);
         return (rentedOut, outLen);
     }
