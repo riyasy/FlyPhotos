@@ -3951,6 +3951,14 @@
                                                     "ValueTypes" = "3:1"
                                                     "Value" = "8:FlyPhotos.Image"
                                                     }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_cin"
+                                                    {
+                                                    "Name" = "8:.cin"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
                                                     "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_cr2"
                                                     {
                                                     "Name" = "8:.cr2"
@@ -4023,6 +4031,14 @@
                                                     "ValueTypes" = "3:1"
                                                     "Value" = "8:FlyPhotos.Image"
                                                     }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_dpx"
+                                                    {
+                                                    "Name" = "8:.dpx"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
                                                     "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_drf"
                                                     {
                                                     "Name" = "8:.drf"
@@ -4055,6 +4071,22 @@
                                                     "ValueTypes" = "3:1"
                                                     "Value" = "8:FlyPhotos.Image"
                                                     }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_exr"
+                                                    {
+                                                    "Name" = "8:.exr"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_ff"
+                                                    {
+                                                    "Name" = "8:.ff"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
                                                     "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_fff"
                                                     {
                                                     "Name" = "8:.fff"
@@ -4063,9 +4095,25 @@
                                                     "ValueTypes" = "3:1"
                                                     "Value" = "8:FlyPhotos.Image"
                                                     }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_fits"
+                                                    {
+                                                    "Name" = "8:.fits"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
                                                     "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_gif"
                                                     {
                                                     "Name" = "8:.gif"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_hdr"
+                                                    {
+                                                    "Name" = "8:.hdr"
                                                     "Condition" = "8:"
                                                     "Transitive" = "11:FALSE"
                                                     "ValueTypes" = "3:1"
@@ -4255,6 +4303,38 @@
                                                     "ValueTypes" = "3:1"
                                                     "Value" = "8:FlyPhotos.Image"
                                                     }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_pam"
+                                                    {
+                                                    "Name" = "8:.pam"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_pbm"
+                                                    {
+                                                    "Name" = "8:.pbm"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_pct"
+                                                    {
+                                                    "Name" = "8:.pct"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_pcx"
+                                                    {
+                                                    "Name" = "8:.pcx"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
                                                     "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_pef"
                                                     {
                                                     "Name" = "8:.pef"
@@ -4263,9 +4343,57 @@
                                                     "ValueTypes" = "3:1"
                                                     "Value" = "8:FlyPhotos.Image"
                                                     }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_pfm"
+                                                    {
+                                                    "Name" = "8:.pfm"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_pgm"
+                                                    {
+                                                    "Name" = "8:.pgm"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_pict"
+                                                    {
+                                                    "Name" = "8:.pict"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_pix"
+                                                    {
+                                                    "Name" = "8:.pix"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
                                                     "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_png"
                                                     {
                                                     "Name" = "8:.png"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_pnm"
+                                                    {
+                                                    "Name" = "8:.pnm"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_ppm"
+                                                    {
+                                                    "Name" = "8:.ppm"
                                                     "Condition" = "8:"
                                                     "Transitive" = "11:FALSE"
                                                     "ValueTypes" = "3:1"
@@ -4295,6 +4423,14 @@
                                                     "ValueTypes" = "3:1"
                                                     "Value" = "8:FlyPhotos.Image"
                                                     }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_qoi"
+                                                    {
+                                                    "Name" = "8:.qoi"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
                                                     "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_raf"
                                                     {
                                                     "Name" = "8:.raf"
@@ -4303,9 +4439,33 @@
                                                     "ValueTypes" = "3:1"
                                                     "Value" = "8:FlyPhotos.Image"
                                                     }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_ras"
+                                                    {
+                                                    "Name" = "8:.ras"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
                                                     "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_raw"
                                                     {
                                                     "Name" = "8:.raw"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_rgb"
+                                                    {
+                                                    "Name" = "8:.rgb"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_rgba"
+                                                    {
+                                                    "Name" = "8:.rgba"
                                                     "Condition" = "8:"
                                                     "Transitive" = "11:FALSE"
                                                     "ValueTypes" = "3:1"
@@ -4335,6 +4495,14 @@
                                                     "ValueTypes" = "3:1"
                                                     "Value" = "8:FlyPhotos.Image"
                                                     }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_sgi"
+                                                    {
+                                                    "Name" = "8:.sgi"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
                                                     "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_sr2"
                                                     {
                                                     "Name" = "8:.sr2"
@@ -4359,9 +4527,25 @@
                                                     "ValueTypes" = "3:1"
                                                     "Value" = "8:FlyPhotos.Image"
                                                     }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_sun"
+                                                    {
+                                                    "Name" = "8:.sun"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
                                                     "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_svg"
                                                     {
                                                     "Name" = "8:.svg"
+                                                    "Condition" = "8:"
+                                                    "Transitive" = "11:FALSE"
+                                                    "ValueTypes" = "3:1"
+                                                    "Value" = "8:FlyPhotos.Image"
+                                                    }
+                                                    "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_tga"
+                                                    {
+                                                    "Name" = "8:.tga"
                                                     "Condition" = "8:"
                                                     "Transitive" = "11:FALSE"
                                                     "ValueTypes" = "3:1"
@@ -5241,6 +5425,190 @@
                                             "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_067_SVG"
                                             {
                                             "Name" = "8:.svg"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_068_CIN"
+                                            {
+                                            "Name" = "8:.cin"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_069_DPX"
+                                            {
+                                            "Name" = "8:.dpx"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_070_EXR"
+                                            {
+                                            "Name" = "8:.exr"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_071_FITS"
+                                            {
+                                            "Name" = "8:.fits"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_072_HDR"
+                                            {
+                                            "Name" = "8:.hdr"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_073_PAM"
+                                            {
+                                            "Name" = "8:.pam"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_074_PBM"
+                                            {
+                                            "Name" = "8:.pbm"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_075_PCT"
+                                            {
+                                            "Name" = "8:.pct"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_076_PCX"
+                                            {
+                                            "Name" = "8:.pcx"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_077_PFM"
+                                            {
+                                            "Name" = "8:.pfm"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_078_PGM"
+                                            {
+                                            "Name" = "8:.pgm"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_079_PIX"
+                                            {
+                                            "Name" = "8:.pix"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_080_PNM"
+                                            {
+                                            "Name" = "8:.pnm"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_081_PPM"
+                                            {
+                                            "Name" = "8:.ppm"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_082_PICT"
+                                            {
+                                            "Name" = "8:.pict"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_083_QOI"
+                                            {
+                                            "Name" = "8:.qoi"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_084_RAS"
+                                            {
+                                            "Name" = "8:.ras"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_085_RGB"
+                                            {
+                                            "Name" = "8:.rgb"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_086_RGBA"
+                                            {
+                                            "Name" = "8:.rgba"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_087_SGI"
+                                            {
+                                            "Name" = "8:.sgi"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_088_SUN"
+                                            {
+                                            "Name" = "8:.sun"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_089_TGA"
+                                            {
+                                            "Name" = "8:.tga"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_090_FF"
+                                            {
+                                            "Name" = "8:.ff"
                                             "Condition" = "8:"
                                             "Transitive" = "11:FALSE"
                                             "ValueTypes" = "3:1"

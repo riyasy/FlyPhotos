@@ -24,12 +24,21 @@ internal static class CodecDiscovery
         ".bmp",".dib",".rle",".gif",".ico",".icon",".cur",
         ".jpeg",".jpe",".jpg",".jfif",".exif",
         ".png",".tiff",".tif",
+        // Traditional formats (added)
+        ".tga",".pcx",".ras",".sun",".sgi",".rgb",".rgba",
+        ".pict",".pct",".pix",
+        // HDR / professional formats (added)
+        ".exr",".hdr",".dpx",".cin",".pfm",
+        // Scientific / portable formats (added)
+        ".pbm",".pgm",".ppm",".pnm",".pam",".fits",
         // Modern
         ".wdp",".jxr",".dds",
         ".heic",".heif",".hif",
         ".avci",".heics",".heifs",".avcs",
         ".avif",".avifs",
         ".webp",".jxl",
+        // New lightweight formats (added)
+        ".qoi",".ff",
         // Fly-specific
         ".psd",".svg"
     ];

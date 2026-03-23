@@ -138,6 +138,31 @@
 			<uap:FileType>.psd</uap:FileType>
 			<uap:FileType>.svg</uap:FileType>
 
+			<!-- ImageMagick formats -->
+			<uap:FileType>.cin</uap:FileType>
+			<uap:FileType>.dpx</uap:FileType>
+			<uap:FileType>.exr</uap:FileType>
+			<uap:FileType>.fits</uap:FileType>
+			<uap:FileType>.hdr</uap:FileType>
+			<uap:FileType>.pam</uap:FileType>
+			<uap:FileType>.pbm</uap:FileType>
+			<uap:FileType>.pct</uap:FileType>
+			<uap:FileType>.pcx</uap:FileType>
+			<uap:FileType>.pfm</uap:FileType>
+			<uap:FileType>.pgm</uap:FileType>
+			<uap:FileType>.pix</uap:FileType>
+			<uap:FileType>.pnm</uap:FileType>
+			<uap:FileType>.ppm</uap:FileType>
+			<uap:FileType>.pict</uap:FileType>
+			<uap:FileType>.qoi</uap:FileType>
+			<uap:FileType>.ras</uap:FileType>
+			<uap:FileType>.rgb</uap:FileType>
+			<uap:FileType>.rgba</uap:FileType>
+			<uap:FileType>.sgi</uap:FileType>
+			<uap:FileType>.sun</uap:FileType>
+			<uap:FileType>.tga</uap:FileType>
+			<uap:FileType>.ff</uap:FileType>
+
 		</uap:SupportedFileTypes>	
 		</uap:FileTypeAssociation>
 	  </uap:Extension>
