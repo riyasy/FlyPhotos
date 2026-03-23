@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,7 +11,7 @@ internal static class FileDiscovery
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public static List<string> DiscoverFiles(string selectedFilePath, bool flyLaunchedExternally)
+    public static IReadOnlyList<string> DiscoverFiles(string selectedFilePath, bool flyLaunchedExternally)
     {
         var sw = System.Diagnostics.Stopwatch.StartNew();
         var files = ListFiles(selectedFilePath, flyLaunchedExternally);
@@ -20,7 +20,7 @@ internal static class FileDiscovery
         return files;
     }
 
-    public static int FindSelectedFileIndex(string selectedFilePath, List<string> files)
+    public static int FindSelectedFileIndex(string selectedFilePath, IReadOnlyList<string> files)
     {
         var targetName = Path.GetFileName(selectedFilePath.AsSpan());
         for (var i = 0; i < files.Count; i++)
@@ -34,10 +34,10 @@ internal static class FileDiscovery
         return 0;
     }
 
-    private static List<string> ListFiles(string selectedFilePath, bool flyLaunchedExternally)
+    private static IReadOnlyList<string> ListFiles(string selectedFilePath, bool flyLaunchedExternally)
     {
         
-        List<string> files = [];
+        IReadOnlyList<string> files = Array.Empty<string>();
 
         // 1. If fly launched externally, Attempt to get files from the active Explorer window.
         // Most probably Fly would have been launched from an explorer window
@@ -83,12 +83,27 @@ internal static class FileDiscovery
         return fileList;
     }
 
-    private static List<string> FindAllFilesFromDirectory(string? dirPath)
+    private static IReadOnlyList<string> FindAllFilesFromDirectory(string dirPath)
     {
-        if (String.IsNullOrEmpty(dirPath) || !Directory.Exists(dirPath))
+        if (!Directory.Exists(dirPath)) return Array.Empty<string>();
+
+        // Standard constructor with object initializer
+        var options = new EnumerationOptions
         {
-            return [];
-        }
-        return [.. Directory.EnumerateFiles(dirPath, "*.*", SearchOption.TopDirectoryOnly)];
+            RecurseSubdirectories = false,
+            IgnoreInaccessible = true,
+            ReturnSpecialDirectories = false,
+            // Optional: Skipping Hidden/System files can further speed up the OS-level scan
+            // AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
+        };
+
+        // Directory.GetFiles is highly optimized in .NET 6+ to work with these options
+        string[] files = Directory.GetFiles(dirPath, "*", options);
+
+        // OrdinalIgnoreCase is the fastest way to sort strings in .NET
+        // as it uses a simple bitwise comparison after case-folding.
+        Array.Sort(files, StringComparer.OrdinalIgnoreCase);
+
+        return files;
     }
 }

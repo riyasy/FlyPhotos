@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -107,7 +107,7 @@ internal partial class PhotoDisplayController
     {
         try
         {
-            List<string> files;
+            IReadOnlyList<string> files;
 
             // Secondary instances only display the single opened image.
             // No folder or Explorer-window discovery is performed.
