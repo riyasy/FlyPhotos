@@ -1,13 +1,15 @@
 ﻿#nullable enable
 using System;
+using System.IO;
 using System.Threading.Tasks;
+using Windows.Graphics.DirectX;
 using Windows.Graphics.Imaging;
+using Windows.Storage.Streams;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Services;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
-using FlyPhotos.Services;
-using Windows.Graphics.DirectX;
 
 namespace FlyPhotos.Display.ImageReading;
 
@@ -15,15 +17,15 @@ internal static class WicReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    //private static readonly string[] OrientationKey = ["System.Photo.Orientation"];
+    private static readonly string[] OrientationKey = ["System.Photo.Orientation"];
 
     public static async Task<(bool, PreviewDisplayItem)> GetEmbedded(CanvasControl ctrl, string inputPath)
     {
-        var (bmp, width, height) = await GetThumbnail(ctrl, inputPath);
+        var (bmp, width, height, rotation) = await GetThumbnail(ctrl, inputPath);
         if (bmp == null) return (false, PreviewDisplayItem.Empty());
 
         var metadata = new ImageMetadata(width, height);
-        return (true, new PreviewDisplayItem(bmp, Origin.Disk, metadata));
+        return (true, new PreviewDisplayItem(bmp, Origin.Disk, metadata, rotation));
     }
 
     /// <summary>
@@ -101,8 +103,13 @@ internal static class WicReader
         try
         {
             using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
+
+            // Nikon NEF codec doesn't respect EXIF orientation — read and apply it manually.
+            // For non Nikon codecs, it simply returns 0.
+            var rotation = await GetNikonSpecialExifRotation(inputPath, stream);
+
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
-            return (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk));
+            return (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk, rotation));
         }
         catch (Exception ex)
         {
@@ -111,7 +118,26 @@ internal static class WicReader
         }
     }
 
-    private static async Task<(CanvasBitmap? Bitmap, int Width, int Height)> GetThumbnail(CanvasControl ctrl, string inputPath)
+    private static async Task<int> GetNikonSpecialExifRotation(string inputPath, IRandomAccessStream stream, BitmapDecoder? decoder = null)
+    {
+        var rotation = 0;
+        var isNef = Path.GetExtension(inputPath).Equals(".nef", StringComparison.OrdinalIgnoreCase);
+        if (!isNef) return rotation;
+        if (decoder == null) decoder = await BitmapDecoder.CreateAsync(stream);
+        if (IsNikonNefCodec(decoder))
+            rotation = await GetRotationFromMetaData(decoder.BitmapProperties);
+        stream.Seek(0);
+        return rotation;
+    }
+
+    private static bool IsNikonNefCodec(BitmapDecoder decoder)
+    {
+        var name = decoder.DecoderInformation?.FriendlyName ?? string.Empty;
+        return name.Contains("Nikon", StringComparison.OrdinalIgnoreCase) &&
+               name.Contains("NEF", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static async Task<(CanvasBitmap? Bitmap, int Width, int Height, int Rotation)> GetThumbnail(CanvasControl ctrl, string inputPath)
     {
         try
         {
@@ -122,28 +148,30 @@ internal static class WicReader
             var originalWidth = (int)decoder.OrientedPixelWidth;
             var originalHeight = (int)decoder.OrientedPixelHeight;
             using var preview = await decoder.GetThumbnailAsync();
+
+            var rotation = await GetNikonSpecialExifRotation(inputPath, stream, decoder);
             var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
 
-            return (canvasBitmap, originalWidth, originalHeight);
+            return (canvasBitmap, originalWidth, originalHeight, rotation);
         }
         catch (Exception)
         {
-            return (null, 0, 0);
+            return (null, 0, 0, 0);
         }
     }
 
-    //private static async Task<int> GetRotationFromMetaData(BitmapPropertiesView bmpProps)
-    //{
-    //    // OrientationKey is static readonly — avoids allocating a new string[] on every call.
-    //    var result = await bmpProps.GetPropertiesAsync(OrientationKey);
+    private static async Task<int> GetRotationFromMetaData(BitmapPropertiesView bmpProps)
+    {
+        // OrientationKey is static readonly — avoids allocating a new string[] on every call.
+        var result = await bmpProps.GetPropertiesAsync(OrientationKey);
 
-    //    if (!result.TryGetValue("System.Photo.Orientation", out var orientation)) return 0;
-    //    return (ushort)orientation.Value switch
-    //    {
-    //        6 => 90,
-    //        3 => 180,
-    //        8 => 270,
-    //        _ => 0
-    //    };
-    //}
+        if (!result.TryGetValue(OrientationKey[0], out var orientation)) return 0;
+        return (ushort)orientation.Value switch
+        {
+            6 => 270,
+            3 => 180,
+            8 => 90,
+            _ => 0
+        };
+    }
 }

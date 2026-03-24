@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Windows.Foundation;
@@ -249,9 +249,9 @@ internal partial class ThumbNailController : IThumbnailController
 
                 var key = _sortedPhotoKeys[thumbnailPosition];
 
-                var bitmap = (_cachedPreviews.TryGetValue(key, out var photo) && photo.Preview?.Bitmap != null)
-                    ? photo.Preview.Bitmap
-                    : Photo.GetLoadingIndicator().Bitmap;
+                var previewCreated = _cachedPreviews.TryGetValue(key, out var photo) && photo.Preview?.Bitmap != null;
+                var bitmap = previewCreated ? photo.Preview.Bitmap : Photo.GetLoadingIndicator().Bitmap;
+                var rotation = previewCreated ? photo.Preview.Rotation : 0;
 
                 // Calculate the source crop rectangle (same as before, this was correct)
                 float bitmapWidth = bitmap.SizeInPixels.Width;
@@ -276,7 +276,18 @@ internal partial class ThumbNailController : IThumbnailController
                     // 2. Create a clipping layer. All drawing inside this 'using' block will be clipped to the geometry.
                     using (dsThumbNail.CreateLayer(1.0f, clipGeometry))
                     {
-                        dsThumbNail.DrawImage(bitmap, destRect, sourceRect, 1f, CanvasImageInterpolation.NearestNeighbor);
+                        if (rotation != 0)
+                        {
+                            var center = new System.Numerics.Vector2((float)(destRect.X + destRect.Width / 2), (float)(destRect.Y + destRect.Height / 2));
+                            var oldTransform = dsThumbNail.Transform;
+                            dsThumbNail.Transform = System.Numerics.Matrix3x2.CreateRotation((float)(rotation * Math.PI / 180.0), center) * oldTransform;
+                            dsThumbNail.DrawImage(bitmap, destRect, sourceRect, 1f, CanvasImageInterpolation.NearestNeighbor);
+                            dsThumbNail.Transform = oldTransform;
+                        }
+                        else
+                        {
+                            dsThumbNail.DrawImage(bitmap, destRect, sourceRect, 1f, CanvasImageInterpolation.NearestNeighbor);
+                        }
                     } // The clipping layer is automatically disposed and removed here.
                 }
 
