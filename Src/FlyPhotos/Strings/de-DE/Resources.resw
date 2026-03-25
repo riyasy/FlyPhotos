@@ -606,4 +606,19 @@ Esc : Einstellungen schließen oder App beenden</value>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
     <value>Mehrere Instanzen erlauben (Beta)</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>Kamera-RAW decodieren</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>Verwenden Sie echte RAW-Daten anstelle des eingebetteten JPEGs in der RAW-Datei</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>Festplatten-Cache löschen</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>Löschen Sie alle Vorschauen aus dem Festplatten-Cache.</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
 </root>

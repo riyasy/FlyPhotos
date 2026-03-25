@@ -606,4 +606,19 @@ Esc : Chiudi impostazioni o Esci</value>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
     <value>Consenti più istanze (Beta)</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>Decodifica i file RAW della fotocamera</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>Usa i dati RAW reali invece del JPEG incorporato nel file RAW.</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>Svuota la cache del disco</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>Elimina tutte le anteprime dalla cache del disco.</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>Svuota</value>
+  </data>
 </root>

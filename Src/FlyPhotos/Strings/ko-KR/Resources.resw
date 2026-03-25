@@ -605,4 +605,19 @@ Esc : 설정 닫기 또는 앱 종료</value>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
     <value>여러 인스턴스 허용 (Beta)</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>카메라 RAW 디코딩</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>RAW 파일 내에 포함된 JPEG 대신 실제 RAW 데이터를 사용합니다</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>디스크 캐시 지우기</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>디스크 캐시에서 모든 미리보기를 삭제합니다.</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>지우기</value>
+  </data>
 </root>

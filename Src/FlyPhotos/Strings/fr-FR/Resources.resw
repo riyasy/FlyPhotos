@@ -606,4 +606,19 @@ Esc : Fermer les paramètres ou Quitter</value>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
     <value>Autoriser plusieurs instances (Beta)</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>Décoder les fichiers RAW de l’appareil photo</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>Utiliser les données RAW réelles au lieu du JPEG intégré dans le fichier RAW.</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>Effacer le cache disque</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>Supprimer toutes les prévisualisations du cache du disque.</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>Effacer</value>
+  </data>
 </root>

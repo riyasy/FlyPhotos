@@ -198,6 +198,21 @@
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>マイカ</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>カメラRAWをデコード</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>RAWファイル内の埋め込みJPEGの代わりに実際のRAWデータを使用します</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>ディスクキャッシュをクリア</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>ディスクキャッシュからすべてのプレビューを削除します。</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>クリア</value>
+  </data>
   <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
     <value>マイカ Alt</value>
   </data>

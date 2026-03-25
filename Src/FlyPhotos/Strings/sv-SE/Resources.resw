@@ -606,4 +606,19 @@ Esc : Stäng inställningar eller Avsluta</value>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
     <value>Tillåt flera instanser (Beta)</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>Avkoda kamerans RAW-filer</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>Använd faktisk RAW-data istället för den inbäddade JPEG-bilden i RAW-filen.</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>Rensa diskcache</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>Ta bort alla förhandsvisningar från diskcachen.</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>Töm</value>
+  </data>
 </root>

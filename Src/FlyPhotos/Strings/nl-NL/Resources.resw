@@ -198,6 +198,21 @@
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Mica</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>Camera RAW decoderen</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>Gebruik echte RAW-gegevens in plaats van de ingesloten JPEG in het RAW-bestand</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>Schijfcache wissen</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>Verwijder alle voorvertoningen uit de schijfcache.</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>Wissen</value>
+  </data>
   <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
     <value>Mica Alt</value>
   </data>

@@ -198,6 +198,21 @@
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>雲母（Mica）</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>解碼相機 RAW</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>使用實際 RAW 資料，而不是 RAW 檔案內嵌的 JPEG</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>清除磁碟快取</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>從磁碟快取刪除所有預覽。</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>清除</value>
+  </data>
   <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
     <value>雲母替代版（Mica Alt）</value>
   </data>

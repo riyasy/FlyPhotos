@@ -603,4 +603,19 @@ Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാ
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
     <value>ഒന്നിലധികം ഇൻസ്റ്റൻസുകൾ അനുവദിക്കുക (Beta)</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>ക്യാമറ RAW ഡീകോഡ് ചെയ്യുക</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>RAW ഫയലിനുള്ളിലെ എംബെഡഡ് JPEG നു പകരം യഥാർത്ഥ RAW ഡാറ്റ ഉപയോഗിക്കുക</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>ഡിസ്‌ക് ക്യാഷ് മായ്ക്കുക</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>ഡിസ്‌ക് ക്യാഷിൽ നിന്നുള്ള എല്ലാ പ്രിവ്യൂകളും ഇല്ലാതാക്കുക.</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>ശൂന്യപ്പെടുത്തുക</value>
+  </data>
 </root>

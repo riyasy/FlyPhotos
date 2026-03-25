@@ -606,4 +606,19 @@ Esc : Close Settings or Exit App</value>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
     <value>Allow Multiple Instances (Beta)</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>Decode Camera RAW</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>Use actual RAW data instead of the embedded JPEG inside the RAW file.</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>Clear Disk Cache</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>Delete all previews from disk cache.</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>Clear</value>
+  </data>
 </root>

@@ -606,4 +606,19 @@ Esc : Cerrar ajustes o Salir</value>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
     <value>Permitir múltiples instancias (Beta)</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>Decodificar RAW de la cámara</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>Usar datos RAW reales en lugar del JPEG incrustado dentro del archivo RAW.</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>Limpiar caché de disco</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>Eliminar todas las vistas previas del caché de disco.</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>Limpiar</value>
+  </data>
 </root>

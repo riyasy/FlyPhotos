@@ -606,4 +606,19 @@ Esc : Sulje asetukset tai Poistu</value>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
     <value>Salli useita instansseja (Beta)</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>Dekoodaa kameran RAW-tiedostot</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>Käytä todellisia RAW-tietoja RAW-tiedoston sisällä olevan upotetun JPEG-kuvan sijaan.</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>Tyhjennä levyn välimuisti</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>Poista kaikki esikatselut levyn välimuistista.</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>Tyhjennä</value>
+  </data>
 </root>
