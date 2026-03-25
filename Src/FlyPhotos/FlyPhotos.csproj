@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<AssemblyVersion>2.5.19.0</AssemblyVersion>
+		<AssemblyVersion>2.5.20.0</AssemblyVersion>
 		<TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 		<RootNamespace>FlyPhotos</RootNamespace>
@@ -14,6 +14,7 @@
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 
 		<EnableMsixTooling>true</EnableMsixTooling>
+		<WindowsPackageType>None</WindowsPackageType>
 		
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
@@ -43,8 +44,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
-		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.11.0" Condition="'$(Platform)' == 'x64'" />
-		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-arm64" Version="14.11.0" Condition="'$(Platform)' == 'ARM64'" />
+		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.11.1" Condition="'$(Platform)' == 'x64'" />
+		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-arm64" Version="14.11.1" Condition="'$(Platform)' == 'ARM64'" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.5" />
@@ -103,10 +104,6 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Visible>false</Visible>
 		</Content>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Strings\zh-TW\" />
 	</ItemGroup>
 
 	<!-- 4. PUBLISH LOGIC (Unpackaged):
