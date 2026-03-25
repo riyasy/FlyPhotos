@@ -1,14 +1,15 @@
-﻿#nullable enable
+#nullable enable
+using Microsoft.Data.Sqlite;
+using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.UI.Xaml;
+using PhotoSauce.MagicScaler;
+using PhotoSauce.MagicScaler.Transforms;
 using System;
 using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Data.Sqlite;
-using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
-using PhotoSauce.MagicScaler;
 
 namespace FlyPhotos.Services;
 
@@ -363,13 +364,15 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     /// </param>
     /// <param name="actualWidth">Width of the original image in pixels.</param>
     /// <param name="actualHeight">Height of the original image in pixels.</param>
-    public async Task PutInCache(string filePath, CanvasBitmap bitmap, int actualWidth, int actualHeight)
+    /// <param name="rotation">Clockwise rotation in degrees (0, 90, 180, 270) to apply to the JPEG before caching.
+    /// Pass 0 (default) to store without rotation.</param>
+    public async Task PutInCache(string filePath, CanvasBitmap bitmap, int actualWidth, int actualHeight, int rotation = 0)
     {
         try
         {
             // Resize and encode outside the lock — this is CPU/IO-intensive.
             var (resizedData, resizedLength) =
-                await ResizeImageWithPhotoSauce(bitmap, ThumbMaxSize).ConfigureAwait(false);
+                await ResizeImageWithPhotoSauce(bitmap, ThumbMaxSize, rotation).ConfigureAwait(false);
 
             var lastMod = FileMtimeString(filePath);
             var now = NowUnix();
@@ -418,6 +421,40 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
             // regenerated on the next session.
             Debug.WriteLine(
                 $"[CACHE-ERROR] Failed to put '{filePath}' in cache: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Removes every entry from the disk cache and resets the in-memory row counter.
+    /// Safe to call at any time; any error is swallowed and logged so the caller
+    /// is never disrupted.
+    /// </summary>
+    public async Task ClearAllAsync()
+    {
+        try
+        {
+            await _gate.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                await using var cmd = _conn.CreateCommand();
+                cmd.CommandText = "DELETE FROM images";
+                await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+                _rowCount = 0;
+            }
+            finally
+            {
+                _gate.Release();
+            }
+
+            // VACUUM must run outside any transaction (and therefore outside the gate).
+            // It rewrites the entire database file, reclaiming the space freed by DELETE.
+            await using var vacuumCmd = _conn.CreateCommand();
+            vacuumCmd.CommandText = "VACUUM";
+            await vacuumCmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[CACHE-ERROR] Failed to clear all cache entries: {ex.Message}");
         }
     }
 
@@ -537,35 +574,47 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     }
 
     /// <summary>
-    /// Encodes <paramref name="bitmap" /> as a JPEG and, if either dimension
-    /// exceeds <paramref name="maxSize" />, downscales it first using MagicScaler's
-    /// high-quality pipeline before encoding.
-    /// <para>
-    /// The bitmap is saved to an intermediate JPEG stream via
-    /// <see cref="CanvasBitmap.SaveAsync" /> before being passed to MagicScaler.
-    /// Feeding raw pixels directly via <see cref="IPixelSource" /> was
-    /// benchmarked and found to be ~3× slower due to per-scanline managed
-    /// dispatch overhead, making the stream-based path the correct choice here.
-    /// </para>
-    /// <para>
-    /// The method rents a buffer from <see cref="ArrayPool{T}" /> for the output
-    /// data to avoid Large Object Heap pressure. The caller is responsible for
-    /// returning it via <c>ArrayPool&lt;byte&gt;.Shared.Return(data)</c> after
-    /// the data has been consumed (e.g. after the DB write completes).
-    /// </para>
+    /// Encodes a <see cref="CanvasBitmap"/> as a JPEG, applying resizing and rotation via 
+    /// the MagicScaler high-quality pipeline.
     /// </summary>
-    /// <param name="bitmap">The source bitmap to encode or encode-and-resize.</param>
-    /// <param name="maxSize">
-    /// Maximum pixel length for the longest edge of the output image.
-    /// </param>
+    /// <remarks>
+    /// <para>
+    /// <b>Pipeline Architecture:</b>
+    /// The bitmap is first saved to an intermediate JPEG stream. While MagicScaler can accept 
+    /// raw pixels via <c>IPixelSource</c>, benchmarks show this is ~3× slower due to managed/unmanaged 
+    /// dispatch overhead on every scanline. The stream-based approach allows MagicScaler to 
+    /// use its highly optimized native decoders.
+    /// </para>
+    /// <para>
+    /// <b>Rotation Handling:</b>
+    /// Rotation is "baked" into the pixel data using <see cref="OrientationTransform"/>. 
+    /// This reorders the pixel grid during the pull-propagation phase of the pipeline, 
+    /// meaning the output image is physically rotated and requires no EXIF orientation 
+    /// tags to display correctly.
+    /// </para>
+    /// <para>
+    /// <b>Memory Management:</b>
+    /// To avoid Large Object Heap (LOH) fragmentation, this method rents a buffer from 
+    /// <see cref="ArrayPool{T}"/>. 
+    /// <b>Caller Responsibility:</b> The caller must return the buffer using 
+    /// <c>ArrayPool&lt;byte&gt;.Shared.Return(rentedBuffer)</c> once processing is complete.
+    /// </para>
+    /// </remarks>
+    /// <param name="bitmap">The source Win2D bitmap to process.</param>
+    /// <param name="maxSize">The maximum length (in pixels) allowed for the longest edge.</param>
+    /// <param name="rotation">The rotation to apply in degrees. Supports 0, 90, 180, and 270.</param>
     /// <returns>
-    /// A tuple of <c>(rentedBuffer, validByteCount)</c>. Only the first
-    /// <c>validByteCount</c> bytes of <c>rentedBuffer</c> contain the JPEG data;
-    /// the remainder of the rented array is uninitialised and must not be read.
+    /// A tuple containing:
+    /// <list type="bullet">
+    /// <item><description><c>rentedBuffer</c>: The byte array containing the JPEG data.</description></item>
+    /// <item><description><c>length</c>: The actual number of valid bytes in the rented array.</description></item>
+    /// </list>
     /// </returns>
     private static async Task<(byte[] rentedBuffer, int length)> ResizeImageWithPhotoSauce(
-        CanvasBitmap bitmap, int maxSize)
+        CanvasBitmap bitmap, int maxSize, int rotation = 0)
     {
+        // 1. Encode CanvasBitmap to an intermediate stream.
+        // This provides the best performance for the MagicScaler/PhotoSauce handoff.
         using var inputStream = new MemoryStream();
         await bitmap.SaveAsync(inputStream.AsRandomAccessStream(), CanvasBitmapFileFormat.Jpeg, 0.9f);
         inputStream.Position = 0;
@@ -573,9 +622,9 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
         double width = bitmap.Size.Width;
         double height = bitmap.Size.Height;
 
-        // Skip MagicScaler entirely when the image already fits within the
-        // thumbnail size — just return the JPEG we already encoded above.
-        if (width <= maxSize && height <= maxSize)
+        // 2. Early Exit check:
+        // Skip MagicScaler ONLY if the image fits the bounds AND no rotation is requested.
+        if (width <= maxSize && height <= maxSize && rotation == 0)
         {
             var raw = inputStream.GetBuffer();
             var rawLen = (int)inputStream.Length;
@@ -584,9 +633,7 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
             return (rawRented, rawLen);
         }
 
-        // Resize path: MagicScaler decodes the input JPEG, resizes, and re-encodes.
-        // GetBuffer() on the output stream avoids the ToArray() copy — we then
-        // copy only the valid bytes into a right-sized rented array.
+        // 3. Configure MagicScaler Pipeline
         using var outputStream = new MemoryStream();
         var settings = new ProcessImageSettings
         {
@@ -601,11 +648,38 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
             }
         };
 
-        MagicImageProcessor.ProcessImage(inputStream, outputStream, settings);
+        // 4. Build the pipeline. 
+        // Using BuildPipeline instead of ProcessImage allows manual injection of transforms.
+        using var pl = MagicImageProcessor.BuildPipeline(inputStream, settings);
 
+        // 5. Apply Rotation Transform.
+        // This rotates the actual pixel data during the encoding process.
+        if (rotation != 0)
+        {
+            var orientation = rotation switch
+            {
+                90 => Orientation.Rotate90,
+                180 => Orientation.Rotate180,
+                270 => Orientation.Rotate270,
+                _ => Orientation.Normal
+            };
+
+            if (orientation != Orientation.Normal)
+            {
+                pl.AddTransform(new OrientationTransform(orientation));
+            }
+        }
+
+        // 6. Execute pipeline and write to output stream.
+        pl.WriteOutput(outputStream);
+
+        // 7. Copy to a rented buffer to avoid LOH allocations for large images.
         var outLen = (int)outputStream.Length;
         var rentedOut = ArrayPool<byte>.Shared.Rent(outLen);
+
+        // GetBuffer() is used to avoid the internal array copy performed by ToArray().
         Buffer.BlockCopy(outputStream.GetBuffer(), 0, rentedOut, 0, outLen);
+
         return (rentedOut, outLen);
     }
 }

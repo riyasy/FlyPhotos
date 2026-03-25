@@ -11,14 +11,25 @@ namespace FlyPhotos.Display.ImageReading;
 
 internal static class ImageReader
 {
+    /// <summary>Logger instance for ImageReader.</summary>
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+    /// <summary>Provides pre-rendered indicator bitmaps (loading, error, file-not-found) used as fallback display items.</summary>
     private static IndicatorFactory _indicators;
 
+    /// <summary>
+    /// Initializes shared resources that depend on the Win2D canvas, specifically the <see cref="IndicatorFactory"/>.
+    /// Must be called once before any other image loading methods.
+    /// </summary>
     public static void Initialize(CanvasControl d2dCanvas)
     {
         _indicators = new IndicatorFactory(d2dCanvas);
     }
 
+    /// <summary>
+    /// Loads the best available display item for the first frame of an image, using format-specific
+    /// fast paths (embedded thumbnails, native decoders) before falling back to heavier decoders. 
+    /// </summary>
     public static async Task<DisplayItem> GetFirstPreviewSpecialHandlingAsync(
         CanvasControl d2dCanvas, string path)
     {
@@ -50,7 +61,7 @@ internal static class ImageReader
                         if (CodecDiscovery.HasWicSupport(extension))
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                         if (CodecDiscovery.HasImageMagickSupport(extension))
-                            if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp4)) return retBmp4;
+                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp4)) return retBmp4;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
                 case ".AVIF":
@@ -61,13 +72,13 @@ internal static class ImageReader
                         if (CodecDiscovery.HasWicSupport(extension))
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                         if (CodecDiscovery.HasImageMagickSupport(extension))
-                            if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp4)) return retBmp4;
+                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp4)) return retBmp4;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
                 case ".PSD":
                     {
                         if (await PsdReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                        if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
                 case ".SVG":
@@ -115,7 +126,7 @@ internal static class ImageReader
                         if (CodecDiscovery.HasWicSupport(extension))
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         if (CodecDiscovery.HasImageMagickSupport(extension))
-                            if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp1)) return retBmp1;
+                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp1)) return retBmp1;
 
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
@@ -128,6 +139,11 @@ internal static class ImageReader
         }
     }
 
+    /// <summary>
+    /// Loads a low-resolution preview of an image suitable for the thumbnail ribbon or preview.
+    /// Tries cheap embedded previews first (EXIF thumbnail, embedded JPEG), then resizes via WIC or ImageMagick.
+    /// Format-specific decoders are used.
+    /// </summary>
     public static async Task<PreviewDisplayItem> GetPreview(CanvasControl d2dCanvas, string path)
     {
         if (!File.Exists(path))
@@ -207,6 +223,10 @@ internal static class ImageReader
         }
     }
 
+    /// <summary>
+    /// Loads the full high-quality image for display in the main viewer.
+    /// Uses format-specific decoders in priority order.
+    /// </summary>
     public static async Task<HqDisplayItem> GetHqImage(CanvasControl d2dCanvas, string path)
     {
         if (!File.Exists(path))
@@ -228,7 +248,7 @@ internal static class ImageReader
                         if (CodecDiscovery.HasWicSupport(extension))
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
                         if (CodecDiscovery.HasImageMagickSupport(extension))
-                            if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
                 case ".AVIF":
@@ -237,12 +257,12 @@ internal static class ImageReader
                         if (CodecDiscovery.HasWicSupport(extension))
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
                         if (CodecDiscovery.HasImageMagickSupport(extension))
-                            if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
                 case ".PSD":
                     {
-                        if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
                 case ".SVG":
@@ -282,7 +302,7 @@ internal static class ImageReader
                         if (CodecDiscovery.HasWicSupport(extension))
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         if (CodecDiscovery.HasImageMagickSupport(extension))
-                            if (MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
             }
@@ -300,6 +320,7 @@ internal static class ImageReader
         //}
     }
 
+    /// <summary>Returns a loading indicator display item to show while an image is being asynchronously decoded.</summary>
     public static DisplayItem GetLoadingIndicator()
     {
         return new PreviewDisplayItem(_indicators.Loading, Origin.ErrorScreen);

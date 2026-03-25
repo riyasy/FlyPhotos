@@ -86,7 +86,7 @@ public sealed partial class FlyProfilerWindow : Window
                         { "WicReader.GetResized", async () => { var (ok, item) = await WicReader.GetResized(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
                         { "MagickNetWrap.GetResized", async () => { var (ok, item) = await MagickNetWrap.GetResized(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
                         { "MagickNetWrap.GetEmbeddedForRawFile", async () => { var (ok, item) = await MagickNetWrap.GetEmbeddedForRawFile(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "MagickNetWrap.GetHq", async () => { var (ok, item) = MagickNetWrap.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); await Task.CompletedTask; return ok; } },
+                        { "MagickNetWrap.GetHq", async () => { var (ok, item) = await MagickNetWrap.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
                         { "MagicScalerWrap.GetResized", async () => { var (ok, item) = await MagicScalerWrap.GetResized(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
                         { "GifReader.GetFirstFrameFullSize", async () => { var (ok, item) = await GifReader.GetFirstFrameFullSize(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
                         { "GifReader.GetHq", async () => { var (ok, item) = await GifReader.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },

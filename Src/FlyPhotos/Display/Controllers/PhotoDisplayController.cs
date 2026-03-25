@@ -265,7 +265,7 @@ internal partial class PhotoDisplayController
                             image.Preview?.Origin == Origin.Disk)
                         {
                             var (actualWidth, actualHeight) = image.GetActualSize();
-                            await DiskCacherWithSqlite.Instance.PutInCache(image.FilePath, image.Preview.Bitmap, (int)Math.Round(actualWidth), (int)Math.Round(actualHeight));
+                            await DiskCacherWithSqlite.Instance.PutInCache(image.FilePath, image.Preview.Bitmap, (int)Math.Round(actualWidth), (int)Math.Round(actualHeight), image.Preview.Rotation);
                         }
                     }
                     finally { _diskCacheTaskThrottler.Release(); }

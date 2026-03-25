@@ -189,6 +189,12 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
                     _canvasViewState.Rotation = imageRotation;
                     _originalImageRotation = imageRotation;
                 }
+                else
+                {
+                    _canvasViewState.Rotation -= _originalImageRotation;
+                    _canvasViewState.Rotation += imageRotation;
+                    _originalImageRotation = imageRotation;
+                }
                 SetViewFromPrevious(oldImageSize, imageSize, canvasSize);
                 break;
 

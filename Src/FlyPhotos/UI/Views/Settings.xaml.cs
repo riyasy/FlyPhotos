@@ -89,6 +89,7 @@ internal sealed partial class Settings
         ComboPanZoomNavBehaviour.SelectedIndex = GetIndexForPanZoomBehaviour(AppConfig.Settings.PanZoomBehaviourOnNavigation);
         ButtonEnableAutoHideMouse.IsOn = AppConfig.Settings.AutoHideMouse;
         ButtonEnableExternalShortcut.IsOn = AppConfig.Settings.ShowExternalAppShortcuts;
+        ButtonDecodeRawData.IsOn = AppConfig.Settings.DecodeRawData;
 
         MainLayout.KeyDown += MainLayout_OnKeyDown;
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
@@ -115,6 +116,7 @@ internal sealed partial class Settings
         ComboPanZoomNavBehaviour.SelectionChanged += ComboPanZoomNavBehaviour_OnSelectionChanged;
         ButtonEnableAutoHideMouse.Toggled += ButtonEnableAutoHideMouse_OnToggled;
         ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
+        ButtonDecodeRawData.Toggled += ButtonDecodeRawData_OnToggled;
 
         // Initialize codec list view
         ListViewCodecs.ItemsSource = CodecDiscovery.GetAllCodecs();
@@ -162,6 +164,12 @@ internal sealed partial class Settings
             ? new Image { Source = bmp, Width = 32, Height = 32 }
             : new FontIcon { Glyph = "\uED35", FontSize = 32 }; // Default icon
         
+    }
+
+    private async void ButtonDecodeRawData_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.DecodeRawData = ButtonDecodeRawData.IsOn;
+        await AppConfig.SaveAsync();
     }
 
     private async void ButtonEnableAutoHideMouse_OnToggled(object sender, RoutedEventArgs e)
@@ -315,6 +323,13 @@ internal sealed partial class Settings
     {
         AppConfig.Settings.CacheSizeOneSideHqImages = (int)SliderHighResCacheSize.Value;
         await AppConfig.SaveAsync();
+    }
+
+    private async void ButtonClearDiskCache_OnClick(object sender, RoutedEventArgs e)
+    {
+        ButtonClearDiskCache.IsEnabled = false;
+        await DiskCacherWithSqlite.Instance.ClearAllAsync();
+        ButtonClearDiskCache.IsEnabled = true;
     }
 
     private void ButtonOpenLog_OnClick(object sender, RoutedEventArgs e)

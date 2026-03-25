@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json.Serialization;
 using FlyPhotos.Core.Model;
 using Microsoft.UI.Xaml;
@@ -73,6 +73,7 @@ public class AppSettings
     public string ExternalApp4 { get; set; } = string.Empty;
     // Show zoom percentage overlay in the center of the photo display
     public bool ShowZoomPercent { get; set; } = true;
+    public bool DecodeRawData { get; set; } = false;
     public string Language { get; set; } = "Default";
     public bool RememberLastWindowState { get; set; } = false;
     public string WindowState { get; set; } = "";
