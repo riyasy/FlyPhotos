@@ -154,7 +154,7 @@ public class ShellAppProvider
         };
 
         // Get the unplated, high-quality icon directly from the Windows Shell by AUMID.
-        var rawIcon = await Task.Run(() => Infra.Interop.NativeWrapper.GetUwpAppIcon(aumid));
+        var rawIcon = await Task.Run(() => NativeWrapper.GetUwpAppIcon(aumid));
         if (rawIcon != null)
         {
             app.RawIconData = rawIcon;

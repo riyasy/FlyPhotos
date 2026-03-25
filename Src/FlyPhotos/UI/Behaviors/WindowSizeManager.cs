@@ -366,7 +366,6 @@ public sealed partial class WindowSizeManager : IDisposable
         _monitor.WindowMessageReceived -= OnWindowMessage;
         _monitor.Dispose();
         AppWindow.Changed -= OnAppWindowChanged;
-        GC.SuppressFinalize(this);
     }
 
     // ---------------------------------------------------------------------------

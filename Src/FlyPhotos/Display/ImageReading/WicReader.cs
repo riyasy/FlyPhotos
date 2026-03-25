@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Windows.Graphics.DirectX;
 using Windows.Graphics.Imaging;
@@ -229,7 +228,7 @@ internal static class WicReader
             }
             _rawExtensions = rawExts;
         }
-        return _rawExtensions!.Contains(ext);
+        return _rawExtensions.Contains(ext);
     }
 
     /// <summary>

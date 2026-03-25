@@ -75,7 +75,7 @@ internal class CanvasController : ICanvasController
         await _animatorLock.WaitAsync();
         try
         {
-            if (_d2dCanvas != null) _d2dCanvas.Draw -= D2dCanvas_Draw;
+            _d2dCanvas?.Draw -= D2dCanvas_Draw;
             _canvasViewManager?.Dispose();
             _currentRenderer?.Dispose();
             _currentRenderer = null;
