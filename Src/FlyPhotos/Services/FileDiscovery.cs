@@ -93,8 +93,7 @@ internal static class FileDiscovery
             RecurseSubdirectories = false,
             IgnoreInaccessible = true,
             ReturnSpecialDirectories = false,
-            // Optional: Skipping Hidden/System files can further speed up the OS-level scan
-            // AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
+            AttributesToSkip = 0 // Default in .NET is FileAttributes.Hidden | FileAttributes.System
         };
 
         // Directory.GetFiles is highly optimized in .NET 6+ to work with these options
