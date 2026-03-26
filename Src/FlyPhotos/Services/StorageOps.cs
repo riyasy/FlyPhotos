@@ -116,13 +116,14 @@ internal class StorageOps
     /// immediately — see the file header for the full performance rationale.
     /// </summary>
     /// <param name="path">Full path to the image file to open.</param>
+    /// <param name="useBufferForNwPaths">Whether to use mem buffering for files on NW path</param>
     /// <returns>
     /// A native <see cref="IRandomAccessStream"/> ready for Win2D / WIC decoding.
     /// The caller is responsible for disposing this stream.
     /// </returns>
-    public static async Task<IRandomAccessStream> GetWin2DPerformantStream(string path)
+    public static async Task<IRandomAccessStream> GetWin2DPerformantStream(string path, bool useBufferForNwPaths = true)
     {
-        if (ShouldBufferFile(path))
+        if (useBufferForNwPaths && ShouldBufferFile(path))
         {
             var memStream = new InMemoryRandomAccessStream();
             try

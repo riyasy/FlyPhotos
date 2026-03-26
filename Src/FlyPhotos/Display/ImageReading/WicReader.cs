@@ -57,7 +57,7 @@ internal static class WicReader
     {
         try
         {
-            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
+            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath, false);
 
             // Auto-detect format — no codec ID needed.
             var decoder = await BitmapDecoder.CreateAsync(stream);
@@ -265,7 +265,7 @@ internal static class WicReader
     {
         try
         {
-            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
+            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath, false);
             var decoder = await BitmapDecoder.CreateAsync(stream);
             // OrientedPixelWidth/Height account for EXIF rotation automatically —
             // no need to read the property bag and swap manually.
