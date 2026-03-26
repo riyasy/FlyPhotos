@@ -112,8 +112,10 @@ HRESULT ShellUtility::GetFileListFromExplorerWindow(std::vector<std::wstring>& a
         // Get the HWND of the shell browser's view. This corresponds to the active tab.
         HWND hwndShellBrowser = nullptr;
         hr = psb->GetWindow(&hwndShellBrowser);
-        // If this handle doesn't match the active tab handle we found earlier, it's not the right view.
-        if (FAILED(hr) || hwndShellBrowser != hwndActiveTab)
+        // FIX: On modern Windows 11 Explorer, hwndActiveTab is a child of hwndShellBrowser
+        // rather than being the same window. Accept both the direct equality case (older Explorer)
+        // and the parent-child case (Windows 11 Explorer) to avoid skipping the correct window.
+        if (FAILED(hr) || (hwndShellBrowser != hwndActiveTab && !IsChild(hwndShellBrowser, hwndActiveTab)))
         {
             psb->Release();
             continue;
@@ -134,9 +136,10 @@ HRESULT ShellUtility::GetFileListFromExplorerWindow(std::vector<std::wstring>& a
             continue;
 
         // Retrieve all items in the folder view as a modern IShellItemArray.
-        // This replaces the legacy IShellFolder and IEnumIDList approach.
+        // FIX: SVGIO_FLAG_VIEWORDER is a modifier flag and must be combined with a base scope.
+        // Using it alone results in undefined behavior and silent empty results on some Explorer views.
         IShellItemArray* psia = nullptr;
-        hr = pfv->Items(SVGIO_FLAG_VIEWORDER, IID_IShellItemArray, (void**)&psia);
+        hr = pfv->Items(SVGIO_ALLVIEW | SVGIO_FLAG_VIEWORDER, IID_IShellItemArray, (void**)&psia);
         pfv->Release();
         if (FAILED(hr))
             continue;
@@ -179,5 +182,9 @@ HRESULT ShellUtility::GetFileListFromExplorerWindow(std::vector<std::wstring>& a
     }
 
     psw->Release();
-    return hr;
+
+    // FIX: Do not return hr here. After the loop, hr holds the result of the last
+    // GetDisplayName() call, which may be a failure code from the final item even
+    // if all other items succeeded. Return a result that reflects the overall outcome.
+    return arr.empty() ? E_FAIL : S_OK;
 }
