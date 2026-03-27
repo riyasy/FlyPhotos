@@ -1,0 +1,22 @@
+[package]
+name = "fly_rust_bridge"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# Version 0.7 doesn't use the 'develop' or 'jpeg' features anymore
+rawler = "0.7" 
+libc = "0.2"
+rayon = "1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+# Highly recommended for a Rust cdylib consumed by C#:
+panic = "abort"
+strip = true
+
