@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
@@ -58,9 +59,9 @@ internal static class ImageReader
                         if (!AppConfig.Settings.OpenExitZoom)
                             if (NativeHeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         if (NativeHeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                        if (CodecDiscovery.HasWicSupport(extension))
+                        if (CodecDiscovery.IsWicSupported(extension))
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
-                        if (CodecDiscovery.HasImageMagickSupport(extension))
+                        if (CodecDiscovery.IsMagickSupported(extension))
                             if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp4)) return retBmp4;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
@@ -69,9 +70,9 @@ internal static class ImageReader
                         if (!AppConfig.Settings.OpenExitZoom)
                             if (NativeHeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         if (await NativeAvifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                        if (CodecDiscovery.HasWicSupport(extension))
+                        if (CodecDiscovery.IsWicSupported(extension))
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
-                        if (CodecDiscovery.HasImageMagickSupport(extension))
+                        if (CodecDiscovery.IsMagickSupported(extension))
                             if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp4)) return retBmp4;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
@@ -117,17 +118,18 @@ internal static class ImageReader
                     {
                         if (!AppConfig.Settings.OpenExitZoom)
                         {
-                            if (CodecDiscovery.HasWicSupport(extension))
+                            if (CodecDiscovery.IsWicSupported(extension))
                                 if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                            if (CodecDiscovery.HasImageMagickRawFileSupport(extension))
+                            if (CodecDiscovery.IsMagickRaw(extension))
                                 if (await MagickNetWrap.GetEmbeddedForRawFile(d2dCanvas, path) is (true, { } retBmp1)) return retBmp1;
                         }
 
-                        if (CodecDiscovery.HasWicSupport(extension))
-                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (CodecDiscovery.HasImageMagickSupport(extension))
-                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp1)) return retBmp1;
-
+                        if (await GetHqFromRawDecoderPipeLine(d2dCanvas, path, extension) is (true, { } rawResult)) return rawResult;
+                        // Non-RAW fallback
+                        if (CodecDiscovery.IsWicNonRaw(extension))
+                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmpW)) return retBmpW;
+                        if (CodecDiscovery.IsMagickNonRaw(extension))
+                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmpM)) return retBmpM;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
             }
@@ -167,7 +169,7 @@ internal static class ImageReader
                 case ".AVIF":
                     {
                         if (NativeHeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (CodecDiscovery.HasImageMagickSupport(extension))
+                        if (CodecDiscovery.IsMagickSupported(extension))
                             if (await MagickNetWrap.GetResized(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                         return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
                     }
@@ -204,13 +206,13 @@ internal static class ImageReader
                     }
                 default:
                     {
-                        if (CodecDiscovery.HasWicSupport(extension))
+                        if (CodecDiscovery.IsWicSupported(extension))
                             if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (CodecDiscovery.HasImageMagickRawFileSupport(extension))
+                        if (CodecDiscovery.IsMagickRaw(extension))
                             if (await MagickNetWrap.GetEmbeddedForRawFile(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
-                        if (CodecDiscovery.HasWicSupport(extension))
+                        if (CodecDiscovery.IsWicSupported(extension))
                             if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                        if (CodecDiscovery.HasImageMagickSupport(extension))
+                        if (CodecDiscovery.IsMagickSupported(extension))
                             if (await MagickNetWrap.GetResized(d2dCanvas, path) is (true, { } retBmp4)) return retBmp4;
                         return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
                     }
@@ -245,18 +247,18 @@ internal static class ImageReader
                 case ".HIF":
                     {
                         if (NativeHeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (CodecDiscovery.HasWicSupport(extension))
+                        if (CodecDiscovery.IsWicSupported(extension))
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                        if (CodecDiscovery.HasImageMagickSupport(extension))
+                        if (CodecDiscovery.IsMagickSupported(extension))
                             if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
                 case ".AVIF":
                     {
                         if (await NativeAvifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (CodecDiscovery.HasWicSupport(extension))
+                        if (CodecDiscovery.IsWicSupported(extension))
                             if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                        if (CodecDiscovery.HasImageMagickSupport(extension))
+                        if (CodecDiscovery.IsMagickSupported(extension))
                             if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
@@ -299,10 +301,12 @@ internal static class ImageReader
                     }
                 default:
                     {
-                        if (CodecDiscovery.HasWicSupport(extension))
-                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (CodecDiscovery.HasImageMagickSupport(extension))
-                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
+                        if (await GetHqFromRawDecoderPipeLine(d2dCanvas, path, extension) is (true, { } rawResult)) return rawResult;
+                        // Non-RAW fallback
+                        if (CodecDiscovery.IsWicNonRaw(extension))
+                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmpW)) return retBmpW;
+                        if (CodecDiscovery.IsMagickNonRaw(extension))
+                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmpM)) return retBmpM;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
             }
@@ -324,5 +328,33 @@ internal static class ImageReader
     public static DisplayItem GetLoadingIndicator()
     {
         return new PreviewDisplayItem(_indicators.Loading, Origin.ErrorScreen);
+    }
+
+    /// <summary>
+    /// Tries each RAW decoder in the configured priority order (Rawler → WIC → Magick).
+    /// Returns empty if no decoder succeeds.
+    /// </summary>
+    private static async Task<(bool, HqDisplayItem)> GetHqFromRawDecoderPipeLine(
+        CanvasControl d2dCanvas, string path, string extension)
+    {
+        foreach (var decoder in AppConfig.Settings.RawDecoderPriority)
+        {
+            switch (decoder)
+            {
+                case RawDecoder.Rawler:
+                    if (CodecDiscovery.IsRawlerRaw(extension))
+                        if (RawlerWrapper.GetHq(d2dCanvas, path) is (true, { } bmp1)) return (true, bmp1);
+                    break;
+                case RawDecoder.Wic:
+                    if (CodecDiscovery.IsWicRaw(extension))
+                        if (await WicReader.GetHq(d2dCanvas, path, true) is (true, { } bmp2)) return (true, bmp2);
+                    break;
+                case RawDecoder.Magick:
+                    if (CodecDiscovery.IsMagickRaw(extension))
+                        if (await MagickNetWrap.GetHq(d2dCanvas, path, true) is (true, { } bmp3)) return (true, bmp3);
+                    break;
+            }
+        }
+        return (false, HqDisplayItem.Empty());
     }
 }

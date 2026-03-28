@@ -20,3 +20,5 @@
 /Src/WicImageFileReaderNative/WicImageFileReaderNative.vcxproj.user
 global.json
 win-ARM64.pubxml.user
+/Src/fly_rust_bridge/target
+/Src/fly_rust_bridge/Cargo.lock

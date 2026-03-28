@@ -124,16 +124,16 @@ internal static class WicReader
     /// </summary>
     /// <param name="ctrl">The Win2D CanvasControl used for creating the CanvasBitmap.</param>
     /// <param name="inputPath">The absolute path to the image file.</param>
+    /// <param name="isRaw">Is a camera RAW file</param>
     /// <returns>A tuple indicating success and the resulting high-quality HqDisplayItem.</returns>
-    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath, bool isRaw = false)
     {
         try
         {
             var ext = Path.GetExtension(inputPath);
-            var isRawFile = CheckRawCodecSupport(ext);
 
             // If the extension is not present in MICROSOFT RAW DECODER OR NIKON NEF DECODER
-            if (!isRawFile)
+            if (!isRaw)
             {
                 using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
                 var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
@@ -198,37 +198,6 @@ internal static class WicReader
             Logger.Error(ex);
             return (false, HqDisplayItem.Empty());
         }
-    }
-
-    /// <summary>
-    /// A cached set of supported RAW extensions discovered initially from the system's WIC decoders.
-    /// </summary>
-    private static HashSet<string>? _rawExtensions;
-
-    /// <summary>
-    /// Determines whether the given file extension is a RAW image format supported by either the
-    /// Microsoft RAW Image Decoder or the Nikon .NEF Raw File Decoder. 
-    /// Extensively iterations over all WIC extensions the first time it is triggered to construct an O(1) hashed validation pass.
-    /// </summary>
-    /// <param name="ext">The file extension (e.g., ".nef") to check.</param>
-    /// <returns>True if the extension is associated with a supported RAW decoder; otherwise, false.</returns>
-    private static bool CheckRawCodecSupport(string ext)
-    {
-        if (_rawExtensions == null)
-        {
-            var rawExts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var codec in CodecDiscovery.GetAllCodecs())
-            {
-                var isMsRaw = codec.FriendlyName.Equals(MS_RAW_DECODER, StringComparison.OrdinalIgnoreCase);
-                var isNikonNef = codec.FriendlyName.Equals(NIKON_NEF_DECODER, StringComparison.OrdinalIgnoreCase);
-                if (isMsRaw || isNikonNef)
-                {
-                    rawExts.UnionWith(codec.FileExtensions);
-                }
-            }
-            _rawExtensions = rawExts;
-        }
-        return _rawExtensions.Contains(ext);
     }
 
     /// <summary>

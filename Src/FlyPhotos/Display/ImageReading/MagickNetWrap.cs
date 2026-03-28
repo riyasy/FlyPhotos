@@ -115,7 +115,7 @@ internal static class MagickNetWrap
     /// only falls back to a full RAW sensor decode if the preview is unavailable.
     /// Alpha is premultiplied inside Magick before export to avoid two SoftwareBitmap copies.
     /// </summary>
-    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl d2dCanvas, string path)
+    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl d2dCanvas, string path, bool isRaw = false)
     {
         try
         {
@@ -124,7 +124,7 @@ internal static class MagickNetWrap
             // We skip the small EXIF thumbnail here — HQ display warrants the best quality available
             // without a full decode.
             var ext = Path.GetExtension(path);
-            if (!AppConfig.Settings.DecodeRawData && CodecDiscovery.HasImageMagickRawFileSupport(ext))
+            if (isRaw && !AppConfig.Settings.DecodeRawData)
             {
                 var (success, bitmap) = await LoadEmbeddedPreviewAsync(d2dCanvas, path);
                 if (success)

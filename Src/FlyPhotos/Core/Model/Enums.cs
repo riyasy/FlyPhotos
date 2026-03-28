@@ -71,3 +71,5 @@ public enum PanZoomBehaviourOnNavigation
     RememberPerPhoto,
     RetainFromLastPhoto
 }
+
+public enum RawDecoder { Rawler, Wic, Magick }

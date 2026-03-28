@@ -11,9 +11,19 @@ internal static class CodecDiscovery
 {
     private static readonly List<CodecInfo> _codecInfoList;
     private static readonly HashSet<string> _wicExtensions = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly HashSet<string> _wicRawExtensions = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly HashSet<string> _wicNonRawExtensions = new(StringComparer.OrdinalIgnoreCase);
     private static readonly HashSet<string> _flyExtensions = new(StringComparer.OrdinalIgnoreCase);
+
     private static readonly HashSet<string> _imageMagickExtensions = new(StringComparer.OrdinalIgnoreCase);
     private static readonly HashSet<string> _imageMagickRawExtensions = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly HashSet<string> _imageMagickNonRawExtensions = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly HashSet<string> _rawlerRawExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".3fr",".ari",".arw",".bay",".cap",
+        ".cr2",".cr3",".crw",
+        ".nef",".nrw"
+    };
 
     public static HashSet<string> SupportedExtensions { get; } = new(StringComparer.OrdinalIgnoreCase);
 
@@ -60,6 +70,8 @@ internal static class CodecDiscovery
         ".x3f",".dng"
     ];
 
+
+
     // If no WIC codec (or any Fly custom codec) is found for a file extension,
     // we can check this list to see if ImageMagick supports it.
     // This is not an exhaustive list of ImageMagick supported formats.
@@ -73,7 +85,15 @@ internal static class CodecDiscovery
         var imageMagickCodecInfo = GetImageMagickCodecs(ProbableImageMagickExtensions);
 
         foreach (var codecInfo in wicCodecInfos)
+        {
             _wicExtensions.UnionWith(codecInfo.FileExtensions);
+            if (codecInfo.FriendlyName.Contains("RAW", StringComparison.OrdinalIgnoreCase))
+                _wicRawExtensions.UnionWith(codecInfo.FileExtensions);
+        }
+        foreach (var ext in _wicExtensions)
+            if (!_wicRawExtensions.Contains(ext))
+                _wicNonRawExtensions.Add(ext);
+                
         foreach (var codecInfo in flyCodecInfos)
             _flyExtensions.UnionWith(codecInfo.FileExtensions);
         _imageMagickExtensions.UnionWith(imageMagickCodecInfo.FileExtensions);
@@ -96,15 +116,27 @@ internal static class CodecDiscovery
         foreach (var ext in ProbableImageMagickRawExtensions)
             if (_imageMagickExtensions.Contains(ext))
                 _imageMagickRawExtensions.Add(ext);
-        
+
+        foreach(var ext in _imageMagickExtensions)
+            if (!_imageMagickRawExtensions.Contains(ext))
+                _imageMagickNonRawExtensions.Add(ext);
+
 
     }
 
-    public static bool HasWicSupport(string extension) => _wicExtensions.Contains(extension);
+    public static bool IsWicSupported(string extension) => _wicExtensions.Contains(extension);
 
-    public static bool HasImageMagickSupport(string extension) => _imageMagickExtensions.Contains(extension);
+    public static bool IsWicRaw(string extension) => _wicRawExtensions.Contains(extension);
 
-    public static bool HasImageMagickRawFileSupport(string extension) => _imageMagickRawExtensions.Contains(extension);
+    public static bool IsWicNonRaw(string extension) => _wicNonRawExtensions.Contains(extension);
+
+    public static bool IsMagickSupported(string extension) => _imageMagickExtensions.Contains(extension);
+
+    public static bool IsMagickRaw(string extension) => _imageMagickRawExtensions.Contains(extension);
+
+    public static bool IsMagickNonRaw(string extension) => _imageMagickNonRawExtensions.Contains(extension);
+
+    public static bool IsRawlerRaw(string extension) => _rawlerRawExtensions.Contains(extension);
 
     public static IReadOnlyList<CodecInfo> GetAllCodecs()
     {
