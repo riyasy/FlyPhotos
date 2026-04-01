@@ -101,6 +101,8 @@ public sealed partial class FlyProfilerWindow : Window
                         { "IcoReader.GetHq", async () => { var (ok, item) = await IcoReader.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
                         { "NativeHeifReader.GetEmbedded", async () => { var (ok, item) = NativeHeifReader.GetEmbedded(TestCanvas, imagePath); if (ok) item?.Dispose(); await Task.CompletedTask; return ok; } },
                         { "NativeHeifReader.GetHq", async () => { var (ok, item) = NativeHeifReader.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); await Task.CompletedTask; return ok; } },
+                        { "RawlerWrapper.GetEmbeddedPreview", async () => { var (ok, item) = RawlerWrapper.GetEmbeddedPreview(TestCanvas, imagePath); if (ok) item?.Dispose(); await Task.CompletedTask; return ok; } },
+                        { "RawlerWrapper.GetHq", async () => { var (ok, item) = RawlerWrapper.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); await Task.CompletedTask; return ok; } },
                     };
 
                     var outRow = new List<string>(new string[headers.Length]) { [0] = imagePath };

@@ -345,11 +345,11 @@ internal static class ImageReader
                     if (CodecDiscovery.IsRawlerRaw(extension))
                         if (RawlerWrapper.GetHq(d2dCanvas, path) is (true, { } bmp1)) return (true, bmp1);
                     break;
-                case RawDecoder.Wic:
+                case RawDecoder.WIC:
                     if (CodecDiscovery.IsWicRaw(extension))
                         if (await WicReader.GetHq(d2dCanvas, path, true) is (true, { } bmp2)) return (true, bmp2);
                     break;
-                case RawDecoder.Magick:
+                case RawDecoder.ImageMagick:
                     if (CodecDiscovery.IsMagickRaw(extension))
                         if (await MagickNetWrap.GetHq(d2dCanvas, path, true) is (true, { } bmp3)) return (true, bmp3);
                     break;

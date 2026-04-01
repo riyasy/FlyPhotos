@@ -14,7 +14,7 @@ namespace FlyPhotos.Display.ImageReading;
 /// Wraps the Rust-based rawler_bridge DLL for high-performance reading of RAW image files.
 /// This utilizes the rawler Rust crate to extract both embedded preview images and full high-quality renders.
 /// </summary>
-internal static partial class RawlerWrapper
+internal static unsafe partial class RawlerWrapper
 {
     private const string DllName = "fly_rust_bridge.dll";
 
@@ -31,32 +31,48 @@ internal static partial class RawlerWrapper
     private static partial void free_rust_buffer(IntPtr ptr, UIntPtr size);
 
     /// <summary>
+    /// Safely handles copying the unmanaged Rust pointer into a Win2D CanvasBitmap 
+    /// using modern, zero-initialization vectorized memory copying.
+    /// Ensures the unmanaged pointer is ALWAYS freed.
+    /// </summary>
+    private static CanvasBitmap? CreateBitmapAndFree(CanvasControl ctrl, IntPtr ptr, int width, int height)
+    {
+        if (ptr == IntPtr.Zero)
+            return null;
+
+        int totalBytes = width * height * 4;
+        try
+        {
+            // This prevents .NET from wasting CPU cycles zeroing out up to 100MB+ of memory.
+            byte[] bgraPixels = GC.AllocateUninitializedArray<byte>(totalBytes);
+            // Span.CopyTo uses heavily optimized SIMD memmove instructions under the hood.
+            new ReadOnlySpan<byte>((void*)ptr, totalBytes).CopyTo(bgraPixels);
+            return CanvasBitmap.CreateFromBytes(ctrl, bgraPixels, width, height, DirectXPixelFormat.B8G8R8A8UIntNormalized);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+        finally
+        {
+            // (uint) cast ensures that even if width*height*4 overflows to a negative signed int, 
+            // the bitwise memory size matches the exact usize Rust used to allocate it.
+            free_rust_buffer(ptr, (UIntPtr)(uint)totalBytes);
+        }
+    }
+
+    /// <summary>
     /// Shared internal logic to extract the embedded JPEG preview and related metadata from a RAW file.
     /// </summary>
     private static (bool success, CanvasBitmap? bitmap, int rotation, int primaryWidth, int primaryHeight) LoadEmbeddedPreview(CanvasControl ctrl, string inputPath)
     {
         IntPtr ptr = get_embedded_preview(inputPath, out var width, out var height, out var rotation, out var primaryWidth, out var primaryHeight);
 
-        if (ptr == IntPtr.Zero)
-            return (false, null, 0, 0, 0);
+        var bitmap = CreateBitmapAndFree(ctrl, ptr, width, height);
 
-        int totalBytes = width * height * 4;
-        try
-        {
-            byte[] bgraPixels = new byte[totalBytes];
-            Marshal.Copy(ptr, bgraPixels, 0, totalBytes);
-
-            var canvasBitmap = CanvasBitmap.CreateFromBytes(ctrl, bgraPixels, width, height, DirectXPixelFormat.B8G8R8A8UIntNormalized);
-            return (true, canvasBitmap, rotation, primaryWidth, primaryHeight);
-        }
-        catch (Exception)
-        {
-            return (false, null, 0, 0, 0);
-        }
-        finally
-        {
-            free_rust_buffer(ptr, (UIntPtr)totalBytes);
-        }
+        return bitmap != null
+            ? (true, bitmap, rotation, primaryWidth, primaryHeight)
+            : (false, null, 0, 0, 0);
     }
 
     /// <summary>
@@ -92,25 +108,10 @@ internal static partial class RawlerWrapper
         // Proceed with full High-Quality decode
         IntPtr ptr = get_hq_image(inputPath, out var width, out var height, out var rotation2);
 
-        if (ptr == IntPtr.Zero)
-            return (false, HqDisplayItem.Empty());
+        var canvasBitmap = CreateBitmapAndFree(ctrl, ptr, width, height);
 
-        int totalBytes = width * height * 4;
-        try
-        {
-            byte[] bgraPixels = new byte[totalBytes];
-            Marshal.Copy(ptr, bgraPixels, 0, totalBytes);
-
-            var canvasBitmap = CanvasBitmap.CreateFromBytes(ctrl, bgraPixels, width, height, DirectXPixelFormat.B8G8R8A8UIntNormalized);
-            return (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk, rotation2));
-        }
-        catch (Exception)
-        {
-            return (false, HqDisplayItem.Empty());
-        }
-        finally
-        {
-            free_rust_buffer(ptr, (UIntPtr)totalBytes);
-        }
+        return canvasBitmap != null
+            ? (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk, rotation2))
+            : (false, HqDisplayItem.Empty());
     }
 }

@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:FlyPhotos.Infra.Configuration"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:model="using:FlyPhotos.Core.Model"
     xmlns:ui="using:CommunityToolkit.WinUI"
@@ -175,13 +176,57 @@
                             HeaderIcon="{ui:FontIcon Glyph=&#xE80A;}">
                             <ToggleSwitch x:Name="ButtonShowCheckeredBackground" />
                         </controls:SettingsCard>
-                        <controls:SettingsCard
+                        <controls:SettingsExpander
                             x:Name="SettingsCardDecodeRawData"
                             x:Uid="SettingsCardDecodeRawData"
                             Margin="0,5,0,0"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE722;}">
                             <ToggleSwitch x:Name="ButtonDecodeRawData" />
-                        </controls:SettingsCard>
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardDecoderPriority"
+                                    Description="Fly will try to use the decoders in the order they are listed here. Rawler is the fastest. ImageMagick has max compatibility. WIC uses default and third party Codecs installed in Windows. But in WIC, some third party codecs can skip raw decoding and supply embedded JPEG itself as RAW."
+                                    Header="Adjust Raw Decoder Priority (Drag to Reorder)">
+                                    <ListView
+                                        x:Name="PriorityListView"
+                                        Width="Auto"
+                                        HorizontalAlignment="Left"
+                                        AllowDrop="True"
+                                        Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CanDragItems="True"
+                                        CanReorderItems="True"
+                                        CornerRadius="8"
+                                        ItemsSource="{x:Bind local:AppConfig.Settings.RawDecoderPriorityAsStrings}"
+                                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                        ScrollViewer.HorizontalScrollMode="Enabled"
+                                        ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                        ScrollViewer.VerticalScrollMode="Disabled">
+                                        <ListView.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <ItemsStackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ListView.ItemsPanel>
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <StackPanel
+                                                    Padding="10"
+                                                    Background="Transparent"
+                                                    Orientation="Horizontal">
+                                                    <!--  We can keep the same icon or change it to a horizontal drag handle  -->
+                                                    <FontIcon
+                                                        Margin="0,0,12,0"
+                                                        FontSize="16"
+                                                        Glyph="&#xE76F;" />
+                                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
                         <TextBlock
                             x:Uid="TextBlockUIControls"
                             Margin="0,20,0,0"

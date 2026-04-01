@@ -117,6 +117,7 @@ internal sealed partial class Settings
         ButtonEnableAutoHideMouse.Toggled += ButtonEnableAutoHideMouse_OnToggled;
         ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
         ButtonDecodeRawData.Toggled += ButtonDecodeRawData_OnToggled;
+        AppConfig.Settings.RawDecoderPriorityAsStrings.CollectionChanged += RawDecoderPriorityAsStrings_CollectionChanged;
 
         // Initialize codec list view
         ListViewCodecs.ItemsSource = CodecDiscovery.GetAllCodecs();
@@ -134,6 +135,11 @@ internal sealed partial class Settings
 
         (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumWidth = 600;
         (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumHeight = 600;
+    }
+
+    private async void RawDecoderPriorityAsStrings_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        await AppConfig.SaveAsync();
     }
 
     private async void ButtonEnableExternalShortcut_OnToggled(object sender, RoutedEventArgs e)

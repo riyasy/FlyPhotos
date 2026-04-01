@@ -1,5 +1,8 @@
+
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text.Json.Serialization;
 using FlyPhotos.Core.Model;
 using Microsoft.UI.Xaml;
@@ -81,19 +84,14 @@ public class AppSettings
     public bool AllowMultiInstance { get; set; } = false;
 
     [JsonPropertyName("RawDecoderPriority")]
-    public List<string> RawDecoderPriorityAsStrings { get; set; } =
-        [nameof(RawDecoder.Rawler), nameof(RawDecoder.Wic), nameof(RawDecoder.Magick)];
+    public ObservableCollection<string> RawDecoderPriorityAsStrings { get; set; } =
+        [nameof(RawDecoder.Rawler), nameof(RawDecoder.WIC), nameof(RawDecoder.ImageMagick)];
 
     [JsonIgnore]
     [field: JsonIgnore]
-    public List<RawDecoder> RawDecoderPriority
-    {
-        get
-        {
-            field ??= RawDecoderPriorityAsStrings
-                .ConvertAll(s => Enum.Parse<RawDecoder>(s, true));
-            return field;
-        }
-    }
+    public List<RawDecoder> RawDecoderPriority =>
+        RawDecoderPriorityAsStrings
+            .Select(s => Enum.Parse<RawDecoder>(s, true))
+            .ToList();
 
 }

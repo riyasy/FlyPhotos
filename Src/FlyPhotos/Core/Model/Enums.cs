@@ -72,4 +72,4 @@ public enum PanZoomBehaviourOnNavigation
     RetainFromLastPhoto
 }
 
-public enum RawDecoder { Rawler, Wic, Magick }
+public enum RawDecoder { Rawler, WIC, ImageMagick }
