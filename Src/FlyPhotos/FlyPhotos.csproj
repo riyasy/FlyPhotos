@@ -20,7 +20,7 @@
 		<ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
 		<PublishAot>true</PublishAot>
 		<DefaultLanguage>en-US</DefaultLanguage>
-		<SatelliteResourceLanguages>en-US;de-DE;fr-FR;es-ES;ja-JP;ko-KR;it-IT;pl-PL;nl-NL;sv-SE;fi-FI;zh-TW;ml-IN</SatelliteResourceLanguages>
+		<SatelliteResourceLanguages>en-US;de-DE;fr-FR;es-ES;ja-JP;ko-KR;it-IT;pl-PL;nl-NL;sv-SE;fi-FI;zh-CN;zh-TW;ml-IN</SatelliteResourceLanguages>
 		<!-- InvariantGlobalization>true</InvariantGlobalization -->
 		<GenerateTestArtifacts>True</GenerateTestArtifacts>
 		<NoWarn>$(NoWarn);CA1416</NoWarn>
