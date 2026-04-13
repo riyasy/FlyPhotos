@@ -1,9 +1,13 @@
 #nullable enable
 using FlyPhotos.Core.Model;
+using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Infra.Interop;
 using ImageMagick;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using RawlerBridge = FlyPhotos.Infra.Interop.RawlerBridge;
 
 namespace FlyPhotos.Services;
 
@@ -18,12 +22,7 @@ internal static class CodecDiscovery
     private static readonly HashSet<string> _imageMagickExtensions = new(StringComparer.OrdinalIgnoreCase);
     private static readonly HashSet<string> _imageMagickRawExtensions = new(StringComparer.OrdinalIgnoreCase);
     private static readonly HashSet<string> _imageMagickNonRawExtensions = new(StringComparer.OrdinalIgnoreCase);
-    private static readonly HashSet<string> _rawlerRawExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".3fr",".ari",".arw",".bay",".cap",
-        ".cr2",".cr3",".crw",
-        ".nef",".nrw"
-    };
+    private static readonly HashSet<string> _rawlerRawExtensions = new(StringComparer.OrdinalIgnoreCase);
 
     public static HashSet<string> SupportedExtensions { get; } = new(StringComparer.OrdinalIgnoreCase);
 
@@ -93,7 +92,7 @@ internal static class CodecDiscovery
         foreach (var ext in _wicExtensions)
             if (!_wicRawExtensions.Contains(ext))
                 _wicNonRawExtensions.Add(ext);
-                
+
         foreach (var codecInfo in flyCodecInfos)
             _flyExtensions.UnionWith(codecInfo.FileExtensions);
         _imageMagickExtensions.UnionWith(imageMagickCodecInfo.FileExtensions);
@@ -117,11 +116,11 @@ internal static class CodecDiscovery
             if (_imageMagickExtensions.Contains(ext))
                 _imageMagickRawExtensions.Add(ext);
 
-        foreach(var ext in _imageMagickExtensions)
+        foreach (var ext in _imageMagickExtensions)
             if (!_imageMagickRawExtensions.Contains(ext))
                 _imageMagickNonRawExtensions.Add(ext);
 
-
+        _rawlerRawExtensions.UnionWith(GetRawlerSupportedExtensions());
     }
 
     public static bool IsWicSupported(string extension) => _wicExtensions.Contains(extension);
@@ -144,6 +143,40 @@ internal static class CodecDiscovery
     }
 
     private static List<CodecInfo> GetWicCodecs() => NativeWrapper.GetWicDecoders();
+
+    /// <summary>
+    /// Calls the Rust DLL to retrieve every RAW extension rawler can decode.
+    /// Rawler returns upper-case strings without a leading dot (e.g. "ARW"),
+    /// so we lower-case them and prepend "."
+    /// </summary>
+    private static IEnumerable<string> GetRawlerSupportedExtensions()
+    {
+        var result = new List<string>();
+        nint formats = RawlerBridge.get_supported_formats(out int size);
+        if (formats == nint.Zero || size <= 0)
+            return result;
+
+        try
+        {
+            for (int i = 0; i < size; i++)
+            {
+                nint strPtr = Marshal.ReadIntPtr(formats, i * IntPtr.Size);
+                string? ext = Marshal.PtrToStringAnsi(strPtr);
+                if (!string.IsNullOrWhiteSpace(ext))
+                    result.Add("." + ext.ToLowerInvariant());
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[CodecDiscovery] Failed to marshal rawler supported formats: {ex}");
+        }
+        finally
+        {
+            RawlerBridge.free_formats_buffer(formats, size);
+        }
+
+        return result;
+    }
 
     private static List<CodecInfo> GetFlyCodecs()
     {

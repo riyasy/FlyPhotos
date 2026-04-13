@@ -618,4 +618,10 @@ Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാ
   <data name="ButtonClearDiskCache.Content" xml:space="preserve">
     <value>ശൂന്യപ്പെടുത്തുക</value>
   </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>ഡ്രാഗ് ചെയ്ത് RAW ഡീകോഡർ മുൻഗണന ക്രമീകരിക്കുക</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC (Windows Imaging Component): സിസ്റ്റം കോഡെക്കുകൾ • Rawler: ഏറ്റവും വേഗം • ImageMagick: മികച്ച അനുയോജ്യത</value>
+  </data>
 </root>

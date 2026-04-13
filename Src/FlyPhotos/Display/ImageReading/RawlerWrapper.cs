@@ -1,51 +1,36 @@
 #nullable enable
 using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Windows.Graphics.DirectX;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
+using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 
 namespace FlyPhotos.Display.ImageReading;
 
 /// <summary>
-/// Wraps the Rust-based rawler_bridge DLL for high-performance reading of RAW image files.
-/// This utilizes the rawler Rust crate to extract both embedded preview images and full high-quality renders.
+/// High-level wrapper around the Rust rawler_bridge DLL.
+/// P/Invoke declarations live in <see cref="Infra.Interop.RawlerBridge"/>; this class contains
+/// only managed orchestration logic.
 /// </summary>
-internal static unsafe partial class RawlerWrapper
+internal static unsafe class RawlerWrapper
 {
-    private const string DllName = "fly_rust_bridge.dll";
-
-    [LibraryImport(DllName, StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    private static partial IntPtr get_hq_image(string path, out int width, out int height, out int rotation);
-
-    [LibraryImport(DllName, StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    private static partial IntPtr get_embedded_preview(string path, out int width, out int height, out int rotation, out int primaryWidth, out int primaryHeight);
-
-    [LibraryImport(DllName)]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    private static partial void free_rust_buffer(IntPtr ptr, UIntPtr size);
-
     /// <summary>
-    /// Safely handles copying the unmanaged Rust pointer into a Win2D CanvasBitmap 
-    /// using modern, zero-initialization vectorized memory copying.
-    /// Ensures the unmanaged pointer is ALWAYS freed.
+    /// Safely copies an unmanaged Rust pixel buffer into a Win2D <see cref="CanvasBitmap"/>
+    /// and unconditionally frees the buffer afterwards.
     /// </summary>
-    private static CanvasBitmap? CreateBitmapAndFree(CanvasControl ctrl, IntPtr ptr, int width, int height)
+    private static CanvasBitmap? CreateBitmapAndFree(CanvasControl ctrl, nint ptr, int width, int height)
     {
-        if (ptr == IntPtr.Zero)
+        if (ptr == nint.Zero)
             return null;
 
         int totalBytes = width * height * 4;
         try
         {
-            // This prevents .NET from wasting CPU cycles zeroing out up to 100MB+ of memory.
+            // AllocateUninitializedArray avoids zeroing potentially 100 MB+ of memory.
             byte[] bgraPixels = GC.AllocateUninitializedArray<byte>(totalBytes);
-            // Span.CopyTo uses heavily optimized SIMD memmove instructions under the hood.
+            // SIMD-optimised memmove via Span.
             new ReadOnlySpan<byte>((void*)ptr, totalBytes).CopyTo(bgraPixels);
             return CanvasBitmap.CreateFromBytes(ctrl, bgraPixels, width, height, DirectXPixelFormat.B8G8R8A8UIntNormalized);
         }
@@ -55,18 +40,20 @@ internal static unsafe partial class RawlerWrapper
         }
         finally
         {
-            // (uint) cast ensures that even if width*height*4 overflows to a negative signed int, 
-            // the bitwise memory size matches the exact usize Rust used to allocate it.
-            free_rust_buffer(ptr, (UIntPtr)(uint)totalBytes);
+            // (uint) cast preserves the exact usize Rust used, even when width*height*4 overflows int.
+            RawlerBridge.free_rust_buffer(ptr, (nuint)(uint)totalBytes);
         }
     }
 
     /// <summary>
     /// Shared internal logic to extract the embedded JPEG preview and related metadata from a RAW file.
     /// </summary>
-    private static (bool success, CanvasBitmap? bitmap, int rotation, int primaryWidth, int primaryHeight) LoadEmbeddedPreview(CanvasControl ctrl, string inputPath)
+    private static (bool success, CanvasBitmap? bitmap, int rotation, int primaryWidth, int primaryHeight)
+        LoadEmbeddedPreview(CanvasControl ctrl, string inputPath)
     {
-        IntPtr ptr = get_embedded_preview(inputPath, out var width, out var height, out var rotation, out var primaryWidth, out var primaryHeight);
+        nint ptr = RawlerBridge.get_embedded_preview(
+            inputPath, out var width, out var height,
+            out var rotation, out var primaryWidth, out var primaryHeight);
 
         var bitmap = CreateBitmapAndFree(ctrl, ptr, width, height);
 
@@ -95,19 +82,17 @@ internal static unsafe partial class RawlerWrapper
     /// </summary>
     public static (bool, HqDisplayItem) GetHq(CanvasControl ctrl, string inputPath)
     {
-        // Check if we should skip full decode and just use the embedded preview
+        // Skip full decode when the user has opted for preview-only mode.
         if (!AppConfig.Settings.DecodeRawData)
         {
             var (success, bitmap, rotation1, _, _) = LoadEmbeddedPreview(ctrl, inputPath);
             if (success && bitmap != null)
                 return (true, new StaticHqDisplayItem(bitmap, Origin.Disk, rotation1));
 
-            // If embedded preview failed, fall through to attempt full RAW decode
+            // Embedded preview unavailable — fall through to full RAW decode.
         }
 
-        // Proceed with full High-Quality decode
-        IntPtr ptr = get_hq_image(inputPath, out var width, out var height, out var rotation2);
-
+        nint ptr = RawlerBridge.get_hq_image(inputPath, out var width, out var height, out var rotation2);
         var canvasBitmap = CreateBitmapAndFree(ctrl, ptr, width, height);
 
         return canvasBitmap != null

@@ -217,6 +217,66 @@ pub extern "C" fn free_rust_buffer(ptr: *mut u8, size: usize) {
     }
 }
 
+/// Returns a heap-allocated array of null-terminated C strings listing every
+/// RAW file extension that rawler can decode (e.g. "ARW\0", "CR2\0", …).
+/// The number of entries is written to `*size`.
+///
+/// All strings are upper-case (as defined by rawler's `SUPPORTED_FILES_EXT`).
+///
+/// # Memory contract
+/// The caller MUST free the returned pointer with `free_formats_buffer(ptr, size)`.
+/// Do NOT call `free_rust_buffer` on this pointer — they use different allocation layouts.
+#[unsafe(no_mangle)]
+pub extern "C" fn get_supported_formats(size: *mut c_int) -> *mut *mut c_char {
+    use rawler::decoders::supported_extensions;
+    use std::ffi::CString;
+
+    let exts = supported_extensions();
+
+    // Allocate each extension as an independent CString on the heap.
+    let ptrs: Vec<*mut c_char> = exts
+        .iter()
+        .map(|s| {
+            // unwrap: rawler extension strings are pure ASCII, no interior NULs
+            CString::new(*s).unwrap().into_raw()
+        })
+        .collect();
+
+    let len = ptrs.len() as c_int;
+
+    // Move the Vec's backing storage onto the heap as a boxed slice.
+    let boxed: Box<[*mut c_char]> = ptrs.into_boxed_slice();
+    let out_ptr = Box::into_raw(boxed) as *mut *mut c_char;
+
+    unsafe {
+        safe_write_int(size, len);
+    }
+
+    out_ptr
+}
+
+/// Frees a pointer previously returned by `get_supported_formats`.
+/// `size` MUST be the same value that was written to the `size` out-param
+/// of `get_supported_formats`.
+#[unsafe(no_mangle)]
+pub extern "C" fn free_formats_buffer(ptr: *mut *mut c_char, size: c_int) {
+    if ptr.is_null() || size <= 0 {
+        return;
+    }
+    unsafe {
+        // Reconstruct the boxed slice so Rust drops it correctly.
+        let slice = slice::from_raw_parts_mut(ptr, size as usize);
+        for p in slice.iter() {
+            if !p.is_null() {
+                // Reclaim each CString so its memory is freed.
+                let _ = std::ffi::CString::from_raw(*p);
+            }
+        }
+        // Drop the outer array.
+        let _ = Box::from_raw(slice as *mut [*mut c_char]);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

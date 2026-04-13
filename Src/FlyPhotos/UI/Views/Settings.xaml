@@ -185,8 +185,7 @@
                             <controls:SettingsExpander.Items>
                                 <controls:SettingsCard
                                     x:Name="SettingsCardDecoderPriority"
-                                    Description="Fly will try to use the decoders in the order they are listed here. Rawler is the fastest. ImageMagick has max compatibility. WIC uses default and third party Codecs installed in Windows. But in WIC, some third party codecs can skip raw decoding and supply embedded JPEG itself as RAW."
-                                    Header="Adjust Raw Decoder Priority (Drag to Reorder)">
+                                    x:Uid="SettingsCardDecoderPriority">
                                     <ListView
                                         x:Name="PriorityListView"
                                         Width="Auto"

@@ -198,21 +198,6 @@
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>マイカ</value>
   </data>
-  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
-    <value>カメラRAWをデコード</value>
-  </data>
-  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
-    <value>RAWファイル内の埋め込みJPEGの代わりに実際のRAWデータを使用します</value>
-  </data>
-  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
-    <value>ディスクキャッシュをクリア</value>
-  </data>
-  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>ディスクキャッシュからすべてのプレビューを削除します。</value>
-  </data>
-  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
-    <value>クリア</value>
-  </data>
   <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
     <value>マイカ Alt</value>
   </data>
@@ -619,5 +604,26 @@ Esc : 設定を閉じる / アプリを終了</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
     <value>複数インスタンスを許可 (Beta)</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>カメラRAWをデコード</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>RAWファイル内の埋め込みJPEGの代わりに実際のRAWデータを使用します</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>ディスクキャッシュをクリア</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>ディスクキャッシュからすべてのプレビューを削除します。</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>クリア</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>RAWデコーダーの優先順位を調整（ドラッグして並べ替え）</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC（Windows Imaging Component）：システムコーデック • Rawler：最速 • ImageMagick：最高の互換性</value>
   </data>
 </root>

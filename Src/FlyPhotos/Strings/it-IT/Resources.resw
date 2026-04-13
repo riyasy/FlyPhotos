@@ -621,4 +621,10 @@ Esc : Chiudi impostazioni o Esci</value>
   <data name="ButtonClearDiskCache.Content" xml:space="preserve">
     <value>Svuota</value>
   </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>Regola la priorità dei decoder RAW (trascina per riordinare)</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC (Windows Imaging Component): codec di sistema • Rawler: più veloce • ImageMagick: migliore compatibilità</value>
+  </data>
 </root>

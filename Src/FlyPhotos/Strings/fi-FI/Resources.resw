@@ -621,4 +621,10 @@ Esc : Sulje asetukset tai Poistu</value>
   <data name="ButtonClearDiskCache.Content" xml:space="preserve">
     <value>Tyhjennä</value>
   </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>Säädä RAW-dekooderien prioriteettia (vedä järjestääksesi)</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC (Windows Imaging Component): järjestelmäkoodekit • Rawler: nopein • ImageMagick: paras yhteensopivuus</value>
+  </data>
 </root>

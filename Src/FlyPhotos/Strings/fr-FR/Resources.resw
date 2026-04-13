@@ -621,4 +621,10 @@ Esc : Fermer les paramètres ou Quitter</value>
   <data name="ButtonClearDiskCache.Content" xml:space="preserve">
     <value>Effacer</value>
   </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>Ajuster la priorité des décodeurs RAW (glisser pour réorganiser)</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC (Windows Imaging Component) : codecs système • Rawler : le plus rapide • ImageMagick : meilleure compatibilité</value>
+  </data>
 </root>

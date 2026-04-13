@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -620,5 +620,11 @@ Esc : Close Settings or Exit App</value>
   </data>
   <data name="ButtonClearDiskCache.Content" xml:space="preserve">
     <value>Clear</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>Adjust RAW Decoder Priority (Drag to Reorder)</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC (Windows Imaging Component) : System codecs • Rawler : fastest • ImageMagick : best compatibility</value>
   </data>
 </root>

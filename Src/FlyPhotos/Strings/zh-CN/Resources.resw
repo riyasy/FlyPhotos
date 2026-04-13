@@ -621,4 +621,10 @@ Esc：关闭设置或退出应用</value>
   <data name="ButtonClearDiskCache.Content" xml:space="preserve">
     <value>清除</value>
   </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>调整 RAW 解码器优先级（拖动以重新排序）</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC（Windows Imaging Component）：系统编解码器 • Rawler：最快 • ImageMagick：最佳兼容性</value>
+  </data>
 </root>

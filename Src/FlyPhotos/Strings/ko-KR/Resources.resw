@@ -620,4 +620,10 @@ Esc : 설정 닫기 또는 앱 종료</value>
   <data name="ButtonClearDiskCache.Content" xml:space="preserve">
     <value>지우기</value>
   </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>RAW 디코더 우선순위 조정 (드래그하여 재정렬)</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC (Windows Imaging Component): 시스템 코덱 • Rawler: 가장 빠름 • ImageMagick: 최고의 호환성</value>
+  </data>
 </root>
