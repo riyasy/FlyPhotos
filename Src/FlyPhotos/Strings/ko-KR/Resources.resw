@@ -309,7 +309,7 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
     <value>파일 삭제 전 확인</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>FlyPhotos는 Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog, WinUIEx에 감사합니다.</value>
+    <value>FlyPhotos는 Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, Rawler, NLog, WinUIEx에 감사합니다.</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>크레딧</value>

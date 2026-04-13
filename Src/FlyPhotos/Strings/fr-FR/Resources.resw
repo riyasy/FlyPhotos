@@ -310,7 +310,7 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Confirmer avant de supprimer des fichiers</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>FlyPhotos remercie Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog et WinUIEx.</value>
+    <value>FlyPhotos remercie Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, Rawler, NLog et WinUIEx.</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Crédits</value>

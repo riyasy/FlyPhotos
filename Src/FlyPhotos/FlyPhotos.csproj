@@ -53,12 +53,12 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.5" />
 		<PackageReference Include="Microsoft.Graphics.Win2D" Version="1.4.0" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260317003" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7705" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1721" />
 		<PackageReference Include="PhotoSauce.MagicScaler" Version="0.15.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
 		<PackageReference Include="NLog.Extensions.Logging" Version="6.1.2" />
 		<PackageReference Include="SkiaSharp" Version="3.119.2" />
-		<PackageReference Include="Svg.Skia" Version="3.7.0" />
+		<PackageReference Include="Svg.Skia" Version="4.2.0" />
 		<PackageReference Include="System.Drawing.Common" Version="10.0.5" />
 		<PackageReference Include="WinUIEx" Version="2.9.0" />
 		<Manifest Include="$(ApplicationManifest)" />

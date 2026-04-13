@@ -310,7 +310,7 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Bevestig alvorens bestanden te verwijderen</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>FlyPhotos dankt Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog en WinUIEx.</value>
+    <value>FlyPhotos dankt Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, Rawler, NLog en WinUIEx.</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Erkenningen</value>
