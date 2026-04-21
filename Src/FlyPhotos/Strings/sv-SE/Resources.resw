@@ -310,7 +310,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Bekräfta innan du tar bort filer</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>FlyPhotos tackar Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, Rawler, NLog och WinUIEx.</value>
+    <value>FlyPhotos tackar Resvg, Magick.NET, MagicScaler, Rawler, NLog och WinUIEx.</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Bidrag</value>

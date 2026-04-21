@@ -307,7 +307,7 @@
     <value>ഫയൽ ഡിലീറ്റ് ചെയ്യുമ്പോൾ സ്ഥിരീകരണ ഡയലോഗ് കാണിക്കുക</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>ഫ്ലൈ Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog, Rawler, WinUIEx എന്നിവയോട് നന്ദി പറയുന്നു.</value>
+    <value>ഫ്ലൈ Resvg, Magick.NET, MagicScaler, NLog, Rawler, WinUIEx എന്നിവയോട് നന്ദി പറയുന്നു.</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>കടപ്പാടുകൾ</value>

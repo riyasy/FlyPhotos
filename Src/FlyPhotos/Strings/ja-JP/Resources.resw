@@ -309,7 +309,7 @@ FlyPhotosを選択し、「常に」を選択します。</value>
     <value>ファイル削除前の確認</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>FlyPhotosは、Svg.Skia、SkiaSharp、Magick.NET、MagicScaler、Rawler、NLog、およびWinUIExに感謝します。</value>
+    <value>FlyPhotosは、Resvg、Magick.NET、MagicScaler、Rawler、NLog、およびWinUIExに感謝します。</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>著作権情報</value>

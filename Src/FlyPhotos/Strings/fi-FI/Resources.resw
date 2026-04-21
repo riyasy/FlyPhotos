@@ -310,7 +310,7 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Vahvista ennen tiedostojen poistamista</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>FlyPhotos kiittää Svg.Skiaa, SkiaSharpia, Magick.NETiä, MagicScaleria, Rawleria, NLogia ja WinUIExiä.</value>
+    <value>FlyPhotos kiittää Resvgia, Magick.NETiä, MagicScaleria, Rawleria, NLogia ja WinUIExiä.</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Kiitokset</value>

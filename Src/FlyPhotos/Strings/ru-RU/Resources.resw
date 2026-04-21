@@ -310,7 +310,7 @@
     <value>Подтверждать удаление файлов</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>FlyPhotos благодарит Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog и WinUIEx.</value>
+    <value>FlyPhotos благодарит Resvg, Magick.NET, MagicScaler, NLog и WinUIEx.</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Благодарности</value>

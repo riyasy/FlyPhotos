@@ -310,7 +310,7 @@ Settings &gt; Apps &gt; Default apps.</value>
     <value>Confirm before deleting files</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>FlyPhotos thanks Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, Rawler, NLog, and WinUIEx.</value>
+    <value>FlyPhotos thanks Resvg, Magick.NET, MagicScaler, Rawler, NLog, and WinUIEx.</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Credits</value>

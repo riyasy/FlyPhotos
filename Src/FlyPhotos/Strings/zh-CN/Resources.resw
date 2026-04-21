@@ -310,7 +310,7 @@
     <value>删除文件前确认</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>FlyPhotos 感谢 Svg.Skia、SkiaSharp、Magick.NET、MagicScaler、Rawler、NLog 和 WinUIEx。</value>
+    <value>FlyPhotos 感谢 Resvg、Magick.NET、MagicScaler、Rawler、NLog 和 WinUIEx。</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>致谢</value>

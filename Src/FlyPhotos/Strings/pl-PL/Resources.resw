@@ -310,7 +310,7 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Potwierdź przed usunięciem plików</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>FlyPhotos dziękuje Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, Rawler, NLog i WinUIEx.</value>
+    <value>FlyPhotos dziękuje Resvg, Magick.NET, MagicScaler, Rawler, NLog i WinUIEx.</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Kredyty</value>
