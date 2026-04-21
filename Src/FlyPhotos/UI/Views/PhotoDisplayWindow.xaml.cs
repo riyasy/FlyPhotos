@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.System;
@@ -58,6 +59,11 @@ public sealed partial class PhotoDisplayWindow
     // For Dragging
     private Point _lastPoint;
     private bool _isDragging;
+
+    // For Right Click Zoom
+    private CancellationTokenSource? _rightClickCts;
+    private bool _isRightClickZooming;
+    private Point _rightClickPosition;
 
     public PhotoDisplayWindow(string firstPhotoPath, bool extLaunch)
     {
@@ -144,6 +150,8 @@ public sealed partial class PhotoDisplayWindow
     {
         _repeatButtonReleaseCheckTimer.Stop();
         _wheelScrollBrakeTimer.Stop();
+        _rightClickCts?.Cancel();
+        _rightClickCts?.Dispose();
         _thumbNailController.ThumbnailClicked -= Thumbnail_Clicked;
         _photoController.CacheStatusChanged -= PhotoController_CacheStatusChanged;
         _photoController.FileNameOrDetailsChanged -= PhotoController_FileNameOrDetailsChanged;
@@ -337,11 +345,53 @@ public sealed partial class PhotoDisplayWindow
     private void D2dCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
         var pointerPoint = e.GetCurrentPoint(D2dCanvas);
-        if (!pointerPoint.Properties.IsLeftButtonPressed) return;
-        if (!_canvasController.IsPressedOnImage(pointerPoint.Position.AdjustForDpi(D2dCanvas))) return;
-        D2dCanvas.CapturePointer(e.Pointer);
-        _lastPoint = pointerPoint.Position;
-        _isDragging = true;
+        var dpiAdjustedPos = pointerPoint.Position.AdjustForDpi(D2dCanvas);
+        var updateKind = pointerPoint.Properties.PointerUpdateKind;
+
+        if (updateKind == Microsoft.UI.Input.PointerUpdateKind.RightButtonPressed)
+        {
+            if (!_canvasController.IsPressedOnImage(dpiAdjustedPos)) return;
+            D2dCanvas.CapturePointer(e.Pointer);
+
+            _rightClickCts?.Cancel();
+            _rightClickCts?.Dispose();
+            _rightClickCts = new CancellationTokenSource();
+            var token = _rightClickCts.Token;
+
+            _rightClickPosition = dpiAdjustedPos;
+            _isRightClickZooming = false;
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(1000, token);
+                    if (token.IsCancellationRequested) return;
+
+                    _isRightClickZooming = true;
+                    while (!token.IsCancellationRequested)
+                    {
+                        DispatcherQueue.TryEnqueue(() =>
+                        {
+                            if (!token.IsCancellationRequested)
+                                _canvasController.ZoomAtPointPrecision(10, _rightClickPosition);
+                        });
+                        await Task.Delay(16, token);
+                    }
+                }
+                catch (TaskCanceledException) { }
+            }, token);
+
+            return;
+        }
+
+        if (updateKind == Microsoft.UI.Input.PointerUpdateKind.LeftButtonPressed || pointerPoint.Properties.IsLeftButtonPressed)
+        {
+            if (!_canvasController.IsPressedOnImage(dpiAdjustedPos)) return;
+            D2dCanvas.CapturePointer(e.Pointer);
+            _lastPoint = pointerPoint.Position;
+            _isDragging = true;
+        }
     }
     private void D2dCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
@@ -366,14 +416,21 @@ public sealed partial class PhotoDisplayWindow
         {
             case Microsoft.UI.Input.PointerUpdateKind.RightButtonReleased:
                 {
-                    if (_canvasController.IsPressedOnImage(dpiAdjustedPosition))
+                    _rightClickCts?.Cancel();
+                    D2dCanvas.ReleasePointerCapture(e.Pointer);
+
+                    if (!_isRightClickZooming)
                     {
-                        var filePath = _photoController.GetFullPathCurrentFile();
-                        if (File.Exists(filePath))
+                        if (_canvasController.IsPressedOnImage(dpiAdjustedPosition))
                         {
-                            ContextMenuHelper.ShowContextMenu(this, filePath);
+                            var filePath = _photoController.GetFullPathCurrentFile();
+                            if (File.Exists(filePath))
+                            {
+                                ContextMenuHelper.ShowContextMenu(this, filePath);
+                            }
                         }
                     }
+                    _isRightClickZooming = false;
                     break;
                 }
             case Microsoft.UI.Input.PointerUpdateKind.LeftButtonReleased:
