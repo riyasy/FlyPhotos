@@ -57,8 +57,6 @@
 		<PackageReference Include="PhotoSauce.MagicScaler" Version="0.15.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.6" />
 		<PackageReference Include="NLog.Extensions.Logging" Version="6.1.2" />
-		<PackageReference Include="SkiaSharp" Version="3.119.2" />
-		<PackageReference Include="Svg.Skia" Version="4.2.0" />
 		<PackageReference Include="System.Drawing.Common" Version="10.0.6" />
 		<PackageReference Include="WinUIEx" Version="2.9.0" />
 		<Manifest Include="$(ApplicationManifest)" />

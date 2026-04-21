@@ -11,7 +11,7 @@ namespace FlyPhotos.Display.ImageReading;
 
 /// <summary>
 /// High-level wrapper around the Rust rawler_bridge DLL.
-/// P/Invoke declarations live in <see cref="Infra.Interop.RawlerBridge"/>; this class contains
+/// P/Invoke declarations live in <see cref="NativeRustBridge"/>; this class contains
 /// only managed orchestration logic.
 /// </summary>
 internal static unsafe class RawlerWrapper
@@ -29,10 +29,10 @@ internal static unsafe class RawlerWrapper
         try
         {
             // AllocateUninitializedArray avoids zeroing potentially 100 MB+ of memory.
-            byte[] bgraPixels = GC.AllocateUninitializedArray<byte>(totalBytes);
+            byte[] pixels = GC.AllocateUninitializedArray<byte>(totalBytes);
             // SIMD-optimised memmove via Span.
-            new ReadOnlySpan<byte>((void*)ptr, totalBytes).CopyTo(bgraPixels);
-            return CanvasBitmap.CreateFromBytes(ctrl, bgraPixels, width, height, DirectXPixelFormat.B8G8R8A8UIntNormalized);
+            new ReadOnlySpan<byte>((void*)ptr, totalBytes).CopyTo(pixels);
+            return CanvasBitmap.CreateFromBytes(ctrl, pixels, width, height, DirectXPixelFormat.R8G8B8A8UIntNormalized);
         }
         catch (Exception)
         {
@@ -41,7 +41,7 @@ internal static unsafe class RawlerWrapper
         finally
         {
             // (uint) cast preserves the exact usize Rust used, even when width*height*4 overflows int.
-            RawlerBridge.free_rust_buffer(ptr, (nuint)(uint)totalBytes);
+            NativeRustBridge.free_rust_buffer(ptr, (nuint)(uint)totalBytes);
         }
     }
 
@@ -51,7 +51,7 @@ internal static unsafe class RawlerWrapper
     private static (bool success, CanvasBitmap? bitmap, int rotation, int primaryWidth, int primaryHeight)
         LoadEmbeddedPreview(CanvasControl ctrl, string inputPath)
     {
-        nint ptr = RawlerBridge.get_embedded_preview(
+        nint ptr = NativeRustBridge.rawler_get_embedded_preview_from_raw(
             inputPath, out var width, out var height,
             out var rotation, out var primaryWidth, out var primaryHeight);
 
@@ -92,7 +92,7 @@ internal static unsafe class RawlerWrapper
             // Embedded preview unavailable — fall through to full RAW decode.
         }
 
-        nint ptr = RawlerBridge.get_hq_image(inputPath, out var width, out var height, out var rotation2);
+        nint ptr = NativeRustBridge.rawler_render_raw(inputPath, out var width, out var height, out var rotation2);
         var canvasBitmap = CreateBitmapAndFree(ctrl, ptr, width, height);
 
         return canvasBitmap != null

@@ -84,7 +84,7 @@ internal static class ImageReader
                     }
                 case ".SVG":
                     {
-                        if (SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
+                        if (ResvgWrap.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
                 case ".GIF":
@@ -180,7 +180,7 @@ internal static class ImageReader
                     }
                 case ".SVG":
                     {
-                        if (SvgReader.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (ResvgWrap.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
                     }
                 case ".GIF":
@@ -269,7 +269,7 @@ internal static class ImageReader
                     }
                 case ".SVG":
                     {
-                        if (SvgReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
+                        if (ResvgWrap.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
                         return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
                     }
                 case ".GIF":

@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using RawlerBridge = FlyPhotos.Infra.Interop.RawlerBridge;
 
 namespace FlyPhotos.Services;
 
@@ -152,7 +151,7 @@ internal static class CodecDiscovery
     private static IEnumerable<string> GetRawlerSupportedExtensions()
     {
         var result = new List<string>();
-        nint formats = RawlerBridge.get_supported_formats(out int size);
+        nint formats = NativeRustBridge.rawler_get_supported_formats(out int size);
         if (formats == nint.Zero || size <= 0)
             return result;
 
@@ -172,7 +171,7 @@ internal static class CodecDiscovery
         }
         finally
         {
-            RawlerBridge.free_formats_buffer(formats, size);
+            NativeRustBridge.free_formats_buffer(formats, size);
         }
 
         return result;
