@@ -570,6 +570,8 @@ Settings &gt; Apps &gt; Default apps.</value>
     <value>Left/Right Arrow Keys : Navigate Photos
 Up/Down Arrow Keys : Zoom In or Out
 Mouse Left Click and Drag : Pan Photo
+Mouse Right Click and Hold : Zoom In
+Mouse Right Click : Windows Explorer Context Menu
 
 Mouse Wheel : Zoom In or Out / Navigate Photos (based on setting)
 Ctrl + Mouse Wheel : Zoom In or Out

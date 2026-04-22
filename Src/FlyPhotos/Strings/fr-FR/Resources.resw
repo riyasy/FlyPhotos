@@ -570,6 +570,8 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Flèches Gauche/Droite : Naviguer entre les photos
 Flèches Haut/Bas : Zoom avant ou arrière
 Clic gauche + Glisser : Déplacer la photo (Pan)
+Clic droit de la souris et maintenir : Zoom avant
+Clic droit de la souris : Menu contextuel de l'explorateur Windows
 
 Molette de la souris : Zoomer / Naviguer (selon paramètres)
 Ctrl + Molette : Zoom avant ou arrière

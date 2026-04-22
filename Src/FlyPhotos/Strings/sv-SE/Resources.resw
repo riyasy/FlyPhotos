@@ -570,6 +570,8 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Vänster/Höger Pil : Bläddra bland bilder
 Upp/Ner Pil : Zooma in eller ut
 Vänsterklick och dra : Panorera bild
+Håll ned höger musknapp : Zooma in
+Högerklicka : Windows Explorer snabbmeny
 
 Mushjul : Zooma / Bläddra (beroende på inställning)
 Ctrl + Mushjul : Zooma in eller ut

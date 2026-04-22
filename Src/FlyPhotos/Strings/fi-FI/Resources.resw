@@ -570,6 +570,8 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Vasen/Oikea Nuolinäppäin : Selaa kuvia
 Ylös/Alas Nuolinäppäin : Zoomaa sisään tai ulos
 Hiiren vasen painike ja veto : Panoroi kuvaa
+Hiiren oikean painikkeen pohjassa pitäminen : Lähennä
+Hiiren oikea painike : Windowsin Resurssienhallinnan pikavalikko
 
 Hiiren rulla : Zoomaa / Selaa (asetuksesta riippuen)
 Ctrl + Hiiren rulla : Zoomaa sisään tai ulos

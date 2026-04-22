@@ -570,6 +570,8 @@ Configuración &gt; Aplicaciones &gt; Aplicaciones predeterminadas.</value>
     <value>Flechas Izquierda/Derecha : Navegar por las fotos
 Flechas Arriba/Abajo : Zoom dentro o fuera
 Clic izquierdo y arrastrar : Desplazar foto (Pan)
+Clic derecho y mantener : Acercar
+Clic derecho : Menú contextual del Explorador de Windows
 
 Rueda del ratón : Zoom / Navegar (según configuración)
 Ctrl + Rueda : Zoom dentro o fuera
