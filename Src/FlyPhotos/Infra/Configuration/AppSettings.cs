@@ -85,7 +85,7 @@ public class AppSettings
 
     [JsonPropertyName("RawDecoderPriority")]
     public ObservableCollection<string> RawDecoderPriorityAsStrings { get; set; } =
-        [nameof(RawDecoder.Rawler), nameof(RawDecoder.WIC), nameof(RawDecoder.ImageMagick)];
+        [nameof(RawDecoder.WIC), nameof(RawDecoder.Rawler), nameof(RawDecoder.ImageMagick)];
 
     [JsonIgnore]
     [field: JsonIgnore]
