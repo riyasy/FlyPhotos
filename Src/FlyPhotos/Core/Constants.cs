@@ -34,6 +34,7 @@ internal static class Constants
         "ko-KR", // Korean
         "it-IT", // Italian
         "pl-PL", // Polish
+        "ru-RU", // Russian
         "nl-NL", // Dutch
         "sv-SE", // Swedish
         "fi-FI",  // Finnish
