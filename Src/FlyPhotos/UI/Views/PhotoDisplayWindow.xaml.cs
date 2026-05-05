@@ -625,6 +625,14 @@ public sealed partial class PhotoDisplayWindow
                     _canvasController.Pan(20, 0);
                     break;
 
+                // Rotate Image
+                case VirtualKey.L:
+                    _canvasController.RotateCurrentPhotoBy90(false);
+                    break;
+                case VirtualKey.R:
+                    _canvasController.RotateCurrentPhotoBy90(true);
+                    break;
+
                 // File Properties (Alt + Enter)
                 case VirtualKey.Enter when altPressed:
                     Util.ShowFileProperties(_photoController.GetFullPathCurrentFile());
@@ -650,7 +658,7 @@ public sealed partial class PhotoDisplayWindow
                     break;
 
                 // Open Image Location in Explorer
-                case VirtualKey.L:
+                case VirtualKey.W:
                 {
                     var filePath = _photoController.GetFullPathCurrentFile();
                     if (File.Exists(filePath))
