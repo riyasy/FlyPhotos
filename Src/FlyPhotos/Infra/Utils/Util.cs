@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Drawing;
 using System.IO;
@@ -111,9 +111,14 @@ internal static class Util
         return 0;
     }
 
-    public static void ShowFileProperties(string filePath)
+    /// <summary>
+    /// Opens the Windows Properties dialog for the specified file.
+    /// </summary>
+    /// <param name="filePath">The path to the file.</param>
+    /// <param name="showDetailsPane">If true, opens on the Details tab. If false, opens on the General tab.</param>
+    public static void ShowFileProperties(string filePath, bool showDetailsPane = false)
     {
-        if (!File.Exists(filePath))        
+        if (!File.Exists(filePath))
             return;
 
         try
@@ -121,11 +126,11 @@ internal static class Util
             var info = new Win32Methods.SHELLEXECUTEINFO();
             info.cbSize = Marshal.SizeOf(info);
             info.lpVerb = "properties";
-            info.lpParameters = "Details";
+            info.lpParameters = showDetailsPane ? "Details" : "";
             info.lpFile = filePath;
             info.nShow = Win32Methods.SW_SHOW;
             info.fMask = Win32Methods.SEE_MASK_INVOKEIDLIST;
-            //info.hwnd = WindowNative.GetWindowHandle(ownerWindow);
+
             Win32Methods.ShellExecuteEx(ref info);
         }
         catch (Exception ex)

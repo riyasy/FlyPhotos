@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -451,6 +452,11 @@ public sealed partial class PhotoDisplayWindow
                     }
                     break;
                 }
+            case Microsoft.UI.Input.PointerUpdateKind.MiddleButtonReleased:
+                {
+                    _windSizeManager.ToggleFullScreen(ButtonFullScreenClose);
+                    break;
+                }
             case Microsoft.UI.Input.PointerUpdateKind.XButton1Released: // Mouse Back button pressed
                 {
                     if (AppConfig.Settings.UseMouseFwdBackForStepZoom)
@@ -619,8 +625,42 @@ public sealed partial class PhotoDisplayWindow
                     _canvasController.Pan(20, 0);
                     break;
 
-                case VirtualKey.D:
+                // File Properties (Alt + Enter)
+                case VirtualKey.Enter when altPressed:
                     Util.ShowFileProperties(_photoController.GetFullPathCurrentFile());
+                    e.Handled = true;
+                    break;
+                case VirtualKey.D:
+                    Util.ShowFileProperties(_photoController.GetFullPathCurrentFile(), true);
+                    break;
+
+                // Fit to Window
+                case VirtualKey.F:
+                    _canvasController.FitToScreen(true);
+                    break;
+
+                // Actual Size (1:1)
+                case VirtualKey.A:
+                    _canvasController.ZoomToHundred();
+                    break;
+
+                // Open in External Editor
+                case VirtualKey.E:
+                    ButtonShortcuts_OnClick(ButtonShortcuts, new RoutedEventArgs());
+                    break;
+
+                // Open Image Location in Explorer
+                case VirtualKey.L:
+                {
+                    var filePath = _photoController.GetFullPathCurrentFile();
+                    if (File.Exists(filePath))
+                        Process.Start("explorer.exe", $"/select,\"{filePath}\"");
+                    break;
+                }
+
+                // Share Dialog
+                case VirtualKey.S:
+                    FileShareDialogService.ShareFile(this, _photoController.GetFullPathCurrentFile());
                     break;
             }
 
