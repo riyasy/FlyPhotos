@@ -147,7 +147,7 @@ public sealed partial class PhotoDisplayWindow
         await AnimatePhotoDisplayWindowClose();
     }
 
-    private async void PhotoDisplayWindow_Closed(object sender, WindowEventArgs args)
+    private void PhotoDisplayWindow_Closed(object sender, WindowEventArgs args)
     {
         _repeatButtonReleaseCheckTimer.Stop();
         _wheelScrollBrakeTimer.Stop();
@@ -161,7 +161,7 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.OnOneToOneStateChanged -= CanvasController_OnOneToOneStateChanged;
         D2dCanvas.DoubleTapped -= D2dCanvas_DoubleTapped;
 
-        await _canvasController.DisposeAsync();
+        _canvasController.Dispose();
         _thumbNailController.Dispose();
         _photoController.Dispose();
         _opacityFader.Dispose();

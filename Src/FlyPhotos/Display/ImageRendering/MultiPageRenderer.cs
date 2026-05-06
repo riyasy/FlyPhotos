@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 using Windows.Storage.Streams;
@@ -27,8 +28,11 @@ internal partial class MultiPageRenderer : IRenderer
     private readonly byte[] _fileBytes;
     private int _currentPageIndex;
     private readonly bool _supportsTransparency;
+    private bool _isDisposed;
+    private int _latestPageLoadId;
 
-    public MultiPageRenderer(CanvasControl canvas,  byte[] fileBytes, int initialPageIndex, CanvasImageBrush checkeredBrush, bool supportsTransparency, Action invalidate)
+    public MultiPageRenderer(CanvasControl canvas, byte[] fileBytes, int initialPageIndex,
+        CanvasImageBrush checkeredBrush, bool supportsTransparency, Action invalidate)
     {
         _canvas = canvas;
         _supportsTransparency = supportsTransparency;
@@ -37,7 +41,6 @@ internal partial class MultiPageRenderer : IRenderer
         _currentPageIndex = initialPageIndex;
         _invalidate = invalidate;
 
-        // Load initial page
         _ = LoadPageAsync(_currentPageIndex);
     }
 
@@ -70,12 +73,14 @@ internal partial class MultiPageRenderer : IRenderer
 
     public void Dispose()
     {
+        _isDisposed = true;
         _currentBitmap?.Dispose();
         _currentBitmap = null;
     }
 
     public async Task<bool> LoadPageAsync(int pageIndex)
     {
+        var operationId = Interlocked.Increment(ref _latestPageLoadId);
         try
         {
             using var ms = new InMemoryRandomAccessStream();
@@ -91,7 +96,6 @@ internal partial class MultiPageRenderer : IRenderer
             var decoder = await BitmapDecoder.CreateAsync(ms);
             if (pageIndex < 0 || pageIndex >= decoder.FrameCount) return false;
 
-            // Decode the requested frame to a SoftwareBitmap then to CanvasBitmap.
             var frame = await decoder.GetFrameAsync((uint)pageIndex);
             var softwareBitmap = await frame.GetSoftwareBitmapAsync();
 
@@ -101,10 +105,22 @@ internal partial class MultiPageRenderer : IRenderer
             await encoder.FlushAsync();
             stream.Seek(0);
 
-            // Dispose old
-            _currentBitmap?.Dispose();
-            _currentBitmap = await CanvasBitmap.LoadAsync(_canvas, stream);
+            // All the heavy decoding is done. Before touching shared state, check if this
+            // operation is still the latest, and that the renderer hasn't been disposed.
+            if (_isDisposed || operationId != _latestPageLoadId) return false;
 
+            var newBitmap = await CanvasBitmap.LoadAsync(_canvas, stream);
+
+            // Re-check after the final await — another page load or disposal may have
+            // raced in during CanvasBitmap.LoadAsync.
+            if (_isDisposed || operationId != _latestPageLoadId)
+            {
+                newBitmap.Dispose();
+                return false;
+            }
+
+            _currentBitmap?.Dispose();
+            _currentBitmap = newBitmap;
             _currentPageIndex = pageIndex;
             _invalidate();
             return true;

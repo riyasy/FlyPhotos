@@ -10,6 +10,7 @@ using FlyPhotos.Infra.Configuration;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
 
 namespace FlyPhotos.Display.ImageRendering;
 
@@ -19,22 +20,24 @@ internal partial class AnimatedImageRenderer : IRenderer
     private readonly IAnimator _animator;
     private readonly Action _invalidateCanvas;
     private readonly Stopwatch _stopwatch = new();
-    private readonly SemaphoreSlim _animatorLock;
+    private readonly SemaphoreSlim _animatorLock = new(1, 1); // owned entirely by this class
     private readonly bool _supportsTransparency;
     private readonly CanvasImageBrush _checkeredBrush;
+    private bool _isDisposed;
 
     public Rect SourceBounds => _animator.Surface.GetBounds(_canvas);
 
     public AnimatedImageRenderer(CanvasControl canvas, CanvasImageBrush checkeredBrush, IAnimator animator,
-        SemaphoreSlim animatorLock, bool supportsTransparency, Action invalidateCanvas)
+        bool supportsTransparency, Action invalidateCanvas)  // removed SemaphoreSlim parameter
     {
         _canvas = canvas;
         _animator = animator;
         _invalidateCanvas = invalidateCanvas;
-        _animatorLock = animatorLock;
         _supportsTransparency = supportsTransparency;
         _checkeredBrush = checkeredBrush;
         _stopwatch.Start();
+
+        CompositionTarget.Rendering += OnCompositionTargetRendering;
     }
 
     public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality)
@@ -43,7 +46,6 @@ internal partial class AnimatedImageRenderer : IRenderer
         if (_animator?.Surface == null) return;
 
         var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
-        // Antialiasing can cause fine lines visible at edge of images when drawing checkerboard
         session.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
         if (drawCheckeredBackground)
         {
@@ -53,20 +55,27 @@ internal partial class AnimatedImageRenderer : IRenderer
         }
 
         session.DrawImage(_animator.Surface, viewState.ImageRect, _animator.Surface.GetBounds(_canvas), 1.0f, quality);
-        _ = RunAnimationLoop();
     }
 
-    private async Task RunAnimationLoop()
+    private async void OnCompositionTargetRendering(object sender, object e)
     {
+        if (_isDisposed) return;
+
+        // Skip frame if previous UpdateAsync is still running, rather than queuing up.
         if (!await _animatorLock.WaitAsync(0)) return;
+
         try
         {
-            if (_animator == null) return;
+            if (_isDisposed) return; // re-check: Dispose() may have run during the WaitAsync(0) yield
+
             await _animator.UpdateAsync(_stopwatch.Elapsed);
-            _invalidateCanvas();
+
+            if (!_isDisposed) // don't invalidate a canvas we no longer own
+                _invalidateCanvas();
         }
-        catch
+        catch (Exception ex)
         {
+            Debug.WriteLine($"Animation update failed: {ex.Message}");
             _stopwatch.Stop();
         }
         finally
@@ -87,6 +96,11 @@ internal partial class AnimatedImageRenderer : IRenderer
 
     public void Dispose()
     {
+        if (_isDisposed) return;
+        _isDisposed = true;
+        CompositionTarget.Rendering -= OnCompositionTargetRendering;
+        _animatorLock.Wait();
+        _animatorLock.Release();
         _stopwatch.Stop();
         _animator?.Dispose();
     }

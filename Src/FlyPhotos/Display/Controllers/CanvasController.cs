@@ -37,9 +37,6 @@ internal class CanvasController : ICanvasController
     private bool _invalidatePending;
     private int _latestSetSourceOperationId;
 
-    // For GIF, WebP, and APNG File handling
-    private readonly SemaphoreSlim _animatorLock = new(1, 1);
-
     // For Checkered Background
     private CanvasImageBrush _checkeredBrush;
 
@@ -70,9 +67,8 @@ internal class CanvasController : ICanvasController
         _canvasViewManager.ViewChanged += RequestInvalidate;
     }
 
-    public async ValueTask DisposeAsync()
+    public void Dispose()
     {
-        await _animatorLock.WaitAsync();
         try
         {
             _d2dCanvas?.Draw -= D2dCanvas_Draw;
@@ -83,11 +79,7 @@ internal class CanvasController : ICanvasController
             _checkeredBrush = null;
             _d2dCanvas?.RemoveFromVisualTree();
         }
-        finally
-        {
-            _animatorLock.Release();
-            _animatorLock.Dispose();
-        }
+        catch (Exception ex) { Debug.WriteLine(ex); }
     }
 
     #endregion
@@ -104,9 +96,6 @@ internal class CanvasController : ICanvasController
     /// <param name="displayLevel">The quality level to display (e.g., PlaceHolder, Preview, Hq).</param>
     public async Task SetSource(Photo photo, DisplayLevel displayLevel)
     {
-        await _animatorLock.WaitAsync();
-        _animatorLock.Release();
-
         _checkeredBrush ??= Util.CreateCheckeredBrush(_d2dCanvas, Constants.CheckerSize);
 
         var currentOperationId = ++_latestSetSourceOperationId;
@@ -181,7 +170,7 @@ internal class CanvasController : ICanvasController
             {
                 // The operation is still valid. Prepare the animator and swap the renderer.
                 await newAnimator.UpdateAsync(TimeSpan.Zero);
-                IRenderer newRenderer = new AnimatedImageRenderer(_d2dCanvas, _checkeredBrush, newAnimator, _animatorLock, photo.SupportsTransparency, RequestInvalidate);
+                IRenderer newRenderer = new AnimatedImageRenderer(_d2dCanvas, _checkeredBrush, newAnimator, photo.SupportsTransparency, RequestInvalidate);
                 // For animation, we don't reset the view again, as the static frame is already there.
                 SetupNewRenderer(newRenderer, _imageSize, animDispItem.Rotation, false, false, false, false);
             }
@@ -238,8 +227,14 @@ internal class CanvasController : ICanvasController
     /// <param name="forceThumbNailRedraw">True to force the thumbnail strip to regenerate its off-screen bitmap.</param>
     private void SetupNewRenderer(IRenderer newRenderer, Size imageSize, int imageRotation, bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder, bool forceThumbNailRedraw)
     {
-        _currentRenderer?.Dispose();
-        _currentRenderer = newRenderer;
+        var oldRenderer = _currentRenderer;
+        _currentRenderer = newRenderer; // swap first — next draw uses new renderer immediately
+
+        if (oldRenderer is AnimatedImageRenderer)
+            _ = Task.Run(oldRenderer.Dispose); // drain in-flight UpdateAsync off the UI thread
+        else
+            oldRenderer?.Dispose();
+
         OnMutliPagePhotoLoaded?.Invoke(newRenderer is MultiPageRenderer);
 
         _canvasViewManager.SetScaleAndPosition(_currentPhotoPath, imageSize,

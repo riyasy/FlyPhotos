@@ -6,7 +6,7 @@ using FlyPhotos.Core.Model;
 
 namespace FlyPhotos.Display.Controllers;
 
-internal interface ICanvasController : IAsyncDisposable
+internal interface ICanvasController : IDisposable
 {
     Task SetSource(Photo photo, DisplayLevel displayLevel);
 }
