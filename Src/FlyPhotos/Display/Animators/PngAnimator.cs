@@ -360,11 +360,14 @@ public partial class PngAnimator : IAnimator
         // Loop wrap-around: reset compositor and disposal state.
         if (targetFrameIndex < _currentFrameIndex)
         {
+            // Loop wrap-around: instead of clearing _compositedSurface here, we set the previous-frame
+            // disposal state to cover the full canvas. RenderFrameAsync(0) will then apply the clear
+            // atomically inside its drawing session — immediately before drawing frame 0's patch —
+            // eliminating the async gap between clear and draw that caused a visible flash on loop restart.
+
             _currentFrameIndex = -1;
-            _previousFrameDisposal = APNG_DISPOSE_OP_NONE;
-            _previousFrameRect = Rect.Empty;
-            using var ds = _compositedSurface.CreateDrawingSession();
-            ds.Clear(Colors.Transparent);
+            _previousFrameDisposal = APNG_DISPOSE_OP_BACKGROUND;
+            _previousFrameRect = CanvasRect;
         }
 
         // Catch-up pass: render any skipped frames in order to correctly apply their

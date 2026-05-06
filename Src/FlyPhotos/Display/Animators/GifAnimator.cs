@@ -294,11 +294,14 @@ public partial class GifAnimator : IAnimator
         // so content from the previous loop cycle does not bleed into the new one.
         if (targetFrameIndex < _currentFrameIndex)
         {
+            // Loop wrap-around: instead of clearing _compositedSurface here, we set the previous-frame
+            // disposal state to cover the full canvas. RenderFrameAsync(0) will then apply the clear
+            // atomically inside its drawing session — immediately before drawing frame 0's patch —
+            // eliminating the async gap between clear and draw that caused a visible flash on loop restart.
+
             _currentFrameIndex = -1;
-            _previousFrameDisposal = 1;
-            _previousFrameRect = Rect.Empty;
-            using var ds = _compositedSurface.CreateDrawingSession();
-            ds.Clear(Colors.Transparent);
+            _previousFrameDisposal = 2;
+            _previousFrameRect = new Rect(0, 0, PixelWidth, PixelHeight);
         }
 
         // Catch-up pass: render all frames from the last rendered index up to the target.
