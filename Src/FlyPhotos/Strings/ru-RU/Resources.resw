@@ -401,7 +401,7 @@
     <value>Настройки панорамирования, зума и поворота при просмотре</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Сохраняет положение, размер, монитор и состояние окна</value>
+    <value>Сохраняет размер, положение, экран и состояние развернутого окна</value>
   </data>
   <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
     <value>Запоминать состояние окна</value>
