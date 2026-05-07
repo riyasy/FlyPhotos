@@ -577,6 +577,7 @@ Kółko myszy : Zoom / Przełączanie (zależnie od ustawień)
 Ctrl + Kółko myszy : Powiększ lub pomniejsz
 Alt + Kółko myszy : Przełączanie zdjęć
 Przechyl kółko w lewo/prawo : Przełączanie zdjęć
+Kliknięcie kółka myszy : Tryb pełnoekranowy
 
 Ctrl + Strzałki : Przesuń zdjęcie
 Ctrl + + : Powiększ
@@ -597,7 +598,15 @@ TouchPad przesunięcie 2 palcami (Góra/Dół) : Zoom / Przełączanie (zależni
 TouchPad uszczypnięcie (Pinch) : Powiększ lub pomniejsz
 
 F11 : Tryb pełnoekranowy
-D : Pokaż właściwości pliku
+
+Alt + Enter : Pokaż właściwości pliku (Ogólne)
+D : Pokaż właściwości pliku (Szczegóły)
+
+W : Pokaż plik w Eksploratorze Windows
+S : Otwórz okno udostępniania Windows dla pliku
+A : Powiększ do rzeczywistego rozmiaru
+F : Dopasuj do okna
+
 Del : Usuń zdjęcie
 
 Esc : Zamknij ustawienia lub Wyjdź</value>

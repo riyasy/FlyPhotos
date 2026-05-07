@@ -577,6 +577,7 @@ Mushjul : Zooma / Bläddra (beroende på inställning)
 Ctrl + Mushjul : Zooma in eller ut
 Alt + Mushjul : Bläddra bland bilder
 Luta mushjul Vänster/Höger : Bläddra bland bilder
+Klick på mushjulet : Helskärm
 
 Ctrl + Piltangenter : Panorera bild
 Ctrl + + : Zooma in
@@ -597,7 +598,15 @@ Pekplatta tvåfingerssvep Upp/Ner : Zooma / Bläddra (beroende på inställning)
 Pekplatta nyp (Pinch) : Zooma in eller ut
 
 F11 : Helskärm
-D : Visa filegenskaper
+
+Alt + Enter : Visa filegenskaper (Allmänt)
+D : Visa filegenskaper (Detaljer)
+
+W : Visa fil i Windows Explorer
+S : Öppna Windows delningsfönster för filen
+A : Zooma till faktisk storlek
+F : Anpassa till fönster
+
 Del : Ta bort bild
 
 Esc : Stäng inställningar eller Avsluta</value>

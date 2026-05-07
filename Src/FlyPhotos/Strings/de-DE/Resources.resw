@@ -577,6 +577,7 @@ Mausrad : Zoomen / Blättern (je nach Einstellung)
 Strg + Mausrad : Vergrößern oder Verkleinern
 Alt + Mausrad : Durch Fotos blättern
 Mausrad nach links/rechts neigen : Durch Fotos blättern
+Mausrad-Klick : Vollbild
 
 Strg + Pfeiltasten : Ausschnitt verschieben
 Strg + + : Vergrößern
@@ -597,7 +598,15 @@ Touchpad Zweifinger-Wischen Oben/Unten : Zoomen / Blättern (je nach Einstellung
 Touchpad Auf- oder Zuziehen (Pinch) : Vergrößern oder Verkleinern
 
 F11 : Vollbild
-D : Dateieigenschaften anzeigen
+
+Alt + Eingabetaste : Dateieigenschaften anzeigen (Allgemein)
+D : Dateieigenschaften anzeigen (Details)
+
+W : Datei im Windows-Explorer anzeigen
+S : Windows-Freigabedialog für die Datei öffnen
+A : Foto in Originalgröße anzeigen
+F : An Fenster anpassen
+
 Entf : Foto löschen
 
 Esc : Einstellungen schließen oder App beenden</value>

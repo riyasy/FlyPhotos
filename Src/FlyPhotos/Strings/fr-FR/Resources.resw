@@ -577,6 +577,7 @@ Molette de la souris : Zoomer / Naviguer (selon paramètres)
 Ctrl + Molette : Zoom avant ou arrière
 Alt + Molette : Naviguer entre les photos
 Incliner la molette (Gauche/Droite) : Naviguer entre les photos
+Clic sur la molette : Plein écran
 
 Ctrl + Flèches : Déplacer la photo
 Ctrl + + : Zoom avant
@@ -596,8 +597,16 @@ Touchpad balayage 2 doigts Gauche/Droite : Naviguer entre les photos
 Touchpad balayage 2 doigts Haut/Bas : Zoomer / Naviguer (selon paramètres)
 Touchpad pincement : Zoom avant ou arrière
 
-F11: Plein écran
-D : Propriétés du fichier
+F11 : Plein écran
+
+Alt + Entrée : Propriétés du fichier (Général)
+D : Propriétés du fichier (Détails)
+
+W : Afficher le fichier dans l’Explorateur Windows
+S : Ouvrir la fenêtre de partage Windows pour le fichier
+A : Zoomer à la taille réelle
+F : Ajuster à la fenêtre
+
 Suppr (Del) : Supprimer la photo
 
 Esc : Fermer les paramètres ou Quitter</value>

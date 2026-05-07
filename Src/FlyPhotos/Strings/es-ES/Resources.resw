@@ -577,6 +577,7 @@ Rueda del ratón : Zoom / Navegar (según configuración)
 Ctrl + Rueda : Zoom dentro o fuera
 Alt + Rueda : Navegar por las fotos
 Inclinar rueda Izquierda/Derecha : Navegar por las fotos
+Clic en la rueda del ratón : Pantalla completa
 
 Ctrl + Flechas : Desplazar foto
 Ctrl + + : Zoom dentro (Acercar)
@@ -597,7 +598,15 @@ Panel táctil deslizar 2 dedos Arriba/Abajo : Zoom / Navegar (según config.)
 Panel táctil pellizcar : Zoom dentro o fuera
 
 F11 : Pantalla completa
-D : Ver propiedades del archivo
+
+Alt + Enter : Ver propiedades del archivo (General)
+D : Ver propiedades del archivo (Detalles)
+
+W : Mostrar archivo en el Explorador de Windows
+S : Abrir el cuadro de compartir de Windows para el archivo
+A : Zoom a tamaño real
+F : Ajustar a la ventana
+
 Supr (Del) : Eliminar foto
 
 Esc : Cerrar ajustes o Salir</value>

@@ -577,6 +577,7 @@ Rotellina del mouse : Zoom / Scorri (secondo impostazioni)
 Ctrl + Rotellina : Zoom avanti o indietro
 Alt + Rotellina : Scorri foto
 Inclinare rotellina Sinistra/Destra : Scorri foto
+Clic sulla rotellina : Schermo intero
 
 Ctrl + Frecce : Sposta foto
 Ctrl + + : Zoom avanti
@@ -597,7 +598,15 @@ TouchPad scorri 2 dita Su/Giù : Zoom / Scorri (secondo imp. rotellina)
 TouchPad pizzica (Pinch) : Zoom avanti o indietro
 
 F11 : Schermo intero
-D : Proprietà del file
+
+Alt + Invio : Proprietà del file (Generale)
+D : Proprietà del file (Dettagli)
+
+W : Mostra file in Esplora file di Windows
+S : Apri la finestra di condivisione di Windows per il file
+A : Zoom a dimensione effettiva
+F : Adatta alla finestra
+
 Canc (Del) : Elimina foto
 
 Esc : Chiudi impostazioni o Esci</value>

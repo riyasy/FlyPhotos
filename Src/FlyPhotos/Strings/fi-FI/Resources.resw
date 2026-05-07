@@ -577,6 +577,7 @@ Hiiren rulla : Zoomaa / Selaa (asetuksesta riippuen)
 Ctrl + Hiiren rulla : Zoomaa sisään tai ulos
 Alt + Hiiren rulla : Selaa kuvia
 Hiiren rullan kallistus Vasen/Oikea : Selaa kuvia
+Hiiren rullan painallus : Koko näyttö
 
 Ctrl + Nuolinäppäimet : Panoroi kuvaa
 Ctrl + + : Zoomaa sisään
@@ -597,7 +598,15 @@ Kosketuslevy kahden sormen pyyhkäisy (Ylös/Alas) : Zoomaa / Selaa
 Kosketuslevy nipistys (Pinch) : Zoomaa sisään tai ulos
 
 F11 : Koko näyttö
-D : Näytä tiedoston ominaisuudet
+
+Alt + Enter : Näytä tiedoston ominaisuudet (Yleiset)
+D : Näytä tiedoston ominaisuudet (Tiedot)
+
+W : Näytä tiedosto Windowsin Resurssienhallinnassa
+S : Avaa Windowsin jakovalinta tiedostolle
+A : Zoomaa todelliseen kokoon
+F : Sovita ikkunaan
+
 Del : Poista kuva
 
 Esc : Sulje asetukset tai Poistu</value>

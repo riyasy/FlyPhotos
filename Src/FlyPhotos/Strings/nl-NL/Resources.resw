@@ -577,6 +577,7 @@ Muiswiel : Zoomen / Bladeren (afhankelijk van instelling)
 Ctrl + Muiswiel : In- of uitzoomen
 Alt + Muiswiel : Door foto's bladeren
 Muiswiel kantelen Links/Rechts : Door foto's bladeren
+Klik op muiswiel : Volledig scherm
 
 Ctrl + Pijltoetsen : Foto verschuiven
 Ctrl + + : Inzoomen
@@ -597,7 +598,15 @@ TouchPad twee vingers vegen Omhoog/Omlaag : Zoomen / Bladeren
 TouchPad knijpen (Pinch) : In- of uitzoomen
 
 F11 : Volledig scherm
-D : Bestandseigenschappen tonen
+
+Alt + Enter : Bestandseigenschappen tonen (Algemeen)
+D : Bestandseigenschappen tonen (Details)
+
+W : Bestand weergeven in Windows Verkenner
+S : Windows-deelvenster voor het bestand openen
+A : Zoomen naar werkelijke grootte
+F : Passend maken aan venster
+
 Del : Foto verwijderen
 
 Esc : Instellingen sluiten of App verlaten</value>
