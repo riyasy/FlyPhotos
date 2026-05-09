@@ -399,12 +399,21 @@ FlyPhotosを選択し、「常に」を選択します。</value>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>ナビゲーション中のパン、ズーム、回転の動作</value>
   </data>
-  <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>ウィンドウの位置、サイズ、モニター、および最大化状態を保存します。</value>
-  </data>
-  <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
-    <value>ウィンドウの状態を記憶</value>
-  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+  <value>前回の状態では、ウィンドウのサイズ、位置、および表示モニターを復元します。</value>
+</data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+  <value>起動時のウィンドウ状態</value>
+</data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+  <value>最大化</value>
+</data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+  <value>全画面表示</value>
+</data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+  <value>前回の状態</value>
+</data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>GitHubで問題を報告するか、ryftools@outlook.comにメールしてください</value>
   </data>

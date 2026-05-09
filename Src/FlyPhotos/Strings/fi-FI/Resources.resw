@@ -400,12 +400,21 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Panoroinnin, zoomin ja kierron käyttäytyminen navigoinnin aikana</value>
   </data>
-  <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Tallentaa ikkunan sijainnin, koon, näytön ja suurennetun tilan.</value>
-  </data>
-  <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
-    <value>Muista ikkunan tila</value>
-  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+  <value>Edellinen tila palauttaa ikkunan viimeisimmän koon, sijainnin ja näytön.</value>
+</data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+  <value>Ikkunan tila käynnistyksessä</value>
+</data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+  <value>Suurennettu</value>
+</data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+  <value>Koko näyttö</value>
+</data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+  <value>Edellinen tila</value>
+</data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Ilmoita ongelmista GitHubissa tai lähetä sähköpostia osoitteeseen ryftools@outlook.com</value>
   </data>

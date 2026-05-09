@@ -400,12 +400,21 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Pan, Zoom &amp; Rotation-beteende under navigering</value>
   </data>
-  <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Sparar fönstrets position, storlek, skärm och maximerat läge.</value>
-  </data>
-  <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
-    <value>Kom ihåg fönsterstatus</value>
-  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+  <value>Föregående tillstånd återställer fönstrets senaste storlek, position och skärm.</value>
+</data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+  <value>Fönsterläge vid start</value>
+</data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+  <value>Maximerat</value>
+</data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+  <value>Helskärm</value>
+</data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+  <value>Föregående tillstånd</value>
+</data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Rapportera problem på GitHub eller maila till ryftools@outlook.com</value>
   </data>

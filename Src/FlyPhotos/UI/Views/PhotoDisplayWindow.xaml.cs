@@ -797,6 +797,16 @@ public sealed partial class PhotoDisplayWindow
 
     #region Helper Functions
 
+    /// <summary>
+    ///     Enters full-screen mode at launch, using the same <see cref="WindowSizeManager.ToggleFullScreen"/> path
+    ///     as the interactive F11 toggle. This ensures PauseTracking is set, the exit-full-screen button is shown,
+    ///     and <c>_wasMaximizedBeforeFullScreen</c> is recorded correctly so exiting later works properly.
+    /// </summary>
+    internal void EnterFullScreenOnLaunch()
+    {
+        _windSizeManager.ToggleFullScreen(ButtonFullScreenClose);
+    }
+
     private async Task HandleMouseWheelNavigation(int delta, bool isHorizontalScroll)
     {
         if (_photoController.IsSinglePhoto()) return;
@@ -854,7 +864,7 @@ public sealed partial class PhotoDisplayWindow
 
     private void SaveLastWindowState()
     {
-        if (AppConfig.Settings.RememberLastWindowState)
+        if (AppConfig.Settings.WindowLaunchMode == Core.Model.WindowLaunchMode.LastWindowState)
         {
             AppConfig.Settings.WindowState = _windSizeManager.Data;
             AppConfig.Save();

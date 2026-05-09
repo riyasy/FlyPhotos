@@ -400,12 +400,21 @@ Impostazioni &gt; App &gt; App predefinite.</value>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Comportamento di Pan, Zoom e Rotazione durante la navigazione</value>
   </data>
-  <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Salva posizione, dimensione, monitor e stato massimizzato della finestra.</value>
-  </data>
-  <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
-    <value>Ricorda stato finestra</value>
-  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+  <value>Lo stato precedente ripristina dimensioni, posizione e monitor della finestra.</value>
+</data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+  <value>Stato finestra all'avvio</value>
+</data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+  <value>Massimizzata</value>
+</data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+  <value>Schermo intero</value>
+</data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+  <value>Stato precedente</value>
+</data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Segnala problemi su GitHub o invia un'email a ryftools@outlook.com</value>
   </data>

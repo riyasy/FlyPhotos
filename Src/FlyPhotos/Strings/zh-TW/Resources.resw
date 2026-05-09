@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -400,12 +400,21 @@
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>瀏覽時的平移、縮放與旋轉行為</value>
   </data>
-  <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>儲存視窗的位置、大小、顯示器與最大化狀態。</value>
-  </data>
-  <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
-    <value>記住視窗狀態</value>
-  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+  <value>「上次狀態」會還原視窗的大小、位置與所在螢幕。</value>
+</data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+  <value>啟動時視窗狀態</value>
+</data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+  <value>最大化</value>
+</data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+  <value>全螢幕</value>
+</data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+  <value>上次狀態</value>
+</data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>在 GitHub 回報問題，或寄信至 ryftools@outlook.com</value>
   </data>

@@ -399,12 +399,21 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>탐색 중 이동, 확대/축소 및 회전 동작</value>
   </data>
-  <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>창 위치, 크기, 모니터 및 최대화 상태를 저장합니다.</value>
-  </data>
-  <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
-    <value>창 상태 기억</value>
-  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+  <value>이전 상태는 창의 마지막 크기, 위치 및 모니터를 복원합니다.</value>
+</data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+  <value>시작 시 창 상태</value>
+</data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+  <value>최대화</value>
+</data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+  <value>전체 화면</value>
+</data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+  <value>이전 상태</value>
+</data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>GitHub에서 문제 보고 또는 ryftools@outlook.com으로 이메일 보내기</value>
   </data>

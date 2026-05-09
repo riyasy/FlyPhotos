@@ -400,12 +400,21 @@
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>浏览照片时的平移、缩放和旋转行为</value>
   </data>
-  <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>保存窗口位置、大小、所在显示器和最大化状态。</value>
-  </data>
-  <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
-    <value>记住窗口状态</value>
-  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+  <value>“上次状态”会恢复窗口的大小、位置和所在显示器。</value>
+</data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+  <value>启动时窗口状态</value>
+</data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+  <value>最大化</value>
+</data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+  <value>全屏</value>
+</data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+  <value>上次状态</value>
+</data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>可在 GitHub 上反馈问题，或发送邮件至 ryftools@outlook.com</value>
   </data>

@@ -80,7 +80,7 @@ internal sealed partial class Settings
         SliderTransparentBackgroundIntensity.Value = AppConfig.Settings.TransparentBackgroundIntensity;
         RectThumbnailSelection.Stroke = new SolidColorBrush(ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor));
         SliderThumbnailSize.Value = AppConfig.Settings.ThumbnailSize;
-        ButtonRememberLastWindowState.IsOn = AppConfig.Settings.RememberLastWindowState;
+        ComboWindowLaunchMode.SelectedIndex = GetIndexForWindowLaunchMode(AppConfig.Settings.WindowLaunchMode);
         ButtonAllowMultiInstance.IsOn = AppConfig.Settings.AllowMultiInstance;
         ButtonConfirmBeforeDelete.IsOn = AppConfig.Settings.ConfirmForDelete;
         ButtonShowFileName.IsOn = AppConfig.Settings.ShowFileName;
@@ -107,7 +107,7 @@ internal sealed partial class Settings
         SliderImageFitPercentage.ValueChanged += SliderImageFitPercentage_ValueChanged;
         SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
         SliderThumbnailSize.ValueChanged += SliderThumbnailSize_ValueChanged;
-        ButtonRememberLastWindowState.Toggled += ButtonRememberLastWindowState_OnToggled;
+        ComboWindowLaunchMode.SelectionChanged += ComboWindowLaunchMode_OnSelectionChanged;
         ButtonAllowMultiInstance.Toggled += ButtonAllowMultiInstance_OnToggled;
         ButtonConfirmBeforeDelete.Toggled += ButtonConfirmBeforeDelete_OnToggled;
         ButtonShowFileName.Toggled += ButtonShowFileName_OnToggled;
@@ -219,9 +219,9 @@ internal sealed partial class Settings
     }
 
 
-    private async void ButtonRememberLastWindowState_OnToggled(object sender, RoutedEventArgs e)
+    private async void ComboWindowLaunchMode_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        AppConfig.Settings.RememberLastWindowState = ButtonRememberLastWindowState.IsOn;
+        AppConfig.Settings.WindowLaunchMode = GetWindowLaunchModeForIndex(ComboWindowLaunchMode.SelectedIndex);
         await AppConfig.SaveAsync();
     }
 
@@ -429,6 +429,27 @@ internal sealed partial class Settings
             PanZoomBehaviourOnNavigation.RememberPerPhoto => 1,
             PanZoomBehaviourOnNavigation.RetainFromLastPhoto => 2,
             _ => 0
+        };
+    }
+
+    private static int GetIndexForWindowLaunchMode(WindowLaunchMode mode)
+    {
+        return mode switch
+        {
+            WindowLaunchMode.Maximized => 0,
+            WindowLaunchMode.FullScreen => 1,
+            WindowLaunchMode.LastWindowState => 2,
+            _ => 0
+        };
+    }
+
+    private static WindowLaunchMode GetWindowLaunchModeForIndex(int index)
+    {
+        return index switch
+        {
+            1 => WindowLaunchMode.FullScreen,
+            2 => WindowLaunchMode.LastWindowState,
+            _ => WindowLaunchMode.Maximized,
         };
     }
 

@@ -400,12 +400,21 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Zachowanie przesuwania, powiększania i obracania podczas nawigacji</value>
   </data>
-  <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Zapisuje pozycję, rozmiar, monitor oraz stan zmaksymalizowany okna.</value>
-  </data>
-  <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
-    <value>Zapamiętaj stan okna</value>
-  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+  <value>Poprzedni stan przywraca ostatni rozmiar, położenie i monitor okna.</value>
+</data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+  <value>Stan okna przy uruchomieniu</value>
+</data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+  <value>Zmaksymalizowane</value>
+</data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+  <value>Pełny ekran</value>
+</data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+  <value>Poprzedni stan</value>
+</data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Zgłoś problemy na GitHub lub wyślij wiadomość na adres ryftools@outlook.com</value>
   </data>

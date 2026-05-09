@@ -79,7 +79,14 @@ public class AppSettings
     public bool ShowZoomPercent { get; set; } = true;
     public bool DecodeRawData { get; set; } = false;
     public string Language { get; set; } = "Default";
-    public bool RememberLastWindowState { get; set; } = false;
+    [JsonPropertyName("WindowLaunchMode")] public string WindowLaunchModeAsString { get; set; } = "Maximized";
+
+    [JsonIgnore]
+    public WindowLaunchMode WindowLaunchMode
+    {
+        get => Enum.TryParse<WindowLaunchMode>(WindowLaunchModeAsString, true, out var result) ? result : WindowLaunchMode.Maximized;
+        set => WindowLaunchModeAsString = value.ToString();
+    }
     public string WindowState { get; set; } = "";
     public bool AllowMultiInstance { get; set; } = false;
 

@@ -400,12 +400,21 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Schwenk-, Zoom- und Drehverhalten bei der Navigation</value>
   </data>
-  <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Speichert Fensterposition, -größe, Monitor und Maximierungsstatus.</value>
-  </data>
-  <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
-    <value>Fensterstatus merken</value>
-  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+  <value>Der vorherige Zustand stellt die letzte Fenstergröße, -position und den Bildschirm wieder her.</value>
+</data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+  <value>Fensterzustand beim Start</value>
+</data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+  <value>Maximiert</value>
+</data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+  <value>Vollbild</value>
+</data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+  <value>Vorheriger Zustand</value>
+</data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Melden Sie Probleme auf GitHub oder per E-Mail an ryftools@outlook.com</value>
   </data>

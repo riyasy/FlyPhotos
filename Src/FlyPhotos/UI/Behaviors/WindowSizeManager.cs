@@ -425,7 +425,7 @@ public sealed partial class WindowSizeManager : IDisposable
         }
         else if (AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen)
         {
-            PauseTracking = true;
+            PauseTracking = false;
             exitFullScreenButton?.Visibility = Visibility.Collapsed;
             // When exiting full screen, and the window was previously maximized,
             // the window will briefly go to restored window state and

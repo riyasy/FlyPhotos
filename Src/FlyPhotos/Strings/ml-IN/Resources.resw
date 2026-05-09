@@ -397,12 +397,21 @@
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>നാവിഗേഷനിലെ പാൻ, സൂം, റൊട്ടേഷൻ രീതികൾ</value>
   </data>
-  <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>വിൻഡോയുടെ സ്ഥാനം, വലുപ്പം, മോണിറ്റർ എന്നിവ സംരക്ഷിക്കുന്നു.</value>
-  </data>
-  <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
-    <value>വിൻഡോ നില ഓർമ്മിക്കുക</value>
-  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+  <value>'പഴയ അവസ്ഥ' വിൻഡോയുടെ അവസാന വലുപ്പം, സ്ഥാനം, മോണിറ്റർ എന്നിവ പുനഃസ്ഥാപിക്കുന്നു.</value>
+</data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+  <value>സ്റ്റാർട്ടപ്പ് വിൻഡോ നില</value>
+</data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+  <value>മാക്സിമൈസ്ഡ്</value>
+</data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+  <value>ഫുൾ സ്ക്രീൻ</value>
+</data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+  <value>പഴയ അവസ്ഥ</value>
+</data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>പ്രശ്നങ്ങൾ GitHub-ൽ റിപ്പോർട്ട് ചെയ്യുക അല്ലെങ്കിൽ ryftools@outlook.com-ലേക്ക് മെയിൽ ചെയ്യുക</value>
   </data>

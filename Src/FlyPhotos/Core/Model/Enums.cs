@@ -1,4 +1,4 @@
-﻿namespace FlyPhotos.Core.Model;
+namespace FlyPhotos.Core.Model;
 
 public enum DisplayLevel
 {
@@ -73,3 +73,10 @@ public enum PanZoomBehaviourOnNavigation
 }
 
 public enum RawDecoder { Rawler, WIC, ImageMagick }
+
+public enum WindowLaunchMode
+{
+    Maximized,
+    FullScreen,
+    LastWindowState
+}

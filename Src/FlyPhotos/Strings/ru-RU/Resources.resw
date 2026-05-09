@@ -400,12 +400,21 @@
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Настройки панорамирования, зума и поворота при просмотре</value>
   </data>
-  <data name="SettingsCardRememberLastWindowState.Description" xml:space="preserve">
-    <value>Сохраняет размер, положение, экран и состояние развернутого окна</value>
-  </data>
-  <data name="SettingsCardRememberLastWindowState.Header" xml:space="preserve">
-    <value>Запоминать состояние окна</value>
-  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+  <value>Предыдущее состояние восстанавливает размер, положение и монитор окна.</value>
+</data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+  <value>Состояние окна при запуске</value>
+</data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+  <value>Развернуто</value>
+</data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+  <value>Во весь экран</value>
+</data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+  <value>Предыдущее состояние</value>
+</data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Сообщайте об ошибках на GitHub или по почте ryftools@outlook.com</value>
   </data>

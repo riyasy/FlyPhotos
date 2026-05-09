@@ -183,9 +183,7 @@
                             HeaderIcon="{ui:FontIcon Glyph=&#xE722;}">
                             <ToggleSwitch x:Name="ButtonDecodeRawData" />
                             <controls:SettingsExpander.Items>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardDecoderPriority"
-                                    x:Uid="SettingsCardDecoderPriority">
+                                <controls:SettingsCard x:Name="SettingsCardDecoderPriority" x:Uid="SettingsCardDecoderPriority">
                                     <ListView
                                         x:Name="PriorityListView"
                                         Width="Auto"
@@ -388,11 +386,18 @@
                             <ToggleSwitch x:Name="ButtonConfirmBeforeDelete" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
-                            x:Name="SettingsCardRememberLastWindowState"
-                            x:Uid="SettingsCardRememberLastWindowState"
+                            x:Name="SettingsCardWindowLaunchMode"
+                            x:Uid="SettingsCardWindowLaunchMode"
                             Margin="0,5,0,0"
                             HeaderIcon="{ui:FontIcon Glyph=&#xEC77;}">
-                            <ToggleSwitch x:Name="ButtonRememberLastWindowState" />
+                            <ComboBox
+                                x:Name="ComboWindowLaunchMode"
+                                MinWidth="150"
+                                HorizontalAlignment="Right">
+                                <ComboBoxItem x:Uid="ComboWindowLaunchModeItemMaximized" />
+                                <ComboBoxItem x:Uid="ComboWindowLaunchModeItemFullScreen" />
+                                <ComboBoxItem x:Uid="ComboWindowLaunchModeItemLastWindowState" />
+                            </ComboBox>
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardAllowMultiInstance"
