@@ -647,4 +647,10 @@ Esc：關閉設定或離開應用程式</value>
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
     <value>WIC（Windows Imaging Component）：系統編解碼器 • Rawler：最快 • ImageMagick：最佳相容性</value>
   </data>
+  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
+  <value>將小型照片放大以符合顯示區域</value>
+</data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+  <value>大型照片會自動符合顯示區域。小型照片預設以 1:1 顯示；啟用此選項可放大並符合顯示區域。</value>
+</data>
 </root>

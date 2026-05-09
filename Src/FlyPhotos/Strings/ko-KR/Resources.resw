@@ -646,4 +646,10 @@ Esc : 설정 닫기 또는 앱 종료</value>
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
     <value>WIC (Windows Imaging Component): 시스템 코덱 • Rawler: 가장 빠름 • ImageMagick: 최고의 호환성</value>
   </data>
+  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
+  <value>작은 사진을 화면에 맞게 확대</value>
+</data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+  <value>큰 사진은 항상 화면에 맞게 표시됩니다. 작은 사진은 기본적으로 1:1 크기로 표시되며, 이 옵션을 켜면 확대하여 화면에 맞춥니다.</value>
+</data>
 </root>

@@ -58,6 +58,7 @@ public class AppSettings
     public bool HighQualityInterpolation { get; set; } = true;
     public bool CheckeredBackground { get; set; } = false;
     public int ImageFitPercentage { get; set; } = 100;
+    public bool StretchSmallImages { get; set; } = false;
     public int TransparentBackgroundIntensity { get; set; } = 40;
     public int ThumbnailSize { get; set; } = 40;
     public int ScrollThreshold { get; set; } = 60;

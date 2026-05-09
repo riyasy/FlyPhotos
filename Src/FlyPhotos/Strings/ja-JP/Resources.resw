@@ -646,4 +646,10 @@ Esc : 設定を閉じる / アプリを終了</value>
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
     <value>WIC（Windows Imaging Component）：システムコーデック • Rawler：最速 • ImageMagick：最高の互換性</value>
   </data>
+  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
+  <value>小さい写真を表示領域に合わせて拡大</value>
+</data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+  <value>大きい写真は常に表示領域に収まります。小さい写真は既定で1:1で表示されますが、これを有効にすると拡大して表示領域に合わせます。</value>
+</data>
 </root>

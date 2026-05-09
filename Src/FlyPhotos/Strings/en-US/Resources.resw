@@ -647,4 +647,10 @@ Esc : Close Settings or Exit App</value>
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
     <value>WIC (Windows Imaging Component) : System codecs • Rawler : fastest • ImageMagick : best compatibility</value>
   </data>
+  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
+    <value>Zoom small photos to fit display area</value>
+  </data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+    <value>Large photos always fit display area. Small photos are shown at 1:1 by default; enable this to zoom and fit them.</value>
+  </data>
 </root>

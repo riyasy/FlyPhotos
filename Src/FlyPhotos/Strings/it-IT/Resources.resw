@@ -647,4 +647,10 @@ Esc : Chiudi impostazioni o Esci</value>
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
     <value>WIC (Windows Imaging Component): codec di sistema • Rawler: più veloce • ImageMagick: migliore compatibilità</value>
   </data>
+  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
+  <value>Ingrandisci le foto piccole per adattarle all’area di visualizzazione</value>
+</data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+  <value>Le foto grandi si adattano sempre all’area di visualizzazione. Le foto piccole vengono mostrate a dimensione reale (1:1) per impostazione predefinita; abilita questa opzione per ingrandirle e adattarle.</value>
+</data>
 </root>

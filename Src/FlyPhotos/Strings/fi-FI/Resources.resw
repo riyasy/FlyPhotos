@@ -647,4 +647,10 @@ Esc : Sulje asetukset tai Poistu</value>
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
     <value>WIC (Windows Imaging Component): järjestelmäkoodekit • Rawler: nopein • ImageMagick: paras yhteensopivuus</value>
   </data>
+  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
+  <value>Suurenna pienet kuvat näkymän kokoisiksi</value>
+</data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+  <value>Suuret kuvat sovitetaan aina näkymään. Pienet kuvat näytetään oletuksena koossa 1:1; ota tämä käyttöön suurentaaksesi ne näkymään sopiviksi.</value>
+</data>
 </root>

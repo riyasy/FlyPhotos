@@ -170,6 +170,13 @@
                                 StepFrequency="10" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
+                            x:Name="SettingsCardStretchSmallImages"
+                            x:Uid="SettingsCardStretchSmallImages"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE740;}">
+                            <ToggleSwitch x:Name="ButtonStretchSmallImages" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
                             x:Name="SettingsCardShowCheckeredBackground"
                             x:Uid="SettingsCardShowCheckeredBackground"
                             Margin="0,5,0,0"

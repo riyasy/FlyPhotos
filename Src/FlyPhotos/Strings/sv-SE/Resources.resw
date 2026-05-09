@@ -647,4 +647,10 @@ Esc : Stäng inställningar eller Avsluta</value>
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
     <value>WIC (Windows Imaging Component): systemkodekar • Rawler: snabbast • ImageMagick: bästa kompatibilitet</value>
   </data>
+  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
+  <value>Zooma små bilder för att passa visningsytan</value>
+</data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+  <value>Stora bilder anpassas alltid till visningsytan. Små bilder visas i 1:1 som standard; aktivera detta för att zooma in och anpassa dem.</value>
+</data>
 </root>

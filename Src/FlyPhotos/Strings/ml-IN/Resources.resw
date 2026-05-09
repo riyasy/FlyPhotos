@@ -644,4 +644,10 @@ Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാ
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
     <value>WIC (Windows Imaging Component): സിസ്റ്റം കോഡെക്കുകൾ • Rawler: ഏറ്റവും വേഗം • ImageMagick: മികച്ച അനുയോജ്യത</value>
   </data>
+  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
+  <value>ചെറിയ ഫോട്ടോകൾ പ്രദർശന മേഖലയിലേക്ക് വലുതാക്കുക</value>
+</data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+  <value>വലിയ ഫോട്ടോകൾ എപ്പോഴും പ്രദർശന മേഖലയിലേക്ക് പൊരുത്തപ്പെടും. ചെറിയ ഫോട്ടോകൾ സാധാരണയായി 1:1 വലുപ്പത്തിൽ കാണിക്കും; ഇത് പ്രവർത്തനക്ഷമമാക്കുമ്പോൾ അവ വലുതാക്കി പ്രദർശന മേഖലയിലേക്ക് പൊരുത്തപ്പെടുത്തും.</value>
+</data>
 </root>

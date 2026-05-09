@@ -648,4 +648,10 @@ Extra instanties tonen alleen de geselecteerde afbeelding (geen navigatie, verwi
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
     <value>WIC (Windows Imaging Component): systeemcodecs • Rawler: snelste • ImageMagick: beste compatibiliteit</value>
   </data>
+  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
+  <value>Kleine foto’s vergroten om in beeld te passen</value>
+</data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+  <value>Grote foto’s passen altijd in beeld. Kleine foto’s worden standaard op ware grootte (1:1) weergegeven; schakel dit in om ze te vergroten en passend te maken.</value>
+</data>
 </root>

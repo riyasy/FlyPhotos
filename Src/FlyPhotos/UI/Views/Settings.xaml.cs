@@ -77,6 +77,7 @@ internal sealed partial class Settings
         ButtonShowZoomPercent.IsOn = AppConfig.Settings.ShowZoomPercent;
         ButtonShowCheckeredBackground.IsOn = AppConfig.Settings.CheckeredBackground;
         SliderImageFitPercentage.Value = AppConfig.Settings.ImageFitPercentage;
+        ButtonStretchSmallImages.IsOn = AppConfig.Settings.StretchSmallImages;
         SliderTransparentBackgroundIntensity.Value = AppConfig.Settings.TransparentBackgroundIntensity;
         RectThumbnailSelection.Stroke = new SolidColorBrush(ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor));
         SliderThumbnailSize.Value = AppConfig.Settings.ThumbnailSize;
@@ -105,6 +106,7 @@ internal sealed partial class Settings
         ButtonShowZoomPercent.Toggled += ButtonShowZoomPercent_OnToggled;
         ButtonShowCheckeredBackground.Toggled += ButtonShowCheckeredBackground_OnToggled;
         SliderImageFitPercentage.ValueChanged += SliderImageFitPercentage_ValueChanged;
+        ButtonStretchSmallImages.Toggled += ButtonStretchSmallImages_OnToggled;
         SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
         SliderThumbnailSize.ValueChanged += SliderThumbnailSize_ValueChanged;
         ComboWindowLaunchMode.SelectionChanged += ComboWindowLaunchMode_OnSelectionChanged;
@@ -248,6 +250,12 @@ internal sealed partial class Settings
     private async void SliderImageFitPercentage_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
         AppConfig.Settings.ImageFitPercentage = (int)SliderImageFitPercentage.Value;
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ButtonStretchSmallImages_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.StretchSmallImages = ButtonStretchSmallImages.IsOn;
         await AppConfig.SaveAsync();
     }
 

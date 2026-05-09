@@ -647,4 +647,10 @@ Esc : Einstellungen schließen oder App beenden</value>
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
     <value>WIC (Windows Imaging Component): Systemcodecs • Rawler: am schnellsten • ImageMagick: beste Kompatibilität</value>
   </data>
+  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
+  <value>Kleine Fotos an Anzeigebereich anpassen</value>
+</data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+  <value>Große Fotos passen immer in den Anzeigebereich. Kleine Fotos werden standardmäßig in Originalgröße (1:1) angezeigt; aktivieren Sie dies, um sie zu vergrößern und anzupassen.</value>
+</data>
 </root>

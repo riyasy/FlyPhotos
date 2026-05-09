@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Windows.Foundation;
@@ -208,7 +208,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     private void SetDefaultView(Size imageSize, int imageRotation, Size canvasSize, bool isFirstPhotoEver)
     {
         var defaultFitScale = CalculateScreenFitScale(canvasSize, imageSize, imageRotation);
-        var initialScale = Math.Min(defaultFitScale, 1.0f);
+        var initialScale = AppConfig.Settings.StretchSmallImages ? defaultFitScale : Math.Min(defaultFitScale, 1.0f);
 
         _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         _canvasViewState.LastScaleTo = initialScale;
@@ -616,7 +616,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     {
         // 1. Calculate the scale of the *actual* default view (which doesn't upscale small images).
         var defaultFitScale = CalculateScreenFitScale(canvasSize, imageSize, _originalImageRotation);
-        var defaultInitialScale = Math.Min(defaultFitScale, 1.0f);
+        var defaultInitialScale = AppConfig.Settings.StretchSmallImages ? defaultFitScale : Math.Min(defaultFitScale, 1.0f);
 
         // 2. Check if the final scale from the user action matches the default scale.
         var isDefaultScale = Math.Abs(finalScale - defaultInitialScale) < 0.001f;
