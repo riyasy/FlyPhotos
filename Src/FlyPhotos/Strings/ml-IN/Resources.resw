@@ -213,6 +213,9 @@
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
     <value>അടുത്തത് അല്ലെങ്കിൽ മുൻപത്തേത് കാണുക</value>
   </data>
+  <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
+    <value>അടുത്തത് അല്ലെങ്കിൽ മുൻപത്തേത് കാണുക</value>
+  </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>സൂം ഇൻ അല്ലെങ്കിൽ സൂം ഔട്ട്</value>
   </data>
@@ -515,6 +518,9 @@ Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാ
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>തമ്പ്‌നെയിൽ സ്ട്രിപ്പ് കാണിക്കുക</value>
   </data>
+  <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
+    <value>സൂം ചെയ്യുമ്പോൾ സ്ക്രീൻ മദ്ധ്യത്തിൽ സൂം ശതമാനം കാണിക്കുക.</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>സൂം ശതമാനം സ്ക്രീനിൽ കാണിക്കുക</value>
   </data>
@@ -658,5 +664,14 @@ Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാ
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
+    <value>മൗസ് ഫോർവേഡ്/ബാക്ക് ബട്ടണുകൾ</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
+    <value>മൗസിലെ ഫോർവേഡ്/ബാക്ക് ബട്ടണുകൾ എന്ത് ചെയ്യണമെന്ന് തിരഞ്ഞെടുക്കുക (ചില മൗസുകളിൽ മാത്രമേ ലഭ്യമാകൂ).</value>
+  </data>
+  <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
+    <value>ഘട്ടംഘട്ടമായ സൂം</value>
   </data>
 </root>

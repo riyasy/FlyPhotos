@@ -213,6 +213,9 @@
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
     <value>Nächstes oder Vorheriges ansehen</value>
   </data>
+  <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
+    <value>Nächstes oder Vorheriges ansehen</value>
+  </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Vergrößern oder Verkleinern</value>
   </data>
@@ -518,6 +521,9 @@ Esc : Einstellungen schließen oder App beenden</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Miniaturansichtleiste anzeigen</value>
   </data>
+  <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
+    <value>Zoomprozentsatz beim Zoomen in der Bildschirmmitte anzeigen.</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>Zoomprozentsatz anzeigen</value>
   </data>
@@ -661,5 +667,14 @@ Esc : Einstellungen schließen oder App beenden</value>
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
+    <value>Vorwärts-/Zurück-Tasten der Maus</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
+    <value>Wählen Sie aus, was die Vorwärts- und Zurück-Tasten der Maus tun (nur bei einigen Mäusen verfügbar).</value>
+  </data>
+  <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
+    <value>Stufenweises Zoomen</value>
   </data>
 </root>

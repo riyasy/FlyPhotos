@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -211,6 +211,9 @@
     <value>Transparent</value>
   </data>
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
+    <value>View Next or Previous</value>
+  </data>
+  <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
     <value>View Next or Previous</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
@@ -518,6 +521,9 @@ Esc : Close Settings or Exit App</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Show thumbnail strip</value>
   </data>
+  <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
+    <value>Show zoom percentage at the center of the screen while zooming.</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>Show Zoom percentage</value>
   </data>
@@ -661,5 +667,14 @@ Esc : Close Settings or Exit App</value>
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
+    <value>Mouse forward/back button</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
+    <value>Choose what the mouse forward and back buttons do (Available on some mice).</value>
+  </data>
+  <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
+    <value>Stepped Zoom</value>
   </data>
 </root>

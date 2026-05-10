@@ -238,6 +238,20 @@
                         </controls:SettingsExpander>
 
                         <controls:SettingsCard
+                            x:Name="SettingsCardMouseFwdBackBehaviour"
+                            x:Uid="SettingsCardMouseFwdBackBehaviour"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;}">
+                            <ComboBox
+                                x:Name="ComboMouseFwdBackBehaviour"
+                                MinWidth="150"
+                                SelectedIndex="0">
+                                <ComboBoxItem x:Uid="ComboMouseFwdBackItemNav" />
+                                <ComboBoxItem x:Uid="ComboMouseFwdBackItemStepZoom" />
+                            </ComboBox>
+                        </controls:SettingsCard>
+
+                        <controls:SettingsCard
                             x:Name="SettingsCardConfirmBeforeDelete"
                             x:Uid="SettingsCardConfirmBeforeDelete"
                             Margin="0,5,0,0"

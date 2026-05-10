@@ -213,6 +213,9 @@
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
     <value>Wyświetl następny lub poprzedni</value>
   </data>
+  <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
+    <value>Wyświetl następny lub poprzedni</value>
+  </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Powiększ lub pomniejsz</value>
   </data>
@@ -518,6 +521,9 @@ Esc : Zamknij ustawienia lub Wyjdź</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Pokaż pasek miniatur</value>
   </data>
+  <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
+    <value>Wyświetl procent powiększenia na środku ekranu podczas powiększania.</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>Pokaż procent powiększenia</value>
   </data>
@@ -661,5 +667,14 @@ Esc : Zamknij ustawienia lub Wyjdź</value>
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
+    <value>Przyciski do przodu/do tyłu myszy</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
+    <value>Wybierz działanie przycisków do przodu i do tyłu myszy (dostępne w niektórych myszach).</value>
+  </data>
+  <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
+    <value>Powiększanie krokowe</value>
   </data>
 </root>

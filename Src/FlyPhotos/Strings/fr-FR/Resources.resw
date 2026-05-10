@@ -213,6 +213,9 @@
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
     <value>Afficher Suivant ou Précédent</value>
   </data>
+  <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
+    <value>Afficher Suivant ou Précédent</value>
+  </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Zoomer avant ou arrière</value>
   </data>
@@ -518,6 +521,9 @@ Esc : Fermer les paramètres ou Quitter</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Afficher la bande de miniatures</value>
   </data>
+  <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
+    <value>Afficher le pourcentage de zoom au centre de l’écran pendant le zoom.</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>Afficher le pourcentage de zoom</value>
   </data>
@@ -661,5 +667,14 @@ Esc : Fermer les paramètres ou Quitter</value>
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
+    <value>Boutons avant/arrière de la souris</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
+    <value>Choisissez l’action des boutons avant et arrière de la souris (disponible sur certaines souris).</value>
+  </data>
+  <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
+    <value>Zoom par paliers</value>
   </data>
 </root>

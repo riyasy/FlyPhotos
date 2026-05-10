@@ -69,6 +69,7 @@ internal sealed partial class Settings
         ComboTheme.SelectedIndex = GetIndexForTheme(AppConfig.Settings.Theme);
         ComboBackGround.SelectedIndex = GetIndexForBackdrop(AppConfig.Settings.WindowBackdrop);
         ComboMouseWheelBehaviour.SelectedIndex = GetIndexForMouseWheelBehaviour(AppConfig.Settings.DefaultMouseWheelBehavior);
+        ComboMouseFwdBackBehaviour.SelectedIndex = GetIndexForMouseFwdBackBehavior(AppConfig.Settings.MouseFwdBackBehavior);
         ButtonShowThumbnail.IsOn = AppConfig.Settings.ShowThumbnails;
         ButtonEnableAutoFade.IsOn = AppConfig.Settings.AutoFade;
         ButtonOpenExitZoom.IsOn = AppConfig.Settings.OpenExitZoom;
@@ -98,6 +99,7 @@ internal sealed partial class Settings
         ComboTheme.SelectionChanged += ComboTheme_OnSelectionChanged;
         ComboBackGround.SelectionChanged += ComboBackGround_OnSelectionChanged;
         ComboMouseWheelBehaviour.SelectionChanged += ComboMouseWheel_OnSelectionChanged;
+        ComboMouseFwdBackBehaviour.SelectionChanged += ComboMouseFwdBackBehaviour_OnSelectionChanged;
         ButtonShowThumbnail.Toggled += ButtonShowThumbnail_OnToggled;
         ButtonOpenExitZoom.Toggled += ButtonOpenExitZoom_OnToggled;
         ButtonEnableAutoFade.Toggled += ButtonEnableAutoFade_OnToggled;
@@ -320,6 +322,13 @@ internal sealed partial class Settings
         await AppConfig.SaveAsync();
     }
 
+    private async void ComboMouseFwdBackBehaviour_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        var behavior = GetMouseFwdBackBehaviorForIndex(ComboMouseFwdBackBehaviour.SelectedIndex);
+        AppConfig.Settings.MouseFwdBackBehavior = behavior;
+        await AppConfig.SaveAsync();
+    }
+
     private async void ButtonShowThumbnail_OnToggled(object sender, RoutedEventArgs e)
     {
         AppConfig.Settings.ShowThumbnails = ButtonShowThumbnail.IsOn;
@@ -427,6 +436,21 @@ internal sealed partial class Settings
     private static DefaultMouseWheelBehavior GetMouseWheelForIndex(int index)
     {
         return index == 1 ? DefaultMouseWheelBehavior.Navigate : DefaultMouseWheelBehavior.Zoom;
+    }
+
+    private static int GetIndexForMouseFwdBackBehavior(MouseFwdBackBehavior behaviour)
+    {
+        return behaviour switch
+        {
+            MouseFwdBackBehavior.Navigate => 0,
+            MouseFwdBackBehavior.StepZoom => 1,
+            _ => 0
+        };
+    }
+
+    private static MouseFwdBackBehavior GetMouseFwdBackBehaviorForIndex(int index)
+    {
+        return index == 1 ? MouseFwdBackBehavior.StepZoom : MouseFwdBackBehavior.Navigate;
     }
 
     private static int GetIndexForPanZoomBehaviour(PanZoomBehaviourOnNavigation behaviour)

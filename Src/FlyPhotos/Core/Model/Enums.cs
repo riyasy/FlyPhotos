@@ -44,6 +44,12 @@ public enum DefaultMouseWheelBehavior
     Navigate
 }
 
+public enum MouseFwdBackBehavior
+{
+    Navigate,
+    StepZoom
+}
+
 public enum Setting
 {
     ThumbnailShowHide,

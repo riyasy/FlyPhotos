@@ -213,6 +213,9 @@
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
     <value>查看上一張或下一張</value>
   </data>
+  <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
+    <value>查看上一張或下一張</value>
+  </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>放大或縮小</value>
   </data>
@@ -518,6 +521,9 @@ Esc：關閉設定或離開應用程式</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>顯示縮圖列</value>
   </data>
+  <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
+    <value>縮放時在螢幕中央顯示縮放百分比。</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>顯示縮放百分比</value>
   </data>
@@ -661,5 +667,14 @@ Esc：關閉設定或離開應用程式</value>
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
+    <value>滑鼠前進/後退按鈕</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
+    <value>選擇滑鼠前進/後退按鈕的功能（僅部分滑鼠支援）。</value>
+  </data>
+  <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
+    <value>分段縮放</value>
   </data>
 </root>

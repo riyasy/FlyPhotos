@@ -213,6 +213,9 @@
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
     <value>Ver Siguiente o Anterior</value>
   </data>
+  <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
+    <value>Ver Siguiente o Anterior</value>
+  </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Acercar o Alejar</value>
   </data>
@@ -518,6 +521,9 @@ Esc : Cerrar ajustes o Salir</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Mostrar tira de miniaturas</value>
   </data>
+  <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
+    <value>Mostrar el porcentaje de zoom en el centro de la pantalla al hacer zoom.</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>Mostrar porcentaje de zoom</value>
   </data>
@@ -661,5 +667,14 @@ Esc : Cerrar ajustes o Salir</value>
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
+    <value>Botones de avance/retroceso del ratón</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
+    <value>Elige qué hacen los botones de avance y retroceso del ratón (disponible en algunos ratones).</value>
+  </data>
+  <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
+    <value>Zoom por pasos</value>
   </data>
 </root>

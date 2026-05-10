@@ -213,6 +213,9 @@
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
     <value>次/前の表示</value>
   </data>
+  <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
+    <value>次/前の表示</value>
+  </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>ズームインまたはズームアウト</value>
   </data>
@@ -517,6 +520,9 @@ Esc : 設定を閉じる / アプリを終了</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>サムネイルストリップを表示</value>
   </data>
+  <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
+    <value>ズーム時に画面中央にズーム率を表示。</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>ズーム率を表示</value>
   </data>
@@ -660,5 +666,14 @@ Esc : 設定を閉じる / アプリを終了</value>
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
+    <value>マウスの進む／戻るボタン</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
+    <value>マウスの進む／戻るボタンの動作を選択します（一部のマウスで利用可能）。</value>
+  </data>
+  <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
+    <value>段階的ズーム</value>
   </data>
 </root>

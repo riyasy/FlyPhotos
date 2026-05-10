@@ -213,6 +213,9 @@
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
     <value>Просмотр фото вперёд или назад</value>
   </data>
+  <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
+    <value>Просмотр фото вперёд или назад</value>
+  </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Увеличение или уменьшение</value>
   </data>
@@ -519,6 +522,9 @@ Esc : Закрыть параметры или выйти из приложен�
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Показывать панель миниатюр</value>
   </data>
+  <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
+    <value>Показывать процент увеличения в центре экрана при масштабировании.</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>Показывать процент масштаба</value>
   </data>
@@ -662,5 +668,14 @@ Esc : Закрыть параметры или выйти из приложен�
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
+    <value>Кнопки «вперёд/назад» мыши</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
+    <value>Выберите, что делают кнопки «вперёд» и «назад» мыши (доступно на некоторых мышах).</value>
+  </data>
+  <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
+    <value>Пошаговое масштабирование</value>
   </data>
 </root>

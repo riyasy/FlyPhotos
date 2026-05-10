@@ -213,6 +213,9 @@
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
     <value>Näytä seuraava tai edellinen</value>
   </data>
+  <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
+    <value>Näytä seuraava tai edellinen</value>
+  </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Lähennä tai loitonna</value>
   </data>
@@ -518,6 +521,9 @@ Esc : Sulje asetukset tai Poistu</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Näytä pikkukuvapalkki</value>
   </data>
+  <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
+    <value>Näytä zoomausprosentti näytön keskellä zoomattaessa.</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>Näytä zoomausprosentti</value>
   </data>
@@ -661,5 +667,14 @@ Esc : Sulje asetukset tai Poistu</value>
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
+    <value>Hiiren eteen-/taaksepainikkeet</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
+    <value>Valitse, mitä hiiren eteen- ja taaksepäin-painikkeet tekevät (käytettävissä joissakin hiirissä).</value>
+  </data>
+  <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
+    <value>Portaittainen zoomaus</value>
   </data>
 </root>

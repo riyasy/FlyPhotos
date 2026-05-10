@@ -62,7 +62,14 @@ public class AppSettings
     public int TransparentBackgroundIntensity { get; set; } = 40;
     public int ThumbnailSize { get; set; } = 40;
     public int ScrollThreshold { get; set; } = 60;
-    public bool UseMouseFwdBackForStepZoom { get; set; } = false;
+    [JsonPropertyName("MouseFwdBackBehavior")] public string MouseFwdBackBehaviorAsString { get; set; } = "Navigate";
+
+    [JsonIgnore]
+    public MouseFwdBackBehavior MouseFwdBackBehavior
+    {
+        get => Enum.TryParse<MouseFwdBackBehavior>(MouseFwdBackBehaviorAsString, true, out var result) ? result : MouseFwdBackBehavior.Navigate;
+        set => MouseFwdBackBehaviorAsString = value.ToString();
+    }
     public bool ConfirmForDelete { get; set; } = true;
     public bool ShowFileName { get; set; } = true;
     public bool ShowCacheStatus { get; set; } = true;

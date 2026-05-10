@@ -213,6 +213,9 @@
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
     <value>Visualizza Successivo o Precedente</value>
   </data>
+  <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
+    <value>Visualizza Successivo o Precedente</value>
+  </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Ingrandisci o Riduci</value>
   </data>
@@ -518,6 +521,9 @@ Esc : Chiudi impostazioni o Esci</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Mostra striscia miniature</value>
   </data>
+  <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
+    <value>Mostra la percentuale di zoom al centro dello schermo durante lo zoom.</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>Mostra percentuale zoom</value>
   </data>
@@ -661,5 +667,14 @@ Esc : Chiudi impostazioni o Esci</value>
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
+    <value>Pulsanti avanti/indietro del mouse</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
+    <value>Scegli cosa fanno i pulsanti avanti e indietro del mouse (disponibile su alcuni mouse).</value>
+  </data>
+  <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
+    <value>Zoom a livelli</value>
   </data>
 </root>

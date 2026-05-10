@@ -213,6 +213,9 @@
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
     <value>Visa nästa eller föregående</value>
   </data>
+  <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
+    <value>Visa nästa eller föregående</value>
+  </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Zooma in eller ut</value>
   </data>
@@ -518,6 +521,9 @@ Esc : Stäng inställningar eller Avsluta</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Visa miniatyrbildsremsa</value>
   </data>
+  <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
+    <value>Visa zoomprocent i mitten av skärmen vid zoomning.</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>Visa zoomprocent</value>
   </data>
@@ -661,5 +667,14 @@ Esc : Stäng inställningar eller Avsluta</value>
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
+    <value>Musens framåt-/bakåtknappar</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
+    <value>Välj vad musens framåt- och bakåtknappar gör (finns på vissa möss).</value>
+  </data>
+  <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
+    <value>Stegvis zoom</value>
   </data>
 </root>

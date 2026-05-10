@@ -213,6 +213,9 @@
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
     <value>다음 또는 이전 보기</value>
   </data>
+  <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
+    <value>다음 또는 이전 보기</value>
+  </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>확대 또는 축소</value>
   </data>
@@ -517,6 +520,9 @@ Esc : 설정 닫기 또는 앱 종료</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>축소판 그림 표시줄 표시</value>
   </data>
+  <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
+    <value>확대/축소 시 화면 중앙에 줌 비율 표시.</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>확대/축소 비율 표시</value>
   </data>
@@ -660,5 +666,14 @@ Esc : 설정 닫기 또는 앱 종료</value>
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
+    <value>마우스 앞으로/뒤로 버튼</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
+    <value>마우스 앞으로/뒤로 버튼의 동작을 선택합니다(일부 마우스에서만 지원).</value>
+  </data>
+  <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
+    <value>단계별 줌</value>
   </data>
 </root>
