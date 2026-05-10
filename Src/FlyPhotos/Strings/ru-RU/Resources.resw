@@ -127,7 +127,7 @@
     <value>Выберите приложение</value>
   </data>
   <data name="BrowseBtn.Content" xml:space="preserve">
-    <value>Обзор приложения…</value>
+    <value>Найти приложение…</value>
   </data>
   <data name="BtnCheckVersion.Content" xml:space="preserve">
     <value>Проверить обновления</value>
@@ -143,6 +143,9 @@
   </data>
   <data name="ButtonBackToolTip.Content" xml:space="preserve">
     <value>Предыдущее фото</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>Очистить</value>
   </data>
   <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
     <value>Показать состояние кэша</value>
@@ -175,7 +178,7 @@
     <value>Открыть в других приложениях</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
-    <value>Для изменения языка интерфейса, необходимо перезапустить приложение</value>
+    <value>Для изменения языка интерфейса, необходимо перезапустить приложение.</value>
   </data>
   <data name="ChangeLanguageAlert.Title" xml:space="preserve">
     <value>Смена языка</value>
@@ -231,6 +234,15 @@
   <data name="ComboThemeItemLight.Content" xml:space="preserve">
     <value>Светлая</value>
   </data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+    <value>Во весь экран</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+    <value>Предыдущее состояние</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+    <value>Развернуто</value>
+  </data>
   <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
     <value>Отмена</value>
   </data>
@@ -245,8 +257,8 @@
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
     <value>Чтобы установить FlyPhotos как приложение по умолчанию:
-Щёлкните правой кнопкой мыши по фото → Открыть с помощью → Выбрать другое приложение.
-Выберите FlyPhotos и включите параметр «Всегда»</value>
+Щёлкните правой кнопкой мыши по фото &gt; Открыть с помощью &gt; Выбрать другое приложение.
+Выберите FlyPhotos и нажмите «Всегда».</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
     <value>В Windows 11 вы также можете установить FlyPhotos как приложение по умолчанию через
@@ -297,23 +309,47 @@
   <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>Поиск приложений…</value>
   </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>В дополнительных окнах отображается только выбранное изображение (без навигации, удаления и настроек)</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>Разрешить запуск нескольких копий программы (бета-версия)</value>
+  </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
-    <value>Скрывать указатель мыши при отсутствии активности</value>
+    <value>Скрывать указатель мыши при отсутствии активности.</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
     <value>Автоматически скрывать указатель мыши</value>
   </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>Удалить все предпросмотры из кэша на диске.</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>Очистить кэш диска</value>
+  </data>
   <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
-    <value>Запрашивать подтверждение перед удалением файлов</value>
+    <value>Запрашивать подтверждение перед удалением файлов.</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Header" xml:space="preserve">
     <value>Подтверждать удаление файлов</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>FlyPhotos благодарит Svg.Skia, SkiaSharp, Magick.NET, MagicScaler, NLog и WinUIEx.</value>
+    <value>FlyPhotos благодарит Resvg, Magick.NET, MagicScaler, Rawler, NLog и WinUIEx.</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Благодарности</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>Использовать реальные данные RAW вместо встроенного JPEG внутри RAW-файла</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>Декодирование RAW</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC (Windows Imaging Component): системные кодеки • Rawler: быстродействие • ImageMagick: лучшая совместимость</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>Настроить приоритет декодера RAW (перетащите для изменения порядка)</value>
   </data>
   <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
     <value>Помогите сделать FlyPhotos ещё лучше</value>
@@ -322,31 +358,31 @@
     <value>Поддержка FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Выберите внешние приложения для добавления ярлыков</value>
+    <value>Выберите внешние приложения для добавления ярлыков.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Выбор внешних приложений</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Description" xml:space="preserve">
+  <data name="SettingsCardExternalShortcuts.Description" xml:space="preserve">
     <value>Открывать текущее фото в других приложениях</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Header" xml:space="preserve">
+  <data name="SettingsCardExternalShortcuts.Header" xml:space="preserve">
     <value>Показывать ярлыки внешних приложений</value>
   </data>
   <data name="SettingsCardFadeControls.Description" xml:space="preserve">
-    <value>Скрывать элементы управления при отсутствии активности мыши</value>
+    <value>Скрывать элементы управления при отсутствии активности мыши.</value>
   </data>
   <data name="SettingsCardFadeControls.Header" xml:space="preserve">
     <value>Автоматическое скрытие элементов управления</value>
   </data>
   <data name="SettingsCardFadeIntensity.Description" xml:space="preserve">
-    <value>Настроить интенсивность эффекта автоскрытия</value>
+    <value>Настроить интенсивность эффекта автоскрытия.</value>
   </data>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Интенсивность автоскрытия (%)</value>
   </data>
   <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>Отключите для более четких границ пикселей (полезно для пиксельной графики)</value>
+    <value>Отключите для более четких границ пикселей (полезно для пиксельной графики).</value>
   </data>
   <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
     <value>Использовать высококачественную интерполяцию при масштабировании</value>
@@ -362,219 +398,6 @@
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Подогнать под размер экрана</value>
-  </data>
-  <data name="SettingsCardLanguage.Header" xml:space="preserve">
-    <value>Выбор языка</value>
-  </data>
-  <data name="SettingsCardLog.Description" xml:space="preserve">
-    <value>Открыть файл журнала</value>
-  </data>
-  <data name="SettingsCardLog.Header" xml:space="preserve">
-    <value>Файл журнала</value>
-  </data>
-  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Укажите количество фотографий низкого разрешения, сохраняемых в кэше</value>
-  </data>
-  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Кэш низкого разрешения</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
-    <value>Выберите поведение колеса мыши по умолчанию</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
-    <value>Колесо мыши</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + колесо мыши всегда масштабирует
-👉 Alt + колесо мыши всегда переключает фото</value>
-  </data>
-  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
-    <value>⚠ Может замедлить запуск. FlyPhotos загружает фото в полном разрешении при открытии</value>
-  </data>
-  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
-    <value>Увеличить при открытии, уменьшить при закрытии</value>
-  </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ Используйте опцию «Сохранить» только для папок, содержащих фотографии одинакового размера</value>
-  </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
-    <value>Настройки панорамирования, зума и поворота при просмотре</value>
-  </data>
-  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-  <value>Предыдущее состояние восстанавливает размер, положение и монитор окна.</value>
-</data>
-  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
-  <value>Состояние окна при запуске</value>
-</data>
-  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
-  <value>Развернуто</value>
-</data>
-  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
-  <value>Во весь экран</value>
-</data>
-  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
-  <value>Предыдущее состояние</value>
-</data>
-  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
-    <value>Сообщайте об ошибках на GitHub или по почте ryftools@outlook.com</value>
-  </data>
-  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
-    <value>Ошибки и проблемы</value>
-  </data>
-  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
-    <value>Отображать состояние кэша на нижней панели</value>
-  </data>
-  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
-    <value>Отображать состояние кэша</value>
-  </data>
-  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
-    <value>Показывать шахматный фон для прозрачных изображений. 
-⚠ Может влиять на производительность
-</value>
-  </data>
-  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
-    <value>Показывать шахматный фон</value>
-  </data>
-  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
-    <value>Показывать имя текущего файла</value>
-  </data>
-  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
-    <value>Показывать имя файла</value>
-  </data>
-  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
-    <value>Показывать ширину и высоту фото, рядом с именем файла</value>
-  </data>
-  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
-    <value>Показывать размеры фото</value>
-  </data>
-  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
-    <value>Показывать панель миниатюр внизу окна</value>
-  </data>
-  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
-    <value>Показывать панель миниатюр</value>
-  </data>
-  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
-    <value>Показывать процент масштаба</value>
-  </data>
-  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
-    <value>FlyPhotos имеет открытый исходный код и размещён на GitHub</value>
-  </data>
-  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
-    <value>Репозиторий GitHub</value>
-  </data>
-  <data name="SettingsCardTheme.Description" xml:space="preserve">
-    <value>Выберите тему приложения</value>
-  </data>
-  <data name="SettingsCardTheme.Header" xml:space="preserve">
-    <value>Тема окна</value>
-  </data>
-  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
-    <value>Выберите цвет выделения выбранных миниатюр</value>
-  </data>
-  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
-    <value>Цвет выделения миниатюр</value>
-  </data>
-  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
-    <value>Настройка размера миниатюр</value>
-  </data>
-  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
-    <value>Размер миниатюр</value>
-  </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
-    <value>Применяется только для прозрачного фона окна</value>
-  </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
-    <value>Прозрачность (%)</value>
-  </data>
-  <data name="SettingsCardVersion.Description" xml:space="preserve">
-    <value>Текущая версия: {0}</value>
-  </data>
-  <data name="SettingsCardVersion.Header" xml:space="preserve">
-    <value>Текущая версия</value>
-  </data>
-  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
-    <value>Выберите фон окна</value>
-  </data>
-  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
-    <value>Фон окна</value>
-  </data>
-  <data name="SettingsExpanderAutoFade.Header" xml:space="preserve">
-    <value>Настройки автозатухания и скрытия</value>
-  </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>Настройте способ обработки кэша фотографий в FlyPhotos</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>Кэширование</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>Горячие клавиши</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>Настроить панорамирование и масштабирование</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>Панорамирование и масштабирование</value>
-  </data>
-  <data name="SettingsPage.Title" xml:space="preserve">
-    <value>FlyPhotos - Параметры</value>
-  </data>
-  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
-    <value>О программе</value>
-  </data>
-  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
-    <value>Кодеки</value>
-  </data>
-  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
-    <value>Общие</value>
-  </data>
-  <data name="Status_FileNotFound" xml:space="preserve">
-    <value>Файл не найден</value>
-  </data>
-  <data name="Status_InvalidFile" xml:space="preserve">
-    <value>Недопустимый файл</value>
-  </data>
-  <data name="Status_Loading" xml:space="preserve">
-    <value>Загрузка…</value>
-  </data>
-  <data name="Status_PreviewFailed" xml:space="preserve">
-    <value>Ошибка загрузки предпросмотра</value>
-  </data>
-  <data name="TextBlockCaching.Text" xml:space="preserve">
-    <value>Кэширование</value>
-  </data>
-  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
-    <value>FlyPhotos в основном использует кодеки Windows Imaging Component (WIC)</value>
-  </data>
-  <data name="TextBlockLog.Text" xml:space="preserve">
-    <value>Журнал</value>
-  </data>
-  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
-    <value>Отображение фото</value>
-  </data>
-  <data name="TextBlockTheming.Text" xml:space="preserve">
-    <value>Оформление</value>
-  </data>
-  <data name="TextBlockUIControls.Text" xml:space="preserve">
-    <value>Элементы управления</value>
-  </data>
-  <data name="TitleTextBlock.Text" xml:space="preserve">
-    <value>FlyPhotos - Открыть фото</value>
-  </data>
-  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
-    <value>ОК</value>
-  </data>
-  <data name="TrialExpiredMessage.Content" xml:space="preserve">
-    <value>Срок бесплатной версии истёк. Пожалуйста, приобретите полную версию в Microsoft Store</value>
-  </data>
-  <data name="TrialExpiredMessage.Title" xml:space="preserve">
-    <value>Срок пробной версии истёк</value>
-  </data>
-  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
-    <value>Тип загруженного файла не поддерживается</value>
-  </data>
-  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
-    <value>Неподдерживаемый файл</value>
   </data>
   <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
     <value>Стрелка влево/вправо : Просмотр фотографий
@@ -622,37 +445,222 @@ Del : Удалить фото
 
 Esc : Закрыть параметры или выйти из приложения</value>
   </data>
-  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>В дополнительных окнах отображается только выбранное изображение (без навигации, удаления и настроек)</value>
+  <data name="SettingsCardLanguage.Header" xml:space="preserve">
+    <value>Выбор языка</value>
   </data>
-  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Разрешить запуск нескольких копий программы (бета-версия)</value>
+  <data name="SettingsCardLog.Description" xml:space="preserve">
+    <value>Открыть файл журнала</value>
   </data>
-  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
-    <value>Декодирование RAW</value>
+  <data name="SettingsCardLog.Header" xml:space="preserve">
+    <value>Файл журнала</value>
   </data>
-  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
-    <value>Использовать реальные данные RAW вместо встроенного JPEG внутри RAW-файла</value>
+  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
+    <value>Укажите количество фотографий низкого разрешения, сохраняемых в кэше</value>
   </data>
-  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
-    <value>Очистить (удалить временные файлы)</value>
+  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
+    <value>Кэш низкого разрешения</value>
   </data>
-  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Удалить все предпросмотры из кэша на диске</value>
+  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
+    <value>Выберите поведение колеса мыши по умолчанию</value>
   </data>
-  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
-    <value>Очистить</value>
+  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
+    <value>Колесо мыши</value>
   </data>
-  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
-    <value>Настроить приоритет декодера RAW (перетащите для изменения порядка)</value>
+  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
+    <value>👉 Ctrl + колесо мыши всегда масштабирует
+👉 Alt + колесо мыши всегда переключает фото</value>
   </data>
-  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
-    <value>WIC (Windows Imaging Component): системные кодеки • Rawler: быстродействие • ImageMagick: лучшая совместимость</value>
+  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
+    <value>⚠ Может замедлить запуск. FlyPhotos загружает фото в полном разрешении при открытии</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
+    <value>Анимация увеличения при запуске и уменьшение при выходе</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
+    <value>⚠ Используйте опцию «Сохранить» только для папок, содержащих фотографии одинакового размера.</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
+    <value>Настройки панорамирования, зума и поворота при просмотре</value>
+  </data>
+  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
+    <value>Сообщайте об ошибках на GitHub или по почте ryftools@outlook.com</value>
+  </data>
+  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
+    <value>Ошибки и проблемы</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
+    <value>Отображать состояние кэша на нижней панели.</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
+    <value>Отображать состояние кэша</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
+    <value>Показывать шахматный фон для прозрачных изображений. 
+⚠ Может влиять на производительность.</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
+    <value>Показывать шахматный фон</value>
+  </data>
+  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
+    <value>Показывать имя текущего файла</value>
+  </data>
+  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
+    <value>Показывать имя файла</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
+    <value>Показывать ширину и высоту фото, рядом с именем файла</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
+    <value>Показывать размеры фото</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
+    <value>Показывать панель миниатюр внизу окна</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
+    <value>Показывать панель миниатюр</value>
+  </data>
+  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
+    <value>Показывать процент масштаба</value>
+  </data>
+  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
+    <value>FlyPhotos имеет открытый исходный код и размещён на GitHub</value>
+  </data>
+  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
+    <value>Репозиторий GitHub</value>
+  </data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+    <value>Большие фото всегда помещаются в область просмотра. Маленькие фото по умолчанию отображаются в масштабе 1:1; включите это, чтобы увеличить и подогнать их.</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
-  <value>Увеличивать маленькие фото до размера области просмотра</value>
-</data>
-  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
-  <value>Большие фото всегда помещаются в область просмотра. Маленькие фото по умолчанию отображаются в масштабе 1:1; включите это, чтобы увеличить и подогнать их.</value>
-</data>
+    <value>Увеличивать маленькие фото до размера области просмотра</value>
+  </data>
+  <data name="SettingsCardTheme.Description" xml:space="preserve">
+    <value>Выберите тему приложения</value>
+  </data>
+  <data name="SettingsCardTheme.Header" xml:space="preserve">
+    <value>Тема окна</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
+    <value>Выберите цвет выделения выбранных миниатюр</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
+    <value>Цвет выделения миниатюр</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
+    <value>Настройка размера миниатюр</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
+    <value>Размер миниатюр</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
+    <value>Применяется только для прозрачного фона окна.</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
+    <value>Прозрачность (%)</value>
+  </data>
+  <data name="SettingsCardVersion.Description" xml:space="preserve">
+    <value>Текущая версия: {0}</value>
+  </data>
+  <data name="SettingsCardVersion.Header" xml:space="preserve">
+    <value>Текущая версия</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
+    <value>Выберите фон окна.</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
+    <value>Фон окна</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+    <value>Предыдущее состояние восстанавливает размер, положение и монитор окна.</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+    <value>Состояние окна при запуске</value>
+  </data>
+  <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
+    <value>Автозатухание и скрытие</value>
+  </data>
+  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
+    <value>Настройте способ обработки кэша фотографий в FlyPhotos</value>
+  </data>
+  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
+    <value>Кэширование</value>
+  </data>
+  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
+    <value>Горячие клавиши</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
+    <value>Настроить панорамирование и масштабирование</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
+    <value>Панорамирование и масштабирование</value>
+  </data>
+  <data name="SettingsPage.Title" xml:space="preserve">
+    <value>FlyPhotos - Параметры</value>
+  </data>
+  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
+    <value>О программе</value>
+  </data>
+  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
+    <value>Кодеки</value>
+  </data>
+  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
+    <value>Общие</value>
+  </data>
+  <data name="Status_FileNotFound" xml:space="preserve">
+    <value>Файл не найден</value>
+  </data>
+  <data name="Status_InvalidFile" xml:space="preserve">
+    <value>Недопустимый файл</value>
+  </data>
+  <data name="Status_Loading" xml:space="preserve">
+    <value>Загрузка…</value>
+  </data>
+  <data name="Status_PreviewFailed" xml:space="preserve">
+    <value>Ошибка загрузки предпросмотра</value>
+  </data>
+  <data name="TextBlockLog.Text" xml:space="preserve">
+    <value>Диагностика</value>
+  </data>
+  <data name="TextBlockCaching.Text" xml:space="preserve">
+    <value>Кэширование</value>
+  </data>
+  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
+    <value>FlyPhotos в основном использует кодеки Windows Imaging Component (WIC)</value>
+  </data>
+  <data name="TextBlockAdvanced.Text" xml:space="preserve">
+    <value>Расширенные</value>
+  </data>
+  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
+    <value>Клавиатура и мышь</value>
+  </data>
+  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
+    <value>Отображение фото</value>
+  </data>
+  <data name="TextBlockStartupAndAppearance.Text" xml:space="preserve">
+    <value>Запуск и внешний вид</value>
+  </data>
+  <data name="TextBlockUIControls.Text" xml:space="preserve">
+    <value>Элементы управления</value>
+  </data>
+  <data name="TitleTextBlock.Text" xml:space="preserve">
+    <value>FlyPhotos - Открыть фото</value>
+  </data>
+  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
+    <value>ОК</value>
+  </data>
+  <data name="TrialExpiredMessage.Content" xml:space="preserve">
+    <value>Срок бесплатной версии истёк. Пожалуйста, приобретите полную версию в Microsoft Store</value>
+  </data>
+  <data name="TrialExpiredMessage.Title" xml:space="preserve">
+    <value>Срок пробной версии истёк</value>
+  </data>
+  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
+    <value>Тип загруженного файла не поддерживается</value>
+  </data>
+  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
+    <value>Неподдерживаемый файл</value>
+  </data>
+  <data name="_end" xml:space="preserve">
+    <value>end</value>
+  </data>
 </root>

@@ -144,6 +144,9 @@
   <data name="ButtonBackToolTip.Content" xml:space="preserve">
     <value>Edellinen kuva</value>
   </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>Tyhjennä</value>
+  </data>
   <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
     <value>Näytä välimuistin tila</value>
   </data>
@@ -220,7 +223,7 @@
     <value>Palauta panorointi/zoomi/kierto</value>
   </data>
   <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
-    <value>Säilytä panorointi/zoomi edellisestä kuvasta</value>
+    <value>Säilytä näkymä ja zoomaus edellisestä kuvasta</value>
   </data>
   <data name="ComboThemeItemDark.Content" xml:space="preserve">
     <value>Tumma</value>
@@ -230,6 +233,15 @@
   </data>
   <data name="ComboThemeItemLight.Content" xml:space="preserve">
     <value>Vaalea</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+    <value>Koko näyttö</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+    <value>Edellinen tila</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+    <value>Suurennettu</value>
   </data>
   <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
     <value>Peruuta</value>
@@ -245,8 +257,8 @@
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
     <value>Voit asettaa FlyPhotosin oletussovellukseksi: 
-Napsauta kuvaa hiiren kakkospainikkeella &gt; Avaa sovelluksessa &gt; Valitse toinen sovellus. 
-Valitse FlyPhotos ja valitse Aina.</value>
+Napsauta kuvaa hiiren kakkospainikkeella &gt; Avaa sovelluksessa &gt; Valitse muu sovellus. 
+Valitse FlyPhotos ja napsauta Aina.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
     <value>Windows 11:ssä voit myös asettaa FlyPhotosin oletussovellukseksi kohdassa 
@@ -297,11 +309,23 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>Etsi sovelluksia…</value>
   </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>Lisäinstanssit näyttävät vain valitun kuvan (ei navigointia, poistamista tai asetuksia).</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>Salli useita instansseja (Beta)</value>
+  </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Piilota hiiren osoitin, jos hiiri on käyttämättömänä.</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
     <value>Piilota hiiren osoitin automaattisesti</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>Poista kaikki esikatselut levyn välimuistista.</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>Tyhjennä levyn välimuisti</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
     <value>Pyydä vahvistus ennen tiedoston poistamista.</value>
@@ -315,6 +339,18 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Kiitokset</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>Käytä todellisia RAW-tietoja RAW-tiedoston sisällä olevan upotetun JPEG-kuvan sijaan.</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>Dekoodaa kameran RAW-tiedostot</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC (Windows Imaging Component): järjestelmäkoodekit • Rawler: nopein • ImageMagick: paras yhteensopivuus</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>Säädä RAW-dekooderien prioriteettia (vedä järjestääksesi)</value>
+  </data>
   <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
     <value>Tee Flystä entistäkin mahtavampi.</value>
   </data>
@@ -327,10 +363,10 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Valitse ulkoiset sovellukset</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Description" xml:space="preserve">
+  <data name="SettingsCardExternalShortcuts.Description" xml:space="preserve">
     <value>Avaa nykyinen kuva muissa sovelluksissa</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Header" xml:space="preserve">
+  <data name="SettingsCardExternalShortcuts.Header" xml:space="preserve">
     <value>Näytä pikakuvakkeet ulkoisiin sovelluksiin</value>
   </data>
   <data name="SettingsCardFadeControls.Description" xml:space="preserve">
@@ -363,6 +399,51 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Kuvan sovittaminen näyttöön</value>
   </data>
+  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
+    <value>Vasen/Oikea Nuolinäppäin : Selaa kuvia
+Ylös/Alas Nuolinäppäin : Zoomaa sisään tai ulos
+Hiiren vasen painike ja veto : Siirrä kuvaa
+Hiiren oikean painikkeen pohjassa pitäminen : Lähennä
+Hiiren oikea painike : Windowsin Resurssienhallinnan pikavalikko
+
+Hiiren rulla : Zoomaa / Selaa (asetuksesta riippuen)
+Ctrl + Hiiren rulla : Zoomaa sisään tai ulos
+Alt + Hiiren rulla : Selaa kuvia
+Hiiren rullan kallistus Vasen/Oikea : Selaa kuvia
+Hiiren rullan painallus : Koko näyttö
+
+Ctrl + Nuolinäppäimet : Panoroi kuvaa
+Ctrl + + : Zoomaa sisään
+Ctrl + - : Zoomaa ulos
+
+Alt + Vasen/Oikea Nuolinäppäin : Vaihda sivua monisivuisessa TIFF:ssä
+
+Page Up / Page Down : Zoomaa seuraavaan esiasetukseen (100%, 400%, Sovita)
+Home : Siirry ensimmäiseen kuvaan
+End : Siirry viimeiseen kuvaan
+
+Hiiren rulla pikkukuvanauhalla : Selaa kuvia
+Hiiren rulla näytön Vasen/Oikea-painikkeilla : Selaa kuvia
+Hiiren rulla kiertopainikkeella : Kierrä kuvaa
+
+Kosketuslevy kahden sormen pyyhkäisy : Selaa kuvia (Vasen/Oikea)
+Kosketuslevy kahden sormen pyyhkäisy (Ylös/Alas) : Zoomaa / Selaa
+Kosketuslevy nipistys (Pinch) : Zoomaa sisään tai ulos
+
+F11 : Koko näyttö
+
+Alt + Enter : Näytä tiedoston ominaisuudet (Yleiset)
+D : Näytä tiedoston ominaisuudet (Tiedot)
+
+W : Näytä tiedosto Windowsin Resurssienhallinnassa
+S : Avaa Windowsin jakovalinta tiedostolle
+A : Zoomaa todelliseen kokoon
+F : Sovita ikkunaan
+
+Del : Poista kuva
+
+Esc : Sulje asetukset tai Poistu</value>
+  </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>Valitse kieli</value>
   </data>
@@ -392,7 +473,7 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>⚠ Voi hidastaa käynnistystä. Fly odottaa täyden resoluution kuvan latautumista käynnistyksessä.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
-    <value>Lähennä tiedostoa avattaessa ja loitonna poistuttaessa</value>
+    <value>Animoi zoomaus käynnistyksessä ja loitonna poistuttaessa</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
     <value>⚠ Käytä Säilytä-vaihtoehtoa vain kansioissa, joissa on samankokoisia kuvia.</value>
@@ -400,21 +481,6 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Panoroinnin, zoomin ja kierron käyttäytyminen navigoinnin aikana</value>
   </data>
-  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-  <value>Edellinen tila palauttaa ikkunan viimeisimmän koon, sijainnin ja näytön.</value>
-</data>
-  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
-  <value>Ikkunan tila käynnistyksessä</value>
-</data>
-  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
-  <value>Suurennettu</value>
-</data>
-  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
-  <value>Koko näyttö</value>
-</data>
-  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
-  <value>Edellinen tila</value>
-</data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Ilmoita ongelmista GitHubissa tai lähetä sähköpostia osoitteeseen ryftools@outlook.com</value>
   </data>
@@ -461,6 +527,12 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="SettingsCardSourceCode.Header" xml:space="preserve">
     <value>GitHub-arkisto</value>
   </data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+    <value>Suuret kuvat sovitetaan aina näkymään. Pienet kuvat näytetään oletuksena koossa 1:1; ota tämä käyttöön suurentaaksesi ne näkymään sopiviksi.</value>
+  </data>
+  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
+    <value>Suurenna pienet kuvat näkymän kokoisiksi</value>
+  </data>
   <data name="SettingsCardTheme.Description" xml:space="preserve">
     <value>Valitse sovelluksen teema.</value>
   </data>
@@ -497,8 +569,14 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Ikkunan tausta</value>
   </data>
-  <data name="SettingsExpanderAutoFade.Header" xml:space="preserve">
-    <value>Automaattinen häivytys ja piilotus asetukset</value>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+    <value>Edellinen tila palauttaa ikkunan viimeisimmän koon, sijainnin ja näytön.</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+    <value>Ikkunan tila käynnistyksessä</value>
+  </data>
+  <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
+    <value>Automaattinen häivytys ja piilotus</value>
   </data>
   <data name="SettingsExpanderCaching.Description" xml:space="preserve">
     <value>Määritä, miten Fly käsittelee valokuvien välimuistiin tallennusta.</value>
@@ -537,7 +615,10 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Ladataan…</value>
   </data>
   <data name="Status_PreviewFailed" xml:space="preserve">
-    <value>Esikatselun lataus epäonnistui</value>
+    <value>Esikatselua ei voitu ladata</value>
+  </data>
+  <data name="TextBlockLog.Text" xml:space="preserve">
+    <value>Diagnostiikka</value>
   </data>
   <data name="TextBlockCaching.Text" xml:space="preserve">
     <value>Välimuistiin tallennus</value>
@@ -545,14 +626,17 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
     <value>FlyPhotos käyttää enimmäkseen Windows Imaging Component (WIC) -koodekkeja.</value>
   </data>
-  <data name="TextBlockLog.Text" xml:space="preserve">
-    <value>Loki</value>
+  <data name="TextBlockAdvanced.Text" xml:space="preserve">
+    <value>Lisäasetukset</value>
+  </data>
+  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
+    <value>Näppäimistö ja hiiri</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Kuvan näyttö</value>
   </data>
-  <data name="TextBlockTheming.Text" xml:space="preserve">
-    <value>Ulkoasu</value>
+  <data name="TextBlockStartupAndAppearance.Text" xml:space="preserve">
+    <value>Käynnistys ja ulkoasu</value>
   </data>
   <data name="TextBlockUIControls.Text" xml:space="preserve">
     <value>Käyttöliittymän ohjaimet</value>
@@ -575,82 +659,7 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="UnsupportedFileAlert.Title" xml:space="preserve">
     <value>Ei tuettu tiedosto</value>
   </data>
-  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
-    <value>Vasen/Oikea Nuolinäppäin : Selaa kuvia
-Ylös/Alas Nuolinäppäin : Zoomaa sisään tai ulos
-Hiiren vasen painike ja veto : Panoroi kuvaa
-Hiiren oikean painikkeen pohjassa pitäminen : Lähennä
-Hiiren oikea painike : Windowsin Resurssienhallinnan pikavalikko
-
-Hiiren rulla : Zoomaa / Selaa (asetuksesta riippuen)
-Ctrl + Hiiren rulla : Zoomaa sisään tai ulos
-Alt + Hiiren rulla : Selaa kuvia
-Hiiren rullan kallistus Vasen/Oikea : Selaa kuvia
-Hiiren rullan painallus : Koko näyttö
-
-Ctrl + Nuolinäppäimet : Panoroi kuvaa
-Ctrl + + : Zoomaa sisään
-Ctrl + - : Zoomaa ulos
-
-Alt + Vasen/Oikea Nuolinäppäin : Vaihda sivua monisivuisessa TIFF:ssä
-
-Page Up / Page Down : Zoomaa seuraavaan esiasetukseen (100%, 400%, Sovita)
-Home : Siirry ensimmäiseen kuvaan
-End : Siirry viimeiseen kuvaan
-
-Hiiren rulla pikkukuvanauhalla : Selaa kuvia
-Hiiren rulla näytön Vasen/Oikea-painikkeilla : Selaa kuvia
-Hiiren rulla kiertopainikkeella : Kierrä kuvaa
-
-Kosketuslevy kahden sormen pyyhkäisy : Selaa kuvia (Vasen/Oikea)
-Kosketuslevy kahden sormen pyyhkäisy (Ylös/Alas) : Zoomaa / Selaa
-Kosketuslevy nipistys (Pinch) : Zoomaa sisään tai ulos
-
-F11 : Koko näyttö
-
-Alt + Enter : Näytä tiedoston ominaisuudet (Yleiset)
-D : Näytä tiedoston ominaisuudet (Tiedot)
-
-W : Näytä tiedosto Windowsin Resurssienhallinnassa
-S : Avaa Windowsin jakovalinta tiedostolle
-A : Zoomaa todelliseen kokoon
-F : Sovita ikkunaan
-
-Del : Poista kuva
-
-Esc : Sulje asetukset tai Poistu</value>
+  <data name="_end" xml:space="preserve">
+    <value>end</value>
   </data>
-  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Lisäinstanssit näyttävät vain valitun kuvan (ei navigointia, poistamista tai asetuksia).</value>
-  </data>
-  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Salli useita instansseja (Beta)</value>
-  </data>
-  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
-    <value>Dekoodaa kameran RAW-tiedostot</value>
-  </data>
-  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
-    <value>Käytä todellisia RAW-tietoja RAW-tiedoston sisällä olevan upotetun JPEG-kuvan sijaan.</value>
-  </data>
-  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
-    <value>Tyhjennä levyn välimuisti</value>
-  </data>
-  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Poista kaikki esikatselut levyn välimuistista.</value>
-  </data>
-  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
-    <value>Tyhjennä</value>
-  </data>
-  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
-    <value>Säädä RAW-dekooderien prioriteettia (vedä järjestääksesi)</value>
-  </data>
-  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
-    <value>WIC (Windows Imaging Component): järjestelmäkoodekit • Rawler: nopein • ImageMagick: paras yhteensopivuus</value>
-  </data>
-  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
-  <value>Suurenna pienet kuvat näkymän kokoisiksi</value>
-</data>
-  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
-  <value>Suuret kuvat sovitetaan aina näkymään. Pienet kuvat näytetään oletuksena koossa 1:1; ota tämä käyttöön suurentaaksesi ne näkymään sopiviksi.</value>
-</data>
 </root>

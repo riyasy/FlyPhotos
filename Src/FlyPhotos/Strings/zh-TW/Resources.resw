@@ -144,6 +144,9 @@
   <data name="ButtonBackToolTip.Content" xml:space="preserve">
     <value>上一張照片</value>
   </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>清除</value>
+  </data>
   <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
     <value>查看快取狀態</value>
   </data>
@@ -231,6 +234,15 @@
   <data name="ComboThemeItemLight.Content" xml:space="preserve">
     <value>淺色</value>
   </data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+    <value>全螢幕</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+    <value>上次狀態</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+    <value>最大化</value>
+  </data>
   <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
     <value>取消</value>
   </data>
@@ -297,11 +309,23 @@
   <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>搜尋應用程式…</value>
   </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>其他執行個體只會顯示所選影像（無法瀏覽、刪除或變更設定）。</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>允許多個執行個體 (Beta)</value>
+  </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>當滑鼠未使用時，隱藏滑鼠指標。</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
     <value>自動隱藏滑鼠指標</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>從磁碟快取刪除所有預覽。</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>清除磁碟快取</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
     <value>刪除檔案前先詢問確認。</value>
@@ -315,6 +339,18 @@
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>致謝</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>使用實際 RAW 資料，而不是 RAW 檔案內嵌的 JPEG</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>解碼相機 RAW</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC（Windows Imaging Component）：系統編解碼器 • Rawler：最快 • ImageMagick：最佳相容性</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>調整 RAW 解碼器優先順序（拖曳以重新排序）</value>
+  </data>
   <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
     <value>讓 Fly 變得更棒。</value>
   </data>
@@ -327,10 +363,10 @@
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>選取外部應用程式</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Description" xml:space="preserve">
+  <data name="SettingsCardExternalShortcuts.Description" xml:space="preserve">
     <value>以其他應用程式開啟目前的照片</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Header" xml:space="preserve">
+  <data name="SettingsCardExternalShortcuts.Header" xml:space="preserve">
     <value>顯示外部應用程式捷徑</value>
   </data>
   <data name="SettingsCardFadeControls.Description" xml:space="preserve">
@@ -362,218 +398,6 @@
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>圖片適應螢幕</value>
-  </data>
-  <data name="SettingsCardLanguage.Header" xml:space="preserve">
-    <value>選擇語言</value>
-  </data>
-  <data name="SettingsCardLog.Description" xml:space="preserve">
-    <value>開啟以查看記錄檔</value>
-  </data>
-  <data name="SettingsCardLog.Header" xml:space="preserve">
-    <value>記錄檔</value>
-  </data>
-  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>設定每側快取的低解析度照片數量。</value>
-  </data>
-  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>低解析度快取</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
-    <value>選擇預設的滑鼠滾輪行為。</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
-    <value>滑鼠滾輪</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + 滑鼠滾輪：永遠縮放。
-👉 Alt + 滑鼠滾輪：永遠切換照片。</value>
-  </data>
-  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
-    <value>⚠ 可能會使啟動變慢。Fly 會在啟動時等待完整解析度的照片載入。</value>
-  </data>
-  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
-    <value>開啟檔案時放大、離開時縮小</value>
-  </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ 僅在包含相似尺寸照片的資料夾中使用「沿用」選項。</value>
-  </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
-    <value>瀏覽時的平移、縮放與旋轉行為</value>
-  </data>
-  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-  <value>「上次狀態」會還原視窗的大小、位置與所在螢幕。</value>
-</data>
-  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
-  <value>啟動時視窗狀態</value>
-</data>
-  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
-  <value>最大化</value>
-</data>
-  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
-  <value>全螢幕</value>
-</data>
-  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
-  <value>上次狀態</value>
-</data>
-  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
-    <value>在 GitHub 回報問題，或寄信至 ryftools@outlook.com</value>
-  </data>
-  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
-    <value>錯誤與問題</value>
-  </data>
-  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
-    <value>在底部面板顯示快取狀態。</value>
-  </data>
-  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
-    <value>顯示快取狀態</value>
-  </data>
-  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
-    <value>為透明圖片顯示棋盤格背景。
-⚠ 可能影響效能。</value>
-  </data>
-  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
-    <value>顯示棋盤格背景</value>
-  </data>
-  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
-    <value>顯示目前開啟檔案的檔名。</value>
-  </data>
-  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
-    <value>顯示檔名</value>
-  </data>
-  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
-    <value>在檔名旁顯示照片的寬度與高度。</value>
-  </data>
-  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
-    <value>顯示照片尺寸</value>
-  </data>
-  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
-    <value>在視窗底部顯示縮圖列。</value>
-  </data>
-  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
-    <value>顯示縮圖列</value>
-  </data>
-  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
-    <value>顯示縮放百分比</value>
-  </data>
-  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
-    <value>FlyPhotos 是開源專案，並託管於 GitHub。</value>
-  </data>
-  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
-    <value>GitHub 儲存庫</value>
-  </data>
-  <data name="SettingsCardTheme.Description" xml:space="preserve">
-    <value>選擇應用程式的主題。</value>
-  </data>
-  <data name="SettingsCardTheme.Header" xml:space="preserve">
-    <value>視窗主題</value>
-  </data>
-  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
-    <value>設定選取縮圖時使用的強調色。</value>
-  </data>
-  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
-    <value>縮圖選取顏色</value>
-  </data>
-  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
-    <value>調整檢視器中縮圖的大小。</value>
-  </data>
-  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
-    <value>縮圖大小</value>
-  </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
-    <value>僅適用於透明視窗背景。</value>
-  </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
-    <value>透明度（％）</value>
-  </data>
-  <data name="SettingsCardVersion.Description" xml:space="preserve">
-    <value>目前版本為 {0}</value>
-  </data>
-  <data name="SettingsCardVersion.Header" xml:space="preserve">
-    <value>目前版本</value>
-  </data>
-  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
-    <value>選擇視窗背景。</value>
-  </data>
-  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
-    <value>視窗背景</value>
-  </data>
-  <data name="SettingsExpanderAutoFade.Header" xml:space="preserve">
-    <value>自動淡出與隱藏設定</value>
-  </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>設定 Fly 如何處理照片快取。</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>快取</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>鍵盤快速鍵</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>自訂平移與縮放行為。</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>平移與縮放</value>
-  </data>
-  <data name="SettingsPage.Title" xml:space="preserve">
-    <value>FlyPhotos - 設定</value>
-  </data>
-  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
-    <value>關於</value>
-  </data>
-  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
-    <value>編解碼器</value>
-  </data>
-  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
-    <value>一般</value>
-  </data>
-  <data name="Status_FileNotFound" xml:space="preserve">
-    <value>找不到檔案</value>
-  </data>
-  <data name="Status_InvalidFile" xml:space="preserve">
-    <value>無效的檔案</value>
-  </data>
-  <data name="Status_Loading" xml:space="preserve">
-    <value>載入中…</value>
-  </data>
-  <data name="Status_PreviewFailed" xml:space="preserve">
-    <value>預覽載入失敗</value>
-  </data>
-  <data name="TextBlockCaching.Text" xml:space="preserve">
-    <value>快取</value>
-  </data>
-  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
-    <value>FlyPhotos 主要使用 Windows 內建的 WIC 編解碼器。</value>
-  </data>
-  <data name="TextBlockLog.Text" xml:space="preserve">
-    <value>記錄</value>
-  </data>
-  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
-    <value>照片顯示</value>
-  </data>
-  <data name="TextBlockTheming.Text" xml:space="preserve">
-    <value>外觀</value>
-  </data>
-  <data name="TextBlockUIControls.Text" xml:space="preserve">
-    <value>介面控制項</value>
-  </data>
-  <data name="TitleTextBlock.Text" xml:space="preserve">
-    <value>FlyPhotos - 開啟照片</value>
-  </data>
-  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
-    <value>確定</value>
-  </data>
-  <data name="TrialExpiredMessage.Content" xml:space="preserve">
-    <value>免費試用已到期。請從 Microsoft Store 購買完整版本。</value>
-  </data>
-  <data name="TrialExpiredMessage.Title" xml:space="preserve">
-    <value>試用已到期</value>
-  </data>
-  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
-    <value>拖曳的檔案不是支援的圖片格式。</value>
-  </data>
-  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
-    <value>不支援的檔案</value>
   </data>
   <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
     <value>左／右方向鍵：切換照片
@@ -620,37 +444,222 @@ Del：刪除照片
 
 Esc：關閉設定或離開應用程式</value>
   </data>
-  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>其他執行個體只會顯示所選影像（無法瀏覽、刪除或變更設定）。</value>
+  <data name="SettingsCardLanguage.Header" xml:space="preserve">
+    <value>選擇語言</value>
   </data>
-  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>允許多個執行個體</value>
+  <data name="SettingsCardLog.Description" xml:space="preserve">
+    <value>開啟以查看記錄檔</value>
   </data>
-  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
-    <value>解碼相機 RAW</value>
+  <data name="SettingsCardLog.Header" xml:space="preserve">
+    <value>記錄檔</value>
   </data>
-  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
-    <value>使用實際 RAW 資料，而不是 RAW 檔案內嵌的 JPEG</value>
+  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
+    <value>設定每側快取的低解析度照片數量。</value>
   </data>
-  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
-    <value>清除磁碟快取</value>
+  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
+    <value>低解析度快取</value>
   </data>
-  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>從磁碟快取刪除所有預覽。</value>
+  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
+    <value>選擇預設的滑鼠滾輪行為。</value>
   </data>
-  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
-    <value>清除</value>
+  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
+    <value>滑鼠滾輪</value>
   </data>
-  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
-    <value>調整 RAW 解碼器優先順序（拖曳以重新排序）</value>
+  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
+    <value>👉 Ctrl + 滑鼠滾輪：永遠縮放。
+👉 Alt + 滑鼠滾輪：永遠切換照片。</value>
   </data>
-  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
-    <value>WIC（Windows Imaging Component）：系統編解碼器 • Rawler：最快 • ImageMagick：最佳相容性</value>
+  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
+    <value>⚠ 可能會使啟動變慢。Fly 會在啟動時等待完整解析度的照片載入。</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
+    <value>啟動時執行縮放動畫，離開時縮小</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
+    <value>⚠ 僅在包含相似尺寸照片的資料夾中使用「沿用」選項。</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
+    <value>瀏覽時的平移、縮放與旋轉行為</value>
+  </data>
+  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
+    <value>在 GitHub 回報問題，或寄信至 ryftools@outlook.com</value>
+  </data>
+  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
+    <value>錯誤與問題</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
+    <value>在底部面板顯示快取狀態。</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
+    <value>顯示快取狀態</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
+    <value>為透明圖片顯示棋盤格背景。
+⚠ 可能影響效能。</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
+    <value>顯示棋盤格背景</value>
+  </data>
+  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
+    <value>顯示目前開啟檔案的檔名。</value>
+  </data>
+  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
+    <value>顯示檔名</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
+    <value>在檔名旁顯示照片的寬度與高度。</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
+    <value>顯示照片尺寸</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
+    <value>在視窗底部顯示縮圖列。</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
+    <value>顯示縮圖列</value>
+  </data>
+  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
+    <value>顯示縮放百分比</value>
+  </data>
+  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
+    <value>FlyPhotos 是開源專案，並託管於 GitHub。</value>
+  </data>
+  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
+    <value>GitHub 儲存庫</value>
+  </data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+    <value>大型照片會自動符合顯示區域。小型照片預設以 1:1 顯示；啟用此選項可放大並符合顯示區域。</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
-  <value>將小型照片放大以符合顯示區域</value>
-</data>
-  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
-  <value>大型照片會自動符合顯示區域。小型照片預設以 1:1 顯示；啟用此選項可放大並符合顯示區域。</value>
-</data>
+    <value>縮放小型照片以符合顯示區域</value>
+  </data>
+  <data name="SettingsCardTheme.Description" xml:space="preserve">
+    <value>選擇應用程式的主題。</value>
+  </data>
+  <data name="SettingsCardTheme.Header" xml:space="preserve">
+    <value>視窗主題</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
+    <value>設定選取縮圖時使用的強調色。</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
+    <value>縮圖選取顏色</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
+    <value>調整檢視器中縮圖的大小。</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
+    <value>縮圖大小</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
+    <value>僅適用於透明視窗背景。</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
+    <value>透明度（％）</value>
+  </data>
+  <data name="SettingsCardVersion.Description" xml:space="preserve">
+    <value>目前版本為 {0}</value>
+  </data>
+  <data name="SettingsCardVersion.Header" xml:space="preserve">
+    <value>目前版本</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
+    <value>選擇視窗背景。</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
+    <value>視窗背景</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+    <value>「上次狀態」會還原視窗的大小、位置與所在螢幕。</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+    <value>啟動時視窗狀態</value>
+  </data>
+  <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
+    <value>自動淡出與隱藏</value>
+  </data>
+  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
+    <value>設定 Fly 如何處理照片快取。</value>
+  </data>
+  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
+    <value>快取</value>
+  </data>
+  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
+    <value>鍵盤快速鍵</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
+    <value>自訂平移與縮放行為。</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
+    <value>平移與縮放</value>
+  </data>
+  <data name="SettingsPage.Title" xml:space="preserve">
+    <value>FlyPhotos - 設定</value>
+  </data>
+  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
+    <value>關於</value>
+  </data>
+  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
+    <value>編解碼器</value>
+  </data>
+  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
+    <value>一般</value>
+  </data>
+  <data name="Status_FileNotFound" xml:space="preserve">
+    <value>找不到檔案</value>
+  </data>
+  <data name="Status_InvalidFile" xml:space="preserve">
+    <value>無效的檔案</value>
+  </data>
+  <data name="Status_Loading" xml:space="preserve">
+    <value>載入中…</value>
+  </data>
+  <data name="Status_PreviewFailed" xml:space="preserve">
+    <value>預覽載入失敗</value>
+  </data>
+  <data name="TextBlockLog.Text" xml:space="preserve">
+    <value>診斷</value>
+  </data>
+  <data name="TextBlockCaching.Text" xml:space="preserve">
+    <value>快取</value>
+  </data>
+  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
+    <value>FlyPhotos 主要使用 Windows 內建的 WIC 編解碼器。</value>
+  </data>
+  <data name="TextBlockAdvanced.Text" xml:space="preserve">
+    <value>進階</value>
+  </data>
+  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
+    <value>鍵盤和滑鼠</value>
+  </data>
+  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
+    <value>照片顯示</value>
+  </data>
+  <data name="TextBlockStartupAndAppearance.Text" xml:space="preserve">
+    <value>啟動與外觀</value>
+  </data>
+  <data name="TextBlockUIControls.Text" xml:space="preserve">
+    <value>介面控制項</value>
+  </data>
+  <data name="TitleTextBlock.Text" xml:space="preserve">
+    <value>FlyPhotos - 開啟照片</value>
+  </data>
+  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
+    <value>確定</value>
+  </data>
+  <data name="TrialExpiredMessage.Content" xml:space="preserve">
+    <value>免費試用已到期。請從 Microsoft Store 購買完整版本。</value>
+  </data>
+  <data name="TrialExpiredMessage.Title" xml:space="preserve">
+    <value>試用已到期</value>
+  </data>
+  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
+    <value>拖曳的檔案不是支援的圖片格式。</value>
+  </data>
+  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
+    <value>不支援的檔案</value>
+  </data>
+  <data name="_end" xml:space="preserve">
+    <value>end</value>
+  </data>
 </root>

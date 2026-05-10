@@ -144,6 +144,9 @@
   <data name="ButtonBackToolTip.Content" xml:space="preserve">
     <value>Vorige foto</value>
   </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>Wissen</value>
+  </data>
   <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
     <value>Cachedetails bekijken</value>
   </data>
@@ -231,6 +234,15 @@
   <data name="ComboThemeItemLight.Content" xml:space="preserve">
     <value>Licht</value>
   </data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+    <value>Volledig scherm</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+    <value>Vorige staat</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+    <value>Gemaximaliseerd</value>
+  </data>
   <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
     <value>Annuleren</value>
   </data>
@@ -297,11 +309,23 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
   <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>Apps zoeken…</value>
   </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>Extra instanties tonen alleen de geselecteerde afbeelding (geen navigatie, verwijderen of instellingen).</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>Meerdere instanties toestaan (Beta)</value>
+  </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Muisaanwijzer verbergen als de muis inactief is.</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
     <value>Muisaanwijzer automatisch verbergen</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>Verwijder alle voorvertoningen uit de schijfcache.</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>Schijfcache wissen</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
     <value>Vraag om bevestiging voordat een bestand wordt verwijderd.</value>
@@ -315,6 +339,18 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Erkenningen</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>Gebruik echte RAW-gegevens in plaats van de ingesloten JPEG in het RAW-bestand</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>Camera RAW decoderen</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC (Windows Imaging Component): systeemcodecs • Rawler: snelste • ImageMagick: beste compatibiliteit</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>RAW-decoderprioriteit aanpassen (slepen om te herschikken)</value>
+  </data>
   <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
     <value>Maak Fly nog geweldiger.</value>
   </data>
@@ -327,10 +363,10 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Selecteer externe apps</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Description" xml:space="preserve">
+  <data name="SettingsCardExternalShortcuts.Description" xml:space="preserve">
     <value>Open de huidige foto in andere apps</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Header" xml:space="preserve">
+  <data name="SettingsCardExternalShortcuts.Header" xml:space="preserve">
     <value>Snelkoppelingen naar externe apps weergeven</value>
   </data>
   <data name="SettingsCardFadeControls.Description" xml:space="preserve">
@@ -362,218 +398,6 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Afbeelding op scherm aanpassen</value>
-  </data>
-  <data name="SettingsCardLanguage.Header" xml:space="preserve">
-    <value>Taal kiezen</value>
-  </data>
-  <data name="SettingsCardLog.Description" xml:space="preserve">
-    <value>Openen om het logboekbestand te bekijken</value>
-  </data>
-  <data name="SettingsCardLog.Header" xml:space="preserve">
-    <value>Logboekbestand</value>
-  </data>
-  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Stel het aantal foto's in lage resolutie in dat aan elke kant is opgeslagen.</value>
-  </data>
-  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Cache in lage resolutie</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
-    <value>Kies het standaardgedrag van het muiswiel.</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
-    <value>Muiswiel</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + Muiswiel zoomt altijd. 
-👉 Alt + Muiswiel navigeert altijd.</value>
-  </data>
-  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
-    <value>⚠ Kan de opstart vertragen. Fly wacht met het laden van de foto met volledige resolutie bij het opstarten.</value>
-  </data>
-  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
-    <value>Inzoomen bij openen van een bestand en uitzoomen bij sluiten</value>
-  </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ Gebruik de optie Behouden alleen voor mappen met foto's van vergelijkbare grootte.</value>
-  </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
-    <value>Pan-, Zoom- en Rotatiegedrag tijdens navigeren</value>
-  </data>
-  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-  <value>Laatste sessie herstelt de laatste venstergrootte, positie en monitor.</value>
-</data>
-  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
-  <value>Vensterstatus bij opstarten</value>
-</data>
-  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
-  <value>Gemaximaliseerd</value>
-</data>
-  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
-  <value>Volledig scherm</value>
-</data>
-  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
-  <value>Vorige staat</value>
-</data>
-  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
-    <value>Problemen melden op GitHub of e-mailen naar ryftools@outlook.com</value>
-  </data>
-  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
-    <value>Bugs en problemen</value>
-  </data>
-  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
-    <value>Cachestatus in het onderste paneel weergeven.</value>
-  </data>
-  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
-    <value>Cachestatus weergeven</value>
-  </data>
-  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
-    <value>Geblokte achtergrond weergeven voor transparante afbeeldingen. 
-⚠ Kan de prestaties beïnvloeden.</value>
-  </data>
-  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
-    <value>Geblokte achtergrond weergeven</value>
-  </data>
-  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
-    <value>Bestandsnaam van momenteel geopend bestand weergeven</value>
-  </data>
-  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
-    <value>Bestandsnaam weergeven</value>
-  </data>
-  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
-    <value>Breedte en hoogte van de foto naast de bestandsnaam weergeven.</value>
-  </data>
-  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
-    <value>Fotodimensies weergeven</value>
-  </data>
-  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
-    <value>Miniatuurstrip onderaan het venster weergeven.</value>
-  </data>
-  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
-    <value>Miniatuurstrip weergeven</value>
-  </data>
-  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
-    <value>Zoompercentage weergeven</value>
-  </data>
-  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
-    <value>FlyPhotos is open source en wordt gehost op GitHub.</value>
-  </data>
-  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
-    <value>GitHub-opslagplaats</value>
-  </data>
-  <data name="SettingsCardTheme.Description" xml:space="preserve">
-    <value>Selecteer het app-thema.</value>
-  </data>
-  <data name="SettingsCardTheme.Header" xml:space="preserve">
-    <value>Vensterthema</value>
-  </data>
-  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
-    <value>Stel de accentkleur in die wordt gebruikt voor geselecteerde miniaturen.</value>
-  </data>
-  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
-    <value>Kleur voor miniatuurselectie</value>
-  </data>
-  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
-    <value>Pas de grootte van de miniaturen in de viewer aan.</value>
-  </data>
-  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
-    <value>Grootte van miniatuur</value>
-  </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
-    <value>Alleen van toepassing op transparante vensterachtergrond.</value>
-  </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
-    <value>Transparantie (%)</value>
-  </data>
-  <data name="SettingsCardVersion.Description" xml:space="preserve">
-    <value>Huidige versie is {0}</value>
-  </data>
-  <data name="SettingsCardVersion.Header" xml:space="preserve">
-    <value>Huidige versie</value>
-  </data>
-  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
-    <value>Kies de vensterachtergrond.</value>
-  </data>
-  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
-    <value>Vensterachtergrond</value>
-  </data>
-  <data name="SettingsExpanderAutoFade.Header" xml:space="preserve">
-    <value>Automatisch vervagen en verbergen instellingen</value>
-  </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>Configureren hoe Fly omgaat met fotocaching.</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>Caching</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>Toetsenbordsnelkoppelingen</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>Pan- en Zoomgedrag aanpassen.</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>Pan en Zoom</value>
-  </data>
-  <data name="SettingsPage.Title" xml:space="preserve">
-    <value>FlyPhotos - Instellingen</value>
-  </data>
-  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
-    <value>Over</value>
-  </data>
-  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
-    <value>Codecs</value>
-  </data>
-  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
-    <value>Algemeen</value>
-  </data>
-  <data name="Status_FileNotFound" xml:space="preserve">
-    <value>Bestand niet gevonden</value>
-  </data>
-  <data name="Status_InvalidFile" xml:space="preserve">
-    <value>Ongeldig bestand</value>
-  </data>
-  <data name="Status_Loading" xml:space="preserve">
-    <value>Laden…</value>
-  </data>
-  <data name="Status_PreviewFailed" xml:space="preserve">
-    <value>Voorbeeld laden mislukt</value>
-  </data>
-  <data name="TextBlockCaching.Text" xml:space="preserve">
-    <value>Caching</value>
-  </data>
-  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
-    <value>FlyPhotos gebruikt voornamelijk Windows Imaging Component (WIC) codecs.</value>
-  </data>
-  <data name="TextBlockLog.Text" xml:space="preserve">
-    <value>Logboek</value>
-  </data>
-  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
-    <value>Fotoweergave</value>
-  </data>
-  <data name="TextBlockTheming.Text" xml:space="preserve">
-    <value>Uiterlijk</value>
-  </data>
-  <data name="TextBlockUIControls.Text" xml:space="preserve">
-    <value>UI-besturingselementen</value>
-  </data>
-  <data name="TitleTextBlock.Text" xml:space="preserve">
-    <value>FlyPhotos - Foto openen</value>
-  </data>
-  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
-    <value>OK</value>
-  </data>
-  <data name="TrialExpiredMessage.Content" xml:space="preserve">
-    <value>Uw gratis proefperiode is verlopen. Koop de volledige versie in de Microsoft Store.</value>
-  </data>
-  <data name="TrialExpiredMessage.Title" xml:space="preserve">
-    <value>Proefperiode verlopen</value>
-  </data>
-  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
-    <value>Het neergezette bestand is geen ondersteund afbeeldingsformaat.</value>
-  </data>
-  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
-    <value>Niet-ondersteund bestand</value>
   </data>
   <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
     <value>Pijltoetsen Links/Rechts : Door foto's bladeren
@@ -620,38 +444,222 @@ Del : Foto verwijderen
 
 Esc : Instellingen sluiten of App verlaten</value>
   </data>
-  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>toestaan
-Extra instanties tonen alleen de geselecteerde afbeelding (geen navigatie, verwijderen of instellingen).</value>
+  <data name="SettingsCardLanguage.Header" xml:space="preserve">
+    <value>Taal kiezen</value>
   </data>
-  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Meerdere instanties toestaan (Beta)</value>
+  <data name="SettingsCardLog.Description" xml:space="preserve">
+    <value>Openen om het logboekbestand te bekijken</value>
   </data>
-  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
-    <value>Camera RAW decoderen</value>
+  <data name="SettingsCardLog.Header" xml:space="preserve">
+    <value>Logboekbestand</value>
   </data>
-  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
-    <value>Gebruik echte RAW-gegevens in plaats van de ingesloten JPEG in het RAW-bestand</value>
+  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
+    <value>Stel het aantal foto's in lage resolutie in dat aan elke kant is opgeslagen.</value>
   </data>
-  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
-    <value>Schijfcache wissen</value>
+  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
+    <value>Cache in lage resolutie</value>
   </data>
-  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Verwijder alle voorvertoningen uit de schijfcache.</value>
+  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
+    <value>Kies het standaardgedrag van het muiswiel.</value>
   </data>
-  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
-    <value>Wissen</value>
+  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
+    <value>Muiswiel</value>
   </data>
-  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
-    <value>RAW-decoderprioriteit aanpassen (slepen om te herschikken)</value>
+  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
+    <value>👉 Ctrl + Muiswiel zoomt altijd. 
+👉 Alt + Muiswiel navigeert altijd.</value>
   </data>
-  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
-    <value>WIC (Windows Imaging Component): systeemcodecs • Rawler: snelste • ImageMagick: beste compatibiliteit</value>
+  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
+    <value>⚠ Kan de opstart vertragen. Fly wacht met het laden van de foto met volledige resolutie bij het opstarten.</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
+    <value>Zoomanimatie bij opstarten en uitzoomen bij afsluiten</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
+    <value>⚠ Gebruik de optie Behouden alleen voor mappen met foto's van vergelijkbare grootte.</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
+    <value>Pan-, Zoom- en Rotatiegedrag tijdens navigeren</value>
+  </data>
+  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
+    <value>Problemen melden op GitHub of e-mailen naar ryftools@outlook.com</value>
+  </data>
+  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
+    <value>Bugs en problemen</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
+    <value>Cachestatus in het onderste paneel weergeven.</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
+    <value>Cachestatus weergeven</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
+    <value>Geblokte achtergrond weergeven voor transparante afbeeldingen. 
+⚠ Kan de prestaties beïnvloeden.</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
+    <value>Geblokte achtergrond weergeven</value>
+  </data>
+  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
+    <value>Bestandsnaam van momenteel geopend bestand weergeven</value>
+  </data>
+  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
+    <value>Bestandsnaam weergeven</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
+    <value>Breedte en hoogte van de foto naast de bestandsnaam weergeven.</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
+    <value>Fotodimensies weergeven</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
+    <value>Miniatuurstrip onderaan het venster weergeven.</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
+    <value>Miniatuurstrip weergeven</value>
+  </data>
+  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
+    <value>Zoompercentage weergeven</value>
+  </data>
+  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
+    <value>FlyPhotos is open source en wordt gehost op GitHub.</value>
+  </data>
+  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
+    <value>GitHub-opslagplaats</value>
+  </data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+    <value>Grote foto’s passen altijd in beeld. Kleine foto’s worden standaard op ware grootte (1:1) weergegeven; schakel dit in om ze te vergroten en passend te maken.</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
-  <value>Kleine foto’s vergroten om in beeld te passen</value>
-</data>
-  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
-  <value>Grote foto’s passen altijd in beeld. Kleine foto’s worden standaard op ware grootte (1:1) weergegeven; schakel dit in om ze te vergroten en passend te maken.</value>
-</data>
+    <value>Kleine foto’s vergroten om in beeld te passen</value>
+  </data>
+  <data name="SettingsCardTheme.Description" xml:space="preserve">
+    <value>Selecteer het app-thema.</value>
+  </data>
+  <data name="SettingsCardTheme.Header" xml:space="preserve">
+    <value>Vensterthema</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
+    <value>Stel de accentkleur in die wordt gebruikt voor geselecteerde miniaturen.</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
+    <value>Kleur voor miniatuurselectie</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
+    <value>Pas de grootte van de miniaturen in de viewer aan.</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
+    <value>Grootte van miniatuur</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
+    <value>Alleen van toepassing op transparante vensterachtergrond.</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
+    <value>Transparantie (%)</value>
+  </data>
+  <data name="SettingsCardVersion.Description" xml:space="preserve">
+    <value>Huidige versie is {0}</value>
+  </data>
+  <data name="SettingsCardVersion.Header" xml:space="preserve">
+    <value>Huidige versie</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
+    <value>Kies de vensterachtergrond.</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
+    <value>Vensterachtergrond</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+    <value>Vorige staat herstelt de laatste venstergrootte, positie en monitor.</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+    <value>Vensterstatus bij opstarten</value>
+  </data>
+  <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
+    <value>Automatisch vervagen en verbergen</value>
+  </data>
+  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
+    <value>Configureren hoe Fly omgaat met fotocaching.</value>
+  </data>
+  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
+    <value>Caching</value>
+  </data>
+  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
+    <value>Toetsenbordsnelkoppelingen</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
+    <value>Pan- en Zoomgedrag aanpassen.</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
+    <value>Pan en Zoom</value>
+  </data>
+  <data name="SettingsPage.Title" xml:space="preserve">
+    <value>FlyPhotos - Instellingen</value>
+  </data>
+  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
+    <value>Over</value>
+  </data>
+  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
+    <value>Codecs</value>
+  </data>
+  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
+    <value>Algemeen</value>
+  </data>
+  <data name="Status_FileNotFound" xml:space="preserve">
+    <value>Bestand niet gevonden</value>
+  </data>
+  <data name="Status_InvalidFile" xml:space="preserve">
+    <value>Ongeldig bestand</value>
+  </data>
+  <data name="Status_Loading" xml:space="preserve">
+    <value>Laden…</value>
+  </data>
+  <data name="Status_PreviewFailed" xml:space="preserve">
+    <value>Voorbeeld laden mislukt</value>
+  </data>
+  <data name="TextBlockLog.Text" xml:space="preserve">
+    <value>Diagnostiek</value>
+  </data>
+  <data name="TextBlockCaching.Text" xml:space="preserve">
+    <value>Caching</value>
+  </data>
+  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
+    <value>FlyPhotos gebruikt voornamelijk Windows Imaging Component (WIC) codecs.</value>
+  </data>
+  <data name="TextBlockAdvanced.Text" xml:space="preserve">
+    <value>Geavanceerd</value>
+  </data>
+  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
+    <value>Toetsenbord en muis</value>
+  </data>
+  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
+    <value>Fotoweergave</value>
+  </data>
+  <data name="TextBlockStartupAndAppearance.Text" xml:space="preserve">
+    <value>Opstarten en weergave</value>
+  </data>
+  <data name="TextBlockUIControls.Text" xml:space="preserve">
+    <value>UI-besturingselementen</value>
+  </data>
+  <data name="TitleTextBlock.Text" xml:space="preserve">
+    <value>FlyPhotos - Foto openen</value>
+  </data>
+  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="TrialExpiredMessage.Content" xml:space="preserve">
+    <value>Uw gratis proefperiode is verlopen. Koop de volledige versie in de Microsoft Store.</value>
+  </data>
+  <data name="TrialExpiredMessage.Title" xml:space="preserve">
+    <value>Proefperiode verlopen</value>
+  </data>
+  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
+    <value>Het neergezette bestand is geen ondersteund afbeeldingsformaat.</value>
+  </data>
+  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
+    <value>Niet-ondersteund bestand</value>
+  </data>
+  <data name="_end" xml:space="preserve">
+    <value>end</value>
+  </data>
 </root>

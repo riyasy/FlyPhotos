@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -144,6 +144,9 @@
   <data name="ButtonBackToolTip.Content" xml:space="preserve">
     <value>Previous Photo</value>
   </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>Clear</value>
+  </data>
   <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
     <value>View Cache Status</value>
   </data>
@@ -231,6 +234,15 @@
   <data name="ComboThemeItemLight.Content" xml:space="preserve">
     <value>Light</value>
   </data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+    <value>Full screen</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+    <value>Previous state</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+    <value>Maximized</value>
+  </data>
   <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
     <value>Cancel</value>
   </data>
@@ -246,7 +258,7 @@
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
     <value>To set FlyPhotos as the default app:
 Right-click a photo &gt; Open with &gt; Choose another app.
-Select FlyPhotos and choose Always.</value>
+Select FlyPhotos and select Always.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
     <value>In Windows 11, you can also set FlyPhotos as the default app in
@@ -297,11 +309,23 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>Search apps…</value>
   </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>Extra instances only show the selected image (no navigation, delete, or settings).</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>Allow Multiple Instances (Beta)</value>
+  </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Hide the mouse pointer if mouse is inactive.</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
     <value>Automatically hide mouse pointer</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>Delete all previews from disk cache.</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>Clear Disk Cache</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
     <value>Ask for confirmation before deleting any file.</value>
@@ -315,6 +339,18 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Credits</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>Use actual RAW data instead of the embedded JPEG inside the RAW file.</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>Decode Camera RAW</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC (Windows Imaging Component) : System codecs • Rawler : fastest • ImageMagick : best compatibility</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>Adjust RAW Decoder Priority (Drag to Reorder)</value>
+  </data>
   <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
     <value>Make Fly more awesome.</value>
   </data>
@@ -327,10 +363,10 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Select external apps</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Description" xml:space="preserve">
+  <data name="SettingsCardExternalShortcuts.Description" xml:space="preserve">
     <value>Open the current photo in other apps</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Header" xml:space="preserve">
+  <data name="SettingsCardExternalShortcuts.Header" xml:space="preserve">
     <value>Show shortcuts to external apps</value>
   </data>
   <data name="SettingsCardFadeControls.Description" xml:space="preserve">
@@ -363,6 +399,51 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Image to Screen Fit</value>
   </data>
+  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
+    <value>Left/Right Arrow Keys : Navigate Photos
+Up/Down Arrow Keys : Zoom In or Out
+Mouse Left Click and Drag : Pan Photo
+Mouse Right Click and Hold : Zoom In
+Mouse Right Click : Windows Explorer Context Menu
+
+Mouse Wheel : Zoom In or Out / Navigate Photos (based on setting)
+Ctrl + Mouse Wheel : Zoom In or Out
+Alt + Mouse Wheel : Navigate Photos
+Tilt Mouse Wheel Left or Right : Navigate Photos
+Mouse Wheel Click : Full screen
+
+Ctrl + Arrow Keys : Pan Photo
+Ctrl + + : Zoom In
+Ctrl + - : Zoom Out
+
+Alt + Left/Right Arrow Keys : Navigate pages in multi-page TIFF
+
+Page Up/Page Down : Zoom In/Out to next Preset (100%, 400%, Fit)
+Home : Navigate to first photo
+End : Navigate to last photo
+
+Mouse Wheel on Thumbnail strip : Navigate Photos
+Mouse Wheel on On-Screen Left/Right Button : Navigate Photos
+Mouse Wheel on On-Screen Rotate Button : Rotate Photo
+
+TouchPad two-finger swipe Left or Right : Navigate Photos
+TouchPad two-finger swipe Up or Down : Zoom In or Out / Navigate Photos (based on Mouse Wheel setting)
+TouchPad pinch open or close : Zoom In or Out
+
+F11 : Full screen
+
+Alt + Enter : Show File Properties (General Tab)
+D : Show File Properties (Details Tab)
+
+W : Show file in Windows File Explorer
+S : Show Windows Share dialog for the file
+A : Zoom photo to actual size
+F : Fit to window
+
+Del : Delete Photo
+
+Esc : Close Settings or Exit App</value>
+  </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>Choose language</value>
   </data>
@@ -392,28 +473,13 @@ Settings &gt; Apps &gt; Default apps.</value>
     <value>⚠ May slow startup. Fly waits to load the full-resolution photo on launch.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
-    <value>Zoom in when opening a file and zoom out on exit</value>
+    <value>Animate zoom on startup and zoom out on exit</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
     <value>⚠ Use Retain option only for folders with similarly sized photos.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Pan, Zoom &amp; Rotation behavior during navigation</value>
-  </data>
-  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>Previous state' restores the last window size, position and monitor.</value>
-  </data>
-  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
-    <value>Startup window state</value>
-  </data>
-  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
-    <value>Maximized</value>
-  </data>
-  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
-    <value>Full screen</value>
-  </data>
-  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
-    <value>Previous state</value>
   </data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Report issues in GitHub or mail to ryftools@outlook.com</value>
@@ -461,6 +527,12 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="SettingsCardSourceCode.Header" xml:space="preserve">
     <value>GitHub Repository</value>
   </data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+    <value>Large photos always fit display area. Small photos are shown at 1:1 by default; enable this to zoom and fit them.</value>
+  </data>
+  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
+    <value>Zoom small photos to fit display area</value>
+  </data>
   <data name="SettingsCardTheme.Description" xml:space="preserve">
     <value>Select the app theme.</value>
   </data>
@@ -497,8 +569,14 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Window Background</value>
   </data>
-  <data name="SettingsExpanderAutoFade.Header" xml:space="preserve">
-    <value>Auto Fade and Hide Settings</value>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+    <value>Previous state' restores the last window size, position and monitor.</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+    <value>Startup window state</value>
+  </data>
+  <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
+    <value>Auto Fade and Hide</value>
   </data>
   <data name="SettingsExpanderCaching.Description" xml:space="preserve">
     <value>Configure how Fly handles photo caching.</value>
@@ -539,20 +617,26 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="Status_PreviewFailed" xml:space="preserve">
     <value>Preview loading failed</value>
   </data>
+  <data name="TextBlockLog.Text" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
   <data name="TextBlockCaching.Text" xml:space="preserve">
     <value>Caching</value>
   </data>
   <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
     <value>FlyPhotos uses Windows Inbuilt Imaging Component (WIC) codecs mostly.</value>
   </data>
-  <data name="TextBlockLog.Text" xml:space="preserve">
-    <value>Log</value>
+  <data name="TextBlockAdvanced.Text" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
+  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
+    <value>Keyboard and Mouse</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Photo Display</value>
   </data>
-  <data name="TextBlockTheming.Text" xml:space="preserve">
-    <value>Appearance</value>
+  <data name="TextBlockStartupAndAppearance.Text" xml:space="preserve">
+    <value>Startup and Appearance</value>
   </data>
   <data name="TextBlockUIControls.Text" xml:space="preserve">
     <value>UI Controls</value>
@@ -575,82 +659,7 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="UnsupportedFileAlert.Title" xml:space="preserve">
     <value>Unsupported File</value>
   </data>
-  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
-    <value>Left/Right Arrow Keys : Navigate Photos
-Up/Down Arrow Keys : Zoom In or Out
-Mouse Left Click and Drag : Pan Photo
-Mouse Right Click and Hold : Zoom In
-Mouse Right Click : Windows Explorer Context Menu
-
-Mouse Wheel : Zoom In or Out / Navigate Photos (based on setting)
-Ctrl + Mouse Wheel : Zoom In or Out
-Alt + Mouse Wheel : Navigate Photos
-Tilt Mouse Wheel Left or Right : Navigate Photos
-Mouse Wheel Click : Full screen
-
-Ctrl + Arrow Keys : Pan Photo
-Ctrl + + : Zoom In
-Ctrl + - : Zoom Out
-
-Alt + Left/Right Arrow Keys : Navigate pages in multi-page TIFF
-
-Page Up/Page Down : Zoom In/Out to next Preset (100%, 400%, Fit)
-Home : Navigate to first photo
-End : Navigate to last photo
-
-Mouse Wheel on Thumbnail strip : Navigate Photos
-Mouse Wheel on On-Screen Left/Right Button : Navigate Photos
-Mouse Wheel on On-Screen Rotate Button : Rotate Photo
-
-TouchPad two-finger swipe Left or Right : Navigate Photos
-TouchPad two-finger swipe Up or Down : Zoom In or Out / Navigate Photos (based on Mouse Wheel setting)
-TouchPad pinch open or close : Zoom In or Out
-
-F11 : Full screen
-
-Alt + Enter : Show File Properties (General Tab)
-D : Show File Properties (Details Tab)
-
-W : Show file in Windows File Explorer
-S : Show Windows Share dialog for the file
-A : Zoom photo to actual size
-F : Fit to window
-
-Del : Delete Photo
-
-Esc : Close Settings or Exit App</value>
-  </data>
-  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Extra instances only show the selected image (no navigation, delete, or settings).</value>
-  </data>
-  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Allow Multiple Instances (Beta)</value>
-  </data>
-  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
-    <value>Decode Camera RAW</value>
-  </data>
-  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
-    <value>Use actual RAW data instead of the embedded JPEG inside the RAW file.</value>
-  </data>
-  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
-    <value>Clear Disk Cache</value>
-  </data>
-  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Delete all previews from disk cache.</value>
-  </data>
-  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
-    <value>Clear</value>
-  </data>
-  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
-    <value>Adjust RAW Decoder Priority (Drag to Reorder)</value>
-  </data>
-  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
-    <value>WIC (Windows Imaging Component) : System codecs • Rawler : fastest • ImageMagick : best compatibility</value>
-  </data>
-  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
-    <value>Zoom small photos to fit display area</value>
-  </data>
-  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
-    <value>Large photos always fit display area. Small photos are shown at 1:1 by default; enable this to zoom and fit them.</value>
+  <data name="_end" xml:space="preserve">
+    <value>end</value>
   </data>
 </root>

@@ -1,4 +1,3 @@
-
 <Window
     x:Class="FlyPhotos.UI.Views.Settings"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -34,7 +33,28 @@
                             </StackPanel>
                         </Flyout>
                     </ScrollViewer.Resources>
+
                     <StackPanel Margin="0,5,15,0" Orientation="Vertical">
+                        <controls:SettingsCard
+                            x:Name="SettingsCardDeveloperSupport"
+                            x:Uid="SettingsCardDeveloperSupport"
+                            Margin="0,5,0,0">
+                            <controls:SettingsCard.HeaderIcon>
+                                <FontIcon
+                                    x:Name="HeartIcon"
+                                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                    Glyph="&#xEB51;" />
+                            </controls:SettingsCard.HeaderIcon>
+                            <HyperlinkButton x:Uid="DonateButton" NavigateUri="https://github.com/sponsors/riyasy" />
+                        </controls:SettingsCard>
+
+                        <!--  *****************  -->
+
+                        <TextBlock
+                            x:Uid="TextBlockStartupAndAppearance"
+                            Margin="0,20,0,0"
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
+
                         <controls:SettingsCard
                             x:Name="SettingsCardLanguage"
                             x:Uid="SettingsCardLanguage"
@@ -51,33 +71,7 @@
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
                         </controls:SettingsCard>
-                        <controls:SettingsCard
-                            x:Name="SettingsCardDeveloperSupport"
-                            x:Uid="SettingsCardDeveloperSupport"
-                            Margin="0,5,0,0">
-                            <controls:SettingsCard.HeaderIcon>
-                                <FontIcon
-                                    x:Name="HeartIcon"
-                                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                    Glyph="&#xEB51;" />
-                            </controls:SettingsCard.HeaderIcon>
-                            <HyperlinkButton x:Uid="DonateButton" NavigateUri="https://github.com/sponsors/riyasy" />
-                        </controls:SettingsCard>
-                        <controls:SettingsExpander
-                            x:Uid="SettingsExpanderKeyboardShortcuts"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE765;}">
-                            <controls:SettingsExpander.Items>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardKeyboardShortCuts"
-                                    x:Uid="SettingsCardKeyboardShortCuts"
-                                    Description="" />
-                            </controls:SettingsExpander.Items>
-                        </controls:SettingsExpander>
-                        <TextBlock
-                            x:Uid="TextBlockTheming"
-                            Margin="0,20,0,0"
-                            Style="{StaticResource BodyStrongTextBlockStyle}" />
+
                         <controls:SettingsCard
                             x:Name="SettingsCardTheme"
                             x:Uid="SettingsCardTheme"
@@ -92,6 +86,7 @@
                                 <ComboBoxItem x:Uid="ComboThemeItemLight" />
                             </ComboBox>
                         </controls:SettingsCard>
+
                         <controls:SettingsExpander
                             x:Name="SettingsCardWindowBackground"
                             x:Uid="SettingsCardWindowBackground"
@@ -126,37 +121,38 @@
                                 </controls:SettingsCard>
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
+
+                        <controls:SettingsCard
+                            x:Name="SettingsCardWindowLaunchMode"
+                            x:Uid="SettingsCardWindowLaunchMode"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xEC77;}">
+                            <ComboBox
+                                x:Name="ComboWindowLaunchMode"
+                                MinWidth="150"
+                                HorizontalAlignment="Right">
+                                <ComboBoxItem x:Uid="ComboWindowLaunchModeItemMaximized" />
+                                <ComboBoxItem x:Uid="ComboWindowLaunchModeItemFullScreen" />
+                                <ComboBoxItem x:Uid="ComboWindowLaunchModeItemLastWindowState" />
+                            </ComboBox>
+                        </controls:SettingsCard>
+
+                        <controls:SettingsCard
+                            x:Name="SettingsCardOpenExitZoom"
+                            x:Uid="SettingsCardOpenExitZoom"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE740;}">
+                            <ToggleSwitch x:Name="ButtonOpenExitZoom" />
+                        </controls:SettingsCard>
+
+                        <!--  *****************  -->
+
                         <TextBlock
                             x:Uid="TextBlockPhotoDisplay"
                             Margin="0,20,0,0"
                             Style="{StaticResource BodyStrongTextBlockStyle}" />
+
                         <controls:SettingsExpander
-                            x:Uid="SettingsExpanderPanZoom"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE71E;}">
-                            <controls:SettingsExpander.Items>
-                                <controls:SettingsCard x:Name="SettingsCardOpenExitZoom" x:Uid="SettingsCardOpenExitZoom">
-                                    <ToggleSwitch x:Name="ButtonOpenExitZoom" />
-                                </controls:SettingsCard>
-                                <controls:SettingsCard x:Name="SettingsCardHighQualityInterpolation" x:Uid="SettingsCardHighQualityInterpolation">
-                                    <ToggleSwitch x:Name="ButtonHighQualityInterpolation" />
-                                </controls:SettingsCard>
-                                <controls:SettingsCard x:Name="SettingsCardPanZoomNavBehaviour" x:Uid="SettingsCardPanZoomNavBehaviour">
-                                    <ComboBox
-                                        x:Name="ComboPanZoomNavBehaviour"
-                                        MinWidth="150"
-                                        HorizontalAlignment="Right">
-                                        <ComboBoxItem x:Uid="ComboPanZoomItemReset" />
-                                        <ComboBoxItem x:Uid="ComboPanZoomItemRemember" />
-                                        <ComboBoxItem x:Uid="ComboPanZoomItemRetain" />
-                                    </ComboBox>
-                                </controls:SettingsCard>
-                                <controls:SettingsCard x:Name="SettingsCardShowZoomPercent" x:Uid="SettingsCardShowZoomPercent">
-                                    <ToggleSwitch x:Name="ButtonShowZoomPercent" />
-                                </controls:SettingsCard>
-                            </controls:SettingsExpander.Items>
-                        </controls:SettingsExpander>
-                        <controls:SettingsCard
                             x:Name="SettingsCardImageFitPercentage"
                             x:Uid="SettingsCardImageFitPercentage"
                             Margin="0,5,0,0"
@@ -168,14 +164,35 @@
                                 Minimum="50"
                                 SmallChange="10"
                                 StepFrequency="10" />
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard x:Name="SettingsCardStretchSmallImages" x:Uid="SettingsCardStretchSmallImages">
+                                    <ToggleSwitch x:Name="ButtonStretchSmallImages" />
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
+
+                        <controls:SettingsCard
+                            x:Name="SettingsCardHighQualityInterpolation"
+                            x:Uid="SettingsCardHighQualityInterpolation"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE794;}">
+                            <ToggleSwitch x:Name="ButtonHighQualityInterpolation" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
-                            x:Name="SettingsCardStretchSmallImages"
-                            x:Uid="SettingsCardStretchSmallImages"
+                            x:Name="SettingsCardPanZoomNavBehaviour"
+                            x:Uid="SettingsCardPanZoomNavBehaviour"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE740;}">
-                            <ToggleSwitch x:Name="ButtonStretchSmallImages" />
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE7C5;}">
+                            <ComboBox
+                                x:Name="ComboPanZoomNavBehaviour"
+                                MinWidth="150"
+                                HorizontalAlignment="Right">
+                                <ComboBoxItem x:Uid="ComboPanZoomItemReset" />
+                                <ComboBoxItem x:Uid="ComboPanZoomItemRemember" />
+                                <ComboBoxItem x:Uid="ComboPanZoomItemRetain" />
+                            </ComboBox>
                         </controls:SettingsCard>
+
                         <controls:SettingsCard
                             x:Name="SettingsCardShowCheckeredBackground"
                             x:Uid="SettingsCardShowCheckeredBackground"
@@ -183,6 +200,269 @@
                             HeaderIcon="{ui:FontIcon Glyph=&#xE80A;}">
                             <ToggleSwitch x:Name="ButtonShowCheckeredBackground" />
                         </controls:SettingsCard>
+
+                        <!--  *****************  -->
+
+                        <TextBlock
+                            x:Uid="TextBlockKeyboardAndMouse"
+                            Margin="0,20,0,0"
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
+
+                        <controls:SettingsExpander
+                            x:Uid="SettingsExpanderKeyboardShortcuts"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE765;}">
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardKeyboardShortCuts"
+                                    x:Uid="SettingsCardKeyboardShortCuts"
+                                    Description="" />
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
+
+                        <controls:SettingsExpander
+                            x:Name="SettingsCardMouseWheelBehaviour"
+                            x:Uid="SettingsCardMouseWheelBehaviour"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;}">
+                            <ComboBox
+                                x:Name="ComboMouseWheelBehaviour"
+                                MinWidth="150"
+                                SelectedIndex="0">
+                                <ComboBoxItem x:Uid="ComboMouseWheelItemZoom" />
+                                <ComboBoxItem x:Uid="ComboMouseWheelItemNav" />
+                            </ComboBox>
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard x:Name="SettingsCardMouseWheelBehaviourInfo" x:Uid="SettingsCardMouseWheelBehaviourInfo" />
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
+
+                        <controls:SettingsCard
+                            x:Name="SettingsCardConfirmBeforeDelete"
+                            x:Uid="SettingsCardConfirmBeforeDelete"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE74D;}">
+                            <ToggleSwitch x:Name="ButtonConfirmBeforeDelete" />
+                        </controls:SettingsCard>
+
+                        <!--  *****************  -->
+
+                        <TextBlock
+                            x:Uid="TextBlockUIControls"
+                            Margin="0,20,0,0"
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
+
+                        <controls:SettingsCard
+                            x:Name="SettingsCardShowFileName"
+                            x:Uid="SettingsCardShowFileName"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
+                            <ToggleSwitch x:Name="ButtonShowFileName" />
+                        </controls:SettingsCard>
+
+                        <controls:SettingsCard
+                            x:Name="SettingsCardShowImageDimensions"
+                            x:Uid="SettingsCardShowImageDimensions"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
+                            <ToggleSwitch x:Name="ButtonShowImageDimensions" />
+                        </controls:SettingsCard>
+
+                        <controls:SettingsCard
+                            x:Name="SettingsCardShowCacheStatusExpander"
+                            x:Uid="SettingsCardShowCacheStatusExpander"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
+                            <ToggleSwitch x:Name="ButtonShowCacheStatusExpander" />
+                        </controls:SettingsCard>
+
+                        <controls:SettingsCard
+                            x:Name="SettingsCardShowZoomPercent"
+                            x:Uid="SettingsCardShowZoomPercent"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE94C;}">
+                            <ToggleSwitch x:Name="ButtonShowZoomPercent" />
+                        </controls:SettingsCard>
+
+                        <controls:SettingsExpander
+                            x:Name="SettingsCardExternalShortcuts"
+                            x:Uid="SettingsCardExternalShortcuts"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE8A7;}">
+                            <ToggleSwitch x:Name="ButtonEnableExternalShortcut" HorizontalAlignment="Right" />
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardExternalApps"
+                                    x:Uid="SettingsCardExternalApps"
+                                    IsEnabled="{x:Bind ButtonEnableExternalShortcut.IsOn, Mode=OneWay}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button
+                                            x:Name="BtnShortcut1"
+                                            Height="50"
+                                            Margin="2"
+                                            Click="OnShortcutButtonClick">
+                                            <FontIcon Glyph="&#xE8E5;" />
+                                        </Button>
+                                        <Button
+                                            x:Name="BtnShortcut2"
+                                            Height="50"
+                                            Margin="2"
+                                            Click="OnShortcutButtonClick">
+                                            <FontIcon Glyph="&#xE8E5;" />
+                                        </Button>
+                                        <Button
+                                            x:Name="BtnShortcut3"
+                                            Height="50"
+                                            Margin="2"
+                                            Click="OnShortcutButtonClick">
+                                            <FontIcon Glyph="&#xE8E5;" />
+                                        </Button>
+                                        <Button
+                                            x:Name="BtnShortcut4"
+                                            Height="50"
+                                            Margin="2"
+                                            Click="OnShortcutButtonClick">
+                                            <FontIcon Glyph="&#xE8E5;" />
+                                        </Button>
+                                    </StackPanel>
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
+
+                        <controls:SettingsExpander
+                            x:Name="SettingsCardShowThumbnail"
+                            x:Uid="SettingsCardShowThumbnail"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xF597;}">
+                            <ToggleSwitch x:Name="ButtonShowThumbnail" HorizontalAlignment="Right" />
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardThumbnailSize"
+                                    x:Uid="SettingsCardThumbnailSize"
+                                    HeaderIcon="{ui:FontIcon Glyph=&#xE620;}"
+                                    IsEnabled="{x:Bind ButtonShowThumbnail.IsOn, Mode=OneWay}">
+                                    <Slider
+                                        x:Name="SliderThumbnailSize"
+                                        MinWidth="150"
+                                        Maximum="60"
+                                        Minimum="30"
+                                        SmallChange="10"
+                                        StepFrequency="10"
+                                        Value="40" />
+                                </controls:SettingsCard>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardThumbnailSelectionColor"
+                                    x:Uid="SettingsCardThumbnailSelectionColor"
+                                    HeaderIcon="{ui:FontIcon Glyph=&#xE790;}"
+                                    IsEnabled="{x:Bind ButtonShowThumbnail.IsOn, Mode=OneWay}">
+                                    <Button
+                                        x:Name="ButtonSetThumbnailSelColor"
+                                        HorizontalAlignment="Right"
+                                        FlyoutBase.AttachedFlyout="{StaticResource ColorPickerFlyout}"
+                                        Tapped="RectThumbnailSelection_Tapped"
+                                        ToolTipService.ToolTip="Click to change selection color.">
+                                        <Button.Content>
+                                            <Rectangle
+                                                x:Name="RectThumbnailSelection"
+                                                Width="20"
+                                                Height="20"
+                                                StrokeThickness="3" />
+                                        </Button.Content>
+                                    </Button>
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
+
+                        <!--  *****************  -->
+
+                        <TextBlock
+                            x:Uid="TextBlockAutoFadeSettings"
+                            Margin="0,20,0,0"
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
+
+                        <controls:SettingsCard
+                            x:Name="SettingsCardFadeControls"
+                            x:Uid="SettingsCardFadeControls"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE754;}">
+                            <ToggleSwitch x:Name="ButtonEnableAutoFade" HorizontalAlignment="Right" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardFadeIntensity"
+                            x:Uid="SettingsCardFadeIntensity"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE94C;}"
+                            IsEnabled="{x:Bind ButtonEnableAutoFade.IsOn, Mode=OneWay}">
+                            <Slider
+                                x:Name="SliderFadeIntensity"
+                                MinWidth="150"
+                                Maximum="100"
+                                Minimum="30"
+                                SmallChange="10"
+                                StepFrequency="10"
+                                Value="50" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardAutoHideMouse"
+                            x:Uid="SettingsCardAutoHideMouse"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE8B0;}">
+                            <ToggleSwitch x:Name="ButtonEnableAutoHideMouse" HorizontalAlignment="Right" />
+                        </controls:SettingsCard>
+
+                        <!--  *****************  -->
+
+                        <TextBlock
+                            x:Uid="TextBlockCaching"
+                            Margin="0,20,0,0"
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
+
+                        <controls:SettingsCard
+                            x:Name="SettingsCardLowResCache"
+                            x:Uid="SettingsCardLowResCache"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xF16A;}">
+                            <Slider
+                                x:Name="SliderLowResCacheSize"
+                                MinWidth="150"
+                                Maximum="300"
+                                Minimum="50"
+                                SmallChange="10"
+                                StepFrequency="10"
+                                Value="300" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardHighResCache"
+                            x:Uid="SettingsCardHighResCache"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xF16A;}">
+                            <Slider
+                                x:Name="SliderHighResCacheSize"
+                                MinWidth="150"
+                                Maximum="3"
+                                Minimum="1"
+                                SmallChange="1"
+                                StepFrequency="1"
+                                Value="2" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardClearDiskCache"
+                            x:Uid="SettingsCardClearDiskCache"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE74D;}">
+                            <Button
+                                x:Name="ButtonClearDiskCache"
+                                x:Uid="ButtonClearDiskCache"
+                                Click="ButtonClearDiskCache_OnClick" />
+                        </controls:SettingsCard>
+
+                        <!--  *****************  -->
+
+                        <TextBlock
+                            x:Uid="TextBlockAdvanced"
+                            Margin="0,20,0,0"
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
+
                         <controls:SettingsExpander
                             x:Name="SettingsCardDecodeRawData"
                             x:Uid="SettingsCardDecodeRawData"
@@ -231,181 +511,7 @@
                                 </controls:SettingsCard>
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
-                        <TextBlock
-                            x:Uid="TextBlockUIControls"
-                            Margin="0,20,0,0"
-                            Style="{StaticResource BodyStrongTextBlockStyle}" />
-                        <controls:SettingsExpander
-                            x:Uid="SettingsExpanderAutoFade"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE754;}">
-                            <controls:SettingsExpander.Items>
-                                <controls:SettingsCard x:Name="SettingsCardFadeControls" x:Uid="SettingsCardFadeControls">
-                                    <ToggleSwitch x:Name="ButtonEnableAutoFade" HorizontalAlignment="Right" />
-                                </controls:SettingsCard>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardFadeIntensity"
-                                    x:Uid="SettingsCardFadeIntensity"
-                                    IsEnabled="{x:Bind ButtonEnableAutoFade.IsOn, Mode=OneWay}">
-                                    <Slider
-                                        x:Name="SliderFadeIntensity"
-                                        MinWidth="150"
-                                        Maximum="100"
-                                        Minimum="30"
-                                        SmallChange="10"
-                                        StepFrequency="10"
-                                        Value="50" />
-                                </controls:SettingsCard>
-                                <controls:SettingsCard x:Name="SettingsCardAutoHideMouse" x:Uid="SettingsCardAutoHideMouse">
-                                    <ToggleSwitch x:Name="ButtonEnableAutoHideMouse" HorizontalAlignment="Right" />
-                                </controls:SettingsCard>
-                            </controls:SettingsExpander.Items>
-                        </controls:SettingsExpander>
-                        <controls:SettingsExpander
-                            x:Name="SettingsCardMouseWheelBehaviour"
-                            x:Uid="SettingsCardMouseWheelBehaviour"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;}">
-                            <ComboBox
-                                x:Name="ComboMouseWheelBehaviour"
-                                MinWidth="150"
-                                SelectedIndex="0">
-                                <ComboBoxItem x:Uid="ComboMouseWheelItemZoom" />
-                                <ComboBoxItem x:Uid="ComboMouseWheelItemNav" />
-                            </ComboBox>
-                            <controls:SettingsExpander.Items>
-                                <controls:SettingsCard x:Name="SettingsCardMouseWheelBehaviourInfo" x:Uid="SettingsCardMouseWheelBehaviourInfo" />
-                            </controls:SettingsExpander.Items>
-                        </controls:SettingsExpander>
-                        <controls:SettingsExpander
-                            x:Name="SettingsCardShowThumbnail"
-                            x:Uid="SettingsCardShowThumbnail"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xF597;}">
-                            <ToggleSwitch x:Name="ButtonShowThumbnail" HorizontalAlignment="Right" />
-                            <controls:SettingsExpander.Items>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardThumbnailSize"
-                                    x:Uid="SettingsCardThumbnailSize"
-                                    HeaderIcon="{ui:FontIcon Glyph=&#xE620;}"
-                                    IsEnabled="{x:Bind ButtonShowThumbnail.IsOn, Mode=OneWay}">
-                                    <Slider
-                                        x:Name="SliderThumbnailSize"
-                                        MinWidth="150"
-                                        Maximum="60"
-                                        Minimum="30"
-                                        SmallChange="10"
-                                        StepFrequency="10"
-                                        Value="40" />
-                                </controls:SettingsCard>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardThumbnailSelectionColor"
-                                    x:Uid="SettingsCardThumbnailSelectionColor"
-                                    HeaderIcon="{ui:FontIcon Glyph=&#xE790;}"
-                                    IsEnabled="{x:Bind ButtonShowThumbnail.IsOn, Mode=OneWay}">
-                                    <Button
-                                        x:Name="ButtonSetThumbnailSelColor"
-                                        HorizontalAlignment="Right"
-                                        FlyoutBase.AttachedFlyout="{StaticResource ColorPickerFlyout}"
-                                        Tapped="RectThumbnailSelection_Tapped"
-                                        ToolTipService.ToolTip="Click to change selection color.">
-                                        <Button.Content>
-                                            <Rectangle
-                                                x:Name="RectThumbnailSelection"
-                                                Width="20"
-                                                Height="20"
-                                                StrokeThickness="3" />
-                                        </Button.Content>
-                                    </Button>
-                                </controls:SettingsCard>
-                            </controls:SettingsExpander.Items>
-                        </controls:SettingsExpander>
-                        <controls:SettingsExpander
-                            x:Name="SettingsCardExternalShorcuts"
-                            x:Uid="SettingsCardExternalShorcuts"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE8A7;}">
-                            <ToggleSwitch x:Name="ButtonEnableExternalShortcut" HorizontalAlignment="Right" />
-                            <controls:SettingsExpander.Items>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardExternalApps"
-                                    x:Uid="SettingsCardExternalApps"
-                                    IsEnabled="{x:Bind ButtonEnableExternalShortcut.IsOn, Mode=OneWay}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Button
-                                            x:Name="BtnShortcut1"
-                                            Height="50"
-                                            Margin="2"
-                                            Click="OnShortcutButtonClick">
-                                            <FontIcon Glyph="&#xE8E5;" />
-                                        </Button>
-                                        <Button
-                                            x:Name="BtnShortcut2"
-                                            Height="50"
-                                            Margin="2"
-                                            Click="OnShortcutButtonClick">
-                                            <FontIcon Glyph="&#xE8E5;" />
-                                        </Button>
-                                        <Button
-                                            x:Name="BtnShortcut3"
-                                            Height="50"
-                                            Margin="2"
-                                            Click="OnShortcutButtonClick">
-                                            <FontIcon Glyph="&#xE8E5;" />
-                                        </Button>
-                                        <Button
-                                            x:Name="BtnShortcut4"
-                                            Height="50"
-                                            Margin="2"
-                                            Click="OnShortcutButtonClick">
-                                            <FontIcon Glyph="&#xE8E5;" />
-                                        </Button>
-                                    </StackPanel>
-                                </controls:SettingsCard>
-                            </controls:SettingsExpander.Items>
-                        </controls:SettingsExpander>
-                        <controls:SettingsCard
-                            x:Name="SettingsCardShowFileName"
-                            x:Uid="SettingsCardShowFileName"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
-                            <ToggleSwitch x:Name="ButtonShowFileName" />
-                        </controls:SettingsCard>
-                        <controls:SettingsCard
-                            x:Name="SettingsCardShowCacheStatusExpander"
-                            x:Uid="SettingsCardShowCacheStatusExpander"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
-                            <ToggleSwitch x:Name="ButtonShowCacheStatusExpander" />
-                        </controls:SettingsCard>
-                        <controls:SettingsCard
-                            x:Name="SettingsCardShowImageDimensions"
-                            x:Uid="SettingsCardShowImageDimensions"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
-                            <ToggleSwitch x:Name="ButtonShowImageDimensions" />
-                        </controls:SettingsCard>
-                        <controls:SettingsCard
-                            x:Name="SettingsCardConfirmBeforeDelete"
-                            x:Uid="SettingsCardConfirmBeforeDelete"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE74D;}">
-                            <ToggleSwitch x:Name="ButtonConfirmBeforeDelete" />
-                        </controls:SettingsCard>
-                        <controls:SettingsCard
-                            x:Name="SettingsCardWindowLaunchMode"
-                            x:Uid="SettingsCardWindowLaunchMode"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xEC77;}">
-                            <ComboBox
-                                x:Name="ComboWindowLaunchMode"
-                                MinWidth="150"
-                                HorizontalAlignment="Right">
-                                <ComboBoxItem x:Uid="ComboWindowLaunchModeItemMaximized" />
-                                <ComboBoxItem x:Uid="ComboWindowLaunchModeItemFullScreen" />
-                                <ComboBoxItem x:Uid="ComboWindowLaunchModeItemLastWindowState" />
-                            </ComboBox>
-                        </controls:SettingsCard>
+
                         <controls:SettingsCard
                             x:Name="SettingsCardAllowMultiInstance"
                             x:Uid="SettingsCardAllowMultiInstance"
@@ -413,58 +519,14 @@
                             HeaderIcon="{ui:FontIcon Glyph=&#xE7AA;}">
                             <ToggleSwitch x:Name="ButtonAllowMultiInstance" />
                         </controls:SettingsCard>
-                        <TextBlock
-                            x:Uid="TextBlockCaching"
-                            Margin="0,20,0,0"
-                            Style="{StaticResource BodyStrongTextBlockStyle}" />
-                        <controls:SettingsExpander
-                            x:Name="SettingsExpanderCaching"
-                            x:Uid="SettingsExpanderCaching"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xF16A;}">
-                            <controls:SettingsExpander.Items>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardLowResCache"
-                                    x:Uid="SettingsCardLowResCache"
-                                    HeaderIcon="{ui:FontIcon Glyph=&#xE7AA;}">
-                                    <Slider
-                                        x:Name="SliderLowResCacheSize"
-                                        MinWidth="150"
-                                        Maximum="300"
-                                        Minimum="50"
-                                        SmallChange="10"
-                                        StepFrequency="10"
-                                        Value="300" />
-                                </controls:SettingsCard>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardHighResCache"
-                                    x:Uid="SettingsCardHighResCache"
-                                    HeaderIcon="{ui:FontIcon Glyph=&#xE7AA;}">
-                                    <Slider
-                                        x:Name="SliderHighResCacheSize"
-                                        MinWidth="150"
-                                        Maximum="3"
-                                        Minimum="1"
-                                        SmallChange="1"
-                                        StepFrequency="1"
-                                        Value="2" />
-                                </controls:SettingsCard>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardClearDiskCache"
-                                    x:Uid="SettingsCardClearDiskCache"
-                                    HeaderIcon="{ui:FontIcon Glyph=&#xE74D;}">
-                                    <Button
-                                        x:Name="ButtonClearDiskCache"
-                                        x:Uid="ButtonClearDiskCache"
-                                        Click="ButtonClearDiskCache_OnClick" />
-                                </controls:SettingsCard>
 
-                            </controls:SettingsExpander.Items>
-                        </controls:SettingsExpander>
+                        <!--  *****************  -->
+
                         <TextBlock
                             x:Uid="TextBlockLog"
                             Margin="0,20,0,0"
                             Style="{StaticResource BodyStrongTextBlockStyle}" />
+
                         <controls:SettingsCard
                             x:Name="SettingsCardLog"
                             x:Uid="SettingsCardLog"
@@ -480,6 +542,7 @@
                     </StackPanel>
                 </ScrollViewer>
             </PivotItem>
+
             <PivotItem x:Uid="SettingsPivotItemCodecs">
                 <ScrollViewer>
                     <StackPanel Margin="0,5,15,0" Orientation="Vertical">

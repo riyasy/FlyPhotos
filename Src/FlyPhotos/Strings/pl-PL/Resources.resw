@@ -144,6 +144,9 @@
   <data name="ButtonBackToolTip.Content" xml:space="preserve">
     <value>Poprzednie zdjęcie</value>
   </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>Wyczyść</value>
+  </data>
   <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
     <value>Wyświetl stan pamięci podręcznej</value>
   </data>
@@ -231,6 +234,15 @@
   <data name="ComboThemeItemLight.Content" xml:space="preserve">
     <value>Jasny</value>
   </data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+    <value>Pełny ekran</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+    <value>Poprzedni stan</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+    <value>Zmaksymalizowane</value>
+  </data>
   <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
     <value>Anuluj</value>
   </data>
@@ -297,11 +309,23 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>Szukaj aplikacji…</value>
   </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>Dodatkowe instancje pokazują tylko wybrany obraz (bez nawigacji, usuwania ani ustawień).</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>Zezwól na wiele instancji (Beta)</value>
+  </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Ukryj wskaźnik myszy, jeśli mysz jest nieaktywna.</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
     <value>Automatycznie ukryj wskaźnik myszy</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>Usuń wszystkie podglądy z pamięci podręcznej dysku.</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>Wyczyść pamięć podręczną dysku</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
     <value>Poproś o potwierdzenie przed usunięciem jakiegokolwiek pliku.</value>
@@ -315,6 +339,18 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Kredyty</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>Użyj rzeczywistych danych RAW zamiast osadzonego pliku JPEG w pliku RAW.</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>Dekoduj RAW z aparatu</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC (Windows Imaging Component): kodeki systemowe • Rawler: najszybszy • ImageMagick: najlepsza kompatybilność</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>Dostosuj priorytet dekoderów RAW (przeciągnij, aby zmienić kolejność)</value>
+  </data>
   <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
     <value>Spraw, aby Fly był jeszcze lepszy.</value>
   </data>
@@ -327,10 +363,10 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Wybierz zewnętrzne aplikacje</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Description" xml:space="preserve">
+  <data name="SettingsCardExternalShortcuts.Description" xml:space="preserve">
     <value>Otwórz bieżące zdjęcie w innych aplikacjach</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Header" xml:space="preserve">
+  <data name="SettingsCardExternalShortcuts.Header" xml:space="preserve">
     <value>Pokaż skróty do zewnętrznych aplikacji</value>
   </data>
   <data name="SettingsCardFadeControls.Description" xml:space="preserve">
@@ -362,218 +398,6 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Dopasowanie obrazu do ekranu</value>
-  </data>
-  <data name="SettingsCardLanguage.Header" xml:space="preserve">
-    <value>Wybierz język</value>
-  </data>
-  <data name="SettingsCardLog.Description" xml:space="preserve">
-    <value>Otwórz, aby zobaczyć plik dziennika</value>
-  </data>
-  <data name="SettingsCardLog.Header" xml:space="preserve">
-    <value>Plik dziennika</value>
-  </data>
-  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Ustaw liczbę zdjęć w niskiej rozdzielczości buforowanych po każdej stronie.</value>
-  </data>
-  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Pamięć podręczna niskiej rozdzielczości</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
-    <value>Wybierz domyślne zachowanie kółka myszy.</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
-    <value>Kółko myszy</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + kółko myszy zawsze powiększa. 
-👉 Alt + kółko myszy zawsze nawiguje.</value>
-  </data>
-  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
-    <value>⚠ Może spowolnić uruchamianie. Fly czeka na załadowanie zdjęcia w pełnej rozdzielczości podczas uruchamiania.</value>
-  </data>
-  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
-    <value>Powiększ przy otwieraniu pliku i pomniejsz przy zamykaniu</value>
-  </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ Użyj opcji Zachowaj tylko dla folderów z podobnymi rozmiarami zdjęć.</value>
-  </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
-    <value>Zachowanie przesuwania, powiększania i obracania podczas nawigacji</value>
-  </data>
-  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-  <value>Poprzedni stan przywraca ostatni rozmiar, położenie i monitor okna.</value>
-</data>
-  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
-  <value>Stan okna przy uruchomieniu</value>
-</data>
-  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
-  <value>Zmaksymalizowane</value>
-</data>
-  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
-  <value>Pełny ekran</value>
-</data>
-  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
-  <value>Poprzedni stan</value>
-</data>
-  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
-    <value>Zgłoś problemy na GitHub lub wyślij wiadomość na adres ryftools@outlook.com</value>
-  </data>
-  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
-    <value>Błędy i problemy</value>
-  </data>
-  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
-    <value>Pokaż stan pamięci podręcznej w dolnym panelu.</value>
-  </data>
-  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
-    <value>Pokaż stan pamięci podręcznej</value>
-  </data>
-  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
-    <value>Pokaż tło w szachownicę dla przezroczystych obrazów. 
-⚠ Może wpływać na wydajność.</value>
-  </data>
-  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
-    <value>Pokaż tło w szachownicę</value>
-  </data>
-  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
-    <value>Pokaż nazwę aktualnie otwartego pliku</value>
-  </data>
-  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
-    <value>Pokaż nazwę pliku</value>
-  </data>
-  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
-    <value>Pokaż szerokość i wysokość zdjęcia obok nazwy pliku.</value>
-  </data>
-  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
-    <value>Pokaż wymiary zdjęcia</value>
-  </data>
-  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
-    <value>Pokaż pasek miniatur u dołu okna.</value>
-  </data>
-  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
-    <value>Pokaż pasek miniatur</value>
-  </data>
-  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
-    <value>Pokaż procent powiększenia</value>
-  </data>
-  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
-    <value>FlyPhotos jest oprogramowaniem open source hostowanym na GitHub.</value>
-  </data>
-  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
-    <value>Repozytorium GitHub</value>
-  </data>
-  <data name="SettingsCardTheme.Description" xml:space="preserve">
-    <value>Wybierz motyw aplikacji.</value>
-  </data>
-  <data name="SettingsCardTheme.Header" xml:space="preserve">
-    <value>Motyw okna</value>
-  </data>
-  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
-    <value>Ustaw kolor wyróżnienia używany dla wybranych miniatur.</value>
-  </data>
-  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
-    <value>Kolor wyboru miniatury</value>
-  </data>
-  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
-    <value>Dostosuj rozmiar miniatur w przeglądarce.</value>
-  </data>
-  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
-    <value>Rozmiar miniatury</value>
-  </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
-    <value>Ma zastosowanie tylko do przezroczystego tła okna.</value>
-  </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
-    <value>Przezroczystość (%)</value>
-  </data>
-  <data name="SettingsCardVersion.Description" xml:space="preserve">
-    <value>Aktualna wersja to {0}</value>
-  </data>
-  <data name="SettingsCardVersion.Header" xml:space="preserve">
-    <value>Aktualna wersja</value>
-  </data>
-  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
-    <value>Wybierz tło okna.</value>
-  </data>
-  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
-    <value>Tło okna</value>
-  </data>
-  <data name="SettingsExpanderAutoFade.Header" xml:space="preserve">
-    <value>Automatyczne wygaszanie i ukrywanie ustawień</value>
-  </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>Skonfiguruj, jak Fly obsługuje buforowanie zdjęć.</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>Buforowanie</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>Skróty klawiaturowe</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>Dostosuj zachowanie przesuwania i powiększania.</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>Przesuwanie i powiększanie</value>
-  </data>
-  <data name="SettingsPage.Title" xml:space="preserve">
-    <value>FlyPhotos - Ustawienia</value>
-  </data>
-  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
-    <value>Informacje</value>
-  </data>
-  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
-    <value>Kodeki</value>
-  </data>
-  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
-    <value>Ogólne</value>
-  </data>
-  <data name="Status_FileNotFound" xml:space="preserve">
-    <value>Nie znaleziono pliku</value>
-  </data>
-  <data name="Status_InvalidFile" xml:space="preserve">
-    <value>Nieprawidłowy plik</value>
-  </data>
-  <data name="Status_Loading" xml:space="preserve">
-    <value>Ładowanie…</value>
-  </data>
-  <data name="Status_PreviewFailed" xml:space="preserve">
-    <value>Nie udało się załadować podglądu</value>
-  </data>
-  <data name="TextBlockCaching.Text" xml:space="preserve">
-    <value>Buforowanie</value>
-  </data>
-  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
-    <value>FlyPhotos używa głównie wbudowanych kodeków Windows Imaging Component (WIC).</value>
-  </data>
-  <data name="TextBlockLog.Text" xml:space="preserve">
-    <value>Dziennik</value>
-  </data>
-  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
-    <value>Wyświetlanie zdjęć</value>
-  </data>
-  <data name="TextBlockTheming.Text" xml:space="preserve">
-    <value>Wygląd</value>
-  </data>
-  <data name="TextBlockUIControls.Text" xml:space="preserve">
-    <value>Elementy sterujące interfejsu użytkownika</value>
-  </data>
-  <data name="TitleTextBlock.Text" xml:space="preserve">
-    <value>FlyPhotos - Otwórz zdjęcie</value>
-  </data>
-  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
-    <value>OK</value>
-  </data>
-  <data name="TrialExpiredMessage.Content" xml:space="preserve">
-    <value>Twój bezpłatny okres próbny wygasł. Kup pełną wersję w Microsoft Store.</value>
-  </data>
-  <data name="TrialExpiredMessage.Title" xml:space="preserve">
-    <value>Wygasł okres próbny</value>
-  </data>
-  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
-    <value>Upuszczony plik nie jest obsługiwanym typem obrazu.</value>
-  </data>
-  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
-    <value>Nieobsługiwany plik</value>
   </data>
   <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
     <value>Strzałki Lewo/Prawo : Przełączanie zdjęć
@@ -620,37 +444,222 @@ Del : Usuń zdjęcie
 
 Esc : Zamknij ustawienia lub Wyjdź</value>
   </data>
-  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Dodatkowe instancje pokazują tylko wybrany obraz (bez nawigacji, usuwania ani ustawień).</value>
+  <data name="SettingsCardLanguage.Header" xml:space="preserve">
+    <value>Wybierz język</value>
   </data>
-  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Zezwól na wiele instancji (Beta)</value>
+  <data name="SettingsCardLog.Description" xml:space="preserve">
+    <value>Otwórz, aby zobaczyć plik dziennika</value>
   </data>
-  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
-    <value>Dekoduj RAW z aparatu</value>
+  <data name="SettingsCardLog.Header" xml:space="preserve">
+    <value>Plik dziennika</value>
   </data>
-  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
-    <value>Użyj rzeczywistych danych RAW zamiast osadzonego pliku JPEG w pliku RAW.</value>
+  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
+    <value>Ustaw liczbę zdjęć w niskiej rozdzielczości buforowanych po każdej stronie.</value>
   </data>
-  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
-    <value>Wyczyść pamięć podręczną dysku</value>
+  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
+    <value>Pamięć podręczna niskiej rozdzielczości</value>
   </data>
-  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Usuń wszystkie podglądy z pamięci podręcznej dysku.</value>
+  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
+    <value>Wybierz domyślne zachowanie kółka myszy.</value>
   </data>
-  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
-    <value>Wyczyść</value>
+  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
+    <value>Kółko myszy</value>
   </data>
-  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
-    <value>Dostosuj priorytet dekoderów RAW (przeciągnij, aby zmienić kolejność)</value>
+  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
+    <value>👉 Ctrl + kółko myszy zawsze powiększa. 
+👉 Alt + kółko myszy zawsze nawiguje.</value>
   </data>
-  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
-    <value>WIC (Windows Imaging Component): kodeki systemowe • Rawler: najszybszy • ImageMagick: najlepsza kompatybilność</value>
+  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
+    <value>⚠ Może spowolnić uruchamianie. Fly czeka na załadowanie zdjęcia w pełnej rozdzielczości podczas uruchamiania.</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
+    <value>Animuj powiększenie przy uruchomieniu i pomniejsz przy zamykaniu</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
+    <value>⚠ Użyj opcji Zachowaj tylko dla folderów z podobnymi rozmiarami zdjęć.</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
+    <value>Zachowanie przesuwania, powiększania i obracania podczas nawigacji</value>
+  </data>
+  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
+    <value>Zgłoś problemy na GitHub lub wyślij wiadomość na adres ryftools@outlook.com</value>
+  </data>
+  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
+    <value>Błędy i problemy</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
+    <value>Pokaż stan pamięci podręcznej w dolnym panelu.</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
+    <value>Pokaż stan pamięci podręcznej</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
+    <value>Pokaż tło w szachownicę dla przezroczystych obrazów. 
+⚠ Może wpływać na wydajność.</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
+    <value>Pokaż tło w szachownicę</value>
+  </data>
+  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
+    <value>Pokaż nazwę aktualnie otwartego pliku</value>
+  </data>
+  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
+    <value>Pokaż nazwę pliku</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
+    <value>Pokaż szerokość i wysokość zdjęcia obok nazwy pliku.</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
+    <value>Pokaż wymiary zdjęcia</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
+    <value>Pokaż pasek miniatur u dołu okna.</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
+    <value>Pokaż pasek miniatur</value>
+  </data>
+  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
+    <value>Pokaż procent powiększenia</value>
+  </data>
+  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
+    <value>FlyPhotos jest oprogramowaniem open source hostowanym na GitHub.</value>
+  </data>
+  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
+    <value>Repozytorium GitHub</value>
+  </data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+    <value>Duże zdjęcia zawsze dopasowują się do obszaru wyświetlania. Małe zdjęcia są domyślnie wyświetlane w skali 1:1; włącz tę opcję, aby je powiększyć i dopasować.</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
-  <value>Powiększ małe zdjęcia, aby dopasować do obszaru wyświetlania</value>
-</data>
-  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
-  <value>Duże zdjęcia zawsze dopasowują się do obszaru wyświetlania. Małe zdjęcia są domyślnie wyświetlane w skali 1:1; włącz tę opcję, aby je powiększyć i dopasować.</value>
-</data>
+    <value>Powiększ małe zdjęcia, aby dopasować do obszaru wyświetlania</value>
+  </data>
+  <data name="SettingsCardTheme.Description" xml:space="preserve">
+    <value>Wybierz motyw aplikacji.</value>
+  </data>
+  <data name="SettingsCardTheme.Header" xml:space="preserve">
+    <value>Motyw okna</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
+    <value>Ustaw kolor wyróżnienia używany dla wybranych miniatur.</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
+    <value>Kolor wyboru miniatury</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
+    <value>Dostosuj rozmiar miniatur w przeglądarce.</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
+    <value>Rozmiar miniatury</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
+    <value>Ma zastosowanie tylko do przezroczystego tła okna.</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
+    <value>Przezroczystość (%)</value>
+  </data>
+  <data name="SettingsCardVersion.Description" xml:space="preserve">
+    <value>Aktualna wersja to {0}</value>
+  </data>
+  <data name="SettingsCardVersion.Header" xml:space="preserve">
+    <value>Aktualna wersja</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
+    <value>Wybierz tło okna.</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
+    <value>Tło okna</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+    <value>Poprzedni stan przywraca ostatni rozmiar, położenie i monitor okna.</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+    <value>Stan okna przy uruchomieniu</value>
+  </data>
+  <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
+    <value>Automatyczne wygaszanie i ukrywanie</value>
+  </data>
+  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
+    <value>Skonfiguruj, jak Fly obsługuje buforowanie zdjęć.</value>
+  </data>
+  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
+    <value>Buforowanie</value>
+  </data>
+  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
+    <value>Skróty klawiaturowe</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
+    <value>Dostosuj zachowanie przesuwania i powiększania.</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
+    <value>Przesuwanie i powiększanie</value>
+  </data>
+  <data name="SettingsPage.Title" xml:space="preserve">
+    <value>FlyPhotos - Ustawienia</value>
+  </data>
+  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
+    <value>Informacje</value>
+  </data>
+  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
+    <value>Kodeki</value>
+  </data>
+  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
+    <value>Ogólne</value>
+  </data>
+  <data name="Status_FileNotFound" xml:space="preserve">
+    <value>Nie znaleziono pliku</value>
+  </data>
+  <data name="Status_InvalidFile" xml:space="preserve">
+    <value>Nieprawidłowy plik</value>
+  </data>
+  <data name="Status_Loading" xml:space="preserve">
+    <value>Ładowanie…</value>
+  </data>
+  <data name="Status_PreviewFailed" xml:space="preserve">
+    <value>Nie udało się załadować podglądu</value>
+  </data>
+  <data name="TextBlockLog.Text" xml:space="preserve">
+    <value>Diagnostyka</value>
+  </data>
+  <data name="TextBlockCaching.Text" xml:space="preserve">
+    <value>Buforowanie</value>
+  </data>
+  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
+    <value>FlyPhotos używa głównie wbudowanych kodeków Windows Imaging Component (WIC).</value>
+  </data>
+  <data name="TextBlockAdvanced.Text" xml:space="preserve">
+    <value>Zaawansowane</value>
+  </data>
+  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
+    <value>Klawiatura i mysz</value>
+  </data>
+  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
+    <value>Wyświetlanie zdjęć</value>
+  </data>
+  <data name="TextBlockStartupAndAppearance.Text" xml:space="preserve">
+    <value>Uruchamianie i wygląd</value>
+  </data>
+  <data name="TextBlockUIControls.Text" xml:space="preserve">
+    <value>Elementy sterujące interfejsu użytkownika</value>
+  </data>
+  <data name="TitleTextBlock.Text" xml:space="preserve">
+    <value>FlyPhotos - Otwórz zdjęcie</value>
+  </data>
+  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="TrialExpiredMessage.Content" xml:space="preserve">
+    <value>Twój bezpłatny okres próbny wygasł. Kup pełną wersję w Microsoft Store.</value>
+  </data>
+  <data name="TrialExpiredMessage.Title" xml:space="preserve">
+    <value>Wygasł okres próbny</value>
+  </data>
+  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
+    <value>Upuszczony plik nie jest obsługiwanym typem obrazu.</value>
+  </data>
+  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
+    <value>Nieobsługiwany plik</value>
+  </data>
+  <data name="_end" xml:space="preserve">
+    <value>end</value>
+  </data>
 </root>

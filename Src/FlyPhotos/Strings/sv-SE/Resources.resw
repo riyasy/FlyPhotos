@@ -144,6 +144,9 @@
   <data name="ButtonBackToolTip.Content" xml:space="preserve">
     <value>Föregående foto</value>
   </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>Töm</value>
+  </data>
   <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
     <value>Visa cachestatus</value>
   </data>
@@ -231,6 +234,15 @@
   <data name="ComboThemeItemLight.Content" xml:space="preserve">
     <value>Ljus</value>
   </data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+    <value>Helskärm</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+    <value>Föregående tillstånd</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+    <value>Maximerat</value>
+  </data>
   <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
     <value>Avbryt</value>
   </data>
@@ -297,11 +309,23 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>Sök appar…</value>
   </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>Ytterligare instanser visar bara vald bild (ingen navigering, radering eller inställningar).</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>Tillåt flera instanser (Beta)</value>
+  </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Dölj muspekaren om musen är inaktiv.</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
     <value>Dölj muspekaren automatiskt</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>Ta bort alla förhandsvisningar från diskcachen.</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>Rensa diskcache</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
     <value>Fråga om bekräftelse innan du tar bort någon fil.</value>
@@ -315,6 +339,18 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Bidrag</value>
   </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>Använd faktisk RAW-data istället för den inbäddade JPEG-bilden i RAW-filen.</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>Avkoda kamerans RAW-filer</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC (Windows Imaging Component): systemkodekar • Rawler: snabbast • ImageMagick: bästa kompatibilitet</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>Justera prioritet för RAW-avkodare (dra för att ändra ordning)</value>
+  </data>
   <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
     <value>Gör Fly ännu bättre.</value>
   </data>
@@ -327,10 +363,10 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Välj externa appar</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Description" xml:space="preserve">
+  <data name="SettingsCardExternalShortcuts.Description" xml:space="preserve">
     <value>Öppna det aktuella fotot i andra appar</value>
   </data>
-  <data name="SettingsCardExternalShorcuts.Header" xml:space="preserve">
+  <data name="SettingsCardExternalShortcuts.Header" xml:space="preserve">
     <value>Visa genvägar till externa appar</value>
   </data>
   <data name="SettingsCardFadeControls.Description" xml:space="preserve">
@@ -362,218 +398,6 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Bild till skärmpassning</value>
-  </data>
-  <data name="SettingsCardLanguage.Header" xml:space="preserve">
-    <value>Välj språk</value>
-  </data>
-  <data name="SettingsCardLog.Description" xml:space="preserve">
-    <value>Öppna för att se loggfilen</value>
-  </data>
-  <data name="SettingsCardLog.Header" xml:space="preserve">
-    <value>Loggfil</value>
-  </data>
-  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Ställ in antalet lågupplösta foton som cachas på varje sida.</value>
-  </data>
-  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Lågupplöst cache</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
-    <value>Välj standardbeteende för mushjulet.</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
-    <value>Mushjul</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + Mushjul zoomar alltid. 
-👉 Alt + Mushjul navigerar alltid.</value>
-  </data>
-  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
-    <value>⚠ Kan sakta ner starten. Fly väntar med att ladda fotot i full upplösning vid start.</value>
-  </data>
-  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
-    <value>Zooma in vid öppning av en fil och zooma ut vid stängning</value>
-  </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ Använd endast alternativet Behåll för mappar med liknande storlek på foton.</value>
-  </data>
-  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
-    <value>Pan, Zoom &amp; Rotation-beteende under navigering</value>
-  </data>
-  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-  <value>Föregående tillstånd återställer fönstrets senaste storlek, position och skärm.</value>
-</data>
-  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
-  <value>Fönsterläge vid start</value>
-</data>
-  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
-  <value>Maximerat</value>
-</data>
-  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
-  <value>Helskärm</value>
-</data>
-  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
-  <value>Föregående tillstånd</value>
-</data>
-  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
-    <value>Rapportera problem på GitHub eller maila till ryftools@outlook.com</value>
-  </data>
-  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
-    <value>Buggar och problem</value>
-  </data>
-  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
-    <value>Visa cachestatus i det nedre panelen.</value>
-  </data>
-  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
-    <value>Visa cachestatus</value>
-  </data>
-  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
-    <value>Visa rutig bakgrund för transparenta bilder. 
-⚠ Kan påverka prestandan.</value>
-  </data>
-  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
-    <value>Visa rutig bakgrund</value>
-  </data>
-  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
-    <value>Visa filnamnet på det aktuella fotot</value>
-  </data>
-  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
-    <value>Visa filnamn</value>
-  </data>
-  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
-    <value>Visa fotots bredd och höjd bredvid filnamnet.</value>
-  </data>
-  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
-    <value>Visa fotodimensioner</value>
-  </data>
-  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
-    <value>Visa miniatyrbildsremsan längst ned i fönstret.</value>
-  </data>
-  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
-    <value>Visa miniatyrbildsremsa</value>
-  </data>
-  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
-    <value>Visa zoomprocent</value>
-  </data>
-  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
-    <value>FlyPhotos är öppen källkod och finns på GitHub.</value>
-  </data>
-  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
-    <value>GitHub-lagringsplats</value>
-  </data>
-  <data name="SettingsCardTheme.Description" xml:space="preserve">
-    <value>Välj apptemat.</value>
-  </data>
-  <data name="SettingsCardTheme.Header" xml:space="preserve">
-    <value>Fönstertema</value>
-  </data>
-  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
-    <value>Ställ in markeringsfärgen som används för valda miniatyrer.</value>
-  </data>
-  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
-    <value>Färg för miniatyrval</value>
-  </data>
-  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
-    <value>Justera storleken på miniatyrerna i visningsprogrammet.</value>
-  </data>
-  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
-    <value>Miniatyrstorlek</value>
-  </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
-    <value>Gäller endast för transparent fönsterbakgrund.</value>
-  </data>
-  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
-    <value>Transparens (%)</value>
-  </data>
-  <data name="SettingsCardVersion.Description" xml:space="preserve">
-    <value>Nuvarande version är {0}</value>
-  </data>
-  <data name="SettingsCardVersion.Header" xml:space="preserve">
-    <value>Nuvarande version</value>
-  </data>
-  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
-    <value>Välj fönsterbakgrund.</value>
-  </data>
-  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
-    <value>Fönsterbakgrund</value>
-  </data>
-  <data name="SettingsExpanderAutoFade.Header" xml:space="preserve">
-    <value>Inställningar för automatisk toning och dölj</value>
-  </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>Konfigurera hur Fly hanterar fotocache.</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>Cache</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>Tangentbordsgenvägar</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>Anpassa Pan och Zoom-beteende.</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>Panorera och zooma</value>
-  </data>
-  <data name="SettingsPage.Title" xml:space="preserve">
-    <value>FlyPhotos - Inställningar</value>
-  </data>
-  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
-    <value>Om</value>
-  </data>
-  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
-    <value>Codec</value>
-  </data>
-  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
-    <value>Allmänt</value>
-  </data>
-  <data name="Status_FileNotFound" xml:space="preserve">
-    <value>Filen hittades inte</value>
-  </data>
-  <data name="Status_InvalidFile" xml:space="preserve">
-    <value>Ogiltig fil</value>
-  </data>
-  <data name="Status_Loading" xml:space="preserve">
-    <value>Laddar…</value>
-  </data>
-  <data name="Status_PreviewFailed" xml:space="preserve">
-    <value>Förhandsgranskning kunde inte laddas</value>
-  </data>
-  <data name="TextBlockCaching.Text" xml:space="preserve">
-    <value>Cache</value>
-  </data>
-  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
-    <value>FlyPhotos använder främst inbyggda Windows Imaging Component (WIC) codecs.</value>
-  </data>
-  <data name="TextBlockLog.Text" xml:space="preserve">
-    <value>Logg</value>
-  </data>
-  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
-    <value>Fotovisning</value>
-  </data>
-  <data name="TextBlockTheming.Text" xml:space="preserve">
-    <value>Utseende</value>
-  </data>
-  <data name="TextBlockUIControls.Text" xml:space="preserve">
-    <value>Användargränssnittskontroller</value>
-  </data>
-  <data name="TitleTextBlock.Text" xml:space="preserve">
-    <value>FlyPhotos - Öppna foto</value>
-  </data>
-  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
-    <value>OK</value>
-  </data>
-  <data name="TrialExpiredMessage.Content" xml:space="preserve">
-    <value>Din kostnadsfria provperiod har löpt ut. Köp den fullständiga versionen från Microsoft Store.</value>
-  </data>
-  <data name="TrialExpiredMessage.Title" xml:space="preserve">
-    <value>Provperioden har löpt ut</value>
-  </data>
-  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
-    <value>Den släppta filen är inte en stödd bildtyp.</value>
-  </data>
-  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
-    <value>Filtyp stöds inte</value>
   </data>
   <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
     <value>Vänster/Höger Pil : Bläddra bland bilder
@@ -620,37 +444,222 @@ Del : Ta bort bild
 
 Esc : Stäng inställningar eller Avsluta</value>
   </data>
-  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Ytterligare instanser visar bara vald bild (ingen navigering, radering eller inställningar).</value>
+  <data name="SettingsCardLanguage.Header" xml:space="preserve">
+    <value>Välj språk</value>
   </data>
-  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Tillåt flera instanser (Beta)</value>
+  <data name="SettingsCardLog.Description" xml:space="preserve">
+    <value>Öppna för att se loggfilen</value>
   </data>
-  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
-    <value>Avkoda kamerans RAW-filer</value>
+  <data name="SettingsCardLog.Header" xml:space="preserve">
+    <value>Loggfil</value>
   </data>
-  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
-    <value>Använd faktisk RAW-data istället för den inbäddade JPEG-bilden i RAW-filen.</value>
+  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
+    <value>Ställ in antalet lågupplösta foton som cachas på varje sida.</value>
   </data>
-  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
-    <value>Rensa diskcache</value>
+  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
+    <value>Lågupplöst cache</value>
   </data>
-  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Ta bort alla förhandsvisningar från diskcachen.</value>
+  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
+    <value>Välj standardbeteende för mushjulet.</value>
   </data>
-  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
-    <value>Töm</value>
+  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
+    <value>Mushjul</value>
   </data>
-  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
-    <value>Justera prioritet för RAW-avkodare (dra för att ändra ordning)</value>
+  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
+    <value>👉 Ctrl + Mushjul zoomar alltid. 
+👉 Alt + Mushjul navigerar alltid.</value>
   </data>
-  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
-    <value>WIC (Windows Imaging Component): systemkodekar • Rawler: snabbast • ImageMagick: bästa kompatibilitet</value>
+  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
+    <value>⚠ Kan sakta ner starten. Fly väntar med att ladda fotot i full upplösning vid start.</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
+    <value>Animera zoom vid start och zooma ut vid avslut</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
+    <value>⚠ Använd endast alternativet Behåll för mappar med liknande storlek på foton.</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
+    <value>Pan, Zoom &amp; Rotation-beteende under navigering</value>
+  </data>
+  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
+    <value>Rapportera problem på GitHub eller maila till ryftools@outlook.com</value>
+  </data>
+  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
+    <value>Buggar och problem</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
+    <value>Visa cachestatus i det nedre panelen.</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
+    <value>Visa cachestatus</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
+    <value>Visa rutig bakgrund för transparenta bilder. 
+⚠ Kan påverka prestandan.</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
+    <value>Visa rutig bakgrund</value>
+  </data>
+  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
+    <value>Visa filnamnet på det aktuella fotot</value>
+  </data>
+  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
+    <value>Visa filnamn</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
+    <value>Visa fotots bredd och höjd bredvid filnamnet.</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
+    <value>Visa fotodimensioner</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
+    <value>Visa miniatyrbildsremsan längst ned i fönstret.</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
+    <value>Visa miniatyrbildsremsa</value>
+  </data>
+  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
+    <value>Visa zoomprocent</value>
+  </data>
+  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
+    <value>FlyPhotos är öppen källkod och finns på GitHub.</value>
+  </data>
+  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
+    <value>GitHub-lagringsplats</value>
+  </data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+    <value>Stora bilder anpassas alltid till visningsytan. Små bilder visas i 1:1 som standard; aktivera detta för att zooma in och anpassa dem.</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
-  <value>Zooma små bilder för att passa visningsytan</value>
-</data>
-  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
-  <value>Stora bilder anpassas alltid till visningsytan. Små bilder visas i 1:1 som standard; aktivera detta för att zooma in och anpassa dem.</value>
-</data>
+    <value>Zooma små bilder för att passa visningsytan</value>
+  </data>
+  <data name="SettingsCardTheme.Description" xml:space="preserve">
+    <value>Välj apptemat.</value>
+  </data>
+  <data name="SettingsCardTheme.Header" xml:space="preserve">
+    <value>Fönstertema</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
+    <value>Ställ in markeringsfärgen som används för valda miniatyrer.</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
+    <value>Färg för miniatyrval</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
+    <value>Justera storleken på miniatyrerna i visningsprogrammet.</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
+    <value>Miniatyrstorlek</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
+    <value>Gäller endast för transparent fönsterbakgrund.</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
+    <value>Transparens (%)</value>
+  </data>
+  <data name="SettingsCardVersion.Description" xml:space="preserve">
+    <value>Nuvarande version är {0}</value>
+  </data>
+  <data name="SettingsCardVersion.Header" xml:space="preserve">
+    <value>Nuvarande version</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
+    <value>Välj fönsterbakgrund.</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
+    <value>Fönsterbakgrund</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+    <value>Föregående tillstånd återställer fönstrets senaste storlek, position och skärm.</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+    <value>Fönsterläge vid start</value>
+  </data>
+  <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
+    <value>Automatisk toning och dölj</value>
+  </data>
+  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
+    <value>Konfigurera hur Fly hanterar fotocache.</value>
+  </data>
+  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
+    <value>Cache</value>
+  </data>
+  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
+    <value>Tangentbordsgenvägar</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
+    <value>Anpassa Pan och Zoom-beteende.</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
+    <value>Panorera och zooma</value>
+  </data>
+  <data name="SettingsPage.Title" xml:space="preserve">
+    <value>FlyPhotos - Inställningar</value>
+  </data>
+  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
+    <value>Om</value>
+  </data>
+  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
+    <value>Codec</value>
+  </data>
+  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
+    <value>Allmänt</value>
+  </data>
+  <data name="Status_FileNotFound" xml:space="preserve">
+    <value>Filen hittades inte</value>
+  </data>
+  <data name="Status_InvalidFile" xml:space="preserve">
+    <value>Ogiltig fil</value>
+  </data>
+  <data name="Status_Loading" xml:space="preserve">
+    <value>Laddar…</value>
+  </data>
+  <data name="Status_PreviewFailed" xml:space="preserve">
+    <value>Förhandsgranskning kunde inte laddas</value>
+  </data>
+  <data name="TextBlockLog.Text" xml:space="preserve">
+    <value>Diagnostik</value>
+  </data>
+  <data name="TextBlockCaching.Text" xml:space="preserve">
+    <value>Cache</value>
+  </data>
+  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
+    <value>FlyPhotos använder främst inbyggda Windows Imaging Component (WIC) codecs.</value>
+  </data>
+  <data name="TextBlockAdvanced.Text" xml:space="preserve">
+    <value>Avancerat</value>
+  </data>
+  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
+    <value>Tangentbord och mus</value>
+  </data>
+  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
+    <value>Fotovisning</value>
+  </data>
+  <data name="TextBlockStartupAndAppearance.Text" xml:space="preserve">
+    <value>Start och utseende</value>
+  </data>
+  <data name="TextBlockUIControls.Text" xml:space="preserve">
+    <value>Användargränssnittskontroller</value>
+  </data>
+  <data name="TitleTextBlock.Text" xml:space="preserve">
+    <value>FlyPhotos - Öppna foto</value>
+  </data>
+  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="TrialExpiredMessage.Content" xml:space="preserve">
+    <value>Din kostnadsfria provperiod har löpt ut. Köp den fullständiga versionen från Microsoft Store.</value>
+  </data>
+  <data name="TrialExpiredMessage.Title" xml:space="preserve">
+    <value>Provperioden har löpt ut</value>
+  </data>
+  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
+    <value>Den släppta filen är inte en stödd bildtyp.</value>
+  </data>
+  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
+    <value>Filtyp stöds inte</value>
+  </data>
+  <data name="_end" xml:space="preserve">
+    <value>end</value>
+  </data>
 </root>
