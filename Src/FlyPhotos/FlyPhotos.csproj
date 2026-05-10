@@ -42,22 +42,53 @@
 		<Exec Command="XCOPY $(ProjectDir)Assets\*.* $(PublishDir)\Assets\ /S /Y" />
 	</Target>
 
+	<Target Name="RemoveAIMLFiles" AfterTargets="Publish">
+		<ItemGroup>
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.MachineLearning.dll" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.Imaging.dll" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.Text.dll" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.ContentSafety.dll" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.Workloads.dll" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.Workloads.Resources.dll" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.Workloads.Resources_ec.dll" />
+			<_FilesToRemove Include="$(PublishDir)onnxruntime.dll" />
+			<_FilesToRemove Include="$(PublishDir)DirectML.dll" />
+			<_FilesToRemove Include="$(PublishDir)NPUDetect.dll" />
+			<_FilesToRemove Include="$(PublishDir)workloads.*.json" />
+			<_FilesToRemove Include="$(PublishDir)workloads.json" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.*.winmd" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.Internal.AI.*.winmd" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.SemanticSearch*.winmd" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.Internal.SemanticSearch.winmd" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.Vision*.winmd" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.VisionInternal.winmd" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.Internal.Vision.winmd" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.ImageCreationInternal.winmd" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.Internal.ImageCreation.winmd" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Graphics.ImagingInternal.ImageObjectRemover.winmd" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.Workloads*.winmd" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.Workloads*.pri" />
+		</ItemGroup>
+		<Delete Files="@(_FilesToRemove)" />
+		<RemoveDir Directories="$(PublishDir)NpuDetect" />
+	</Target>
+
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
-		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.12.0" Condition="'$(Platform)' == 'x64'" />
-		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-arm64" Version="14.12.0" Condition="'$(Platform)' == 'ARM64'" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.6" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.6" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.6" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.6" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.6" />
+		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.13.0" Condition="'$(Platform)' == 'x64'" />
+		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-arm64" Version="14.13.0" Condition="'$(Platform)' == 'ARM64'" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.7" />
 		<PackageReference Include="Microsoft.Graphics.Win2D" Version="1.4.0" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260317003" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1721" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.1" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1839" />
 		<PackageReference Include="PhotoSauce.MagicScaler" Version="0.15.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.6" />
-		<PackageReference Include="NLog.Extensions.Logging" Version="6.1.2" />
-		<PackageReference Include="System.Drawing.Common" Version="10.0.6" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.7" />
+		<PackageReference Include="NLog.Extensions.Logging" Version="6.1.3" />
+		<PackageReference Include="System.Drawing.Common" Version="10.0.7" />
 		<PackageReference Include="WinUIEx" Version="2.9.0" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
