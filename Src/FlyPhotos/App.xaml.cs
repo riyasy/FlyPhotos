@@ -94,7 +94,7 @@ public partial class App
             case WindowLaunchMode.FullScreen:
                 _photoDisplayWindow.Activate();
                 _photoDisplayWindow.EnterFullScreenOnLaunch();
-                return; // Activate already called above
+                break; // Activate already called above
             case WindowLaunchMode.LastWindowState:
                 _photoDisplayWindow.Activate();
                 break;
