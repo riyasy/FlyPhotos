@@ -442,6 +442,8 @@ W : Visa fil i Windows Explorer
 S : Öppna Windows delningsfönster för filen
 A : Zooma till faktisk storlek
 F : Anpassa till fönster
+E : Visa panel för externa appar
+Ctrl + 1–4: Öppna i extern app 1–4
 
 Del : Ta bort bild
 

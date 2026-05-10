@@ -442,6 +442,8 @@ W : Näytä tiedosto Windowsin Resurssienhallinnassa
 S : Avaa Windowsin jakovalinta tiedostolle
 A : Zoomaa todelliseen kokoon
 F : Sovita ikkunaan
+E : Näytä ulkoisten sovellusten paneeli
+Ctrl + 1–4: Avaa ulkoisessa sovelluksessa 1–4
 
 Del : Poista kuva
 

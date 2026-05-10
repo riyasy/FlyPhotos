@@ -442,6 +442,8 @@ W : Mostrar archivo en el Explorador de Windows
 S : Abrir el cuadro de compartir de Windows para el archivo
 A : Zoom a tamaño real
 F : Ajustar a la ventana
+E : Mostrar panel de aplicaciones externas
+Ctrl + 1–4: Abrir en la aplicación externa 1–4
 
 Supr (Del) : Eliminar foto
 

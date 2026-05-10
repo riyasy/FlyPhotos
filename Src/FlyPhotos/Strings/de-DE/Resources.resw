@@ -442,6 +442,8 @@ W : Datei im Windows-Explorer anzeigen
 S : Windows-Freigabedialog für die Datei öffnen
 A : Foto in Originalgröße anzeigen
 F : An Fenster anpassen
+E : Panel für externe Apps anzeigen
+Strg + 1–4: In externer App 1–4 öffnen
 
 Entf : Foto löschen
 

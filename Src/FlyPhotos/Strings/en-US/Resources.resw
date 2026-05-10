@@ -442,6 +442,8 @@ W : Show file in Windows File Explorer
 S : Show Windows Share dialog for the file
 A : Zoom photo to actual size
 F : Fit to window
+E : Show external apps panel
+Ctrl + 1–4: Open in external app 1–4
 
 Del : Delete Photo
 

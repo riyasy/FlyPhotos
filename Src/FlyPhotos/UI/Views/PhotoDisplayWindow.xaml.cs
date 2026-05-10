@@ -657,6 +657,20 @@ public sealed partial class PhotoDisplayWindow
                     ButtonShortcuts_OnClick(ButtonShortcuts, new RoutedEventArgs());
                     break;
 
+                // Launch External Apps directly
+                case VirtualKey.Number1 or VirtualKey.NumberPad1 when ctrlPressed:
+                    await LaunchExternalAppAsync(0);
+                    break;
+                case VirtualKey.Number2 or VirtualKey.NumberPad2 when ctrlPressed:
+                    await LaunchExternalAppAsync(1);
+                    break;
+                case VirtualKey.Number3 or VirtualKey.NumberPad3 when ctrlPressed:
+                    await LaunchExternalAppAsync(2);
+                    break;
+                case VirtualKey.Number4 or VirtualKey.NumberPad4 when ctrlPressed:
+                    await LaunchExternalAppAsync(3);
+                    break;
+
                 // Open Image Location in Explorer
                 case VirtualKey.W:
                 {
@@ -796,6 +810,24 @@ public sealed partial class PhotoDisplayWindow
     #endregion
 
     #region Helper Functions
+
+    private async Task LaunchExternalAppAsync(int index)
+    {
+        var filePathArgument = _photoController.GetFullPathCurrentFile();
+        if (!File.Exists(filePathArgument)) return;
+
+        var appShortCuts = new List<string> { AppConfig.Settings.ExternalApp1, AppConfig.Settings.ExternalApp2, AppConfig.Settings.ExternalApp3, AppConfig.Settings.ExternalApp4 };
+        if (index < 0 || index >= appShortCuts.Count) return;
+
+        var shortCut = appShortCuts[index];
+        if (string.IsNullOrEmpty(shortCut)) return;
+
+        var app = await ShellAppProvider.GetAppAsync(shortCut);
+        if (app != null)
+        {
+            _ = app.LaunchAsync(filePathArgument);
+        }
+    }
 
     /// <summary>
     ///     Enters full-screen mode at launch, using the same <see cref="WindowSizeManager.ToggleFullScreen"/> path
