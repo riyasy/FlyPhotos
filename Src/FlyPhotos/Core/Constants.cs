@@ -30,16 +30,19 @@ internal static class Constants
         "de-DE", // German
         "fr-FR", // French
         "es-ES", // Spanish
-        "ja-JP", // Japanese
-        "ko-KR", // Korean
         "it-IT", // Italian
         "pl-PL", // Polish
-        "ru-RU", // Russian
         "nl-NL", // Dutch
         "sv-SE", // Swedish
-        "fi-FI",  // Finnish
+        "fi-FI", // Finnish
+        "pt-PT", // Portuguese
+        "pt-BR", // Portuguese (Brazil)
+        "ru-RU", // Russian
+        "uk-UA", // Ukrainian
+        "ja-JP", // Japanese
+        "ko-KR", // Korean
         "zh-CN", // Chinese (Simplified, China)
         "zh-TW", // Chinese (Traditional, Taiwan)
-        "ml-IN" // Malayalam
+        "ml-IN"  // Malayalam
     ];
 }
