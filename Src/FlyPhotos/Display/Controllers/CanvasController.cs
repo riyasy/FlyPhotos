@@ -46,6 +46,7 @@ internal class CanvasController : ICanvasController
     private Size _imageSize;
     private string _currentPhotoPath = string.Empty;
     private bool _realImageDisplayedForCurrentPhoto;
+    private bool isGoingToExit;
 
     #region Construction and Destruction
 
@@ -65,6 +66,7 @@ internal class CanvasController : ICanvasController
         _canvasViewManager.OneToOneStateChanged += (isOneToOne) => OnOneToOneStateChanged?.Invoke(isOneToOne);
         _canvasViewManager.ZoomChanged += RequestZoomUpdate;
         _canvasViewManager.ViewChanged += RequestInvalidate;
+        _canvasViewManager.AnimationCompleted += CanvasViewManager_AnimationCompleted;
     }
 
     public void Dispose()
@@ -249,24 +251,22 @@ internal class CanvasController : ICanvasController
     public void FitToScreen(bool animateChange)
     {
         _canvasViewManager.ZoomPanToFit(animateChange, _imageSize, _d2dCanvas.GetSize());
-        _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
     public void ZoomToHundred()
     {
         _canvasViewManager.ZoomToHundred(_d2dCanvas.GetSize());
-        _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
     public void ZoomToHundred(Point anchor)
     {
         if (IsScreenEmpty()) return;
         _canvasViewManager.ZoomToHundred(_d2dCanvas.GetSize(), anchor);
-        _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
     public void ZoomOutOnExit(double exitAnimationDuration)
     {
+        isGoingToExit = true;
         _canvasViewManager.ZoomOutOnExit(exitAnimationDuration, _d2dCanvas.GetSize());
     }
 
@@ -274,28 +274,24 @@ internal class CanvasController : ICanvasController
     {
         if (IsScreenEmpty()) return;
         _canvasViewManager.ZoomAtCenter(zoomDirection, _d2dCanvas.GetSize());
-        _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
     public void StepZoom(ZoomDirection zoomDirection, Point? zoomAnchor = null)
     {
         if (IsScreenEmpty()) return;
         _canvasViewManager.StepZoom(zoomDirection, _d2dCanvas.GetSize(), zoomAnchor);
-        _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
     public void ZoomAtPoint(ZoomDirection zoomDirection, Point zoomAnchor)
     {
         if (IsScreenEmpty()) return;
         _canvasViewManager.ZoomAtPoint(zoomDirection, zoomAnchor);
-        _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
     public void ZoomAtPointPrecision(int delta, Point zoomAnchor)
     {
         if (IsScreenEmpty()) return;
         _canvasViewManager.ZoomAtPointPrecision(delta, zoomAnchor);
-        _currentRenderer?.RestartOffScreenDrawTimer();
     }
 
     public void Pan(double dx, double dy)
@@ -358,6 +354,12 @@ internal class CanvasController : ICanvasController
         _canvasViewManager.HandleSizeChange(args.NewSize.AdjustForDpi(_d2dCanvas), args.PreviousSize.AdjustForDpi(_d2dCanvas));
     }
 
+    private void CanvasViewManager_AnimationCompleted()
+    {
+        if (!isGoingToExit)
+            _currentRenderer?.TryRedrawOffScreen(false);
+    }
+
     #endregion
 
     #region Rendering And State Management
@@ -377,7 +379,7 @@ internal class CanvasController : ICanvasController
 
     public void HandleCheckeredBackgroundChange()
     {
-        _currentRenderer?.TryRedrawOffScreen();
+        _currentRenderer?.TryRedrawOffScreen(true);
     }
 
     private void RequestInvalidate()

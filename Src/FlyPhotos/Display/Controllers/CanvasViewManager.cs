@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Windows.Foundation;
 using FlyPhotos.Core;
@@ -15,7 +16,7 @@ namespace FlyPhotos.Display.Controllers;
 /// Manages the view state (pan, zoom, rotation) of the canvas.
 /// Handles user interactions, animations, and state transitions.
 /// </summary>
-internal class CanvasViewManager(CanvasViewState canvasViewState)
+internal class CanvasViewManager
 {
     // --- Public Properties & Events ---
 
@@ -49,12 +50,20 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     /// </summary>
     public event Action ViewChanged;
 
+    /// <summary>
+    /// Fires when any animation (zoom, pan, or shrug) completes.
+    /// </summary>
+    public event Action AnimationCompleted;
+
     // --- Animation & State Fields ---
 
-    private EventHandler<object> _renderingHandler;
-    private DateTime _panZoomAnimationStartTime;
+    private enum AnimationType { None, Zoom, PanAndZoom, Shrug }
+    private AnimationType _currentAnimation = AnimationType.None;
+    private readonly Stopwatch _animationStopwatch = new();
     private double _panZoomAnimationDurationMs = Constants.PanZoomAnimationDurationNormal;
+    private bool _suppressZoomUpdateForNextAnimation;
 
+    private readonly CanvasViewState _canvasViewState;
     private float _zoomStartScale;
     private float _zoomTargetScale;
     private Point _zoomCenter;
@@ -107,10 +116,15 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         }
     }
 
+    // --- Constructor ---
 
-    private bool _suppressZoomUpdateForNextAnimation;
+    public CanvasViewManager(CanvasViewState canvasViewState)
+    {
+        _canvasViewState = canvasViewState;
 
-    private readonly CanvasViewState _canvasViewState = canvasViewState;
+        // Permanently subscribe to the rendering loop to prevent warm-up latency.
+        CompositionTarget.Rendering += OnCompositionTargetRendering;
+    }
 
     // --- Public API Methods ---
 
@@ -645,21 +659,38 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     }
 
     /// <summary>
+    /// Permanent event handler for the composition rendering loop.
+    /// </summary>
+    private void OnCompositionTargetRendering(object sender, object e)
+    {
+        if (!PanZoomAnimationOnGoing) return; // Fast exit to prevent CPU drain
+
+        switch (_currentAnimation)
+        {
+            case AnimationType.Zoom:
+                AnimateZoom();
+                break;
+            case AnimationType.PanAndZoom:
+                AnimatePanAndZoom();
+                break;
+            case AnimationType.Shrug:
+                AnimateShrug();
+                break;
+        }
+    }
+
+    /// <summary>
     /// Starts a pure zoom animation, keeping the anchor point stationary on screen.
     /// </summary>
     private void StartZoomAnimation(float targetScale, Point zoomAnchor)
     {
-        _panZoomAnimationStartTime = DateTime.UtcNow;
         _zoomStartScale = _canvasViewState.Scale;
         _zoomTargetScale = targetScale;
         _zoomCenter = zoomAnchor;
 
-        if (_renderingHandler != null)
-            CompositionTarget.Rendering -= _renderingHandler;
-
-        _renderingHandler = (_, _) => AnimateZoom();
-        CompositionTarget.Rendering += _renderingHandler;
+        _currentAnimation = AnimationType.Zoom;
         PanZoomAnimationOnGoing = true;
+        _animationStopwatch.Restart();
     }
 
     /// <summary>
@@ -667,21 +698,14 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     /// </summary>
     private void StartPanAndZoomAnimation(float targetScale, Point targetPosition)
     {
-        // Setup animation state
-        _panZoomAnimationStartTime = DateTime.UtcNow;
         _zoomStartScale = _canvasViewState.Scale;
         _zoomTargetScale = targetScale;
         _panStartPosition = _canvasViewState.ImagePos;
         _panTargetPosition = targetPosition;
 
-        // Ensure any previous animation is stopped
-        if (_renderingHandler != null)
-            CompositionTarget.Rendering -= _renderingHandler;
-
-        // Point the handler to the NEW animation method
-        _renderingHandler = (_, _) => AnimatePanAndZoom();
-        CompositionTarget.Rendering += _renderingHandler;
+        _currentAnimation = AnimationType.PanAndZoom;
         PanZoomAnimationOnGoing = true;
+        _animationStopwatch.Restart();
     }
 
     /// <summary>
@@ -689,26 +713,18 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     /// </summary>
     private void StartShrugAnimation()
     {
-        // Store the original position to return to
         _panStartPosition = _canvasViewState.ImagePos;
-        _panZoomAnimationStartTime = DateTime.UtcNow;
-
-        if (_renderingHandler != null)
-        {
-            CompositionTarget.Rendering -= _renderingHandler;
-        }
-
-        _renderingHandler = (_, _) => AnimateShrug();
-        CompositionTarget.Rendering += _renderingHandler;
+        _currentAnimation = AnimationType.Shrug;
         PanZoomAnimationOnGoing = true;
+        _animationStopwatch.Restart();
     }
 
     /// <summary>
-    /// The rendering loop callback for the pure zoom animation.
+    /// The rendering loop logic for pure zoom.
     /// </summary>
     private void AnimateZoom()
     {
-        var elapsed = (DateTime.UtcNow - _panZoomAnimationStartTime).TotalMilliseconds;
+        var elapsed = _animationStopwatch.Elapsed.TotalMilliseconds;
         var t = Math.Clamp(elapsed / _panZoomAnimationDurationMs, 0.0, 1.0);
         float easedT = 1f - (float)Math.Pow(1 - t, 3); // Ease-out cubic: f(t) = 1 - (1 - t)^3
         var newScale = _zoomStartScale + (_zoomTargetScale - _zoomStartScale) * easedT;
@@ -725,9 +741,11 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         // Stop the animation when finished.
         if (t >= 1.0)
         {
-            CompositionTarget.Rendering -= _renderingHandler;
+            _animationStopwatch.Stop();
+            _currentAnimation = AnimationType.None;
             PanZoomAnimationOnGoing = false;
             _suppressZoomUpdateForNextAnimation = false;
+            AnimationCompleted?.Invoke();
         }
     }
 
@@ -736,7 +754,7 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     /// </summary>
     private void AnimatePanAndZoom()
     {
-        var elapsed = (DateTime.UtcNow - _panZoomAnimationStartTime).TotalMilliseconds;
+        var elapsed = _animationStopwatch.Elapsed.TotalMilliseconds;
         var t = Math.Clamp(elapsed / _panZoomAnimationDurationMs, 0.0, 1.0);
         float easedT = 1f - (float)Math.Pow(1 - t, 3); // Ease-out cubic: f(t) = 1 - (1 - t)^3
 
@@ -754,10 +772,11 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
         // Stop the animation when finished.
         if (t >= 1.0)
         {
-            CompositionTarget.Rendering -= _renderingHandler;
+            _animationStopwatch.Stop();
+            _currentAnimation = AnimationType.None;
             PanZoomAnimationOnGoing = false;
             _suppressZoomUpdateForNextAnimation = false;
-
+            AnimationCompleted?.Invoke();
             // This block remains as a final "truth-setter" after animation,
             // which is harmless and good for robustness.
             var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
@@ -776,17 +795,18 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     /// </summary>
     private void AnimateShrug()
     {
-        var elapsed = (DateTime.UtcNow - _panZoomAnimationStartTime).TotalMilliseconds;
+        var elapsed = _animationStopwatch.Elapsed.TotalMilliseconds;
         var t = Math.Clamp(elapsed / Constants.ShrugAnimationDurationMs, 0.0, 1.0);
 
         if (t >= 1.0)
         {
+            _animationStopwatch.Stop();
             // Animation finished. Ensure the image is back to its exact starting position.
             _canvasViewState.ImagePos = _panStartPosition;
             _canvasViewState.UpdateTransform();
             ViewChanged?.Invoke();
 
-            CompositionTarget.Rendering -= _renderingHandler;
+            _currentAnimation = AnimationType.None;
             PanZoomAnimationOnGoing = false;
             return;
         }
@@ -807,13 +827,13 @@ internal class CanvasViewManager(CanvasViewState canvasViewState)
     }
 
     /// <summary>
-    /// Cleans up resources, specifically the rendering event handler.
+    /// Cleans up resources.
     /// </summary>
     public void Dispose()
     {
-        if (_renderingHandler == null) return;
-        CompositionTarget.Rendering -= _renderingHandler;
-        _renderingHandler = null;
+        CompositionTarget.Rendering -= OnCompositionTargetRendering;
         PanZoomAnimationOnGoing = false;
+        _currentAnimation = AnimationType.None;
+        _animationStopwatch.Stop();
     }
 }

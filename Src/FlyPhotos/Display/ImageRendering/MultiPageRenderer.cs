@@ -66,9 +66,9 @@ internal partial class MultiPageRenderer : IRenderer
         // Not applicable
     }
 
-    public void TryRedrawOffScreen()
+    public void TryRedrawOffScreen(bool forceCreate)
     {
-        _invalidate();
+        // Not applicable
     }
 
     public void Dispose()

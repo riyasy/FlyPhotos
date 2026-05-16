@@ -89,7 +89,7 @@ internal partial class AnimatedImageRenderer : IRenderer
         // This concept does not apply to animated images.
     }
 
-    public void TryRedrawOffScreen()
+    public void TryRedrawOffScreen(bool forceCreate)
     {
         // This concept does not apply to animated images.
     }

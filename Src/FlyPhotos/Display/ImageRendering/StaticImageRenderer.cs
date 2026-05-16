@@ -117,10 +117,11 @@ internal partial class StaticImageRenderer : IRenderer
         _offscreenDrawTimer.Start();
     }
 
-    public void TryRedrawOffScreen()
+    public void TryRedrawOffScreen(bool forceCreate)
     {
         if (!_createOffScreen) return;
-        CreateOffscreen(true);
+        _offscreenDrawTimer.Stop();
+        CreateOffscreen(forceCreate);
         _invalidateCanvas();
     }
 
