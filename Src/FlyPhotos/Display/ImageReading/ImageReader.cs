@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Services;
+using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 
@@ -22,7 +23,7 @@ internal static class ImageReader
     /// Initializes shared resources that depend on the Win2D canvas, specifically the <see cref="IndicatorFactory"/>.
     /// Must be called once before any other image loading methods.
     /// </summary>
-    public static void Initialize(CanvasControl d2dCanvas)
+    public static void Initialize(ICanvasResourceCreatorWithDpi d2dCanvas)
     {
         _indicators = new IndicatorFactory(d2dCanvas);
     }
@@ -32,7 +33,7 @@ internal static class ImageReader
     /// fast paths (embedded thumbnails, native decoders) before falling back to heavier decoders. 
     /// </summary>
     public static async Task<DisplayItem> GetFirstPreviewSpecialHandlingAsync(
-        CanvasControl d2dCanvas, string path)
+        ICanvasResourceCreatorWithDpi d2dCanvas, string path)
     {
         try
         {
@@ -146,7 +147,7 @@ internal static class ImageReader
     /// Tries cheap embedded previews first (EXIF thumbnail, embedded JPEG), then resizes via WIC or ImageMagick.
     /// Format-specific decoders are used.
     /// </summary>
-    public static async Task<PreviewDisplayItem> GetPreview(CanvasControl d2dCanvas, string path)
+    public static async Task<PreviewDisplayItem> GetPreview(ICanvasResourceCreatorWithDpi d2dCanvas, string path)
     {
         if (!File.Exists(path))
             return new PreviewDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen);
@@ -229,7 +230,7 @@ internal static class ImageReader
     /// Loads the full high-quality image for display in the main viewer.
     /// Uses format-specific decoders in priority order.
     /// </summary>
-    public static async Task<HqDisplayItem> GetHqImage(CanvasControl d2dCanvas, string path)
+    public static async Task<HqDisplayItem> GetHqImage(ICanvasResourceCreatorWithDpi d2dCanvas, string path)
     {
         if (!File.Exists(path))
             return new StaticHqDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen);
@@ -335,7 +336,7 @@ internal static class ImageReader
     /// Returns empty if no decoder succeeds.
     /// </summary>
     private static async Task<(bool, HqDisplayItem)> GetHqFromRawDecoderPipeLine(
-        CanvasControl d2dCanvas, string path, string extension)
+        ICanvasResourceCreatorWithDpi d2dCanvas, string path, string extension)
     {
         foreach (var decoder in AppConfig.Settings.RawDecoderPriority)
         {

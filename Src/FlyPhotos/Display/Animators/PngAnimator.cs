@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,7 +28,7 @@ namespace FlyPhotos.Display.Animators;
 ///     <para>
 ///         <b>Why PNG re-assembly per frame?</b>
 ///         The Windows WIC PNG codec decodes complete PNG files, not raw chunk sequences.
-///         APNG frame data is stored as sequences of raw IDAT/fdAT chunks â€” not standalone files.
+///         APNG frame data is stored as sequences of raw IDAT/fdAT chunks — not standalone files.
 ///         To decode each frame, a minimal valid PNG is assembled in memory from the frame's
 ///         chunks plus the shared global chunks (PLTE, tRNS, etc.) and the IHDR with updated
 ///         dimensions, then handed to <c>CanvasBitmap.LoadAsync</c> for decoding.
@@ -111,7 +111,7 @@ public partial class PngAnimator : IAnimator
         public byte BlendOp { get; init; }
 
         /// <summary>
-        ///     Raw PNG data chunks (converted fdAT â†’ IDAT, or original IDAT) for this frame.
+        ///     Raw PNG data chunks (converted fdAT -> IDAT, or original IDAT) for this frame.
         ///     Used by <see cref="Parser.ReconstructAndLoadCanvasBitmapAsync" /> to assemble a
         ///     decodable PNG in memory.
         /// </summary>
@@ -160,7 +160,7 @@ public partial class PngAnimator : IAnimator
     private readonly TimeSpan[] _frameCumulativeTime;
 
     /// <summary>The Win2D canvas context used to create GPU resources and load bitmaps.</summary>
-    private readonly CanvasControl _canvas;
+    private readonly ICanvasResourceCreatorWithDpi _canvas;
 
     /// <summary>
     ///     Off-screen render target where frames are incrementally composited.
@@ -196,7 +196,7 @@ public partial class PngAnimator : IAnimator
 
     /// <summary>
     ///     Reusable 13-byte IHDR data buffer. IHDR is always exactly 13 bytes per the PNG spec.
-    ///     The width and height fields (bytes 0â€“3 and 4â€“7) are overwritten in-place for each
+    ///     The width and height fields (bytes 0–3 and 4–7) are overwritten in-place for each
     ///     frame with the current patch dimensions, avoiding a new array allocation per frame.
     /// </summary>
     private readonly byte[] _ihdrBuffer = new byte[13];
@@ -242,7 +242,7 @@ public partial class PngAnimator : IAnimator
     ///     asynchronously by <see cref="CreateAsync" /> after this constructor returns.
     /// </summary>
     private PngAnimator(
-        CanvasControl canvas,
+        ICanvasResourceCreatorWithDpi canvas,
         IRandomAccessStream stream,
         Parser.ApngData apngData,
         List<ApngFrameMetadata> metadata)
@@ -284,9 +284,9 @@ public partial class PngAnimator : IAnimator
     ///     Asynchronously creates a <see cref="PngAnimator" /> from raw APNG file bytes.
     /// </summary>
     /// <param name="apngData">Complete raw bytes of the APNG file.</param>
-    /// <param name="canvas">The Win2D <see cref="CanvasControl" /> context.</param>
+    /// <param name="canvas">The Win2D <see cref="ICanvasResourceCreatorWithDpi" /> context.</param>
     /// <returns>A fully initialised <see cref="PngAnimator" /> ready for <see cref="UpdateAsync" /> calls.</returns>
-    public static async Task<PngAnimator> CreateAsync(byte[] apngData, CanvasControl canvas)
+    public static async Task<PngAnimator> CreateAsync(byte[] apngData, ICanvasResourceCreatorWithDpi canvas)
     {
         // AsRandomAccessStream() wraps but does not own the underlying MemoryStream,
         // so both must be named locals to ensure both are disposed on the failure path.
@@ -296,7 +296,7 @@ public partial class PngAnimator : IAnimator
         {
             var parsedData = await Parser.ParseApngStreamAsync(randomAccessStream);
 
-            // APNG spec (Â§4.4): delay = DelayNum / (DelayDen == 0 ? 100 : DelayDen) seconds.
+            // APNG spec (§4.4): delay = DelayNum / (DelayDen == 0 ? 100 : DelayDen) seconds.
             // DelayNum == 0 means zero delay, which browsers treat as 100 ms.
             var metadata = parsedData.FrameControls.Select(fc => new ApngFrameMetadata
             {
@@ -362,7 +362,7 @@ public partial class PngAnimator : IAnimator
         {
             // Loop wrap-around: instead of clearing _compositedSurface here, we set the previous-frame
             // disposal state to cover the full canvas. RenderFrameAsync(0) will then apply the clear
-            // atomically inside its drawing session â€” immediately before drawing frame 0's patch â€”
+            // atomically inside its drawing session — immediately before drawing frame 0's patch —
             // eliminating the async gap between clear and draw that caused a visible flash on loop restart.
 
             _currentFrameIndex = -1;
@@ -390,7 +390,7 @@ public partial class PngAnimator : IAnimator
         var metadata = _frameMetadata[frameIndex];
 
         // Reconstruct a minimal valid PNG from the frame's raw chunk data and decode it.
-        // CanvasBitmap.LoadAsync allocates a new GPU texture per frame â€” unavoidable without
+        // CanvasBitmap.LoadAsync allocates a new GPU texture per frame — unavoidable without
         // a decoded frame cache. _reusableStream and _reusableWriter avoid the per-frame
         // stream and writer allocations that would otherwise occur here.
         using var patchBitmap = await Parser.ReconstructAndLoadCanvasBitmapAsync(
@@ -399,7 +399,7 @@ public partial class PngAnimator : IAnimator
             _canvas.Device);
 
         // If this frame specifies dispose-to-previous, snapshot the full compositor surface
-        // now â€” before we draw â€” so it can be restored on the next iteration's disposal step.
+        // now — before we draw — so it can be restored on the next iteration's disposal step.
         if (metadata.DisposeOp == APNG_DISPOSE_OP_PREVIOUS)
         {
             using var backupDs = _previousFrameBackup.CreateDrawingSession();
@@ -408,7 +408,7 @@ public partial class PngAnimator : IAnimator
 
         using (var ds = _compositedSurface.CreateDrawingSession())
         {
-            // Step 1 â€” Apply the PREVIOUS frame's dispose operation.
+            // Step 1 — Apply the PREVIOUS frame's dispose operation.
             if (_previousFrameDisposal == APNG_DISPOSE_OP_BACKGROUND)
             {
                 // Clear the previous frame's region to transparent.
@@ -433,7 +433,7 @@ public partial class PngAnimator : IAnimator
                     CanvasComposite.Copy);
             }
 
-            // Step 2 â€” Draw the current frame patch using its specified blend operation.
+            // Step 2 — Draw the current frame patch using its specified blend operation.
             var patchSourceRect = new Rect(0, 0, patchBitmap.SizeInPixels.Width, patchBitmap.SizeInPixels.Height);
 
             if (metadata.BlendOp == APNG_BLEND_OP_SOURCE)
@@ -550,7 +550,7 @@ public partial class PngAnimator : IAnimator
             public bool IsDefaultImageFirstFrame;
         }
 
-        /// <summary>Standard 8-byte PNG file signature, per PNG spec Â§5.2.</summary>
+        /// <summary>Standard 8-byte PNG file signature, per PNG spec §5.2.</summary>
         private static readonly byte[] PngSig = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
 
         /// <summary>
@@ -584,7 +584,7 @@ public partial class PngAnimator : IAnimator
                     }
                     else if (c.Type == "fdAT" && fcs.Count > 0)
                     {
-                        // Convert fdAT â†’ IDAT by stripping the 4-byte sequence number prefix.
+                        // Convert fdAT -> IDAT by stripping the 4-byte sequence number prefix.
                         fcs.Last().FrameDataChunks.Add(ConvertFdat(c));
                     }
                     else if (c.Type == "IDAT")
@@ -597,7 +597,7 @@ public partial class PngAnimator : IAnimator
                     else if (c.Type != "IEND" && c.Type != "acTL")
                     {
                         // Collect global ancillary chunks (PLTE, tRNS, gAMA, cHRM, etc.).
-                        // acTL is intentionally skipped â€” it merely signals "this is an APNG".
+                        // acTL is intentionally skipped — it merely signals "this is an APNG".
                         global.Add(c);
                     }
 
@@ -673,7 +673,7 @@ public partial class PngAnimator : IAnimator
                 var len = ReadU32BE(r);
                 var type = Encoding.ASCII.GetString(r.ReadBytes(4));
                 var data = r.ReadBytes((int)len);
-                r.ReadBytes(4); // CRC â€” verified by the PNG decoder; skipped here for speed.
+                r.ReadBytes(4); // CRC — verified by the PNG decoder; skipped here for speed.
                 res.Add(new PngChunk { Type = type, Data = data });
                 if (type == "IEND") break;
             }
@@ -714,14 +714,14 @@ public partial class PngAnimator : IAnimator
         /// <summary>
         ///     Writes a complete PNG chunk to <paramref name="w" />:
         ///     4-byte big-endian length, 4-byte type, data bytes, 4-byte CRC32.
-        ///     CRC covers the type and data fields, per PNG spec Â§5.3.
+        ///     CRC covers the type and data fields, per PNG spec §5.3.
         ///     <para>
         ///         <paramref name="crcBuf" /> is a caller-owned scratch buffer grown in place
         ///         via <see cref="Array.Resize{T}" /> only when the chunk (4 type bytes + data)
         ///         exceeds its current capacity. It is never shrunk, so it converges to the size
         ///         of the largest chunk seen and causes no further allocations at steady state.
         ///         The CRC is computed over a <see cref="ReadOnlySpan{T}" /> slice of
-        ///         <paramref name="crcBuf" /> so only the relevant bytes are hashed â€” no trimmed
+        ///         <paramref name="crcBuf" /> so only the relevant bytes are hashed — no trimmed
         ///         array copy is allocated regardless of whether the buffer is larger than needed.
         ///     </para>
         /// </summary>
@@ -732,7 +732,7 @@ public partial class PngAnimator : IAnimator
             if (crcBuf.Length < needed)
                 Array.Resize(ref crcBuf, needed);
 
-            // Encode the 4-byte chunk type directly into the scratch buffer â€” no temp array.
+            // Encode the 4-byte chunk type directly into the scratch buffer — no temp array.
             Encoding.ASCII.GetBytes(t, 0, 4, crcBuf, 0);
             if (d.Length > 0) Buffer.BlockCopy(d, 0, crcBuf, 4, d.Length);
 

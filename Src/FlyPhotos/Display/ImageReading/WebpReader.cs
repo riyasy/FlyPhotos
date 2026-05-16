@@ -34,13 +34,13 @@ internal static class WebpReader
     /// Loads the first frame of the WebP file at full resolution as a lightweight preview.
     /// Used during initial thumbnail/preview loading before the high-quality decode is ready.
     /// </summary>
-    /// <param name="ctrl">The Win2D <see cref="CanvasControl"/> that owns the GPU device.</param>
+    /// <param name="ctrl">The Win2D <see cref="ICanvasResourceCreatorWithDpi"/> that owns the GPU device.</param>
     /// <param name="inputPath">Absolute path to the .webp file on disk.</param>
     /// <returns>
     /// A tuple of (<c>success</c>, <see cref="PreviewDisplayItem"/>).
     /// On failure, returns <c>(false, PreviewDisplayItem.Empty())</c> and logs the error.
     /// </returns>
-    public static async Task<(bool, PreviewDisplayItem)> GetFirstFrameFullSize(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetFirstFrameFullSize(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         try
         {
@@ -59,7 +59,7 @@ internal static class WebpReader
     /// <summary>
     /// Decodes the WebP file at full quality and returns either a static or animated display item.
     /// </summary>
-    /// <param name="ctrl">The Win2D <see cref="CanvasControl"/> that owns the GPU device.</param>
+    /// <param name="ctrl">The Win2D <see cref="ICanvasResourceCreatorWithDpi"/> that owns the GPU device.</param>
     /// <param name="inputPath">Absolute path to the .webp file on disk.</param>
     /// <returns>
     /// A tuple of (<c>success</c>, <see cref="HqDisplayItem"/>):
@@ -79,7 +79,7 @@ internal static class WebpReader
     /// For animated files, the stream is rewound and re-read as a raw byte array for the
     /// animator; this is cheaper than a second full pixel decode.
     /// </remarks>
-    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         try
         {

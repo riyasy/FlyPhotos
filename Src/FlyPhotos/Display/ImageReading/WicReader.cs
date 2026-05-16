@@ -33,10 +33,10 @@ internal static class WicReader
     /// Extracts the embedded thumbnail/preview from an image file without fully decoding the high-resolution pixel data.
     /// Typically used for fast initial rendering or gallery views.
     /// </summary>
-    /// <param name="ctrl">The Win2D CanvasControl used for creating the CanvasBitmap.</param>
+    /// <param name="ctrl">The Win2D ICanvasResourceCreatorWithDpi used for creating the CanvasBitmap.</param>
     /// <param name="inputPath">The absolute path to the image file.</param>
     /// <returns>A tuple indicating success and the resulting PreviewDisplayItem.</returns>
-    public static async Task<(bool, PreviewDisplayItem)> GetEmbedded(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetEmbedded(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         var (bmp, width, height, rotation) = await GetThumbnail(ctrl, inputPath);
         if (bmp == null) return (false, PreviewDisplayItem.Empty());
@@ -52,7 +52,7 @@ internal static class WicReader
     /// Works for JPEG, PNG, GIF (frame 0), TIFF (frame 0), BMP, and any other
     /// format WIC can auto-detect.
     /// </summary>
-    public static async Task<(bool, PreviewDisplayItem)> GetResized(CanvasControl ctrl, string inputPath,
+    public static async Task<(bool, PreviewDisplayItem)> GetResized(ICanvasResourceCreatorWithDpi ctrl, string inputPath,
         uint maxDimension = 800)
     {
         try
@@ -122,11 +122,11 @@ internal static class WicReader
     /// If that fails or raw ingestion is configured, it falls back to decoding and extracting the raw sensor data natively using WIC,
     /// while intercepting and manually correcting specific EXIF orientation constraints mandated by Microsoft or Nikon Decoders.
     /// </summary>
-    /// <param name="ctrl">The Win2D CanvasControl used for creating the CanvasBitmap.</param>
+    /// <param name="ctrl">The Win2D ICanvasResourceCreatorWithDpi used for creating the CanvasBitmap.</param>
     /// <param name="inputPath">The absolute path to the image file.</param>
     /// <param name="isRaw">Is a camera RAW file</param>
     /// <returns>A tuple indicating success and the resulting high-quality HqDisplayItem.</returns>
-    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath, bool isRaw = false)
+    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath, bool isRaw = false)
     {
         try
         {
@@ -227,10 +227,10 @@ internal static class WicReader
     /// Computes the original oriented dimensions while intercepting unapplied EXIF rotation degrees dynamically, 
     /// especially for NEF components decoded using Nikon codecs.
     /// </summary>
-    /// <param name="ctrl">The Win2D CanvasControl to bind initialization to.</param>
+    /// <param name="ctrl">The Win2D ICanvasResourceCreatorWithDpi to bind initialization to.</param>
     /// <param name="inputPath">The absolute path to the local source image file.</param>
     /// <returns>A tuple containing the Win2D bitmap, its dimensions, and unapplied rotation (in degrees).</returns>
-    private static async Task<(CanvasBitmap? Bitmap, int Width, int Height, int Rotation)> GetThumbnail(CanvasControl ctrl, string inputPath)
+    private static async Task<(CanvasBitmap? Bitmap, int Width, int Height, int Rotation)> GetThumbnail(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         try
         {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Windows.Foundation;
 using FlyPhotos.Infra.Localization;
@@ -10,7 +10,7 @@ using Microsoft.UI;
 
 namespace FlyPhotos.Display.ImageReading;
 
-internal sealed class IndicatorFactory(CanvasControl canvas) : IDisposable
+internal sealed class IndicatorFactory(ICanvasResourceCreatorWithDpi canvas) : IDisposable
 {
     private const float IndicatorSize = 600f;
 

@@ -168,7 +168,7 @@ public partial class AvifAnimator : IAnimator
     ///     Performs only GPU resource creation — no native decode work happens here.
     ///     Must be called on the Win2D device thread (not inside <c>Task.Run</c>).
     /// </summary>
-    private AvifAnimator(IntPtr handle, IntPtr unmanagedFileData, CanvasControl canvas)
+    private AvifAnimator(IntPtr handle, IntPtr unmanagedFileData, ICanvasResourceCreatorWithDpi canvas)
     {
         _nativeHandle = handle;
         _unmanagedFileData = unmanagedFileData;
@@ -203,9 +203,9 @@ public partial class AvifAnimator : IAnimator
     ///     that GPU objects be created on the device thread.
     /// </remarks>
     /// <param name="fileData">Complete raw bytes of the AVIF file.</param>
-    /// <param name="canvas">The Win2D <see cref="CanvasControl" /> that owns the GPU device.</param>
+    /// <param name="canvas">The Win2D <see cref="ICanvasResourceCreatorWithDpi" /> that owns the GPU device.</param>
     /// <returns>A fully initialised <see cref="AvifAnimator" /> ready for <see cref="UpdateAsync" /> calls.</returns>
-    public static async Task<AvifAnimator> CreateAsync(byte[] fileData, CanvasControl canvas)
+    public static async Task<AvifAnimator> CreateAsync(byte[] fileData, ICanvasResourceCreatorWithDpi canvas)
     {
         // Phase 1 (threadpool): native allocation and decoder open — CPU-only work.
         // The file bytes are copied into unmanaged memory so the native decoder can hold a

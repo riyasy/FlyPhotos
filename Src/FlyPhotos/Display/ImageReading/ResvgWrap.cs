@@ -1,4 +1,4 @@
-ï»¿#nullable enable
+#nullable enable
 using System;
 using Windows.Graphics.DirectX;
 using FlyPhotos.Core.Model;
@@ -18,7 +18,7 @@ internal static unsafe partial class ResvgWrap
     private const int PreviewMaxDimension = 800;
     private const int HqMaxDimension = 2000;
 
-    public static (bool, PreviewDisplayItem) GetResized(CanvasControl ctrl, string inputPath)
+    public static (bool, PreviewDisplayItem) GetResized(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         var (bmp, width, height) = RenderSvg(ctrl, inputPath, PreviewMaxDimension);
         if (bmp == null) return (false, PreviewDisplayItem.Empty());
@@ -34,7 +34,7 @@ internal static unsafe partial class ResvgWrap
         return (true, new PreviewDisplayItem(bmp, Origin.Disk, metadata));
     }
 
-    public static (bool, HqDisplayItem) GetHq(CanvasControl ctrl, string inputPath)
+    public static (bool, HqDisplayItem) GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         var (bmp, _, _) = RenderSvg(ctrl, inputPath, HqMaxDimension);
         if (bmp == null) return (false, HqDisplayItem.Empty());
@@ -44,10 +44,10 @@ internal static unsafe partial class ResvgWrap
     /// <summary>
     /// Calls the Rust resvg_render_svg entry point, copies the resulting RGBA8
     /// pixels into a <see cref="CanvasBitmap"/>, and unconditionally frees the
-    /// native buffer â€” mirroring the contract in <see cref="RawlerWrapper"/>.
+    /// native buffer — mirroring the contract in <see cref="RawlerWrapper"/>.
     /// </summary>
     private static (CanvasBitmap? Bitmap, int Width, int Height) RenderSvg(
-        CanvasControl ctrl, string inputPath, int maxDimension)
+        ICanvasResourceCreatorWithDpi ctrl, string inputPath, int maxDimension)
     {
         nint pixelPtr = NativeRustBridge.resvg_render_svg(
             inputPath, maxDimension, out int renderWidth, out int renderHeight);
@@ -55,7 +55,7 @@ internal static unsafe partial class ResvgWrap
         if (pixelPtr == nint.Zero || renderWidth <= 0 || renderHeight <= 0)
         {
             Logger.Warn("Rust failed to render SVG or returned empty dimensions: {InputPath}", inputPath);
-            // pixelPtr is either null or unusable â€” nothing to free.
+            // pixelPtr is either null or unusable — nothing to free.
             return (null, 0, 0);
         }
 
@@ -77,11 +77,11 @@ internal static unsafe partial class ResvgWrap
     /// a SIMD-optimised memmove, matching the pattern in <see cref="RawlerWrapper"/>.
     /// </remarks>
     private static CanvasBitmap? CreateBitmapAndFree(
-        CanvasControl ctrl, nint ptr, int width, int height, int totalBytes, string inputPath)
+        ICanvasResourceCreatorWithDpi ctrl, nint ptr, int width, int height, int totalBytes, string inputPath)
     {
         try
         {
-            // Skip zero-initialisation â€” every byte is overwritten by CopyTo.
+            // Skip zero-initialisation — every byte is overwritten by CopyTo.
             byte[] pixels = GC.AllocateUninitializedArray<byte>(totalBytes);
             new ReadOnlySpan<byte>((void*)ptr, totalBytes).CopyTo(pixels);
             return CanvasBitmap.CreateFromBytes(ctrl, pixels, width, height, DirectXPixelFormat.R8G8B8A8UIntNormalized);

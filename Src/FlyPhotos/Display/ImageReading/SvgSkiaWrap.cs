@@ -1,4 +1,4 @@
-﻿//#nullable enable
+//#nullable enable
 //using System;
 //using FlyPhotos.Core.Model;
 //using Microsoft.Graphics.Canvas;
@@ -14,7 +14,7 @@
 //{
 //    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-//    public static (bool, PreviewDisplayItem) GetResized(CanvasControl ctrl, string inputPath)
+//    public static (bool, PreviewDisplayItem) GetResized(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
 //    {
 //        var (bmp, width, height) = LoadSvgViaSkia(ctrl, inputPath, 800);
 //        if (bmp == null) return (false, PreviewDisplayItem.Empty());
@@ -30,7 +30,7 @@
 //        return (true, new PreviewDisplayItem(bmp, Origin.Disk, metadata));
 //    }
 
-//    public static (bool, HqDisplayItem) GetHq(CanvasControl ctrl, string inputPath)
+//    public static (bool, HqDisplayItem) GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
 //    {
 //        var (bmp, _, _) = LoadSvgViaSkia(ctrl, inputPath, 2000);
 //        if (bmp == null) return (false, HqDisplayItem.Empty());
@@ -38,7 +38,7 @@
 //    }
 
 //    private static (CanvasBitmap? Bitmap, int Width, int Height) LoadSvgViaSkia(
-//        CanvasControl ctrl, string inputPath, int maxDimension)
+//        ICanvasResourceCreatorWithDpi ctrl, string inputPath, int maxDimension)
 //    {
 //        try
 //        {
@@ -85,7 +85,7 @@
 //            }
 
 //            // Render SVG directly into an SKBitmap (Bgra8888 premultiplied).
-//            // This avoids the previous SKSurface → Snapshot → PNG encode → MemoryStream → PNG decode
+//            // This avoids the previous SKSurface ? Snapshot ? PNG encode ? MemoryStream ? PNG decode
 //            // round-trip: two full-frame codec passes and a MemoryStream allocation are eliminated.
 //            // SKBitmap.Bytes in Bgra8888/Premul maps exactly to DirectX B8G8R8A8UIntNormalized.
 //            var imageInfo = new SKImageInfo(renderWidth, renderHeight, SKColorType.Bgra8888, SKAlphaType.Premul);

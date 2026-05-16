@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Buffers.Binary;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
@@ -30,7 +30,7 @@ internal static class PngReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    /// <summary>Standard 8-byte PNG file signature, per PNG spec Â§5.2.</summary>
+    /// <summary>Standard 8-byte PNG file signature, per PNG spec §5.2.</summary>
     private static readonly byte[] PngSignature = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
 
     /// <summary>Size of a PNG chunk header: 4-byte data length + 4-byte type tag.</summary>
@@ -39,7 +39,7 @@ internal static class PngReader
     /// <summary>Size of the CRC field that follows every PNG chunk's data.</summary>
     private const int PngChunkCrcSize = 4;
 
-    // u8 literals produce stack-allocated ReadOnlySpan<byte> backed by PE read-only data â€”
+    // u8 literals produce stack-allocated ReadOnlySpan<byte> backed by PE read-only data —
     // zero heap allocation per access, replacing the previous byte[] fields that allocated
     // on class initialisation.
 
@@ -56,13 +56,13 @@ internal static class PngReader
     ///     Loads the first frame of the PNG file at full resolution as a lightweight preview.
     ///     Used during initial thumbnail/preview loading before the high-quality decode is ready.
     /// </summary>
-    /// <param name="ctrl">The Win2D <see cref="CanvasControl" /> that owns the GPU device.</param>
+    /// <param name="ctrl">The Win2D <see cref="ICanvasResourceCreatorWithDpi" /> that owns the GPU device.</param>
     /// <param name="inputPath">Absolute path to the .png file on disk.</param>
     /// <returns>
     ///     A tuple of (<c>success</c>, <see cref="PreviewDisplayItem" />).
     ///     On failure, returns <c>(false, PreviewDisplayItem.Empty())</c> and logs the error.
     /// </returns>
-    public static async Task<(bool, PreviewDisplayItem)> GetFirstFrameFullSize(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetFirstFrameFullSize(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         try
         {
@@ -81,14 +81,14 @@ internal static class PngReader
     /// <summary>
     ///     Decodes the PNG file at full quality and returns either a static or animated display item.
     /// </summary>
-    /// <param name="ctrl">The Win2D <see cref="CanvasControl" /> that owns the GPU device.</param>
+    /// <param name="ctrl">The Win2D <see cref="ICanvasResourceCreatorWithDpi" /> that owns the GPU device.</param>
     /// <param name="inputPath">Absolute path to the .png file on disk.</param>
     /// <returns>
     ///     A tuple of (<c>success</c>, <see cref="HqDisplayItem" />):
     ///     <list type="bullet">
-    ///         <item><see cref="StaticHqDisplayItem" /> â€” for single-frame PNG files.</item>
+    ///         <item><see cref="StaticHqDisplayItem" /> — for single-frame PNG files.</item>
     ///         <item>
-    ///             <see cref="AnimatedHqDisplayItem" /> â€” for APNG files, carrying the first decoded
+    ///             <see cref="AnimatedHqDisplayItem" /> — for APNG files, carrying the first decoded
     ///             frame and the raw file bytes for the animator.
     ///         </item>
     ///     </list>
@@ -100,7 +100,7 @@ internal static class PngReader
     ///     For animated files the stream is rewound and re-read as a raw byte array for the animator;
     ///     this is cheaper than a second full pixel decode pass.
     /// </remarks>
-    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         try
         {
@@ -149,7 +149,7 @@ internal static class PngReader
     ///     </para>
     ///     <para>
     ///         <b>APNG spec reference:</b> The <c>acTL</c> chunk is defined in the APNG specification
-    ///         Â§2.1 as a PNG ancillary chunk that appears before the first <c>IDAT</c> in an animated
+    ///         §2.1 as a PNG ancillary chunk that appears before the first <c>IDAT</c> in an animated
     ///         file. A PNG file without an <c>acTL</c> chunk before its first <c>IDAT</c> is a
     ///         standard static PNG and must be treated as such by decoders.
     ///     </para>
@@ -178,8 +178,8 @@ internal static class PngReader
                 uint chunkLength = BinaryPrimitives.ReadUInt32BigEndian(data.Slice(offset, 4));
                 var chunkType = data.Slice(offset + 4, 4);
 
-                if (chunkType.SequenceEqual(ChunkAcTL)) return true; // Animation control â†’ APNG
-                if (chunkType.SequenceEqual(ChunkIDAT)) return false; // Image data before acTL â†’ static
+                if (chunkType.SequenceEqual(ChunkAcTL)) return true; // Animation control ? APNG
+                if (chunkType.SequenceEqual(ChunkIDAT)) return false; // Image data before acTL ? static
                 if (chunkType.SequenceEqual(ChunkIEND)) return false; // End of file
 
                 // Advance past: length(4) + type(4) + data(chunkLength) + CRC(4)

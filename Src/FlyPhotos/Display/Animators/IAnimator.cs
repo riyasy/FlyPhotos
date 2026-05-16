@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Microsoft.Graphics.Canvas;
 
@@ -21,7 +21,7 @@ public interface IAnimator : IDisposable
     uint PixelHeight { get; }
 
     /// <summary>
-    ///     The composited output surface that can be drawn to a CanvasControl.
+    ///     The composited output surface that can be drawn to a ICanvasResourceCreatorWithDpi.
     /// </summary>
     ICanvasImage Surface { get; }
 

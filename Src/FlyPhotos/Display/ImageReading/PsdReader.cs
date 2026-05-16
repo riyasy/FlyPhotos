@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Buffers.Binary;
 using System.IO;
 using System.Threading.Tasks;
@@ -13,7 +13,7 @@ internal static class PsdReader
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     // Get preview as a CanvasBitmap for WinUI
-    public static async Task<(bool, PreviewDisplayItem)> GetEmbedded(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetEmbedded(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         if (GetPsdInfo(inputPath, out int width, out var height, out var thumbnailData))
         {
@@ -154,7 +154,7 @@ internal static class PsdReader
         return -1; // Pattern not found
     }
 
-    // Reads a big-endian uint32 using a stack-allocated buffer — no heap allocation per call.
+    // Reads a big-endian uint32 using a stack-allocated buffer � no heap allocation per call.
     private static uint ReadBigEndianUInt32(BinaryReader reader)
     {
         Span<byte> buf = stackalloc byte[4];

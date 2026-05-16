@@ -46,7 +46,7 @@ internal static class Util
         return coreWindow.HasFlag(CoreVirtualKeyStates.Down);
     }
 
-    public static CanvasImageBrush CreateCheckeredBrush(CanvasControl canvas, int checkerSize)
+    public static CanvasImageBrush CreateCheckeredBrush(ICanvasResourceCreatorWithDpi canvas, int checkerSize)
     {
         // Create a render target for the small 2x2 checker pattern
         using var patternRenderTarget = new CanvasRenderTarget(canvas, checkerSize * 2, checkerSize * 2, canvas.Dpi);

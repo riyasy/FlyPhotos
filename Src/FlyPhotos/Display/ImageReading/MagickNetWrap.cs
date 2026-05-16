@@ -24,7 +24,7 @@ internal static class MagickNetWrap
     /// Extracts the larger embedded camera preview JPEG from a RAW image file without performing a full decode.
     /// </summary>
     public static async Task<(bool, PreviewDisplayItem)> GetEmbeddedForRawFile(
-        ICanvasResourceCreator resourceCreator, string path)
+        ICanvasResourceCreatorWithDpi resourceCreator, string path)
     {
         try
         {
@@ -60,7 +60,7 @@ internal static class MagickNetWrap
     /// pixel buffers to avoid an encode/decode round-trip. Large images are resized and encoded
     /// to a compact JPEG stream (Q80) before being handed to Win2D.
     /// </summary>
-    public static async Task<(bool, PreviewDisplayItem)> GetResized(ICanvasResourceCreator resourceCreator, string path, uint maxDimension = 800)
+    public static async Task<(bool, PreviewDisplayItem)> GetResized(ICanvasResourceCreatorWithDpi resourceCreator, string path, uint maxDimension = 800)
     {
         try
         {
@@ -115,7 +115,7 @@ internal static class MagickNetWrap
     /// only falls back to a full RAW sensor decode if the preview is unavailable.
     /// Alpha is premultiplied inside Magick before export to avoid two SoftwareBitmap copies.
     /// </summary>
-    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl d2dCanvas, string path, bool isRaw = false)
+    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi d2dCanvas, string path, bool isRaw = false)
     {
         try
         {
@@ -164,7 +164,7 @@ internal static class MagickNetWrap
     /// time — much larger than the EXIF thumbnail.
     /// </summary>
     private static async Task<(bool Success, CanvasBitmap? Bitmap)> LoadEmbeddedPreviewAsync(
-        ICanvasResourceCreator resourceCreator, string path)
+        ICanvasResourceCreatorWithDpi resourceCreator, string path)
     {
         try
         {

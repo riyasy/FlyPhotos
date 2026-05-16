@@ -1,9 +1,10 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Display.ImageReading;
+using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 
 namespace FlyPhotos.Core.Model;
@@ -29,7 +30,7 @@ internal partial class Photo : IDisposable
     private static readonly Photo _empty = new(string.Empty);
     public static Photo Empty() => _empty;
 
-    public async Task<bool> LoadPreviewFirstPhoto(CanvasControl device)
+    public async Task<bool> LoadPreviewFirstPhoto(ICanvasResourceCreatorWithDpi device)
     {
         var continueLoadingHq = false;
         DisplayItem? firstDisplay = null;
@@ -55,7 +56,7 @@ internal partial class Photo : IDisposable
         }
     }
 
-    public async Task LoadHqFirstPhoto(CanvasControl device)
+    public async Task LoadHqFirstPhoto(ICanvasResourceCreatorWithDpi device)
     {
         async Task GetHqImage()
         {
@@ -64,12 +65,12 @@ internal partial class Photo : IDisposable
         await Task.Run(GetHqImage);
     }
 
-    public async Task LoadHq(CanvasControl device)
+    public async Task LoadHq(ICanvasResourceCreatorWithDpi device)
     {
         Hq ??= await ImageReader.GetHqImage(device, FilePath);
     }
 
-    public async Task LoadPreview(CanvasControl device)
+    public async Task LoadPreview(ICanvasResourceCreatorWithDpi device)
     {
         if (Preview == null || Preview.Origin == Origin.ErrorScreen ||
             Preview.Origin == Origin.Undefined)

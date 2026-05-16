@@ -264,7 +264,7 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     /// original (un-resized) image. Returns <c>(null, 0, 0)</c> on miss or error.
     /// </returns>
     public async Task<(CanvasBitmap? bitmap, int actualWidth, int actualHeight)> ReturnFromCache(
-        CanvasControl canvasControl, string filePath)
+        ICanvasResourceCreatorWithDpi canvasControl, string filePath)
     {
         try
         {

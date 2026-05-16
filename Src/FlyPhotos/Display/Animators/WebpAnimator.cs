@@ -222,7 +222,7 @@ public partial class WebpAnimator : IAnimator
     ///     Private constructor. Use <see cref="CreateAsync" /> to instantiate.
     /// </summary>
     private WebpAnimator(
-        CanvasControl canvas,
+        ICanvasResourceCreatorWithDpi canvas,
         BitmapDecoder decoder,
         IRandomAccessStream stream,
         uint canvasWidth,
@@ -277,10 +277,10 @@ public partial class WebpAnimator : IAnimator
     ///     Asynchronously creates a <see cref="WebpAnimator" /> from raw WebP file bytes.
     /// </summary>
     /// <param name="webpData">Complete raw bytes of the WebP file.</param>
-    /// <param name="canvas">The Win2D <see cref="CanvasControl" /> that owns the GPU device.</param>
+    /// <param name="canvas">The Win2D <see cref="ICanvasResourceCreatorWithDpi" /> that owns the GPU device.</param>
     /// <returns>A fully initialised <see cref="WebpAnimator" /> ready for <see cref="UpdateAsync" /> calls.</returns>
     /// <exception cref="ArgumentException">Thrown if the WIC decoder finds zero frames.</exception>
-    public static async Task<WebpAnimator> CreateAsync(byte[] webpData, CanvasControl canvas)
+    public static async Task<WebpAnimator> CreateAsync(byte[] webpData, ICanvasResourceCreatorWithDpi canvas)
     {
         // Parse VP8X/ANIM/ANMF metadata from the raw RIFF binary before opening the WIC decoder.
         // WIC BitmapProperties does not expose any of these values for WebP.

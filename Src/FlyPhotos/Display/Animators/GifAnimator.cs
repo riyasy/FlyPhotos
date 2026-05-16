@@ -193,7 +193,7 @@ public partial class GifAnimator : IAnimator
     ///     All arguments are pre-validated and pre-built by <see cref="CreateAsync" />.
     /// </summary>
     private GifAnimator(
-        CanvasControl canvas,
+        ICanvasResourceCreatorWithDpi canvas,
         BitmapDecoder decoder,
         IRandomAccessStream stream,
         List<FrameMetadata> metadata)
@@ -240,9 +240,9 @@ public partial class GifAnimator : IAnimator
     ///     Asynchronously creates a <see cref="GifAnimator" /> from raw GIF file bytes.
     /// </summary>
     /// <param name="gifData">Complete raw bytes of the GIF file.</param>
-    /// <param name="canvas">The Win2D <see cref="CanvasControl" /> that owns the GPU device.</param>
+    /// <param name="canvas">The Win2D <see cref="ICanvasResourceCreatorWithDpi" /> that owns the GPU device.</param>
     /// <returns>A fully initialised <see cref="GifAnimator" /> ready for <see cref="UpdateAsync" /> calls.</returns>
-    public static async Task<GifAnimator> CreateAsync(byte[] gifData, CanvasControl canvas)
+    public static async Task<GifAnimator> CreateAsync(byte[] gifData, ICanvasResourceCreatorWithDpi canvas)
     {
         // AsRandomAccessStream() wraps but does not own the underlying MemoryStream,
         // so both must be named locals to ensure both are disposed on the failure path.

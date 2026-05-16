@@ -1,4 +1,4 @@
-﻿// Assuming you have 'using Microsoft.Graphics.Canvas;' and other relevant usings at the top.
+// Assuming you have 'using Microsoft.Graphics.Canvas;' and other relevant usings at the top.
 // Also assuming the HeifDecoder class we created is available in this project.
 
 using System;
@@ -17,7 +17,7 @@ internal static class NativeHeifReader
     /// <summary>
     /// Gets the embedded thumbnail using the high-performance native HeifDecoder.
     /// </summary>
-    public static (bool, PreviewDisplayItem) GetEmbedded(CanvasControl ctrl, string inputPath)
+    public static (bool, PreviewDisplayItem) GetEmbedded(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         try
         {
@@ -57,7 +57,7 @@ internal static class NativeHeifReader
     /// <summary>
     /// Gets the high-quality primary image using the high-performance native HeifDecoder.
     /// </summary>
-    public static (bool, HqDisplayItem) GetHq(CanvasControl ctrl, string inputPath)
+    public static (bool, HqDisplayItem) GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         try
         {

@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
@@ -22,7 +22,7 @@ internal static class IcoReader
     /// <summary>
     /// Gets the highest-resolution image from an ICO file for preview purposes.
     /// </summary>
-    public static async Task<(bool, PreviewDisplayItem)> GetPreview(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetPreview(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         var (bitmap, width, height) = await LoadLargestFrameAsync(ctrl, inputPath);
 
@@ -38,7 +38,7 @@ internal static class IcoReader
     /// <summary>
     /// Gets the highest-resolution image from an ICO file for high-quality display.
     /// </summary>
-    public static async Task<(bool, HqDisplayItem)> GetHq(CanvasControl ctrl, string inputPath)
+    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         var (bitmap, _, _) = await LoadLargestFrameAsync(ctrl, inputPath);
 
@@ -54,7 +54,7 @@ internal static class IcoReader
     /// Core logic to open an ICO file, find the frame with the largest dimensions, and load it into a CanvasBitmap.
     /// </summary>
     /// <returns>A tuple containing the loaded bitmap, its width, and its height. Returns null on failure.</returns>
-    private static async Task<(CanvasBitmap? bitmap, int width, int height)> LoadLargestFrameAsync(CanvasControl canvasControl, string filePath)
+    private static async Task<(CanvasBitmap? bitmap, int width, int height)> LoadLargestFrameAsync(ICanvasResourceCreatorWithDpi ctrl, string filePath)
     {
         try
         {
@@ -77,7 +77,7 @@ internal static class IcoReader
 
             // Create the final CanvasBitmap directly from the pixel data of the chosen frame.
             var canvasBitmap = CanvasBitmap.CreateFromBytes(
-                canvasControl,
+                ctrl,
                 pixelData,
                 (int)bestFrame.PixelWidth,
                 (int)bestFrame.PixelHeight,

@@ -20,7 +20,7 @@ internal static unsafe class RawlerWrapper
     /// Safely copies an unmanaged Rust pixel buffer into a Win2D <see cref="CanvasBitmap"/>
     /// and unconditionally frees the buffer afterwards.
     /// </summary>
-    private static CanvasBitmap? CreateBitmapAndFree(CanvasControl ctrl, nint ptr, int width, int height)
+    private static CanvasBitmap? CreateBitmapAndFree(ICanvasResourceCreatorWithDpi ctrl, nint ptr, int width, int height)
     {
         if (ptr == nint.Zero)
             return null;
@@ -49,7 +49,7 @@ internal static unsafe class RawlerWrapper
     /// Shared internal logic to extract the embedded JPEG preview and related metadata from a RAW file.
     /// </summary>
     private static (bool success, CanvasBitmap? bitmap, int rotation, int primaryWidth, int primaryHeight)
-        LoadEmbeddedPreview(CanvasControl ctrl, string inputPath)
+        LoadEmbeddedPreview(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         nint ptr = NativeRustBridge.rawler_get_embedded_preview_from_raw(
             inputPath, out var width, out var height,
@@ -65,7 +65,7 @@ internal static unsafe class RawlerWrapper
     /// <summary>
     /// Extracts the embedded JPEG preview from a RAW file if available.
     /// </summary>
-    public static (bool, PreviewDisplayItem) GetEmbeddedPreview(CanvasControl ctrl, string inputPath)
+    public static (bool, PreviewDisplayItem) GetEmbeddedPreview(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         var (success, bitmap, rotation, pWidth, pHeight) = LoadEmbeddedPreview(ctrl, inputPath);
 
@@ -80,7 +80,7 @@ internal static unsafe class RawlerWrapper
     /// Fully decodes a RAW file into a high-quality render.
     /// Falls back to the embedded preview if high-quality decoding is disabled in settings.
     /// </summary>
-    public static (bool, HqDisplayItem) GetHq(CanvasControl ctrl, string inputPath)
+    public static (bool, HqDisplayItem) GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         // Skip full decode when the user has opted for preview-only mode.
         if (!AppConfig.Settings.DecodeRawData)
