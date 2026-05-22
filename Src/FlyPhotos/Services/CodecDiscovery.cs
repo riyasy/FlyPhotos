@@ -1,6 +1,5 @@
 #nullable enable
 using FlyPhotos.Core.Model;
-using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Infra.Interop;
 using ImageMagick;
 using System;

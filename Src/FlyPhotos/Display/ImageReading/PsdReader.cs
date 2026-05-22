@@ -4,7 +4,6 @@ using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
 using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 
 namespace FlyPhotos.Display.ImageReading;

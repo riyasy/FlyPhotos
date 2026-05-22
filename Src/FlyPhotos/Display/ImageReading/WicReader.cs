@@ -1,6 +1,5 @@
 #nullable enable
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Graphics.DirectX;
@@ -9,7 +8,6 @@ using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Services;
 using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 
 namespace FlyPhotos.Display.ImageReading;

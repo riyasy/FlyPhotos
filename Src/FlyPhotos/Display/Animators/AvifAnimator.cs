@@ -5,7 +5,6 @@ using Windows.Foundation;
 using Windows.Graphics.DirectX;
 using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 
 namespace FlyPhotos.Display.Animators;

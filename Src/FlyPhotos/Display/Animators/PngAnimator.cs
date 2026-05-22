@@ -8,7 +8,6 @@ using Windows.Foundation;
 using Windows.Storage.Streams;
 using FlyPhotos.Infra.Utils;
 using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Buffer = System.Buffer;
 

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Services;
 using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 using PhotoSauce.MagicScaler;
 

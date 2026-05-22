@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 using Windows.Graphics.DirectX;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
-using FlyPhotos.Services;
 using ImageMagick;
 using ImageMagick.Formats;
 using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 
 namespace FlyPhotos.Display.ImageReading;
@@ -123,7 +121,6 @@ internal static class MagickNetWrap
             // use the private LoadEmbeddedPreviewAsync directly to get the larger embedded camera JPEG.
             // We skip the small EXIF thumbnail here — HQ display warrants the best quality available
             // without a full decode.
-            var ext = Path.GetExtension(path);
             if (isRaw && !AppConfig.Settings.DecodeRawData)
             {
                 var (success, bitmap) = await LoadEmbeddedPreviewAsync(d2dCanvas, path);

@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 using FlyPhotos.Core.Model;
 using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
 using FlyPhotos.Services;
 using Windows.Graphics.DirectX;

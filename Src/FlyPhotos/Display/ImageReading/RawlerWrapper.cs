@@ -5,7 +5,6 @@ using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
 
 namespace FlyPhotos.Display.ImageReading;
 
