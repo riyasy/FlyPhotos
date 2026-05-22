@@ -506,23 +506,21 @@ internal partial class PhotoDisplayController
         int newPosition = currentPosition + (direction == NavDirection.Next ? 1 : -1);
         if (newPosition < 0 || newPosition >= keys.Count) return;
         int newKey = keys[newPosition];
-        await FlyTo(newKey, false);
+        await FlyTo(newKey, newPosition, false);
     }
 
     public async Task FlyToFirst()
     {
         var keys = _sortedPhotoKeys;
         if (keys.Count <= 1) return;
-        int firstKey = keys[0];
-        await FlyTo(firstKey, true);
+        await FlyTo(keys[0], 0, true);
     }
 
     public async Task FlyToLast()
     {
         var keys = _sortedPhotoKeys;
         if (keys.Count <= 1) return;
-        int lastKey = keys[^1];
-        await FlyTo(lastKey, true);
+        await FlyTo(keys[^1], keys.Count - 1, true);
     }
 
     public async Task FlyBy(int shiftBy)
@@ -532,17 +530,14 @@ internal partial class PhotoDisplayController
         int currentPosition = _photoSessionState.CurrentPhotoListPosition;
         if (currentPosition < 0) return;
         int newPosition = Math.Clamp(currentPosition + shiftBy, 0, keys.Count - 1);
-        int newKey = keys[newPosition];
-        await FlyTo(newKey, true);
+        await FlyTo(keys[newPosition], newPosition, true);
     }
 
-    private async Task FlyTo(int toKey, bool triggerHqCaching)
+    private async Task FlyTo(int toKey, int toPosition, bool triggerHqCaching)
     {
-        // Safety check if the target key is valid
         if (!_photos.ContainsKey(toKey)) return;
 
-        var keys = _sortedPhotoKeys;
-        _photoSessionState.SetCurrentPhotoKeyAndListPosition(toKey, keys.BinarySearch(toKey));
+        _photoSessionState.SetCurrentPhotoKeyAndListPosition(toKey, toPosition);
 
         await DisplayPhotoAtKey(_photoSessionState.CurrentPhotoKey, triggerHqCaching);
     }
@@ -593,8 +588,7 @@ internal partial class PhotoDisplayController
         // --- Step 4: Navigate to the New Photo or Handle Empty State ---
         if (updatedKeys.Count > 0)
         {
-            int newKey = updatedKeys[nextPosition];
-            await FlyTo(newKey, true);
+            await FlyTo(updatedKeys[nextPosition], nextPosition, true);
 
             // --- Step 5: Clean Up Resources ---
             deletedPhoto?.Dispose();
