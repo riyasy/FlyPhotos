@@ -26,10 +26,6 @@ internal partial class AnimatedImageRenderer : IRenderer
     // Read on the W2D thread (OnUpdate) and the ThreadPool decode continuation; written in Dispose.
     private volatile bool _isDisposed;
 
-    // Set to true by UpdateFrameAsync when a new frame has been decoded and is ready to display.
-    // Read by CanvasController.D2dCanvas_Update to decide whether to keep the control un-paused.
-    private volatile bool _frameReady;
-
     public Rect SourceBounds => _animator.Surface.GetBounds(_canvas);
 
     public AnimatedImageRenderer(CanvasAnimatedControl canvas, IAnimator animator, bool supportsTransparency,
@@ -62,42 +58,28 @@ internal partial class AnimatedImageRenderer : IRenderer
 
     /// <summary>
     /// Called by CanvasController on the Win2D background thread each Update tick.
-    /// Tries to advance the animator by one frame (non-blocking; skips if previous update still running).
-    /// Returns true if a new frame is ready and the canvas should stay un-paused for another Draw.
+    /// Fires an async frame-advance if the previous one has completed (non-blocking).
+    /// Always returns true — animated images keep the canvas running continuously.
     /// </summary>
     public bool OnUpdate()
     {
-        if (_isDisposed) return false;
-
-        // Non-blocking: skip this tick if the previous async update hasn't finished yet.
-        if (!_animatorLock.Wait(0)) return _frameReady;
-
-        // Lock was acquired; fire-and-forget the async decode.
-        // The lock is released inside UpdateFrameAsync when it completes.
-        _ = UpdateFrameAsync();
-
-        return _frameReady;
+        if (_isDisposed) 
+            return false;
+        if (_animatorLock.Wait(0))
+            _ = UpdateFrameAsync();
+        return true;
     }
 
     private async Task UpdateFrameAsync()
     {
         try
         {
-            if (_isDisposed)
-            {
-                _animatorLock.Release();
-                return;
-            }
+            if (_isDisposed) { _animatorLock.Release(); return; }
 
-            _frameReady = false;
             await _animator.UpdateAsync(_stopwatch.Elapsed);
 
             if (!_isDisposed)
-            {
-                _frameReady = true;
-                // Wake the canvas if it paused while this async decode was in flight.
-                _requestInvalidate();
-            }
+                _requestInvalidate(); // defensive: wakes the canvas if something externally paused it
         }
         catch (Exception ex)
         {
@@ -109,8 +91,6 @@ internal partial class AnimatedImageRenderer : IRenderer
             _animatorLock.Release();
         }
     }
-
-
 
     public void RestartOffScreenDrawTimer()
     {
