@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
@@ -21,6 +22,19 @@ using Size = FlyPhotos.Core.Model.Size;
 
 namespace FlyPhotos.Display.Controllers;
 
+/// <summary>
+/// Win2D rendering controller for the main canvas.
+///
+/// Threading model — "everything that touches rendering state runs on the W2D thread; the queue
+/// is the only door in". The CanvasAnimatedControl runs an Update/Draw worker thread (the "W2D
+/// thread"). <see cref="_currentRenderer"/>, <see cref="_checkeredBrush"/>, <see cref="_canvasViewState"/>
+/// and <see cref="_canvasViewManager"/> are W2D-owned: they are only ever touched inside actions
+/// drained from <see cref="_pendingW2dActions"/> at the top of <see cref="D2dCanvas_Update"/>,
+/// or inside Update/Draw itself. The UI thread never touches them directly — it posts work via
+/// <see cref="EnqueueW2dAction"/>. There is therefore no lock on the render hot path.
+///
+/// All public methods must be called on the UI (DispatcherQueue) thread.
+/// </summary>
 internal class CanvasController : ICanvasController
 {
     public event Action<int> OnZoomChanged;
@@ -30,40 +44,63 @@ internal class CanvasController : ICanvasController
 
     private readonly IThumbnailController _thumbNailController;
     private readonly PhotoSessionState _photoSessionState;
-    private readonly CanvasControl _d2dCanvas;
+    private readonly CanvasAnimatedControl _d2dCanvas;
 
+    // The single UI -> W2D handoff. Drained at the top of every Update on the W2D thread.
+    private readonly ConcurrentQueue<Action> _pendingW2dActions = new();
+
+    // W2D-owned: swapped/read only on the W2D thread (install action + Draw).
     private IRenderer _currentRenderer;
 
-    private bool _invalidatePending;
+    // Published W2D -> UI for synchronous pointer hit-testing (IsPressedOnImage).
+    // Written every Update on the W2D thread; read on the UI thread during pointer events.
+    // A Lock is used because Matrix3x2 (6 floats) and Rect (4 doubles) are not atomically writable,
+    // making volatile inadequate. Contention is negligible: pointer events are rare vs. 144 Hz Update.
+    private Matrix3x2 _hitTestMatInv = Matrix3x2.Identity;
+    private Rect _hitTestImageRect;
+    private readonly Lock _hitTestLock = new();
+
     private int _latestSetSourceOperationId;
 
-    // For Checkered Background
+    // W2D-owned: created lazily in the install action, disposed on device loss in CreateResources.
     private CanvasImageBrush _checkeredBrush;
 
-    // For State management
+    // W2D-owned view state and view logic.
     private readonly CanvasViewState _canvasViewState;
     private readonly CanvasViewManager _canvasViewManager;
+
+    // UI-owned orchestration fields — touched only inside SetSource / InstallRenderer on the UI thread.
     private Size _imageSize;
     private string _currentPhotoPath = string.Empty;
     private bool _realImageDisplayedForCurrentPhoto;
-    private bool isGoingToExit;
+    private bool _isMultiPageActive;
+
+    // W2D-owned: set inside the ZoomOutOnExit action, read in the AnimationCompleted handler.
+    private bool _isGoingToExit;
 
     #region Construction and Destruction
 
-    public CanvasController(CanvasControl d2dCanvas, IThumbnailController thumbNailController,
+    public CanvasController(CanvasAnimatedControl d2dCanvas, IThumbnailController thumbNailController,
         PhotoSessionState photoSessionState)
     {
         _d2dCanvas = d2dCanvas;
         _thumbNailController = thumbNailController;
         _photoSessionState = photoSessionState;
 
+        _d2dCanvas.CreateResources += D2dCanvas_CreateResources;
+        _d2dCanvas.Update += D2dCanvas_Update;
         _d2dCanvas.Draw += D2dCanvas_Draw;
         _d2dCanvas.SizeChanged += D2dCanvas_SizeChanged;
 
         _canvasViewState = new CanvasViewState();
         _canvasViewManager = new CanvasViewManager(_canvasViewState);
-        _canvasViewManager.FitToScreenStateChanged += (isFitted) => OnFitToScreenStateChanged?.Invoke(isFitted);
-        _canvasViewManager.OneToOneStateChanged += (isOneToOne) => OnOneToOneStateChanged?.Invoke(isOneToOne);
+
+        // CanvasViewManager events fire on the W2D thread. This is the single place where each one
+        // crosses back to the UI thread, so PhotoDisplayWindow's handlers can be plain UI code.
+        _canvasViewManager.FitToScreenStateChanged += isFitted =>
+            _d2dCanvas.DispatcherQueue.TryEnqueue(() => OnFitToScreenStateChanged?.Invoke(isFitted));
+        _canvasViewManager.OneToOneStateChanged += isOneToOne =>
+            _d2dCanvas.DispatcherQueue.TryEnqueue(() => OnOneToOneStateChanged?.Invoke(isOneToOne));
         _canvasViewManager.ZoomChanged += RequestZoomUpdate;
         _canvasViewManager.ViewChanged += RequestInvalidate;
         _canvasViewManager.AnimationCompleted += CanvasViewManager_AnimationCompleted;
@@ -73,13 +110,20 @@ internal class CanvasController : ICanvasController
     {
         try
         {
-            _d2dCanvas?.Draw -= D2dCanvas_Draw;
+            // Stop and join the Win2D worker thread BEFORE freeing GPU resources, so no in-flight
+            // Update/Draw can observe a disposed renderer or brush. After this returns there is no
+            // concurrency, so disposal needs no lock.
+            _d2dCanvas.RemoveFromVisualTree();
+            _d2dCanvas.CreateResources -= D2dCanvas_CreateResources;
+            _d2dCanvas.Update -= D2dCanvas_Update;
+            _d2dCanvas.Draw -= D2dCanvas_Draw;
+            _d2dCanvas.SizeChanged -= D2dCanvas_SizeChanged;
+
             _canvasViewManager?.Dispose();
             _currentRenderer?.Dispose();
             _currentRenderer = null;
             _checkeredBrush?.Dispose();
             _checkeredBrush = null;
-            _d2dCanvas?.RemoveFromVisualTree();
         }
         catch (Exception ex) { Debug.WriteLine(ex); }
     }
@@ -98,18 +142,16 @@ internal class CanvasController : ICanvasController
     /// <param name="displayLevel">The quality level to display (e.g., PlaceHolder, Preview, Hq).</param>
     public async Task SetSource(Photo photo, DisplayLevel displayLevel)
     {
-        _checkeredBrush ??= Util.CreateCheckeredBrush(_d2dCanvas, Constants.CheckerSize);
+        // Read the canvas size on the (UI) calling thread; the install action runs on the W2D thread.
+        var canvasSize = _d2dCanvas.GetSize();
 
-        var currentOperationId = ++_latestSetSourceOperationId;
+        var currentOperationId = Interlocked.Increment(ref _latestSetSourceOperationId);
         var isFirstPhotoEver = string.IsNullOrEmpty(_currentPhotoPath);
-
+        var previousPhotoPath = _currentPhotoPath;
         var isNewPhoto = photo.FilePath != _currentPhotoPath;
+
         if (isNewPhoto)
         {
-            // If switching to a new photo, cache the view state of the old photo first.
-            if (!string.IsNullOrEmpty(_currentPhotoPath))
-                _canvasViewManager.CacheCurrentViewState(_currentPhotoPath, _d2dCanvas.GetSize());
-            
             _currentPhotoPath = photo.FilePath;
             _realImageDisplayedForCurrentPhoto = false;
         }
@@ -129,52 +171,58 @@ internal class CanvasController : ICanvasController
         if (displayLevel > DisplayLevel.PlaceHolder)
             _realImageDisplayedForCurrentPhoto = true;
 
+        var ctx = new PhotoInstallContext(_currentPhotoPath, previousPhotoPath, canvasSize,
+            isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
+
         // Handle the specific type of display item (Animated, HQ Static, Preview, MultiPage)
         switch (displayItem)
         {
             case AnimatedHqDisplayItem animDispItem:
-                await HandleHqAnimatedDisplayItemAsync(currentOperationId, photo, animDispItem, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
+                await HandleHqAnimatedDisplayItemAsync(currentOperationId, photo, animDispItem, ctx);
                 break;
             case MultiPageHqDisplayItem multiDispItem:
-                HandleHqMultiPageDisplayItem(photo, multiDispItem, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
+                HandleHqMultiPageDisplayItem(photo, multiDispItem, ctx);
                 break;
             case HqDisplayItem hqDispItem:
-                HandleHqStaticDisplayItem(photo, hqDispItem, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
+                HandleHqStaticDisplayItem(photo, hqDispItem, ctx);
                 break;
             case PreviewDisplayItem previewDispItem:
-                HandlePreviewDisplayItem(photo, previewDispItem, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
+                HandlePreviewDisplayItem(photo, previewDispItem, ctx);
                 break;
         }
     }
 
-
-
-    private async Task HandleHqAnimatedDisplayItemAsync(int currentOperationId, Photo photo, AnimatedHqDisplayItem animDispItem,
-        bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
+    private async Task HandleHqAnimatedDisplayItemAsync(int currentOperationId, Photo photo,
+        AnimatedHqDisplayItem animDispItem, PhotoInstallContext ctx)
     {
         try
         {
             // For animated images, first display the static first frame immediately for responsiveness.
-            IRenderer firstFrameRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, animDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency, RequestInvalidate, false);
-            SetupNewRenderer(firstFrameRenderer, _imageSize, animDispItem.Rotation, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, true);
+            InstallRenderer(
+                new StaticImageRenderer(_d2dCanvas, _canvasViewState, animDispItem.Bitmap,
+                    photo.SupportsTransparency, RequestInvalidate, createOffScreen: false),
+                _imageSize, animDispItem.Rotation, ctx, forceThumbNailRedraw: true);
 
             // Asynchronously create the appropriate animator (GIF, WebP, APNG, or AVIF).
             var ext = Path.GetExtension(photo.FilePath);
             IAnimator newAnimator =
-                string.Equals(ext, ".avif",  StringComparison.OrdinalIgnoreCase) ? await AvifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas) :
-                string.Equals(ext, ".gif",  StringComparison.OrdinalIgnoreCase) ? await GifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas)  :
+                string.Equals(ext, ".avif", StringComparison.OrdinalIgnoreCase) ? await AvifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas) :
+                string.Equals(ext, ".gif", StringComparison.OrdinalIgnoreCase) ? await GifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas) :
                 string.Equals(ext, ".webp", StringComparison.OrdinalIgnoreCase) ? await WebpAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas) :
-                                                                                   await PngAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas);
+                                                                                  await PngAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas);
 
             // RACE CONDITION CHECK: If another SetSource call has started while we were creating the
             // animator, this operation is now obsolete. We should discard the result and clean up.
             if (currentOperationId == _latestSetSourceOperationId)
             {
-                // The operation is still valid. Prepare the animator and swap the renderer.
                 await newAnimator.UpdateAsync(TimeSpan.Zero);
-                IRenderer newRenderer = new AnimatedImageRenderer(_d2dCanvas, _checkeredBrush, newAnimator, photo.SupportsTransparency, RequestInvalidate);
-                // For animation, we don't reset the view again, as the static frame is already there.
-                SetupNewRenderer(newRenderer, _imageSize, animDispItem.Rotation, false, false, false, false);
+                // Swap in the animated renderer without re-resetting the view — the static first
+                // frame already placed it (AsFollowUp clears the view-reset flags).
+                InstallRenderer(
+                    new AnimatedImageRenderer(_d2dCanvas, newAnimator, photo.SupportsTransparency, RequestInvalidate),
+                    _imageSize, animDispItem.Rotation, ctx.AsFollowUp(), forceThumbNailRedraw: false);
+                // Keep the control running while the animated image is active.
+                RequestInvalidate();
             }
             else
             {
@@ -184,27 +232,27 @@ internal class CanvasController : ICanvasController
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Failed to display GIF: {ex.Message}");
+            Debug.WriteLine($"Failed to display animated image: {ex.Message}");
         }
     }
 
-    private void HandleHqStaticDisplayItem(Photo photo, HqDisplayItem hqDispItem,
-        bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
+    private void HandleHqStaticDisplayItem(Photo photo, HqDisplayItem hqDispItem, PhotoInstallContext ctx)
     {
-        // For a high-quality static image, create and set the static renderer.
-        IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, hqDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency, RequestInvalidate);
-        SetupNewRenderer(newRenderer, _imageSize, hqDispItem.Rotation, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, true);
+        InstallRenderer(
+            new StaticImageRenderer(_d2dCanvas, _canvasViewState, hqDispItem.Bitmap,
+                photo.SupportsTransparency, RequestInvalidate),
+            _imageSize, hqDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
-    private void HandleHqMultiPageDisplayItem(Photo photo, MultiPageHqDisplayItem multiDispItem,
-        bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
+    private void HandleHqMultiPageDisplayItem(Photo photo, MultiPageHqDisplayItem multiDispItem, PhotoInstallContext ctx)
     {
-        var renderer = new MultiPageRenderer(_d2dCanvas, multiDispItem.FileAsByteArray, 0, _checkeredBrush, photo.SupportsTransparency, RequestInvalidate);
-        SetupNewRenderer(renderer, _imageSize, multiDispItem.Rotation, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, true);
+        InstallRenderer(
+            new MultiPageRenderer(_d2dCanvas, multiDispItem.FileAsByteArray, 0,
+                photo.SupportsTransparency, RequestInvalidate),
+            _imageSize, multiDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
-    private void HandlePreviewDisplayItem(Photo photo, PreviewDisplayItem previewDispItem,
-        bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
+    private void HandlePreviewDisplayItem(Photo photo, PreviewDisplayItem previewDispItem, PhotoInstallContext ctx)
     {
         // Previews can sometimes have a slightly different aspect ratio than the HQ image.
         // To prevent distortion when the HQ image eventually loads, we adjust the preview's
@@ -212,151 +260,273 @@ internal class CanvasController : ICanvasController
         var previewAspectRatio = previewDispItem.Bitmap.Bounds.Width / previewDispItem.Bitmap.Bounds.Height;
         var correctedWidth = _imageSize.Height * previewAspectRatio;
 
-        IRenderer newRenderer = new StaticImageRenderer(_d2dCanvas, _canvasViewState, previewDispItem.Bitmap, _checkeredBrush, photo.SupportsTransparency, RequestInvalidate);
-        SetupNewRenderer(newRenderer, new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, true);
+        InstallRenderer(
+            new StaticImageRenderer(_d2dCanvas, _canvasViewState, previewDispItem.Bitmap,
+                photo.SupportsTransparency, RequestInvalidate),
+            new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
     /// <summary>
-    /// Configures the canvas with a new renderer and updates the view state. This method centralizes
-    /// the logic for swapping renderers and informing the CanvasViewManager of new image metrics.
+    /// Immutable parameters describing a photo-install request, captured on the UI thread and
+    /// applied on the W2D thread inside <see cref="InstallRenderer"/>.
     /// </summary>
-    /// <param name="newRenderer">The new renderer instance to be used for drawing.</param>
-    /// <param name="imageSize">The actual dimensions of the image being displayed.</param>
-    /// <param name="imageRotation">The rotation of the image.</param>
-    /// <param name="isFirstPhotoEver">True if this is the very first image loaded in the session.</param>
-    /// /// <param name="isNewPhoto">A new photo at a new path. Will be false for a HQ loading after low res preview of same photo.</param>
-    /// <param name="isUpgradeFromPlaceholder">Will be true for preview and HQ loading after a place-holder display.</param>
-    /// <param name="forceThumbNailRedraw">True to force the thumbnail strip to regenerate its off-screen bitmap.</param>
-    private void SetupNewRenderer(IRenderer newRenderer, Size imageSize, int imageRotation, bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder, bool forceThumbNailRedraw)
+    private readonly record struct PhotoInstallContext(
+        string PhotoPath, string PreviousPhotoPath, Size CanvasSize,
+        bool IsFirstPhotoEver, bool IsNewPhoto, bool IsUpgradeFromPlaceholder)
     {
-        var oldRenderer = _currentRenderer;
-        _currentRenderer = newRenderer; // swap first — next draw uses new renderer immediately
+        /// <summary>A follow-up install for the same photo (e.g. animator after its static first frame) that must not reset the view.</summary>
+        public PhotoInstallContext AsFollowUp() =>
+            this with { IsFirstPhotoEver = false, IsNewPhoto = false, IsUpgradeFromPlaceholder = false };
+    }
 
-        if (oldRenderer is AnimatedImageRenderer)
-            _ = Task.Run(oldRenderer.Dispose); // drain in-flight UpdateAsync off the UI thread
-        else
-            oldRenderer?.Dispose();
+    /// <summary>
+    /// Installs a new renderer on the W2D thread. The brush is injected there (W2D-owned), and the
+    /// swap + view-state update apply atomically in the same tick — no one-frame mismatch, and Draw
+    /// can never see a renderer mid-disposal.
+    /// </summary>
+    private void InstallRenderer(IRenderer newRenderer, Size imageSize,
+        int imageRotation, PhotoInstallContext ctx, bool forceThumbNailRedraw)
+    {
+        // InstallRenderer is always called on the UI thread, so we can fire the event directly here
+        // without a DispatcherQueue.TryEnqueue. Only notify when the multipage state actually changes
+        // to avoid redundant button-visibility updates on every photo navigation.
+        var isMultiPage = newRenderer is MultiPageRenderer;
+        if (isMultiPage != _isMultiPageActive)
+        {
+            _isMultiPageActive = isMultiPage;
+            OnMutliPagePhotoLoaded?.Invoke(isMultiPage);
+        }
 
-        OnMutliPagePhotoLoaded?.Invoke(newRenderer is MultiPageRenderer);
+        EnqueueW2dAction(() =>
+        {
+            _checkeredBrush ??= Util.CreateCheckeredBrush(_d2dCanvas, Constants.CheckerSize);
+            newRenderer.CheckeredBrush = _checkeredBrush;
 
-        _canvasViewManager.SetScaleAndPosition(_currentPhotoPath, imageSize,
-            imageRotation, _d2dCanvas.GetSize(), isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
+            // Cache the OLD photo's view state before applying the new one. _canvasViewState still
+            // holds the previous photo's state at this point, so this reads it race-free.
+            if (ctx.IsNewPhoto && !string.IsNullOrEmpty(ctx.PreviousPhotoPath))
+                _canvasViewManager.CacheCurrentViewState(ctx.PreviousPhotoPath, ctx.CanvasSize);
 
-        if (forceThumbNailRedraw)
-            _thumbNailController.CreateThumbnailRibbonOffScreen();
+            var oldRenderer = _currentRenderer;
+            _currentRenderer = newRenderer;
 
-        _currentRenderer.RestartOffScreenDrawTimer();
+            if (oldRenderer is AnimatedImageRenderer)
+                _ = Task.Run(oldRenderer.Dispose); // drain in-flight UpdateFrameAsync off the W2D thread
+            else
+                oldRenderer?.Dispose();
+
+            _canvasViewManager.SetScaleAndPosition(ctx.PhotoPath, imageSize, imageRotation,
+                ctx.CanvasSize, ctx.IsFirstPhotoEver, ctx.IsNewPhoto, ctx.IsUpgradeFromPlaceholder);
+
+            if (forceThumbNailRedraw)
+                _thumbNailController.CreateThumbnailRibbonOffScreen(); // self-marshals to the UI thread
+
+            _currentRenderer.RestartOffScreenDrawTimer();
+        });
     }
 
     public void FitToScreen(bool animateChange)
     {
-        _canvasViewManager.ZoomPanToFit(animateChange, _imageSize, _d2dCanvas.GetSize());
+        var canvasSize = _d2dCanvas.GetSize();
+        var imageSize = _imageSize;
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.ZoomPanToFit(animateChange, imageSize, canvasSize);
+        });
     }
 
     public void ZoomToHundred()
     {
-        _canvasViewManager.ZoomToHundred(_d2dCanvas.GetSize());
+        var canvasSize = _d2dCanvas.GetSize();
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.ZoomToHundred(canvasSize);
+        });
     }
 
     public void ZoomToHundred(Point anchor)
     {
-        if (IsScreenEmpty()) return;
-        _canvasViewManager.ZoomToHundred(_d2dCanvas.GetSize(), anchor);
+        var canvasSize = _d2dCanvas.GetSize();
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.ZoomToHundred(canvasSize, anchor);
+        });
     }
 
     public void ZoomOutOnExit(double exitAnimationDuration)
     {
-        isGoingToExit = true;
-        _canvasViewManager.ZoomOutOnExit(exitAnimationDuration, _d2dCanvas.GetSize());
+        var canvasSize = _d2dCanvas.GetSize();
+        EnqueueW2dAction(() =>
+        {
+            _isGoingToExit = true;
+            _canvasViewManager.ZoomOutOnExit(exitAnimationDuration, canvasSize);
+        });
     }
 
     public void ZoomByKeyboard(ZoomDirection zoomDirection)
     {
-        if (IsScreenEmpty()) return;
-        _canvasViewManager.ZoomAtCenter(zoomDirection, _d2dCanvas.GetSize());
+        var canvasSize = _d2dCanvas.GetSize();
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.ZoomAtCenter(zoomDirection, canvasSize);
+        });
     }
 
     public void StepZoom(ZoomDirection zoomDirection, Point? zoomAnchor = null)
     {
-        if (IsScreenEmpty()) return;
-        _canvasViewManager.StepZoom(zoomDirection, _d2dCanvas.GetSize(), zoomAnchor);
+        var canvasSize = _d2dCanvas.GetSize();
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.StepZoom(zoomDirection, canvasSize, zoomAnchor);
+        });
     }
 
     public void ZoomAtPoint(ZoomDirection zoomDirection, Point zoomAnchor)
     {
-        if (IsScreenEmpty()) return;
-        _canvasViewManager.ZoomAtPoint(zoomDirection, zoomAnchor);
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.ZoomAtPoint(zoomDirection, zoomAnchor);
+        });
     }
 
     public void ZoomAtPointPrecision(int delta, Point zoomAnchor)
     {
-        if (IsScreenEmpty()) return;
-        _canvasViewManager.ZoomAtPointPrecision(delta, zoomAnchor);
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.ZoomAtPointPrecision(delta, zoomAnchor);
+            // No animation → no AnimationCompleted → must restart the offscreen timer manually
+            // so the offscreen is recreated 650ms after the last zoom tick.
+            _currentRenderer.RestartOffScreenDrawTimer();
+        });
     }
 
     public void Pan(double dx, double dy)
     {
-        if (IsScreenEmpty()) return;
-        _canvasViewManager.Pan(dx, dy);
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.Pan(dx, dy);
+        });
     }
 
     public void RotateCurrentPhotoBy90(bool clockWise)
     {
-        if (IsScreenEmpty()) return;
-        _canvasViewManager.RotateBy(clockWise ? 90 : -90);
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.RotateBy(clockWise ? 90 : -90);
+        });
     }
 
     public void Shrug()
     {
-        if (IsScreenEmpty()) return;
-        _canvasViewManager.Shrug();
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.Shrug();
+        });
     }
 
-    public async Task ChangePage(NavDirection navDirection)
+    public void ChangePage(NavDirection navDirection)
     {
-        if (_currentRenderer is not MultiPageRenderer multiPageRenderer) return;
-
-        switch (navDirection)
+        EnqueueW2dAction(() =>
         {
-            case NavDirection.Next:
-                var next = multiPageRenderer.CurrentPageIndex + 1;
-                await multiPageRenderer.LoadPageAsync(next);
-                break;
-            case NavDirection.Prev:
-                var prev = multiPageRenderer.CurrentPageIndex - 1;
-                await multiPageRenderer.LoadPageAsync(prev);
-                break;
-        }
+            if (_currentRenderer is not MultiPageRenderer multiPageRenderer) return;
+            var targetIndex = navDirection == NavDirection.Next
+                ? multiPageRenderer.CurrentPageIndex + 1
+                : multiPageRenderer.CurrentPageIndex - 1;
+            _ = multiPageRenderer.LoadPageAsync(targetIndex);
+        });
     }
 
     #endregion
 
-    #region Event Handlers
+    #region Win2D Event Handlers
 
-    private void D2dCanvas_Draw(CanvasControl sender, CanvasDrawEventArgs args)
+    private void D2dCanvas_CreateResources(CanvasAnimatedControl sender,
+        Microsoft.Graphics.Canvas.UI.CanvasCreateResourcesEventArgs args)
+    {
+        // Device (re)created (first load or device loss). Drop the device-bound brush so it is
+        // rebuilt lazily, and ask the current renderer to rebuild its off-screen surface.
+        // Runs on the W2D thread.
+        _checkeredBrush?.Dispose();
+        _checkeredBrush = null;
+        _currentRenderer?.TryRedrawOffScreen(true);
+    }
+
+    /// <summary>
+    /// Called on the W2D thread before each Draw. Drains the queue (the single UI->W2D handoff),
+    /// drives animation, publishes the hit-test snapshot, and pauses when idle.
+    /// </summary>
+    private void D2dCanvas_Update(ICanvasAnimatedControl sender, CanvasAnimatedUpdateEventArgs args)
+    {
+        // ① Apply all queued UI-thread requests. Every view-state / renderer change happens here.
+        while (_pendingW2dActions.TryDequeue(out var action))
+            action();
+
+        // ② Drive pan/zoom/shrug animation ticks.
+        _canvasViewManager.OnUpdate();
+
+        // ③ Drive animated image frame advancement.
+        var animatedFrameReady = _currentRenderer is AnimatedImageRenderer animRenderer && animRenderer.OnUpdate();
+
+        // ④ Publish the current transform for UI-thread hit-testing (IsPressedOnImage).
+        lock (_hitTestLock)
+        {
+            _hitTestMatInv = _canvasViewState.MatInv;
+            _hitTestImageRect = _canvasViewState.ImageRect;
+        }
+
+        // ⑤ Pause when there is nothing to do. Re-check the queue after pausing: an item enqueued
+        //    during the pause decision stays in the queue until drained, so this closes the
+        //    enqueue/pause lost-wakeup race without a lock.
+        if (_pendingW2dActions.IsEmpty && !_canvasViewManager.PanZoomAnimationOnGoing && !animatedFrameReady)
+        {
+            sender.Paused = true;
+            if (!_pendingW2dActions.IsEmpty)
+                sender.Paused = false;
+        }
+    }
+
+    /// <summary>
+    /// Called on the W2D thread to draw the current frame. Reads W2D-owned state directly — no lock.
+    /// </summary>
+    private void D2dCanvas_Draw(ICanvasAnimatedControl sender, CanvasAnimatedDrawEventArgs args)
     {
         args.DrawingSession.Clear(Colors.Transparent);
 
-        if (_currentRenderer == null) return;
+        var renderer = _currentRenderer;
+        if (renderer == null) return;
 
         var drawingQuality = !AppConfig.Settings.HighQualityInterpolation || _canvasViewManager.PanZoomAnimationOnGoing
             ? CanvasImageInterpolation.NearestNeighbor
             : CanvasImageInterpolation.HighQualityCubic;
 
         args.DrawingSession.Transform = _canvasViewState.Mat;
-
-        _currentRenderer.Draw(args.DrawingSession, _canvasViewState, drawingQuality);
+        renderer.Draw(args.DrawingSession, _canvasViewState, drawingQuality);
     }
 
     private void D2dCanvas_SizeChanged(object sender, SizeChangedEventArgs args)
     {
-        if (IsScreenEmpty()) return;
-        _canvasViewManager.HandleSizeChange(args.NewSize.AdjustForDpi(_d2dCanvas), args.PreviousSize.AdjustForDpi(_d2dCanvas));
+        var newSize = args.NewSize.AdjustForDpi(_d2dCanvas);
+        var previousSize = args.PreviousSize.AdjustForDpi(_d2dCanvas);
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.HandleSizeChange(newSize, previousSize);
+        });
     }
 
     private void CanvasViewManager_AnimationCompleted()
     {
-        if (!isGoingToExit)
+        if (!_isGoingToExit)
             _currentRenderer?.TryRedrawOffScreen(false);
     }
 
@@ -364,43 +534,59 @@ internal class CanvasController : ICanvasController
 
     #region Rendering And State Management
 
-    private bool IsScreenEmpty()
-    {
-        return _currentRenderer == null;
-    }
-
     public bool IsPressedOnImage(Point position)
     {
-        var tp = Vector2.Transform(new Vector2((float)position.X, (float)position.Y), _canvasViewState.MatInv);
-        return tp.X >= _canvasViewState.ImageRect.X && tp.Y >= _canvasViewState.ImageRect.Y
-                                                    && tp.X <= _canvasViewState.ImageRect.Right &&
-                                                    tp.Y <= _canvasViewState.ImageRect.Bottom;
+        Matrix3x2 matInv;
+        Rect imageRect;
+        lock (_hitTestLock)
+        {
+            matInv = _hitTestMatInv;
+            imageRect = _hitTestImageRect;
+        }
+        var tp = Vector2.Transform(new Vector2((float)position.X, (float)position.Y), matInv);
+        return tp.X >= imageRect.X && tp.Y >= imageRect.Y
+                                   && tp.X <= imageRect.Right && tp.Y <= imageRect.Bottom;
     }
 
     public void HandleCheckeredBackgroundChange()
     {
-        _currentRenderer?.TryRedrawOffScreen(true);
+        EnqueueW2dAction(() => _currentRenderer?.TryRedrawOffScreen(true));
     }
 
+    /// <summary>
+    /// Posts an action to the W2D thread and wakes the render loop. Safe to call from the UI thread.
+    /// </summary>
+    private void EnqueueW2dAction(Action action)
+    {
+        _pendingW2dActions.Enqueue(action);
+        _d2dCanvas.Paused = false; // thread-safe; Win2D documents this as safe to call from any thread
+    }
+
+    /// <summary>
+    /// Wakes the render loop for at least one more Update+Draw. Safe to call from any thread; used
+    /// when a renderer's off-screen surface or animation frame becomes ready.
+    /// </summary>
     private void RequestInvalidate()
     {
-        if (_invalidatePending) return;
-        _invalidatePending = true;
-
-        _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
-        {
-            _invalidatePending = false;
-            _d2dCanvas.Invalidate();
-        });
+        _d2dCanvas.Paused = false;
     }
+
+    private int _zoomPercentUiUpdatePending;
+    private int _pendingZoomPercent;
 
     private void RequestZoomUpdate()
     {
-        _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
-        {
-            OnZoomChanged?.Invoke((int)Math.Round(_canvasViewState.Scale * 100));
-        });
+        // Capture the zoom percentage here (W2D thread) so the dispatched lambda does not read
+        // W2D-owned view state from the UI thread. Coalesced: latest value wins.
+        Volatile.Write(ref _pendingZoomPercent, (int)Math.Round(_canvasViewState.Scale * 100));
+        if (Interlocked.CompareExchange(ref _zoomPercentUiUpdatePending, 1, 0) == 0)
+            _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
+            {
+                Volatile.Write(ref _zoomPercentUiUpdatePending, 0);
+                OnZoomChanged?.Invoke(Volatile.Read(ref _pendingZoomPercent));
+            });
     }
+
 
     #endregion
 }

@@ -38,7 +38,12 @@
                 Fill="{ThemeResource SystemControlBackgroundAltHighBrush}"
                 Opacity="0" />
         </Grid>
-        <win2d:CanvasControl x:Name="D2dCanvas" />
+        <win2d:CanvasAnimatedControl
+            x:Name="D2dCanvas"
+            Margin="0,1,0,0"
+            Background="Transparent"
+            ClearColor="Transparent"
+            IsFixedTimeStep="False" />
         <Button
             x:Name="ButtonFullScreenClose"
             Width="30"

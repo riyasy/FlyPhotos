@@ -17,6 +17,7 @@ internal static class Constants
     public const double ShrugFrequency = 4;  // How many "wiggles"       
         
     // Thumbnail Related
+    public const int ThumbnailPixelBufferSize = 128; // intermediate square pixel buffer stored on Photo
     public const int ThumbnailPadding = 2;
     public const float ThumbnailSelectionBorderThickness = 3.0f;
     public const float ThumbnailCornerRadius = 4.0f;

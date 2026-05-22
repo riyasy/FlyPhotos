@@ -2,11 +2,13 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Windows.Foundation;
+using Windows.Graphics.DirectX;
 using Windows.UI;
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
+using FlyPhotos.Infra.Utils;
 using FlyPhotos.UI.Views;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Geometry;
@@ -41,7 +43,8 @@ internal partial class ThumbNailController : IThumbnailController
     private readonly PhotoSessionState _photoSessionState;
     private CanvasRenderTarget _thumbnailOffscreen;
     private ConcurrentDictionary<int, Photo> _cachedPreviews;
-    private List<int> _sortedPhotoKeys;
+    private Func<IReadOnlyList<int>> _getSortedPhotoKeys;
+    private CanvasBitmap _loadingIndicatorBitmap;
 
     public ThumbNailController(CanvasControl d2dCanvasThumbNail, PhotoSessionState photoSessionState)
     {
@@ -55,6 +58,16 @@ internal partial class ThumbNailController : IThumbnailController
         _thumbNailSelectionColor = ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor);
     }
 
+    private void RunOnUiThread(Action action)
+    {
+        if (!_d2dCanvasThumbNail.DispatcherQueue.HasThreadAccess)
+        {
+            _d2dCanvasThumbNail.DispatcherQueue.TryEnqueue(() => action());
+            return;
+        }
+        action();
+    }
+
     // --- Public Methods ---
 
     public void SetPreviewCacheReference(ConcurrentDictionary<int, Photo> cachedPreviews)
@@ -62,35 +75,39 @@ internal partial class ThumbNailController : IThumbnailController
         _cachedPreviews = cachedPreviews;
     }
 
-    public void SetSortedPhotoKeysReference(List<int> sortedPhotoKeys)
+    public void SetSortedPhotoKeysProvider(Func<IReadOnlyList<int>> provider)
     {
-        _sortedPhotoKeys = sortedPhotoKeys;
+        _getSortedPhotoKeys = provider;
     }
 
     public void ShowHideThumbnailBasedOnSettings()
     {
-        if (AppConfig.Settings.ShowThumbnails)
+        RunOnUiThread(() =>
         {
-            _d2dCanvasThumbNail.Visibility = Visibility.Visible;
-            _canDrawThumbnails = true; // Enable drawing when shown
-            CreateThumbnailRibbonOffScreen();
-        }
-        else
-        {
-            _d2dCanvasThumbNail.Visibility = Visibility.Collapsed;
-            _thumbnailOffscreen?.Dispose();
-            _thumbnailOffscreen = null;
-        }
+            if (AppConfig.Settings.ShowThumbnails)
+            {
+                _d2dCanvasThumbNail.Visibility = Visibility.Visible;
+                _canDrawThumbnails = true;
+                CreateThumbnailRibbonOffScreen();
+            }
+            else
+            {
+                _d2dCanvasThumbNail.Visibility = Visibility.Collapsed;
+                _thumbnailOffscreen?.Dispose();
+                _thumbnailOffscreen = null;
+            }
+        });
     }
 
     public void RefreshThumbnail()
     {
-        _thumbNailSelectionColor = ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor);
-        _thumbnailBoxSize = AppConfig.Settings.ThumbnailSize;
-        if (AppConfig.Settings.ShowThumbnails)
+        RunOnUiThread(() =>
         {
-            CreateThumbnailRibbonOffScreen();
-        }
+            _thumbNailSelectionColor = ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor);
+            _thumbnailBoxSize = AppConfig.Settings.ThumbnailSize;
+            if (AppConfig.Settings.ShowThumbnails)
+                CreateThumbnailRibbonOffScreen();
+        });
     }
 
     /// <summary>
@@ -99,12 +116,14 @@ internal partial class ThumbNailController : IThumbnailController
     /// </summary>
     public void RedrawThumbNailsIfNeeded(int updatedKey)
     {
-        // Guard against calls before references are set.
-        if (_sortedPhotoKeys == null || _sortedPhotoKeys.Count == 0) return;
+        // Capture the snapshot once — this method is called from a ThreadPool continuation and the
+        // list may be swapped by DeleteCurrentPhoto on the UI thread at any moment.
+        var keys = _getSortedPhotoKeys?.Invoke();
+        if (keys == null || keys.Count == 0) return;
 
         // Find the POSITION of the current and updated keys.
         int currentPosition = _photoSessionState.CurrentPhotoListPosition;
-        int updatedPosition = _sortedPhotoKeys.BinarySearch(updatedKey);
+        int updatedPosition = keys.BinarySearch(updatedKey);
 
         // If either key isn't found (e.g., already deleted), we can't proceed.
         if (currentPosition < 0 || updatedPosition < 0) return;
@@ -130,7 +149,8 @@ internal partial class ThumbNailController : IThumbnailController
 
     private void D2dCanvasThumbNail_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
-        if (_sortedPhotoKeys == null || _sortedPhotoKeys.Count <= 1) return;
+        var keys = _getSortedPhotoKeys?.Invoke();
+        if (keys == null || keys.Count <= 1) return;
 
         var pos = e.GetCurrentPoint(_d2dCanvasThumbNail).Position;
         double canvasCenterX = _d2dCanvasThumbNail.ActualWidth / 2;
@@ -149,7 +169,7 @@ internal partial class ThumbNailController : IThumbnailController
         int newPosition = currentPosition + offset;
 
         // 4. Validate the NEW POSITION against the bounds of the sorted key list.
-        if (newPosition >= 0 && newPosition < _sortedPhotoKeys.Count)
+        if (newPosition >= 0 && newPosition < keys.Count)
         {
             // 5. Fire the event. The PhotoDisplayController will handle the navigation.
             ThumbnailClicked?.Invoke(offset);
@@ -202,12 +222,19 @@ internal partial class ThumbNailController : IThumbnailController
     /// </summary>
     public void CreateThumbnailRibbonOffScreen()
     {
-        // This method is now called by the throttled timer or direct UI actions.
-        // We can stop the timer here as a safeguard, but it's primarily stopped in the Tick handler.
+        if (!_d2dCanvasThumbNail.DispatcherQueue.HasThreadAccess)
+        {
+            _d2dCanvasThumbNail.DispatcherQueue.TryEnqueue(CreateThumbnailRibbonOffScreen);
+            return;
+        }
+
         _throttledRedrawTimer.Stop();
 
 
-        if (_sortedPhotoKeys == null || _sortedPhotoKeys.Count < 1 || !_canDrawThumbnails || !AppConfig.Settings.ShowThumbnails)
+        // Capture snapshot once for the entire draw pass — always called on the UI thread so no
+        // race with DeleteCurrentPhoto, but a single capture avoids repeated volatile reads.
+        var keys = _getSortedPhotoKeys?.Invoke();
+        if (keys == null || keys.Count < 1 || !_canDrawThumbnails || !AppConfig.Settings.ShowThumbnails)
         {
             _thumbnailOffscreen?.Dispose();
             _thumbnailOffscreen = null;
@@ -239,71 +266,63 @@ internal partial class ThumbNailController : IThumbnailController
             var startX = (int)_d2dCanvasThumbNail.ActualWidth / 2 - _thumbnailBoxSize / 2;
             var startY = 0;
 
-
             for (var i = -_numOfThumbNailsInOneDirection; i <= _numOfThumbNailsInOneDirection; i++)
             {
-
                 var thumbnailPosition = currentPosition + i;
+                if (thumbnailPosition < 0 || thumbnailPosition >= keys.Count) continue;
 
-                if (thumbnailPosition < 0 || thumbnailPosition >= _sortedPhotoKeys.Count) continue;
+                var key = keys[thumbnailPosition];
+                _cachedPreviews.TryGetValue(key, out var photo);
 
-                var key = _sortedPhotoKeys[thumbnailPosition];
+                // Lazy-create the GPU bitmap on first draw. Pixels were rendered on the main canvas
+                // device during preview load; CreateFromBytes transfers them to the thumbnail device.
+                if (photo?.Thumbnail != null && photo.Thumbnail.Bitmap == null)
+                {
+                    try
+                    {
+                        int s = Constants.ThumbnailPixelBufferSize;
+                        photo.Thumbnail.Bitmap = CanvasBitmap.CreateFromBytes(_d2dCanvasThumbNail,
+                            photo.Thumbnail.Pixels, s, s, DirectXPixelFormat.B8G8R8A8UIntNormalized);
+                    }
+                    catch { }
+                }
 
-                var previewCreated = _cachedPreviews.TryGetValue(key, out var photo) && photo.Preview?.Bitmap != null;
-                var bitmap = previewCreated ? photo.Preview.Bitmap : Photo.GetLoadingIndicator().Bitmap;
-                var rotation = previewCreated ? photo.Preview.Rotation : 0;
+                var bitmapToDraw = photo?.Thumbnail?.Bitmap ?? GetOrCreateLoadingIndicatorBitmap();
+                if (bitmapToDraw == null) continue;
 
-                // Calculate the source crop rectangle (same as before, this was correct)
-                float bitmapWidth = bitmap.SizeInPixels.Width;
-                float bitmapHeight = bitmap.SizeInPixels.Height;
-                var cropSize = Math.Min(bitmapWidth, bitmapHeight);
-                var cropX = (bitmapWidth - cropSize) / 2;
-                var cropY = (bitmapHeight - cropSize) / 2;
-                var sourceRect = new Rect(cropX, cropY, cropSize, cropSize);
-
-                // Calculate the destination rectangle on our canvas (same as before, this was correct)
+                var sourceRect = new Rect(0, 0, bitmapToDraw.SizeInPixels.Width, bitmapToDraw.SizeInPixels.Height);
                 var destX = startX + i * _thumbnailBoxSize;
-
                 var destRect = new Rect(
-                    destX + Constants.ThumbnailPadding, 
-                    startY + Constants.ThumbnailPadding, 
-                    _thumbnailBoxSize - (Constants.ThumbnailPadding * 2), 
+                    destX + Constants.ThumbnailPadding,
+                    startY + Constants.ThumbnailPadding,
+                    _thumbnailBoxSize - (Constants.ThumbnailPadding * 2),
                     _thumbnailBoxSize - (Constants.ThumbnailPadding * 2));
 
-                // 1. Define the clipping shape (our rounded rectangle)
                 using (var clipGeometry = CanvasGeometry.CreateRoundedRectangle(dsThumbNail, destRect, Constants.ThumbnailCornerRadius, Constants.ThumbnailCornerRadius))
+                using (dsThumbNail.CreateLayer(1.0f, clipGeometry))
                 {
-                    // 2. Create a clipping layer. All drawing inside this 'using' block will be clipped to the geometry.
-                    using (dsThumbNail.CreateLayer(1.0f, clipGeometry))
-                    {
-                        if (rotation != 0)
-                        {
-                            var center = new System.Numerics.Vector2((float)(destRect.X + destRect.Width / 2), (float)(destRect.Y + destRect.Height / 2));
-                            var oldTransform = dsThumbNail.Transform;
-                            dsThumbNail.Transform = System.Numerics.Matrix3x2.CreateRotation((float)(rotation * Math.PI / 180.0), center) * oldTransform;
-                            dsThumbNail.DrawImage(bitmap, destRect, sourceRect, 1f, CanvasImageInterpolation.NearestNeighbor);
-                            dsThumbNail.Transform = oldTransform;
-                        }
-                        else
-                        {
-                            dsThumbNail.DrawImage(bitmap, destRect, sourceRect, 1f, CanvasImageInterpolation.NearestNeighbor);
-                        }
-                    } // The clipping layer is automatically disposed and removed here.
+                    // Rotation is baked into the bitmap at creation time — plain DrawImage suffices.
+                    dsThumbNail.DrawImage(bitmapToDraw, destRect, sourceRect, 1f, CanvasImageInterpolation.HighQualityCubic);
                 }
 
-                // Draw the selection indicator on top, without any clipping.
                 if (key == _photoSessionState.CurrentPhotoKey)
-                {
-                    // Use DrawRoundedRectangle to match the shape of the thumbnail.
                     dsThumbNail.DrawRoundedRectangle(destRect, Constants.ThumbnailCornerRadius, Constants.ThumbnailCornerRadius, _thumbNailSelectionColor, Constants.ThumbnailSelectionBorderThickness);
-                }
             }
         }
 
         RequestInvalidate();
     }
 
-
+    private CanvasBitmap GetOrCreateLoadingIndicatorBitmap()
+    {
+        if (_loadingIndicatorBitmap != null) return _loadingIndicatorBitmap;
+        var src = Photo.GetLoadingIndicator().Bitmap;
+        if (src == null) return null;
+        var pixels = src.GetPixelBytes();
+        _loadingIndicatorBitmap = CanvasBitmap.CreateFromBytes(_d2dCanvasThumbNail,
+            pixels, (int)src.SizeInPixels.Width, (int)src.SizeInPixels.Height, src.Format);
+        return _loadingIndicatorBitmap;
+    }
 
     /// <summary>
     /// Coalesces multiple Invalidate requests into a single one on the DispatcherQueue.
@@ -337,8 +356,10 @@ internal partial class ThumbNailController : IThumbnailController
 
         _thumbnailOffscreen?.Dispose();
         _thumbnailOffscreen = null;
+        _loadingIndicatorBitmap?.Dispose();
+        _loadingIndicatorBitmap = null;
         ThumbnailClicked = null;
         _cachedPreviews = null;
-        _sortedPhotoKeys = null;
+        _getSortedPhotoKeys = null;
     }
 }

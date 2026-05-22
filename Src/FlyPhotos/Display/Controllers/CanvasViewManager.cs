@@ -7,7 +7,6 @@ using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
-using Microsoft.UI.Xaml.Media;
 using Size = FlyPhotos.Core.Model.Size;
 
 namespace FlyPhotos.Display.Controllers;
@@ -121,9 +120,6 @@ internal class CanvasViewManager
     public CanvasViewManager(CanvasViewState canvasViewState)
     {
         _canvasViewState = canvasViewState;
-
-        // Permanently subscribe to the rendering loop to prevent warm-up latency.
-        CompositionTarget.Rendering += OnCompositionTargetRendering;
     }
 
     // --- Public API Methods ---
@@ -167,17 +163,31 @@ internal class CanvasViewManager
 
         if (isFirstPhotoEver)
             panZoomBehaviourOnNavigation = PanZoomBehaviourOnNavigation.Reset;
-        else if (!isNewPhoto && !isUpgradeFromPlaceholder)
+        else if (!isNewPhoto && !isUpgradeFromPlaceholder
+                 && panZoomBehaviourOnNavigation != PanZoomBehaviourOnNavigation.RememberPerPhoto)
             panZoomBehaviourOnNavigation = PanZoomBehaviourOnNavigation.RetainFromLastPhoto;
 
         switch (panZoomBehaviourOnNavigation)
         {
             case PanZoomBehaviourOnNavigation.RememberPerPhoto:
                 _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
-                // For a new photo, always start with its native rotation.
                 if (isNewPhoto)
                 {
                     _canvasViewState.Rotation = imageRotation;
+                    _originalImageRotation = imageRotation;
+                }
+                else if (isUpgradeFromPlaceholder)
+                {
+                    // Placeholder can set _currentPhotoPath without calling SetScaleAndPosition,
+                    // leaving _originalImageRotation pointing at the previous photo. Sync it here.
+                    _originalImageRotation = imageRotation;
+                }
+                else
+                {
+                    // Same-photo quality upgrade (Preview → HQ): apply rotation delta in case
+                    // the embedded thumbnail had a different rotation than the full image.
+                    _canvasViewState.Rotation -= _originalImageRotation;
+                    _canvasViewState.Rotation += imageRotation;
                     _originalImageRotation = imageRotation;
                 }
 
@@ -263,8 +273,11 @@ internal class CanvasViewManager
         _canvasViewState.ImagePos = new Point(canvasSize.Width / 2.0 + panOffsetX, canvasSize.Height / 2.0 + panOffsetY);
 
         // After applying, recalculate if the restored state is fitted or 1:1.
+        // Must check both scale AND pan position: a panned-at-fit-scale photo is not "fitted to screen".
         var fitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
-        IsFittedToScreen = Math.Abs(_canvasViewState.Scale - fitScale) < 0.001f;
+        IsFittedToScreen = Math.Abs(_canvasViewState.Scale - fitScale) < 0.001f
+                           && Math.Abs(normalizedPanX) < 0.001
+                           && Math.Abs(normalizedPanY) < 0.001;
         IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < 0.001f;
         _canvasViewState.UpdateTransform();
         _isStateModifiedByUser = true; // A cached state is by definition a user-modified one.
@@ -659,11 +672,12 @@ internal class CanvasViewManager
     }
 
     /// <summary>
-    /// Permanent event handler for the composition rendering loop.
+    /// Called by CanvasController on the Win2D background thread each Update tick.
+    /// Advances whichever pan/zoom/shrug animation is currently active.
     /// </summary>
-    private void OnCompositionTargetRendering(object sender, object e)
+    public void OnUpdate()
     {
-        if (!PanZoomAnimationOnGoing) return; // Fast exit to prevent CPU drain
+        if (!PanZoomAnimationOnGoing) return; // Fast exit — no animation running
 
         switch (_currentAnimation)
         {
@@ -691,6 +705,7 @@ internal class CanvasViewManager
         _currentAnimation = AnimationType.Zoom;
         PanZoomAnimationOnGoing = true;
         _animationStopwatch.Restart();
+        ViewChanged?.Invoke();
     }
 
     /// <summary>
@@ -706,6 +721,7 @@ internal class CanvasViewManager
         _currentAnimation = AnimationType.PanAndZoom;
         PanZoomAnimationOnGoing = true;
         _animationStopwatch.Restart();
+        ViewChanged?.Invoke();
     }
 
     /// <summary>
@@ -717,6 +733,7 @@ internal class CanvasViewManager
         _currentAnimation = AnimationType.Shrug;
         PanZoomAnimationOnGoing = true;
         _animationStopwatch.Restart();
+        ViewChanged?.Invoke();
     }
 
     /// <summary>
@@ -761,9 +778,8 @@ internal class CanvasViewManager
         // Interpolate scale and position.
         _canvasViewState.Scale = _zoomStartScale + (_zoomTargetScale - _zoomStartScale) * easedT;
         // Interpolate position (a simple linear interpolation)
-        var newX = _panStartPosition.X + (_panTargetPosition.X - _panStartPosition.X) * easedT;
-        var newY = _panStartPosition.Y + (_panTargetPosition.Y - _panStartPosition.Y) * easedT;
-        _canvasViewState.ImagePos = new Point(newX, newY);
+        _canvasViewState.ImagePos.X = _panStartPosition.X + (_panTargetPosition.X - _panStartPosition.X) * easedT;
+        _canvasViewState.ImagePos.Y = _panStartPosition.Y + (_panTargetPosition.Y - _panStartPosition.Y) * easedT;
 
         _canvasViewState.UpdateTransform();
         ViewChanged?.Invoke();
@@ -831,7 +847,6 @@ internal class CanvasViewManager
     /// </summary>
     public void Dispose()
     {
-        CompositionTarget.Rendering -= OnCompositionTargetRendering;
         PanZoomAnimationOnGoing = false;
         _currentAnimation = AnimationType.None;
         _animationStopwatch.Stop();

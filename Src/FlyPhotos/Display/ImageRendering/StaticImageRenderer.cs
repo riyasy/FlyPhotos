@@ -1,5 +1,7 @@
-﻿using System;
+using System;
 using System.Numerics;
+using System.Threading;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI;
 using FlyPhotos.Core;
@@ -11,7 +13,7 @@ using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.Text;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
-using Microsoft.UI.Xaml;
+using Size = FlyPhotos.Core.Model.Size;
 
 namespace FlyPhotos.Display.ImageRendering;
 
@@ -21,29 +23,34 @@ internal partial class StaticImageRenderer : IRenderer
 {
     private readonly CanvasBitmap _sourceBitmap;
     private readonly Action _invalidateCanvas;
-    private readonly bool _createOffScreen;
-    private readonly DispatcherTimer _offscreenDrawTimer;
-    private CanvasRenderTarget _offscreen;
+
     private readonly CanvasViewState _canvasViewState;
-    private readonly CanvasImageBrush _checkeredBrush;
+    private CanvasImageBrush _checkeredBrush;
+    public CanvasImageBrush CheckeredBrush { set => _checkeredBrush = value; }
     private readonly bool _supportsTransparency;
-    private readonly CanvasControl _canvas;
+    private readonly CanvasAnimatedControl _canvas;
+
+    // Off-screen render target for the scaled image.
+    // Created on demand when zoomed in beyond a certain threshold,
+    // to avoid expensive real-time scaling of large images on the W2D thread.
+    // Updated asynchronously after a delay when view state changes,
+    // to avoid unnecessary repeated creation while user is actively zooming/panning.
+    private CanvasRenderTarget _offscreen;
+    private readonly bool _createOffScreen;
+    private readonly Lock _timerLock = new();
+    private CancellationTokenSource _offscreenDrawCts;
 
     private Rect SourceBounds => _sourceBitmap.Bounds;
 
-    public StaticImageRenderer(CanvasControl canvas, CanvasViewState canvasViewState, CanvasBitmap sourceBitmap,
-        CanvasImageBrush checkeredBrush, bool supportsTransparency, Action invalidateCanvas, bool createOffScreen = true)
+    public StaticImageRenderer(CanvasAnimatedControl canvas, CanvasViewState canvasViewState, CanvasBitmap sourceBitmap,
+        bool supportsTransparency, Action invalidateCanvas, bool createOffScreen = true)
     {
         _sourceBitmap = sourceBitmap;
         _supportsTransparency = supportsTransparency;
         _invalidateCanvas = invalidateCanvas;
         _createOffScreen = createOffScreen;
         _canvasViewState = canvasViewState;
-        _checkeredBrush = checkeredBrush;
         _canvas = canvas;
-
-        _offscreenDrawTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(Constants.OffScreenDrawDelayMs) };
-        _offscreenDrawTimer.Tick += OffScreenDrawTimer_Tick;
     }
 
 
@@ -54,16 +61,19 @@ internal partial class StaticImageRenderer : IRenderer
         session.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
         if (drawCheckeredBackground)
         {
-            var brushScale = _canvasViewState.MatInv.M11;
+            var brushScale = viewState.MatInv.M11;
             _checkeredBrush.Transform = Matrix3x2.CreateScale(brushScale);
             session.FillRectangle(viewState.ImageRect, _checkeredBrush);
         }
 
 
-        if (_offscreen != null)
-            session.DrawImage(_offscreen, viewState.ImageRect, _offscreen.Bounds, 1f, quality);
-        else
-            session.DrawImage(_sourceBitmap, viewState.ImageRect, _sourceBitmap.Bounds, 1f, quality);
+        lock (_timerLock)
+        {
+            if (_offscreen != null)
+                session.DrawImage(_offscreen, viewState.ImageRect, _offscreen.Bounds, 1f, quality);
+            else
+                session.DrawImage(_sourceBitmap, viewState.ImageRect, _sourceBitmap.Bounds, 1f, quality);
+        }
 
         // DrawDebugInfo(session, viewState);
     }
@@ -110,65 +120,93 @@ internal partial class StaticImageRenderer : IRenderer
         session.Transform = originalTransform;
     }
 
+    // Invoked on the W2D thread. Snapshots the W2D-owned view state up front so the deferred
+    // background task never reads it cross-thread.
     public void RestartOffScreenDrawTimer()
     {
         if (!_createOffScreen) return;
-        _offscreenDrawTimer.Stop();
-        _offscreenDrawTimer.Start();
+        var scale = _canvasViewState.Scale;
+        var imageRect = _canvasViewState.ImageRect;
+        var canvasSize = _canvas.GetSize();
+        lock (_timerLock)
+        {
+            _offscreenDrawCts?.Cancel();
+            _offscreenDrawCts?.Dispose();
+            _offscreenDrawCts = new CancellationTokenSource();
+            var token = _offscreenDrawCts.Token;
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(Constants.OffScreenDrawDelayMs), token);
+                    if (token.IsCancellationRequested) return;
+
+                    lock (_timerLock)
+                    {
+                        if (token.IsCancellationRequested) return;
+                        CreateOffscreen(false, scale, imageRect, canvasSize);
+                    }
+                    _invalidateCanvas();
+                }
+                catch (TaskCanceledException) { }
+            }, token);
+        }
     }
 
+    // Invoked on the W2D thread. Snapshots view state and creates the off-screen synchronously.
     public void TryRedrawOffScreen(bool forceCreate)
     {
         if (!_createOffScreen) return;
-        _offscreenDrawTimer.Stop();
-        CreateOffscreen(forceCreate);
-        _invalidateCanvas();
-    }
-
-    private void OffScreenDrawTimer_Tick(object sender, object e)
-    {
-        _offscreenDrawTimer.Stop();
-        CreateOffscreen(false);
-        _invalidateCanvas();
-    }
-
-    private void CreateOffscreen(bool forceCreate)
-    {
-        if (_canvasViewState.ImageRect.Width < _canvas.GetSize().Width * 1.5 &&
-            _canvasViewState.ImageRect.Height < _canvas.GetSize().Height * 1.5)
+        var scale = _canvasViewState.Scale;
+        var imageRect = _canvasViewState.ImageRect;
+        var canvasSize = _canvas.GetSize();
+        lock (_timerLock)
         {
-            return;
+            _offscreenDrawCts?.Cancel();
+            CreateOffscreen(forceCreate, scale, imageRect, canvasSize);
         }
+        _invalidateCanvas();
+    }
 
-        var scaledImageWidth = _canvasViewState.ImageRect.Width * _canvasViewState.Scale;
-        var scaledImageHeight = _canvasViewState.ImageRect.Height * _canvasViewState.Scale;
+    private void CreateOffscreen(bool forceCreate, float scale, Rect imageRect, Size canvasSize)
+    {
+        var scaledImageWidth = imageRect.Width * scale;
+        var scaledImageHeight = imageRect.Height * scale;
 
+        // Always destroy stale offscreen first, before any early-return guard.
+        // Guards below only control creation, not cleanup.
         var offScreenDimensionsChanged =
             _offscreen != null &&
             (!(_offscreen.SizeInPixels.Width == (int)scaledImageWidth &&
                _offscreen.SizeInPixels.Height == (int)scaledImageHeight));
 
         if (forceCreate || offScreenDimensionsChanged)
-        {
             DestroyOffscreen();
-        }
 
-        // offscreen already exists and is valid
-        if (_offscreen != null) 
+        // offscreen already exists and matches current scale — reuse it
+        if (_offscreen != null)
             return;
+
+        // image is small enough to draw directly from source with no offscreen
+        if (imageRect.Width < canvasSize.Width * 1.5 &&
+            imageRect.Height < canvasSize.Height * 1.5)
+            return;
+
         // invalid size
-        if (scaledImageWidth <= 0 || scaledImageHeight <= 0)  
+        if (scaledImageWidth <= 0 || scaledImageHeight <= 0)
             return;
-        // too zoomed-in to bother with offscreen
-        if (scaledImageWidth > _canvas.GetSize().Width * 1.5 &&
-            scaledImageHeight > _canvas.GetSize().Height * 1.5)
+
+        // too zoomed-in — offscreen would exceed canvas, draw from source instead
+        if (scaledImageWidth > canvasSize.Width * 1.5 &&
+            scaledImageHeight > canvasSize.Height * 1.5)
             return;
 
         var drawingQuality = AppConfig.Settings.HighQualityInterpolation
             ? CanvasImageInterpolation.HighQualityCubic
             : CanvasImageInterpolation.NearestNeighbor;
 
-        var tempOffScreen = new CanvasRenderTarget(_canvas, (float)scaledImageWidth, (float)scaledImageHeight, 96);
+        var tempOffScreen = new CanvasRenderTarget(_canvas.Device, (float)scaledImageWidth, (float)scaledImageHeight, 96);
         using (var ds = tempOffScreen.CreateDrawingSession())
         {
             var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
@@ -197,8 +235,11 @@ internal partial class StaticImageRenderer : IRenderer
 
     public void Dispose()
     {
-        _offscreenDrawTimer.Tick -= OffScreenDrawTimer_Tick;
-        _offscreenDrawTimer.Stop();
-        DestroyOffscreen();
+        lock (_timerLock)
+        {
+            _offscreenDrawCts?.Cancel();
+            _offscreenDrawCts?.Dispose();
+            DestroyOffscreen();
+        }
     }
 }

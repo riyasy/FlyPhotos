@@ -16,5 +16,5 @@ internal interface IThumbnailController : IDisposable
     void CreateThumbnailRibbonOffScreen();
     void RedrawThumbNailsIfNeeded(int key);
     void SetPreviewCacheReference(ConcurrentDictionary<int, Photo> cachedPreviews);
-    void SetSortedPhotoKeysReference(List<int> sortedPhotoKeys);
+    void SetSortedPhotoKeysProvider(Func<IReadOnlyList<int>> provider);
 }

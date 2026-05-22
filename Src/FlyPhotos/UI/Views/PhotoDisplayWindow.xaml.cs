@@ -45,6 +45,10 @@ public sealed partial class PhotoDisplayWindow
     private readonly VirtualKey _plusVk = Util.GetKeyThatProduces('+');
     private readonly VirtualKey _minusVk = Util.GetKeyThatProduces('-');
 
+    private Dictionary<(VirtualKey Key, bool Ctrl, bool Alt), Func<Task>> _keyActions = null!;
+    private HashSet<(VirtualKey, bool, bool)> _handledKeys = null!;
+    private bool _cacheStatusExpanded;
+
     private readonly OpacityFader _opacityFader;
     private readonly InactivityFader _inactivityFader;
     private readonly MouseAutoHider _mouseAutoHider;
@@ -88,7 +92,7 @@ public sealed partial class PhotoDisplayWindow
         _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, photoSessionState);
         _photoController.CacheStatusChanged += PhotoController_CacheStatusChanged;
         _photoController.FileNameOrDetailsChanged += PhotoController_FileNameOrDetailsChanged;
-        _photoController.FirstPhotoLoaded += () => { DispatcherQueue.TryEnqueue(CheckLicense); };
+        _photoController.FirstPhotoLoaded += OnFirstPhotoLoaded;
         _canvasController.OnZoomChanged += CanvasController_OnZoomChanged;
         _canvasController.OnFitToScreenStateChanged += CanvasController_OnFitToScreenStateChanged;  
         _canvasController.OnOneToOneStateChanged += CanvasController_OnOneToOneStateChanged;
@@ -121,7 +125,7 @@ public sealed partial class PhotoDisplayWindow
 
         D2dCanvasThumbNail.PointerWheelChanged += ThumbNail_PointerWheelChanged;
 
-        MainLayout.Loaded += async (_, _) => { await LicenseService.Instance.RefreshLicenseStateAsync(); };
+        MainLayout.Loaded += MainLayout_Loaded;
         MainLayout.KeyDown += HandleKeyDown;
         MainLayout.KeyUp += HandleKeyUp;
 
@@ -132,6 +136,85 @@ public sealed partial class PhotoDisplayWindow
         _inactivityFader = new InactivityFader(BorderTxtZoom);
         _mouseAutoHider = new MouseAutoHider(MainLayout, TimeSpan.FromSeconds(1));
         _windSizeManager = new WindowSizeManager(this, AppConfig.Settings.WindowState);
+        InitKeyActions();
+    }
+
+    private static Func<Task> Act(Action a) => () => { a(); return Task.CompletedTask; };
+
+    private void InitKeyActions()
+    {
+        // KEY, CTRL, ALT, whether to mark event as handled after executing the action
+        _handledKeys =
+        [
+            (VirtualKey.C,      true,  false),  // Ctrl+C — prevent browser-style copy
+            (VirtualKey.Enter,  false, true),   // Alt+Enter — prevent default Enter handling
+            (VirtualKey.Delete, false, false),  // Delete — prevent WinUI focus-loss default
+        ];
+
+        // KEY, CTRL, ALT, Action
+        _keyActions = new Dictionary<(VirtualKey, bool, bool), Func<Task>>
+        {
+            // File operations
+            [(VirtualKey.C,      true,  false)] = () => _photoController.CopyFileToClipboardAsync(),
+            [(VirtualKey.Delete, false, false)] = DeleteCurrentlyDisplayedPhoto,
+            [(VirtualKey.W,      false, false)] = Act(OpenFileInExplorer),
+            [(VirtualKey.S,      false, false)] = Act(() => FileShareDialogService.ShareFile(this, _photoController.GetFullPathCurrentFile())),
+
+            // Window
+            [(VirtualKey.Escape, false, false)] = AnimatePhotoDisplayWindowClose,
+            [(VirtualKey.F11,    false, false)] = Act(() => _windSizeManager.ToggleFullScreen(ButtonFullScreenClose)),
+
+            // Photo navigation
+            [(VirtualKey.Right, false, false)] = () => _photoController.Fly(NavDirection.Next),
+            [(VirtualKey.Left,  false, false)] = () => _photoController.Fly(NavDirection.Prev),
+            [(VirtualKey.Home,  false, false)] = () => _photoController.FlyToFirst(),
+            [(VirtualKey.End,   false, false)] = () => _photoController.FlyToLast(),
+
+            // Multi-page navigation (Alt+Arrow)
+            [(VirtualKey.Right, false, true)] = Act(() => _canvasController.ChangePage(NavDirection.Next)),
+            [(VirtualKey.Left,  false, true)] = Act(() => _canvasController.ChangePage(NavDirection.Prev)),
+
+            // Zoom
+            [(VirtualKey.Add,      true,  false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In)),
+            [(VirtualKey.Subtract, true,  false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out)),
+            [(VirtualKey.Up,       false, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In)),
+            [(VirtualKey.Down,     false, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out)),
+            [(VirtualKey.PageUp,   false, false)] = Act(() => _canvasController.StepZoom(ZoomDirection.In)),
+            [(VirtualKey.PageDown, false, false)] = Act(() => _canvasController.StepZoom(ZoomDirection.Out)),
+
+            // Pan (Ctrl+Arrow)
+            [(VirtualKey.Up,    true, false)] = Act(() => _canvasController.Pan(0,   -20)),
+            [(VirtualKey.Down,  true, false)] = Act(() => _canvasController.Pan(0,    20)),
+            [(VirtualKey.Left,  true, false)] = Act(() => _canvasController.Pan(-20,   0)),
+            [(VirtualKey.Right, true, false)] = Act(() => _canvasController.Pan(20,    0)),
+
+            // Rotate
+            [(VirtualKey.L, false, false)] = Act(() => _canvasController.RotateCurrentPhotoBy90(false)),
+            [(VirtualKey.R, false, false)] = Act(() => _canvasController.RotateCurrentPhotoBy90(true)),
+
+            // View
+            [(VirtualKey.F, false, false)] = Act(() => _canvasController.FitToScreen(true)),
+            [(VirtualKey.A, false, false)] = Act(() => _canvasController.ZoomToHundred()),
+
+            // File properties
+            [(VirtualKey.Enter, false, true)] = Act(() => Util.ShowFileProperties(_photoController.GetFullPathCurrentFile())),
+            [(VirtualKey.D,     false, false)] = Act(() => Util.ShowFileProperties(_photoController.GetFullPathCurrentFile(), true)),
+
+            // External apps
+            [(VirtualKey.E,          false, false)] = Act(() => ButtonShortcuts_OnClick(ButtonShortcuts, new RoutedEventArgs())),
+            [(VirtualKey.Number1,    true,  false)] = () => LaunchExternalAppAsync(0),
+            [(VirtualKey.NumberPad1, true,  false)] = () => LaunchExternalAppAsync(0),
+            [(VirtualKey.Number2,    true,  false)] = () => LaunchExternalAppAsync(1),
+            [(VirtualKey.NumberPad2, true,  false)] = () => LaunchExternalAppAsync(1),
+            [(VirtualKey.Number3,    true,  false)] = () => LaunchExternalAppAsync(2),
+            [(VirtualKey.NumberPad3, true,  false)] = () => LaunchExternalAppAsync(2),
+            [(VirtualKey.Number4,    true,  false)] = () => LaunchExternalAppAsync(3),
+            [(VirtualKey.NumberPad4, true,  false)] = () => LaunchExternalAppAsync(3),
+
+            // Layout-aware zoom (keyboard-layout-dependent keys for + and -)
+            [(_plusVk,  true, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In)),
+            [(_minusVk, true, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out)),
+        };
     }
 
     #region Event Handlers
@@ -150,16 +233,37 @@ public sealed partial class PhotoDisplayWindow
     private void PhotoDisplayWindow_Closed(object sender, WindowEventArgs args)
     {
         _repeatButtonReleaseCheckTimer.Stop();
+        _repeatButtonReleaseCheckTimer.Tick -= RepeatButtonReleaseCheckTimer_Tick;
         _wheelScrollBrakeTimer.Stop();
+        _wheelScrollBrakeTimer.Tick -= WheelScrollBrakeTimer_Tick;
         _rightClickCts?.Cancel();
         _rightClickCts?.Dispose();
-        _thumbNailController.ThumbnailClicked -= Thumbnail_Clicked;
+
+        AppWindow.Closing -= PhotoDisplayWindow_Closing;
+
+        _photoController.FirstPhotoLoaded -= OnFirstPhotoLoaded;
         _photoController.CacheStatusChanged -= PhotoController_CacheStatusChanged;
         _photoController.FileNameOrDetailsChanged -= PhotoController_FileNameOrDetailsChanged;
+
         _canvasController.OnZoomChanged -= CanvasController_OnZoomChanged;
-        _canvasController.OnFitToScreenStateChanged -= CanvasController_OnFitToScreenStateChanged;        
+        _canvasController.OnFitToScreenStateChanged -= CanvasController_OnFitToScreenStateChanged;
         _canvasController.OnOneToOneStateChanged -= CanvasController_OnOneToOneStateChanged;
+        _canvasController.OnMutliPagePhotoLoaded -= CanvasController_OnMultiPagePhotoLoaded;
+
+        _thumbNailController.ThumbnailClicked -= Thumbnail_Clicked;
+
+        D2dCanvas.CreateResources -= D2dCanvas_CreateResources;
+        D2dCanvas.PointerPressed -= D2dCanvas_PointerPressed;
+        D2dCanvas.PointerMoved -= D2dCanvas_PointerMoved;
+        D2dCanvas.PointerReleased -= D2dCanvas_PointerReleased;
         D2dCanvas.DoubleTapped -= D2dCanvas_DoubleTapped;
+        D2dCanvas.PointerWheelChanged -= D2dCanvas_PointerWheelChanged;
+
+        D2dCanvasThumbNail.PointerWheelChanged -= ThumbNail_PointerWheelChanged;
+
+        MainLayout.Loaded -= MainLayout_Loaded;
+        MainLayout.KeyDown -= HandleKeyDown;
+        MainLayout.KeyUp -= HandleKeyUp;
 
         _canvasController.Dispose();
         _thumbNailController.Dispose();
@@ -209,20 +313,20 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.RotateCurrentPhotoBy90(delta > 0);
     }
 
-    private async void ButtonPrevPage_OnClick(object sender, RoutedEventArgs e)
+    private void ButtonPrevPage_OnClick(object sender, RoutedEventArgs e)
     {
-        await _canvasController.ChangePage(NavDirection.Prev);
+        _canvasController.ChangePage(NavDirection.Prev);
     }
 
-    private async void ButtonNextPage_OnClick(object sender, RoutedEventArgs e)
+    private void ButtonNextPage_OnClick(object sender, RoutedEventArgs e)
     {
-        await _canvasController.ChangePage(NavDirection.Next);
+        _canvasController.ChangePage(NavDirection.Next);
     }
 
-    private async void ButtonBackNextPage_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+    private void ButtonBackNextPage_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         var delta = e.GetCurrentPoint(ButtonBack).Properties.MouseWheelDelta;
-        await _canvasController.ChangePage(delta > 0 ? NavDirection.Prev : NavDirection.Next);
+        _canvasController.ChangePage(delta > 0 ? NavDirection.Prev : NavDirection.Next);
     }
 
     private void ButtonScaleSet_Click(object sender, RoutedEventArgs e)
@@ -243,16 +347,9 @@ public sealed partial class PhotoDisplayWindow
 
     private void ButtonExpander_Click(object sender, RoutedEventArgs e)
     {
-        if (IconExpander.Text == ((char)0xE761).ToString())
-        {
-            IconExpander.Text = ((char)0xE760).ToString();
-            CacheStatusProgress.Visibility = Visibility.Visible;
-        }
-        else
-        {
-            IconExpander.Text = ((char)0xE761).ToString();
-            CacheStatusProgress.Visibility = Visibility.Collapsed;
-        }
+        _cacheStatusExpanded = !_cacheStatusExpanded;
+        IconExpander.Text = ((char)(_cacheStatusExpanded ? 0xE760 : 0xE761)).ToString();
+        CacheStatusProgress.Visibility = _cacheStatusExpanded ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void ButtonSettings_OnClick(object sender, RoutedEventArgs e)
@@ -329,14 +426,12 @@ public sealed partial class PhotoDisplayWindow
         _settingWindow = null;
     }
 
-    private void D2dCanvas_CreateResources(CanvasControl sender,
+    private void D2dCanvas_CreateResources(CanvasAnimatedControl sender, 
         CanvasCreateResourcesEventArgs args)
     {
-        //args.TrackAsyncAction(_photoController.LoadFirstPhoto().AsAsyncAction());
-
         // This flag is needed to prevent multiple calls to LoadFirstPhoto
-        // CreateResources can be called again after the initial call// if the device is lost
-        // and recreated which can happen when there is a DPI change for example.
+        // CreateResources can be called again after the initial call
+        // if the device is lost and recreated which can happen when there is a DPI change for example.
         if (!_loadingStarted)
         {
             _loadingStarted = true;
@@ -543,154 +638,12 @@ public sealed partial class PhotoDisplayWindow
     {
         try
         {
-            bool ctrlPressed = Util.IsControlPressed();
-            bool altPressed = Util.IsAltPressed();
-            switch (e.Key)
+            var key = (e.Key, Util.IsControlPressed(), Util.IsAltPressed());
+            if (_keyActions.TryGetValue(key, out var action))
             {
-                case VirtualKey.C when ctrlPressed:
-                    await _photoController.CopyFileToClipboardAsync();
-                    e.Handled = true;
-                    break;
-                case VirtualKey.Escape:
-                    await AnimatePhotoDisplayWindowClose();
-                    break;
-
-                case VirtualKey.F11:
-                    _windSizeManager.ToggleFullScreen(ButtonFullScreenClose);
-                    break;
-
-                case VirtualKey.Delete:
-                    if (!AppConfig.Volatile.IsSecondaryInstance)
-                        await DeleteCurrentlyDisplayedPhoto();
-                    break;
-
-                case VirtualKey.Home:
-                    await _photoController.FlyToFirst();
-                    break;
-                case VirtualKey.End:
-                    await _photoController.FlyToLast();
-                    break;
-
-
-                // Page Navigation in multi page photos (like TIFF)
-                case VirtualKey.Right when altPressed:
-                    await _canvasController.ChangePage(NavDirection.Next);
-                    break;
-                case VirtualKey.Left when altPressed:
-                    await _canvasController.ChangePage(NavDirection.Prev);
-                    break;
-
-
-                // File Navigation
-                case VirtualKey.Right when !ctrlPressed && !altPressed:
-                    await _photoController.Fly(NavDirection.Next);
-                    break;
-                case VirtualKey.Left when !ctrlPressed && !altPressed:
-                    await _photoController.Fly(NavDirection.Prev);
-                    break;
-
-
-                // ZOOM
-                case VirtualKey.Add when ctrlPressed:
-                    _canvasController.ZoomByKeyboard(ZoomDirection.In);
-                    break;
-                case VirtualKey.Subtract when ctrlPressed:
-                    _canvasController.ZoomByKeyboard(ZoomDirection.Out);
-                    break;
-                case VirtualKey.Up when !ctrlPressed:
-                    _canvasController.ZoomByKeyboard(ZoomDirection.In);
-                    break;
-                case VirtualKey.Down when !ctrlPressed:
-                    _canvasController.ZoomByKeyboard(ZoomDirection.Out);
-                    break;
-
-                case VirtualKey.PageUp:
-                    _canvasController.StepZoom(ZoomDirection.In);
-                    break;
-                case VirtualKey.PageDown:
-                    _canvasController.StepZoom(ZoomDirection.Out);
-                    break;
-
-                // PAN
-                case VirtualKey.Up when ctrlPressed:
-                    _canvasController.Pan(0, -20);
-                    break;
-                case VirtualKey.Down when ctrlPressed:
-                    _canvasController.Pan(0, 20);
-                    break;
-                case VirtualKey.Left when ctrlPressed:
-                    _canvasController.Pan(-20, 0);
-                    break;
-                case VirtualKey.Right when ctrlPressed:
-                    _canvasController.Pan(20, 0);
-                    break;
-
-                // Rotate Image
-                case VirtualKey.L:
-                    _canvasController.RotateCurrentPhotoBy90(false);
-                    break;
-                case VirtualKey.R:
-                    _canvasController.RotateCurrentPhotoBy90(true);
-                    break;
-
-                // File Properties (Alt + Enter)
-                case VirtualKey.Enter when altPressed:
-                    Util.ShowFileProperties(_photoController.GetFullPathCurrentFile());
-                    e.Handled = true;
-                    break;
-                case VirtualKey.D:
-                    Util.ShowFileProperties(_photoController.GetFullPathCurrentFile(), true);
-                    break;
-
-                // Fit to Window
-                case VirtualKey.F:
-                    _canvasController.FitToScreen(true);
-                    break;
-
-                // Actual Size (1:1)
-                case VirtualKey.A:
-                    _canvasController.ZoomToHundred();
-                    break;
-
-                // Open in External Editor
-                case VirtualKey.E:
-                    ButtonShortcuts_OnClick(ButtonShortcuts, new RoutedEventArgs());
-                    break;
-
-                // Launch External Apps directly
-                case VirtualKey.Number1 or VirtualKey.NumberPad1 when ctrlPressed:
-                    await LaunchExternalAppAsync(0);
-                    break;
-                case VirtualKey.Number2 or VirtualKey.NumberPad2 when ctrlPressed:
-                    await LaunchExternalAppAsync(1);
-                    break;
-                case VirtualKey.Number3 or VirtualKey.NumberPad3 when ctrlPressed:
-                    await LaunchExternalAppAsync(2);
-                    break;
-                case VirtualKey.Number4 or VirtualKey.NumberPad4 when ctrlPressed:
-                    await LaunchExternalAppAsync(3);
-                    break;
-
-                // Open Image Location in Explorer
-                case VirtualKey.W:
-                {
-                    var filePath = _photoController.GetFullPathCurrentFile();
-                    if (File.Exists(filePath))
-                        Process.Start("explorer.exe", $"/select,\"{filePath}\"");
-                    break;
-                }
-
-                // Share Dialog
-                case VirtualKey.S:
-                    FileShareDialogService.ShareFile(this, _photoController.GetFullPathCurrentFile());
-                    break;
+                await action();
+                if (_handledKeys.Contains(key)) e.Handled = true;
             }
-
-            // Layout-aware override
-            if (ctrlPressed && e.Key == _plusVk)
-                _canvasController.ZoomByKeyboard(ZoomDirection.In);
-            else if (ctrlPressed && e.Key == _minusVk)
-                _canvasController.ZoomByKeyboard(ZoomDirection.Out);
         }
         catch (Exception ex)
         {
@@ -751,12 +704,14 @@ public sealed partial class PhotoDisplayWindow
 
     private void CanvasController_OnFitToScreenStateChanged(bool isFitted)
     {
-        DispatcherQueue.TryEnqueue(() => { ButtonScaleSet.IsChecked = isFitted; });
+        // CanvasController marshals this event to the UI thread.
+        ButtonScaleSet.IsChecked = isFitted;
     }
 
     private void CanvasController_OnOneToOneStateChanged(bool isOneToOne)
     {
-        DispatcherQueue.TryEnqueue(() => { ButtonOneIsToOne.IsChecked = isOneToOne; });
+        // CanvasController marshals this event to the UI thread.
+        ButtonOneIsToOne.IsChecked = isOneToOne;
     }
 
     private void CanvasController_OnMultiPagePhotoLoaded(bool isMultiPagePhoto)
@@ -896,16 +851,24 @@ public sealed partial class PhotoDisplayWindow
 
     private void SaveLastWindowState()
     {
-        if (AppConfig.Settings.WindowLaunchMode == Core.Model.WindowLaunchMode.LastWindowState)
+        if (AppConfig.Settings.WindowLaunchMode == WindowLaunchMode.LastWindowState)
         {
             AppConfig.Settings.WindowState = _windSizeManager.Data;
             AppConfig.Save();
         }
     }
 
+    private void OnFirstPhotoLoaded() => DispatcherQueue.TryEnqueue(CheckLicense);
+
+    private async void MainLayout_Loaded(object sender, RoutedEventArgs e)
+    {
+        await LicenseService.Instance.RefreshLicenseStateAsync();
+    }
+
     private async void CheckLicense()
     {
         if (LicenseService.Instance.State != LicenseState.TrialExpired) return;
+        if (Content?.XamlRoot == null) return; // window may be closing
         var dialog = new ContentDialog
         {
             Title = L.Get("TrialExpiredMessage/Title"),
@@ -917,8 +880,16 @@ public sealed partial class PhotoDisplayWindow
         await AnimatePhotoDisplayWindowClose();
     }
 
+    private void OpenFileInExplorer()
+    {
+        var filePath = _photoController.GetFullPathCurrentFile();
+        if (File.Exists(filePath))
+            Process.Start("explorer.exe", $"/select,\"{filePath}\"");
+    }
+
     private async Task DeleteCurrentlyDisplayedPhoto()
     {
+        if (AppConfig.Volatile.IsSecondaryInstance) return;
         if (!_photoController.CanDeleteCurrentPhoto())
         {
             TxtZoom.Text = L.Get("LoadingHighQuality/Message");

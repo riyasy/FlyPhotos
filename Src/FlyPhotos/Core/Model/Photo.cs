@@ -5,7 +5,7 @@ using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Display.ImageReading;
 using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
+using Windows.Foundation;
 
 namespace FlyPhotos.Core.Model;
 
@@ -14,6 +14,7 @@ internal partial class Photo : IDisposable
     public readonly string FilePath;
     public HqDisplayItem? Hq { get; private set; }
     public PreviewDisplayItem? Preview { get; private set; }
+    public Thumbnail? Thumbnail { get; private set; }
 
     public bool SupportsTransparency { get; }
 
@@ -41,6 +42,7 @@ internal partial class Photo : IDisposable
         {
             case PreviewDisplayItem prev:
                 Preview = prev;
+                GenerateThumbnail(device, prev);
                 continueLoadingHq = true;
                 break;
             case HqDisplayItem hq:
@@ -76,6 +78,8 @@ internal partial class Photo : IDisposable
             Preview.Origin == Origin.Undefined)
         {
             Preview = await ImageReader.GetPreview(device, FilePath);
+            if (Thumbnail == null && Preview != null && !Preview.IsErrorOrUndefined())
+                GenerateThumbnail(device, Preview);
         }
     }
 
@@ -103,7 +107,6 @@ internal partial class Photo : IDisposable
                 return (Preview.Metadata.FullWidth, Preview.Metadata.FullHeight);
             }
             return (Preview.Bitmap.SizeInPixels.Width, Preview.Bitmap.SizeInPixels.Height);
-
         }
         return (100, 100);
     }
@@ -116,19 +119,16 @@ internal partial class Photo : IDisposable
     private static readonly HashSet<string> FormatsSupportingTransparency =
         new(StringComparer.OrdinalIgnoreCase)
     {
-        ".png",  // Standard for lossless transparency
-        ".gif",  // Supports indexed transparency
-        ".webp", // Modern format with excellent transparency support
-        ".tiff", // Can contain an alpha channel
-        ".tif",  // Alternate extension for TIFF
-        ".svg",  // Vector format, fully supports transparency
-        ".apng", // Animated PNG, supports transparency
-        ".ico",  // Icon format, requires transparency
-        //".heic", // High Efficiency Image Format (Apple)
-        //".heif", // High Efficiency Image Format
-        //".avif", // Modern high-compression format
-        ".jxl",  // JPEG XL, a newer format that supports transparency
-        ".psd"   // Photoshop document
+        ".png",
+        ".gif",
+        ".webp",
+        ".tiff",
+        ".tif",
+        ".svg",
+        ".apng",
+        ".ico",
+        ".jxl",
+        ".psd"
     };
 
     public bool IsErrorScreen(DisplayLevel currentDisplayLevel)
@@ -137,10 +137,41 @@ internal partial class Photo : IDisposable
         return dispItem == null || dispItem.IsErrorOrUndefined();
     }
 
+    private void GenerateThumbnail(ICanvasResourceCreatorWithDpi device, PreviewDisplayItem preview)
+    {
+        if (preview.Bitmap == null) return;
+        try
+        {
+            var src = preview.Bitmap;
+            float srcW = src.SizeInPixels.Width;
+            float srcH = src.SizeInPixels.Height;
+            float cropSize = Math.Min(srcW, srcH);
+            int size = Constants.ThumbnailPixelBufferSize;
+            using var rt = new CanvasRenderTarget(device, size, size, 96);
+            using (var ds = rt.CreateDrawingSession())
+            {
+                if (preview.Rotation != 0)
+                {
+                    var center = new System.Numerics.Vector2(size / 2f, size / 2f);
+                    ds.Transform = System.Numerics.Matrix3x2.CreateRotation(
+                        (float)(preview.Rotation * Math.PI / 180.0), center);
+                }
+                ds.DrawImage(src,
+                    new Rect(0, 0, size, size),
+                    new Rect((srcW - cropSize) / 2, (srcH - cropSize) / 2, cropSize, cropSize),
+                    1f, CanvasImageInterpolation.MultiSampleLinear);
+            }
+            Thumbnail = new Thumbnail(rt.GetPixelBytes());
+        }
+        catch { }
+    }
+
     public void Dispose()
     {
         Hq?.Dispose();
         Preview?.Dispose();
+        Thumbnail?.Dispose();
+        Thumbnail = null;
     }
 
     public void DisposeHqOnly()
@@ -153,5 +184,7 @@ internal partial class Photo : IDisposable
     {
         Preview?.Dispose();
         Preview = null;
+        Thumbnail?.Dispose();
+        Thumbnail = null;
     }
 }

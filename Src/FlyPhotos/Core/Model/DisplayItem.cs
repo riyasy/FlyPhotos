@@ -48,3 +48,10 @@ internal sealed partial class MultiPageHqDisplayItem(CanvasBitmap firstFrame, Or
 {
     public byte[] FileAsByteArray { get; } = fileAsByteArray;
 }
+
+internal sealed partial class Thumbnail(byte[] pixels) : IDisposable
+{
+    public byte[] Pixels { get; } = pixels;
+    public CanvasBitmap Bitmap { get; internal set; }
+    public void Dispose() => Bitmap?.Dispose();
+}
