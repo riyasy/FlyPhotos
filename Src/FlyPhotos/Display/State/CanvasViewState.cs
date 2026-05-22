@@ -16,31 +16,6 @@ internal class CanvasViewState
 
     public int Rotation = 0;
 
-    /// <summary>
-    /// Applies the core view properties from another state object to this one.
-    /// </summary>
-    public void Apply(CanvasViewState source)
-    {
-        Scale = source.Scale;
-        LastScaleTo = source.LastScaleTo;
-        ImagePos = source.ImagePos;
-        Rotation = source.Rotation;
-    }
-
-    /// <summary>
-    /// Creates a new CanvasViewState instance with a copy of the core view properties.
-    /// </summary>
-    public CanvasViewState Clone()
-    {
-        return new CanvasViewState
-        {
-            Scale = Scale,
-            LastScaleTo = LastScaleTo,
-            ImagePos = ImagePos,
-            Rotation = Rotation
-        };
-    }
-
     public void UpdateTransform()
     {
         Mat = Matrix3x2.Identity;
