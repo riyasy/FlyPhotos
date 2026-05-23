@@ -92,15 +92,9 @@ internal partial class AnimatedImageRenderer : IRenderer
         }
     }
 
-    public void RestartOffScreenDrawTimer()
-    {
-        // This concept does not apply to animated images.
-    }
-
-    public void TryRedrawOffScreen(bool forceCreate)
-    {
-        // This concept does not apply to animated images.
-    }
+    public void RestartOffScreenDrawTimer() { }
+    public void CancelOffScreenTimer() { }
+    public void TryRedrawOffScreen(bool forceCreate) { }
 
     public void Dispose()
     {

@@ -262,7 +262,7 @@ internal class CanvasController : ICanvasController
 
         InstallRenderer(
             new StaticImageRenderer(_d2dCanvas, _canvasViewState, previewDispItem.Bitmap,
-                photo.SupportsTransparency, RequestInvalidate),
+                photo.SupportsTransparency, RequestInvalidate, createOffScreen: false),
             new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
@@ -321,7 +321,11 @@ internal class CanvasController : ICanvasController
             if (forceThumbNailRedraw)
                 _thumbNailController.CreateThumbnailRibbonOffScreen(); // self-marshals to the UI thread
 
-            _currentRenderer.RestartOffScreenDrawTimer();
+            // Skip the offscreen timer when an animation is starting — AnimationCompleted will call
+            // TryRedrawOffScreen(false) at the correct final scale. Starting the timer here while
+            // Scale is near-zero (startup zoom) would bake a tiny offscreen mid-animation.
+            if (!_canvasViewManager.PanZoomAnimationOnGoing)
+                _currentRenderer.RestartOffScreenDrawTimer();
         });
     }
 
@@ -332,6 +336,7 @@ internal class CanvasController : ICanvasController
         EnqueueW2dAction(() =>
         {
             if (_currentRenderer == null) return;
+            if (animateChange) _currentRenderer.CancelOffScreenTimer();
             _canvasViewManager.ZoomPanToFit(animateChange, imageSize, canvasSize);
         });
     }
@@ -342,6 +347,7 @@ internal class CanvasController : ICanvasController
         EnqueueW2dAction(() =>
         {
             if (_currentRenderer == null) return;
+            _currentRenderer.CancelOffScreenTimer();
             _canvasViewManager.ZoomToHundred(canvasSize);
         });
     }
@@ -352,6 +358,7 @@ internal class CanvasController : ICanvasController
         EnqueueW2dAction(() =>
         {
             if (_currentRenderer == null) return;
+            _currentRenderer.CancelOffScreenTimer();
             _canvasViewManager.ZoomToHundred(canvasSize, anchor);
         });
     }
@@ -372,6 +379,7 @@ internal class CanvasController : ICanvasController
         EnqueueW2dAction(() =>
         {
             if (_currentRenderer == null) return;
+            _currentRenderer.CancelOffScreenTimer();
             _canvasViewManager.ZoomAtCenter(zoomDirection, canvasSize);
         });
     }
@@ -382,6 +390,7 @@ internal class CanvasController : ICanvasController
         EnqueueW2dAction(() =>
         {
             if (_currentRenderer == null) return;
+            _currentRenderer.CancelOffScreenTimer();
             _canvasViewManager.StepZoom(zoomDirection, canvasSize, zoomAnchor);
         });
     }
@@ -391,6 +400,7 @@ internal class CanvasController : ICanvasController
         EnqueueW2dAction(() =>
         {
             if (_currentRenderer == null) return;
+            _currentRenderer.CancelOffScreenTimer();
             _canvasViewManager.ZoomAtPoint(zoomDirection, zoomAnchor);
         });
     }
@@ -521,6 +531,7 @@ internal class CanvasController : ICanvasController
         {
             if (_currentRenderer == null) return;
             _canvasViewManager.HandleSizeChange(newSize, previousSize);
+            _currentRenderer.RestartOffScreenDrawTimer();
         });
     }
 

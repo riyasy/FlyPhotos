@@ -120,6 +120,14 @@ internal partial class StaticImageRenderer : IRenderer
         session.Transform = originalTransform;
     }
 
+    public void CancelOffScreenTimer()
+    {
+        lock (_timerLock)
+        {
+            _offscreenDrawCts?.Cancel();
+        }
+    }
+
     // Invoked on the W2D thread. Snapshots the W2D-owned view state up front so the deferred
     // background task never reads it cross-thread.
     public void RestartOffScreenDrawTimer()

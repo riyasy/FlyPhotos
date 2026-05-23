@@ -16,5 +16,7 @@ internal interface IRenderer : IDisposable
 
     void RestartOffScreenDrawTimer();
 
+    void CancelOffScreenTimer();
+
     void TryRedrawOffScreen(bool forceCreate);
 }
