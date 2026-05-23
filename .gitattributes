@@ -1,0 +1,4 @@
+# Patch and diff files must use LF line endings.
+# git apply / vcpkg's patch tool both require LF -- CRLF causes "corrupt patch" errors.
+*.diff  text eol=lf
+*.patch text eol=lf
