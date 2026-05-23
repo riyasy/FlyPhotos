@@ -73,6 +73,13 @@
 		<RemoveDir Directories="$(PublishDir)NpuDetect" />
 	</Target>
 
+	<Target Name="RemovePdbFiles" AfterTargets="Publish">
+		<ItemGroup>
+			<_PdbFiles Include="$(PublishDir)*.pdb" />
+		</ItemGroup>
+		<Delete Files="@(_PdbFiles)" />
+	</Target>
+
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
 		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.13.1" Condition="'$(Platform)' == 'x64'" />
