@@ -175,65 +175,93 @@ internal class CanvasViewManager
     {
         _photoPath = photoPath;
 
-        var panZoomBehaviourOnNavigation = AppConfig.Settings.PanZoomBehaviourOnNavigation;
-
         // The very first photo on launch always opens from a clean, fitted view.
         if (isFirstPhotoEver)
         {
-            panZoomBehaviourOnNavigation = PanZoomBehaviourOnNavigation.Reset;
+            _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+            _canvasViewState.Rotation = imageRotation;
+            _originalImageRotation = imageRotation;
+            SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver: true);
         }
-        // A pure quality upgrade (Preview → HQ of the same, already-displayed photo) must never disturb
-        // the user's current view in ANY mode — it only swaps in higher-resolution pixels. The
-        // RetainFromLastPhoto branch does exactly that (preserves scale/pan, re-bases rotation), so route
-        // every such upgrade through it regardless of the configured setting. Without this, RememberPerPhoto
-        // would re-run SetCachedView/SetDefaultView on upgrade and discard the user's live pan/zoom/rotation.
+        // A pure quality upgrade (Preview → HQ of the same already-displayed photo) must preserve
+        // the live visual view exactly. Scale is adjusted so the scene-relative zoom (Scale / fitScale)
+        // is unchanged; pan stays fixed in canvas coordinates; rotation is re-based onto the new EXIF
+        // baseline. Routing this through SetViewFromPrevious would apply an image-size ratio to the
+        // pan offset, which is wrong — preview thumbnails can be 10–15× smaller than the HQ image,
+        // making a 300 px pan become 3000+ px after the upgrade.
         else if (!isNewPhoto && !isUpgradeFromPlaceholder)
         {
-            panZoomBehaviourOnNavigation = PanZoomBehaviourOnNavigation.RetainFromLastPhoto;
-        }
+            var oldImageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
+            var oldRotation = _canvasViewState.Rotation;
+            _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+            _canvasViewState.Rotation += imageRotation - _originalImageRotation;
+            _originalImageRotation = imageRotation;
 
-        switch (panZoomBehaviourOnNavigation)
-        {
-            case PanZoomBehaviourOnNavigation.RememberPerPhoto:
-                // Reached only for a photo's INITIAL display — a fresh navigation, or the first real
-                // content after a placeholder. (Pure quality upgrades are redirected to
-                // RetainFromLastPhoto above.) Establish this image's EXIF baseline first, so SetCachedView
-                // can re-base the remembered user-rotation onto it. SetCachedView/SetDefaultView set the
-                // final Rotation, so no explicit Rotation assignment is needed here.
-                _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
-                _originalImageRotation = imageRotation;
-
-                if (_perPhotoStateCache.TryGetValue(photoPath, out var cachedState))
-                    SetCachedView(imageSize, canvasSize, cachedState);
-                else
-                    SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver);
-
-                break;
-
-            case PanZoomBehaviourOnNavigation.Reset:
-                _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
-                _canvasViewState.Rotation = imageRotation;
-                _originalImageRotation = imageRotation;
-                SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver);
-                break;
-
-            case PanZoomBehaviourOnNavigation.RetainFromLastPhoto:
-                var oldImageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
-                _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
-                if (isNewPhoto)
+            if (IsFittedToScreen)
+            {
+                var newFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+                _canvasViewState.Scale = newFitScale;
+                _canvasViewState.LastScaleTo = newFitScale;
+                _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
+                IsAtOneToOne = Math.Abs(newFitScale - 1.0f) < 0.001f;
+            }
+            else
+            {
+                // Preserve scene-relative zoom: multiply scale by (newFitScale / oldFitScale).
+                // Pan stays unchanged in canvas coordinates — the image centre remains at the same
+                // pixel on screen regardless of the change in image resolution.
+                var oldFitScale = CalculateScreenFitScale(canvasSize, oldImageSize, oldRotation);
+                var newFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+                if (oldFitScale > 0)
                 {
+                    var scaleRatio = newFitScale / oldFitScale;
+                    _canvasViewState.Scale *= scaleRatio;
+                    _canvasViewState.LastScaleTo *= scaleRatio;
+                }
+                IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < 0.001f;
+            }
+            _canvasViewState.UpdateTransform();
+        }
+        else
+        {
+            // New photo navigation or upgrade from placeholder: apply the configured behaviour.
+            switch (AppConfig.Settings.PanZoomBehaviourOnNavigation)
+            {
+                case PanZoomBehaviourOnNavigation.RememberPerPhoto:
+                    // Reached for a photo's initial display or first real content after a placeholder.
+                    // Establish the EXIF baseline before SetCachedView re-bases the stored user-rotation.
+                    _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+                    _originalImageRotation = imageRotation;
+
+                    if (_perPhotoStateCache.TryGetValue(photoPath, out var cachedState))
+                        SetCachedView(imageSize, canvasSize, cachedState);
+                    else
+                        SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver: false);
+                    break;
+
+                case PanZoomBehaviourOnNavigation.Reset:
+                    _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
                     _canvasViewState.Rotation = imageRotation;
                     _originalImageRotation = imageRotation;
-                }
-                else
-                {
-                    _canvasViewState.Rotation -= _originalImageRotation;
-                    _canvasViewState.Rotation += imageRotation;
-                    _originalImageRotation = imageRotation;
-                }
-                SetViewFromPrevious(oldImageSize, imageSize, canvasSize);
-                break;
+                    SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver: false);
+                    break;
 
+                case PanZoomBehaviourOnNavigation.RetainFromLastPhoto:
+                    var oldImageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
+                    _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+                    if (isNewPhoto)
+                    {
+                        _canvasViewState.Rotation = imageRotation;
+                        _originalImageRotation = imageRotation;
+                    }
+                    else // isUpgradeFromPlaceholder
+                    {
+                        _canvasViewState.Rotation += imageRotation - _originalImageRotation;
+                        _originalImageRotation = imageRotation;
+                    }
+                    SetViewFromPrevious(oldImageSize, imageSize, canvasSize);
+                    break;
+            }
         }
         ViewChanged?.Invoke();
     }
