@@ -1,132 +1,255 @@
 name: Build
 
+# Triggered manually from the Actions tab.
+# No automatic triggers -- builds are intentional releases, not on every push.
 on:
   workflow_dispatch:
 
 jobs:
   build:
     strategy:
+      # Run both platforms in parallel. If one fails, let the other finish
+      # so you get failure information for both at the same time.
       fail-fast: false
       matrix:
         include:
           - runner: windows-latest
             platform: x64
             rid: win-x64
-            vcpkg-triplet: x64-windows
+            vcpkg-triplet: x64-windows-release    # release-only, ~50% faster than x64-windows
+            install-root: vcpkg_installed_x64      # isolated install root (prevents cross-platform pruning)
+            rust-target: x86_64-pc-windows-msvc
+            publish-profile: win-x64
+
           - runner: windows-11-arm
             platform: ARM64
             rid: win-arm64
-            vcpkg-triplet: arm64-windows
+            vcpkg-triplet: arm64-windows-release   # custom overlay triplet (not built-in to vcpkg)
+            install-root: vcpkg_installed_arm64
+            rust-target: aarch64-pc-windows-msvc
+            publish-profile: win-ARM64
 
     runs-on: ${{ matrix.runner }}
     name: Build (${{ matrix.platform }})
 
     env:
+      # vcpkg binary cache: stores compressed pre-built packages so vcpkg
+      # install is a cache-hit on repeat runs instead of a full recompile.
+      # "clear" resets default sources; "files,<path>,readwrite" adds our
+      # local folder as the only source.
       VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/vcpkg_cache,readwrite"
 
     steps:
+      # -----------------------------------------------------------------------
+      # Checkout
+      # -----------------------------------------------------------------------
+      # This brings in the committed overlay port files at
+      # Src/build_libheif/ports/libheif/ and the custom triplet at
+      # Src/build_libheif/triplets/arm64-windows-release.cmake.
+      # Those files are what tell vcpkg to use dav1d instead of aom.
+      # -----------------------------------------------------------------------
       - name: Checkout
         uses: actions/checkout@v4
 
+      # -----------------------------------------------------------------------
+      # Toolchain setup
+      # -----------------------------------------------------------------------
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-          dotnet-quality: 'preview'
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      # Cache vcpkg binary cache (small, compressed packages only)
-      - name: Cache vcpkg binary cache
+      # Install the stable Rust toolchain and pre-add the cross-compilation
+      # target for this platform. On windows-latest the host IS x86_64 so
+      # the target is native; on windows-11-arm the host IS aarch64 so same.
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-target }}
+
+      # -----------------------------------------------------------------------
+      # Caches
+      # -----------------------------------------------------------------------
+      # vcpkg binary cache -- keyed on the manifest + overlay port files.
+      # A change to any port file or vcpkg.json invalidates the cache and
+      # triggers a full recompile of the affected packages.
+      - name: Cache vcpkg binary packages
         uses: actions/cache@v4
         with:
           path: vcpkg_cache
-          key: vcpkg-${{ matrix.vcpkg-triplet }}-${{ hashFiles('Src/build_libheif/vcpkg.json', 'Src/build_libheif/vcpkg-configuration.json') }}
+          key: vcpkg-${{ matrix.vcpkg-triplet }}-${{ hashFiles('Src/build_libheif/vcpkg.json', 'Src/build_libheif/ports/libheif/**', 'Src/build_libheif/triplets/**') }}
+          restore-keys: |
+            vcpkg-${{ matrix.vcpkg-triplet }}-
 
-      # Install vcpkg dependencies (manifest mode)
+      # Rust build cache -- caches ~/.cargo/registry (downloaded crate source)
+      # and the target/ directory (compiled artifacts). Keyed automatically
+      # by Cargo.lock + rust-target so a dependency change invalidates it.
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: Src/fly_rust_bridge
+          key: ${{ matrix.rust-target }}
+
+      # -----------------------------------------------------------------------
+      # Step 1 -- vcpkg: heif.dll, dav1d.dll, libde265.dll, libpng16.dll
+      # -----------------------------------------------------------------------
+      # The overlay ports at Src/build_libheif/ports/ contain the patched
+      # libheif port that adds dav1d support (see how_to_patch_heif.md).
+      # --overlay-ports tells vcpkg to use those files instead of the built-in
+      # port registry -- without this flag vcpkg would build against aom.
+      # --overlay-triplets provides the custom arm64-windows-release triplet
+      # (vcpkg ships x64-windows-release built-in but not the ARM64 equivalent).
+      # --x-install-root isolates each platform's packages so they don't
+      # interfere with each other when both platforms run in parallel.
       - name: Install vcpkg dependencies
         working-directory: Src/build_libheif
         run: |
-          vcpkg install --triplet ${{ matrix.vcpkg-triplet }} --x-manifest-root=.
+          vcpkg install `
+            --triplet ${{ matrix.vcpkg-triplet }} `
+            --x-manifest-root=. `
+            --x-install-root=${{ matrix.install-root }} `
+            --overlay-ports=ports `
+            --overlay-triplets=triplets
 
-      # Build native projects
+      # -----------------------------------------------------------------------
+      # Step 2 -- Native C++: FlyNativeLib.dll, FlyNativeLibHeif.dll,
+      #                         FlyContextMenuHelper.exe
+      # -----------------------------------------------------------------------
+      # PlatformToolset=v143 targets VS 2022 (all versions). The local scripts
+      # use v145 but CI uses v143 for broader runner compatibility.
+      # Build order matters: FlyNativeLib has no vcpkg dependency and must be
+      # built before FlyNativeLibHeif which links against heif.lib.
+      # Output lands in Src/<Platform>/Release/ (not Src/<Project>/<Platform>/Release/).
+      # The .vcxproj OutDir is $(ProjectDir)\..\$(Platform)\$(Configuration)\.
       - name: Build FlyNativeLib
         working-directory: Src/FlyNativeLib
         run: |
-          msbuild FlyNativeLib.vcxproj /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:PlatformToolset=v143
+          msbuild FlyNativeLib.vcxproj `
+            /p:Configuration=Release `
+            /p:Platform=${{ matrix.platform }} `
+            /p:PlatformToolset=v143
 
       - name: Build FlyNativeLibHeif
         working-directory: Src/FlyNativeLibHeif
         run: |
-          msbuild FlyNativeLibHeif.vcxproj /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:PlatformToolset=v143
+          msbuild FlyNativeLibHeif.vcxproj `
+            /p:Configuration=Release `
+            /p:Platform=${{ matrix.platform }} `
+            /p:PlatformToolset=v143
 
       - name: Build FlyContextMenuHelper
         working-directory: Src/FlyContextMenuHelper
         run: |
-          msbuild FlyContextMenuHelper.vcxproj /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:PlatformToolset=v143
+          msbuild FlyContextMenuHelper.vcxproj `
+            /p:Configuration=Release `
+            /p:Platform=${{ matrix.platform }} `
+            /p:PlatformToolset=v143
 
-      # Copy native outputs
-      - name: Copy native binaries
+      # -----------------------------------------------------------------------
+      # Step 3 -- Rust: fly_rust_bridge.dll  (RAW decode + SVG render)
+      # -----------------------------------------------------------------------
+      # --release activates the optimised profile in Cargo.toml:
+      #   opt-level=3, lto=true, codegen-units=1, panic=abort, strip=true.
+      # --target must be specified or cargo builds for the host and the DLL
+      # lands in target/release/ (no triplet subfolder) -- easy to mis-deploy.
+      - name: Build fly_rust_bridge
+        working-directory: Src/fly_rust_bridge
+        run: |
+          cargo build --release --target ${{ matrix.rust-target }}
+
+      # -----------------------------------------------------------------------
+      # Step 4 -- Assemble External\<Platform>
+      # -----------------------------------------------------------------------
+      # Copies all required DLLs into the one folder that FlyPhotos.csproj
+      # reads from via:  <ExternalBinaries Include="External\$(Platform)\*.*" />
+      # The FlattenDllsOnPublish MSBuild target then copies them into the
+      # publish root during dotnet publish.
+      #
+      # IMPORTANT: we do NOT clean the folder first. We copy each file
+      # individually so that if any copy source is missing the step fails
+      # with a clear error rather than silently succeeding with a partial set.
+      - name: Assemble External binaries
         shell: pwsh
         run: |
-          $platform = "${{ matrix.platform }}"
-          $triplet  = "${{ matrix.vcpkg-triplet }}"
-
+          $platform    = "${{ matrix.platform }}"
+          $triplet     = "${{ matrix.vcpkg-triplet }}"
+          $installRoot = "Src/build_libheif/${{ matrix.install-root }}"
+          $rustTarget  = "${{ matrix.rust-target }}"
           $externalDir = "Src/FlyPhotos/External/$platform"
 
           New-Item -ItemType Directory -Path $externalDir -Force | Out-Null
 
-          Get-ChildItem $externalDir -File -ErrorAction SilentlyContinue |
-            Remove-Item -Force
-
-          Copy-Item "Src/FlyNativeLib/$platform/Release/FlyNativeLib.dll" `
-            -Destination $externalDir -Force
-
-          Copy-Item "Src/FlyNativeLibHeif/$platform/Release/FlyNativeLibHeif.dll" `
-            -Destination $externalDir -Force
-
-          Copy-Item "Src/FlyContextMenuHelper/$platform/Release/FlyContextMenuHelper.exe" `
-            -Destination $externalDir -Force
-
-          $vcpkgBinDir = "Src/build_libheif/vcpkg_installed/$triplet/bin"
-
-          if (Test-Path $vcpkgBinDir) {
-            Get-ChildItem "$vcpkgBinDir/*.dll" |
-              Copy-Item -Destination $externalDir -Force
+          # vcpkg DLLs: heif.dll, dav1d.dll, libde265.dll, libpng16.dll
+          $vcpkgBinDir = "$installRoot/$triplet/bin"
+          if (-not (Test-Path $vcpkgBinDir)) {
+            Write-Error "vcpkg bin dir not found: $vcpkgBinDir"
+            exit 1
           }
-  
-      # # Publish and Package MSIX
-      # - name: Publish and package MSIX
-      #   working-directory: Src
-      #   run: |
-      #     dotnet publish FlyPhotos/FlyPhotos.csproj `
-      #       -c Release `
-      #       -r ${{ matrix.rid }} `
-      #       /p:Platform=${{ matrix.platform }} `
-      #       /p:WindowsPackageType=MSIX `
-      #       /p:GenerateAppxPackageOnBuild=true `
-      #       /p:AppxPackageSigningEnabled=false
-    
-      # - name: Upload MSIX artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: FlyPhotos-${{ matrix.platform }}-msix
-      #     path: Src/FlyPhotos/AppPackages/**/*.msix
+          Get-ChildItem "$vcpkgBinDir/*.dll" | Copy-Item -Destination $externalDir -Force
 
-      # Publish
+          # Native C++ DLLs (OutDir = Src\<Platform>\Release\)
+          Copy-Item "Src/$platform/Release/FlyNativeLib.dll"          -Destination $externalDir -Force
+          Copy-Item "Src/$platform/Release/FlyNativeLibHeif.dll"       -Destination $externalDir -Force
+          Copy-Item "Src/$platform/Release/FlyContextMenuHelper.exe"   -Destination $externalDir -Force
+
+          # Rust DLL
+          Copy-Item "Src/fly_rust_bridge/target/$rustTarget/release/fly_rust_bridge.dll" `
+            -Destination $externalDir -Force
+
+      # -----------------------------------------------------------------------
+      # Step 5 -- Verify External before publishing
+      # -----------------------------------------------------------------------
+      # Fail loudly here rather than producing a publish artifact that ships
+      # without a required DLL. dotnet publish would succeed but the app
+      # would crash at runtime when it tries to P/Invoke into the missing DLL.
+      - name: Verify External binaries
+        shell: pwsh
+        run: |
+          $externalDir = "Src/FlyPhotos/External/${{ matrix.platform }}"
+          $expected = @(
+            "heif.dll", "dav1d.dll", "libde265.dll", "libpng16.dll",
+            "FlyNativeLib.dll", "FlyNativeLibHeif.dll", "FlyContextMenuHelper.exe",
+            "fly_rust_bridge.dll"
+          )
+          $failed = $false
+          foreach ($f in $expected) {
+            if (Test-Path "$externalDir/$f") {
+              Write-Host "  [OK] $f" -ForegroundColor Green
+            } else {
+              Write-Host "  [MISSING] $f" -ForegroundColor Red
+              $failed = $true
+            }
+          }
+          if ($failed) { exit 1 }
+
+      # -----------------------------------------------------------------------
+      # Step 6 -- dotnet publish (AOT, self-contained, trimmed)
+      # -----------------------------------------------------------------------
+      # The publish profile is selected from the csproj property:
+      #   <PublishProfile>Properties\PublishProfiles\win-$(Platform).pubxml</PublishProfile>
+      # The profile writes output to FlyPhotos/bin/win-x64/publish/ (or win-arm64).
+      # We do NOT use -o to override this -- the installer .vdproj files
+      # reference the profile output path and would break if it changed.
+      #
+      # The RemoveAIMLFiles MSBuild target (defined in FlyPhotos.csproj) runs
+      # after publish and strips large Windows AI/ML DLLs that WindowsAppSDK
+      # includes but FlyPhotos does not use (~150 MB removed).
       - name: Publish
         working-directory: Src
         run: |
           dotnet publish FlyPhotos/FlyPhotos.csproj `
             -c Release `
-            -r ${{ matrix.rid }} `
             /p:Platform=${{ matrix.platform }} `
-            -o publish/${{ matrix.rid }}
+            /p:PublishProfile=Properties/PublishProfiles/${{ matrix.publish-profile }}.pubxml
 
+      # -----------------------------------------------------------------------
+      # Step 7 -- Upload publish artifact
+      # -----------------------------------------------------------------------
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: FlyPhotos-${{ matrix.platform }}
-          path: Src/publish/${{ matrix.rid }}/
-
+          path: Src/FlyPhotos/bin/${{ matrix.rid }}/publish/
