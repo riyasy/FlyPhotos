@@ -103,7 +103,6 @@ public class AppSettings
         [nameof(RawDecoder.WIC), nameof(RawDecoder.Rawler), nameof(RawDecoder.ImageMagick)];
 
     [JsonIgnore]
-    [field: JsonIgnore]
     public List<RawDecoder> RawDecoderPriority =>
         RawDecoderPriorityAsStrings
             .Select(s => Enum.Parse<RawDecoder>(s, true))
