@@ -1,14 +1,13 @@
-{
+﻿{
   "dependencies": [
-    "dav1d",
+    "libde265",
     {
       "name": "libheif",
+      "default-features": false,
       "features": [
-        "aom"
+        "dav1d"
       ]
     },
-    "libde265",
-    "x265",
     "libpng"
   ]
 }

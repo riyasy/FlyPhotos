@@ -71,20 +71,24 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)..\build_libheif\vcpkg_installed\x64-windows\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\build_libheif\vcpkg_installed\x64-windows\lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(ProjectDir)..\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>$(ProjectDir)..\build_libheif\vcpkg_installed_x64\x64-windows\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\build_libheif\vcpkg_installed_x64\x64-windows\debug\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)..\build_libheif\vcpkg_installed\x64-windows\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\build_libheif\vcpkg_installed\x64-windows\lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(ProjectDir)..\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>$(ProjectDir)..\build_libheif\vcpkg_installed_x64\x64-windows-release\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\build_libheif\vcpkg_installed_x64\x64-windows-release\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <IncludePath>$(ProjectDir)..\build_libheif\vcpkg_installed\arm64-windows\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\build_libheif\vcpkg_installed\arm64-windows\lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(ProjectDir)..\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>$(ProjectDir)..\build_libheif\vcpkg_installed_arm64\arm64-windows\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\build_libheif\vcpkg_installed_arm64\arm64-windows\debug\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-    <IncludePath>$(ProjectDir)..\build_libheif\vcpkg_installed\arm64-windows\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\build_libheif\vcpkg_installed\arm64-windows\lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(ProjectDir)..\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>$(ProjectDir)..\build_libheif\vcpkg_installed_arm64\arm64-windows-release\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\build_libheif\vcpkg_installed_arm64\arm64-windows-release\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
