@@ -16,7 +16,7 @@ internal static partial class NativeAvifBridge
     /// </summary>
     [LibraryImport(DllName)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr OpenAvifAnimation(IntPtr data, nint size);
+    public static partial IntPtr OpenAvifAnimation(IntPtr data, nuint size);
 
     /// <summary>
     ///     Returns whether the provided handle contains a sequence track.

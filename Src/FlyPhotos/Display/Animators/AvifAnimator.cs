@@ -27,7 +27,7 @@ namespace FlyPhotos.Display.Animators;
 ///         The pixel buffer (<see cref="_pixelBuffer" />) is permanently pinned at construction
 ///         via a <see cref="GCHandle" />. The native decoder writes directly into it via
 ///         <see cref="_pixelBufferPtr" />, and Win2D uploads from it via <c>SetPixelBytes</c>.
-///         <see cref="UpdateAsync" /> returns <c>Task.CompletedTask</c> — no async state machine
+///         <see cref="UpdateAsync" /> returns <c>Task.CompletedTask</c> ï¿½ no async state machine
 ///         is allocated per call. The combination achieves zero managed heap allocation during
 ///         steady-state playback.
 ///     </para>
@@ -70,7 +70,7 @@ public partial class AvifAnimator : IAnimator
 
     /// <summary>
     ///     CPU-side pixel buffer that receives decoded frame data from the native decoder.
-    ///     Sized to <c>PixelWidth × PixelHeight × 4</c> bytes (BGRA8, one byte per channel).
+    ///     Sized to <c>PixelWidth ï¿½ PixelHeight ï¿½ 4</c> bytes (BGRA8, one byte per channel).
     ///     Permanently pinned at construction so the GC never relocates it, allowing the
     ///     native decoder to write into <see cref="_pixelBufferPtr" /> without marshalling,
     ///     and allowing Win2D's <c>SetPixelBytes</c> to upload without additional pinning.
@@ -164,7 +164,7 @@ public partial class AvifAnimator : IAnimator
 
     /// <summary>
     ///     Private constructor. Use <see cref="CreateAsync" /> to instantiate.
-    ///     Performs only GPU resource creation — no native decode work happens here.
+    ///     Performs only GPU resource creation ï¿½ no native decode work happens here.
     ///     Must be called on the Win2D device thread (not inside <c>Task.Run</c>).
     /// </summary>
     private AvifAnimator(IntPtr handle, IntPtr unmanagedFileData, ICanvasResourceCreatorWithDpi canvas)
@@ -206,7 +206,7 @@ public partial class AvifAnimator : IAnimator
     /// <returns>A fully initialised <see cref="AvifAnimator" /> ready for <see cref="UpdateAsync" /> calls.</returns>
     public static async Task<AvifAnimator> CreateAsync(byte[] fileData, ICanvasResourceCreatorWithDpi canvas)
     {
-        // Phase 1 (threadpool): native allocation and decoder open — CPU-only work.
+        // Phase 1 (threadpool): native allocation and decoder open ï¿½ CPU-only work.
         // The file bytes are copied into unmanaged memory so the native decoder can hold a
         // raw pointer without pinning the managed array, allowing the GC to compact the heap.
         var (handle, unmanagedMemory) = await Task.Run(() =>
@@ -216,7 +216,7 @@ public partial class AvifAnimator : IAnimator
             {
                 Marshal.Copy(fileData, 0, mem, fileData.Length);
 
-                IntPtr h = NativeAvifBridge.OpenAvifAnimation(mem, fileData.Length);
+                IntPtr h = NativeAvifBridge.OpenAvifAnimation(mem, (nuint)fileData.Length);
                 if (h == IntPtr.Zero)
                     throw new InvalidOperationException("Failed to open animated AVIF via native decoder.");
 
@@ -252,40 +252,43 @@ public partial class AvifAnimator : IAnimator
     /// <summary>
     ///     Advances the animation by the elapsed time since the previous call and renders
     ///     the resulting frame to <see cref="_compositedSurface" />.
-    ///     Fully synchronous — returns <c>Task.CompletedTask</c> with no async state machine.
+    ///     Fully synchronous ï¿½ returns <c>Task.CompletedTask</c> with no async state machine.
     /// </summary>
     /// <param name="totalElapsedTime">Total time elapsed since the animator was started.</param>
-    public Task UpdateAsync(TimeSpan totalElapsedTime)
+    public async Task UpdateAsync(TimeSpan totalElapsedTime)
     {
-        if (_nativeHandle == IntPtr.Zero) return Task.CompletedTask;
+        if (_nativeHandle == IntPtr.Zero) return;
 
-        // First-frame path: initialise timing state and render frame 0.
+        // First-frame path: initialise timing state and decode frame 0 off the Win2D thread.
         if (_isFirstFrame)
         {
-            _currentFrameDurationMs = NativeAvifBridge.DecodeNextAvifFrame(_nativeHandle, _pixelBufferPtr);
-            if (_currentFrameDurationMs > 0)
-                RenderBufferToSurface();
             _isFirstFrame = false;
             _lastElapsedTime = totalElapsedTime;
-            return Task.CompletedTask;
+            _currentFrameDurationMs = await Task.Run(
+                () => NativeAvifBridge.DecodeNextAvifFrame(_nativeHandle, _pixelBufferPtr));
+            if (_currentFrameDurationMs > 0)
+                RenderBufferToSurface();
+            return;
         }
 
         var delta = totalElapsedTime - _lastElapsedTime;
         _lastElapsedTime = totalElapsedTime;
 
         // Negative delta means the caller's clock was reset (e.g. explicit restart).
-        // Reset the native decoder back to frame 0 and restart accumulation.
         if (delta < TimeSpan.Zero)
         {
-            NativeAvifBridge.ResetAvifAnimation(_nativeHandle);
-            _currentFrameDurationMs = NativeAvifBridge.DecodeNextAvifFrame(_nativeHandle, _pixelBufferPtr);
+            int dur = await Task.Run(() =>
+            {
+                NativeAvifBridge.ResetAvifAnimation(_nativeHandle);
+                return NativeAvifBridge.DecodeNextAvifFrame(_nativeHandle, _pixelBufferPtr);
+            });
+            _currentFrameDurationMs = dur > 0 ? dur : 0;
             if (_currentFrameDurationMs > 0) RenderBufferToSurface();
-            else _currentFrameDurationMs = 0;
             _accumulatedTimeMs = 0;
-            return Task.CompletedTask;
+            return;
         }
 
-        // Cap the accumulator before adding the new delta. Without this cap, a long stall
+        // Cap the accumulator to avoid a burst of catch-up decodes after a long stall.
         // (e.g. app backgrounded) would cause a burst of synchronous native decodes on the
         // next tick, potentially freezing the render thread for a noticeable duration.
         // 10 frames of catch-up per tick is enough to stay smooth under moderate frame drops.
@@ -299,40 +302,40 @@ public partial class AvifAnimator : IAnimator
 
         _accumulatedTimeMs += delta.TotalMilliseconds;
 
-        bool rendered = false;
+        if (_accumulatedTimeMs < _currentFrameDurationMs || _currentFrameDurationMs <= 0)
+            return;
 
-        while (_accumulatedTimeMs >= _currentFrameDurationMs && _currentFrameDurationMs > 0)
+        // Offload all native decode work for this tick to the ThreadPool.
+        // _animatorLock (in AnimatedImageRenderer) prevents re-entry, so the timing
+        // fields are only accessed from one logical call at a time â€” no races.
+        bool rendered = await Task.Run(() =>
         {
-            _accumulatedTimeMs -= _currentFrameDurationMs;
-
-            int nextDurationMs = NativeAvifBridge.DecodeNextAvifFrame(_nativeHandle, _pixelBufferPtr);
-            if (nextDurationMs <= 0)
+            bool didRender = false;
+            while (_accumulatedTimeMs >= _currentFrameDurationMs && _currentFrameDurationMs > 0)
             {
-                // Native decoder signals end-of-sequence. Reset to loop back to frame 0.
-                // Accumulated time is also reset so the loop boundary does not carry overshoot
-                // into the first frame of the new cycle, which would skip it immediately.
-                NativeAvifBridge.ResetAvifAnimation(_nativeHandle);
-                _accumulatedTimeMs = 0;
+                _accumulatedTimeMs -= _currentFrameDurationMs;
 
-                nextDurationMs = NativeAvifBridge.DecodeNextAvifFrame(_nativeHandle, _pixelBufferPtr);
+                int nextDurationMs = NativeAvifBridge.DecodeNextAvifFrame(_nativeHandle, _pixelBufferPtr);
                 if (nextDurationMs <= 0)
                 {
-                    // Post-reset decode also failed. Zero out the duration to suppress the
-                    // while guard for all remaining iterations this tick and every subsequent
-                    // tick, preventing a native call storm against a persistently broken file.
-                    _currentFrameDurationMs = 0;
-                    break;
+                    NativeAvifBridge.ResetAvifAnimation(_nativeHandle);
+                    _accumulatedTimeMs = 0;
+                    nextDurationMs = NativeAvifBridge.DecodeNextAvifFrame(_nativeHandle, _pixelBufferPtr);
+                    if (nextDurationMs <= 0)
+                    {
+                        _currentFrameDurationMs = 0;
+                        break;
+                    }
                 }
-            }
 
-            _currentFrameDurationMs = nextDurationMs;
-            rendered = true;
-        }
+                _currentFrameDurationMs = nextDurationMs;
+                didRender = true;
+            }
+            return didRender;
+        });
 
         if (rendered)
             RenderBufferToSurface();
-
-        return Task.CompletedTask;
     }
 
     // -------------------------------------------------------------------------
@@ -348,13 +351,13 @@ public partial class AvifAnimator : IAnimator
         if (_nativeHandle == IntPtr.Zero || _compositedSurface.Device == null) return;
 
         // SetPixelBytes reads from _pixelBuffer. Because the buffer is permanently pinned,
-        // no additional GC pin/unpin occurs here — zero GC pressure on this call.
+        // no additional GC pin/unpin occurs here ï¿½ zero GC pressure on this call.
         _frameBitmap.SetPixelBytes(_pixelBuffer);
 
         using var ds = _compositedSurface.CreateDrawingSession();
         ds.Blend = CanvasBlend.Copy;
 
-        // Rect overload guarantees 1:1 pixel mapping — bypasses Win2D's DPI-scaling transform.
+        // Rect overload guarantees 1:1 pixel mapping ï¿½ bypasses Win2D's DPI-scaling transform.
         ds.DrawImage(_frameBitmap, _canvasRect);
     }
 
@@ -373,15 +376,15 @@ public partial class AvifAnimator : IAnimator
     ///     Internal disposal logic following the standard IDisposable/finalizer pattern.
     /// </summary>
     /// <param name="disposing">
-    ///     <c>true</c> when called from <see cref="Dispose()" /> — safe to release managed resources.<br />
-    ///     <c>false</c> when called from the finalizer — managed objects may already be collected;
+    ///     <c>true</c> when called from <see cref="Dispose()" /> ï¿½ safe to release managed resources.<br />
+    ///     <c>false</c> when called from the finalizer ï¿½ managed objects may already be collected;
     ///     only unmanaged resources are released.
     /// </param>
     protected virtual void Dispose(bool disposing)
     {
         if (_isDisposed) return;
 
-        // Unmanaged resources — always safe to release, including from the finalizer thread.
+        // Unmanaged resources ï¿½ always safe to release, including from the finalizer thread.
         if (_nativeHandle != IntPtr.Zero)
         {
             NativeAvifBridge.CloseAvifAnimation(_nativeHandle);
@@ -399,7 +402,7 @@ public partial class AvifAnimator : IAnimator
         if (_pixelBufferPin.IsAllocated)
             _pixelBufferPin.Free();
 
-        // Managed Win2D GPU resources — only safe to release when explicitly disposed.
+        // Managed Win2D GPU resources ï¿½ only safe to release when explicitly disposed.
         // Releasing Win2D objects from a finalizer thread races against the device dispatcher.
         if (disposing)
         {
@@ -413,7 +416,7 @@ public partial class AvifAnimator : IAnimator
     /// <summary>
     ///     Finalizer backstop ensuring native memory and handles are released even if
     ///     <see cref="Dispose()" /> is never called. Win2D GPU resources are NOT released
-    ///     from here — see <see cref="Dispose(bool)" />.
+    ///     from here ï¿½ see <see cref="Dispose(bool)" />.
     /// </summary>
     ~AvifAnimator()
     {

@@ -11,8 +11,7 @@
  */
 static std::string WStringToString(const std::wstring& wstr)
 {
-    // CW2A is a handy ATL/MFC conversion class that handles the string conversion.
-    return std::string(CW2A(wstr.c_str()));
+    return std::string(CW2A(wstr.c_str(), CP_UTF8));
 }
 
 /**

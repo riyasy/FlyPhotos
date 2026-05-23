@@ -10,13 +10,6 @@
 #include <libheif/heif.h>
 #include <vector>
 
- /// @brief A RAII wrapper to manage libheif's global initialization and deinitialization.
-class LibHeifInitializer {
-public:
-    LibHeifInitializer() { heif_init(nullptr); }
-    ~LibHeifInitializer() { heif_deinit(); }
-};
-
 /// @brief Error codes for HEIF reading operations.
 enum class HeifError {
     Ok = 0,               ///< Operation was successful.
@@ -60,11 +53,8 @@ private:
     ///@brief Internal helper to decode any image handle into a BGRA buffer.
     HeifError ExtractImageToBGRA(heif_image_handle* image_handle, PixelBuffer& out_buffer);
 
-    ///@brief [NEW HELPER] Fills a PixelBuffer from a decoded heif_image.
+    ///@brief Fills a PixelBuffer from a decoded heif_image.
     void FillPixelBufferFromImage(const heif_image* image, int width, int height, PixelBuffer& out_buffer);
-
-    /// @brief Manages libheif's lifecycle.
-    LibHeifInitializer heif_initializer_;
 };
 
 #endif // HEIF_READER_H
