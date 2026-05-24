@@ -52,6 +52,7 @@ public sealed partial class PhotoDisplayWindow
     private readonly OpacityFader _opacityFader;
     private readonly InactivityFader _inactivityFader;
     private readonly MouseAutoHider _mouseAutoHider;
+    // private readonly WindowCaptionButtonFader _captionButtonFader;
     private readonly WindowPlacementManager _windPlacementManager;
     private readonly WindowFullScreenManager _windFullScreenManager;
     private readonly WindowAppearanceManager _windAppearanceManager;
@@ -138,7 +139,12 @@ public sealed partial class PhotoDisplayWindow
         _mouseAutoHider = new MouseAutoHider(MainLayout, TimeSpan.FromSeconds(1));
         _windPlacementManager = new WindowPlacementManager(this, AppConfig.Settings.WindowState);
         _windFullScreenManager = new WindowFullScreenManager(this);
-        _windFullScreenManager.FullScreenToggled += isFullScreen => _windPlacementManager.PauseTracking = isFullScreen;
+        // _captionButtonFader = new WindowCaptionButtonFader(AppWindow.TitleBar, MainLayout);
+        _windFullScreenManager.FullScreenToggled += isFullScreen =>
+        {
+            _windPlacementManager.PauseTracking = isFullScreen;
+            //_captionButtonFader.Suspended = isFullScreen;
+        };
         InitKeyActions();
     }
 
