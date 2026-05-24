@@ -87,7 +87,7 @@ namespace FlyPhotos.UI.Behaviors
         public void Dispose()
         {
             _window.Activated -= Window_Activated;
-            //((FrameworkElement)_window.Content).ActualThemeChanged -= Window_ActualThemeChanged;
+            ((FrameworkElement)_window.Content).ActualThemeChanged -= Window_ActualThemeChanged;
             _backdropController?.RemoveSystemBackdropTarget(_window.As<ICompositionSupportsSystemBackdrop>());
             _backdropController?.Dispose();
             _backdropController = null;
@@ -263,7 +263,7 @@ namespace FlyPhotos.UI.Behaviors
     /// <summary>
     /// Represents a customized brush backdrop that provides a blurred effect.
     /// </summary>
-    public partial class BlurredBackdrop : CompositionBrushBackdrop
+    internal partial class BlurredBackdrop : CompositionBrushBackdrop
     {
         /// <summary>
         /// Creates the composition brush used by the backdrop.
