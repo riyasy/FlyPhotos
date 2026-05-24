@@ -578,7 +578,7 @@ Esc : Einstellungen schließen oder App beenden</value>
     <value>Fensterhintergrund</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>Der vorherige Zustand stellt die letzte Fenstergröße, -position und den Bildschirm wieder her.</value>
+    <value>„Vorheriger Zustand“ stellt die letzte Fenstergröße (normal oder maximiert), Position und den Bildschirm wieder her.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>Fensterzustand beim Start</value>

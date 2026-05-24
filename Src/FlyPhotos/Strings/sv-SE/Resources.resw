@@ -578,7 +578,7 @@ Esc : Stäng inställningar eller Avsluta</value>
     <value>Fönsterbakgrund</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>Föregående tillstånd återställer fönstrets senaste storlek, position och skärm.</value>
+    <value>”Föregående tillstånd” återställer fönstrets senaste storlek (fönsterläge eller maximerat), position och skärm.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>Fönsterläge vid start</value>

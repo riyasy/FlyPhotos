@@ -575,7 +575,7 @@ Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാ
     <value>വിൻഡോ പശ്ചാത്തലം</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>പഴയ അവസ്ഥ' വിൻഡോയുടെ അവസാന വലുപ്പം, സ്ഥാനം, മോണിറ്റർ എന്നിവ പുനഃസ്ഥാപിക്കുന്നു.</value>
+    <value>'പഴയ അവസ്ഥ' വിൻഡോ അവസാനമായി വിൻഡോ രൂപത്തിലോ മാക്സിമൈസ് ചെയ്ത രൂപത്തിലോ ഉണ്ടായിരുന്ന വലുപ്പവും സ്ഥാനവും മോണിറ്ററും പുനഃസ്ഥാപിക്കുന്നു.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>സ്റ്റാർട്ടപ്പ് വിൻഡോ നില</value>

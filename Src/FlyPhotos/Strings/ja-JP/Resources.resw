@@ -577,7 +577,7 @@ Esc : 設定を閉じる / アプリを終了</value>
     <value>ウィンドウの背景</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>前回の状態では、ウィンドウのサイズ、位置、および表示モニターを復元します。</value>
+    <value>「前回の状態」では、最後にウインドウ表示または最大化されたときのサイズ、位置、表示モニターを復元します。</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>起動時のウィンドウ状態</value>

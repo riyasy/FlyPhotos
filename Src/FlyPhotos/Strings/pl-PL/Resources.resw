@@ -578,7 +578,7 @@ Esc : Zamknij ustawienia lub Wyjdź</value>
     <value>Tło okna</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>Poprzedni stan przywraca ostatni rozmiar, położenie i monitor okna.</value>
+    <value>„Poprzedni stan” przywraca ostatni rozmiar (w oknie lub zmaksymalizowany), położenie i monitor.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>Stan okna przy uruchomieniu</value>

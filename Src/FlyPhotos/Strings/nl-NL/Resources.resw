@@ -578,7 +578,7 @@ Esc : Instellingen sluiten of App verlaten</value>
     <value>Vensterachtergrond</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>Vorige staat herstelt de laatste venstergrootte, positie en monitor.</value>
+    <value>‘Vorige staat’ herstelt de laatste venstergrootte (venster of gemaximaliseerd), positie en monitor.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>Vensterstatus bij opstarten</value>

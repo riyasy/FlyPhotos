@@ -578,7 +578,7 @@ Esc : Chiudi impostazioni o Esci</value>
     <value>Sfondo finestra</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>Lo stato precedente ripristina dimensioni, posizione e monitor della finestra.</value>
+    <value>«Stato precedente» ripristina l'ultima dimensione (in finestra o massimizzata), posizione e monitor.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>Stato finestra all'avvio</value>

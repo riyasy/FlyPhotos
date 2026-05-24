@@ -578,7 +578,7 @@ Esc : Sulje asetukset tai Poistu</value>
     <value>Ikkunan tausta</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>Edellinen tila palauttaa ikkunan viimeisimmän koon, sijainnin ja näytön.</value>
+    <value>’Edellinen tila’ palauttaa ikkunan viimeisimmän koon (ikkunoitu tai maksimoitu), sijainnin ja näytön.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>Ikkunan tila käynnistyksessä</value>

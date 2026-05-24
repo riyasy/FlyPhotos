@@ -578,7 +578,7 @@ Esc : Cerrar ajustes o Salir</value>
     <value>Fondo de la ventana</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>El estado anterior restaura el tamaño, la posición y el monitor de la ventana.</value>
+    <value>«Estado anterior» restaura el último tamaño (en ventana o maximizado), posición y monitor.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>Estado de la ventana al iniciar</value>

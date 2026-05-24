@@ -577,7 +577,7 @@ Esc : 설정 닫기 또는 앱 종료</value>
     <value>창 배경</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>이전 상태는 창의 마지막 크기, 위치 및 모니터를 복원합니다.</value>
+    <value>‘이전 상태’는 마지막 창 모드 또는 최대화 상태의 크기, 위치 및 모니터를 복원합니다.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>시작 시 창 상태</value>

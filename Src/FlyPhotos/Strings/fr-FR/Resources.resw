@@ -578,7 +578,7 @@ Esc : Fermer les paramètres ou Quitter</value>
     <value>Arrière-plan de la fenêtre</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>L’état précédent restaure la taille, la position et l’écran de la fenêtre.</value>
+    <value>« État précédent » restaure la dernière taille (fenêtrée ou maximisée), la position et l'écran.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>État de la fenêtre au démarrage</value>

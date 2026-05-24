@@ -578,7 +578,7 @@ Esc : Close Settings or Exit App</value>
     <value>Window Background</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>Previous state' restores the last window size, position and monitor.</value>
+    <value>'Previous state' restores the last windowed or maximized size, position, and monitor.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>Startup window state</value>

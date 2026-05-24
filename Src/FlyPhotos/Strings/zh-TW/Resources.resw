@@ -578,7 +578,7 @@ Esc：關閉設定或離開應用程式</value>
     <value>視窗背景</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>「上次狀態」會還原視窗的大小、位置與所在螢幕。</value>
+    <value>「上次狀態」會還原上次視窗化或最大化時的大小、位置與所在螢幕。</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>啟動時視窗狀態</value>
