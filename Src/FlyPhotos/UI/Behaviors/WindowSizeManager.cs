@@ -65,7 +65,7 @@ internal readonly record struct WindowStateData(
 ///         the saved placement is safely discarded to prevent off-screen windows.
 ///     </para>
 /// </remarks>
-public sealed partial class WindowSizeManager : IDisposable
+public sealed partial class WindowPlacementManager : IDisposable
 {
     // Fields
 
@@ -136,7 +136,7 @@ public sealed partial class WindowSizeManager : IDisposable
     ///     The opaque string previously received from <see cref="Data" />,
     ///     or <see langword="null" /> / empty to use OS-default placement.
     /// </param>
-    public WindowSizeManager(Window window, string? serialisedData)
+    public WindowPlacementManager(Window window, string? serialisedData)
     {
         _window = window ?? throw new ArgumentNullException(nameof(window));
         _hwnd = WindowNative.GetWindowHandle(_window);
@@ -368,91 +368,4 @@ public sealed partial class WindowSizeManager : IDisposable
         AppWindow.Changed -= OnAppWindowChanged;
     }
 
-    // ---------------------------------------------------------------------------
-    // FullScreen Related Functions
-    // ---------------------------------------------------------------------------
-
-    /// <summary>
-    ///     Tracks whether the window was in a maximized state before entering full-screen mode, to correctly re-maximize
-    ///     it upon exit.
-    /// </summary>
-    private bool _wasMaximizedBeforeFullScreen = false;
-
-    /// <summary>
-    ///     Restores the window from a maximized or full-screen state to its normal overlapped (windowed) state.
-    /// </summary>
-    /// <param name="exitFullScreenButton">
-    ///     An optional UI element (e.g., an 'Exit Full Screen' button) to collapse when
-    ///     restoring from full-screen mode.
-    /// </param>
-    public void Restore(UIElement? exitFullScreenButton = null)
-    {
-        // Use .Kind (a plain enum) instead of `is OverlappedPresenter` / `is FullScreenPresenter`
-        // type-pattern checks. The `is T` form goes through WinRT COM QueryInterface, which the
-        // Release-build trimmer strips — causing the check to silently return false in Release.
-        if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped)
-        {
-            if (AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Maximized } op)
-                op.Restore();
-        }
-        else if (AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen)
-        {
-            exitFullScreenButton?.Visibility = Visibility.Collapsed;
-            AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
-            (AppWindow.Presenter as OverlappedPresenter)?.Restore();
-        }
-    }
-
-    /// <summary>
-    ///     Toggles the window between full-screen mode and the normal overlapped state.
-    ///     Tracks previous maximized state to avoid flickering when returning from full-screen.
-    /// </summary>
-    /// <param name="exitFullScreenButton">
-    ///     An optional UI element (e.g., an 'Exit Full Screen' button) to show during
-    ///     full-screen mode and hide otherwise.
-    /// </param>
-    public void ToggleFullScreen(UIElement? exitFullScreenButton = null)
-    {
-        // Use .Kind (a plain enum) instead of `is OverlappedPresenter` / `is FullScreenPresenter`
-        // type-pattern checks. The `is T` form goes through WinRT COM QueryInterface, which the
-        // Release-build trimmer strips — causing the check to silently return false in Release.
-        if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped)
-        {
-            PauseTracking = true;
-            _wasMaximizedBeforeFullScreen = AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Maximized };
-            AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
-            exitFullScreenButton?.Visibility = Visibility.Visible;
-        }
-        else if (AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen)
-        {
-            PauseTracking = false;
-            exitFullScreenButton?.Visibility = Visibility.Collapsed;
-            // When exiting full screen, and the window was previously maximized,
-            // the window will briefly go to restored window state and
-            // then go to maximized. This causes a flicker. This happens because 
-            // the OverlappedPresenter goes to Restored state internally
-            // when we go fullscreen instead of keeping state as maximized.
-            if (_wasMaximizedBeforeFullScreen)
-                NoFlickerMaximize(_window);
-            AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
-            _wasMaximizedBeforeFullScreen = false;
-        }
-    }
-
-    /// <summary>
-    ///     Maximizes the specified window using Win32 PInvoke, minimizing visual flicker during the transition.
-    /// </summary>
-    /// <remarks>
-    ///     This method applies the maximized window placement and includes a brief delay to ensure the
-    ///     change is fully applied before any subsequent actions. This helps provide a smoother visual experience when
-    ///     maximizing the window.
-    /// </remarks>
-    /// <param name="window">The window to maximize. This parameter cannot be null.</param>
-    private static void NoFlickerMaximize(Window window)
-    {
-        var hwnd = WindowNative.GetWindowHandle(window);
-        Win32Methods.GetWindowPlacement(hwnd, out var placement);
-        placement.showCmd = Win32Methods.SW_SHOWMAXIMIZED;
-        Win32Methods.SetWindowPlacement(hwnd, in placement);
-    }
 }

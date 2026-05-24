@@ -52,7 +52,8 @@ public sealed partial class PhotoDisplayWindow
     private readonly OpacityFader _opacityFader;
     private readonly InactivityFader _inactivityFader;
     private readonly MouseAutoHider _mouseAutoHider;
-    private readonly WindowSizeManager _windSizeManager;
+    private readonly WindowPlacementManager _windPlacementManager;
+    private readonly WindowFullScreenManager _windFullScreenManager;
     private readonly WindowAppearanceManager _windAppearanceManager;
 
     private bool _loadingStarted;
@@ -135,7 +136,9 @@ public sealed partial class PhotoDisplayWindow
         _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
         _mouseAutoHider = new MouseAutoHider(MainLayout, TimeSpan.FromSeconds(1));
-        _windSizeManager = new WindowSizeManager(this, AppConfig.Settings.WindowState);
+        _windPlacementManager = new WindowPlacementManager(this, AppConfig.Settings.WindowState);
+        _windFullScreenManager = new WindowFullScreenManager(this);
+        _windFullScreenManager.FullScreenToggled += isFullScreen => _windPlacementManager.PauseTracking = isFullScreen;
         InitKeyActions();
     }
 
@@ -162,7 +165,7 @@ public sealed partial class PhotoDisplayWindow
 
             // Window
             [(VirtualKey.Escape, false, false)] = AnimatePhotoDisplayWindowClose,
-            [(VirtualKey.F11,    false, false)] = Act(() => _windSizeManager.ToggleFullScreen(ButtonFullScreenClose)),
+            [(VirtualKey.F11,    false, false)] = Act(() => _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose)),
 
             // Photo navigation
             [(VirtualKey.Right, false, false)] = () => _photoController.Fly(NavDirection.Next),
@@ -274,7 +277,7 @@ public sealed partial class PhotoDisplayWindow
         DiskCacherWithSqlite.Shutdown();
 
         _windAppearanceManager.Dispose();
-        _windSizeManager.Dispose();
+        _windPlacementManager.Dispose();
     }
 
     private async void ButtonBack_OnClick(object sender, RoutedEventArgs e)
@@ -542,14 +545,14 @@ public sealed partial class PhotoDisplayWindow
                         {
                             var pointerY = currentPoint.Position.Y;
                             if (pointerY >= AppTitlebar.ActualHeight)
-                                _windSizeManager.Restore(ButtonFullScreenClose);
+                                _windFullScreenManager.Restore(ButtonFullScreenClose);
                         }
                     }
                     break;
                 }
             case Microsoft.UI.Input.PointerUpdateKind.MiddleButtonReleased:
                 {
-                    _windSizeManager.ToggleFullScreen(ButtonFullScreenClose);
+                    _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
                     break;
                 }
             case Microsoft.UI.Input.PointerUpdateKind.XButton1Released: // Mouse Back button pressed
@@ -785,13 +788,13 @@ public sealed partial class PhotoDisplayWindow
     }
 
     /// <summary>
-    ///     Enters full-screen mode at launch, using the same <see cref="WindowSizeManager.ToggleFullScreen"/> path
+    ///     Enters full-screen mode at launch, using the same <see cref="WindowFullScreenManager.ToggleFullScreen"/> path
     ///     as the interactive F11 toggle. This ensures PauseTracking is set, the exit-full-screen button is shown,
     ///     and <c>_wasMaximizedBeforeFullScreen</c> is recorded correctly so exiting later works properly.
     /// </summary>
     internal void EnterFullScreenOnLaunch()
     {
-        _windSizeManager.ToggleFullScreen(ButtonFullScreenClose);
+        _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
     }
 
     private async Task HandleMouseWheelNavigation(int delta, bool isHorizontalScroll)
@@ -853,7 +856,7 @@ public sealed partial class PhotoDisplayWindow
     {
         if (AppConfig.Settings.WindowLaunchMode == WindowLaunchMode.LastWindowState)
         {
-            AppConfig.Settings.WindowState = _windSizeManager.Data;
+            AppConfig.Settings.WindowState = _windPlacementManager.Data;
             AppConfig.Save();
         }
     }
