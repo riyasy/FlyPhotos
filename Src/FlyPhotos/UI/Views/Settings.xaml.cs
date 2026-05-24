@@ -49,7 +49,7 @@ internal sealed partial class Settings
         // Title property is used only by TaskBar label. Actual TitleBar is customized using AppWindow.TitleBar.
         Title = L.Get("SettingsPage/Title").Replace("FlyPhotos - ", string.Empty);
 
-        _windAppearanceManager = new WindowAppearanceManager(this, false);
+        _windAppearanceManager = new WindowAppearanceManager(this, WindowBackdropType.Acrylic);
         _windAppearanceManager.SetupTransparentTitleBar(null);
 
         SettingsCardVersion.Description = 

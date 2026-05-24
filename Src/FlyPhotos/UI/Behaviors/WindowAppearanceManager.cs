@@ -54,30 +54,19 @@ namespace FlyPhotos.UI.Behaviors
         private readonly Window _window;
 
         /// <summary>
-        /// Indicates if the window supports dynamic backdrop changes.
-        /// </summary>
-        private readonly bool _supportsBackDropChange;
-
-        /// <summary>
-        /// The default backdrop type to apply if none is specified or available.
-        /// </summary>
-        private const WindowBackdropType DefaultBackdrop = WindowBackdropType.Acrylic;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="WindowAppearanceManager"/> class.
         /// </summary>
         /// <param name="window">The target window.</param>
-        /// <param name="supportsBackDropChange">Whether changing the backdrop dynamically is supported.</param>
-        public WindowAppearanceManager(Window window, bool supportsBackDropChange = true)
+        /// <param name="initialBackdrop">The backdrop to apply immediately.</param>
+        public WindowAppearanceManager(Window window, WindowBackdropType initialBackdrop)
         {
             _window = window;
-            _supportsBackDropChange = supportsBackDropChange;
 
             _configurationSource = new SystemBackdropConfiguration { IsInputActive = true };
             _window.Activated += Window_Activated;
             ((FrameworkElement)_window.Content).ActualThemeChanged += Window_ActualThemeChanged;
             SetConfigurationSourceTheme();
-            SetWindowBackdropPrivate(supportsBackDropChange ? AppConfig.Settings.WindowBackdrop : DefaultBackdrop);
+            SetWindowBackdropPrivate(initialBackdrop);
             SetWindowTheme(AppConfig.Settings.Theme);
         }
 
@@ -103,13 +92,12 @@ namespace FlyPhotos.UI.Behaviors
         }
 
         /// <summary>
-        /// Sets the window backdrop if supported.
+        /// Sets the window backdrop.
         /// </summary>
         /// <param name="backdropType">The type of backdrop to apply.</param>
         public void SetWindowBackdrop(WindowBackdropType backdropType)
         {
-            if (_supportsBackDropChange) 
-                SetWindowBackdropPrivate(backdropType);
+            SetWindowBackdropPrivate(backdropType);
         }
 
         /// <summary>

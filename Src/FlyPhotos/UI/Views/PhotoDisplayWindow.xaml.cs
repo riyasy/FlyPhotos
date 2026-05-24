@@ -82,7 +82,7 @@ public sealed partial class PhotoDisplayWindow
         (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumWidth = 400;
         (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumHeight = 300;
 
-        _windAppearanceManager = new WindowAppearanceManager(this);
+        _windAppearanceManager = new WindowAppearanceManager(this, AppConfig.Settings.WindowBackdrop);
         _windAppearanceManager.SetupTransparentTitleBar(AppTitlebar);
 
         DispatcherQueue.EnsureSystemDispatcherQueue();
