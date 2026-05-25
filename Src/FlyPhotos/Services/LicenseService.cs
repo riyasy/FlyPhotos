@@ -17,7 +17,7 @@ public sealed class LicenseService
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    LicenseState _licenseState = LicenseState.Full;
+    private volatile LicenseState _licenseState = LicenseState.Full;
 
     public static LicenseService Instance { get; } = new();
 

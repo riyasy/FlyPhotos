@@ -150,8 +150,6 @@ internal partial class PhotoDisplayController
             // Secondary instances skip all background caching threads.
             if (AppConfig.Volatile.IsSecondaryInstance) return;
 
-            if (LicenseService.Instance.State == LicenseState.TrialExpired) return;
-
             var previewCachingThread = new Thread(() => PreviewCacheBuilderDoWork(_cts.Token)) { IsBackground = true };
             previewCachingThread.Start();
             var hqCachingThread = new Thread(() => HqImageCacheBuilderDoWork(_cts.Token))

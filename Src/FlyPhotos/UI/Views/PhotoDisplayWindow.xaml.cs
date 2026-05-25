@@ -58,6 +58,8 @@ public sealed partial class PhotoDisplayWindow
     private readonly WindowAppearanceManager _windAppearanceManager;
 
     private bool _loadingStarted;
+    private bool _firstPhotoLoaded;
+    private bool _licenseCheckDone;
 
     // Accumulators for smooth scrolling
     private int _verticalDeltaAccumulator;
@@ -867,11 +869,17 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
-    private void OnFirstPhotoLoaded() => DispatcherQueue.TryEnqueue(CheckLicense);
+    private void OnFirstPhotoLoaded() => DispatcherQueue.TryEnqueue(() =>
+    {
+        _firstPhotoLoaded = true;
+        if (_licenseCheckDone) CheckLicense();
+    });
 
     private async void MainLayout_Loaded(object sender, RoutedEventArgs e)
     {
         await LicenseService.Instance.RefreshLicenseStateAsync();
+        _licenseCheckDone = true;
+        if (_firstPhotoLoaded) CheckLicense();
     }
 
     private async void CheckLicense()
