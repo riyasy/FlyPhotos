@@ -566,7 +566,7 @@ public sealed partial class PhotoDisplayWindow
                     if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom)
                         _canvasController.StepZoom(ZoomDirection.Out, dpiAdjustedPosition);
                     else
-                        await _photoController.Fly(NavDirection.Prev);
+                        await _photoController.FlyBy(-1);
                     break;
                 }
             case Microsoft.UI.Input.PointerUpdateKind.XButton2Released: // Mouse Forward button pressed
@@ -574,7 +574,7 @@ public sealed partial class PhotoDisplayWindow
                     if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom)
                         _canvasController.StepZoom(ZoomDirection.In, dpiAdjustedPosition);
                     else
-                        await _photoController.Fly(NavDirection.Next);
+                        await _photoController.FlyBy(1);
                     break;
                 }
         }
