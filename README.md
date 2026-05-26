@@ -1,4 +1,4 @@
-# Fly Photos [![Github All Releases](https://img.shields.io/github/downloads/riyasy/Flyphotos/total.svg)]()
+# Fly Photos [![Github All Releases](https://img.shields.io/github/downloads/riyasy/FlyPhotos/total.svg)]()
 
 Fly Photos is one of the fastest photo viewers for Windows, designed as a modern replacement for the now-discontinued Google Picasa Photo Viewer.  
 Built with **WinUI 3, WinRT, and Win2D**, it delivers smooth animations, instant startup, and an efficient viewing experience.  
@@ -31,7 +31,8 @@ Watch Fly Photos in action:
 | **Security** | ✅ Signed and certified by Microsoft | ❌ Not signed |
 
 ---
-## 📥 Installation
+
+## 📦 Installation
 
 - Option 1 : [**Install from Microsoft Store**](https://apps.microsoft.com/detail/9pmsk128v1qt?launch=true&cid=GitHubRelease&mode=full)
 - Option 2 : Download and install MSI from Github [**Releases Page**](https://github.com/riyasy/FlyPhotos/releases)
@@ -39,7 +40,7 @@ Watch Fly Photos in action:
 
 ## 🚀 Getting Started
 
-Once installed, these are the ways to use Fly to view photos
+Once installed, you can open photos in three ways:
 
 ### 1. Context Menu (Right-Click)
 Right-click an image, select **"Open with"**, and choose **Fly Photos** from the list.
@@ -50,7 +51,7 @@ Launch **Fly Photos** directly from the Start menu. You can then use the file pi
 ### 3. Set as Default App
 To open images with Fly Photos automatically when you double-click them:
 1. Right-click an image file (e.g., a `.jpg`).
-2. Select **"Open With"** and **"Choose Another App"** and Select **FlyPhotos** from List and click **Always**.
+2. Select **"Open With"** and **"Choose Another App"** and select **FlyPhotos** from the list and click **Always**.
 3. Repeat this for other file types (PNG, WEBP, etc.) as needed.
 
 ---
@@ -64,12 +65,12 @@ To open images with Fly Photos automatically when you double-click them:
 
 - **Image format support**
   - All formats supported by Windows Imaging Component (JPEG, PNG, TIFF, RAW, etc.).  
-  - Extended support for PSD (with transparency), HEIC/HEIF, SVG, GIF, and APNG (Animated PNG).  
+  - Extended support for PSD (with transparency), HEIC/HEIF, SVG, GIF, APNG (Animated PNG), animated WebP, and AVIF.  
 
 - **Viewing experience**
   - Transparent background like in Picasa Photo Viewer.  
-  - Modern Windows themes like Mica, Acrylic, and Frozen Glass.  
-  - Smooth pan and zoom animations.  
+  - Modern Windows themes like Mica, Acrylic, and Frozen Glass (a frosted blur variant).  
+  - Smooth pan, zoom, and rotation.  
   - Thumbnail strip with adjustable size and click-to-jump navigation.  
   - Multi-monitor support (remembers last used monitor).  
 
@@ -84,35 +85,48 @@ To open images with Fly Photos automatically when you double-click them:
 
 | Category | Action | Shortcut |
 |-----------|---------|-----------|
-| **🖐 Touchpad** | Navigate photos | Two-finger Swipe Left / Right |
+| **🖐 Touchpad** | Navigate Photos | Two-finger Swipe Left / Right |
 |  | Zoom or Navigate | Two-finger Swipe Up / Down (based on setting) |
 |  | Zoom In / Out | Pinch Open / Close |
-| **🖱 Mouse** | Zoom / Navigate | Wheel Scroll (based on setting) |
+| **🖱 Mouse** | Pan Photo | Left Click + Drag |
+|  | Context Menu | Right Click |
+|  | Zoom In | Right Click + Hold |
+|  | Zoom / Navigate | Wheel Scroll (based on setting) |
 |  | Always Zoom | Ctrl + Wheel |
 |  | Always Navigate | Alt + Wheel |
 |  | Navigate Photos | Tilt Wheel Left / Right |
-|  | Pan Photo | Click + Drag |
+|  | Full Screen | Middle Click |
 |  | Navigate Photos | Mouse Back / Forward Buttons |
 |  | Navigate Photos | Wheel on Thumbnail Strip |
-|  | Navigate / Rotate | Wheel on On-screen Buttons |
+|  | Navigate Photos | Wheel on On-screen Left / Right Button |
+|  | Rotate Photo | Wheel on On-screen Rotate Button |
 | **⌨️ Keyboard** | Next / Previous Photo | ← / → |
 |  | Fly-through Mode | Hold ← / → |
-|  | Zoom In / Out | ↑ / ↓ OR Ctrl + (+ / −) |
-|  | Zoom Presets | Page Up / Page Down |
+|  | Zoom In / Out | ↑ / ↓  or  Ctrl + + / − |
+|  | Cycle Zoom Presets (Fit / 100% / 400%) | Page Up / Page Down |
+|  | Zoom to Actual Size | A |
+|  | Fit to Window | F |
 |  | Pan Photo | Ctrl + Arrow Keys |
-|  | Multi-page TIFF Nav | Alt + Left / Right |
-|  | Jump First / Last | Home / End |
-|  | Delete Photo | Del |
-|  | Show Properties | D |
+|  | Navigate Pages (multi-page TIFF) | Alt + ← / → |
+|  | Jump to First Photo | Home |
+|  | Jump to Last Photo | End |
+|  | Full Screen | F11 |
+|  | Show File Properties (General) | Alt + Enter |
+|  | Show File Properties (Details) | D |
+|  | Show File in Windows Explorer | W |
+|  | Share File | S |
+|  | Show External Apps Panel | E |
+|  | Open in External App 1–4 | Ctrl + 1–4 |
 |  | Copy to Clipboard | Ctrl + C |
-|  | Exit App | Esc |
+|  | Delete Photo | Del |
+|  | Close Settings / Exit App | Esc |
 
 ---
 
 ## 🚧 Known Limitations
 - SVG rendering limited to 2000px on the longest side.  
-- HDR Support yet to be implemented
-- Max Resolution of the images which can be displayed depends on DirectX device capability
+- HDR support yet to be implemented.  
+- Very large images (e.g. >16384px) may not display on all hardware due to DirectX texture size limits.  
 
 ---
 
