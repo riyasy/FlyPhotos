@@ -63,6 +63,32 @@ internal sealed class WindowCaptionButtonFader
     }
 
     /// <summary>
+    ///     Gets or sets whether the fader is active. When <see langword="false"/>, the caption
+    ///     buttons are forced visible (Standard titlebar height) and pointer-driven show/hide
+    ///     logic is ignored. When toggled back to <see langword="true"/>, the buttons are
+    ///     hidden again, matching constructor behavior.
+    /// </summary>
+    internal bool Enabled
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            if (value)
+            {
+                HideButtons();
+            }
+            else
+            {
+                _hideTimer.Stop();
+                _buttonsVisible = true;
+                _titleBar.PreferredHeightOption = TitleBarHeightOption.Standard;
+            }
+        }
+    } = true;
+
+    /// <summary>
     ///     Initialises the fader, wires up the pointer-move listener, and immediately
     ///     hides the caption buttons.
     /// </summary>
@@ -74,7 +100,11 @@ internal sealed class WindowCaptionButtonFader
     ///     The root <see cref="UIElement"/> of the window (typically the full-window layout grid).
     ///     <see cref="UIElement.PointerMoved"/> is used to track pointer position.
     /// </param>
-    public WindowCaptionButtonFader(AppWindowTitleBar titleBar, UIElement rootElement)
+    /// <param name="enabled">
+    ///     Initial value for <see cref="Enabled"/>. When <see langword="false"/>, the fader is
+    ///     created but does nothing until <see cref="Enabled"/> is set to <see langword="true"/>.
+    /// </param>
+    public WindowCaptionButtonFader(AppWindowTitleBar titleBar, UIElement rootElement, bool enabled)
     {
         _titleBar = titleBar;
 
@@ -82,7 +112,9 @@ internal sealed class WindowCaptionButtonFader
         _hideTimer.Tick += (_, _) => HideButtons();
 
         rootElement.PointerMoved += OnPointerMoved;
-        HideButtons();
+
+        Enabled = enabled;
+        if (enabled) HideButtons();
     }
 
     /// <summary>
@@ -92,7 +124,7 @@ internal sealed class WindowCaptionButtonFader
     /// </summary>
     private void OnPointerMoved(object sender, PointerRoutedEventArgs e)
     {
-        if (Suspended) return;
+        if (Suspended || !Enabled) return;
 
         var y = e.GetCurrentPoint((UIElement)sender).Position.Y;
         if (y <= TitlebarZoneHeight)

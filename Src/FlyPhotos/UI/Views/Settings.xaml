@@ -420,8 +420,15 @@
                             x:Name="SettingsCardAutoHideMouse"
                             x:Uid="SettingsCardAutoHideMouse"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE8B0;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xED1A;}">
                             <ToggleSwitch x:Name="ButtonEnableAutoHideMouse" HorizontalAlignment="Right" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardAutoHideCaptionButtons"
+                            x:Uid="SettingsCardAutoHideCaptionButtons"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xED1A;}">
+                            <ToggleSwitch x:Name="ButtonEnableAutoHideCaptionButtons" HorizontalAlignment="Right" />
                         </controls:SettingsCard>
 
                         <!--  *****************  -->

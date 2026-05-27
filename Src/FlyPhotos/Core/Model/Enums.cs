@@ -62,7 +62,8 @@ public enum Setting
     FileNameShowHide,
     CacheStatusShowHide,
     ExtShortcutsShowHide,
-    ImageDimensionsShowHide
+    ImageDimensionsShowHide,
+    CaptionButtonsAutoHideToggle
 }
 
 public enum ScrollDirection

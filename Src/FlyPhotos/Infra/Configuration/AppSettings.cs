@@ -75,6 +75,7 @@ public class AppSettings
     public bool ShowCacheStatus { get; set; } = true;
     public bool ShowImageDimensions { get; set; } = false;
     public bool AutoHideMouse { get; set; } = false;
+    public bool AutoHideCaptionButtons { get; set; } = false;
 
     public bool UseExternalExeForContextMenu { get; set; } = false;
 

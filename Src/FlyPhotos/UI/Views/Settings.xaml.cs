@@ -91,6 +91,7 @@ internal sealed partial class Settings
         ButtonShowImageDimensions.IsOn = AppConfig.Settings.ShowImageDimensions;
         ComboPanZoomNavBehaviour.SelectedIndex = GetIndexForPanZoomBehaviour(AppConfig.Settings.PanZoomBehaviourOnNavigation);
         ButtonEnableAutoHideMouse.IsOn = AppConfig.Settings.AutoHideMouse;
+        ButtonEnableAutoHideCaptionButtons.IsOn = AppConfig.Settings.AutoHideCaptionButtons;
         ButtonEnableExternalShortcut.IsOn = AppConfig.Settings.ShowExternalAppShortcuts;
         ButtonDecodeRawData.IsOn = AppConfig.Settings.DecodeRawData;
 
@@ -120,6 +121,7 @@ internal sealed partial class Settings
         ButtonShowCacheStatusExpander.Toggled += ButtonShowCacheStatusExpander_OnToggled;
         ComboPanZoomNavBehaviour.SelectionChanged += ComboPanZoomNavBehaviour_OnSelectionChanged;
         ButtonEnableAutoHideMouse.Toggled += ButtonEnableAutoHideMouse_OnToggled;
+        ButtonEnableAutoHideCaptionButtons.Toggled += ButtonEnableAutoHideCaptionButtons_OnToggled;
         ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
         ButtonDecodeRawData.Toggled += ButtonDecodeRawData_OnToggled;
         AppConfig.Settings.RawDecoderPriorityAsStrings.CollectionChanged += RawDecoderPriorityAsStrings_CollectionChanged;
@@ -186,6 +188,13 @@ internal sealed partial class Settings
     private async void ButtonEnableAutoHideMouse_OnToggled(object sender, RoutedEventArgs e)
     {
         AppConfig.Settings.AutoHideMouse = ButtonEnableAutoHideMouse.IsOn;
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ButtonEnableAutoHideCaptionButtons_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.AutoHideCaptionButtons = ButtonEnableAutoHideCaptionButtons.IsOn;
+        SettingChanged?.Invoke(Setting.CaptionButtonsAutoHideToggle);
         await AppConfig.SaveAsync();
     }
 

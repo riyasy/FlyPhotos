@@ -324,6 +324,12 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
     <value>Automatically hide mouse pointer</value>
   </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>Hide the minimize, maximize and close buttons unless the pointer is near the top of the window.</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>Automatically hide caption buttons</value>
+  </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
     <value>Delete all previews from disk cache.</value>
   </data>
