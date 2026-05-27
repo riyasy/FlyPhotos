@@ -114,7 +114,7 @@
                                         x:Name="SliderTransparentBackgroundIntensity"
                                         MinWidth="150"
                                         Maximum="90"
-                                        Minimum="30"
+                                        Minimum="20"
                                         SmallChange="10"
                                         StepFrequency="10"
                                         Value="60" />
