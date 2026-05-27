@@ -192,6 +192,7 @@ internal sealed partial class Settings
     private async void ButtonEnableAutoHideMouse_OnToggled(object sender, RoutedEventArgs e)
     {
         AppConfig.Settings.AutoHideMouse = ButtonEnableAutoHideMouse.IsOn;
+        SettingChanged?.Invoke(Setting.AutoHideMouseToggle);
         await AppConfig.SaveAsync();
     }
 
@@ -317,6 +318,7 @@ internal sealed partial class Settings
     private async void ButtonEnableAutoFade_OnToggled(object sender, RoutedEventArgs e)
     {
         AppConfig.Settings.AutoFade = ButtonEnableAutoFade.IsOn;
+        SettingChanged?.Invoke(Setting.AutoFadeToggle);
         await AppConfig.SaveAsync();
     }
 

@@ -137,9 +137,9 @@ public sealed partial class PhotoDisplayWindow
         _repeatButtonReleaseCheckTimer.Tick += RepeatButtonReleaseCheckTimer_Tick;
         _wheelScrollBrakeTimer.Tick += WheelScrollBrakeTimer_Tick;
 
-        _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout);
+        _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout, AppConfig.Settings.AutoFade);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
-        _mouseAutoHider = new MouseAutoHider(MainLayout, TimeSpan.FromSeconds(1));
+        _mouseAutoHider = new MouseAutoHider(MainLayout, AppConfig.Settings.AutoHideMouse, TimeSpan.FromSeconds(1));
         _windPlacementManager = new WindowPlacementManager(this, AppConfig.Settings.WindowState);
         _windFullScreenManager = new WindowFullScreenManager(this);
         _captionButtonFader = new WindowCaptionButtonFader(AppWindow.TitleBar, MainLayout, AppConfig.Settings.AutoHideCaptionButtons);
@@ -780,6 +780,12 @@ public sealed partial class PhotoDisplayWindow
                 break;
             case Setting.CtrlDragToMoveWindowToggle:
                 _ctrlDragWindowMover.Enabled = AppConfig.Settings.CtrlDragToMoveWindow;
+                break;
+            case Setting.AutoFadeToggle:
+                _opacityFader.Enabled = AppConfig.Settings.AutoFade;
+                break;
+            case Setting.AutoHideMouseToggle:
+                _mouseAutoHider.Enabled = AppConfig.Settings.AutoHideMouse;
                 break;
         }
     }

@@ -64,7 +64,9 @@ public enum Setting
     ExtShortcutsShowHide,
     ImageDimensionsShowHide,
     CaptionButtonsAutoHideToggle,
-    CtrlDragToMoveWindowToggle
+    CtrlDragToMoveWindowToggle,
+    AutoFadeToggle,
+    AutoHideMouseToggle
 }
 
 public enum ScrollDirection

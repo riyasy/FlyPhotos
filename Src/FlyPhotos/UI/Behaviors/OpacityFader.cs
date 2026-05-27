@@ -66,7 +66,7 @@ public partial class OpacityFader : IDisposable
     /// An optional <see cref="TimeSpan"/> specifying the duration of the opacity fade animation.
     /// If null, a default duration of 500 milliseconds is used.
     /// </param>
-    public OpacityFader(IEnumerable<FrameworkElement> elementsToFade, FrameworkElement trackingElement, TimeSpan? fadeDuration = null)
+    public OpacityFader(IEnumerable<FrameworkElement> elementsToFade, FrameworkElement trackingElement, bool enabled, TimeSpan? fadeDuration = null)
     {
         ArgumentNullException.ThrowIfNull(elementsToFade);
         ArgumentNullException.ThrowIfNull(trackingElement);
@@ -84,21 +84,43 @@ public partial class OpacityFader : IDisposable
         _compositor = _visuals[0].Compositor;
         _trackingElement = trackingElement;
         _defaultDuration = fadeDuration ?? TimeSpan.FromMilliseconds(500);
-        _isFaded = false; // Initial state is assumed not faded, will be updated by InitializeFadeState
+        _isFaded = false;
 
         _initialFadeTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
         _initialFadeTimer.Tick += InitialFadeTimer_Tick;
 
-        Attach();
-        InitializeFadeState();
+        Enabled = enabled;
     }
 
     /// <summary>
-    /// Attaches necessary event handlers to the tracking element.
+    ///     When <see langword="false"/>, <see cref="PointerMoved"/> is unsubscribed and the elements
+    ///     are restored to full opacity. When toggled back to <see langword="true"/>, pointer tracking
+    ///     and the initial-fade timer restart.
     /// </summary>
-    private void Attach()
+    internal bool Enabled
     {
-        _trackingElement.PointerMoved += TrackingElement_PointerMoved;
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            if (value)
+            {
+                _trackingElement.PointerMoved += TrackingElement_PointerMoved;
+                InitializeFadeState();
+            }
+            else
+            {
+                _trackingElement.PointerMoved -= TrackingElement_PointerMoved;
+                _trackingElement.Loaded -= TrackingElement_Loaded;
+                _initialFadeTimer.Stop();
+                if (_isFaded)
+                {
+                    FadeTo(1.0f);
+                    _isFaded = false;
+                }
+            }
+        }
     }
 
     /// <summary>

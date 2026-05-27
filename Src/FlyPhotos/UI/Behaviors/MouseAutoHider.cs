@@ -57,36 +57,65 @@ public partial class MouseAutoHider : IDisposable
     /// Initializes a new instance of the MouseInactivityHelper.
     /// </summary>
     /// <param name="host">The UI element to attach to.</param>
+    /// <param name="enabled">Whether auto-hiding is active from the start.</param>
     /// <param name="timeout">The duration of inactivity before the cursor is hidden.</param>
-    public MouseAutoHider(CursorHost host, TimeSpan? timeout = null)
+    public MouseAutoHider(CursorHost host, bool enabled, TimeSpan? timeout = null)
     {
-        // Resolve the path to the cursor file for both packaged and unpackaged app scenarios.
         var cursorPath = Path.Combine(PathResolver.IsPackagedApp ?
             Windows.ApplicationModel.Package.Current.InstalledLocation.Path : AppContext.BaseDirectory, "Assets", "transparent.cur");
         _transparentCursor = Win32CursorMethods.LoadCursor(cursorPath);
 
-        // Set up the host element and the initial cursor state.
         _host = host ?? throw new ArgumentNullException(nameof(host));
         _host.PublicCursor = _defaultCursor;
 
-        // Configure the inactivity timer.
         _inActivityTimer = new DispatcherTimer { Interval = timeout ?? TimeSpan.FromSeconds(1) };
         _inActivityTimer.Tick += OnInactivityTimeout;
 
-        // Configure the grace period timer to prevent cursor bounce.
         _ignoreActivityTimer = new Timer(TimeSpan.FromMilliseconds(250));
         _ignoreActivityTimer.Elapsed += IgnoreActivityTimeout;
-        _ignoreActivityTimer.AutoReset = false; // Ensures the timer only runs once per start.
+        _ignoreActivityTimer.AutoReset = false;
 
-        // Subscribe to all relevant pointer events to detect user activity.
-        _host.PointerMoved += OnPointerActivity;
-        _host.PointerPressed += OnPointerActivity;
-        _host.PointerReleased += OnPointerActivity;
-        _host.PointerWheelChanged += OnPointerActivity;
-
-        // Store the handler so it can be unsubscribed later.
         _onHostLoaded = (_, _) => ResetInactivityTimer();
-        _host.Loaded += _onHostLoaded;
+
+        Enabled = enabled;
+    }
+
+    /// <summary>
+    ///     Gets or sets whether auto-hiding is active. When <see langword="false"/>, all pointer
+    ///     event subscriptions and timers are torn down and the cursor is restored.
+    /// </summary>
+    internal bool Enabled
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            if (value)
+            {
+                _host.PointerMoved        += OnPointerActivity;
+                _host.PointerPressed      += OnPointerActivity;
+                _host.PointerReleased     += OnPointerActivity;
+                _host.PointerWheelChanged += OnPointerActivity;
+                if (_host.IsLoaded)
+                    ResetInactivityTimer();
+                else
+                    _host.Loaded += _onHostLoaded;
+            }
+            else
+            {
+                _host.PointerMoved        -= OnPointerActivity;
+                _host.PointerPressed      -= OnPointerActivity;
+                _host.PointerReleased     -= OnPointerActivity;
+                _host.PointerWheelChanged -= OnPointerActivity;
+                _host.Loaded              -= _onHostLoaded;
+                _inActivityTimer.Stop();
+                _ignoreActivityTimer.Stop();
+                _isIgnoringActivity = false;
+                if (!_isCursorShown)
+                    SetCursorVisible(true);
+            }
+        }
     }
 
     /// <summary>
