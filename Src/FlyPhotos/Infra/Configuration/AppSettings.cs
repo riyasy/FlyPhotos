@@ -76,6 +76,7 @@ public class AppSettings
     public bool ShowImageDimensions { get; set; } = false;
     public bool AutoHideMouse { get; set; } = false;
     public bool AutoHideCaptionButtons { get; set; } = false;
+    public bool ClickOutsideImageToRestoreWindow { get; set; } = true;
 
     public bool UseExternalExeForContextMenu { get; set; } = false;
 

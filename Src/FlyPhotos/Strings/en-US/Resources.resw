@@ -330,6 +330,12 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Automatically hide caption buttons</value>
   </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>Clicking outside the photo restores the window from fullscreen or maximized state.</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>Click outside image to restore window</value>
+  </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
     <value>Delete all previews from disk cache.</value>
   </data>

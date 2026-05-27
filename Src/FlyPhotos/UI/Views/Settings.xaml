@@ -259,6 +259,14 @@
                             <ToggleSwitch x:Name="ButtonConfirmBeforeDelete" />
                         </controls:SettingsCard>
 
+                        <controls:SettingsCard
+                            x:Name="SettingsCardClickOutsideImageToRestoreWindow"
+                            x:Uid="SettingsCardClickOutsideImageToRestoreWindow"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE944;}">
+                            <ToggleSwitch x:Name="ButtonClickOutsideImageToRestoreWindow" />
+                        </controls:SettingsCard>
+
                         <!--  *****************  -->
 
                         <TextBlock

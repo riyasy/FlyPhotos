@@ -552,7 +552,8 @@ public sealed partial class PhotoDisplayWindow
                         if (!_canvasController.IsPressedOnImage(dpiAdjustedPosition))
                         {
                             var pointerY = currentPoint.Position.Y;
-                            if (pointerY >= AppTitlebar.ActualHeight)
+                            if (pointerY >= AppTitlebar.ActualHeight
+                                && AppConfig.Settings.ClickOutsideImageToRestoreWindow)
                                 _windFullScreenManager.Restore(ButtonFullScreenClose);
                         }
                     }
