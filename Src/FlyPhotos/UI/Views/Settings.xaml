@@ -402,28 +402,28 @@
                             Margin="0,20,0,0"
                             Style="{StaticResource BodyStrongTextBlockStyle}" />
 
-                        <controls:SettingsCard
+                        <controls:SettingsExpander
                             x:Name="SettingsCardFadeControls"
                             x:Uid="SettingsCardFadeControls"
                             Margin="0,5,0,0"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE754;}">
                             <ToggleSwitch x:Name="ButtonEnableAutoFade" HorizontalAlignment="Right" />
-                        </controls:SettingsCard>
-                        <controls:SettingsCard
-                            x:Name="SettingsCardFadeIntensity"
-                            x:Uid="SettingsCardFadeIntensity"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE94C;}"
-                            IsEnabled="{x:Bind ButtonEnableAutoFade.IsOn, Mode=OneWay}">
-                            <Slider
-                                x:Name="SliderFadeIntensity"
-                                MinWidth="150"
-                                Maximum="100"
-                                Minimum="30"
-                                SmallChange="10"
-                                StepFrequency="10"
-                                Value="50" />
-                        </controls:SettingsCard>
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardFadeIntensity"
+                                    x:Uid="SettingsCardFadeIntensity"
+                                    IsEnabled="{x:Bind ButtonEnableAutoFade.IsOn, Mode=OneWay}">
+                                    <Slider
+                                        x:Name="SliderFadeIntensity"
+                                        MinWidth="150"
+                                        Maximum="100"
+                                        Minimum="30"
+                                        SmallChange="10"
+                                        StepFrequency="10"
+                                        Value="50" />
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
                         <controls:SettingsCard
                             x:Name="SettingsCardAutoHideMouse"
                             x:Uid="SettingsCardAutoHideMouse"
