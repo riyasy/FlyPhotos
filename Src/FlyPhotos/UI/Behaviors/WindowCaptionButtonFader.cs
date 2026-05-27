@@ -32,9 +32,10 @@ internal sealed class WindowCaptionButtonFader
     /// <summary>
     ///     Delay after the pointer leaves the titlebar zone before the buttons are hidden.
     /// </summary>
-    private static readonly TimeSpan HideDelay = TimeSpan.FromMilliseconds(1500);
+    private static readonly TimeSpan HideDelay = TimeSpan.FromMilliseconds(1000);
 
     private readonly AppWindowTitleBar _titleBar;
+    private readonly UIElement _rootElement;
 
     /// <summary>
     ///     Fires <see cref="HideButtons"/> after <see cref="HideDelay"/> of pointer inactivity
@@ -77,16 +78,18 @@ internal sealed class WindowCaptionButtonFader
             field = value;
             if (value)
             {
+                _rootElement.PointerMoved += OnPointerMoved;
                 HideButtons();
             }
             else
             {
+                _rootElement.PointerMoved -= OnPointerMoved;
                 _hideTimer.Stop();
                 _buttonsVisible = true;
                 _titleBar.PreferredHeightOption = TitleBarHeightOption.Standard;
             }
         }
-    } = true;
+    }
 
     /// <summary>
     ///     Initialises the fader, wires up the pointer-move listener, and immediately
@@ -107,14 +110,12 @@ internal sealed class WindowCaptionButtonFader
     public WindowCaptionButtonFader(AppWindowTitleBar titleBar, UIElement rootElement, bool enabled)
     {
         _titleBar = titleBar;
+        _rootElement = rootElement;
 
         _hideTimer = new DispatcherTimer { Interval = HideDelay };
         _hideTimer.Tick += (_, _) => HideButtons();
 
-        rootElement.PointerMoved += OnPointerMoved;
-
         Enabled = enabled;
-        if (enabled) HideButtons();
     }
 
     /// <summary>
@@ -124,7 +125,7 @@ internal sealed class WindowCaptionButtonFader
     /// </summary>
     private void OnPointerMoved(object sender, PointerRoutedEventArgs e)
     {
-        if (Suspended || !Enabled) return;
+        if (Suspended) return;
 
         var y = e.GetCurrentPoint((UIElement)sender).Position.Y;
         if (y <= TitlebarZoneHeight)
