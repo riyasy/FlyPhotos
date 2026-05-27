@@ -56,6 +56,7 @@ public sealed partial class PhotoDisplayWindow
     private readonly WindowPlacementManager _windPlacementManager;
     private readonly WindowFullScreenManager _windFullScreenManager;
     private readonly WindowAppearanceManager _windAppearanceManager;
+    private readonly CtrlDragWindowMover _ctrlDragWindowMover;
 
     private bool _loadingStarted;
     private bool _firstPhotoLoaded;
@@ -142,6 +143,7 @@ public sealed partial class PhotoDisplayWindow
         _windPlacementManager = new WindowPlacementManager(this, AppConfig.Settings.WindowState);
         _windFullScreenManager = new WindowFullScreenManager(this);
         _captionButtonFader = new WindowCaptionButtonFader(AppWindow.TitleBar, MainLayout, AppConfig.Settings.AutoHideCaptionButtons);
+        _ctrlDragWindowMover = new CtrlDragWindowMover(D2dCanvas, AppWindow, AppConfig.Settings.CtrlDragToMoveWindow);
         _windFullScreenManager.FullScreenToggled += isFullScreen =>
         {
             _windPlacementManager.PauseTracking = isFullScreen;
@@ -282,6 +284,7 @@ public sealed partial class PhotoDisplayWindow
         _opacityFader.Dispose();
         _inactivityFader.Dispose();
         _mouseAutoHider.Dispose();
+        _ctrlDragWindowMover.Dispose();
         DiskCacherWithSqlite.Shutdown();
 
         _windAppearanceManager.Dispose();
@@ -495,6 +498,7 @@ public sealed partial class PhotoDisplayWindow
         if (updateKind == Microsoft.UI.Input.PointerUpdateKind.LeftButtonPressed || pointerPoint.Properties.IsLeftButtonPressed)
         {
             if (!_canvasController.IsPressedOnImage(dpiAdjustedPos)) return;
+            if (_ctrlDragWindowMover.Enabled && Util.IsControlPressed()) return;
             D2dCanvas.CapturePointer(e.Pointer);
             _lastPoint = pointerPoint.Position;
             _isDragging = true;
@@ -773,6 +777,9 @@ public sealed partial class PhotoDisplayWindow
                 break;
             case Setting.CaptionButtonsAutoHideToggle:
                 _captionButtonFader.Enabled = AppConfig.Settings.AutoHideCaptionButtons;
+                break;
+            case Setting.CtrlDragToMoveWindowToggle:
+                _ctrlDragWindowMover.Enabled = AppConfig.Settings.CtrlDragToMoveWindow;
                 break;
         }
     }

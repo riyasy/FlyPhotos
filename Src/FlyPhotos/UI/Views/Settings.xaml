@@ -438,6 +438,13 @@
                             HeaderIcon="{ui:FontIcon Glyph=&#xED1A;}">
                             <ToggleSwitch x:Name="ButtonEnableAutoHideCaptionButtons" HorizontalAlignment="Right" />
                         </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardCtrlDragToMoveWindow"
+                            x:Uid="SettingsCardCtrlDragToMoveWindow"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE7C2;}">
+                            <ToggleSwitch x:Name="ButtonCtrlDragToMoveWindow" HorizontalAlignment="Right" />
+                        </controls:SettingsCard>
 
                         <!--  *****************  -->
 

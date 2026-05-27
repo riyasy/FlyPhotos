@@ -63,7 +63,8 @@ public enum Setting
     CacheStatusShowHide,
     ExtShortcutsShowHide,
     ImageDimensionsShowHide,
-    CaptionButtonsAutoHideToggle
+    CaptionButtonsAutoHideToggle,
+    CtrlDragToMoveWindowToggle
 }
 
 public enum ScrollDirection

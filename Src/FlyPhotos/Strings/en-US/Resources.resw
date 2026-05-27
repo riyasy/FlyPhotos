@@ -330,6 +330,12 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Automatically hide caption buttons</value>
   </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>Hold Ctrl and drag the image to reposition the window.</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>Ctrl+drag to move window</value>
+  </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
     <value>Clicking outside the photo restores the window from fullscreen or maximized state.</value>
   </data>
