@@ -61,6 +61,7 @@ public sealed partial class CtrlDragWindowMover : IDisposable
         if (!Util.IsControlPressed()) return;
         var point = e.GetCurrentPoint(_canvas);
         if (!point.Properties.IsLeftButtonPressed) return;
+        if (_appWindow.Presenter is not OverlappedPresenter { State: OverlappedPresenterState.Restored }) return;
         GetCursorPos(out _startCursorPos);
         _startWindowPos = _appWindow.Position;
         _isActive = true;
