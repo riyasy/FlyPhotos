@@ -679,4 +679,22 @@ Esc : Stäng inställningar eller Avsluta</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Stegvis zoom</value>
   </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>Genom att klicka utanför fotot återställs fönstret från helskärmsläge eller maximerat läge.</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>Klicka utanför bilden för att återställa fönstret</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>Knapparna för att minimera, maximera och stänga visas endast när musen är nära fönstrets överkant.</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>Dölj fönsterknappar automatiskt</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>Håll ned Ctrl och dra bilden för att flytta fönstret.</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>Ctrl+dra för att flytta fönstret</value>
+  </data>
 </root>

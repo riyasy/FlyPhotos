@@ -679,4 +679,22 @@ Esc : Fechar Definições ou sair da aplicação</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Zoom por etapas</value>
   </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>Clicar fora da foto restaura a janela a partir do modo ecrã inteiro ou maximizado.</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>Clique fora da imagem para restaurar a janela</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>Os botões de minimizar, maximizar e fechar são apresentados apenas quando o rato está próximo do topo da janela.</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>Ocultar automaticamente os botões da janela</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>Mantenha premido Ctrl e arraste a imagem para mover a janela.</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>Ctrl+arrastar para mover a janela</value>
+  </data>
 </root>

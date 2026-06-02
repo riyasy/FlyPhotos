@@ -324,24 +324,6 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
     <value>Automatically hide mouse pointer</value>
   </data>
-  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
-    <value>Hide the minimize, maximize and close buttons unless the pointer is near the top of the window.</value>
-  </data>
-  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
-    <value>Automatically hide caption buttons</value>
-  </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Hold Ctrl and drag the image to reposition the window.</value>
-  </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Ctrl+drag to move window</value>
-  </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
-    <value>Clicking outside the photo restores the window from fullscreen or maximized state.</value>
-  </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Click outside image to restore window</value>
-  </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
     <value>Delete all previews from disk cache.</value>
   </data>
@@ -696,5 +678,23 @@ Esc : Close Settings or Exit App</value>
   </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Stepped Zoom</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>Clicking outside the photo restores the window from fullscreen or maximized state.</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>Click outside image to restore window</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>The minimize, maximize, and close buttons are shown only when the mouse is near the top of the window.</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>Automatically hide caption buttons</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>Hold Ctrl and drag the image to move the window.</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>Ctrl+drag to move window</value>
   </data>
 </root>

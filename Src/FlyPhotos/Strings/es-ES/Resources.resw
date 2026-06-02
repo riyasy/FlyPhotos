@@ -679,4 +679,22 @@ Esc : Cerrar ajustes o Salir</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Zoom por pasos</value>
   </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>Al hacer clic fuera de la foto, se restaura la ventana desde el estado de pantalla completa o maximizada.</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>Hacer clic fuera de la imagen para restaurar la ventana</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>Los botones de minimizar, maximizar y cerrar solo se muestran cuando el ratón está cerca de la parte superior de la ventana.</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>Ocultar automáticamente los botones de la ventana</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>Mantenga pulsado Ctrl y arrastre la imagen para mover la ventana.</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>Ctrl+arrastrar para mover la ventana</value>
+  </data>
 </root>

@@ -679,4 +679,22 @@ Esc : Fermer les paramètres ou Quitter</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Zoom par paliers</value>
   </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>Cliquer en dehors de la photo restaure la fenêtre depuis le mode plein écran ou maximisé.</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>Cliquer en dehors de l'image pour restaurer la fenêtre</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>Les boutons réduire, agrandir et fermer s'affichent uniquement lorsque la souris est proche du haut de la fenêtre.</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>Masquer automatiquement les boutons de la fenêtre</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>Maintenez la touche Ctrl enfoncée et glissez l'image pour déplacer la fenêtre.</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>Ctrl+glisser pour déplacer la fenêtre</value>
+  </data>
 </root>

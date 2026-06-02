@@ -679,4 +679,22 @@ Esc : Instellingen sluiten of App verlaten</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Stapsgewijs zoomen</value>
   </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>Als u buiten de foto klikt, wordt het venster hersteld vanuit de modus Volledig scherm of Gemaximaliseerd.</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>Klik buiten de afbeelding om het venster te herstellen</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>De knoppen voor minimaliseren, maximaliseren en sluiten worden alleen weergegeven als de muis zich in de buurt van de bovenkant van het venster bevindt.</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>Vensterknoppen automatisch verbergen</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>Houd Ctrl ingedrukt en sleep de afbeelding om het venster te verplaatsen.</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>Ctrl+slepen om venster te verplaatsen</value>
+  </data>
 </root>

@@ -679,4 +679,22 @@ Esc : Sulje asetukset tai Poistu</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Portaittainen zoomaus</value>
   </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>Kuvan ulkopuolelle napsauttaminen palauttaa ikkunan kokonäytön tilasta tai maksimoidusta tilasta.</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>Napsauta kuvan ulkopuolelle palauttaaksesi ikkunan</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>Pienennä-, suurenna- ja sulje-painikkeet näytetään vain, kun hiiri on lähellä ikkunan yläreunaa.</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>Piilota ikkunapainikkeet automaattisesti</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>Pidä Ctrl-näppäintä painettuna ja vedä kuvaa siirtääksesi ikkunaa.</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>Ctrl+vetäminen ikkunan siirtämiseksi</value>
+  </data>
 </root>

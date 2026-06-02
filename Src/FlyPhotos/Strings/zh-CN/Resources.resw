@@ -679,4 +679,22 @@ Esc：关闭设置或退出应用</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>分级缩放</value>
   </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>点击照片外部可将窗口从全屏或最大化状态恢复。</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>点击图片外部以恢复窗口</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>仅当鼠标靠近窗口顶部时，才会显示最小化、最大化和关闭按钮。</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>自动隐藏窗口按钮</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>按住 Ctrl 键并拖动图片即可移动窗口。</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>Ctrl+拖动以移动窗口</value>
+  </data>
 </root>

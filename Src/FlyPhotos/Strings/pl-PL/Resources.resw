@@ -679,4 +679,22 @@ Esc : Zamknij ustawienia lub Wyjdź</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Powiększanie krokowe</value>
   </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>Kliknięcie poza zdjęciem przywraca okno z trybu pełnoekranowego lub zmaksymalizowanego.</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>Kliknij poza obrazem, aby przywrócić okno</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>Przyciski minimalizacji, maksymalizacji i zamykania są wyświetlane tylko wtedy, gdy mysz znajduje się w pobliżu górnej krawędzi okna.</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>Automatycznie ukrywaj przyciski okna</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>Przytrzymaj klawisz Ctrl i przeciągnij obraz, aby przenieść okno.</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>Ctrl+przeciągnięcie, aby przenieść okno</value>
+  </data>
 </root>

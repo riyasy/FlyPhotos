@@ -679,4 +679,22 @@ Esc : Einstellungen schließen oder App beenden</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Stufenweises Zoomen</value>
   </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>Ein Klick außerhalb des Fotos stellt das Fenster aus dem Vollbildmodus oder dem maximierten Zustand wieder her.</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>Außerhalb des Bildes klicken, um das Fenster wiederherzustellen</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>Die Schaltflächen zum Minimieren, Maximieren und Schließen werden nur angezeigt, wenn sich die Maus in der Nähe des oberen Fensterrands befindet.</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>Fensterschaltflächen automatisch ausblenden</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>Halten Sie die Strg-Taste gedrückt und ziehen Sie das Bild, um das Fenster zu verschieben.</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>Strg+Ziehen zum Verschieben des Fensters</value>
+  </data>
 </root>

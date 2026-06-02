@@ -676,4 +676,22 @@ Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാ
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>ഘട്ടംഘട്ടമായ സൂം</value>
   </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>ചിത്രത്തിന് പുറത്ത് ക്ലിക്ക് ചെയ്യുന്നത് ഫുൾസ്‌ക്രീൻ അല്ലെങ്കിൽ മാക്സിമൈസ് ചെയ്ത അവസ്ഥയിൽ നിന്ന് വിൻഡോയെ പഴയപടിയാക്കുന്നു.</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>വിൻഡോ പുനഃസ്ഥാപിക്കാൻ ചിത്രത്തിന് പുറത്ത് ക്ലിക്ക് ചെയ്യുക</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>മൗസ് വിൻഡോയുടെ മുകൾഭാഗത്തിന് സമീപം ആയിരിക്കുമ്പോൾ മാത്രമേ മിനിമൈസ്, മാക്സിമൈസ്, ക്ലോസ് ബട്ടണുകൾ കാണിക്കുകയുള്ളൂ.</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>വിൻഡോ ബട്ടണുകൾ സ്വയമേവ മറയ്ക്കുക</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>വിൻഡോ നീക്കുന്നതിനായി Ctrl അമർത്തിപ്പിടിച്ചുകൊണ്ട് ചിത്രം ഡ്രാഗ് ചെയ്യുക.</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>വിൻഡോ മാറ്റാൻ Ctrl+drag ചെയ്യുക</value>
+  </data>
 </root>

@@ -679,4 +679,22 @@ Esc : Chiudi impostazioni o Esci</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Zoom a livelli</value>
   </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>Facendo clic all'esterno della foto si ripristina la finestra dallo stato a schermo intero o massimizzato.</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>Fai clic all'esterno dell'immagine per ripristinare la finestra</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>I pulsanti per ridurre a icona, ingrandire e chiudere vengono mostrati solo quando il mouse si trova vicino alla parte superiore della finestra.</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>Nascondi automaticamente i pulsanti della finestra</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>Tieni premuto Ctrl e trascina l'immagine per spostare la finestra.</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>Ctrl+trascinamento per spostare la finestra</value>
+  </data>
 </root>

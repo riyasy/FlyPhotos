@@ -679,4 +679,22 @@ Esc：關閉設定或離開應用程式</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>分段縮放</value>
   </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>按一下相片外部可將視窗從全螢幕或最大化狀態還原。</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>按一下圖片外部以還原視窗</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>僅當滑鼠靠近視窗頂部時，才會顯示最小化、最大化和關閉按鈕。</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>自動隱藏視窗按鈕</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>按住 Ctrl 鍵並拖曳圖片即可移動視窗。</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>Ctrl+拖曳以移動視窗</value>
+  </data>
 </root>
