@@ -42,6 +42,8 @@
                             <controls:SettingsCard.HeaderIcon>
                                 <FontIcon
                                     x:Name="HeartIcon"
+                                    MinWidth="32"
+                                    MinHeight="32"
                                     Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                                     Glyph="&#xEB51;" />
                             </controls:SettingsCard.HeaderIcon>

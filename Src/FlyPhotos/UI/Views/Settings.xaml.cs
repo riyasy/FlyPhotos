@@ -42,6 +42,10 @@ internal sealed partial class Settings
 
     private readonly WindowAppearanceManager _windAppearanceManager;
 
+    private bool _heartBeatStarted;
+    private Visual? _heartVisual;
+    private SizeChangedEventHandler? _heartSizeChangedHandler;
+
     internal Settings()
     {
         InitializeComponent();
@@ -61,7 +65,11 @@ internal sealed partial class Settings
 
         DispatcherQueue.EnsureSystemDispatcherQueue();
 
-        Closed += (_, _) => _windAppearanceManager.Dispose();
+        Closed += (_, _) =>
+        {
+            StopHeartBeat();
+            _windAppearanceManager.Dispose();
+        };
 
         SliderHighResCacheSize.Value = AppConfig.Settings.CacheSizeOneSideHqImages;
         SliderLowResCacheSize.Value = AppConfig.Settings.CacheSizeOneSidePreviews;
@@ -167,7 +175,10 @@ internal sealed partial class Settings
         await SetButtonIconFromAppData(BtnShortcut3, AppConfig.Settings.ExternalApp3);
         await SetButtonIconFromAppData(BtnShortcut4, AppConfig.Settings.ExternalApp4);
 
-        // StartHeartBeat();
+        // The developer-support card (and its heart icon) is collapsed when packaged,
+        // so only animate it for unpackaged builds.
+        if (!PathResolver.IsPackagedApp)
+            StartHeartBeat();
     }
 
     private static async Task SetButtonIconFromAppData(Button btnShortcut, string appShortCut)
@@ -638,31 +649,69 @@ internal sealed partial class Settings
 
     void StartHeartBeat()
     {
+        // Loaded can fire more than once (e.g. the element re-entering the visual tree).
+        // Guard so we never stack duplicate SizeChanged handlers or restart the animation.
+        if (_heartBeatStarted) return;
         var heartVisual = ElementCompositionPreview.GetElementVisual(HeartIcon);
         if (heartVisual == null) return;
+        _heartBeatStarted = true;
+        _heartVisual = heartVisual;
         var compositor = heartVisual.Compositor;
-        // Ensure CenterPoint is set correctly. 
-        heartVisual.CenterPoint = new Vector3((float)HeartIcon.ActualWidth / 2, (float)HeartIcon.ActualHeight / 2, 0);
+        // Scale from the icon's center. ActualWidth/Height can still be 0 here if the
+        // icon hasn't been measured yet, which would pivot from the corner; keep the
+        // pivot in sync via SizeChanged so it stays centered without any CPU polling.
+        UpdateHeartPivot(heartVisual);
+        _heartSizeChangedHandler = (_, _) => UpdateHeartPivot(heartVisual);
+        HeartIcon.SizeChanged += _heartSizeChangedHandler;
+        // Stop the render-thread animation when the icon leaves the visual tree so the
+        // compositor isn't ticking a transform for a page that is no longer shown.
+        HeartIcon.Unloaded += HeartIcon_Unloaded;
         // Use a single Vector3 animation instead of two Scalar animations
         var scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
         // Set the total duration to 3 seconds
         scaleAnimation.Duration = TimeSpan.FromSeconds(3);
         scaleAnimation.IterationBehavior = AnimationIterationBehavior.Forever;
         // We compress the 1.2s heartbeat into the first 40% of the 3-second timeline.
-        // Scales are adjusted so it maxes out at 1.0f to prevent clipping.
-        scaleAnimation.InsertKeyFrame(0.00f, new Vector3(0.8f, 0.8f, 1f));
-        // First beat (Peak at 1.0f)
-        scaleAnimation.InsertKeyFrame(0.08f, new Vector3(1.0f, 1.0f, 1f));
+        // Rest at natural size (1.0) and beat outward; the 32px box gives headroom so
+        // the peaks don't clip.
+        scaleAnimation.InsertKeyFrame(0.00f, new Vector3(1.0f, 1.0f, 1f));
+        // First beat (peak)
+        scaleAnimation.InsertKeyFrame(0.08f, new Vector3(1.2f, 1.2f, 1f));
         // Recoil
-        scaleAnimation.InsertKeyFrame(0.16f, new Vector3(0.8f, 0.8f, 1f));
-        // Second beat (Smaller peak at 0.92f)
-        scaleAnimation.InsertKeyFrame(0.24f, new Vector3(0.92f, 0.92f, 1f));
+        scaleAnimation.InsertKeyFrame(0.16f, new Vector3(1.0f, 1.0f, 1f));
+        // Second beat (smaller peak)
+        scaleAnimation.InsertKeyFrame(0.24f, new Vector3(1.12f, 1.12f, 1f));
         // End of beat, return to rest
-        scaleAnimation.InsertKeyFrame(0.40f, new Vector3(0.8f, 0.8f, 1f));
+        scaleAnimation.InsertKeyFrame(0.40f, new Vector3(1.0f, 1.0f, 1f));
         // Hold at rest for the remaining 60% of the 3-second loop
-        scaleAnimation.InsertKeyFrame(1.00f, new Vector3(0.8f, 0.8f, 1f));
+        scaleAnimation.InsertKeyFrame(1.00f, new Vector3(1.0f, 1.0f, 1f));
         // Start the single animation on the "Scale" property
         heartVisual.StartAnimation("Scale", scaleAnimation);
+    }
+
+    private void UpdateHeartPivot(Visual heartVisual)
+    {
+        heartVisual.CenterPoint = new Vector3((float)HeartIcon.ActualWidth / 2, (float)HeartIcon.ActualHeight / 2, 0);
+    }
+
+    private void HeartIcon_Unloaded(object sender, RoutedEventArgs e)
+    {
+        StopHeartBeat();
+    }
+
+    // Idempotent teardown: safe to call from Unloaded and from the window's Closed event
+    // (WinUI doesn't reliably raise Unloaded on window close), and a no-op when the beat
+    // was never started (e.g. packaged builds).
+    private void StopHeartBeat()
+    {
+        _heartVisual?.StopAnimation("Scale");
+        if (_heartSizeChangedHandler != null)
+            HeartIcon.SizeChanged -= _heartSizeChangedHandler;
+        HeartIcon.Unloaded -= HeartIcon_Unloaded;
+        _heartSizeChangedHandler = null;
+        _heartVisual = null;
+        // Allow the beat to restart cleanly if the icon is reloaded into the tree.
+        _heartBeatStarted = false;
     }
 }
 
