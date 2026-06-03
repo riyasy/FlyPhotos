@@ -169,7 +169,36 @@ namespace FlyPhotos.UI.Behaviors
             titleBar.ExtendsContentIntoTitleBar = true;
             titleBar.ButtonBackgroundColor = Colors.Transparent;
             titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
-            titleBar.ButtonForegroundColor = Colors.Gray;
+            UpdateCaptionButtonForeground();
+        }
+
+        /// <summary>
+        /// Updates the caption button glyph color to stay legible against the current backdrop and theme.
+        /// The transparent backdrop shows arbitrary content underneath, so the glyphs are always white;
+        /// for every other backdrop they follow the theme (white in dark, black in light).
+        /// </summary>
+        private void UpdateCaptionButtonForeground()
+        {
+            var foreground = _currentBackdropType == WindowBackdropType.Transparent
+                ? Colors.White
+                : ((FrameworkElement)_window.Content).ActualTheme == ElementTheme.Light
+                    ? Colors.Black
+                    : Colors.White;
+            var titleBar = _window.AppWindow.TitleBar;
+            titleBar.ButtonForegroundColor = foreground;
+
+
+            // TODO - revisit this after Frozen issue fix
+            // Frozen has no backdrop controller, so its inactive glyph default resolves wrong
+            // (flips to white in light theme). Pin an explicit gray per theme. Other backdrops keep
+            // their natural inactive default (= null) so they still dim normally on deactivation.
+            if (_currentBackdropType == WindowBackdropType.Frozen)
+                titleBar.ButtonInactiveForegroundColor =
+                    ((FrameworkElement)_window.Content).ActualTheme == ElementTheme.Light
+                        ? Color.FromArgb(0xFF, 153, 153, 153)
+                        : Color.FromArgb(0xFF, 128, 128, 128);
+            else
+                titleBar.ButtonInactiveForegroundColor = null;
         }
 
         /// <summary>
@@ -245,6 +274,7 @@ namespace FlyPhotos.UI.Behaviors
                     break;
             }
             ((Grid)_window.Content).Background = new SolidColorBrush(gridColor);
+            UpdateCaptionButtonForeground();
         }
     }
 
