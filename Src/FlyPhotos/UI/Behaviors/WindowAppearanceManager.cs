@@ -3,6 +3,8 @@ using System;
 using Windows.UI;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
+using Microsoft.Graphics.Canvas;          // CanvasComposite
+using Microsoft.Graphics.Canvas.Effects;  // CompositeEffect, ColorSourceEffect
 using Microsoft.UI;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Composition.SystemBackdrops;
@@ -21,17 +23,37 @@ namespace FlyPhotos.UI.Behaviors
     internal partial class WindowAppearanceManager : IDisposable
     {
         /// <summary>
-        /// Lazy-initialized tint backdrop used for transparent window modes.
+        /// Lazy-initialized tint backdrop used for the <see cref="WindowBackdropType.Transparent"/> mode.
+        /// This must be WinUIEx's <see cref="TransparentTintBackdrop"/> (not a plain colour backdrop):
+        /// it does the actual window see-through plumbing on connect — <c>DwmExtendFrameIntoClientArea</c>
+        /// plus a <c>WM_ERASEBKGND</c> handler. A plain <see cref="SolidColorBackdrop"/> only paints a
+        /// translucent brush over an opaque window, so the desktop would not show through.
         /// </summary>
         private TransparentTintBackdrop TransparentTintBackdrop => field ??= new TransparentTintBackdrop
         {
-            TintColor = Color.FromArgb((byte)(((100 - AppConfig.Settings.TransparentBackgroundIntensity) * 255) / 100), 0, 0, 0)
+            TintColor = TransparentTint(AppConfig.Settings.TransparentBackgroundIntensity)
         };
 
         /// <summary>
-        /// Lazy-initialized blurred backdrop used for frozen window modes.
+        /// The Frozen backdrop currently assigned to the window, if any. A fresh instance is created
+        /// each time the Frozen backdrop is applied (see <see cref="ApplyFrozenBackdrop"/>): the
+        /// effect brush does not survive being detached and re-attached, so reusing one instance
+        /// across backdrop switches leaves the window transparent and can crash. The dark-theme
+        /// darkening is composited into this brush and updated <em>in place</em> on theme change
+        /// (never reassigned) — reassigning <c>_window.SystemBackdrop</c> from inside the theme-change
+        /// handler crashes, and the CanvasAnimatedControl swapchain occludes the Grid background so
+        /// the darkening can no longer live on the Grid either.
         /// </summary>
-        private BlurredBackdrop FrozenBackdrop => field ??= new BlurredBackdrop();
+        private BlurredBackdrop? _frozenBackdrop;
+
+        /// <summary>
+        /// The solid-colour backdrop currently assigned for the <see cref="WindowBackdropType.None"/>
+        /// mode, if any. The CanvasAnimatedControl swapchain composites over (and so occludes) the
+        /// root Grid background, so a plain Grid colour no longer paints the window — the opaque
+        /// theme colour must be supplied as a system backdrop instead. Its colour is updated
+        /// <em>in place</em> on theme change (never reassigned, which would crash).
+        /// </summary>
+        private SolidColorBackdrop? _noneBackdrop;
 
         /// <summary>
         /// The currently applied window backdrop type.
@@ -54,6 +76,11 @@ namespace FlyPhotos.UI.Behaviors
         private readonly Window _window;
 
         /// <summary>
+        /// The window's root content element, cached to avoid repeatedly casting <see cref="Window.Content"/>.
+        /// </summary>
+        private readonly FrameworkElement _root;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="WindowAppearanceManager"/> class.
         /// </summary>
         /// <param name="window">The target window.</param>
@@ -61,10 +88,16 @@ namespace FlyPhotos.UI.Behaviors
         public WindowAppearanceManager(Window window, WindowBackdropType initialBackdrop)
         {
             _window = window;
+            _root = (FrameworkElement)_window.Content;
+
+            // The CanvasAnimatedControl swapchain occludes the root Grid, so it never paints the
+            // window background. Keep it permanently transparent and supply every opaque colour via a
+            // system backdrop brush instead — there is no longer any per-backdrop Grid colour.
+            ((Grid)_root).Background = new SolidColorBrush(Colors.Transparent);
 
             _configurationSource = new SystemBackdropConfiguration { IsInputActive = true };
             _window.Activated += Window_Activated;
-            ((FrameworkElement)_window.Content).ActualThemeChanged += Window_ActualThemeChanged;
+            _root.ActualThemeChanged += Window_ActualThemeChanged;
             SetConfigurationSourceTheme();
             SetWindowBackdropPrivate(initialBackdrop);
             SetWindowTheme(AppConfig.Settings.Theme);
@@ -76,10 +109,16 @@ namespace FlyPhotos.UI.Behaviors
         public void Dispose()
         {
             _window.Activated -= Window_Activated;
-            ((FrameworkElement)_window.Content).ActualThemeChanged -= Window_ActualThemeChanged;
+            _root.ActualThemeChanged -= Window_ActualThemeChanged;
             _backdropController?.RemoveSystemBackdropTarget(_window.As<ICompositionSupportsSystemBackdrop>());
             _backdropController?.Dispose();
             _backdropController = null;
+
+            // Release the brush-based backdrops (Transparent / Frozen / None) and their composition
+            // brushes; only the Mica/Acrylic controllers are torn down above.
+            _window.SystemBackdrop = null;
+            _frozenBackdrop = null;
+            _noneBackdrop = null;
         }
 
         /// <summary>
@@ -88,7 +127,7 @@ namespace FlyPhotos.UI.Behaviors
         /// <param name="theme">The element theme to apply.</param>
         public void SetWindowTheme(ElementTheme theme)
         {
-            ((FrameworkElement)_window.Content).RequestedTheme = theme;
+            _root.RequestedTheme = theme;
         }
 
         /// <summary>
@@ -111,6 +150,10 @@ namespace FlyPhotos.UI.Behaviors
             _backdropController = null;
 
             _window.SystemBackdrop = null;
+            // The previous brush-based backdrops (if any) are now detached; drop them so theme
+            // changes can't touch a dead brush. Fresh ones are created if (re)applied below.
+            _frozenBackdrop = null;
+            _noneBackdrop = null;
 
             switch (backdropType)
             {
@@ -135,25 +178,75 @@ namespace FlyPhotos.UI.Behaviors
                     break;
 
                 case WindowBackdropType.Frozen:
-                    _window.SystemBackdrop = FrozenBackdrop;
+                    ApplyFrozenBackdrop();
                     break;
 
                 case WindowBackdropType.None:
+                    ApplyNoneBackdrop();
+                    break;
+
                 default:
                     break;
             }
-            SetBackColorAsPerThemeAndBackdrop();
+            UpdateCaptionButtonForeground();
         }
 
         /// <summary>
-        /// Adjusts the transparency intensity of the transparent backdrop.
+        /// Creates a fresh Frozen backdrop tinted for the current theme and assigns it to the window.
+        /// A new instance is used every time (the effect brush cannot be detached and re-attached);
+        /// theme changes thereafter update the tint in place rather than reassigning the backdrop
+        /// (see <see cref="Window_ActualThemeChanged"/>).
+        /// </summary>
+        private void ApplyFrozenBackdrop()
+        {
+            _frozenBackdrop = new BlurredBackdrop(FrozenTint(_root.ActualTheme));
+            _window.SystemBackdrop = _frozenBackdrop;
+        }
+
+        /// <summary>
+        /// The tint composited over the Frozen blur for a given theme: transparent in light,
+        /// translucent black in dark.
+        /// </summary>
+        private static Color FrozenTint(ElementTheme theme) =>
+            theme == ElementTheme.Light ? Colors.Transparent : Color.FromArgb(0x60, 0x00, 0x00, 0x00);
+
+        /// <summary>
+        /// Creates a fresh opaque solid-colour backdrop for the current theme and assigns it for the
+        /// <see cref="WindowBackdropType.None"/> mode. A system backdrop is used (rather than the
+        /// root Grid background) because the CanvasAnimatedControl swapchain occludes the Grid;
+        /// theme changes thereafter update the colour in place (see <see cref="Window_ActualThemeChanged"/>).
+        /// </summary>
+        private void ApplyNoneBackdrop()
+        {
+            _noneBackdrop = new SolidColorBackdrop(NoneColor(_root.ActualTheme));
+            _window.SystemBackdrop = _noneBackdrop;
+        }
+
+        /// <summary>
+        /// The opaque background colour for the <see cref="WindowBackdropType.None"/> mode:
+        /// white in light, black in dark.
+        /// </summary>
+        private static Color NoneColor(ElementTheme theme) =>
+            theme == ElementTheme.Light ? Colors.White : Colors.Black;
+
+        /// <summary>
+        /// The semi-transparent black tint for a given transparency intensity (0-100): higher
+        /// intensity means more transparent (lower alpha).
+        /// </summary>
+        private static Color TransparentTint(int intensity) =>
+            Color.FromArgb((byte)(((100 - intensity) * 255) / 100), 0, 0, 0);
+
+        /// <summary>
+        /// Adjusts the transparency intensity of the transparent backdrop. WinUIEx's
+        /// <see cref="TransparentTintBackdrop"/> builds its brush once in <c>CreateBrush</c>, so the
+        /// backdrop must be re-assigned to pick up the new tint.
         /// </summary>
         /// <param name="transparencyIntensity">The intensity level (0-100).</param>
         public void SetWindowBackdropTransparency(int transparencyIntensity)
         {
             if (_currentBackdropType == WindowBackdropType.Transparent)
             {
-                TransparentTintBackdrop.TintColor = Color.FromArgb((byte)(((100 - transparencyIntensity) * 255) / 100), 0, 0, 0);
+                TransparentTintBackdrop.TintColor = TransparentTint(transparencyIntensity);
                 _window.SystemBackdrop = TransparentTintBackdrop;
             }
         }
@@ -179,26 +272,14 @@ namespace FlyPhotos.UI.Behaviors
         /// </summary>
         private void UpdateCaptionButtonForeground()
         {
-            var foreground = _currentBackdropType == WindowBackdropType.Transparent
-                ? Colors.White
-                : ((FrameworkElement)_window.Content).ActualTheme == ElementTheme.Light
-                    ? Colors.Black
-                    : Colors.White;
+            var isLight = _root.ActualTheme == ElementTheme.Light;
             var titleBar = _window.AppWindow.TitleBar;
-            titleBar.ButtonForegroundColor = foreground;
 
-
-            // TODO - revisit this after Frozen issue fix
-            // Frozen has no backdrop controller, so its inactive glyph default resolves wrong
-            // (flips to white in light theme). Pin an explicit gray per theme. Other backdrops keep
-            // their natural inactive default (= null) so they still dim normally on deactivation.
-            if (_currentBackdropType == WindowBackdropType.Frozen)
-                titleBar.ButtonInactiveForegroundColor =
-                    ((FrameworkElement)_window.Content).ActualTheme == ElementTheme.Light
-                        ? Color.FromArgb(0xFF, 153, 153, 153)
-                        : Color.FromArgb(0xFF, 128, 128, 128);
-            else
-                titleBar.ButtonInactiveForegroundColor = null;
+            // Transparent shows arbitrary content underneath, so glyphs are always white; every other
+            // backdrop follows the theme.
+            titleBar.ButtonForegroundColor = _currentBackdropType == WindowBackdropType.Transparent
+                ? Colors.White
+                : isLight ? Colors.Black : Colors.White;
         }
 
         /// <summary>
@@ -234,7 +315,14 @@ namespace FlyPhotos.UI.Behaviors
         private void Window_ActualThemeChanged(FrameworkElement sender, object args)
         {
             SetConfigurationSourceTheme();
-            SetBackColorAsPerThemeAndBackdrop();
+            // Update the brush colour in place; do NOT reassign _window.SystemBackdrop here — doing
+            // so from within the theme-change handler crashes.
+            var actualTheme = _root.ActualTheme;
+            if (_currentBackdropType == WindowBackdropType.Frozen)
+                _frozenBackdrop?.UpdateTint(FrozenTint(actualTheme));
+            else if (_currentBackdropType == WindowBackdropType.None)
+                _noneBackdrop?.UpdateColor(NoneColor(actualTheme));
+            UpdateCaptionButtonForeground();
         }
 
         /// <summary>
@@ -251,46 +339,109 @@ namespace FlyPhotos.UI.Behaviors
         private void SetConfigurationSourceTheme()
         {
             _configurationSource.IsHighContrast = ThemeSettings.CreateForWindowId(_window.AppWindow.Id).HighContrast;
-            _configurationSource.Theme = (SystemBackdropTheme)((FrameworkElement)_window.Content).ActualTheme;
-        }
-
-        /// <summary>
-        /// Updates the root content background color depending on the applied theme and backdrop.
-        /// </summary>
-        private void SetBackColorAsPerThemeAndBackdrop()
-        {
-            var actualTheme = ((FrameworkElement)_window.Content).ActualTheme;
-            Color gridColor;
-            switch (_currentBackdropType)
+            // Map explicitly rather than casting: ElementTheme and SystemBackdropTheme share ordinal
+            // values today, but that is a coincidence, not a contract.
+            _configurationSource.Theme = _root.ActualTheme switch
             {
-                case WindowBackdropType.None:
-                    gridColor = actualTheme == ElementTheme.Light ? Colors.White : Colors.Black;
-                    break;
-                case WindowBackdropType.Frozen:
-                    gridColor = actualTheme == ElementTheme.Light ? Colors.Transparent : ColorHelper.FromArgb(0x60, 0x00, 0x00, 0x00);
-                    break;
-                default:
-                    gridColor = Colors.Transparent;
-                    break;
-            }
-            ((Grid)_window.Content).Background = new SolidColorBrush(gridColor);
-            UpdateCaptionButtonForeground();
+                ElementTheme.Light => SystemBackdropTheme.Light,
+                ElementTheme.Dark => SystemBackdropTheme.Dark,
+                _ => SystemBackdropTheme.Default
+            };
         }
     }
 
     /// <summary>
-    /// Represents a customized brush backdrop that provides a blurred effect.
+    /// A brush backdrop providing a blurred host-backdrop effect with a solid tint composited over
+    /// the blur. The tint colour can be updated <em>in place</em> via <see cref="UpdateTint"/>
+    /// without reassigning the window's backdrop, because reassigning <c>SystemBackdrop</c> during a
+    /// theme change crashes. A fully transparent tint yields a plain blur (light Frozen).
     /// </summary>
-    internal partial class BlurredBackdrop : CompositionBrushBackdrop
+    internal partial class BlurredBackdrop(Color tint) : CompositionBrushBackdrop
     {
+        private Color _tint = tint;
+        private Windows.UI.Composition.Compositor? _compositor;
+        private Windows.UI.Composition.CompositionEffectBrush? _brush;
+
         /// <summary>
-        /// Creates the composition brush used by the backdrop.
+        /// Updates the tint composited over the blur, animating the existing brush's colour in
+        /// place. Safe to call before the brush is created — the value is then applied on creation.
+        /// </summary>
+        /// <param name="tint">The new tint colour.</param>
+        public void UpdateTint(Color tint)
+        {
+            _tint = tint;
+            if (_compositor is null || _brush is null) return;
+
+            var animation = _compositor.CreateExpressionAnimation("color");
+            animation.SetColorParameter("color", _tint);
+            _brush.StartAnimation("TintColor.Color", animation);
+        }
+
+        /// <summary>
+        /// Creates the composition brush used by the backdrop: a host-backdrop blur with the tint
+        /// composited over it. The tint is registered as an animatable property so it can be
+        /// updated in place by <see cref="UpdateTint"/>.
         /// </summary>
         /// <param name="compositor">The associated compositor.</param>
-        /// <returns>A host backdrop brush.</returns>
+        /// <returns>A host backdrop brush with a solid tint composited on top.</returns>
         protected override Windows.UI.Composition.CompositionBrush CreateBrush(Windows.UI.Composition.Compositor compositor)
         {
-            return compositor.CreateHostBackdropBrush();
+            var hostBackdrop = compositor.CreateHostBackdropBrush();
+
+            // Solid colour composited over the blur, so the darkening is part of the backdrop brush
+            // and no longer depends on the Grid / CanvasAnimatedControl layer.
+            var effect = new CompositeEffect
+            {
+                Mode = CanvasComposite.SourceOver,
+                Sources =
+                {
+                    new Windows.UI.Composition.CompositionEffectSourceParameter("Backdrop"), // destination (blur)
+                    new ColorSourceEffect { Name = "TintColor", Color = _tint }              // source, on top
+                }
+            };
+
+            var factory = compositor.CreateEffectFactory(effect, new[] { "TintColor.Color" });
+            var brush = factory.CreateBrush();
+            brush.SetSourceParameter("Backdrop", hostBackdrop);
+
+            _compositor = compositor;
+            _brush = brush;
+            return brush;
+        }
+    }
+
+    /// <summary>
+    /// A brush backdrop that paints a plain opaque colour. Used for <see cref="WindowBackdropType.None"/>:
+    /// the CanvasAnimatedControl swapchain occludes the root Grid background, so the window's solid
+    /// colour is supplied as a system backdrop instead. The colour can be updated <em>in place</em>
+    /// via <see cref="UpdateColor"/> (a <see cref="Windows.UI.Composition.CompositionColorBrush"/>
+    /// updates live), so theme changes never reassign <c>SystemBackdrop</c>, which would crash.
+    /// </summary>
+    internal partial class SolidColorBackdrop(Color color) : CompositionBrushBackdrop
+    {
+        private Color _color = color;
+        private Windows.UI.Composition.CompositionColorBrush? _brush;
+
+        /// <summary>
+        /// Updates the backdrop colour in place. Safe to call before the brush is created — the
+        /// value is then applied on creation.
+        /// </summary>
+        /// <param name="color">The new background colour.</param>
+        public void UpdateColor(Color color)
+        {
+            _color = color;
+            if (_brush is not null) _brush.Color = color;
+        }
+
+        /// <summary>
+        /// Creates the composition brush used by the backdrop: a single opaque colour brush.
+        /// </summary>
+        /// <param name="compositor">The associated compositor.</param>
+        /// <returns>A solid colour brush.</returns>
+        protected override Windows.UI.Composition.CompositionBrush CreateBrush(Windows.UI.Composition.Compositor compositor)
+        {
+            _brush = compositor.CreateColorBrush(_color);
+            return _brush;
         }
     }
 }
