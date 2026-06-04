@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<AssemblyVersion>2.5.23.0</AssemblyVersion>
+		<AssemblyVersion>2.6.0.0</AssemblyVersion>
 		<TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 		<RootNamespace>FlyPhotos</RootNamespace>
@@ -48,6 +48,7 @@
 			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.Imaging.dll" />
 			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.Text.dll" />
 			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.ContentSafety.dll" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.AICapabilities.dll" />
 			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.Workloads.dll" />
 			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.Workloads.Resources.dll" />
 			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.Workloads.Resources_ec.dll" />
