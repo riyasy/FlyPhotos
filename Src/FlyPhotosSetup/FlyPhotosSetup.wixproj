@@ -54,4 +54,44 @@
   <ItemGroup>
     <PackageReference Include="WixToolset.UI.wixext" Version="5.0.2" />
   </ItemGroup>
+
+  <!--
+    Rename the built MSI to FlyPhotosInstaller_<version>_<Platform>.msi.
+
+    The MSI's internal ProductVersion is resolved at WiX *link* time
+    (!(bind.FileVersion.FlyPhotosExe)), which is too late to feed the output
+    file name (decided by MSBuild). So we read the same FlyPhotos.exe FileVersion
+    here with a tiny inline task and rename the output after the build - the file
+    name and the internal version therefore always come from the same binary.
+  -->
+  <UsingTask TaskName="GetExeFileVersion"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <ExePath ParameterType="System.String" Required="true" />
+      <Version ParameterType="System.String" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        var fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(ExePath);
+        Version = fvi.FileMajorPart + "." + fvi.FileMinorPart + "." + fvi.FileBuildPart;
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="RenameMsiWithVersion" AfterTargets="Build">
+    <PropertyGroup>
+      <_BuiltMsi>$(OutDir)FlyPhotos-$(Platform).msi</_BuiltMsi>
+    </PropertyGroup>
+    <GetExeFileVersion ExePath="$(PublishDir)\FlyPhotos.exe" Condition="Exists('$(_BuiltMsi)')">
+      <Output TaskParameter="Version" PropertyName="_MsiVersion" />
+    </GetExeFileVersion>
+    <PropertyGroup>
+      <_FinalMsi>$(OutDir)FlyPhotosInstaller_$(_MsiVersion)_$(Platform).msi</_FinalMsi>
+    </PropertyGroup>
+    <!-- Move has no overwrite flag, so clear any stale destination first. -->
+    <Delete Files="$(_FinalMsi)" Condition="Exists('$(_BuiltMsi)') And Exists('$(_FinalMsi)')" />
+    <Move SourceFiles="$(_BuiltMsi)" DestinationFiles="$(_FinalMsi)" Condition="Exists('$(_BuiltMsi)')" />
+    <Message Importance="high" Text="Installer: $(_FinalMsi)" Condition="Exists('$(_FinalMsi)')" />
+  </Target>
 </Project>

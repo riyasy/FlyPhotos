@@ -270,8 +270,10 @@ jobs:
           name: FlyPhotos-${{ matrix.platform }}
           path: Src/FlyPhotos/bin/${{ matrix.rid }}/publish/
 
+      # The wixproj renames the output to FlyPhotosInstaller_<version>_<platform>.msi,
+      # so match it by pattern.
       - name: Upload MSI artifact
         uses: actions/upload-artifact@v4
         with:
           name: FlyPhotos-${{ matrix.platform }}-MSI
-          path: Src/FlyPhotosSetup/bin/${{ matrix.platform }}/Release/FlyPhotos-${{ matrix.platform }}.msi
+          path: Src/FlyPhotosSetup/bin/${{ matrix.platform }}/Release/FlyPhotosInstaller_*_${{ matrix.platform }}.msi
