@@ -1,0 +1,57 @@
+﻿<Project Sdk="WixToolset.Sdk/5.0.2">
+  <!--
+    FlyPhotos WiX v5 installer (replaces the legacy FlyPhotosInstaller*.vdproj).
+
+    Build (x64):
+      dotnet build Src\FlyPhotosSetup\FlyPhotosSetup.wixproj -c Release -p:Platform=x64
+    Build (ARM64):
+      dotnet build Src\FlyPhotosSetup\FlyPhotosSetup.wixproj -c Release -p:Platform=ARM64
+
+    The MSI architecture follows the MSBuild $(Platform) (x64 -> 64-bit package,
+    ARM64 -> arm64 package), and the file-harvest source follows it too via
+    $(PublishRid). The MSI version is taken from the harvested FlyPhotos.exe
+    FileVersion by default (see BuildVersion below), so it always matches the
+    binary; pass -p:BuildVersion=x.y.z only to override it.
+  -->
+  <PropertyGroup>
+    <Platform Condition="'$(Platform)' == ''">x64</Platform>
+    <!-- Map MSBuild platform -> dotnet publish RID folder -->
+    <PublishRid Condition="'$(Platform)' == 'x64'">win-x64</PublishRid>
+    <PublishRid Condition="'$(Platform)' == 'ARM64'">win-arm64</PublishRid>
+    <!-- Version of the produced MSI. By default it binds to the FileVersion
+         resource of the harvested FlyPhotos.exe (File Id "FlyPhotosExe", see
+         Files.wxs), so the MSI version always equals the binary it ships - no
+         hardcoded number. WiX resolves !(bind.FileVersion.<FileId>) at link time.
+         Pass -p:BuildVersion=x.y.z to override with an explicit version instead. -->
+    <BuildVersion Condition="'$(BuildVersion)' == ''">!(bind.FileVersion.FlyPhotosExe)</BuildVersion>
+    <!-- Source folder harvested by Files.wxs (the AOT publish output). -->
+    <PublishDir>$(MSBuildThisFileDirectory)..\FlyPhotos\bin\$(PublishRid)\publish</PublishDir>
+    <OutputName>FlyPhotos-$(Platform)</OutputName>
+    <!--
+      Suppressed ICE checks, each a known false positive for this package:
+
+      ICE03/ICE60 - language metadata. Several harvested third-party native DLLs
+        (vcpkg libheif/dav1d stack, Rust bridge) carry non-standard language IDs
+        in their version resource. No functional effect; they shipped fine under
+        the vdproj MSI.
+
+      ICE38/ICE43/ICE57 - these assume a Start Menu shortcut is per-user data and
+        demand an HKCU keypath. This is a deliberate perMachine, All-Users Start
+        Menu shortcut (matching the vdproj); every item in the StartMenuShortcut
+        component is per-machine with a per-machine HKLM keypath, so the warnings
+        are spurious.
+    -->
+    <!-- ICE61 is expected: AllowSameVersionUpgrades=yes (Package.wxs) makes the
+         Upgrade VersionMax inclusive of the current version, which ICE61 flags. -->
+    <SuppressIces>ICE03;ICE60;ICE38;ICE43;ICE57;ICE61</SuppressIces>
+    <!-- Preprocessor variables consumed by the .wxs sources. -->
+    <DefineConstants>BuildVersion=$(BuildVersion);PublishDir=$(PublishDir)</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="banner.bmp" />
+    <Content Include="dialog.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="5.0.2" />
+  </ItemGroup>
+</Project>

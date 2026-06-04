@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <!--
+    Curated harvest of the AOT publish folder into INSTALLFOLDER.
+
+    The publish output ships ~88 localized resource folders and a large set of
+    MSIX packaging images under Assets\. The MSI deliberately ships only a subset:
+
+      * All root files (the EXE, every native/managed DLL, config, etc.).
+      * en-us\          - the only language pack kept (drops the other ~87 locales).
+      * Microsoft.UI.Xaml\ - required WinUI runtime resources (map.html, acrylic
+                             noise texture); not a language folder.
+      * Assets\          - only the four files the app actually loads at runtime:
+                             app-icon.ico, file-type.ico, transparent.cur, and
+                             Fonts\Segoe Fluent Icons.ttf. The MSIX tile/logo PNGs
+                             are not used by the installed (non-packaged) app.
+
+    Each <Files> element still assigns stable, path-derived component GUIDs, so
+    component identity stays constant build-to-build (needed for clean upgrades
+    and repair). The Subdirectory attribute recreates the folder under
+    INSTALLFOLDER (the glob's non-wildcard prefix would otherwise flatten it).
+  -->
+  <Fragment>
+    <ComponentGroup Id="PublishedFiles" Directory="INSTALLFOLDER">
+
+      <!-- FlyPhotos.exe is harvested explicitly with a stable File Id
+           ("FlyPhotosExe") so the MSI ProductVersion can bind to its FileVersion
+           resource (see FlyPhotosSetup.wixproj). It is excluded from the wildcard
+           below to avoid harvesting it twice. -->
+      <Component Id="FlyPhotosExe">
+        <File Id="FlyPhotosExe" Source="$(var.PublishDir)\FlyPhotos.exe" />
+      </Component>
+
+      <!-- All other files in the publish root (non-recursive). -->
+      <Files Include="$(var.PublishDir)\*">
+        <Exclude Files="$(var.PublishDir)\FlyPhotos.exe" />
+      </Files>
+
+      <!-- Keep only the en-us language pack. -->
+      <Files Include="$(var.PublishDir)\en-us\**" Subdirectory="en-us" />
+
+      <!-- WinUI runtime resources (not a locale). -->
+      <Files Include="$(var.PublishDir)\Microsoft.UI.Xaml\**" Subdirectory="Microsoft.UI.Xaml" />
+
+      <!-- Only the four Assets files the app loads at runtime. -->
+      <Files Include="$(var.PublishDir)\Assets\app-icon.ico" Subdirectory="Assets" />
+      <Files Include="$(var.PublishDir)\Assets\file-type.ico" Subdirectory="Assets" />
+      <Files Include="$(var.PublishDir)\Assets\transparent.cur" Subdirectory="Assets" />
+      <Files Include="$(var.PublishDir)\Assets\Fonts\Segoe Fluent Icons.ttf" Subdirectory="Assets\Fonts" />
+
+    </ComponentGroup>
+  </Fragment>
+
+</Wix>

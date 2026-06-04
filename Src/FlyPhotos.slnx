@@ -11,10 +11,5 @@
     <Platform Solution="*|x64" Project="x64" />
     <Deploy />
   </Project>
-  <Project Path="FlyPhotosInstaller/FlyPhotosInstaller.vdproj" Type="Installer">
-    <Build />
-  </Project>
-  <Project Path="FlyPhotosInstaller_ARM64/FlyPhotosInstaller_ARM64.vdproj" Type="Installer">
-    <Build />
-  </Project>
+  <Project Path="FlyPhotosSetup/FlyPhotosSetup.wixproj" Type="b7dd6f7e-def8-4e67-b5b7-07ef123db6f0" />
 </Solution>

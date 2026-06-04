@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <!--
+    Product identity.
+
+    UpgradeCode MUST stay constant (and identical between x64 and ARM64) so that
+    existing vdproj-built installs (2.5.2x) upgrade in place. ProductCode="*"
+    makes WiX mint a fresh ProductCode every build, which is required for the
+    major-upgrade flow below.
+
+    The vdproj version of this installer scheduled RemoveExistingProducts AFTER
+    InstallFinalize and regenerated component GUIDs every build, which corrupted
+    in-place upgrades. The single <MajorUpgrade> line here, together with WiX's
+    stable path-derived component GUIDs (see Files.wxs / Registry.wxs), is the
+    fix and makes Src\fix_msi_remove_existing_products.ps1 unnecessary.
+  -->
+  <Package Name="FlyPhotos"
+           Manufacturer="RYFTools"
+           Version="$(var.BuildVersion)"
+           UpgradeCode="5565DCCD-EEED-45A0-93FF-4BABC468C2A7"
+           ProductCode="*"
+           Scope="perMachine"
+           Compressed="yes">
+
+    <SummaryInformation Description="FlyPhotos - Fastest Windows photo viewer"
+                        Manufacturer="RYFTools" />
+
+    <!-- AllowSameVersionUpgrades=yes makes a same-version install REPLACE an
+         existing install instead of installing a second copy. This matters
+         because ProductCode="*" mints a new ProductCode every build, so without
+         it, re-installing a rebuilt (un-bumped) MSI would leave two Add/Remove
+         Programs entries. It also lets a same-version WiX MSI cleanly replace a
+         same-version vdproj install (no version bump required for that case).
+         The trade-off (two copies if only the 4th version field differs) doesn't
+         apply here - our versions are always X.Y.Z.0. Triggers ICE61, which is
+         suppressed in the wixproj. -->
+    <MajorUpgrade Schedule="afterInstallValidate"
+                  AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="A newer version of FlyPhotos is already installed. Setup will now exit." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Icons used by the shortcut and Add/Remove Programs. Embedded at build
+         time from the publish folder; not the same as the installed copies. -->
+    <Icon Id="AppIcon.ico" SourceFile="$(var.PublishDir)\Assets\app-icon.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.ico" />
+
+    <!-- Property gates the context-menu component (Registry.wxs). No default
+         value = empty = the checkbox starts UNCHECKED, so the "Open with Fly"
+         right-click entry is opt-in. The checkbox dialog (ContextMenuDlg, in the
+         UI section below) sets it to 1 when ticked; a silent install can pass
+         ADDCONTEXTMENU=1 to enable it. Secure="yes" is required so the value
+         chosen in the UI survives into the (elevated) install sequence where the
+         component condition is evaluated. -->
+    <Property Id="ADDCONTEXTMENU" Secure="yes" />
+
+    <!-- Install location: [ProgramFiles64Folder]\RYFTools\FlyPhotos -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="MANUFACTURERDIR" Name="RYFTools">
+        <Directory Id="INSTALLFOLDER" Name="FlyPhotos" />
+      </Directory>
+    </StandardDirectory>
+
+    <!-- Start Menu + Desktop shortcuts, both -> FlyPhotos.exe. The vdproj created
+         both unconditionally, so these match it. Each component uses an HKLM
+         keypath value (perMachine, all-users). -->
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Component Id="StartMenuShortcut" Guid="*">
+        <Shortcut Id="FlyPhotosStartMenu"
+                  Name="FlyPhotos"
+                  Description="FlyPhotos photo viewer"
+                  Target="[INSTALLFOLDER]FlyPhotos.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="AppIcon.ico" />
+        <RegistryValue Root="HKLM" Key="Software\RYFTools\FlyPhotos"
+                       Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder">
+      <Component Id="DesktopShortcut" Guid="*">
+        <Shortcut Id="FlyPhotosDesktop"
+                  Name="FlyPhotos"
+                  Description="FlyPhotos photo viewer"
+                  Target="[INSTALLFOLDER]FlyPhotos.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="AppIcon.ico" />
+        <RegistryValue Root="HKLM" Key="Software\RYFTools\FlyPhotos"
+                       Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+
+    <Feature Id="Main" Title="FlyPhotos" Level="1" AllowAbsent="no">
+      <ComponentGroupRef Id="PublishedFiles" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+      <ComponentGroupRef Id="RegistryEntries" />
+      <ComponentRef Id="ContextMenuEntry" />
+    </Feature>
+
+    <!--
+      Installer UI. Base set WixUI_InstallDir (Welcome -> InstallDir -> Verify ->
+      Progress -> Exit) with two customizations to match the old vdproj experience:
+
+        1. The license/EULA dialog is skipped - the vdproj used the VS "Basic"
+           dialog set, which had no EULA. Welcome -> InstallDir is re-routed
+           directly. License.rtf still has to exist because LicenseAgreementDlg is
+           part of the dialog set even though it is never shown.
+
+        2. A custom "Options" dialog (ContextMenuDlg) is inserted after InstallDir
+           with a single checkbox bound to the ADDCONTEXTMENU property - the
+           equivalent of the vdproj CHECKBOXA1. It gates the "Open with Fly"
+           right-click entry (Registry.wxs). Default unchecked (opt-in); a silent
+           install can pass ADDCONTEXTMENU=1 to enable it.
+
+      The routing <Publish> overrides use a high Order so they win over the stock
+      WixUI_InstallDir publishes for the same controls.
+
+      NOTE: this UI must live inside <Package> (or be referenced from it). A
+      <Fragment> is only linked when one of its symbols is referenced, so moving
+      the UI to an unreferenced fragment silently drops the entire Dialog/Control
+      set from the MSI.
+    -->
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+
+    <!-- Branding bitmaps (override the default WixUI artwork):
+           WixUIBannerBmp - 493x58 top banner shown on most dialogs (incl. the
+                            custom ContextMenuDlg, via !(loc.InstallDirDlgBannerBitmap)).
+           WixUIDialogBmp - 493x312 background of the Welcome and Exit dialogs. -->
+    <WixVariable Id="WixUIBannerBmp" Value="banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="dialog.bmp" />
+
+    <UI>
+      <!-- 1) Skip the license dialog. -->
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg"
+               Order="10" Condition="NOT Installed" />
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg"
+               Order="10" />
+
+      <!-- 2) Route InstallDir -> ContextMenuDlg -> SupportDlg -> VerifyReady (and back). -->
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="ContextMenuDlg"
+               Order="10" Condition="WIXUI_INSTALLDIR_VALID = &quot;1&quot;" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="SupportDlg"
+               Order="10" Condition="NOT Installed" />
+
+      <!-- Custom "Options" dialog carrying the context-menu checkbox. -->
+      <Dialog Id="ContextMenuDlg" Width="370" Height="270" Title="!(loc.InstallDirDlg_Title)">
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
+                 TabSkip="no" Text="!(loc.InstallDirDlgBannerBitmap)" />
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15"
+                 Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Windows Explorer Integration" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15"
+                 Transparent="yes" NoPrefix="yes" Text="Choose additional integration options" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+
+        <Control Id="ContextMenuCheckBox" Type="CheckBox" X="20" Y="100" Width="330" Height="18"
+                 Property="ADDCONTEXTMENU" CheckBoxValue="1"
+                 Text="Add generic &quot;Open With Fly&quot; entry in Windows Classic Context Menu" />
+        <Control Id="ContextMenuHelp" Type="Text" X="36" Y="120" Width="310" Height="24"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="Note: &quot;Open with Fly&quot; menu will be added for all files (not just images)" />
+
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
+                 Text="!(loc.WixUIBack)">
+          <Publish Event="NewDialog" Value="InstallDirDlg" />
+        </Control>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
+                 Default="yes" Text="!(loc.WixUINext)">
+          <Publish Event="NewDialog" Value="SupportDlg" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
+                 Cancel="yes" Text="!(loc.WixUICancel)">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+      </Dialog>
+
+      <!-- Custom "Support FlyPhotos" dialog: two browser hyperlinks (Microsoft
+           Store + GitHub Sponsors). Hyperlink controls shell-execute the href on
+           click, so no custom action / extra extension is needed. Purely
+           informational - it does not affect what gets installed. -->
+      <Dialog Id="SupportDlg" Width="370" Height="270" Title="!(loc.InstallDirDlg_Title)">
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
+                 TabSkip="no" Text="!(loc.InstallDirDlgBannerBitmap)" />
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
+                 Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Support FlyPhotos" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="320" Height="15"
+                 Transparent="yes" NoPrefix="yes" Text="FlyPhotos is free - here is how you can help it keep improving" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+
+        <Control Id="IntroText" Type="Text" X="25" Y="58" Width="320" Height="24"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="If you find FlyPhotos useful, please consider supporting its continued development. It takes a moment and makes a real difference." />
+
+        <Control Id="StoreText" Type="Text" X="25" Y="92" Width="320" Height="24"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="Buying FlyPhotos from the Microsoft Store is a great way to support the project (you also get a Microsoft-signed, auto-updating build):" />
+        <Control Id="StoreLink" Type="Hyperlink" X="25" Y="118" Width="320" Height="15" TabSkip="no">
+          <Text Value="&lt;a href=&quot;https://apps.microsoft.com/detail/9pmsk128v1qt?cid=MsiInstaller&amp;mode=full&quot;&gt;Buy FlyPhotos on the Microsoft Store&lt;/a&gt;" />
+        </Control>
+
+        <Control Id="DonateText" Type="Text" X="25" Y="148" Width="320" Height="36"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="Or you can sponsor development on GitHub." />
+        <Control Id="DonateLink" Type="Hyperlink" X="25" Y="164" Width="320" Height="15" TabSkip="no">
+          <Text Value="&lt;a href=&quot;https://github.com/sponsors/riyasy&quot;&gt;Donate on GitHub Sponsors&lt;/a&gt;" />
+        </Control>
+
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
+                 Text="!(loc.WixUIBack)">
+          <Publish Event="NewDialog" Value="ContextMenuDlg" />
+        </Control>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
+                 Default="yes" Text="!(loc.WixUINext)">
+          <Publish Event="NewDialog" Value="VerifyReadyDlg" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
+                 Cancel="yes" Text="!(loc.WixUICancel)">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+      </Dialog>
+    </UI>
+
+  </Package>
+</Wix>

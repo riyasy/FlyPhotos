@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <!--
+    All registry the legacy vdproj wrote, reproduced 1:1:
+
+      * HKCR\FlyPhotos.Image                  - the ProgID (icon + open command)
+      * HKCR\Applications\FlyPhotos.exe        - app open command + SupportedTypes
+                                                 (90 empty values -> "Open With" list)
+      * HKLM\Software\RegisteredApplications    - Default Programs pointer
+        + HKLM\Software\FlyPhotos\Capabilities  - ApplicationName + FileAssociations
+                                                 (90 values -> FlyPhotos.Image)
+      * HKCR\*\shell\Open with Fly             - right-click entry, gated on the
+                                                 ADDCONTEXTMENU property (vdproj CHECKBOXA1)
+
+    Paths use [INSTALLFOLDER] (the vdproj used [TARGETDIR], same target). The two
+    empty vestigial HKCU/HKLM [Manufacturer] keys the vdproj editor created are
+    intentionally dropped - they had no values and no function.
+
+    Each component takes a single real registry value as its KeyPath, and the
+    ProgID / Applications / Capabilities / context-menu roots use
+    ForceDeleteOnUninstall so no empty keys are left behind on uninstall.
+  -->
+  <Fragment>
+    <ComponentGroup Id="RegistryEntries" Directory="INSTALLFOLDER">
+
+      <!-- ProgID: HKCR\FlyPhotos.Image -->
+      <Component Id="ProgId_FlyPhotosImage" Guid="*">
+        <RegistryKey Root="HKCR" Key="FlyPhotos.Image" ForceDeleteOnUninstall="yes">
+          <RegistryValue Key="DefaultIcon" Type="string"
+                         Value="&quot;[INSTALLFOLDER]Assets\file-type.ico&quot;" KeyPath="yes" />
+          <RegistryValue Key="shell\open\command" Type="string"
+                         Value="&quot;[INSTALLFOLDER]FlyPhotos.exe&quot; &quot;%1&quot;" />
+        </RegistryKey>
+      </Component>
+
+      <!-- HKCR\Applications\FlyPhotos.exe : open command + 90 SupportedTypes -->
+      <Component Id="App_FlyPhotosExe" Guid="*">
+        <RegistryKey Root="HKCR" Key="Applications\FlyPhotos.exe" ForceDeleteOnUninstall="yes">
+          <RegistryValue Key="shell\open\command" Type="string"
+                         Value="&quot;[INSTALLFOLDER]FlyPhotos.exe&quot; &quot;%1&quot;" KeyPath="yes" />
+          <RegistryValue Key="SupportedTypes" Name=".bmp" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".dib" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".rle" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".gif" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".ico" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".icon" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".cur" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".jpeg" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".jpe" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".jpg" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".jfif" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".exif" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".png" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".tiff" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".tif" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".wdp" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".jxr" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".dds" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".heic" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".heif" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".hif" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".avci" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".heics" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".heifs" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".avcs" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".avif" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".avifs" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".webp" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".jxl" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".3fr" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".ari" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".arw" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".bay" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".cap" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".cr2" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".cr3" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".crw" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".dcs" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".dcr" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".drf" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".eip" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".erf" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".fff" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".iiq" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".k25" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".kdc" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".mef" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".mos" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".mrw" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".nef" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".nrw" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".orf" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".ori" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".pef" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".ptx" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".pxn" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".raf" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".raw" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".rw2" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".rwl" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".sr2" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".srf" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".srw" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".x3f" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".dng" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".psd" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".svg" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".cin" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".dpx" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".exr" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".fits" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".hdr" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".pam" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".pbm" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".pct" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".pcx" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".pfm" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".pgm" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".pix" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".pnm" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".ppm" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".pict" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".qoi" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".ras" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".rgb" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".rgba" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".sgi" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".sun" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".tga" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".ff" Type="string" Value="" />
+        </RegistryKey>
+      </Component>
+
+      <!-- Default Programs: RegisteredApplications + Capabilities (90 FileAssociations) -->
+      <Component Id="Capabilities" Guid="*">
+        <RegistryValue Root="HKLM" Key="Software\RegisteredApplications"
+                       Name="FlyPhotos" Type="string"
+                       Value="Software\FlyPhotos\Capabilities" KeyPath="yes" />
+        <RegistryKey Root="HKLM" Key="Software\FlyPhotos" ForceDeleteOnUninstall="yes">
+          <RegistryKey Key="Capabilities">
+            <RegistryValue Name="ApplicationName" Type="string" Value="FlyPhotos" />
+            <RegistryValue Key="FileAssociations" Name=".bmp" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".dib" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".rle" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".gif" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".ico" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".icon" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".cur" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".jpeg" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".jpe" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".jpg" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".jfif" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".exif" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".png" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".tiff" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".tif" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".wdp" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".jxr" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".dds" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".heic" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".heif" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".hif" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".avci" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".heics" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".heifs" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".avcs" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".avif" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".avifs" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".webp" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".jxl" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".3fr" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".ari" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".arw" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".bay" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".cap" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".cr2" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".cr3" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".crw" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".dcs" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".dcr" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".drf" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".eip" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".erf" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".fff" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".iiq" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".k25" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".kdc" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".mef" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".mos" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".mrw" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".nef" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".nrw" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".orf" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".ori" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".pef" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".ptx" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".pxn" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".raf" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".raw" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".rw2" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".rwl" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".sr2" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".srf" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".srw" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".x3f" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".dng" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".psd" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".svg" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".cin" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".dpx" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".exr" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".fits" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".hdr" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".pam" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".pbm" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".pct" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".pcx" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".pfm" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".pgm" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".pix" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".pnm" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".ppm" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".pict" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".qoi" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".ras" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".rgb" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".rgba" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".sgi" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".sun" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".tga" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".ff" Type="string" Value="FlyPhotos.Image" />
+          </RegistryKey>
+        </RegistryKey>
+      </Component>
+
+      <!-- Right-click "Open with Fly" on all files - gated by the checkbox property. -->
+      <Component Id="ContextMenuEntry" Guid="*" Condition="ADDCONTEXTMENU=1">
+        <RegistryKey Root="HKCR" Key="*\shell\Open with Fly" ForceDeleteOnUninstall="yes">
+          <RegistryValue Key="command" Type="string"
+                         Value="&quot;[INSTALLFOLDER]FlyPhotos.exe&quot; &quot;%1&quot;" KeyPath="yes" />
+          <RegistryValue Name="Icon" Type="string"
+                         Value="&quot;[INSTALLFOLDER]Assets\app-icon.ico&quot;" />
+        </RegistryKey>
+      </Component>
+
+    </ComponentGroup>
+  </Fragment>
+</Wix>
