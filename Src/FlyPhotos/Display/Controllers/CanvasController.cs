@@ -78,6 +78,12 @@ internal class CanvasController : ICanvasController
     // W2D-owned: set inside the ZoomOutOnExit action, read in the AnimationCompleted handler.
     private bool _isGoingToExit;
 
+    // W2D-owned: true while ZoomAtPointPrecision ticks are arriving (right-click continuous zoom).
+    // Cleared 700 ms after the last tick — just after the 650 ms offscreen timer fires — so Draw
+    // skips the offscreen and uses source-bitmap quality during the zoom burst.
+    private bool _continuousZoomActive;
+    private CancellationTokenSource _continuousZoomCts;
+
     #region Construction and Destruction
 
     public CanvasController(CanvasAnimatedControl d2dCanvas, IThumbnailController thumbNailController,
@@ -119,6 +125,8 @@ internal class CanvasController : ICanvasController
             _d2dCanvas.Draw -= D2dCanvas_Draw;
             _d2dCanvas.SizeChanged -= D2dCanvas_SizeChanged;
 
+            _continuousZoomCts?.Cancel();
+            _continuousZoomCts?.Dispose();
             _canvasViewManager?.Dispose();
             _currentRenderer?.Dispose();
             _currentRenderer = null;
@@ -411,9 +419,25 @@ internal class CanvasController : ICanvasController
         {
             if (_currentRenderer == null) return;
             _canvasViewManager.ZoomAtPointPrecision(delta, zoomAnchor);
+
             // No animation → no AnimationCompleted → must restart the offscreen timer manually
             // so the offscreen is recreated 650ms after the last zoom tick.
             _currentRenderer.RestartOffScreenDrawTimer();
+
+            // Mark the burst as active so D2dCanvas_Draw skips the offscreen and uses
+            // source-bitmap quality. Debounce the clear to 700ms (just after the 650ms
+            // offscreen timer) so Draw switches back to the fresh offscreen once zoom stops.
+            _continuousZoomActive = true;
+            _continuousZoomCts?.Cancel();
+            _continuousZoomCts?.Dispose();
+            _continuousZoomCts = new CancellationTokenSource();
+            var token = _continuousZoomCts.Token;
+            Task.Run(async () =>
+            {
+                try { await Task.Delay(700, token); }
+                catch (TaskCanceledException) { return; }
+                EnqueueW2dAction(() => _continuousZoomActive = false);
+            }, token);
         });
     }
 
@@ -515,7 +539,7 @@ internal class CanvasController : ICanvasController
         var renderer = _currentRenderer;
         if (renderer == null) return;
 
-        var isAnimating = _canvasViewManager.PanZoomAnimationOnGoing;
+        var isAnimating = _canvasViewManager.PanZoomAnimationOnGoing || _continuousZoomActive;
         // HQ Interpolation Setting ON  + Zoom animation ongoing -> Use Linear Interpolation
         // HQ Interpolation Setting ON  + Final zoomed image    -> Use HighQualityCubic
         // HQ Interpolation Setting OFF + Zoom animation ongoing -> Use NearestNeighbor
