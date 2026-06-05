@@ -4,30 +4,53 @@ name: Build
 # No automatic triggers -- builds are intentional releases, not on every push.
 on:
   workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform(s) to build
+        type: choice
+        default: Both
+        options:
+          - Both
+          - x64
+          - ARM64
+      native:
+        description: Native DLLs (vcpkg + C++ + Rust)
+        type: choice
+        default: Build fresh
+        options:
+          - Build fresh
+          - Use committed (skip native build)
 
 jobs:
-  build:
-    strategy:
-      # Run both platforms in parallel. If one fails, let the other finish
-      # so you get failure information for both at the same time.
-      fail-fast: false
-      matrix:
-        include:
-          - runner: windows-latest
-            platform: x64
-            rid: win-x64
-            vcpkg-triplet: x64-windows-release    # release-only, ~50% faster than x64-windows
-            install-root: vcpkg_installed_x64      # isolated install root (prevents cross-platform pruning)
-            rust-target: x86_64-pc-windows-msvc
-            publish-profile: win-x64
+  # Turn the "platform" choice into the build matrix. The matrix context is not
+  # available in a job-level `if:`, so we compute the matrix here and the build
+  # job consumes it via fromJSON -- that way an UN-selected platform's runner
+  # never even starts (vs. starting and skipping every step).
+  setup:
+    name: Select platform(s)
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.pick.outputs.matrix }}
+    steps:
+      - id: pick
+        shell: pwsh
+        run: |
+          $x64 = '{"runner":"windows-latest","platform":"x64","rid":"win-x64","vcpkg-triplet":"x64-windows-release","install-root":"vcpkg_installed_x64","rust-target":"x86_64-pc-windows-msvc","publish-profile":"win-x64"}'
+          $arm = '{"runner":"windows-11-arm","platform":"ARM64","rid":"win-arm64","vcpkg-triplet":"arm64-windows-release","install-root":"vcpkg_installed_arm64","rust-target":"aarch64-pc-windows-msvc","publish-profile":"win-ARM64"}'
+          $items = switch ("${{ inputs.platform }}") {
+            'x64'   { $x64 }
+            'ARM64' { $arm }
+            default { "$x64,$arm" }
+          }
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "matrix={`"include`":[$items]}"
 
-          - runner: windows-11-arm
-            platform: ARM64
-            rid: win-arm64
-            vcpkg-triplet: arm64-windows-release   # custom overlay triplet (not built-in to vcpkg)
-            install-root: vcpkg_installed_arm64
-            rust-target: aarch64-pc-windows-msvc
-            publish-profile: win-ARM64
+  build:
+    needs: setup
+    strategy:
+      # Run the selected platform(s) in parallel. If one fails, let the other
+      # finish so you get failure information for both at the same time.
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
 
     runs-on: ${{ matrix.runner }}
     name: Build (${{ matrix.platform }})
@@ -65,7 +88,12 @@ jobs:
       # Install the stable Rust toolchain and pre-add the cross-compilation
       # target for this platform. On windows-latest the host IS x86_64 so
       # the target is native; on windows-11-arm the host IS aarch64 so same.
+      #
+      # Everything from here through "Assemble External binaries" is the native
+      # build; it is skipped when the "native" input is set to reuse the DLLs
+      # already committed under Src/FlyPhotos/External/<Platform>/.
       - name: Setup Rust
+        if: ${{ inputs.native == 'Build fresh' }}
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.rust-target }}
@@ -77,6 +105,7 @@ jobs:
       # A change to any port file or vcpkg.json invalidates the cache and
       # triggers a full recompile of the affected packages.
       - name: Cache vcpkg binary packages
+        if: ${{ inputs.native == 'Build fresh' }}
         uses: actions/cache@v4
         with:
           path: vcpkg_cache
@@ -88,6 +117,7 @@ jobs:
       # and the target/ directory (compiled artifacts). Keyed automatically
       # by Cargo.lock + rust-target so a dependency change invalidates it.
       - name: Cache Rust build
+        if: ${{ inputs.native == 'Build fresh' }}
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: Src/fly_rust_bridge
@@ -105,6 +135,7 @@ jobs:
       # --x-install-root isolates each platform's packages so they don't
       # interfere with each other when both platforms run in parallel.
       - name: Install vcpkg dependencies
+        if: ${{ inputs.native == 'Build fresh' }}
         working-directory: Src/build_libheif
         run: |
           vcpkg install `
@@ -125,6 +156,7 @@ jobs:
       # Output lands in Src/<Platform>/Release/ (not Src/<Project>/<Platform>/Release/).
       # The .vcxproj OutDir is $(ProjectDir)\..\$(Platform)\$(Configuration)\.
       - name: Build FlyNativeLib
+        if: ${{ inputs.native == 'Build fresh' }}
         working-directory: Src/FlyNativeLib
         run: |
           msbuild FlyNativeLib.vcxproj `
@@ -133,6 +165,7 @@ jobs:
             /p:PlatformToolset=v143
 
       - name: Build FlyNativeLibHeif
+        if: ${{ inputs.native == 'Build fresh' }}
         working-directory: Src/FlyNativeLibHeif
         run: |
           msbuild FlyNativeLibHeif.vcxproj `
@@ -141,6 +174,7 @@ jobs:
             /p:PlatformToolset=v143
 
       - name: Build FlyContextMenuHelper
+        if: ${{ inputs.native == 'Build fresh' }}
         working-directory: Src/FlyContextMenuHelper
         run: |
           msbuild FlyContextMenuHelper.vcxproj `
@@ -156,6 +190,7 @@ jobs:
       # --target must be specified or cargo builds for the host and the DLL
       # lands in target/release/ (no triplet subfolder) -- easy to mis-deploy.
       - name: Build fly_rust_bridge
+        if: ${{ inputs.native == 'Build fresh' }}
         working-directory: Src/fly_rust_bridge
         run: |
           cargo build --release --target ${{ matrix.rust-target }}
@@ -172,6 +207,7 @@ jobs:
       # individually so that if any copy source is missing the step fails
       # with a clear error rather than silently succeeding with a partial set.
       - name: Assemble External binaries
+        if: ${{ inputs.native == 'Build fresh' }}
         shell: pwsh
         run: |
           $platform    = "${{ matrix.platform }}"
