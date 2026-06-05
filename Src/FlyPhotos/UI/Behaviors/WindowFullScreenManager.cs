@@ -41,9 +41,17 @@ internal sealed class WindowFullScreenManager
     /// </param>
     internal void Restore(UIElement? exitFullScreenButton = null)
     {
-        // Use .Kind (a plain enum) instead of `is OverlappedPresenter` / `is FullScreenPresenter`
-        // type-pattern checks. The `is T` form goes through WinRT COM QueryInterface, which the
-        // Release-build trimmer strips — causing the check to silently return false in Release.
+        // --- WinRT presenter checks under NativeAOT + Release ---
+        // Discriminate the presenter via .Kind (a plain enum). A *memberless* type check such as
+        // `is OverlappedPresenter` / `as OverlappedPresenter` can silently return false/null under
+        // NativeAOT + Release: CsWinRT may not retain the projected type's vtable / type-mapping, so
+        // the QueryInterface yields nothing. Debug and non-AOT builds are unaffected, which makes it
+        // an easy regression to miss. See CsWinRT#1930 and microsoft-ui-xaml#10471 (both still open).
+        //
+        // The `is OverlappedPresenter { State: ... }` patterns used below ARE safe precisely because
+        // they read a member (.State / .Restore): that member reference roots the projection mapping,
+        // which is the same effect as the documented `Presenter.As<OverlappedPresenter>()` workaround.
+        // Do NOT "simplify" these into a memberless cast — that reintroduces the silent AOT failure.
         if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped)
         {
             if (AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Maximized } op)
@@ -68,9 +76,10 @@ internal sealed class WindowFullScreenManager
     /// </param>
     internal void ToggleFullScreen(UIElement? exitFullScreenButton = null)
     {
-        // Use .Kind (a plain enum) instead of `is OverlappedPresenter` / `is FullScreenPresenter`
-        // type-pattern checks. The `is T` form goes through WinRT COM QueryInterface, which the
-        // Release-build trimmer strips — causing the check to silently return false in Release.
+        // .Kind discriminates the presenter; the `is OverlappedPresenter { State: ... }` capture below
+        // reads .State, which roots the projection so the cast resolves under NativeAOT + Release.
+        // See the full note in Restore(). Refs: CsWinRT#1930, microsoft-ui-xaml#10471.
+        // Do NOT reduce the State read to a memberless `is/as OverlappedPresenter`.
         if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped)
         {
             FullScreenToggled?.Invoke(true);
