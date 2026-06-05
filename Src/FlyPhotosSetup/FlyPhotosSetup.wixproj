@@ -9,24 +9,23 @@
 
     The MSI architecture follows the MSBuild $(Platform) (x64 -> 64-bit package,
     ARM64 -> arm64 package), and the file-harvest source follows it too via
-    $(PublishRid). The MSI version is taken from the harvested FlyPhotos.exe
-    FileVersion by default (see BuildVersion below), so it always matches the
-    binary; pass -p:BuildVersion=x.y.z only to override it.
+    $(PublishRid). The MSI version is the fixed BuildVersion string below - bump it
+    for each release; pass -p:BuildVersion=x.y.z to override it.
   -->
   <PropertyGroup>
     <Platform Condition="'$(Platform)' == ''">x64</Platform>
     <!-- Map MSBuild platform -> dotnet publish RID folder -->
     <PublishRid Condition="'$(Platform)' == 'x64'">win-x64</PublishRid>
     <PublishRid Condition="'$(Platform)' == 'ARM64'">win-arm64</PublishRid>
-    <!-- Version of the produced MSI. By default it binds to the FileVersion
-         resource of the harvested FlyPhotos.exe (File Id "FlyPhotosExe", see
-         Files.wxs), so the MSI version always equals the binary it ships - no
-         hardcoded number. WiX resolves !(bind.FileVersion.<FileId>) at link time.
-         Pass -p:BuildVersion=x.y.z to override with an explicit version instead. -->
-    <BuildVersion Condition="'$(BuildVersion)' == ''">!(bind.FileVersion.FlyPhotosExe)</BuildVersion>
+    <!-- The installer's own version string: it becomes both the MSI ProductVersion
+         and the version in the output file name. >>> BUMP THIS FOR EACH RELEASE <<<
+         Override per build with -p:BuildVersion=x.y.z. -->
+    <BuildVersion Condition="'$(BuildVersion)' == ''">2.6.1</BuildVersion>
     <!-- Source folder harvested by Files.wxs (the AOT publish output). -->
     <PublishDir>$(MSBuildThisFileDirectory)..\FlyPhotos\bin\$(PublishRid)\publish</PublishDir>
-    <OutputName>FlyPhotos-$(Platform)</OutputName>
+    <!-- Output file: FlyPhotosInstaller_<version>_<Platform>.msi. WiX overwrites
+         this same-named file on every rebuild. -->
+    <OutputName>FlyPhotosInstaller_$(BuildVersion)_$(Platform)</OutputName>
     <!--
       Suppressed ICE checks, each a known false positive for this package:
 
@@ -54,44 +53,4 @@
   <ItemGroup>
     <PackageReference Include="WixToolset.UI.wixext" Version="5.0.2" />
   </ItemGroup>
-
-  <!--
-    Rename the built MSI to FlyPhotosInstaller_<version>_<Platform>.msi.
-
-    The MSI's internal ProductVersion is resolved at WiX *link* time
-    (!(bind.FileVersion.FlyPhotosExe)), which is too late to feed the output
-    file name (decided by MSBuild). So we read the same FlyPhotos.exe FileVersion
-    here with a tiny inline task and rename the output after the build - the file
-    name and the internal version therefore always come from the same binary.
-  -->
-  <UsingTask TaskName="GetExeFileVersion"
-             TaskFactory="RoslynCodeTaskFactory"
-             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
-    <ParameterGroup>
-      <ExePath ParameterType="System.String" Required="true" />
-      <Version ParameterType="System.String" Output="true" />
-    </ParameterGroup>
-    <Task>
-      <Code Type="Fragment" Language="cs"><![CDATA[
-        var fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(ExePath);
-        Version = fvi.FileMajorPart + "." + fvi.FileMinorPart + "." + fvi.FileBuildPart;
-      ]]></Code>
-    </Task>
-  </UsingTask>
-
-  <Target Name="RenameMsiWithVersion" AfterTargets="Build">
-    <PropertyGroup>
-      <_BuiltMsi>$(OutDir)FlyPhotos-$(Platform).msi</_BuiltMsi>
-    </PropertyGroup>
-    <GetExeFileVersion ExePath="$(PublishDir)\FlyPhotos.exe" Condition="Exists('$(_BuiltMsi)')">
-      <Output TaskParameter="Version" PropertyName="_MsiVersion" />
-    </GetExeFileVersion>
-    <PropertyGroup>
-      <_FinalMsi>$(OutDir)FlyPhotosInstaller_$(_MsiVersion)_$(Platform).msi</_FinalMsi>
-    </PropertyGroup>
-    <!-- Move has no overwrite flag, so clear any stale destination first. -->
-    <Delete Files="$(_FinalMsi)" Condition="Exists('$(_BuiltMsi)') And Exists('$(_FinalMsi)')" />
-    <Move SourceFiles="$(_BuiltMsi)" DestinationFiles="$(_FinalMsi)" Condition="Exists('$(_BuiltMsi)')" />
-    <Message Importance="high" Text="Installer: $(_FinalMsi)" Condition="Exists('$(_FinalMsi)')" />
-  </Target>
 </Project>
