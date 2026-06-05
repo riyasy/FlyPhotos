@@ -54,7 +54,7 @@ internal partial class StaticImageRenderer : IRenderer
     }
 
 
-    public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality)
+    public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating)
     {
         session.Units = CanvasUnits.Pixels;
         var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
@@ -69,7 +69,7 @@ internal partial class StaticImageRenderer : IRenderer
 
         lock (_timerLock)
         {
-            if (_offscreen != null)
+            if (_offscreen != null && !isAnimating)
                 session.DrawImage(_offscreen, viewState.ImageRect, _offscreen.Bounds, 1f, quality);
             else
                 session.DrawImage(_sourceBitmap, viewState.ImageRect, _sourceBitmap.Bounds, 1f, quality);

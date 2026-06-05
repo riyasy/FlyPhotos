@@ -70,7 +70,7 @@ internal partial class MultiPageRenderer : IRenderer
         return decoder;
     }
 
-    public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality)
+    public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating)
     {
         session.Units = CanvasUnits.Pixels;
 

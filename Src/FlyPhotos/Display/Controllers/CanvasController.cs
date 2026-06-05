@@ -515,12 +515,17 @@ internal class CanvasController : ICanvasController
         var renderer = _currentRenderer;
         if (renderer == null) return;
 
-        var drawingQuality = !AppConfig.Settings.HighQualityInterpolation || _canvasViewManager.PanZoomAnimationOnGoing
-            ? CanvasImageInterpolation.NearestNeighbor
-            : CanvasImageInterpolation.HighQualityCubic;
+        var isAnimating = _canvasViewManager.PanZoomAnimationOnGoing;
+        // HQ Interpolation Setting ON  + Zoom animation ongoing -> Use Linear Interpolation
+        // HQ Interpolation Setting ON  + Final zoomed image    -> Use HighQualityCubic
+        // HQ Interpolation Setting OFF + Zoom animation ongoing -> Use NearestNeighbor
+        // HQ Interpolation Setting OFF + Final zoomed image     -> Use NearestNeighbor
+        var drawingQuality = isAnimating
+            ? (AppConfig.Settings.HighQualityInterpolation ? CanvasImageInterpolation.Linear : CanvasImageInterpolation.NearestNeighbor)
+            : (AppConfig.Settings.HighQualityInterpolation ? CanvasImageInterpolation.HighQualityCubic : CanvasImageInterpolation.NearestNeighbor);
 
         args.DrawingSession.Transform = _canvasViewState.Mat;
-        renderer.Draw(args.DrawingSession, _canvasViewState, drawingQuality);
+        renderer.Draw(args.DrawingSession, _canvasViewState, drawingQuality, isAnimating);
     }
 
     private void D2dCanvas_SizeChanged(object sender, SizeChangedEventArgs args)

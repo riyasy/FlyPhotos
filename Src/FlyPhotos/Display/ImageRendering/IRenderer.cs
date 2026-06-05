@@ -12,7 +12,7 @@ internal interface IRenderer : IDisposable
     /// <summary>
     /// Draws the content to the canvas.
     /// </summary>
-    void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality);
+    void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating);
 
     void RestartOffScreenDrawTimer();
 

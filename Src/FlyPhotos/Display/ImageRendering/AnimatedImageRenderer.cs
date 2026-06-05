@@ -39,7 +39,7 @@ internal partial class AnimatedImageRenderer : IRenderer
         // No CompositionTarget.Rendering subscription — the Update loop in CanvasController drives us.
     }
 
-    public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality)
+    public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating)
     {
         session.Units = CanvasUnits.Pixels;
         if (_animator?.Surface == null) return;
