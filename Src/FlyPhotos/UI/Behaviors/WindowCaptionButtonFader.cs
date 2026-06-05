@@ -50,16 +50,26 @@ internal sealed class WindowCaptionButtonFader
 
     /// <summary>
     ///     Gets or sets whether show/hide logic is suspended.
-    ///     Setting to <see langword="true"/> also immediately hides the buttons.
-    ///     Typically set by the composer in response to a full-screen toggle event.
+    ///     Setting to <see langword="true"/> immediately hides the buttons; setting it
+    ///     back to <see langword="false"/> restores them to the state dictated by
+    ///     <see cref="Enabled"/> (forced visible when the fader is off, hidden-until-hover
+    ///     when it is on). Typically set by the composer in response to a full-screen toggle event.
     /// </summary>
     internal bool Suspended
     {
         get;
         set
         {
+            if (field == value) return;
             field = value;
-            if (value) HideButtons();
+            if (value)
+                HideButtons();
+            else if (Enabled)
+                // Auto-hide is active: resume hidden, reappear on hover near the top.
+                HideButtons();
+            else
+                // Fader is off: caption buttons must stay permanently visible.
+                ShowButtons();
         }
     }
 
