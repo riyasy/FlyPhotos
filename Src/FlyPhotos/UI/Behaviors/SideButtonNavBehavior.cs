@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
 using Microsoft.UI.Input;
@@ -10,8 +11,8 @@ using Microsoft.UI.Xaml.Input;
 namespace FlyPhotos.UI.Behaviors;
 
 // Handles XButton1/XButton2 (mouse back/forward) hold-navigation.
-// Lazy: registers only a lightweight sentinel on construction. The timer and
-// full press/release handlers are allocated on the first XButton event so
+// Lazy: registers only a lightweight sentinel on construction. The full
+// press/release handlers are allocated on the first XButton event so
 // users without side-button mice pay no ongoing cost.
 internal sealed partial class SideButtonNavBehavior
 {
@@ -24,9 +25,7 @@ internal sealed partial class SideButtonNavBehavior
     private PointerEventHandler? _pressedHandler;
     private PointerEventHandler? _releasedHandler;
 
-    private DispatcherTimer? _timer;
-    private int _direction;   // -1 = back, 0 = none, 1 = forward
-    private bool _inDelay;
+    private CancellationTokenSource? _repeatCts;
 
     public SideButtonNavBehavior(
         UIElement root,
@@ -46,10 +45,9 @@ internal sealed partial class SideButtonNavBehavior
     // Called from window Closed handler.
     public void Detach()
     {
+        _repeatCts?.Cancel();
         if (_pressedHandler is not null)
         {
-            _timer!.Stop();
-            _timer.Tick -= OnTimerTick;
             _root.RemoveHandler(UIElement.PointerPressedEvent, _pressedHandler);
             _root.RemoveHandler(UIElement.PointerReleasedEvent, _releasedHandler);
         }
@@ -60,7 +58,7 @@ internal sealed partial class SideButtonNavBehavior
     }
 
     // Sentinel: fires for every PointerPressed on the root until the first XButton
-    // event, then promotes to full press/release handlers and allocates the timer.
+    // event, then promotes to full press/release handlers.
     private void OnFirstXButton(object sender, PointerRoutedEventArgs e)
     {
         var kind = e.GetCurrentPoint(_root).Properties.PointerUpdateKind;
@@ -72,9 +70,6 @@ internal sealed partial class SideButtonNavBehavior
         _releasedHandler = OnReleased;
         _root.AddHandler(UIElement.PointerPressedEvent, _pressedHandler, true);
         _root.AddHandler(UIElement.PointerReleasedEvent, _releasedHandler, true);
-
-        _timer = new DispatcherTimer();
-        _timer.Tick += OnTimerTick;
 
         HandlePress(kind);
     }
@@ -88,13 +83,12 @@ internal sealed partial class SideButtonNavBehavior
         if (_isStepZoomMode()) return;
 
         var dir = kind == PointerUpdateKind.XButton1Pressed ? NavDirection.Prev : NavDirection.Next;
-        _direction = dir == NavDirection.Prev ? -1 : 1;
+
         _ = _fly(dir);
 
-        _inDelay = true;
-        _timer!.Interval = KeyboardDelayInterval();
-        _timer.Stop();
-        _timer.Start();
+        _repeatCts?.Cancel();
+        _repeatCts = new CancellationTokenSource();
+        _ = RunRepeatAsync(dir, _repeatCts.Token);
     }
 
     private async void OnReleased(object sender, PointerRoutedEventArgs e)
@@ -102,38 +96,40 @@ internal sealed partial class SideButtonNavBehavior
         var kind = e.GetCurrentPoint(_root).Properties.PointerUpdateKind;
         if (kind is not (PointerUpdateKind.XButton1Released or PointerUpdateKind.XButton2Released)) return;
 
-        _timer?.Stop();
-        _direction = 0;
+        _repeatCts?.Cancel();
         try { await _brake(); } catch { /* prevent async void crash */ }
     }
 
-    private async void OnTimerTick(object? sender, object e)
+    // Runs on the ThreadPool so Task.Delay timing is independent of UI thread load.
+    // Navigations are posted to the DispatcherQueue, where they queue up just like
+    // keyboard WM_KEYDOWN messages queue in the Windows message pump.
+    private async Task RunRepeatAsync(NavDirection dir, CancellationToken token)
     {
-        if (_direction == 0) { _timer?.Stop(); return; }
-        if (_inDelay)
+        try
         {
-            // Initial delay elapsed — switch to the OS repeat rate for subsequent ticks.
-            _inDelay = false;
-            _timer?.Stop();
-            _timer!.Interval = TimeSpan.FromMilliseconds(KeyboardRepeatIntervalMs());
-            _timer.Start();
+            await Task.Delay(KeyboardDelayMs(), token).ConfigureAwait(false);
+            while (!token.IsCancellationRequested)
+            {
+                _root.DispatcherQueue.TryEnqueue(() => _ = _fly(dir));
+                await Task.Delay(KeyboardRepeatMs(), token).ConfigureAwait(false);
+            }
         }
-        try { await _fly(_direction < 0 ? NavDirection.Prev : NavDirection.Next); } catch { /* prevent async void crash */ }
+        catch (OperationCanceledException) { }
     }
 
     [LibraryImport("user32.dll", EntryPoint = "SystemParametersInfoW")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool SystemParametersInfo(uint uiAction, uint uiParam, ref uint pvParam, uint fWinIni);
 
-    private static TimeSpan KeyboardDelayInterval()
+    private static int KeyboardDelayMs()
     {
         uint delay = 1;
         SystemParametersInfo(0x0016 /* SPI_GETKEYBOARDDELAY */, 0, ref delay, 0);
         // 0 → 250 ms, 1 → 500 ms, 2 → 750 ms, 3 → 1000 ms
-        return TimeSpan.FromMilliseconds((delay + 1) * 250);
+        return (int)((delay + 1) * 250);
     }
 
-    private static int KeyboardRepeatIntervalMs()
+    private static int KeyboardRepeatMs()
     {
         uint speed = 15;
         SystemParametersInfo(0x000A /* SPI_GETKEYBOARDSPEED */, 0, ref speed, 0);
