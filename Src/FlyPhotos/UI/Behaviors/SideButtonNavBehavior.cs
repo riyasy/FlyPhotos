@@ -18,7 +18,6 @@ internal sealed partial class SideButtonNavBehavior
     private readonly UIElement _root;
     private readonly Func<NavDirection, Task> _fly;
     private readonly Func<Task> _brake;
-    private readonly Func<bool> _isSinglePhoto;
     private readonly Func<bool> _isStepZoomMode;
 
     private readonly PointerEventHandler _sentinel;
@@ -33,13 +32,11 @@ internal sealed partial class SideButtonNavBehavior
         UIElement root,
         Func<NavDirection, Task> fly,
         Func<Task> brake,
-        Func<bool> isSinglePhoto,
         Func<bool> isStepZoomMode)
     {
         _root = root;
         _fly = fly;
         _brake = brake;
-        _isSinglePhoto = isSinglePhoto;
         _isStepZoomMode = isStepZoomMode;
 
         _sentinel = OnFirstXButton;
@@ -88,7 +85,7 @@ internal sealed partial class SideButtonNavBehavior
     private void HandlePress(PointerUpdateKind kind)
     {
         if (kind is not (PointerUpdateKind.XButton1Pressed or PointerUpdateKind.XButton2Pressed)) return;
-        if (_isSinglePhoto() || _isStepZoomMode()) return;
+        if (_isStepZoomMode()) return;
 
         var dir = kind == PointerUpdateKind.XButton1Pressed ? NavDirection.Prev : NavDirection.Next;
         _direction = dir == NavDirection.Prev ? -1 : 1;
@@ -105,28 +102,26 @@ internal sealed partial class SideButtonNavBehavior
         var kind = e.GetCurrentPoint(_root).Properties.PointerUpdateKind;
         if (kind is not (PointerUpdateKind.XButton1Released or PointerUpdateKind.XButton2Released)) return;
 
-        _timer!.Stop();
+        _timer?.Stop();
         _direction = 0;
-
-        if (_isStepZoomMode()) return;
-        await _brake();
+        try { await _brake(); } catch { /* prevent async void crash */ }
     }
 
     private async void OnTimerTick(object? sender, object e)
     {
-        if (_direction == 0) { _timer!.Stop(); return; }
+        if (_direction == 0) { _timer?.Stop(); return; }
         if (_inDelay)
         {
             // Initial delay elapsed — switch to the OS repeat rate for subsequent ticks.
             _inDelay = false;
-            _timer!.Stop();
-            _timer.Interval = TimeSpan.FromMilliseconds(KeyboardRepeatIntervalMs());
+            _timer?.Stop();
+            _timer!.Interval = TimeSpan.FromMilliseconds(KeyboardRepeatIntervalMs());
             _timer.Start();
         }
-        await _fly(_direction < 0 ? NavDirection.Prev : NavDirection.Next);
+        try { await _fly(_direction < 0 ? NavDirection.Prev : NavDirection.Next); } catch { /* prevent async void crash */ }
     }
 
-    [LibraryImport("user32.dll")]
+    [LibraryImport("user32.dll", EntryPoint = "SystemParametersInfoW")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool SystemParametersInfo(uint uiAction, uint uiParam, ref uint pvParam, uint fWinIni);
 

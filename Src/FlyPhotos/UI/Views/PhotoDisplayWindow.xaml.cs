@@ -139,13 +139,12 @@ public sealed partial class PhotoDisplayWindow
 
         _repeatButtonReleaseCheckTimer.Tick += RepeatButtonReleaseCheckTimer_Tick;
         _wheelScrollBrakeTimer.Tick += WheelScrollBrakeTimer_Tick;
+
         _sideButtonNav = new SideButtonNavBehavior(
             MainLayout,
             dir => _photoController.Fly(dir),
             () => _photoController.Brake(),
-            () => _photoController.IsSinglePhoto(),
             () => AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom);
-
         _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout, AppConfig.Settings.AutoFade);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
         _mouseAutoHider = new MouseAutoHider(MainLayout, AppConfig.Settings.AutoHideMouse, TimeSpan.FromSeconds(1));
