@@ -19,6 +19,7 @@ using FlyPhotos.Services.ExternalAppListing;
 using FlyPhotos.UI.Behaviors;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
+using Microsoft.UI.Input;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -41,6 +42,9 @@ public sealed partial class PhotoDisplayWindow
 
     private readonly DispatcherTimer _repeatButtonReleaseCheckTimer = new() { Interval = new TimeSpan(0, 0, 0, 0, 100) };
     private readonly DispatcherTimer _wheelScrollBrakeTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
+    private readonly DispatcherTimer _sideButtonRepeatTimer = new() { Interval = TimeSpan.FromMilliseconds(150) };
+    private int _sideButtonDirection; // -1 = back, 0 = none, 1 = forward
+    private PointerUpdateKind _lastPointerDownKind;
 
     private readonly VirtualKey _plusVk = Util.GetKeyThatProduces('+');
     private readonly VirtualKey _minusVk = Util.GetKeyThatProduces('-');
@@ -136,6 +140,7 @@ public sealed partial class PhotoDisplayWindow
 
         _repeatButtonReleaseCheckTimer.Tick += RepeatButtonReleaseCheckTimer_Tick;
         _wheelScrollBrakeTimer.Tick += WheelScrollBrakeTimer_Tick;
+        _sideButtonRepeatTimer.Tick += SideButtonRepeatTimer_Tick;
 
         _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout, AppConfig.Settings.AutoFade);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
@@ -249,6 +254,8 @@ public sealed partial class PhotoDisplayWindow
         _repeatButtonReleaseCheckTimer.Tick -= RepeatButtonReleaseCheckTimer_Tick;
         _wheelScrollBrakeTimer.Stop();
         _wheelScrollBrakeTimer.Tick -= WheelScrollBrakeTimer_Tick;
+        _sideButtonRepeatTimer.Stop();
+        _sideButtonRepeatTimer.Tick -= SideButtonRepeatTimer_Tick;
         _rightClickCts?.Cancel();
         _rightClickCts?.Dispose();
 
@@ -457,6 +464,7 @@ public sealed partial class PhotoDisplayWindow
         var pointerPoint = e.GetCurrentPoint(D2dCanvas);
         var dpiAdjustedPos = pointerPoint.Position.AdjustForDpi(D2dCanvas);
         var updateKind = pointerPoint.Properties.PointerUpdateKind;
+        _lastPointerDownKind = updateKind;
 
         if (updateKind == Microsoft.UI.Input.PointerUpdateKind.RightButtonPressed)
         {
@@ -502,6 +510,18 @@ public sealed partial class PhotoDisplayWindow
             D2dCanvas.CapturePointer(e.Pointer);
             _lastPoint = pointerPoint.Position;
             _isDragging = true;
+            return;
+        }
+
+        if (updateKind is PointerUpdateKind.XButton1Pressed or PointerUpdateKind.XButton2Pressed)
+        {
+            if (_photoController.IsSinglePhoto()) return;
+            if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom) return;
+            var dir = updateKind == PointerUpdateKind.XButton1Pressed ? NavDirection.Prev : NavDirection.Next;
+            _sideButtonDirection = dir == NavDirection.Prev ? -1 : 1;
+            _ = _photoController.Fly(dir);
+            _sideButtonRepeatTimer.Stop();
+            _sideButtonRepeatTimer.Start();
         }
     }
     private void D2dCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
@@ -568,20 +588,28 @@ public sealed partial class PhotoDisplayWindow
                     _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
                     break;
                 }
-            case Microsoft.UI.Input.PointerUpdateKind.XButton1Released: // Mouse Back button pressed
+            case Microsoft.UI.Input.PointerUpdateKind.XButton1Released:
                 {
                     if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom)
                         _canvasController.StepZoom(ZoomDirection.Out, dpiAdjustedPosition);
                     else
-                        await _photoController.FlyBy(-1);
+                    {
+                        _sideButtonRepeatTimer.Stop();
+                        _sideButtonDirection = 0;
+                        await _photoController.Brake();
+                    }
                     break;
                 }
-            case Microsoft.UI.Input.PointerUpdateKind.XButton2Released: // Mouse Forward button pressed
+            case Microsoft.UI.Input.PointerUpdateKind.XButton2Released:
                 {
                     if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom)
                         _canvasController.StepZoom(ZoomDirection.In, dpiAdjustedPosition);
                     else
-                        await _photoController.FlyBy(1);
+                    {
+                        _sideButtonRepeatTimer.Stop();
+                        _sideButtonDirection = 0;
+                        await _photoController.Brake();
+                    }
                     break;
                 }
         }
@@ -619,6 +647,7 @@ public sealed partial class PhotoDisplayWindow
 
     private void D2dCanvas_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
     {
+        if (_lastPointerDownKind is PointerUpdateKind.XButton1Pressed or PointerUpdateKind.XButton2Pressed) return;
         var point = e.GetPosition(D2dCanvas).AdjustForDpi(D2dCanvas);
         // Only handle double click if inside image bounds
         if (!_canvasController.IsPressedOnImage(point)) return;
@@ -689,6 +718,12 @@ public sealed partial class PhotoDisplayWindow
     {
         _wheelScrollBrakeTimer.Stop();
         await _photoController.Brake();
+    }
+
+    private async void SideButtonRepeatTimer_Tick(object? sender, object e)
+    {
+        if (_sideButtonDirection == 0) { _sideButtonRepeatTimer.Stop(); return; }
+        await _photoController.Fly(_sideButtonDirection < 0 ? NavDirection.Prev : NavDirection.Next);
     }
 
     #endregion
