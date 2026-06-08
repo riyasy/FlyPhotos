@@ -52,6 +52,7 @@ internal sealed partial class SideButtonNavBehavior
         if (_pressedHandler is not null)
         {
             _timer!.Stop();
+            _timer.Tick -= OnTimerTick;
             _root.RemoveHandler(UIElement.PointerPressedEvent, _pressedHandler);
             _root.RemoveHandler(UIElement.PointerReleasedEvent, _releasedHandler);
         }
@@ -103,10 +104,11 @@ internal sealed partial class SideButtonNavBehavior
     {
         var kind = e.GetCurrentPoint(_root).Properties.PointerUpdateKind;
         if (kind is not (PointerUpdateKind.XButton1Released or PointerUpdateKind.XButton2Released)) return;
-        if (_isStepZoomMode()) return;
 
         _timer!.Stop();
         _direction = 0;
+
+        if (_isStepZoomMode()) return;
         await _brake();
     }
 
