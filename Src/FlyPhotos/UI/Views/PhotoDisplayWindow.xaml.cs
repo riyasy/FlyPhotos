@@ -45,6 +45,8 @@ public sealed partial class PhotoDisplayWindow
     private readonly DispatcherTimer _sideButtonRepeatTimer = new() { Interval = TimeSpan.FromMilliseconds(150) };
     private int _sideButtonDirection; // -1 = back, 0 = none, 1 = forward
     private PointerUpdateKind _lastPointerDownKind;
+    private PointerEventHandler? _xButtonPressedHandler;
+    private PointerEventHandler? _xButtonReleasedHandler;
 
     private readonly VirtualKey _plusVk = Util.GetKeyThatProduces('+');
     private readonly VirtualKey _minusVk = Util.GetKeyThatProduces('-');
@@ -141,6 +143,10 @@ public sealed partial class PhotoDisplayWindow
         _repeatButtonReleaseCheckTimer.Tick += RepeatButtonReleaseCheckTimer_Tick;
         _wheelScrollBrakeTimer.Tick += WheelScrollBrakeTimer_Tick;
         _sideButtonRepeatTimer.Tick += SideButtonRepeatTimer_Tick;
+        _xButtonPressedHandler = MainLayout_XButtonPressed;
+        _xButtonReleasedHandler = MainLayout_XButtonReleased;
+        MainLayout.AddHandler(UIElement.PointerPressedEvent, _xButtonPressedHandler, true);
+        MainLayout.AddHandler(UIElement.PointerReleasedEvent, _xButtonReleasedHandler, true);
 
         _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout, AppConfig.Settings.AutoFade);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
@@ -256,6 +262,8 @@ public sealed partial class PhotoDisplayWindow
         _wheelScrollBrakeTimer.Tick -= WheelScrollBrakeTimer_Tick;
         _sideButtonRepeatTimer.Stop();
         _sideButtonRepeatTimer.Tick -= SideButtonRepeatTimer_Tick;
+        MainLayout.RemoveHandler(UIElement.PointerPressedEvent, _xButtonPressedHandler);
+        MainLayout.RemoveHandler(UIElement.PointerReleasedEvent, _xButtonReleasedHandler);
         _rightClickCts?.Cancel();
         _rightClickCts?.Dispose();
 
@@ -513,16 +521,6 @@ public sealed partial class PhotoDisplayWindow
             return;
         }
 
-        if (updateKind is PointerUpdateKind.XButton1Pressed or PointerUpdateKind.XButton2Pressed)
-        {
-            if (_photoController.IsSinglePhoto()) return;
-            if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom) return;
-            var dir = updateKind == PointerUpdateKind.XButton1Pressed ? NavDirection.Prev : NavDirection.Next;
-            _sideButtonDirection = dir == NavDirection.Prev ? -1 : 1;
-            _ = _photoController.Fly(dir);
-            _sideButtonRepeatTimer.Stop();
-            _sideButtonRepeatTimer.Start();
-        }
     }
     private void D2dCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
@@ -592,24 +590,12 @@ public sealed partial class PhotoDisplayWindow
                 {
                     if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom)
                         _canvasController.StepZoom(ZoomDirection.Out, dpiAdjustedPosition);
-                    else
-                    {
-                        _sideButtonRepeatTimer.Stop();
-                        _sideButtonDirection = 0;
-                        await _photoController.Brake();
-                    }
                     break;
                 }
             case Microsoft.UI.Input.PointerUpdateKind.XButton2Released:
                 {
                     if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom)
                         _canvasController.StepZoom(ZoomDirection.In, dpiAdjustedPosition);
-                    else
-                    {
-                        _sideButtonRepeatTimer.Stop();
-                        _sideButtonDirection = 0;
-                        await _photoController.Brake();
-                    }
                     break;
                 }
         }
@@ -724,6 +710,29 @@ public sealed partial class PhotoDisplayWindow
     {
         if (_sideButtonDirection == 0) { _sideButtonRepeatTimer.Stop(); return; }
         await _photoController.Fly(_sideButtonDirection < 0 ? NavDirection.Prev : NavDirection.Next);
+    }
+
+    private void MainLayout_XButtonPressed(object sender, PointerRoutedEventArgs e)
+    {
+        var kind = e.GetCurrentPoint(MainLayout).Properties.PointerUpdateKind;
+        if (kind is not (PointerUpdateKind.XButton1Pressed or PointerUpdateKind.XButton2Pressed)) return;
+        if (_photoController.IsSinglePhoto()) return;
+        if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom) return;
+        var dir = kind == PointerUpdateKind.XButton1Pressed ? NavDirection.Prev : NavDirection.Next;
+        _sideButtonDirection = dir == NavDirection.Prev ? -1 : 1;
+        _ = _photoController.Fly(dir);
+        _sideButtonRepeatTimer.Stop();
+        _sideButtonRepeatTimer.Start();
+    }
+
+    private async void MainLayout_XButtonReleased(object sender, PointerRoutedEventArgs e)
+    {
+        var kind = e.GetCurrentPoint(MainLayout).Properties.PointerUpdateKind;
+        if (kind is not (PointerUpdateKind.XButton1Released or PointerUpdateKind.XButton2Released)) return;
+        if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom) return;
+        _sideButtonRepeatTimer.Stop();
+        _sideButtonDirection = 0;
+        await _photoController.Brake();
     }
 
     #endregion
