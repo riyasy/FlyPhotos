@@ -96,11 +96,29 @@ namespace FlyPhotos.UI.Behaviors
             ((Grid)_root).Background = new SolidColorBrush(Colors.Transparent);
 
             _configurationSource = new SystemBackdropConfiguration { IsInputActive = true };
+
+            // Set the theme BEFORE subscribing ActualThemeChanged and BEFORE applying the backdrop.
+            // This prevents two problems:
+            //   1. A spurious ActualThemeChanged firing inside SetWindowBackdropPrivate (or the old
+            //      SetWindowTheme call after it) that would re-run SetConfigurationSourceTheme and
+            //      double-call UpdateCaptionButtonForeground.
+            //   2. Mica/Acrylic being attached with the wrong theme in _configurationSource before
+            //      the requested theme is resolved, which can produce a transient wrong-theme frame
+            //      in dark mode.
+            // Note: whether RequestedTheme resolves synchronously to ActualTheme before the handler
+            // is subscribed depends on whether the content is already in the visual tree. Confirm
+            // via WPA/ETW on-device; if ActualTheme lags, the first ActualThemeChanged after
+            // layout will still correct it, but the wrong-theme frame risk remains until then.
+            _root.RequestedTheme = AppConfig.Settings.Theme;
+
             _window.Activated += Window_Activated;
             _root.ActualThemeChanged += Window_ActualThemeChanged;
-            SetConfigurationSourceTheme();
+
+            // SetConfigurationSourceTheme is NOT called here. It is deferred to TrySetMicaBackdrop /
+            // TrySetAcrylicBackdrop immediately before SetSystemBackdropConfiguration, so the COM
+            // activation (ThemeSettings.CreateForWindowId) is skipped entirely for
+            // Transparent / Frozen / None backdrops that never consume _configurationSource.
             SetWindowBackdropPrivate(initialBackdrop);
-            SetWindowTheme(AppConfig.Settings.Theme);
         }
 
         /// <summary>
@@ -262,7 +280,8 @@ namespace FlyPhotos.UI.Behaviors
             titleBar.ExtendsContentIntoTitleBar = true;
             titleBar.ButtonBackgroundColor = Colors.Transparent;
             titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
-            UpdateCaptionButtonForeground();
+            // ButtonForegroundColor is already current from the UpdateCaptionButtonForeground()
+            // call at the end of SetWindowBackdropPrivate in the constructor — no redundant write.
         }
 
         /// <summary>
@@ -291,6 +310,10 @@ namespace FlyPhotos.UI.Behaviors
             if (!MicaController.IsSupported()) return;
             var micaController = new MicaController { Kind = useMicaAlt ? MicaKind.BaseAlt : MicaKind.Base };
             micaController.AddSystemBackdropTarget(_window.As<ICompositionSupportsSystemBackdrop>());
+            // Populate _configurationSource here, not in the constructor: the COM activation
+            // (ThemeSettings.CreateForWindowId) is only needed on paths that call
+            // SetSystemBackdropConfiguration.
+            SetConfigurationSourceTheme();
             micaController.SetSystemBackdropConfiguration(_configurationSource);
             _backdropController = micaController;
         }
@@ -305,6 +328,10 @@ namespace FlyPhotos.UI.Behaviors
             var acrylicController = new DesktopAcrylicController
             { Kind = useAcrylicThin ? DesktopAcrylicKind.Thin : DesktopAcrylicKind.Base };
             acrylicController.AddSystemBackdropTarget(_window.As<ICompositionSupportsSystemBackdrop>());
+            // Populate _configurationSource here, not in the constructor: the COM activation
+            // (ThemeSettings.CreateForWindowId) is only needed on paths that call
+            // SetSystemBackdropConfiguration.
+            SetConfigurationSourceTheme();
             acrylicController.SetSystemBackdropConfiguration(_configurationSource);
             _backdropController = acrylicController;
         }
