@@ -100,6 +100,7 @@ public class AppSettings
     }
     public string WindowState { get; set; } = "";
     public bool AllowMultiInstance { get; set; } = false;
+    public bool StickyZoomLevels { get; set; } = true;
 
     [JsonPropertyName("RawDecoderPriority")]
     public ObservableCollection<string> RawDecoderPriorityAsStrings { get; set; } =

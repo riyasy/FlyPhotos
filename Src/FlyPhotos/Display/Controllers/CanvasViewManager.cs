@@ -383,13 +383,39 @@ internal class CanvasViewManager
         }
     }
 
+    private static readonly float[] ZoomSnapPoints = [0.5f, 1.0f, 2.0f, 5.0f, 10.0f];
+
+    private static float ApplyZoomSnap(float newScale, float oldScale, ZoomDirection direction)
+    {
+        if (direction == ZoomDirection.In)
+        {
+            float? snap = ZoomSnapPoints
+                .Where(s => s > oldScale && s <= newScale)
+                .Cast<float?>()
+                .FirstOrDefault();
+            if (snap.HasValue) return snap.Value;
+        }
+        else
+        {
+            float? snap = ZoomSnapPoints
+                .Where(s => s < oldScale && s >= newScale)
+                .Cast<float?>()
+                .LastOrDefault();
+            if (snap.HasValue) return snap.Value;
+        }
+        return newScale;
+    }
+
     /// <summary>
     /// Performs a standard zoom operation centered on the canvas.
     /// </summary>
     public void ZoomAtCenter(ZoomDirection zoomDirection, Size canvasSize)
     {
         var scalePercentage = (zoomDirection == ZoomDirection.In) ? 1.25f : 0.8f;
-        var scaleTo = _canvasViewState.LastScaleTo * scalePercentage;
+        var rawScaleTo = _canvasViewState.LastScaleTo * scalePercentage;
+        var scaleTo = AppConfig.Settings.StickyZoomLevels
+            ? ApplyZoomSnap(rawScaleTo, _canvasViewState.LastScaleTo, zoomDirection)
+            : rawScaleTo;
         if (scaleTo < 0.05) return;
         _canvasViewState.LastScaleTo = scaleTo;
         var center = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
@@ -407,7 +433,10 @@ internal class CanvasViewManager
     public void ZoomAtPoint(ZoomDirection zoomDirection, Point zoomAnchor)
     {
         var scalePercentage = (zoomDirection == ZoomDirection.In) ? 1.25f : 0.8f;
-        var scaleTo = _canvasViewState.LastScaleTo * scalePercentage;
+        var rawScaleTo = _canvasViewState.LastScaleTo * scalePercentage;
+        var scaleTo = AppConfig.Settings.StickyZoomLevels
+            ? ApplyZoomSnap(rawScaleTo, _canvasViewState.LastScaleTo, zoomDirection)
+            : rawScaleTo;
         if (scaleTo < 0.05) return;
         _canvasViewState.LastScaleTo = scaleTo;
         StartZoomAnimation(scaleTo, zoomAnchor);
