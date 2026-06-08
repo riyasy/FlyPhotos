@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
@@ -17,6 +18,7 @@ namespace FlyPhotos.UI.Behaviors;
 internal sealed partial class SideButtonNavBehavior
 {
     private readonly UIElement _root;
+    private readonly DispatcherQueue _dispatcherQueue; // captured on UI thread; safe to use from pool thread
     private readonly Func<NavDirection, Task> _fly;
     private readonly Func<Task> _brake;
     private readonly Func<bool> _isStepZoomMode;
@@ -34,6 +36,7 @@ internal sealed partial class SideButtonNavBehavior
         Func<bool> isStepZoomMode)
     {
         _root = root;
+        _dispatcherQueue = root.DispatcherQueue; // ctor runs on the UI thread
         _fly = fly;
         _brake = brake;
         _isStepZoomMode = isStepZoomMode;
@@ -42,10 +45,14 @@ internal sealed partial class SideButtonNavBehavior
         root.AddHandler(UIElement.PointerPressedEvent, _sentinel, true);
     }
 
-    // Called from window Closed handler.
+    // Called from window Closed handler (UI thread).
     public void Detach()
     {
-        _repeatCts?.Cancel();
+        var cts = _repeatCts;
+        _repeatCts = null;
+        cts?.Cancel();
+        cts?.Dispose();
+
         if (_pressedHandler is not null)
         {
             _root.RemoveHandler(UIElement.PointerPressedEvent, _pressedHandler);
@@ -84,11 +91,16 @@ internal sealed partial class SideButtonNavBehavior
 
         var dir = kind == PointerUpdateKind.XButton1Pressed ? NavDirection.Prev : NavDirection.Next;
 
-        _ = _fly(dir);
+        FlySafe(dir);
 
-        _repeatCts?.Cancel();
+        var old = _repeatCts;
         _repeatCts = new CancellationTokenSource();
-        _ = RunRepeatAsync(dir, _repeatCts.Token);
+        old?.Cancel();
+        old?.Dispose();
+
+        // Read keyboard timings once per hold; they can't change mid-press,
+        // and this keeps the P/Invokes off the repeat loop.
+        _ = RunRepeatAsync(dir, KeyboardDelayMs(), KeyboardRepeatMs(), _repeatCts.Token);
     }
 
     private async void OnReleased(object sender, PointerRoutedEventArgs e)
@@ -96,25 +108,42 @@ internal sealed partial class SideButtonNavBehavior
         var kind = e.GetCurrentPoint(_root).Properties.PointerUpdateKind;
         if (kind is not (PointerUpdateKind.XButton1Released or PointerUpdateKind.XButton2Released)) return;
 
-        _repeatCts?.Cancel();
+        var cts = _repeatCts;
+        _repeatCts = null;
+        cts?.Cancel();
+        cts?.Dispose();
+
         try { await _brake(); } catch { /* prevent async void crash */ }
     }
 
     // Runs on the ThreadPool so Task.Delay timing is independent of UI thread load.
     // Navigations are posted to the DispatcherQueue, where they queue up just like
     // keyboard WM_KEYDOWN messages queue in the Windows message pump.
-    private async Task RunRepeatAsync(NavDirection dir, CancellationToken token)
+    private async Task RunRepeatAsync(NavDirection dir, int delayMs, int repeatMs, CancellationToken token)
     {
         try
         {
-            await Task.Delay(KeyboardDelayMs(), token).ConfigureAwait(false);
+            await Task.Delay(delayMs, token).ConfigureAwait(false);
             while (!token.IsCancellationRequested)
             {
-                _root.DispatcherQueue.TryEnqueue(() => _ = _fly(dir));
-                await Task.Delay(KeyboardRepeatMs(), token).ConfigureAwait(false);
+                _dispatcherQueue.TryEnqueue(() =>
+                {
+                    // Re-check on the UI thread: cancellation (release/detach) may have
+                    // landed after the loop's check but before this delegate runs,
+                    // which would otherwise post a stray step after _brake().
+                    if (!token.IsCancellationRequested) FlySafe(dir);
+                });
+                await Task.Delay(repeatMs, token).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException) { }
+    }
+
+    // Fire-and-forget _fly with the same fault-swallowing posture as _brake,
+    // so a faulted navigation Task doesn't go unobserved.
+    private async void FlySafe(NavDirection dir)
+    {
+        try { await _fly(dir); } catch { /* prevent async void crash */ }
     }
 
     [LibraryImport("user32.dll", EntryPoint = "SystemParametersInfoW")]
