@@ -824,13 +824,28 @@ public sealed partial class PhotoDisplayWindow
     }
 
     /// <summary>
-    ///     Enters full-screen mode at launch, using the same <see cref="WindowFullScreenManager.ToggleFullScreen"/> path
-    ///     as the interactive F11 toggle. This ensures PauseTracking is set, the exit-full-screen button is shown,
-    ///     and <c>_wasMaximizedBeforeFullScreen</c> is recorded correctly so exiting later works properly.
+    ///     Activates the window and applies the configured launch mode (maximized, full-screen,
+    ///     or last window state). <c>Activate()</c> is always called first so that
+    ///     <c>ExtendsContentIntoTitleBar</c> is stable before any maximize, avoiding the
+    ///     top-edge position jag that occurs when <c>SW_SHOWMAXIMIZED</c> is applied inside
+    ///     <c>WM_SHOWWINDOW</c> before the title-bar geometry has settled.
     /// </summary>
-    internal void EnterFullScreenOnLaunch()
+    internal void ActivateForStartup()
     {
-        _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
+        Activate();
+        switch (AppConfig.Settings.WindowLaunchMode)
+        {
+            case WindowLaunchMode.Maximized:
+                this.Maximize();
+                break;
+            case WindowLaunchMode.FullScreen:
+                _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
+                break;
+            case WindowLaunchMode.LastWindowState:
+                if (_windPlacementManager.WasMaximized)
+                    this.Maximize();
+                break;
+        }
     }
 
     private async Task HandleMouseWheelNavigation(int delta, bool isHorizontalScroll)
