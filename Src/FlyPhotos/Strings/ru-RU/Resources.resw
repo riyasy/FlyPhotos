@@ -384,12 +384,6 @@
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Интенсивность автоскрытия (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>Отключите для более четких границ пикселей (полезно для пиксельной графики).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>Использовать высококачественную интерполяцию при масштабировании</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Укажите количество фотографий высокого разрешения, сохраняемых в кэше</value>
   </data>

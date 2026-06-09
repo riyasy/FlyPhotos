@@ -55,7 +55,15 @@ public class AppSettings
     public bool AutoFade { get; set; } = true;
     public int FadeIntensity { get; set; } = 60;
     public bool OpenExitZoom { get; set; } = false;
-    public bool HighQualityInterpolation { get; set; } = true;
+    [JsonPropertyName("ImageScalingQuality")]
+    public string ImageScalingQualityAsString { get; set; } = "HighQualityCubic";
+
+    [JsonIgnore]
+    public ImageInterpolation ImageScalingQuality
+    {
+        get => Enum.TryParse<ImageInterpolation>(ImageScalingQualityAsString, true, out var r) ? r : ImageInterpolation.HighQualityCubic;
+        set => ImageScalingQualityAsString = value.ToString();
+    }
     public bool CheckeredBackground { get; set; } = false;
     public int ImageFitPercentage { get; set; } = 100;
     public bool StretchSmallImages { get; set; } = false;

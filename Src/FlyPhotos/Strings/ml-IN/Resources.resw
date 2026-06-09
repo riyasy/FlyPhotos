@@ -381,12 +381,6 @@
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>മങ്ങൽ തീവ്രത %</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>വ്യക്തമായ പിക്സൽ അറ്റങ്ങൾക്കായി ഇത് ഓഫ് ആക്കുക (പിക്സൽ ആർട്ടിന് ഉപകരിക്കും).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>സൂം ചെയ്യുമ്പോൾ ഉയർന്ന ഗുണനിലവാരമുള്ള ഇന്റർപോളേഷൻ ഉപയോഗിക്കുക</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>ഓരോ വശത്തും കാഷെ ചെയ്ത ഹൈ-റെസല്യൂഷൻ ഫോട്ടോകളുടെ എണ്ണം സജ്ജമാക്കുക.</value>
   </data>

@@ -540,13 +540,7 @@ internal class CanvasController : ICanvasController
         if (renderer == null) return;
 
         var isAnimating = _canvasViewManager.PanZoomAnimationOnGoing || _continuousZoomActive;
-        // HQ Interpolation Setting ON  + Zoom animation ongoing -> Use Linear Interpolation
-        // HQ Interpolation Setting ON  + Final zoomed image    -> Use HighQualityCubic
-        // HQ Interpolation Setting OFF + Zoom animation ongoing -> Use NearestNeighbor
-        // HQ Interpolation Setting OFF + Final zoomed image     -> Use NearestNeighbor
-        var drawingQuality = isAnimating
-            ? (AppConfig.Settings.HighQualityInterpolation ? CanvasImageInterpolation.Linear : CanvasImageInterpolation.NearestNeighbor)
-            : (AppConfig.Settings.HighQualityInterpolation ? CanvasImageInterpolation.HighQualityCubic : CanvasImageInterpolation.NearestNeighbor);
+        var drawingQuality = AppConfig.Settings.ImageScalingQuality.ToCanvasInterpolation(isAnimating);
 
         args.DrawingSession.Transform = _canvasViewState.Mat;
         renderer.Draw(args.DrawingSession, _canvasViewState, drawingQuality, isAnimating);

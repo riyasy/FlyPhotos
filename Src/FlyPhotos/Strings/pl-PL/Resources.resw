@@ -384,12 +384,6 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Intensywność automatycznego wygaszania (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>Wyłącz, aby uzyskać ostrzejsze krawędzie pikseli (przydatne w przypadku grafiki pikselowej).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>Użyj interpolacji wysokiej jakości podczas powiększania</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Ustaw liczbę zdjęć w wysokiej rozdzielczości buforowanych po każdej stronie.</value>
   </data>

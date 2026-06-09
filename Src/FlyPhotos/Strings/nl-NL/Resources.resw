@@ -384,12 +384,6 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Intensiteit automatisch vervagen (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>Uitschakelen voor scherpere pixelranden (handig voor pixelart).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>Interpolatie van hoge kwaliteit gebruiken bij zoomen</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Stel het aantal foto's in hoge resolutie in dat aan elke kant is opgeslagen.</value>
   </data>

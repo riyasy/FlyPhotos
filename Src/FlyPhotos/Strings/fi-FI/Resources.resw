@@ -384,12 +384,6 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Automaattisen häivytyksen voimakkuus (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>Poista käytöstä terävämpien pikselireunojen saamiseksi (hyödyllinen pikselitaiteelle).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>Käytä korkealaatuista interpolointia zoomatessa</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Aseta kummallekin puolelle välimuistiin tallennettujen korkearesoluutioisten kuvien määrä.</value>
   </data>

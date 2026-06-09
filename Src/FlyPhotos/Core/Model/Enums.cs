@@ -90,3 +90,10 @@ public enum WindowLaunchMode
     FullScreen,
     LastWindowState
 }
+
+public enum ImageInterpolation
+{
+    NearestNeighbor,
+    Linear,
+    HighQualityCubic
+}

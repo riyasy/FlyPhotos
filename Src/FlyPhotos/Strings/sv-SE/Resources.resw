@@ -384,12 +384,6 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Automatisk toningintensitet (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>Inaktivera för skarpare pixelkanter (användbart för pixelkonst).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>Använd högkvalitativ interpolation vid zoomning</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Ställ in antalet högupplösta foton som cachas på varje sida.</value>
   </data>

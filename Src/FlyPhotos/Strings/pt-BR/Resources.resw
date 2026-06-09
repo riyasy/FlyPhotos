@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -383,12 +383,6 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
   </data>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Intensidade da ocultação gradual (%)</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>Desabilitar para bordas de pixels mais nítidas (útil para pixel art).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>Usar interpolação de alta qualidade ao usar o zoom</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Definir o número de fotos em alta resolução armazenadas em cache de cada lado.</value>

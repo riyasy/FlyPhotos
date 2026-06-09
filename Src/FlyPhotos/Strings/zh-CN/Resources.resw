@@ -384,12 +384,6 @@
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>自动淡出强度 (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>关闭后像素边缘会更锐利（适合像素画）。</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>缩放时使用高质量插值</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>设置两侧缓存的高分辨率照片数量。</value>
   </data>

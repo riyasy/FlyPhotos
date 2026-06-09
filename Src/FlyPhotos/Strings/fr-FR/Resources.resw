@@ -384,12 +384,6 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Intensité d'estompage automatique (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>Désactiver pour des bords de pixels plus nets (utile pour le pixel art).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>Utiliser une interpolation de haute qualité lors du zoom</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Définir le nombre de photos haute résolution mises en cache de chaque côté.</value>
   </data>

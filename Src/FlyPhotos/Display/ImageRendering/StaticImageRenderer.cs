@@ -210,9 +210,7 @@ internal partial class StaticImageRenderer : IRenderer
             scaledImageHeight > canvasSize.Height * 1.5)
             return;
 
-        var drawingQuality = AppConfig.Settings.HighQualityInterpolation
-            ? CanvasImageInterpolation.HighQualityCubic
-            : CanvasImageInterpolation.NearestNeighbor;
+        var drawingQuality = AppConfig.Settings.ImageScalingQuality.ToCanvasInterpolation(false);
 
         var tempOffScreen = new CanvasRenderTarget(_canvas.Device, (float)scaledImageWidth, (float)scaledImageHeight, 96);
         using (var ds = tempOffScreen.CreateDrawingSession())

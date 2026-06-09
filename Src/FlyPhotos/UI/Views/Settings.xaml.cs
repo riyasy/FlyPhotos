@@ -82,7 +82,8 @@ internal sealed partial class Settings
         ButtonEnableAutoFade.IsOn = AppConfig.Settings.AutoFade;
         ButtonOpenExitZoom.IsOn = AppConfig.Settings.OpenExitZoom;
         SliderFadeIntensity.Value = AppConfig.Settings.FadeIntensity;
-        ButtonHighQualityInterpolation.IsOn = AppConfig.Settings.HighQualityInterpolation;
+        ComboImageScalingQuality.SelectedIndex = GetIndexForImageScalingQuality(AppConfig.Settings.ImageScalingQuality);
+        SettingsCardImageScalingQuality.Description = GetImageScalingQualityDescription(ComboImageScalingQuality.SelectedIndex);
         ButtonShowZoomPercent.IsOn = AppConfig.Settings.ShowZoomPercent;
         ButtonShowCheckeredBackground.IsOn = AppConfig.Settings.CheckeredBackground;
         SliderImageFitPercentage.Value = AppConfig.Settings.ImageFitPercentage;
@@ -116,7 +117,7 @@ internal sealed partial class Settings
         ButtonOpenExitZoom.Toggled += ButtonOpenExitZoom_OnToggled;
         ButtonEnableAutoFade.Toggled += ButtonEnableAutoFade_OnToggled;
         SliderFadeIntensity.ValueChanged += SliderFadeIntensity_ValueChanged;
-        ButtonHighQualityInterpolation.Toggled += ButtonHighQualityInterpolation_OnToggled;
+        ComboImageScalingQuality.SelectionChanged += ComboImageScalingQuality_OnSelectionChanged;
         ButtonShowZoomPercent.Toggled += ButtonShowZoomPercent_OnToggled;
         ButtonShowCheckeredBackground.Toggled += ButtonShowCheckeredBackground_OnToggled;
         SliderImageFitPercentage.ValueChanged += SliderImageFitPercentage_ValueChanged;
@@ -308,11 +309,34 @@ internal sealed partial class Settings
         await AppConfig.SaveAsync();
     }
 
-    private async void ButtonHighQualityInterpolation_OnToggled(object sender, RoutedEventArgs e)
+    private async void ComboImageScalingQuality_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        AppConfig.Settings.HighQualityInterpolation = ButtonHighQualityInterpolation.IsOn;
+        AppConfig.Settings.ImageScalingQuality = GetImageScalingQualityForIndex(ComboImageScalingQuality.SelectedIndex);
+        SettingsCardImageScalingQuality.Description = GetImageScalingQualityDescription(ComboImageScalingQuality.SelectedIndex);
         await AppConfig.SaveAsync();
     }
+
+    private static string GetImageScalingQualityDescription(int index) => index switch
+    {
+        0 => L.Get("ImageScalingQualityDescPixelArt"),  // NearestNeighbor
+        2 => L.Get("ImageScalingQualityDescAnimation"), // HighQualityCubic
+        _ => string.Empty                               // Bilinear/Linear
+    };
+
+    private static int GetIndexForImageScalingQuality(ImageInterpolation quality) => quality switch
+    {
+        ImageInterpolation.NearestNeighbor => 0,
+        ImageInterpolation.Linear => 1,
+        ImageInterpolation.HighQualityCubic => 2,
+        _ => 2
+    };
+
+    private static ImageInterpolation GetImageScalingQualityForIndex(int index) => index switch
+    {
+        0 => ImageInterpolation.NearestNeighbor,
+        1 => ImageInterpolation.Linear,
+        _ => ImageInterpolation.HighQualityCubic
+    };
 
     private async void ButtonShowZoomPercent_OnToggled(object sender, RoutedEventArgs e)
     {

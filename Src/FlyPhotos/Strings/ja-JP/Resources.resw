@@ -383,12 +383,6 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>自動フェードの強度 (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>よりシャープなピクセルエッジのために無効にします (ピクセルアートに役立ちます)。</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>ズーム時に高品質な補間を使用</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>各側にキャッシュされる高解像度写真の数を設定します。</value>
   </data>

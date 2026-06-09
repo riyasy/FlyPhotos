@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -383,12 +383,6 @@
   </data>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Інтенсивність автозникання (%)</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>Вимкніть для чіткіших пікселів (корисно для піксельної графіки).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>Використовувати інтерполяцію високої якості при масштабуванні</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Встановити кількість фото у кеші у високій роздільній здатності з кожного боку.</value>

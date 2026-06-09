@@ -384,12 +384,6 @@ Impostazioni &gt; App &gt; App predefinite.</value>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Intensità dissolvenza automatica (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>Disabilita per bordi dei pixel più nitidi (utile per la pixel art).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>Usa interpolazione di alta qualità durante lo zoom</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Imposta il numero di foto ad alta risoluzione memorizzate nella cache su ciascun lato.</value>
   </data>

@@ -383,12 +383,6 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>자동 페이드 강도(%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>더 선명한 픽셀 모서리를 위해 비활성화합니다(픽셀 아트에 유용).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>확대/축소 시 고품질 보간 사용</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>각 측면에 캐시된 고해상도 사진 수를 설정합니다.</value>
   </data>

@@ -384,12 +384,6 @@
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>淡出強度（％）</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>停用以獲得更銳利的像素邊緣（可用於像素藝術）。</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>縮放時使用高品質插值</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>設定每側快取的高解析度照片數量。</value>
   </data>
