@@ -206,15 +206,35 @@ internal class CanvasViewManager
         // making a 300 px pan become 3000+ px after the upgrade.
         else if (!isNewPhoto && !isUpgradeFromPlaceholder)
         {
+            // Pure quality upgrade (Preview → HQ of the same photo). Must be visually seamless — never
+            // reset or jump, even when a zoom/pan animation is still in flight as the HQ buffer arrives.
+            var animating = _currentAnimation is AnimationType.SpringZoom
+                or AnimationType.SpringPanAndZoom or AnimationType.PanAndZoom;
+
             var oldImageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
             var oldRotation = _canvasViewState.Rotation;
             _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
             _canvasViewState.Rotation += imageRotation - _originalImageRotation;
             _originalImageRotation = imageRotation;
 
-            if (IsFittedToScreen)
+            var oldFitScale = CalculateScreenFitScale(canvasSize, oldImageSize, oldRotation);
+            var newFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+            var scaleRatio = oldFitScale > 0 ? newFitScale / oldFitScale : 1f;
+
+            if (animating)
             {
-                var newFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+                // An animation is running: keep it alive. Rescale BOTH the displayed scale and the
+                // animation's internal scale/target by the resolution ratio, so the image keeps the same
+                // visual size and the spring/tween keeps converging to the resolution-adjusted target.
+                // Pan is screen-space (unchanged here), so the animation's pan state stays valid.
+                // Snapping to fit (the IsFittedToScreen path below) would visibly reset mid-animation.
+                _canvasViewState.Scale *= scaleRatio;
+                _canvasViewState.LastScaleTo *= scaleRatio;
+                RebaseAnimationScale(scaleRatio);
+                IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < 0.001f;
+            }
+            else if (IsFittedToScreen)
+            {
                 _canvasViewState.Scale = newFitScale;
                 _canvasViewState.LastScaleTo = newFitScale;
                 _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
@@ -225,20 +245,18 @@ internal class CanvasViewManager
                 // Preserve scene-relative zoom: multiply scale by (newFitScale / oldFitScale).
                 // Pan stays unchanged in canvas coordinates — the image centre remains at the same
                 // pixel on screen regardless of the change in image resolution.
-                var oldFitScale = CalculateScreenFitScale(canvasSize, oldImageSize, oldRotation);
-                var newFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
-                if (oldFitScale > 0)
-                {
-                    var scaleRatio = newFitScale / oldFitScale;
-                    _canvasViewState.Scale *= scaleRatio;
-                    _canvasViewState.LastScaleTo *= scaleRatio;
-                }
+                _canvasViewState.Scale *= scaleRatio;
+                _canvasViewState.LastScaleTo *= scaleRatio;
                 IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < 0.001f;
             }
             _canvasViewState.UpdateTransform();
         }
         else
         {
+            // Navigating to a genuinely new photo (or first real content after a placeholder): cancel any
+            // in-flight animation so its stale internal state can't clobber the freshly-applied view.
+            StopAnimationSnappingToTarget();
+
             // New photo navigation or upgrade from placeholder: apply the configured behaviour.
             switch (AppConfig.Settings.PanZoomBehaviourOnNavigation)
             {
@@ -897,6 +915,67 @@ internal class CanvasViewManager
         PanZoomAnimationOnGoing = false;
         _suppressZoomUpdateForNextAnimation = false;
         AnimationCompleted?.Invoke();
+    }
+
+    /// <summary>
+    /// Immediately terminates any in-flight animation, snapping the view to that animation's intended
+    /// target first (so a subsequent RetainFromLastPhoto navigation inherits the settled view rather than
+    /// a mid-flight frame). Used when navigating to a genuinely new photo — see <see cref="SetScaleAndPosition"/>.
+    /// Does NOT fire AnimationCompleted: the caller is about to overwrite the view, and the new renderer's
+    /// off-screen redraw is driven separately by InstallRenderer.
+    /// </summary>
+    private void StopAnimationSnappingToTarget()
+    {
+        switch (_currentAnimation)
+        {
+            case AnimationType.SpringZoom:
+                // Final anchor-preserving step to the exact target scale.
+                var oldScale = _canvasViewState.Scale;
+                if (oldScale > 0)
+                {
+                    _canvasViewState.ImagePos.X = _zoomCenter.X - (_zoomTargetScale / oldScale) * (_zoomCenter.X - _canvasViewState.ImagePos.X);
+                    _canvasViewState.ImagePos.Y = _zoomCenter.Y - (_zoomTargetScale / oldScale) * (_zoomCenter.Y - _canvasViewState.ImagePos.Y);
+                }
+                _canvasViewState.Scale = _zoomTargetScale;
+                _canvasViewState.UpdateTransform();
+                break;
+            case AnimationType.SpringPanAndZoom:
+            case AnimationType.PanAndZoom:
+                _canvasViewState.Scale = _zoomTargetScale;
+                _canvasViewState.ImagePos = _panTargetPosition;
+                _canvasViewState.UpdateTransform();
+                break;
+            case AnimationType.None:
+            case AnimationType.Shrug:
+                break;
+        }
+
+        _animationStopwatch.Stop();
+        _currentAnimation = AnimationType.None;
+        PanZoomAnimationOnGoing = false;
+        _suppressZoomUpdateForNextAnimation = false;
+    }
+
+    /// <summary>
+    /// Re-bases an in-flight animation's scale by <paramref name="scaleFactor"/> after a resolution change
+    /// (Preview → HQ). The displayed scale is rescaled by the caller; this keeps the animation's internal
+    /// scale state and target consistent so it keeps converging to the same *visual* zoom without a jump.
+    /// Pan is in screen space and so is unaffected.
+    /// </summary>
+    private void RebaseAnimationScale(float scaleFactor)
+    {
+        if (scaleFactor <= 0f) return;
+        _zoomTargetScale *= scaleFactor;
+        switch (_currentAnimation)
+        {
+            case AnimationType.SpringZoom:
+            case AnimationType.SpringPanAndZoom:
+                _springCurrentLogScale += (float)Math.Log(scaleFactor);
+                break;
+            case AnimationType.PanAndZoom: // cubic launch/exit tween interpolates start → target
+                _zoomStartScale *= scaleFactor;
+                break;
+        }
     }
 
     /// <summary>
