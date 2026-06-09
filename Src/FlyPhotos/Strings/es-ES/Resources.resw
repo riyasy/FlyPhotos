@@ -691,4 +691,21 @@ Esc : Cerrar ajustes o Salir</value>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Ctrl+arrastrar para mover la ventana</value>
   </data>
+  <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
+    <value>Método de escala de imagen</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
+    <value>Nearest Neighbor: Ideal para pixel art.
+Bilinear: Recomendado para visualización general de fotos.
+High Quality Cubic: Máxima calidad para imágenes ampliadas.</value>
+  </data>
+  <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
+    <value>Nearest Neighbor</value>
+  </data>
+  <data name="ComboImageScalingQualityItemBilinear.Content" xml:space="preserve">
+    <value>Bilinear</value>
+  </data>
+  <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
+    <value>High Quality Cubic</value>
+  </data>
 </root>

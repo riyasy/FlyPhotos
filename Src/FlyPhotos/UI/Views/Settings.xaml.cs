@@ -83,7 +83,6 @@ internal sealed partial class Settings
         ButtonOpenExitZoom.IsOn = AppConfig.Settings.OpenExitZoom;
         SliderFadeIntensity.Value = AppConfig.Settings.FadeIntensity;
         ComboImageScalingQuality.SelectedIndex = GetIndexForImageScalingQuality(AppConfig.Settings.ImageScalingQuality);
-        SettingsCardImageScalingQuality.Description = GetImageScalingQualityDescription(ComboImageScalingQuality.SelectedIndex);
         ButtonShowZoomPercent.IsOn = AppConfig.Settings.ShowZoomPercent;
         ButtonShowCheckeredBackground.IsOn = AppConfig.Settings.CheckeredBackground;
         SliderImageFitPercentage.Value = AppConfig.Settings.ImageFitPercentage;
@@ -312,16 +311,8 @@ internal sealed partial class Settings
     private async void ComboImageScalingQuality_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         AppConfig.Settings.ImageScalingQuality = GetImageScalingQualityForIndex(ComboImageScalingQuality.SelectedIndex);
-        SettingsCardImageScalingQuality.Description = GetImageScalingQualityDescription(ComboImageScalingQuality.SelectedIndex);
         await AppConfig.SaveAsync();
     }
-
-    private static string GetImageScalingQualityDescription(int index) => index switch
-    {
-        0 => L.Get("ImageScalingQualityDescPixelArt"),  // NearestNeighbor
-        2 => L.Get("ImageScalingQualityDescAnimation"), // HighQualityCubic
-        _ => string.Empty                               // Bilinear/Linear
-    };
 
     private static int GetIndexForImageScalingQuality(ImageInterpolation quality) => quality switch
     {

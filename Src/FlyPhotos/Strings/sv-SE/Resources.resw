@@ -691,4 +691,21 @@ Esc : Stäng inställningar eller Avsluta</value>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Ctrl+dra för att flytta fönstret</value>
   </data>
+  <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
+    <value>Skalningsmetod för bilder</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
+    <value>Nearest Neighbor: Bäst för pixelkonst.
+Bilinear: Rekommenderas för vanlig fotovisning.
+High Quality Cubic: Högsta kvalitet för zoomade bilder.</value>
+  </data>
+  <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
+    <value>Nearest Neighbor</value>
+  </data>
+  <data name="ComboImageScalingQualityItemBilinear.Content" xml:space="preserve">
+    <value>Bilinear</value>
+  </data>
+  <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
+    <value>High Quality Cubic</value>
+  </data>
 </root>

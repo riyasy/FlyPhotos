@@ -690,4 +690,21 @@ Esc : 설정 닫기 또는 앱 종료</value>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Ctrl+드래그하여 창 이동</value>
   </data>
+  <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
+    <value>이미지 크기 조절 방법</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
+    <value>Nearest Neighbor: 픽셀 아트에 적합합니다.
+Bilinear: 일반적인 사진 보기에 권장됩니다.
+High Quality Cubic: 확대된 이미지의 최고 화질입니다.</value>
+  </data>
+  <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
+    <value>Nearest Neighbor</value>
+  </data>
+  <data name="ComboImageScalingQualityItemBilinear.Content" xml:space="preserve">
+    <value>Bilinear</value>
+  </data>
+  <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
+    <value>High Quality Cubic</value>
+  </data>
 </root>

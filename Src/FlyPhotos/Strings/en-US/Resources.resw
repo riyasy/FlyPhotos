@@ -385,7 +385,12 @@ Settings &gt; Apps &gt; Default apps.</value>
     <value>Auto Fade intensity (%)</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
-    <value>Image Scaling Quality</value>
+    <value>Image scaling method</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
+    <value>Nearest Neighbor: Best for pixel art.
+Bilinear: Recommended for general photo viewing.
+High Quality Cubic: Highest quality for zoomed images.</value>
   </data>
   <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
     <value>Nearest Neighbor</value>
@@ -395,12 +400,6 @@ Settings &gt; Apps &gt; Default apps.</value>
   </data>
   <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
     <value>High Quality Cubic</value>
-  </data>
-  <data name="ImageScalingQualityDescPixelArt" xml:space="preserve">
-    <value>NearestNeighbor is useful for working with pixel art</value>
-  </data>
-  <data name="ImageScalingQualityDescAnimation" xml:space="preserve">
-    <value>During zoom animation Bilinear will still be used</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Set the number of high-resolution photos cached on each side.</value>
