@@ -505,7 +505,7 @@ public sealed partial class PhotoDisplayWindow
             return;
         }
 
-        if (updateKind == Microsoft.UI.Input.PointerUpdateKind.LeftButtonPressed || pointerPoint.Properties.IsLeftButtonPressed)
+        if (updateKind == Microsoft.UI.Input.PointerUpdateKind.LeftButtonPressed)
         {
             if (!_canvasController.IsPressedOnImage(dpiAdjustedPos)) return;
             if (_ctrlDragWindowMover.Enabled && Util.IsControlPressed()) return;
@@ -519,7 +519,9 @@ public sealed partial class PhotoDisplayWindow
     private void D2dCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
         if (!_isDragging) return;
-        var currentPoint = e.GetCurrentPoint(D2dCanvas).Position;
+        var pp = e.GetCurrentPoint(D2dCanvas);
+        if (!pp.Properties.IsLeftButtonPressed) { _isDragging = false; return; }
+        var currentPoint = pp.Position;
         // Calculate logical delta
         double deltaX = currentPoint.X - _lastPoint.X;
         double deltaY = currentPoint.Y - _lastPoint.Y;

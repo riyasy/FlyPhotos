@@ -60,7 +60,7 @@ public sealed partial class CtrlDragWindowMover : IDisposable
     {
         if (!Util.IsControlPressed()) return;
         var point = e.GetCurrentPoint(_canvas);
-        if (!point.Properties.IsLeftButtonPressed) return;
+        if (point.Properties.PointerUpdateKind != Microsoft.UI.Input.PointerUpdateKind.LeftButtonPressed) return;
         // The `{ State: Restored }` member read roots the OverlappedPresenter projection so this cast
         // resolves under NativeAOT + Release; a memberless `is/as OverlappedPresenter` can silently
         // return null there (Debug/non-AOT are fine). Refs: CsWinRT#1930, microsoft-ui-xaml#10471.
