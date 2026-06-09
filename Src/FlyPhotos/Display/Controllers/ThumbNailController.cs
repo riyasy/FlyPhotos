@@ -149,6 +149,9 @@ internal partial class ThumbNailController : IThumbnailController
 
     private void D2dCanvasThumbNail_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
+        if (e.GetCurrentPoint(_d2dCanvasThumbNail).Properties.PointerUpdateKind
+            is not Microsoft.UI.Input.PointerUpdateKind.LeftButtonPressed) return;
+
         var keys = _getSortedPhotoKeys?.Invoke();
         if (keys == null || keys.Count <= 1) return;
 
