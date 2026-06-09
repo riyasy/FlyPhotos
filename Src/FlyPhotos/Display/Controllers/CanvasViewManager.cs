@@ -918,10 +918,18 @@ internal class CanvasViewManager
     /// </summary>
     private static void StepSpringAxis(ref float current, ref float velocity, float target, float dt)
     {
-        var displacement = current - target;
-        var acceleration = -Constants.SpringStiffness * displacement - Constants.SpringDamping * velocity;
-        velocity += acceleration * dt;
-        current += velocity * dt;
+        // Sub-step so each integration step is small enough to stay accurate (no overshoot) even when a
+        // single frame's dt is large — e.g. the first frame after launch, where dt hits the clamp and a
+        // one-shot Euler step would explode the velocity and overshoot the target.
+        var steps = Math.Max(1, (int)Math.Ceiling(dt / Constants.SpringMaxSubStepSeconds));
+        var h = dt / steps;
+        for (var i = 0; i < steps; i++)
+        {
+            var displacement = current - target;
+            var acceleration = -Constants.SpringStiffness * displacement - Constants.SpringDamping * velocity;
+            velocity += acceleration * h;
+            current += velocity * h;
+        }
     }
 
     /// <summary>

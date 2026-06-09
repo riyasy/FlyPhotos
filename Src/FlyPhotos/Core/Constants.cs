@@ -17,6 +17,10 @@ internal static class Constants
     public const float SpringStiffness = 500f; // higher = snappier
     public const float SpringDamping = 50f;    // 2*sqrt(500) ~= 44.7 -> zeta ~= 1.12 (overdamped)
     public const float SpringMaxDtSeconds = 0.05f; // clamp per-frame dt (e.g. after the control un-pauses)
+    // The explicit integrator is only accurate when stepSize * sqrt(Stiffness) << 1. A single large frame
+    // (e.g. the first frame after launch, dt up to SpringMaxDtSeconds) would otherwise overshoot, so each
+    // frame's dt is integrated in fixed sub-steps no larger than this (~240 Hz).
+    public const float SpringMaxSubStepSeconds = 1f / 240f;
     // Settle thresholds: snap to target once both displacement and velocity fall below these.
     public const float SpringScaleSettleEpsilon = 0.0002f; // in log-scale units
     public const float SpringScaleVelocitySettle = 0.05f;
