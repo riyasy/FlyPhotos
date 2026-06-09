@@ -96,6 +96,13 @@ public sealed partial class WindowPlacementManager : IDisposable
     /// <summary>Indicates whether the manager has been disposed to prevent further event handling.</summary>
     private bool _isDisposed;
 
+    /// <summary>
+    ///     Snapshot of <c>IsMaximized</c> from the loaded saved state, captured before
+    ///     <see cref="CaptureOverlappedGeometry"/> can overwrite <see cref="_state"/>.
+    ///     Used by <see cref="WasMaximized"/> so the value is stable after <c>Activate()</c>.
+    /// </summary>
+    private readonly bool _loadedAsMaximized;
+
     // Win32 show-command constants supplementary to Win32Methods
 
     /// <summary>SW_SHOWNORMAL – activate and show in original size/position.</summary>
@@ -115,6 +122,15 @@ public sealed partial class WindowPlacementManager : IDisposable
     ///     no string allocation occurs during resize/move tracking.
     /// </summary>
     public string? Data => Serialize();
+
+    /// <summary>
+    ///     <see langword="true" /> if the loaded saved state had the window maximized.
+    ///     The caller uses this to drive a post-<c>Activate</c> maximize so that
+    ///     <c>ExtendsContentIntoTitleBar</c> is already stable before the window goes maximized,
+    ///     avoiding the position jag that occurs when <c>SW_SHOWMAXIMIZED</c> is applied inside
+    ///     <c>WM_SHOWWINDOW</c> during <c>Activate()</c>.
+    /// </summary>
+    public bool WasMaximized => _loadedAsMaximized;
 
     /// <summary>
     ///     <see langword="true" /> if the monitor layout encoded in the loaded data
@@ -156,6 +172,12 @@ public sealed partial class WindowPlacementManager : IDisposable
             MonitorLayoutChanged = loadedState != null; // true only when there WAS data
         }
 
+        // Capture the loaded maximized flag NOW, before CaptureOverlappedGeometry can
+        // overwrite _state. WasMaximized reads this field; _state.IsMaximized is mutable
+        // and will be set to false by CaptureOverlappedGeometry when ApplySavedPlacement
+        // applies SW_SHOWNORMAL during Activate().
+        _loadedAsMaximized = _state?.IsMaximized == true;
+
         // WM_SHOWWINDOW fires before the first paint, so placement is applied
         // in one shot with no visible flicker.
         _monitor = new WindowMessageMonitor(_window);
@@ -196,6 +218,13 @@ public sealed partial class WindowPlacementManager : IDisposable
     {
         if (_state is not { } state) return;
 
+        // When the saved state is maximized, skip SetWindowPlacement entirely.
+        // Changing window geometry inside WM_SHOWWINDOW (even with SW_SHOWNORMAL) while
+        // ExtendsContentIntoTitleBar hasn't yet settled causes the same position jag as
+        // the original SW_SHOWMAXIMIZED bug. The caller (ActivateForStartup) drives
+        // Maximize() after Activate() returns, at which point the title bar is stable.
+        if (state.IsMaximized) return;
+
         Win32Methods.GetWindowPlacement(_hwnd, out var wp);
         wp.length = (uint)Marshal.SizeOf<Win32Methods.WINDOWPLACEMENT>();
 
@@ -207,10 +236,7 @@ public sealed partial class WindowPlacementManager : IDisposable
             Bottom = state.Y + state.Height
         };
 
-        // Always restore as an overlapped window – never back into full-screen.
-        wp.showCmd = state.IsMaximized
-            ? Win32Methods.SW_SHOWMAXIMIZED
-            : SW_SHOWNORMAL;
+        wp.showCmd = SW_SHOWNORMAL;
 
         // Bracket SetWindowPlacement with the flag so that WM_DPICHANGED fired
         // by moving the window to a different-DPI monitor is suppressed above.

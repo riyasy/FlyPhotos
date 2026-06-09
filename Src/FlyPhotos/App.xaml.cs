@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
-using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Localization;
 using FlyPhotos.Services;
@@ -85,20 +84,7 @@ public partial class App
     private void LaunchPhotoDisplayWindow(string selectedFilePath, bool extLaunch)
     {
         _photoDisplayWindow = new PhotoDisplayWindow(selectedFilePath, extLaunch);
-        switch (AppConfig.Settings.WindowLaunchMode)
-        {
-            case WindowLaunchMode.Maximized:
-                _photoDisplayWindow.Maximize();
-                _photoDisplayWindow.Activate();
-                break;
-            case WindowLaunchMode.FullScreen:
-                _photoDisplayWindow.Activate();
-                _photoDisplayWindow.EnterFullScreenOnLaunch();
-                break; // Activate already called above
-            case WindowLaunchMode.LastWindowState:
-                _photoDisplayWindow.Activate();
-                break;
-        }
+        _photoDisplayWindow.ActivateForStartup();
     }
 
     /// <summary>
