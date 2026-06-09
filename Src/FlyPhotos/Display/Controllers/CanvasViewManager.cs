@@ -311,11 +311,17 @@ internal class CanvasViewManager
         _canvasViewState.LastScaleTo = initialScale;
         _canvasViewState.Rotation = imageRotation; // Ensure rotation is set correctly for default view.
 
-        if (isFirstPhotoEver && AppConfig.Settings.OpenExitZoom)
+        // Guard: the spring drives log(scale), so a zero/negative fit scale (canvas not yet sized)
+        // would feed log(0) = -infinity into the integrator. Only animate when the target is valid.
+        if (isFirstPhotoEver && AppConfig.Settings.OpenExitZoom && initialScale > 0)
         {
             _canvasViewState.Scale = 0.01f;
             _suppressZoomUpdateForNextAnimation = true;
-            StartLaunchExitTween(initialScale, new Point(canvasSize.Width / 2, canvasSize.Height / 2));
+            // forceReseed: the open-zoom is a hard reset to 0.01 — it must seed from that scale even if a
+            // spring is already mid-flight, otherwise it inherits stale internal state and springs from
+            // ~100% down to fit instead of growing from tiny.
+            StartSpringPanAndZoomAnimation(initialScale, new Point(canvasSize.Width / 2, canvasSize.Height / 2),
+                forceReseed: true);
         }
         else
         {
@@ -565,10 +571,13 @@ internal class CanvasViewManager
     /// </summary>
     public void ZoomOutOnExit(double exitAnimationDuration, Size canvasSize)
     {
-        _panZoomAnimationDurationMs = exitAnimationDuration;
+        // exitAnimationDuration is retained for API/caller compatibility but no longer drives a
+        // fixed-duration tween — the spring settles on its own. In log space the shrink reaches a
+        // sub-pixel dot well within the caller's close deadline (PanZoomAnimationDurationForExit * 2).
+        _ = exitAnimationDuration;
         var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         _suppressZoomUpdateForNextAnimation = true;
-        StartLaunchExitTween(0.001f, targetPosition);
+        StartSpringPanAndZoomAnimation(0.001f, targetPosition);
         IsFittedToScreen = false;
         IsAtOneToOne = false;
     }
@@ -819,12 +828,20 @@ internal class CanvasViewManager
     /// Starts (or re-targets) a spring that drives scale and pan together (fit / 100% / step).
     /// Velocity carries forward across re-targets, as with <see cref="StartZoomAnimation"/>.
     /// </summary>
-    private void StartSpringPanAndZoomAnimation(float targetScale, Point targetPosition)
+    /// <param name="forceReseed">
+    /// When true, the spring's internal scale AND pan state are re-seeded from the live view even if a
+    /// spring is already running, and velocities are zeroed. Used by the launch open-zoom, which is a
+    /// deliberate reset to a known start scale (0.01) — NOT a re-target — so it must not inherit a
+    /// previous spring's internal state (which would otherwise render from the stale/default scale and
+    /// spring from ~100% down to fit instead of growing up from tiny).
+    /// </param>
+    private void StartSpringPanAndZoomAnimation(float targetScale, Point targetPosition, bool forceReseed = false)
     {
-        SeedScaleSpringIfFresh();
+        SeedScaleSpringIfFresh(forceReseed);
         // Pan state must be seeded whenever the previous animation wasn't already a pan spring
-        // (e.g. coming from a scale-only SpringZoom, which doesn't track pan velocity).
-        if (_currentAnimation != AnimationType.SpringPanAndZoom)
+        // (e.g. coming from a scale-only SpringZoom, which doesn't track pan velocity) — or always on a
+        // forced reseed.
+        if (forceReseed || _currentAnimation != AnimationType.SpringPanAndZoom)
         {
             _springCurrentPanX = (float)_canvasViewState.ImagePos.X;
             _springCurrentPanY = (float)_canvasViewState.ImagePos.Y;
@@ -840,12 +857,13 @@ internal class CanvasViewManager
     }
 
     /// <summary>
-    /// Seeds the scale spring's internal state from the live view, but only when no spring is already
-    /// running — when one is, scale position/velocity are preserved for seamless re-targeting.
+    /// Seeds the scale spring's internal state from the live view. When a spring is already running the
+    /// scale position/velocity are normally preserved for seamless re-targeting; pass
+    /// <paramref name="force"/> = true to override that (a deliberate reset, e.g. the launch open-zoom).
     /// </summary>
-    private void SeedScaleSpringIfFresh()
+    private void SeedScaleSpringIfFresh(bool force = false)
     {
-        if (_currentAnimation is AnimationType.SpringZoom or AnimationType.SpringPanAndZoom) return;
+        if (!force && _currentAnimation is AnimationType.SpringZoom or AnimationType.SpringPanAndZoom) return;
         _springCurrentLogScale = (float)Math.Log(_canvasViewState.Scale);
         _springLogScaleVelocity = 0f;
         _animationStopwatch.Restart();
@@ -853,8 +871,9 @@ internal class CanvasViewManager
     }
 
     /// <summary>
-    /// Starts the legacy cubic pan+zoom tween. Used ONLY for the launch open-zoom and exit zoom-out,
-    /// whose deterministic, fixed-duration completion is depended on elsewhere.
+    /// Starts the legacy cubic pan+zoom tween. DORMANT — launch open-zoom and exit zoom-out moved to the
+    /// spring path; no caller remains. Kept as a two-line-revertible fallback (re-point
+    /// <see cref="SetDefaultView"/>'s open branch and <see cref="ZoomOutOnExit"/> here to restore it).
     /// </summary>
     private void StartLaunchExitTween(float targetScale, Point targetPosition)
     {
@@ -1073,8 +1092,9 @@ internal class CanvasViewManager
     }
 
     /// <summary>
-    /// Legacy ease-out cubic pan+zoom tween. Retained ONLY for the launch open-zoom and exit zoom-out
-    /// (see <see cref="StartLaunchExitTween"/>); all user-triggered zoom uses the spring path instead.
+    /// Legacy ease-out cubic pan+zoom tween (<see cref="StartLaunchExitTween"/>). DORMANT — launch
+    /// open-zoom and exit zoom-out now use the spring path too; nothing starts this anymore. Kept as a
+    /// two-line-revertible fallback should the spring launch/exit ever need backing out.
     /// </summary>
     private void AnimatePanAndZoom()
     {
