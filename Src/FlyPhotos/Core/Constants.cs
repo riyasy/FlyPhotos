@@ -7,9 +7,21 @@ internal static class Constants
     public const string AppVersion = "2.6.1";
 
     // Pan Zoom Animation Related
+    // Cubic-tween durations are used only by the launch open-zoom and exit zoom-out paths.
     public const int PanZoomAnimationDurationForExit = 200;
     public const int PanZoomAnimationDurationNormal = 600;
     public const int OffScreenDrawDelayMs = 400;
+
+    // Spring (damped harmonic oscillator) for all user-triggered zoom / pan+zoom.
+    // Damping ~ 2*sqrt(Stiffness) is critical; slightly above => overdamped => no overshoot.
+    public const float SpringStiffness = 500f; // higher = snappier
+    public const float SpringDamping = 50f;    // 2*sqrt(500) ~= 44.7 -> zeta ~= 1.12 (overdamped)
+    public const float SpringMaxDtSeconds = 0.05f; // clamp per-frame dt (e.g. after the control un-pauses)
+    // Settle thresholds: snap to target once both displacement and velocity fall below these.
+    public const float SpringScaleSettleEpsilon = 0.0002f; // in log-scale units
+    public const float SpringScaleVelocitySettle = 0.05f;
+    public const double SpringPanSettleEpsilon = 0.1;       // pixels
+    public const float SpringPanVelocitySettle = 2f;        // pixels/sec
 
     // Related to Shrug Animation for Delete Failure
     public const double ShrugAnimationDurationMs = 350;
