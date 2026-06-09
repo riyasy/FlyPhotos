@@ -97,6 +97,12 @@ internal partial class PhotoDisplayController
         _firstPhoto = new Photo(_photoSessionState.FirstPhotoPath);
         bool continueLoadingHq = await _firstPhoto.LoadPreviewFirstPhoto(_d2dCanvas);
 
+        // The open-zoom animation begins on the FIRST SetSource below. Arm the completion wait now
+        // so the W2D subscribe is enqueued (FIFO) before that SetSource installs/starts the animation.
+        Task openZoomAnimation = AppConfig.Settings.OpenExitZoom
+            ? _canvasController.WaitForPanZoomAnimationAsync(Constants.PanZoomAnimationDurationNormal * 2)
+            : Task.CompletedTask;
+
         if (continueLoadingHq)
         {
             await SetSourceAsync(_firstPhoto, DisplayLevel.Preview);
@@ -104,8 +110,9 @@ internal partial class PhotoDisplayController
         }
 
         await SetSourceAsync(_firstPhoto, DisplayLevel.Hq);
-        if (AppConfig.Settings.OpenExitZoom)
-            await Task.Delay(Constants.PanZoomAnimationDurationNormal);
+
+        // Wait for the actual animation to finish rather than a fixed delay; already-complete is a no-op.
+        await openZoomAnimation;
         _firstPhotoLoadedTcs.SetResult(true);
     }
 

@@ -9,6 +9,7 @@ namespace FlyPhotos.Display.Controllers;
 internal interface ICanvasController : IDisposable
 {
     Task SetSource(Photo photo, DisplayLevel displayLevel);
+    Task WaitForPanZoomAnimationAsync(int timeoutMs);
 }
 
 internal interface IThumbnailController : IDisposable

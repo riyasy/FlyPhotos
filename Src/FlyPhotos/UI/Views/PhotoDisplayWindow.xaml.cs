@@ -878,8 +878,12 @@ public sealed partial class PhotoDisplayWindow
 
         if (AppConfig.Settings.OpenExitZoom)
         {
+            // Arm before starting so the W2D subscribe is enqueued (FIFO) ahead of ZoomOutOnExit's
+            // start action, then wait for the actual animation to finish instead of a fixed delay.
+            var exitAnimation = _canvasController.WaitForPanZoomAnimationAsync(
+                Constants.PanZoomAnimationDurationForExit * 2);
             _canvasController.ZoomOutOnExit(Constants.PanZoomAnimationDurationForExit);
-            await Task.Delay(Constants.PanZoomAnimationDurationForExit);
+            await exitAnimation;
         }
         SaveLastWindowState();
         this.Hide();

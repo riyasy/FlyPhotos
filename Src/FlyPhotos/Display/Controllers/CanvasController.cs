@@ -570,6 +570,35 @@ internal class CanvasController : ICanvasController
             _currentRenderer?.TryRedrawOffScreen(false);
     }
 
+    /// <summary>
+    /// Returns a Task that completes when the next pan/zoom animation finishes (via the W2D-thread
+    /// <see cref="CanvasViewManager.AnimationCompleted"/> event), or after <paramref name="timeoutMs"/>
+    /// as a safety ceiling so the caller can never hang if the render loop drops the completion. The
+    /// one-shot handler is subscribed on the W2D thread, ordered before any subsequently started
+    /// animation. Used for the open-zoom (startup) and exit-zoom waits instead of a fixed delay.
+    /// </summary>
+    public Task WaitForPanZoomAnimationAsync(int timeoutMs)
+    {
+        var tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        Action handler = null;
+        handler = () =>
+        {
+            _canvasViewManager.AnimationCompleted -= handler;
+            tcs.TrySetResult();
+        };
+        // Subscribe on the W2D thread so the add is ordered relative to animation ticks and the
+        // permanent subscriber — no cross-thread race on the event delegate.
+        EnqueueW2dAction(() => _canvasViewManager.AnimationCompleted += handler);
+
+        // Safety net: never hang if AnimationCompleted is missed. Unsubscribe back on the W2D thread.
+        _ = Task.Delay(timeoutMs).ContinueWith(_ =>
+        {
+            if (tcs.TrySetResult())
+                EnqueueW2dAction(() => _canvasViewManager.AnimationCompleted -= handler);
+        });
+        return tcs.Task;
+    }
+
     #endregion
 
     #region Rendering And State Management
