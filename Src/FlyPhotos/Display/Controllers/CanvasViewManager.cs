@@ -12,9 +12,69 @@ using Size = FlyPhotos.Core.Model.Size;
 namespace FlyPhotos.Display.Controllers;
 
 /// <summary>
-/// Manages the view state (pan, zoom, rotation) of the canvas.
-/// Handles user interactions, animations, and state transitions.
+/// Owns the canvas view transform — scale (zoom), pan position, and rotation — and animates changes to it.
+/// All public methods translate a user action (zoom at point, fit, 100%, pan, rotate, …) or a lifecycle
+/// event (new photo, preview→HQ upgrade, launch, exit, resize) into updates of <see cref="CanvasViewState"/>,
+/// firing events so the canvas redraws and the UI (zoom %, fit/1:1 toggles) stays in sync.
 /// </summary>
+/// <remarks>
+/// <para><b>Threading.</b> Every method here runs on the Win2D render ("W2D") thread — callers on the UI
+/// thread funnel through <c>CanvasController</c>'s action queue. <see cref="OnUpdate"/> is ticked once per
+/// frame from that thread and advances whatever animation is active. So there is no locking here; treat the
+/// whole class as single-threaded.</para>
+///
+/// <para><b>Animation models.</b> There are four, selected by <c>AnimationType</c>:
+/// <list type="bullet">
+///   <item><b>SpringZoom</b> — scale-only damped spring; pan is recomputed each tick to keep a zoom anchor
+///     point stationary (wheel/keyboard/anchored-step zoom).</item>
+///   <item><b>SpringPanAndZoom</b> — three independent springs (scale + panX + panY) toward a target
+///     (Fit, 100%, centred step, double-click, AND launch open-zoom / exit zoom-out).</item>
+///   <item><b>PanAndZoom</b> — the legacy fixed-duration ease-out cubic tween. DORMANT: nothing starts it;
+///     kept only as a two-line-revertible fallback for launch/exit.</item>
+///   <item><b>Shrug</b> — a decaying sine wiggle for "action rejected" feedback (not a spring).</item>
+/// </list>
+/// Pan, rotate, and precision-touchpad zoom are applied directly (no animation).</para>
+///
+/// <para><b>Spring physics.</b> Each axis is a damped harmonic oscillator integrated per frame in
+/// <see cref="StepSpringAxis"/> (<c>accel = -k·displacement - c·velocity</c>), with <c>k</c>/<c>c</c> from
+/// <see cref="Constants.SpringStiffness"/>/<see cref="Constants.SpringDamping"/>. Key choices:
+/// <list type="bullet">
+///   <item><b>Scale springs in LOG space</b> (and is rebuilt via <c>exp</c>): zoom is perceived
+///     multiplicatively, so log space gives a uniform perceived rate and can never reach ≤ 0. Pan springs
+///     in linear pixels.</item>
+///   <item><b>Sub-stepping</b>: a frame's <c>dt</c> (clamped to <see cref="Constants.SpringMaxDtSeconds"/>)
+///     is integrated in fixed sub-steps (<see cref="Constants.SpringMaxSubStepSeconds"/>) so a large frame
+///     — e.g. the first frame after launch — can't make one Euler step overshoot. This is pure math; the
+///     canvas still draws once per frame. It also makes the motion frame-rate-independent (50 Hz vs 180 Hz
+///     differ only in smoothness, not duration/path).</item>
+///   <item><b>Output-only spring state</b> (the <c>_springCurrent*</c> fields): the spring WRITES scale/pan
+///     into <see cref="CanvasViewState"/> each tick and never reads them back, so an external mid-flight
+///     write can't perturb it. State is seeded from the live view only when starting fresh
+///     (<see cref="SeedScaleSpringIfFresh"/>); a running spring keeps its velocity so re-targets (e.g. rapid
+///     wheel notches) stay continuous instead of restarting with a lurch.</item>
+/// </list></para>
+///
+/// <para><b>Lifecycle transitions</b> (<see cref="SetScaleAndPosition"/>):
+/// <list type="bullet">
+///   <item><b>New photo / placeholder upgrade</b> → <see cref="StopAnimationSnappingToTarget"/> cancels any
+///     in-flight animation (snapping to its target first, so Retain-mode inherits the settled view).</item>
+///   <item><b>Preview→HQ upgrade of the same photo</b> → must be seamless. If an animation is in flight it
+///     is kept alive and rescaled by the resolution ratio (<see cref="RebaseAnimationScale"/>) so the image
+///     keeps its on-screen size and the spring keeps converging; otherwise scale is adjusted to preserve the
+///     scene-relative zoom.</item>
+///   <item><b>Launch open-zoom</b> force-reseeds the spring from 0.01 (a deliberate reset, guarded on a
+///     valid fit scale so it never feeds <c>log(0)</c>). <b>Exit zoom-out</b> springs toward ~0; the caller
+///     closes the window on a short wait (see <see cref="Constants.PanZoomAnimationDurationForExit"/>),
+///     since full spring-settle (~0.6 s) is far later than when the image visually vanishes.</item>
+/// </list></para>
+///
+/// <para><b>Per-photo view cache</b> (<c>RememberPerPhoto</c> mode): a navigated-away photo's view is stored
+/// normalized (pan relative to canvas size, rotation relative to the EXIF baseline) and restored on revisit
+/// — see <c>PerPhotoViewState</c>.</para>
+///
+/// <para><b>Tuning</b> lives entirely in <see cref="Constants"/> (each spring constant documents the effect
+/// of raising/lowering it). A fuller write-up is in <c>docs/pan-zoom-physics.md</c>.</para>
+/// </remarks>
 internal class CanvasViewManager
 {
     // --- Public Properties & Events ---
