@@ -636,12 +636,18 @@ internal class CanvasController : ICanvasController
 
     private int _zoomPercentUiUpdatePending;
     private int _pendingZoomPercent;
+    private int _lastDispatchedZoomPercent = -1;
 
     private void RequestZoomUpdate()
     {
         // Capture the zoom percentage here (W2D thread) so the dispatched lambda does not read
         // W2D-owned view state from the UI thread. Coalesced: latest value wins.
-        Volatile.Write(ref _pendingZoomPercent, (int)Math.Round(_canvasViewState.Scale * 100));
+        var newZoom = (int)Math.Round(_canvasViewState.Scale * 100);
+        // Skip when the displayed integer is unchanged — avoids dispatching to the UI thread
+        // every frame during pan animations where scale is constant.
+        if (newZoom == _lastDispatchedZoomPercent) return;
+        _lastDispatchedZoomPercent = newZoom;
+        Volatile.Write(ref _pendingZoomPercent, newZoom);
         if (Interlocked.CompareExchange(ref _zoomPercentUiUpdatePending, 1, 0) == 0)
             _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
             {
