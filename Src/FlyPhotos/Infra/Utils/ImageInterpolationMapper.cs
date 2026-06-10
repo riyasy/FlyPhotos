@@ -1,7 +1,7 @@
 using FlyPhotos.Core.Model;
 using Microsoft.Graphics.Canvas;
 
-namespace FlyPhotos.Display.ImageRendering;
+namespace FlyPhotos.Infra.Utils;
 
 internal static class ImageInterpolationMapper
 {

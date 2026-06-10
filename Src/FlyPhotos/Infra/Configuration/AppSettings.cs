@@ -56,12 +56,12 @@ public class AppSettings
     public int FadeIntensity { get; set; } = 60;
     public bool OpenExitZoom { get; set; } = false;
     [JsonPropertyName("ImageScalingQuality")]
-    public string ImageScalingQualityAsString { get; set; } = "HighQualityCubic";
+    public string ImageScalingQualityAsString { get; set; } = "Linear";
 
     [JsonIgnore]
     public ImageInterpolation ImageScalingQuality
     {
-        get => Enum.TryParse<ImageInterpolation>(ImageScalingQualityAsString, true, out var r) ? r : ImageInterpolation.HighQualityCubic;
+        get => Enum.TryParse<ImageInterpolation>(ImageScalingQualityAsString, true, out var r) ? r : ImageInterpolation.Linear;
         set => ImageScalingQualityAsString = value.ToString();
     }
     public bool CheckeredBackground { get; set; } = false;
