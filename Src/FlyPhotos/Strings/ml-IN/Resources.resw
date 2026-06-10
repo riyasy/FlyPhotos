@@ -381,12 +381,6 @@
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>മങ്ങൽ തീവ്രത %</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>വ്യക്തമായ പിക്സൽ അറ്റങ്ങൾക്കായി ഇത് ഓഫ് ആക്കുക (പിക്സൽ ആർട്ടിന് ഉപകരിക്കും).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>സൂം ചെയ്യുമ്പോൾ ഉയർന്ന ഗുണനിലവാരമുള്ള ഇന്റർപോളേഷൻ ഉപയോഗിക്കുക</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>ഓരോ വശത്തും കാഷെ ചെയ്ത ഹൈ-റെസല്യൂഷൻ ഫോട്ടോകളുടെ എണ്ണം സജ്ജമാക്കുക.</value>
   </data>
@@ -693,5 +687,22 @@ Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാ
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>വിൻഡോ മാറ്റാൻ Ctrl+drag ചെയ്യുക</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
+    <value>ഇമേജ് സ്കെയിലിംഗ് രീതി</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
+    <value>Nearest Neighbor: പിക്സൽ ആർട്ടിനായി ഉപയോഗിക്കുക.
+Bilinear: സാധാരണ ഫോട്ടോകൾ കാണാൻ നിർദ്ദേശിക്കുന്നു.
+High Quality Cubic: സൂം ചെയ്ത ചിത്രങ്ങൾക്ക് ഏറ്റവും ഉയർന്ന റെസല്യൂഷൻ.</value>
+  </data>
+  <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
+    <value>Nearest Neighbor</value>
+  </data>
+  <data name="ComboImageScalingQualityItemBilinear.Content" xml:space="preserve">
+    <value>Bilinear</value>
+  </data>
+  <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
+    <value>High Quality Cubic</value>
   </data>
 </root>

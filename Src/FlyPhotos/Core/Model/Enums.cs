@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace FlyPhotos.Core.Model;
 
 public enum DisplayLevel
@@ -82,6 +84,9 @@ public enum PanZoomBehaviourOnNavigation
     RetainFromLastPhoto
 }
 
+// JsonStringEnumConverter is declared here (not on the property) so that element-level
+// serialization works when this enum appears inside a collection (ObservableCollection<RawDecoder>).
+[JsonConverter(typeof(JsonStringEnumConverter<RawDecoder>))]
 public enum RawDecoder { Rawler, WIC, ImageMagick }
 
 public enum WindowLaunchMode
@@ -89,4 +94,11 @@ public enum WindowLaunchMode
     Maximized,
     FullScreen,
     LastWindowState
+}
+
+public enum ImageInterpolation
+{
+    NearestNeighbor,
+    Linear,
+    HighQualityCubic
 }

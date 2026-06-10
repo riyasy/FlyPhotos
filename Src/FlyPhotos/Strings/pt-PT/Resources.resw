@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -384,12 +384,6 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Intensidade de ocultação gradual (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>Desativar para margens de píxeis mais nítidas (útil para pixel art).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>Utilizar interpolação de alta qualidade ao fazer zoom</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Definir o número de fotografias de alta resolução em cache de cada lado.</value>
   </data>
@@ -696,5 +690,22 @@ Esc : Fechar Definições ou sair da aplicação</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Ctrl+arrastar para mover a janela</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
+    <value>Método de dimensionamento de imagem</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
+    <value>Nearest Neighbor: Ideal para pixel art.
+Bilinear: Recomendado para visualização geral de fotos.
+High Quality Cubic: Maior qualidade para imagens ampliadas (zoom).</value>
+  </data>
+  <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
+    <value>Nearest Neighbor</value>
+  </data>
+  <data name="ComboImageScalingQualityItemBilinear.Content" xml:space="preserve">
+    <value>Bilinear</value>
+  </data>
+  <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
+    <value>High Quality Cubic</value>
   </data>
 </root>

@@ -384,12 +384,6 @@ Impostazioni &gt; App &gt; App predefinite.</value>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Intensità dissolvenza automatica (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>Disabilita per bordi dei pixel più nitidi (utile per la pixel art).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>Usa interpolazione di alta qualità durante lo zoom</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Imposta il numero di foto ad alta risoluzione memorizzate nella cache su ciascun lato.</value>
   </data>
@@ -696,5 +690,22 @@ Esc : Chiudi impostazioni o Esci</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Ctrl+trascinamento per spostare la finestra</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
+    <value>Metodo di ridimensionamento immagine</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
+    <value>Nearest Neighbor: Ideale per la pixel art.
+Bilinear: Consigliato per la normale visualizzazione delle foto.
+High Quality Cubic: Massima qualità per le immagini ingrandite.</value>
+  </data>
+  <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
+    <value>Nearest Neighbor</value>
+  </data>
+  <data name="ComboImageScalingQualityItemBilinear.Content" xml:space="preserve">
+    <value>Bilinear</value>
+  </data>
+  <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
+    <value>High Quality Cubic</value>
   </data>
 </root>

@@ -384,11 +384,22 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Auto Fade intensity (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>Disable for sharper pixel edges (useful for pixel art).</value>
+  <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
+    <value>Image scaling method</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>Use high quality interpolation when zooming</value>
+  <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
+    <value>Nearest Neighbor: Best for pixel art.
+Bilinear: Recommended for general photo viewing.
+High Quality Cubic: Highest quality for zoomed images.</value>
+  </data>
+  <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
+    <value>Nearest Neighbor</value>
+  </data>
+  <data name="ComboImageScalingQualityItemBilinear.Content" xml:space="preserve">
+    <value>Bilinear</value>
+  </data>
+  <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
+    <value>High Quality Cubic</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Set the number of high-resolution photos cached on each side.</value>

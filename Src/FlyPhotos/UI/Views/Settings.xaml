@@ -174,11 +174,18 @@
                         </controls:SettingsExpander>
 
                         <controls:SettingsCard
-                            x:Name="SettingsCardHighQualityInterpolation"
-                            x:Uid="SettingsCardHighQualityInterpolation"
+                            x:Name="SettingsCardImageScalingQuality"
+                            x:Uid="SettingsCardImageScalingQuality"
                             Margin="0,5,0,0"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE794;}">
-                            <ToggleSwitch x:Name="ButtonHighQualityInterpolation" />
+                            <ComboBox
+                                x:Name="ComboImageScalingQuality"
+                                MinWidth="150"
+                                HorizontalAlignment="Right">
+                                <ComboBoxItem x:Uid="ComboImageScalingQualityItemNearestNeighbor" />
+                                <ComboBoxItem x:Uid="ComboImageScalingQualityItemBilinear" />
+                                <ComboBoxItem x:Uid="ComboImageScalingQualityItemHighQualityCubic" />
+                            </ComboBox>
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardPanZoomNavBehaviour"
@@ -521,7 +528,7 @@
                                         CanDragItems="True"
                                         CanReorderItems="True"
                                         CornerRadius="8"
-                                        ItemsSource="{x:Bind local:AppConfig.Settings.RawDecoderPriorityAsStrings}"
+                                        ItemsSource="{x:Bind local:AppConfig.Settings.RawDecoderPriority}"
                                         ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                         ScrollViewer.HorizontalScrollMode="Enabled"
                                         ScrollViewer.VerticalScrollBarVisibility="Disabled"
@@ -532,7 +539,7 @@
                                             </ItemsPanelTemplate>
                                         </ListView.ItemsPanel>
                                         <ListView.ItemTemplate>
-                                            <DataTemplate x:DataType="x:String">
+                                            <DataTemplate x:DataType="model:RawDecoder">
                                                 <StackPanel
                                                     Padding="10"
                                                     Background="Transparent"

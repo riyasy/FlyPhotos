@@ -384,12 +384,6 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Intensywność automatycznego wygaszania (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>Wyłącz, aby uzyskać ostrzejsze krawędzie pikseli (przydatne w przypadku grafiki pikselowej).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>Użyj interpolacji wysokiej jakości podczas powiększania</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Ustaw liczbę zdjęć w wysokiej rozdzielczości buforowanych po każdej stronie.</value>
   </data>
@@ -696,5 +690,22 @@ Esc : Zamknij ustawienia lub Wyjdź</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Ctrl+przeciągnięcie, aby przenieść okno</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
+    <value>Metoda skalowania obrazu</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
+    <value>Nearest Neighbor: Najlepsza do grafiki pikselowej (pixel art).
+Bilinear: Zalecana do ogólnego przeglądania zdjęć.
+High Quality Cubic: Najwyższa jakość powiększonych obrazów.</value>
+  </data>
+  <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
+    <value>Nearest Neighbor</value>
+  </data>
+  <data name="ComboImageScalingQualityItemBilinear.Content" xml:space="preserve">
+    <value>Bilinear</value>
+  </data>
+  <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
+    <value>High Quality Cubic</value>
   </data>
 </root>

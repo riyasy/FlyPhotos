@@ -383,12 +383,6 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>자동 페이드 강도(%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>더 선명한 픽셀 모서리를 위해 비활성화합니다(픽셀 아트에 유용).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>확대/축소 시 고품질 보간 사용</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>각 측면에 캐시된 고해상도 사진 수를 설정합니다.</value>
   </data>
@@ -695,5 +689,22 @@ Esc : 설정 닫기 또는 앱 종료</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Ctrl+드래그하여 창 이동</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
+    <value>이미지 크기 조절 방법</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
+    <value>Nearest Neighbor: 픽셀 아트에 적합합니다.
+Bilinear: 일반적인 사진 보기에 권장됩니다.
+High Quality Cubic: 확대된 이미지의 최고 화질입니다.</value>
+  </data>
+  <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
+    <value>Nearest Neighbor</value>
+  </data>
+  <data name="ComboImageScalingQualityItemBilinear.Content" xml:space="preserve">
+    <value>Bilinear</value>
+  </data>
+  <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
+    <value>High Quality Cubic</value>
   </data>
 </root>

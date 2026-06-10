@@ -44,6 +44,8 @@ public partial class OpacityFader : IDisposable
     /// </summary>
     private bool _isFaded;
 
+    private bool _disposed;
+
     /// <summary>
     /// A DispatcherTimer used to introduce a delay before applying the initial fade state
     /// after the application starts or the tracking element loads.
@@ -102,6 +104,7 @@ public partial class OpacityFader : IDisposable
         get;
         set
         {
+            if (_disposed) return;
             if (field == value) return;
             field = value;
             if (value)
@@ -129,17 +132,10 @@ public partial class OpacityFader : IDisposable
     /// </summary>
     private void Detach()
     {
-        if (_trackingElement != null)
-        {
-            _trackingElement.PointerMoved -= TrackingElement_PointerMoved;
-            _trackingElement.Loaded -= TrackingElement_Loaded;
-        }
-
-        if (_initialFadeTimer != null)
-        {
-            _initialFadeTimer.Stop();
-            _initialFadeTimer.Tick -= InitialFadeTimer_Tick;
-        }
+        _trackingElement.PointerMoved -= TrackingElement_PointerMoved;
+        _trackingElement.Loaded -= TrackingElement_Loaded;
+        _initialFadeTimer.Stop();
+        _initialFadeTimer.Tick -= InitialFadeTimer_Tick;
     }
 
     /// <summary>
@@ -294,6 +290,10 @@ public partial class OpacityFader : IDisposable
     /// </summary>
     public void Dispose()
     {
+        if (_disposed) return;
+        _disposed = true;
+        if (_isFaded)
+            FadeTo(1.0f, TimeSpan.Zero);
         Detach();
         GC.SuppressFinalize(this);
     }

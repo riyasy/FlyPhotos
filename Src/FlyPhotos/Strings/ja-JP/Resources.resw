@@ -383,12 +383,6 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>自動フェードの強度 (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>よりシャープなピクセルエッジのために無効にします (ピクセルアートに役立ちます)。</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>ズーム時に高品質な補間を使用</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>各側にキャッシュされる高解像度写真の数を設定します。</value>
   </data>
@@ -695,5 +689,22 @@ Esc : 設定を閉じる / アプリを終了</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Ctrl+ドラッグでウィンドウを移動</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
+    <value>画像拡大縮小方法</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
+    <value>Nearest Neighbor: ピクセルアートに最適。
+Bilinear: 通常の写真鑑賞に推奨。
+High Quality Cubic: ズーム画像の最高画質。</value>
+  </data>
+  <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
+    <value>Nearest Neighbor</value>
+  </data>
+  <data name="ComboImageScalingQualityItemBilinear.Content" xml:space="preserve">
+    <value>Bilinear</value>
+  </data>
+  <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
+    <value>High Quality Cubic</value>
   </data>
 </root>

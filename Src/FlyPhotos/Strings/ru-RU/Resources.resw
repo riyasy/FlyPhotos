@@ -384,12 +384,6 @@
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Интенсивность автоскрытия (%)</value>
   </data>
-  <data name="SettingsCardHighQualityInterpolation.Description" xml:space="preserve">
-    <value>Отключите для более четких границ пикселей (полезно для пиксельной графики).</value>
-  </data>
-  <data name="SettingsCardHighQualityInterpolation.Header" xml:space="preserve">
-    <value>Использовать высококачественную интерполяцию при масштабировании</value>
-  </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Укажите количество фотографий высокого разрешения, сохраняемых в кэше</value>
   </data>
@@ -697,5 +691,22 @@ Esc : Закрыть параметры или выйти из приложен�
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Ctrl+перетаскивание для перемещения окна</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
+    <value>Метод масштабирования изображения</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
+    <value>Nearest Neighbor: Оптимально для пиксельной графики.
+Bilinear: Рекомендуется для обычного просмотра фото.
+High Quality Cubic: Максимальное качество для увеличенных изображений.</value>
+  </data>
+  <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
+    <value>Nearest Neighbor</value>
+  </data>
+  <data name="ComboImageScalingQualityItemBilinear.Content" xml:space="preserve">
+    <value>Bilinear</value>
+  </data>
+  <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
+    <value>High Quality Cubic</value>
   </data>
 </root>

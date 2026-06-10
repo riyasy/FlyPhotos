@@ -1,7 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
-using System.Timers;
-using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Interop;
 using FlyPhotos.Services;
 using Microsoft.UI.Input;
@@ -14,7 +13,7 @@ namespace FlyPhotos.UI.Behaviors;
 /// <summary>
 /// A custom Grid that exposes the ProtectedCursor property for easy access.
 /// </summary>
-public partial class CursorHost : Grid
+public sealed partial class CursorHost : Grid
 {
     public InputCursor PublicCursor
     {
@@ -27,22 +26,26 @@ public partial class CursorHost : Grid
 /// Manages mouse cursor visibility, hiding it after a period of inactivity
 /// and showing it again on any pointer activity.
 /// </summary>
+/// <remarks>
+/// Must be created, used, and disposed on the UI thread. All timers are
+/// <see cref="DispatcherTimer"/>s, so the entire class is single-threaded.
+/// </remarks>
 public partial class MouseAutoHider : IDisposable
 {
     // The UI element whose cursor is being managed.
     private readonly CursorHost _host;
 
-    // A UI-thread timer that triggers when the mouse has been inactive for a set duration.
+    // Triggers when the mouse has been inactive for a set duration.
     private readonly DispatcherTimer _inActivityTimer;
-    // A background timer to create a short grace period after hiding the cursor, preventing flickering.
-    private readonly Timer _ignoreActivityTimer;
+    // A short grace period after hiding the cursor, preventing flicker from
+    // the synthetic pointer move that a cursor change can generate.
+    private readonly DispatcherTimer _ignoreActivityTimer;
 
-    // State flags.
+    // State flags. All accessed only on the UI thread.
     private bool _isCursorShown = true;
-    // volatile: written by System.Timers.Timer callback (thread pool), read by PointerMoved (UI thread).
-    private volatile bool _isIgnoringActivity;
+    private bool _isIgnoringActivity;
 
-    // The pre-loaded invisible cursor resource.
+    // The pre-loaded invisible cursor resource. May be null if the asset fails to load.
     private readonly InputCursor _transparentCursor;
     // The pre-loaded visible cursor resource.
     private readonly InputCursor _defaultCursor = InputSystemCursor.Create(InputSystemCursorShape.Arrow);
@@ -54,26 +57,29 @@ public partial class MouseAutoHider : IDisposable
     private bool _disposed;
 
     /// <summary>
-    /// Initializes a new instance of the MouseInactivityHelper.
+    /// Initializes a new instance of the MouseAutoHider.
     /// </summary>
     /// <param name="host">The UI element to attach to.</param>
     /// <param name="enabled">Whether auto-hiding is active from the start.</param>
     /// <param name="timeout">The duration of inactivity before the cursor is hidden.</param>
     public MouseAutoHider(CursorHost host, bool enabled, TimeSpan? timeout = null)
     {
-        var cursorPath = Path.Combine(PathResolver.IsPackagedApp ?
-            Windows.ApplicationModel.Package.Current.InstalledLocation.Path : AppContext.BaseDirectory, "Assets", "transparent.cur");
-        _transparentCursor = Win32CursorMethods.LoadCursor(cursorPath);
-
         _host = host ?? throw new ArgumentNullException(nameof(host));
+
+        var cursorPath = Path.Combine(PathResolver.IsPackagedApp
+            ? Windows.ApplicationModel.Package.Current.InstalledLocation.Path
+            : AppContext.BaseDirectory, "Assets", "transparent.cur");
+        _transparentCursor = Win32CursorMethods.LoadCursor(cursorPath);
+        if (_transparentCursor == null)
+            Debug.WriteLine($"MouseAutoHider: failed to load transparent cursor from '{cursorPath}'. Cursor hiding will be a no-op.");
+
         _host.PublicCursor = _defaultCursor;
 
         _inActivityTimer = new DispatcherTimer { Interval = timeout ?? TimeSpan.FromSeconds(1) };
         _inActivityTimer.Tick += OnInactivityTimeout;
 
-        _ignoreActivityTimer = new Timer(TimeSpan.FromMilliseconds(250));
-        _ignoreActivityTimer.Elapsed += IgnoreActivityTimeout;
-        _ignoreActivityTimer.AutoReset = false;
+        _ignoreActivityTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
+        _ignoreActivityTimer.Tick += OnIgnoreActivityTimeout;
 
         _onHostLoaded = (_, _) => ResetInactivityTimer();
 
@@ -93,9 +99,9 @@ public partial class MouseAutoHider : IDisposable
             field = value;
             if (value)
             {
-                _host.PointerMoved        += OnPointerActivity;
-                _host.PointerPressed      += OnPointerActivity;
-                _host.PointerReleased     += OnPointerActivity;
+                _host.PointerMoved += OnPointerActivity;
+                _host.PointerPressed += OnPointerActivity;
+                _host.PointerReleased += OnPointerActivity;
                 _host.PointerWheelChanged += OnPointerActivity;
                 if (_host.IsLoaded)
                     ResetInactivityTimer();
@@ -104,11 +110,11 @@ public partial class MouseAutoHider : IDisposable
             }
             else
             {
-                _host.PointerMoved        -= OnPointerActivity;
-                _host.PointerPressed      -= OnPointerActivity;
-                _host.PointerReleased     -= OnPointerActivity;
+                _host.PointerMoved -= OnPointerActivity;
+                _host.PointerPressed -= OnPointerActivity;
+                _host.PointerReleased -= OnPointerActivity;
                 _host.PointerWheelChanged -= OnPointerActivity;
-                _host.Loaded              -= _onHostLoaded;
+                _host.Loaded -= _onHostLoaded;
                 _inActivityTimer.Stop();
                 _ignoreActivityTimer.Stop();
                 _isIgnoringActivity = false;
@@ -124,7 +130,7 @@ public partial class MouseAutoHider : IDisposable
     private void OnInactivityTimeout(object sender, object e)
     {
         _inActivityTimer.Stop();
-        if (AppConfig.Settings.AutoHideMouse && _isCursorShown)
+        if (_isCursorShown)
         {
             SetCursorVisible(false);
             // Start ignoring subsequent pointer events for a short duration.
@@ -143,14 +149,13 @@ public partial class MouseAutoHider : IDisposable
         if (!_isCursorShown)
             SetCursorVisible(true);
 
-        if (AppConfig.Settings.AutoHideMouse)
-            ResetInactivityTimer();
+        ResetInactivityTimer();
     }
 
     /// <summary>
     /// Called when the grace period timer elapses. Resumes normal pointer activity tracking.
     /// </summary>
-    private void IgnoreActivityTimeout(object sender, object e)
+    private void OnIgnoreActivityTimeout(object sender, object e)
     {
         _ignoreActivityTimer.Stop();
         _isIgnoringActivity = false;
@@ -168,6 +173,9 @@ public partial class MouseAutoHider : IDisposable
         }
         else
         {
+            // If the transparent cursor failed to load, leave the default cursor in place
+            // rather than assigning null (which would show the default cursor anyway).
+            if (_transparentCursor == null) return;
             _host.PublicCursor = _transparentCursor;
             _isCursorShown = false;
         }
@@ -184,19 +192,18 @@ public partial class MouseAutoHider : IDisposable
 
     /// <summary>
     /// Cleans up resources by stopping timers and unsubscribing from events.
+    /// Must be called on the UI thread.
     /// </summary>
     public void Dispose()
     {
         if (_disposed) return;
+        _disposed = true;
 
-        // Unsubscribe from events to prevent memory leaks.
+        // Unsubscribe timer handlers and stop timers.
         _inActivityTimer.Tick -= OnInactivityTimeout;
-        _ignoreActivityTimer.Elapsed -= IgnoreActivityTimeout;
-
-        // Stop timers.
+        _ignoreActivityTimer.Tick -= OnIgnoreActivityTimeout;
         _inActivityTimer.Stop();
         _ignoreActivityTimer.Stop();
-        _ignoreActivityTimer.Dispose(); // Dispose the System.Timers.Timer.
 
         // Unsubscribe from host pointer events.
         _host.PointerMoved -= OnPointerActivity;
@@ -205,17 +212,14 @@ public partial class MouseAutoHider : IDisposable
         _host.PointerWheelChanged -= OnPointerActivity;
         _host.Loaded -= _onHostLoaded;
 
-        // Dispose cursor resources.
+        // Detach our cursor from the host BEFORE disposing the cursor resources,
+        // so the host never holds a disposed InputCursor. null restores the
+        // default (visible) cursor, so no separate "show" step is needed.
+        _host.PublicCursor = null;
+
         _transparentCursor?.Dispose();
         _defaultCursor?.Dispose();
 
-        // Ensure the cursor is visible when the helper is disposed.
-        if (!_isCursorShown)
-            _host.DispatcherQueue.TryEnqueue(() => SetCursorVisible(true));
-
-        _disposed = true;
-
-        // Suppress finalization as we have cleaned up resources.
         GC.SuppressFinalize(this);
     }
 }

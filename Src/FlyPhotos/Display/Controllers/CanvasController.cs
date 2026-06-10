@@ -540,13 +540,7 @@ internal class CanvasController : ICanvasController
         if (renderer == null) return;
 
         var isAnimating = _canvasViewManager.PanZoomAnimationOnGoing || _continuousZoomActive;
-        // HQ Interpolation Setting ON  + Zoom animation ongoing -> Use Linear Interpolation
-        // HQ Interpolation Setting ON  + Final zoomed image    -> Use HighQualityCubic
-        // HQ Interpolation Setting OFF + Zoom animation ongoing -> Use NearestNeighbor
-        // HQ Interpolation Setting OFF + Final zoomed image     -> Use NearestNeighbor
-        var drawingQuality = isAnimating
-            ? (AppConfig.Settings.HighQualityInterpolation ? CanvasImageInterpolation.Linear : CanvasImageInterpolation.NearestNeighbor)
-            : (AppConfig.Settings.HighQualityInterpolation ? CanvasImageInterpolation.HighQualityCubic : CanvasImageInterpolation.NearestNeighbor);
+        var drawingQuality = AppConfig.Settings.ImageScalingQuality.ToCanvasInterpolation(isAnimating);
 
         args.DrawingSession.Transform = _canvasViewState.Mat;
         renderer.Draw(args.DrawingSession, _canvasViewState, drawingQuality, isAnimating);
@@ -642,12 +636,18 @@ internal class CanvasController : ICanvasController
 
     private int _zoomPercentUiUpdatePending;
     private int _pendingZoomPercent;
+    private int _lastDispatchedZoomPercent = -1;
 
     private void RequestZoomUpdate()
     {
         // Capture the zoom percentage here (W2D thread) so the dispatched lambda does not read
         // W2D-owned view state from the UI thread. Coalesced: latest value wins.
-        Volatile.Write(ref _pendingZoomPercent, (int)Math.Round(_canvasViewState.Scale * 100));
+        var newZoom = (int)Math.Round(_canvasViewState.Scale * 100);
+        // Skip when the displayed integer is unchanged — avoids dispatching to the UI thread
+        // every frame during pan animations where scale is constant.
+        if (newZoom == _lastDispatchedZoomPercent) return;
+        _lastDispatchedZoomPercent = newZoom;
+        Volatile.Write(ref _pendingZoomPercent, newZoom);
         if (Interlocked.CompareExchange(ref _zoomPercentUiUpdatePending, 1, 0) == 0)
             _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
             {
