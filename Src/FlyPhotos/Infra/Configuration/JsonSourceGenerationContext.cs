@@ -1,10 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
+using FlyPhotos.Core.Model;
 
 namespace FlyPhotos.Infra.Configuration;
 
-[JsonSourceGenerationOptions(WriteIndented = true)] // Keep other options you need
+[JsonSourceGenerationOptions(WriteIndented = true)]
 [JsonSerializable(typeof(SettingsWrapper))]
-// By including SettingsWrapper, the generator also automatically includes AppSettings.
+[JsonSerializable(typeof(ObservableCollection<RawDecoder>))]
 public partial class JsonSourceGenerationContext : JsonSerializerContext
 {
 }

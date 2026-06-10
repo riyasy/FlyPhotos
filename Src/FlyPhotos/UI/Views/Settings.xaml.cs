@@ -136,7 +136,7 @@ internal sealed partial class Settings
         ButtonClickOutsideImageToRestoreWindow.Toggled += ButtonClickOutsideImageToRestoreWindow_OnToggled;
         ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
         ButtonDecodeRawData.Toggled += ButtonDecodeRawData_OnToggled;
-        AppConfig.Settings.RawDecoderPriorityAsStrings.CollectionChanged += RawDecoderPriorityAsStrings_CollectionChanged;
+        AppConfig.Settings.RawDecoderPriority.CollectionChanged += RawDecoderPriority_CollectionChanged;
 
         // Initialize codec list view
         ListViewCodecs.ItemsSource = CodecDiscovery.GetAllCodecs();
@@ -156,7 +156,7 @@ internal sealed partial class Settings
         (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumHeight = 600;
     }
 
-    private async void RawDecoderPriorityAsStrings_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    private async void RawDecoderPriority_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
         await AppConfig.SaveAsync();
     }
