@@ -19,17 +19,12 @@ public static class AppConfig
     public static AppSettings Settings { get; private set; }
     public static AppVolatileState Volatile { get; } = new();
 
-    // This method reads the config files when the app starts.
+    // Loads user settings on startup. Falls back to AppSettings defaults if the file is
+    // absent or corrupt — no separate appsettings.json needed since all defaults live in the class.
     public static void Initialize()
     {
         _userSettingsPath = Path.Combine(PathResolver.GetUserSettingsFolder(), "usersettings.json");
-        var defaultSettingsPath = Path.Combine(PathResolver.GetDefaultSettingsFolder(), "appsettings.json");
 
-        // AOT-Safe Loading Logic:
-        // 1. Try to load user settings first.
-        // 2. If they don't exist or fail to load, fall back to default settings.
-
-        // Try loading the user's settings
         if (File.Exists(_userSettingsPath))
         {
             try
@@ -43,32 +38,12 @@ public static class AppConfig
             }
             catch (Exception ex)
             {
-                // Log error if user settings are corrupt
-                System.Diagnostics.Debug.WriteLine($"Error loading user settings, falling back to default: {ex.Message}");
-                Settings = null; // Ensure we fall back
+                // Corrupt or unreadable file — fall through to defaults below
+                System.Diagnostics.Debug.WriteLine($"Error loading user settings: {ex.Message}");
             }
         }
 
-        // If user settings were not loaded, load the defaults from appsettings.json
-        if (Settings == null && File.Exists(defaultSettingsPath))
-        {
-            try
-            {
-                var json = File.ReadAllText(defaultSettingsPath);
-                var settingsWrapper = JsonSerializer.Deserialize(
-                    json,
-                    JsonSourceGenerationContext.Default.SettingsWrapper
-                );
-                Settings = settingsWrapper?.Settings;
-            }
-            catch (Exception ex)
-            {
-                // Log error if default settings are corrupt
-                System.Diagnostics.Debug.WriteLine($"FATAL: Could not load default settings: {ex.Message}");
-            }
-        }
-
-        // If all loading fails, create a new default instance to prevent null references
+        // First launch, or recovery from a corrupt file
         Settings ??= new AppSettings();
     }
 
