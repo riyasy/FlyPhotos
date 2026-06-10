@@ -16,7 +16,7 @@ public class AppSettings
     [JsonIgnore]
     public ElementTheme Theme
     {
-        get => Enum.Parse<ElementTheme>(ThemeAsString, true);
+        get => Enum.TryParse<ElementTheme>(ThemeAsString, true, out var r) ? r : ElementTheme.Default;
         set => ThemeAsString = value.ToString();
     }
 
@@ -25,7 +25,7 @@ public class AppSettings
     [JsonIgnore]
     public WindowBackdropType WindowBackdrop
     {
-        get => Enum.Parse<WindowBackdropType>(WindowBackdropAsString, true);
+        get => Enum.TryParse<WindowBackdropType>(WindowBackdropAsString, true, out var r) ? r : WindowBackdropType.Transparent;
         set => WindowBackdropAsString = value.ToString();
     }
 
@@ -34,7 +34,7 @@ public class AppSettings
     [JsonIgnore]
     public DefaultMouseWheelBehavior DefaultMouseWheelBehavior
     {
-        get => Enum.Parse<DefaultMouseWheelBehavior>(DefaultMouseWheelBehaviorAsString, true);
+        get => Enum.TryParse<DefaultMouseWheelBehavior>(DefaultMouseWheelBehaviorAsString, true, out var r) ? r : DefaultMouseWheelBehavior.Zoom;
         set => DefaultMouseWheelBehaviorAsString = value.ToString();
     }
 
@@ -44,7 +44,7 @@ public class AppSettings
     [JsonIgnore]
     public PanZoomBehaviourOnNavigation PanZoomBehaviourOnNavigation
     {
-        get => Enum.Parse<PanZoomBehaviourOnNavigation>(PanZoomBehaviourOnNavigationAsString, true);
+        get => Enum.TryParse<PanZoomBehaviourOnNavigation>(PanZoomBehaviourOnNavigationAsString, true, out var r) ? r : PanZoomBehaviourOnNavigation.Reset;
         set => PanZoomBehaviourOnNavigationAsString = value.ToString();
     }
 
@@ -107,9 +107,17 @@ public class AppSettings
         [nameof(RawDecoder.WIC), nameof(RawDecoder.Rawler), nameof(RawDecoder.ImageMagick)];
 
     [JsonIgnore]
-    public List<RawDecoder> RawDecoderPriority =>
-        RawDecoderPriorityAsStrings
-            .Select(s => Enum.Parse<RawDecoder>(s, true))
-            .ToList();
+    public List<RawDecoder> RawDecoderPriority => IsValidRawDecoderPriority(RawDecoderPriorityAsStrings)
+        ? RawDecoderPriorityAsStrings.Select(s => Enum.Parse<RawDecoder>(s, true)).ToList()
+        : [RawDecoder.WIC, RawDecoder.Rawler, RawDecoder.ImageMagick];
+
+    private static bool IsValidRawDecoderPriority(ICollection<string> strings)
+    {
+        var allValues = Enum.GetValues<RawDecoder>();
+        if (strings.Count != allValues.Length) return false;
+        foreach (var v in allValues)
+            if (!strings.Contains(v.ToString(), StringComparer.OrdinalIgnoreCase)) return false;
+        return true;
+    }
 
 }
