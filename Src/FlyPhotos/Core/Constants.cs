@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace FlyPhotos.Core;
 
 internal static class Constants
 {
-    public const string AppVersion = "2.6.1";
+    public const string AppVersion = "2.6.2";
 
     // ───────────────────────── Pan / Zoom animation ─────────────────────────
     // The full model is documented on CanvasViewManager. In short: every user-triggered zoom/pan is a
