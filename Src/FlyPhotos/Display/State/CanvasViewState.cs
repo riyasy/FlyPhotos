@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using Windows.Foundation;
+using FlyPhotos.Infra.Configuration;
 
 namespace FlyPhotos.Display.State;
 
@@ -18,22 +19,32 @@ internal class CanvasViewState
 
     public void UpdateTransform()
     {
+        // Rounding the translations to integers avoids subpixel rendering glitches seen on some
+        // NVIDIA GPUs (#55), but quantizes the animation tail into visible 1px shivers.
+        var snap = AppConfig.Settings.UseSubPixelSnapping;
+
         Mat = Matrix3x2.Identity;
 
-        // Round the first translation to nearest integer to avoid subpixel rendering
-        float translateX1 = MathF.Round((float)(-ImageRect.Width * 0.5f));
-        float translateY1 = MathF.Round((float)(-ImageRect.Height * 0.5f));
+        float translateX1 = (float)(-ImageRect.Width * 0.5f);
+        float translateY1 = (float)(-ImageRect.Height * 0.5f);
+        if (snap)
+        {
+            translateX1 = MathF.Round(translateX1);
+            translateY1 = MathF.Round(translateY1);
+        }
         Mat *= Matrix3x2.CreateTranslation(translateX1, translateY1);
 
-        // Scale operation remains unchanged
         Mat *= Matrix3x2.CreateScale(Scale, Scale);
 
-        // Rotation remains unchanged
         Mat *= Matrix3x2.CreateRotation((float)(Math.PI * Rotation / 180f));
 
-        // Round the second translation to nearest integer to avoid subpixel rendering
-        float translateX2 = MathF.Round((float)ImagePos.X);
-        float translateY2 = MathF.Round((float)ImagePos.Y);
+        float translateX2 = (float)ImagePos.X;
+        float translateY2 = (float)ImagePos.Y;
+        if (snap)
+        {
+            translateX2 = MathF.Round(translateX2);
+            translateY2 = MathF.Round(translateY2);
+        }
         Mat *= Matrix3x2.CreateTranslation(translateX2, translateY2);
 
         // Calculate inverse transform

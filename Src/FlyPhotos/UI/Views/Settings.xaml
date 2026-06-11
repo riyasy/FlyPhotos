@@ -566,6 +566,14 @@
                             <ToggleSwitch x:Name="ButtonAllowMultiInstance" />
                         </controls:SettingsCard>
 
+                        <controls:SettingsCard
+                            x:Name="SettingsCardUseSubPixelSnapping"
+                            Margin="0,5,0,0"
+                            Header="Use sub pixel snapping"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE80A;}">
+                            <ToggleSwitch x:Name="ButtonUseSubPixelSnapping" />
+                        </controls:SettingsCard>
+
                         <!--  *****************  -->
 
                         <TextBlock

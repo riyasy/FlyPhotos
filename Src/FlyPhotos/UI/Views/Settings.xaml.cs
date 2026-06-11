@@ -93,6 +93,7 @@ internal sealed partial class Settings
         ComboWindowLaunchMode.SelectedIndex = GetIndexForWindowLaunchMode(AppConfig.Settings.WindowLaunchMode);
         SettingsCardWindowLaunchMode.Description = ComboWindowLaunchMode.SelectedIndex == 2 ? L.Get("SettingsCardWindowLaunchMode/Description") : String.Empty;
         ButtonAllowMultiInstance.IsOn = AppConfig.Settings.AllowMultiInstance;
+        ButtonUseSubPixelSnapping.IsOn = AppConfig.Settings.UseSubPixelSnapping;
         ButtonConfirmBeforeDelete.IsOn = AppConfig.Settings.ConfirmForDelete;
         ButtonShowFileName.IsOn = AppConfig.Settings.ShowFileName;
         ButtonShowCacheStatusExpander.IsOn = AppConfig.Settings.ShowCacheStatus;
@@ -125,6 +126,7 @@ internal sealed partial class Settings
         SliderThumbnailSize.ValueChanged += SliderThumbnailSize_ValueChanged;
         ComboWindowLaunchMode.SelectionChanged += ComboWindowLaunchMode_OnSelectionChanged;
         ButtonAllowMultiInstance.Toggled += ButtonAllowMultiInstance_OnToggled;
+        ButtonUseSubPixelSnapping.Toggled += ButtonUseSubPixelSnapping_OnToggled;
         ButtonConfirmBeforeDelete.Toggled += ButtonConfirmBeforeDelete_OnToggled;
         ButtonShowFileName.Toggled += ButtonShowFileName_OnToggled;
         ButtonShowImageDimensions.Toggled += ButtonShowImageDimensions_OnToggled;
@@ -272,6 +274,12 @@ internal sealed partial class Settings
     private async void ButtonAllowMultiInstance_OnToggled(object sender, RoutedEventArgs e)
     {
         AppConfig.Settings.AllowMultiInstance = ButtonAllowMultiInstance.IsOn;
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ButtonUseSubPixelSnapping_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.UseSubPixelSnapping = ButtonUseSubPixelSnapping.IsOn;
         await AppConfig.SaveAsync();
     }
 

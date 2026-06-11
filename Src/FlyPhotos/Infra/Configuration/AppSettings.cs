@@ -65,6 +65,7 @@ public class AppSettings
 
     public string WindowState { get; set; } = "";
     public bool AllowMultiInstance { get; set; } = false;
+    public bool UseSubPixelSnapping { get; set; } = true;
     public bool StickyZoomLevels { get; set; } = true;
 
     // String serialization for elements is handled by [JsonConverter] on the RawDecoder type,
