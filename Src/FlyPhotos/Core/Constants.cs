@@ -89,6 +89,7 @@ internal static class Constants
         "fi-FI", // Finnish
         "pt-PT", // Portuguese
         "pt-BR", // Portuguese (Brazil)
+        "hu-HU", // Hungarian
         "ru-RU", // Russian
         "uk-UA", // Ukrainian
         "ja-JP", // Japanese
