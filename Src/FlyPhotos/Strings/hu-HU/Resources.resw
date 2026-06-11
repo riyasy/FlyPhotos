@@ -1,0 +1,710 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppSelectionDialog.PrimaryButtonText" xml:space="preserve">
+    <value>Kiválasztás</value>
+  </data>
+  <data name="AppSelectionDialog.SecondaryButtonText" xml:space="preserve">
+    <value>Mégse</value>
+  </data>
+  <data name="AppSelectionDialog.Title" xml:space="preserve">
+    <value>Alkalmazás kiválasztása</value>
+  </data>
+  <data name="BrowseBtn.Content" xml:space="preserve">
+    <value>Alkalmazás tallózása…</value>
+  </data>
+  <data name="BtnCheckVersion.Content" xml:space="preserve">
+    <value>Frissítések keresése</value>
+  </data>
+  <data name="BtnGitHubRepo.Content" xml:space="preserve">
+    <value>GitHub tárhely megnyitása</value>
+  </data>
+  <data name="BtnReportBugs.Content" xml:space="preserve">
+    <value>Hiba bejelentése a GitHubon</value>
+  </data>
+  <data name="BtnThirdPartyLicenses.Content" xml:space="preserve">
+    <value>Harmadik fél licenceinek megtekintése</value>
+  </data>
+  <data name="ButtonBackToolTip.Content" xml:space="preserve">
+    <value>Előző kép</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>Törlés</value>
+  </data>
+  <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
+    <value>Gyorsítótár állapotának megtekintése</value>
+  </data>
+  <data name="ButtonNextPageToolTip.Content" xml:space="preserve">
+    <value>Következő oldal</value>
+  </data>
+  <data name="ButtonNextToolTip.Content" xml:space="preserve">
+    <value>Következő kép</value>
+  </data>
+  <data name="ButtonOneIsToOneToolTip.Content" xml:space="preserve">
+    <value>Nagyítás tényleges méretre</value>
+  </data>
+  <data name="ButtonOpenLog.Content" xml:space="preserve">
+    <value>Napló megnyitása</value>
+  </data>
+  <data name="ButtonPrevPageToolTip.Content" xml:space="preserve">
+    <value>Előző oldal</value>
+  </data>
+  <data name="ButtonRotateToolTip.Content" xml:space="preserve">
+    <value>Kép forgatása</value>
+  </data>
+  <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
+    <value>Igazítás az ablakhoz</value>
+  </data>
+  <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
+    <value>Beállítások</value>
+  </data>
+  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
+    <value>Megnyitás más alkalmazásokban</value>
+  </data>
+  <data name="ChangeLanguageAlert.Description" xml:space="preserve">
+    <value>A megjelenítési nyelv váltásához újra kell indítani az alkalmazást.</value>
+  </data>
+  <data name="ChangeLanguageAlert.Title" xml:space="preserve">
+    <value>Nyelv váltása</value>
+  </data>
+  <data name="ColorPickerFlyoutCancelButton.Content" xml:space="preserve">
+    <value>Mégse</value>
+  </data>
+  <data name="ColorPickerFlyoutOkButton.Content" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="ComboBackgroundItemAcrylic.Content" xml:space="preserve">
+    <value>Akril</value>
+  </data>
+  <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
+    <value>Vékony akril</value>
+  </data>
+  <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
+    <value>Fagyott</value>
+  </data>
+  <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
+    <value>Csillám</value>
+  </data>
+  <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
+    <value>Csillám alternatív</value>
+  </data>
+  <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
+    <value>Nincs</value>
+  </data>
+  <data name="ComboBackgroundItemTransparent.Content" xml:space="preserve">
+    <value>Átlátszó</value>
+  </data>
+  <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
+    <value>Következő vagy előző megtekintése</value>
+  </data>
+  <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
+    <value>Következő vagy előző megtekintése</value>
+  </data>
+  <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
+    <value>Nagyítás vagy kicsinyítés</value>
+  </data>
+  <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
+    <value>Pásztázás/nagyítás/forgatás megjegyzése képenként</value>
+  </data>
+  <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
+    <value>Pásztázás/nagyítás/forgatás alaphelyzetbe állítása</value>
+  </data>
+  <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
+    <value>Pásztázás/nagyítás megtartása az előző képről</value>
+  </data>
+  <data name="ComboThemeItemDark.Content" xml:space="preserve">
+    <value>Sötét</value>
+  </data>
+  <data name="ComboThemeItemDefault.Content" xml:space="preserve">
+    <value>Alapértelmezett</value>
+  </data>
+  <data name="ComboThemeItemLight.Content" xml:space="preserve">
+    <value>Világos</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+    <value>Teljes képernyő</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+    <value>Előző állapot</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+    <value>Maximalizált</value>
+  </data>
+  <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
+    <value>Mégse</value>
+  </data>
+  <data name="ConfirmDeletion.DeleteButton" xml:space="preserve">
+    <value>Törlés</value>
+  </data>
+  <data name="ConfirmDeletion.Message" xml:space="preserve">
+    <value>Biztosan törölni szeretné ezt a fájlt?</value>
+  </data>
+  <data name="ConfirmDeletion.Title" xml:space="preserve">
+    <value>Törlés megerősítése</value>
+  </data>
+  <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
+    <value>A FlyPhotos alapértelmezett alkalmazásként való beállításához:
+Kattintson jobb gombbal egy képre &gt; Megnyitás ezzel &gt; Válasszon másik alkalmazást.
+Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
+  </data>
+  <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
+    <value>Windows 11 rendszerben a FlyPhotos-t a Beállítások &gt; Alkalmazások &gt; Alapértelmezett alkalmazások menüpontban is beállíthatja alapértelmezett alkalmazásként.</value>
+  </data>
+  <data name="DeletionFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="DeletionFailed.Message" xml:space="preserve">
+    <value>A fájl nem törölhető.</value>
+  </data>
+  <data name="DeletionFailed.Title" xml:space="preserve">
+    <value>Törlés sikertelen</value>
+  </data>
+  <data name="DonateButton.Content" xml:space="preserve">
+    <value>Támogatás</value>
+  </data>
+  <data name="DropAreaRun.Text" xml:space="preserve">
+    <value>Húzzon ide egy képet vagy</value>
+  </data>
+  <data name="HeaderCodec.Text" xml:space="preserve">
+    <value>Kodek</value>
+  </data>
+  <data name="HeaderExtensions.Text" xml:space="preserve">
+    <value>Kiterjesztések</value>
+  </data>
+  <data name="HeaderType.Text" xml:space="preserve">
+    <value>Típus</value>
+  </data>
+  <data name="LoadingHighQuality.Message" xml:space="preserve">
+    <value>Nagy felbontású verzió betöltése. Kérem, várjon…</value>
+  </data>
+  <data name="MessageClose_Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="NoShortcutsCreated.Message" xml:space="preserve">
+    <value>Nem lettek parancsikonok létrehozva. Állítsa be őket a Beállításokban.</value>
+  </data>
+  <data name="OpenFileHyperlink.Text" xml:space="preserve">
+    <value>Fájl megnyitása</value>
+  </data>
+  <data name="RightClickInstruction.Text" xml:space="preserve">
+    <value>A FlyPhotos használatához kattintson jobb gombbal egy képre, és válassza a Megnyitás ezzel &gt; FlyPhotos lehetőséget.</value>
+  </data>
+  <data name="ScanningTextBlock.Text" xml:space="preserve">
+    <value>Alkalmazások keresése…</value>
+  </data>
+  <data name="SearchBox.PlaceholderText" xml:space="preserve">
+    <value>Alkalmazások keresése…</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>A további példányok csak a kiválasztott képet jelenítik meg (navigáció, törlés vagy beállítások nélkül).</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>Több példány engedélyezése (Béta)</value>
+  </data>
+  <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
+    <value>Egérmutató elrejtése, ha az egér inaktív.</value>
+  </data>
+  <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
+    <value>Egérmutató automatikus elrejtése</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>Az összes előnézet törlése a lemezgyorsítótárból.</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>Lemezgyorsítótár törlése</value>
+  </data>
+  <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
+    <value>Megerősítés kérése fájl törlése előtt.</value>
+  </data>
+  <data name="SettingsCardConfirmBeforeDelete.Header" xml:space="preserve">
+    <value>Megerősítés fájlok törlése előtt</value>
+  </data>
+  <data name="SettingsCardCredits.Description" xml:space="preserve">
+    <value>A FlyPhotos köszönetet mond a Resvg, Magick.NET, MagicScaler, Rawler, NLog és WinUIEx programoknak.</value>
+  </data>
+  <data name="SettingsCardCredits.Header" xml:space="preserve">
+    <value>Köszönetnyilvánítás</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>Tényleges RAW adatok használata a RAW fájlba ágyazott JPEG helyett.</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>Camera RAW dekódolása</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC (Windows Imaging Component) : Rendszerkodekek • Rawler : leggyorsabb • ImageMagick : legjobb kompatibilitás</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>RAW dekódoló prioritásának beállítása (Rendezés húzással)</value>
+  </data>
+  <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
+    <value>Tedd a Fly-t még fantasztikusabbá.</value>
+  </data>
+  <data name="SettingsCardDeveloperSupport.Header" xml:space="preserve">
+    <value>FlyPhotos támogatása</value>
+  </data>
+  <data name="SettingsCardExternalApps.Description" xml:space="preserve">
+    <value>Válassza ki a külső alkalmazásokat, amelyeket parancsikonként szeretne hozzáadni.</value>
+  </data>
+  <data name="SettingsCardExternalApps.Header" xml:space="preserve">
+    <value>Külső alkalmazások kiválasztása</value>
+  </data>
+  <data name="SettingsCardExternalShortcuts.Description" xml:space="preserve">
+    <value>Az aktuális kép megnyitása más alkalmazásokban</value>
+  </data>
+  <data name="SettingsCardExternalShortcuts.Header" xml:space="preserve">
+    <value>Parancsikonok megjelenítése külső alkalmazásokhoz</value>
+  </data>
+  <data name="SettingsCardFadeControls.Description" xml:space="preserve">
+    <value>Vezérlők elhalványítása, amikor az egér elmozdul.</value>
+  </data>
+  <data name="SettingsCardFadeControls.Header" xml:space="preserve">
+    <value>UI vezérlők automatikus elhalványítása</value>
+  </data>
+  <data name="SettingsCardFadeIntensity.Description" xml:space="preserve">
+    <value>Az automatikus elhalványítás erősségének beállítása.</value>
+  </data>
+  <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
+    <value>Automatikus elhalványítás intenzitása (%)</value>
+  </data>
+  <data name="SettingsCardHighResCache.Description" xml:space="preserve">
+    <value>Állítsa be a nagy felbontású képek gyorsítótárának méretét oldalanként.</value>
+  </data>
+  <data name="SettingsCardHighResCache.Header" xml:space="preserve">
+    <value>Nagy felbontású gyorsítótár</value>
+  </data>
+  <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
+    <value>Válassza ki, hogy a kép mennyire töltse ki a képernyőt. (%)</value>
+  </data>
+  <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
+    <value>Kép illesztése a képernyőhöz</value>
+  </data>
+  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
+    <value>Balra/Jobbra nyilak : Képek közötti navigálás
+Fel/Le nyilak : Nagyítás vagy kicsinyítés
+Bal gomb + húzás : Kép pásztázása
+Jobb gomb nyomva tartás : Nagyítás
+Jobb gomb : Windows Intéző helyi menü
+
+Egérgörgő : Nagyítás/kicsinyítés / Képek közötti navigálás (beállítástól függően)
+Ctrl + Egérgörgő : Nagyítás/kicsinyítés
+Alt + Egérgörgő : Képek közötti navigálás
+Egérgörgő döntése balra/jobbra : Képek közötti navigálás
+Egérgörgő gomb : Teljes képernyő
+
+Ctrl + Nyilak : Kép pásztázása
+Ctrl + + : Nagyítás
+Ctrl + - : Kicsinyítés
+
+Alt + Balra/Jobbra nyilak : Lapozás több oldalas TIFF fájlban
+
+Page Up/Page Down : Nagyítás/kicsinyítés a következő előre beállított értékre (100%, 400%, Illesztés)
+Home : Ugrás az első képre
+End : Ugrás az utolsó képre
+
+Egérgörgő a bélyegkép csíkon : Képek közötti navigálás
+Egérgörgő a képernyőn lévő bal/jobb gombon : Képek közötti navigálás
+Egérgörgő a képernyőn lévő forgatás gombon : Kép forgatása
+
+TouchPad kétujjas balra vagy jobbra húzás : Képek közötti navigálás
+TouchPad kétujjas fel vagy le húzás : Nagyítás/kicsinyítés / Képek közötti navigálás (az egérgörgő beállítástól függően)
+TouchPad csípés szét vagy összezárása : Nagyítás vagy kicsinyítés
+
+F11 : Teljes képernyő
+
+Alt + Enter : Fájltulajdonságok megjelenítése (Általános lap)
+D : Fájltulajdonságok megjelenítése (Részletek lap)
+
+W : Fájl megjelenítése a Windows Intézőben
+S : Windows Megosztás párbeszédablak megjelenítése a fájlhoz
+A : Kép nagyítása tényleges méretre
+F : Illesztés az ablakhoz
+E : Külső alkalmazások panel megjelenítése
+Ctrl + 1–4 : Megnyitás a(z) 1–4. külső alkalmazásban
+
+Del : Kép törlése
+
+Esc : Beállítások bezárása vagy alkalmazás kilépése</value>
+  </data>
+  <data name="SettingsCardLanguage.Header" xml:space="preserve">
+    <value>Nyelv kiválasztása</value>
+  </data>
+  <data name="SettingsCardLog.Description" xml:space="preserve">
+    <value>Nyissa meg a naplófájl megtekintéséhez</value>
+  </data>
+  <data name="SettingsCardLog.Header" xml:space="preserve">
+    <value>Naplófájl</value>
+  </data>
+  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
+    <value>Állítsa be az alacsony felbontású képek gyorsítótárának méretét oldalanként.</value>
+  </data>
+  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
+    <value>Alacsony felbontású gyorsítótár</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
+    <value>Válassza ki az alapértelmezett egérgörgő viselkedést.</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
+    <value>Egérgörgő</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
+    <value>👉 Ctrl + egérgörgő mindig nagyít.
+👉 Alt + egérgörgő mindig navigál.</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
+    <value>⚠ Lassíthatja az indulást. A Fly a teljes felbontású kép betöltésére vár indításkor.</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
+    <value>Animált nagyítás indításkor és kicsinyítés kilépéskor</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
+    <value>⚠ A Megtartás opciót csak hasonló méretű képeket tartalmazó mappákhoz használja.</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
+    <value>Pásztázás, nagyítás és forgatás viselkedése navigáláskor</value>
+  </data>
+  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
+    <value>Problémák bejelentése a GitHubon vagy emailben a ryftools@outlook.com címen</value>
+  </data>
+  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
+    <value>Hibák és problémák</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
+    <value>Gyorsítótár állapotának megjelenítése az alsó panelen.</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
+    <value>Gyorsítótár állapotának megjelenítése</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
+    <value>Kockás háttér megjelenítése átlátszó képeknél.
+⚠ Befolyásolhatja a teljesítményt.</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
+    <value>Kockás háttér megjelenítése</value>
+  </data>
+  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
+    <value>Az aktuálisan megnyitott fájl nevének megjelenítése</value>
+  </data>
+  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
+    <value>Fájlnév megjelenítése</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
+    <value>A kép szélességének és magasságának megjelenítése a fájlnév mellett.</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
+    <value>Kép méreteinek megjelenítése</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
+    <value>A bélyegkép csík megjelenítése az ablak alján</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
+    <value>Bélyegkép csík megjelenítése</value>
+  </data>
+  <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
+    <value>Nagyítási százalék megjelenítése a képernyő közepén nagyításkor.</value>
+  </data>
+  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
+    <value>Nagyítási százalék megjelenítése</value>
+  </data>
+  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
+    <value>A FlyPhotos nyílt forráskódú, a GitHubon tároljuk</value>
+  </data>
+  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
+    <value>GitHub tárhely</value>
+  </data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+    <value>A nagy képek mindig illeszkednek a megjelenítési területhez. A kis képek alapértelmezés szerint 1:1 arányban jelennek meg; kapcsolja be ezt a nagyításhoz és illesztéshez.</value>
+  </data>
+  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
+    <value>Kis képek nagyítása a megjelenítési területhez illeszkedéshez</value>
+  </data>
+  <data name="SettingsCardTheme.Description" xml:space="preserve">
+    <value>Válassza ki az alkalmazás témáját.</value>
+  </data>
+  <data name="SettingsCardTheme.Header" xml:space="preserve">
+    <value>Ablaktéma</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
+    <value>Állítsa be a kiválasztott bélyegképek kiemelő színét.</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
+    <value>Bélyegkép kijelölési szín</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
+    <value>Állítsa be a bélyegképek méretét a nézőben.</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
+    <value>Bélyegkép méret</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
+    <value>Csak az Átlátszó ablak háttér esetén alkalmazható.</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
+    <value>Átlátszóság (%)</value>
+  </data>
+  <data name="SettingsCardVersion.Description" xml:space="preserve">
+    <value>Jelenlegi verzió: {0}</value>
+  </data>
+  <data name="SettingsCardVersion.Header" xml:space="preserve">
+    <value>Jelenlegi verzió</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
+    <value>Válassza ki az ablak hátterét.</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
+    <value>Ablak háttér</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+    <value>Az 'Előző állapot' visszaállítja az utolsó ablakos vagy maximalizált méretet, pozíciót és monitort.</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+    <value>Indulási ablakállapot</value>
+  </data>
+  <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
+    <value>Automatikus elhalványítás és elrejtés</value>
+  </data>
+  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
+    <value>Konfigurálja, hogy a Fly hogyan kezelje a képgyorsítótárazást.</value>
+  </data>
+  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
+    <value>Gyorsítótárazás</value>
+  </data>
+  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
+    <value>Billentyűparancsok</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
+    <value>Pásztázás és nagyítás viselkedésének testreszabása.</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
+    <value>Pásztázás és nagyítás</value>
+  </data>
+  <data name="SettingsPage.Title" xml:space="preserve">
+    <value>FlyPhotos - Beállítások</value>
+  </data>
+  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
+    <value>Névjegy</value>
+  </data>
+  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
+    <value>Kodekek</value>
+  </data>
+  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
+    <value>Általános</value>
+  </data>
+  <data name="Status_FileNotFound" xml:space="preserve">
+    <value>Fájl nem található</value>
+  </data>
+  <data name="Status_InvalidFile" xml:space="preserve">
+    <value>Érvénytelen fájl</value>
+  </data>
+  <data name="Status_Loading" xml:space="preserve">
+    <value>Betöltés…</value>
+  </data>
+  <data name="Status_PreviewFailed" xml:space="preserve">
+    <value>Előnézet betöltése nem sikerült</value>
+  </data>
+  <data name="TextBlockLog.Text" xml:space="preserve">
+    <value>Diagnosztika</value>
+  </data>
+  <data name="TextBlockCaching.Text" xml:space="preserve">
+    <value>Gyorsítótárazás</value>
+  </data>
+  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
+    <value>A FlyPhotos többnyire a Windows beépített képalkotó összetevő (WIC) kodekeket használja.</value>
+  </data>
+  <data name="TextBlockAdvanced.Text" xml:space="preserve">
+    <value>Speciális</value>
+  </data>
+  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
+    <value>Billentyűzet és egér</value>
+  </data>
+  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
+    <value>Kép megjelenítése</value>
+  </data>
+  <data name="TextBlockStartupAndAppearance.Text" xml:space="preserve">
+    <value>Indítás és megjelenés</value>
+  </data>
+  <data name="TextBlockUIControls.Text" xml:space="preserve">
+    <value>UI vezérlők</value>
+  </data>
+  <data name="TitleTextBlock.Text" xml:space="preserve">
+    <value>FlyPhotos - Kép megnyitása</value>
+  </data>
+  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="TrialExpiredMessage.Content" xml:space="preserve">
+    <value>Ingyenes próbaverziója lejárt. Kérjük, vásárolja meg a teljes verziót a Microsoft Store-ból.</value>
+  </data>
+  <data name="TrialExpiredMessage.Title" xml:space="preserve">
+    <value>A próbaverzió lejárt</value>
+  </data>
+  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
+    <value>A behúzott fájl nem támogatott képformátum.</value>
+  </data>
+  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
+    <value>Nem támogatott fájl</value>
+  </data>
+  <data name="_end" xml:space="preserve">
+    <value>end</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
+    <value>Egér előre/vissza gomb</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
+    <value>Válassza ki, mit csináljon az egér előre és vissza gombja (néhány egéren elérhető).</value>
+  </data>
+  <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
+    <value>Lépcsős nagyítás</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>A képen kívülre kattintva visszaállítja az ablakot a teljes képernyős vagy maximalizált állapotból.</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>Kattintson a képen kívülre az ablak visszaállításához</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>A minimalizálás, maximalizálás és bezárás gombok csak akkor jelennek meg, ha az egér az ablak tetejéhez közel van.</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>Címsor gombok automatikus elrejtése</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>Tartsa lenyomva a Ctrl-t, és húzza a képet az ablak mozgatásához.</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>Ctrl + húzás az ablak mozgatásához</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
+    <value>Képskálázási módszer</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
+    <value>Nearest Neighbor: Ideális pixel arthoz.
+Bilinear: Általános képnézegetéshez ajánlott.
+High Quality Cubic: Nagyításkor a legjobb képminőséget nyújtja.</value>
+  </data>
+  <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
+    <value>Nearest Neighbor</value>
+  </data>
+  <data name="ComboImageScalingQualityItemBilinear.Content" xml:space="preserve">
+    <value>High Quality Cubic</value>
+  </data>
+  <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
+    <value>High Quality Cubic</value>
+  </data>
+</root>
