@@ -57,7 +57,10 @@ internal static class Constants
     // Settle thresholds — the animation ends (snaps to target, fires AnimationCompleted) once BOTH the
     // remaining displacement AND the velocity are under these. Lower = settles more precisely but the loop
     // runs longer doing invisible micro-motion; higher = ends sooner but can visibly snap the last bit.
-    public const float SpringScaleSettleEpsilon = 0.0002f; // scale closeness, in LOG units (~0.02% of scale)
+    //public const float SpringScaleSettleEpsilon = 0.0002f; // scale closeness, in LOG units (~0.02% of scale)
+    public const float SpringScaleSettleEpsilon = 0.0008f; // modified from 0.0002f to 0.0008f to make it settle
+                                                           // faster with less CPU usage, at the cost of a slightly
+                                                           // less precise settle (still very close, within ~0.08% of scale).
     public const float SpringScaleVelocitySettle = 0.05f;  // scale speed, log-units/sec
     public const double SpringPanSettleEpsilon = 0.1;      // pan closeness, pixels
     public const float SpringPanVelocitySettle = 2f;       // pan speed, pixels/sec
