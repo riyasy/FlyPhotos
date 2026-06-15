@@ -85,7 +85,23 @@ internal class CanvasViewManager
     /// <summary>
     /// Indicates if a pan or zoom animation is currently in progress.
     /// </summary>
-    public bool PanZoomAnimationOnGoing { get; private set; }
+    /// <remarks>
+    /// This is the SINGLE SOURCE OF TRUTH for pixel snapping: the setter keeps
+    /// <see cref="CanvasViewState.SnapTranslation"/> equal to <c>!value</c>, so snapping is on exactly when
+    /// no animation is running. That makes it structurally impossible to leave snapping off at rest — every
+    /// path that ends an animation flips this back to <c>false</c> and thereby re-enables snapping. Stop
+    /// paths must still rebuild the transform (<c>UpdateTransform()</c>) AFTER setting this false so the
+    /// resting frame is rebuilt with rounding applied.
+    /// </remarks>
+    public bool PanZoomAnimationOnGoing
+    {
+        get;
+        private set
+        {
+            field = value;
+            _canvasViewState.SnapTranslation = !value;
+        }
+    }
 
     /// <summary>
     /// Fires when the view's "fitted to screen" state changes.
@@ -852,7 +868,7 @@ internal class CanvasViewManager
         _zoomCenter = zoomAnchor;
 
         _currentAnimation = AnimationType.SpringZoom;
-        PanZoomAnimationOnGoing = true;
+        PanZoomAnimationOnGoing = true; // setter turns OFF snapping for the duration of the spring
         ViewChanged?.Invoke();
     }
 
@@ -885,7 +901,7 @@ internal class CanvasViewManager
         _springPanZoomTargetCanvasSize = targetCanvasSize;
 
         _currentAnimation = AnimationType.SpringPanAndZoom;
-        PanZoomAnimationOnGoing = true;
+        PanZoomAnimationOnGoing = true; // setter turns OFF snapping for the duration of the spring
         ViewChanged?.Invoke();
     }
 
@@ -910,7 +926,7 @@ internal class CanvasViewManager
     {
         _shrugStartPosition = _canvasViewState.ImagePos;
         _currentAnimation = AnimationType.Shrug;
-        PanZoomAnimationOnGoing = true;
+        PanZoomAnimationOnGoing = true; // setter turns OFF snapping for the duration of the wiggle
         _animationStopwatch.Restart();
         ViewChanged?.Invoke();
     }
@@ -954,8 +970,12 @@ internal class CanvasViewManager
     {
         _animationStopwatch.Stop();
         _currentAnimation = AnimationType.None;
-        PanZoomAnimationOnGoing = false;
+        PanZoomAnimationOnGoing = false; // setter re-enables snapping now that we are at rest
         _suppressZoomUpdateForNextAnimation = false;
+        // Rebuild the transform AFTER snapping is back on so the final resting frame lands on the
+        // device-pixel grid (crisp 1:1 / NVIDIA fix). The settled branch already wrote the exact target
+        // Scale/ImagePos, so this just re-snaps them. See CanvasViewState.SnapTranslation.
+        _canvasViewState.UpdateTransform();
         AnimationCompleted?.Invoke();
     }
 
@@ -968,6 +988,10 @@ internal class CanvasViewManager
     /// </summary>
     private void StopAnimationSnappingToTarget()
     {
+        // We are forcing the view to its settled target. Clear the animation flag FIRST (its setter
+        // re-enables snapping) so the per-case UpdateTransform calls below build a snapped, device-pixel
+        // aligned resting frame.
+        PanZoomAnimationOnGoing = false;
         switch (_currentAnimation)
         {
             case AnimationType.SpringZoom:
@@ -993,7 +1017,6 @@ internal class CanvasViewManager
 
         _animationStopwatch.Stop();
         _currentAnimation = AnimationType.None;
-        PanZoomAnimationOnGoing = false;
         _suppressZoomUpdateForNextAnimation = false;
     }
 
@@ -1122,11 +1145,10 @@ internal class CanvasViewManager
             _animationStopwatch.Stop();
             // Animation finished. Ensure the image is back to its exact starting position.
             _canvasViewState.ImagePos = _shrugStartPosition;
+            _currentAnimation = AnimationType.None;
+            PanZoomAnimationOnGoing = false; // setter re-enables snapping BEFORE the rebuild below
             _canvasViewState.UpdateTransform();
             ViewChanged?.Invoke();
-
-            _currentAnimation = AnimationType.None;
-            PanZoomAnimationOnGoing = false;
             return;
         }
 
