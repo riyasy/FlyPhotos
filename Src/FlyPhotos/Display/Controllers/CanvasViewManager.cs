@@ -23,14 +23,12 @@ namespace FlyPhotos.Display.Controllers;
 /// frame from that thread and advances whatever animation is active. So there is no locking here; treat the
 /// whole class as single-threaded.</para>
 ///
-/// <para><b>Animation models.</b> There are four, selected by <c>AnimationType</c>:
+/// <para><b>Animation models.</b> There are three, selected by <c>AnimationType</c>:
 /// <list type="bullet">
 ///   <item><b>SpringZoom</b> — scale-only damped spring; pan is recomputed each tick to keep a zoom anchor
 ///     point stationary (wheel/keyboard/anchored-step zoom).</item>
 ///   <item><b>SpringPanAndZoom</b> — three independent springs (scale + panX + panY) toward a target
 ///     (Fit, 100%, centred step, double-click, AND launch open-zoom / exit zoom-out).</item>
-///   <item><b>PanAndZoom</b> — the legacy fixed-duration ease-out cubic tween. DORMANT: nothing starts it;
-///     kept only as a two-line-revertible fallback for launch/exit.</item>
 ///   <item><b>Shrug</b> — a decaying sine wiggle for "action rejected" feedback (not a spring).</item>
 /// </list>
 /// Pan, rotate, and precision-touchpad zoom are applied directly (no animation).</para>
@@ -116,19 +114,15 @@ internal class CanvasViewManager
 
     // --- Animation & State Fields ---
 
-    // SpringZoom / SpringPanAndZoom drive all user-triggered zoom (damped spring).
-    // PanAndZoom is the legacy cubic tween, retained ONLY for the launch open-zoom and exit zoom-out.
-    private enum AnimationType { None, SpringZoom, SpringPanAndZoom, PanAndZoom, Shrug }
+    private enum AnimationType { None, SpringZoom, SpringPanAndZoom, Shrug }
     private AnimationType _currentAnimation = AnimationType.None;
     private readonly Stopwatch _animationStopwatch = new();
-    private double _panZoomAnimationDurationMs = Constants.PanZoomAnimationDurationNormal;
     private bool _suppressZoomUpdateForNextAnimation;
 
     private readonly CanvasViewState _canvasViewState;
-    private float _zoomStartScale;      // cubic launch/exit tween only
     private float _zoomTargetScale;
     private Point _zoomCenter;
-    private Point _panStartPosition;    // cubic tween + shrug
+    private Point _shrugStartPosition;
     private Point _panTargetPosition;
     private int _originalImageRotation;
 
@@ -144,6 +138,7 @@ internal class CanvasViewManager
     private float _springCurrentPanY;
     private float _springPanVelocityX;
     private float _springPanVelocityY;
+    private Size _springPanZoomTargetCanvasSize;
 
     // --- State Management Properties ---
 
@@ -268,8 +263,7 @@ internal class CanvasViewManager
         {
             // Pure quality upgrade (Preview → HQ of the same photo). Must be visually seamless — never
             // reset or jump, even when a zoom/pan animation is still in flight as the HQ buffer arrives.
-            var animating = _currentAnimation is AnimationType.SpringZoom
-                or AnimationType.SpringPanAndZoom or AnimationType.PanAndZoom;
+            var animating = _currentAnimation is AnimationType.SpringZoom or AnimationType.SpringPanAndZoom;
 
             var oldImageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
             var oldRotation = _canvasViewState.Rotation;
@@ -379,9 +373,9 @@ internal class CanvasViewManager
             _suppressZoomUpdateForNextAnimation = true;
             // forceReseed: the open-zoom is a hard reset to 0.01 — it must seed from that scale even if a
             // spring is already mid-flight, otherwise it inherits stale internal state and springs from
-            // ~100% down to fit instead of growing from tiny.
+            // ~100% down to fit instead of growing up from tiny.
             StartSpringPanAndZoomAnimation(initialScale, new Point(canvasSize.Width / 2, canvasSize.Height / 2),
-                forceReseed: true);
+                canvasSize, forceReseed: true);
         }
         else
         {
@@ -434,7 +428,6 @@ internal class CanvasViewManager
             _canvasViewState.Scale = newScale;
             _canvasViewState.LastScaleTo = newScale;
             _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
-            // ZoomChanged?.Invoke();
             IsAtOneToOne = Math.Abs(newScale - 1.0f) < 0.001f;
         }
         else if (oldImageSize.Width > 0 && oldImageSize.Height > 0 && oldImageSize != imageSize)
@@ -505,26 +498,8 @@ internal class CanvasViewManager
         return newScale;
     }
 
-    /// <summary>
-    /// Performs a standard zoom operation centered on the canvas.
-    /// </summary>
-    public void ZoomAtCenter(ZoomDirection zoomDirection, Size canvasSize)
-    {
-        var scalePercentage = (zoomDirection == ZoomDirection.In) ? 1.25f : 0.8f;
-        var rawScaleTo = _canvasViewState.LastScaleTo * scalePercentage;
-        var scaleTo = AppConfig.Settings.StickyZoomLevels
-            ? ApplyZoomSnap(rawScaleTo, _canvasViewState.LastScaleTo, zoomDirection)
-            : rawScaleTo;
-        if (scaleTo < 0.05) return;
-        _canvasViewState.LastScaleTo = scaleTo;
-        var center = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
-        StartZoomAnimation(scaleTo, center);
-
-        // Any manual zoom action invalidates both fitted and 1:1 states.
-        IsFittedToScreen = false;
-        IsAtOneToOne = false;
-        _isStateModifiedByUser = true;
-    }
+    public void ZoomAtCenter(ZoomDirection zoomDirection, Size canvasSize) =>
+        ZoomAtPoint(zoomDirection, new Point(canvasSize.Width / 2, canvasSize.Height / 2));
 
     /// <summary>
     /// Performs a standard zoom operation anchored at a specific point (e.g., mouse cursor).
@@ -618,7 +593,7 @@ internal class CanvasViewManager
         if (zoomAnchor.HasValue)
             StartZoomAnimation(targetScale, anchor);
         else
-            StartSpringPanAndZoomAnimation(targetScale, anchor);
+            StartSpringPanAndZoomAnimation(targetScale, anchor, canvasSize);
 
         // Set state immediately for responsive UI.
         IsFittedToScreen = Math.Abs(targetScale - screenFitScale) < 0.001f;
@@ -637,7 +612,7 @@ internal class CanvasViewManager
         _ = exitAnimationDuration;
         var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         _suppressZoomUpdateForNextAnimation = true;
-        StartSpringPanAndZoomAnimation(0.001f, targetPosition);
+        StartSpringPanAndZoomAnimation(0.001f, targetPosition, canvasSize);
         IsFittedToScreen = false;
         IsAtOneToOne = false;
     }
@@ -666,7 +641,7 @@ internal class CanvasViewManager
 
         var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         _canvasViewState.LastScaleTo = scaleFactor;
-        StartSpringPanAndZoomAnimation(scaleFactor, targetPosition);
+        StartSpringPanAndZoomAnimation(scaleFactor, targetPosition, canvasSize);
 
         // Set state immediately for responsive UI, even when animating.
         IsFittedToScreen = true;
@@ -683,7 +658,7 @@ internal class CanvasViewManager
         const float targetScale = 1.0f;
         var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
         _canvasViewState.LastScaleTo = 1.0f;
-        StartSpringPanAndZoomAnimation(1.0f, targetPosition);
+        StartSpringPanAndZoomAnimation(1.0f, targetPosition, canvasSize);
 
         // Set state immediately. The view is fitted only if 100% happens to be the fit scale.
         var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
@@ -708,14 +683,14 @@ internal class CanvasViewManager
         // If already at 1:1, just center on anchor
         if (Math.Abs(oldScale - targetScale) < 0.0001f)
         {
-            StartSpringPanAndZoomAnimation(targetScale, anchor);
+            StartSpringPanAndZoomAnimation(targetScale, anchor, canvasSize);
         }
         else
         {
             var newPosX = anchor.X - (targetScale / oldScale) * (anchor.X - _canvasViewState.ImagePos.X);
             var newPosY = anchor.Y - (targetScale / oldScale) * (anchor.Y - _canvasViewState.ImagePos.Y);
             var targetPos = new Point(newPosX, newPosY);
-            StartSpringPanAndZoomAnimation(targetScale, targetPos);
+            StartSpringPanAndZoomAnimation(targetScale, targetPos, canvasSize);
         }
 
         var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
@@ -859,9 +834,6 @@ internal class CanvasViewManager
             case AnimationType.SpringPanAndZoom:
                 AnimateSpringPanAndZoom();
                 break;
-            case AnimationType.PanAndZoom:
-                AnimatePanAndZoom();
-                break;
             case AnimationType.Shrug:
                 AnimateShrug();
                 break;
@@ -895,7 +867,7 @@ internal class CanvasViewManager
     /// previous spring's internal state (which would otherwise render from the stale/default scale and
     /// spring from ~100% down to fit instead of growing up from tiny).
     /// </param>
-    private void StartSpringPanAndZoomAnimation(float targetScale, Point targetPosition, bool forceReseed = false)
+    private void StartSpringPanAndZoomAnimation(float targetScale, Point targetPosition, Size targetCanvasSize, bool forceReseed = false)
     {
         SeedScaleSpringIfFresh(forceReseed);
         // Pan state must be seeded whenever the previous animation wasn't already a pan spring
@@ -910,6 +882,7 @@ internal class CanvasViewManager
         }
         _zoomTargetScale = targetScale;
         _panTargetPosition = targetPosition;
+        _springPanZoomTargetCanvasSize = targetCanvasSize;
 
         _currentAnimation = AnimationType.SpringPanAndZoom;
         PanZoomAnimationOnGoing = true;
@@ -931,29 +904,11 @@ internal class CanvasViewManager
     }
 
     /// <summary>
-    /// Starts the legacy cubic pan+zoom tween. DORMANT — launch open-zoom and exit zoom-out moved to the
-    /// spring path; no caller remains. Kept as a two-line-revertible fallback (re-point
-    /// <see cref="SetDefaultView"/>'s open branch and <see cref="ZoomOutOnExit"/> here to restore it).
-    /// </summary>
-    private void StartLaunchExitTween(float targetScale, Point targetPosition)
-    {
-        _zoomStartScale = _canvasViewState.Scale;
-        _zoomTargetScale = targetScale;
-        _panStartPosition = _canvasViewState.ImagePos;
-        _panTargetPosition = targetPosition;
-
-        _currentAnimation = AnimationType.PanAndZoom;
-        PanZoomAnimationOnGoing = true;
-        _animationStopwatch.Restart();
-        ViewChanged?.Invoke();
-    }
-
-    /// <summary>
     /// Starts the shrug/shake animation.
     /// </summary>
     private void StartShrugAnimation()
     {
-        _panStartPosition = _canvasViewState.ImagePos;
+        _shrugStartPosition = _canvasViewState.ImagePos;
         _currentAnimation = AnimationType.Shrug;
         PanZoomAnimationOnGoing = true;
         _animationStopwatch.Restart();
@@ -1027,7 +982,6 @@ internal class CanvasViewManager
                 _canvasViewState.UpdateTransform();
                 break;
             case AnimationType.SpringPanAndZoom:
-            case AnimationType.PanAndZoom:
                 _canvasViewState.Scale = _zoomTargetScale;
                 _canvasViewState.ImagePos = _panTargetPosition;
                 _canvasViewState.UpdateTransform();
@@ -1058,9 +1012,6 @@ internal class CanvasViewManager
             case AnimationType.SpringZoom:
             case AnimationType.SpringPanAndZoom:
                 _springCurrentLogScale += (float)Math.Log(scaleFactor);
-                break;
-            case AnimationType.PanAndZoom: // cubic launch/exit tween interpolates start → target
-                _zoomStartScale *= scaleFactor;
                 break;
         }
     }
@@ -1146,58 +1097,15 @@ internal class CanvasViewManager
 
         if (settled)
         {
-            // Final "truth-setter" for the fitted / 1:1 flags (mirrors the cubic tween).
+            // Final "truth-setter" for the fitted / 1:1 flags using the stored canvas size.
             var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
-            var canvasSize = new Size(_panTargetPosition.X * 2, _panTargetPosition.Y * 2);
-            if (canvasSize.Width > 0 && canvasSize.Height > 0)
+            if (_springPanZoomTargetCanvasSize.Width > 0 && _springPanZoomTargetCanvasSize.Height > 0)
             {
-                var screenFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+                var screenFitScale = CalculateScreenFitScale(_springPanZoomTargetCanvasSize, imageSize, _canvasViewState.Rotation);
                 IsFittedToScreen = Math.Abs(_zoomTargetScale - screenFitScale) < 0.001f;
                 IsAtOneToOne = Math.Abs(_zoomTargetScale - 1.0f) < 0.001f;
             }
             FinishSpringAnimation();
-        }
-    }
-
-    /// <summary>
-    /// Legacy ease-out cubic pan+zoom tween (<see cref="StartLaunchExitTween"/>). DORMANT — launch
-    /// open-zoom and exit zoom-out now use the spring path too; nothing starts this anymore. Kept as a
-    /// two-line-revertible fallback should the spring launch/exit ever need backing out.
-    /// </summary>
-    private void AnimatePanAndZoom()
-    {
-        var elapsed = _animationStopwatch.Elapsed.TotalMilliseconds;
-        var t = Math.Clamp(elapsed / _panZoomAnimationDurationMs, 0.0, 1.0);
-        float easedT = 1f - (float)Math.Pow(1 - t, 3); // Ease-out cubic: f(t) = 1 - (1 - t)^3
-
-        // Interpolate scale and position.
-        _canvasViewState.Scale = _zoomStartScale + (_zoomTargetScale - _zoomStartScale) * easedT;
-        // Interpolate position (a simple linear interpolation)
-        _canvasViewState.ImagePos.X = _panStartPosition.X + (_panTargetPosition.X - _panStartPosition.X) * easedT;
-        _canvasViewState.ImagePos.Y = _panStartPosition.Y + (_panTargetPosition.Y - _panStartPosition.Y) * easedT;
-
-        _canvasViewState.UpdateTransform();
-        ViewChanged?.Invoke();
-        if (!_suppressZoomUpdateForNextAnimation) ZoomChanged?.Invoke();
-
-        // Stop the animation when finished.
-        if (t >= 1.0)
-        {
-            _animationStopwatch.Stop();
-            _currentAnimation = AnimationType.None;
-            PanZoomAnimationOnGoing = false;
-            _suppressZoomUpdateForNextAnimation = false;
-            AnimationCompleted?.Invoke();
-            // This block remains as a final "truth-setter" after animation,
-            // which is harmless and good for robustness.
-            var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
-            var canvasSize = new Size(_panTargetPosition.X * 2, _panTargetPosition.Y * 2);
-            if (canvasSize.Width > 0 && canvasSize.Height > 0)
-            {
-                var screenFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
-                IsFittedToScreen = Math.Abs(_zoomTargetScale - screenFitScale) < 0.001f;
-                IsAtOneToOne = Math.Abs(_zoomTargetScale - 1.0f) < 0.001f;
-            }
         }
     }
 
@@ -1213,7 +1121,7 @@ internal class CanvasViewManager
         {
             _animationStopwatch.Stop();
             // Animation finished. Ensure the image is back to its exact starting position.
-            _canvasViewState.ImagePos = _panStartPosition;
+            _canvasViewState.ImagePos = _shrugStartPosition;
             _canvasViewState.UpdateTransform();
             ViewChanged?.Invoke();
 
@@ -1231,7 +1139,7 @@ internal class CanvasViewManager
         var xOffset = Constants.ShrugAmplitude * wave * damping;
 
         // Apply the offset to the original X position. Y position remains unchanged.
-        _canvasViewState.ImagePos.X = _panStartPosition.X + xOffset;
+        _canvasViewState.ImagePos.X = _shrugStartPosition.X + xOffset;
 
         _canvasViewState.UpdateTransform();
         ViewChanged?.Invoke();

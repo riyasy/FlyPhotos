@@ -39,25 +39,4 @@ internal class CanvasViewState
         // Calculate inverse transform
         Matrix3x2.Invert(Mat, out MatInv);
     }
-
-    public string GetAsString()
-    {
-        return $@"
---Image Rect Properties--
-Bitmap is scaled if its 1:1 is greater than display area.
-Display Area is canvas control minus the padding set in settings.
-Scaled to ImageRect := [x={ImageRect.X:0.00}, y={ImageRect.Y:0.00}, Width={ImageRect.Width:0.00}, Height={ImageRect.Height:0.00}]
-ImagePos := [x={ImagePos.X:0.00}, y={ImagePos.Y:0.00}]
-
-Zoom Scale := {Scale:0.00}
-Rotation := {Rotation:00}deg
-
---Transform Matrix--
-Step1: Translate to origin := [x={-ImageRect.Width * 0.5f:0.00}, y={-ImageRect.Height * 0.5f:0.00}]
-Step2: Scale := [ScaleX={Scale:0.00}, ScaleY={Scale:0.00}]
-Step3: Rotate := {Rotation:00}deg
-Step4: Translate to ImagePos := [x={ImagePos.X:0.00}, y={ImagePos.Y:0.00}]
-
-";
-    }
 }
