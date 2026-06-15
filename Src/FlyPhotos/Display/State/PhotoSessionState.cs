@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using FlyPhotos.Core.Model;
 
@@ -6,8 +6,12 @@ namespace FlyPhotos.Display.State;
 
 internal class PhotoSessionState
 {
-    public int CurrentPhotoKey { get; private set; }
-    public int CurrentPhotoListPosition { get; private set; }
+    private volatile int _currentPhotoKey;
+    private volatile int _currentPhotoListPosition;
+
+    public int CurrentPhotoKey => _currentPhotoKey;
+    public int CurrentPhotoListPosition => _currentPhotoListPosition;
+
     public DisplayLevel CurrentDisplayLevel { get; set; }
     public int PhotosCount { get; set; }
     public string FirstPhotoPath { get; init; } = string.Empty;
@@ -15,7 +19,7 @@ internal class PhotoSessionState
 
     public void SetCurrentPhotoKeyAndListPosition(int newKey, int newPosition)
     {
-        CurrentPhotoKey = newKey;
-        CurrentPhotoListPosition = newPosition;
+        _currentPhotoKey = newKey;
+        _currentPhotoListPosition = newPosition;
     }
 }

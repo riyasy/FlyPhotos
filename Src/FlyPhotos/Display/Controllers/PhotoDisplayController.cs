@@ -29,6 +29,16 @@ internal partial class PhotoDisplayController
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    private sealed class PhotoCacheTier : IDisposable
+    {
+        public readonly ConcurrentStack<int>            Queue    = new();
+        public readonly AutoResetEvent                  Signal   = new(false);
+        public readonly ConcurrentDictionary<int, byte> InFlight = new();
+        public readonly ConcurrentDictionary<int, byte> Done     = new();
+
+        public void Dispose() => Signal.Dispose();
+    }
+
     private readonly CancellationTokenSource _cts = new();
     private readonly SemaphoreSlim _previewTaskThrottler = new(Environment.ProcessorCount);
     private readonly SemaphoreSlim _hqTaskThrottler = new(Environment.ProcessorCount);
@@ -44,18 +54,13 @@ internal partial class PhotoDisplayController
     private volatile IReadOnlyList<int> _sortedPhotoKeys = Array.Empty<int>();
     private readonly ConcurrentDictionary<int, Photo> _photos = [];
 
-    private readonly ConcurrentStack<int> _toBeCachedHqImages = new();
-    private readonly ConcurrentDictionary<int, Photo> _cachedHqImages = new();
-    private readonly AutoResetEvent _hqCachingCanStart = new(false);
-    private readonly ConcurrentDictionary<int, bool> _hqsBeingCached = new();
+    private readonly PhotoCacheTier       _previewTier    = new();
+    private readonly PhotoCacheTier       _hqTier         = new();
+    private readonly ConcurrentStack<int> _diskCacheQueue = new();
+    private readonly ManualResetEvent     _diskCacheSignal = new(false);
 
-    private readonly ConcurrentStack<int> _toBeCachedPreviews = new();
-    private readonly ConcurrentDictionary<int, Photo> _cachedPreviews = new();
-    private readonly AutoResetEvent _previewCachingCanStart = new(false);
-    private readonly ConcurrentDictionary<int, bool> _previewsBeingCached = new();
-
-    private readonly ConcurrentStack<int> _toBeDiskCachedPreviews = new();
-    private readonly ManualResetEvent _diskCachingCanStart = new(false);
+    // Reused across SyncCacheTier calls — only touched on the UI/STA thread.
+    private readonly HashSet<int> _syncKeysToKeep = new();
 
     private volatile int _keyPressCounter;
     private const int ContinuousPressThreshold = 1;
@@ -74,7 +79,8 @@ internal partial class PhotoDisplayController
         _canvasController = canvasController;
         _thumbNailController = thumbNailController;
         _photoSessionState = photoSessionState;
-        _thumbNailController.SetPreviewCacheReference(_cachedPreviews);
+        _thumbNailController.SetPhotosReference(_photos);
+        _thumbNailController.SetPreviewDoneKeysReference(_previewTier.Done);
         _thumbNailController.SetSortedPhotoKeysProvider(() => _sortedPhotoKeys);
         _firstPhoto = Photo.Empty();
 
@@ -122,10 +128,10 @@ internal partial class PhotoDisplayController
         {
             // Secondary instances only display the single opened image.
             // No folder or Explorer-window discovery is performed.
-            IReadOnlyList<string> files = AppConfig.Volatile.IsSecondaryInstance ? 
-                [selectedFilePath] : 
+            IReadOnlyList<string> files = AppConfig.Volatile.IsSecondaryInstance ?
+                [selectedFilePath] :
                 FileDiscovery.DiscoverFiles(selectedFilePath, _photoSessionState.FlyLaunchedExternally);
-            
+
 
             _photoSessionState.PhotosCount = files.Count;
 
@@ -144,7 +150,7 @@ internal partial class PhotoDisplayController
             _photoSessionState.SetCurrentPhotoKeyAndListPosition(currentDisplayIndex, currentDisplayIndex);
 
             _photos[_photoSessionState.CurrentPhotoKey] = _firstPhoto;
-            _cachedHqImages[_photoSessionState.CurrentPhotoKey] = _firstPhoto;
+            _hqTier.Done[_photoSessionState.CurrentPhotoKey] = 0;
             _firstPhoto = Photo.Empty(); // release redundant field reference; _photos owns it now
 
             _initialFileListingCompleted = true;
@@ -157,12 +163,14 @@ internal partial class PhotoDisplayController
             // Secondary instances skip all background caching threads.
             if (AppConfig.Volatile.IsSecondaryInstance) return;
 
-            var previewCachingThread = new Thread(() => PreviewCacheBuilderDoWork(_cts.Token)) { IsBackground = true };
+            var previewCachingThread = new Thread(() => PreviewCacheBuilderDoWork(_cts.Token))
+                { IsBackground = true, Name = "PreviewCacheBuilder" };
             previewCachingThread.Start();
             var hqCachingThread = new Thread(() => HqImageCacheBuilderDoWork(_cts.Token))
-            { IsBackground = true, Priority = ThreadPriority.AboveNormal };
+                { IsBackground = true, Priority = ThreadPriority.AboveNormal, Name = "HqCacheBuilder" };
             hqCachingThread.Start();
-            var previewDiskCachingThread = new Thread(() => PreviewDiskCacherDoWork(_cts.Token)) { IsBackground = true };
+            var previewDiskCachingThread = new Thread(() => PreviewDiskCacherDoWork(_cts.Token))
+                { IsBackground = true, Name = "DiskCacheBuilder" };
             previewDiskCachingThread.Start();
         }
         catch (Exception ex)
@@ -177,15 +185,17 @@ internal partial class PhotoDisplayController
         {
             while (!token.IsCancellationRequested)
             {
-                if (_toBeCachedPreviews.IsEmpty)
+                if (_previewTier.Queue.IsEmpty)
                 {
-                    _diskCachingCanStart.Set();
-                    WaitHandle.WaitAny([_previewCachingCanStart, token.WaitHandle]);
+                    // Preview queue is empty — hand off to the disk-cache thread, which writes
+                    // the just-loaded previews (Origin.Disk) to the SQLite thumbnail store.
+                    _diskCacheSignal.Set();
+                    WaitHandle.WaitAny([_previewTier.Signal, token.WaitHandle]);
                     if (token.IsCancellationRequested) break;
-                    _diskCachingCanStart.Reset();
+                    _diskCacheSignal.Reset();
                 }
 
-                if (!_toBeCachedPreviews.TryPop(out var item)) continue;
+                if (!_previewTier.Queue.TryPop(out var item)) continue;
 
                 _previewTaskThrottler.Wait(token);
 
@@ -202,13 +212,13 @@ internal partial class PhotoDisplayController
         {
             while (!token.IsCancellationRequested)
             {
-                if (_toBeCachedHqImages.IsEmpty || IsContinuousKeyPress())
+                if (_hqTier.Queue.IsEmpty || IsContinuousKeyPress())
                 {
-                    WaitHandle.WaitAny([_hqCachingCanStart, token.WaitHandle]);
+                    WaitHandle.WaitAny([_hqTier.Signal, token.WaitHandle]);
                     if (token.IsCancellationRequested) break;
                 }
 
-                if (!_toBeCachedHqImages.TryPop(out var item)) continue;
+                if (!_hqTier.Queue.TryPop(out var item)) continue;
 
                 _hqTaskThrottler.Wait(token);
 
@@ -225,16 +235,16 @@ internal partial class PhotoDisplayController
         {
             while (!token.IsCancellationRequested)
             {
-                WaitHandle.WaitAny([_diskCachingCanStart, token.WaitHandle]);
+                WaitHandle.WaitAny([_diskCacheSignal, token.WaitHandle]);
                 if (token.IsCancellationRequested) break;
 
-                if (_toBeDiskCachedPreviews.IsEmpty)
+                if (_diskCacheQueue.IsEmpty)
                 {
-                    _diskCachingCanStart.Reset();
+                    _diskCacheSignal.Reset();
                     continue;
                 }
 
-                if (!_toBeDiskCachedPreviews.TryPop(out var key)) continue;
+                if (!_diskCacheQueue.TryPop(out var key)) continue;
 
                 _diskCacheTaskThrottler.Wait(token);
 
@@ -254,18 +264,18 @@ internal partial class PhotoDisplayController
                 _ = SetSourceAsync(photo, toDisplayState);
             });
     }
-    
+
 
     private async Task LoadPreviewAsync(int key)
     {
         try
         {
-            _previewsBeingCached[key] = true;
+            _previewTier.InFlight[key] = 0;
             if (!_photos.TryGetValue(key, out var photo)) return;
             await photo.LoadPreview(_d2dCanvas);
-            _cachedPreviews[key] = photo;
-            _previewsBeingCached.Remove(key, out _);
-            if (photo.Preview?.Origin == Origin.Disk) _toBeDiskCachedPreviews.Push(key);
+            _previewTier.Done[key] = 0;
+            _previewTier.InFlight.Remove(key, out _);
+            if (photo.Preview?.Origin == Origin.Disk) _diskCacheQueue.Push(key);
             if (_photoSessionState.CurrentPhotoKey == key)
                 UpgradeImageIfNeeded(photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
             _thumbNailController.RedrawThumbNailsIfNeeded(key);
@@ -278,11 +288,11 @@ internal partial class PhotoDisplayController
     {
         try
         {
-            _hqsBeingCached[key] = true;
+            _hqTier.InFlight[key] = 0;
             if (!_photos.TryGetValue(key, out var photo)) return;
             await photo.LoadHq(_d2dCanvas);
-            _cachedHqImages[key] = photo;
-            _hqsBeingCached.Remove(key, out _);
+            _hqTier.Done[key] = 0;
+            _hqTier.InFlight.Remove(key, out _);
             if (_photoSessionState.CurrentPhotoKey == key)
                 UpgradeImageIfNeeded(photo, DisplayLevel.Preview, DisplayLevel.Hq);
         }
@@ -293,7 +303,8 @@ internal partial class PhotoDisplayController
     {
         try
         {
-            if (_cachedPreviews.TryGetValue(key, out var image) &&
+            if (_previewTier.Done.ContainsKey(key) &&
+                _photos.TryGetValue(key, out var image) &&
                 image.Preview?.Origin == Origin.Disk)
             {
                 var (actualWidth, actualHeight) = image.GetActualSize();
@@ -308,8 +319,8 @@ internal partial class PhotoDisplayController
     {
         if (_photos.IsEmpty)
         {
-            _cachedHqImages.Clear();
-            _cachedPreviews.Clear();
+            _hqTier.Done.Clear();
+            _previewTier.Done.Clear();
             return;
         }
         var currentKey = _photoSessionState.CurrentPhotoKey;
@@ -323,38 +334,27 @@ internal partial class PhotoDisplayController
 
         var desiredHqKeys = FindNeighborKeys(currentPos, AppConfig.Settings.CacheSizeOneSideHqImages);
         var desiredPreviewKeys = FindNeighborKeys(currentPos, AppConfig.Settings.CacheSizeOneSidePreviews);
-        SyncCacheState(desiredHqKeys, _cachedHqImages, _hqsBeingCached, _toBeCachedHqImages,
-            photo => { photo.DisposeHqOnly(); });
-        SyncCacheState(desiredPreviewKeys, _cachedPreviews, _previewsBeingCached, _toBeCachedPreviews,
-            photo => { photo.DisposePreviewOnly(); });
+        SyncCacheTier(desiredHqKeys,      _hqTier,      p => p.DisposeHqOnly());
+        SyncCacheTier(desiredPreviewKeys, _previewTier, p => p.DisposePreviewOnly());
     }
 
-    private void SyncCacheState(List<int> desiredKeys, ConcurrentDictionary<int, Photo> cachedItems,
-        ConcurrentDictionary<int, bool> itemsBeingCached, ConcurrentStack<int> toBeCached, Action<Photo> disposeAction)
+    private void SyncCacheTier(List<int> desiredKeys, PhotoCacheTier tier, Action<Photo> disposeAction)
     {
-        // Remove unwanted cached items
-        var keysToKeep = new HashSet<int>(desiredKeys);
-        var keysToRemove = new List<int>();
-        foreach (int key in cachedItems.Keys)
-            if (!keysToKeep.Contains(key))
-                keysToRemove.Add(key);
+        _syncKeysToKeep.Clear();
+        _syncKeysToKeep.UnionWith(desiredKeys);
 
-        foreach (int key in keysToRemove)
-        {
-            if (_photos.TryGetValue(key, out var photo))
-                disposeAction(photo);
-            cachedItems.TryRemove(key, out _);
-        }
+        foreach (int key in tier.Done.Keys)
+            if (!_syncKeysToKeep.Contains(key))
+            {
+                if (_photos.TryGetValue(key, out var photo))
+                    disposeAction(photo);
+                tier.Done.TryRemove(key, out _);
+            }
 
-        // Create new list of to be cached items
-        toBeCached.Clear();
-        var keysToPush = new List<int>();
+        tier.Queue.Clear();
         foreach (int key in desiredKeys)
-            if (!cachedItems.ContainsKey(key) && !itemsBeingCached.ContainsKey(key))
-                keysToPush.Add(key);
-
-        if (keysToPush.Count > 0)
-            toBeCached.PushRange([.. keysToPush]);
+            if (!tier.Done.ContainsKey(key) && !tier.InFlight.ContainsKey(key))
+                tier.Queue.Push(key);
     }
 
     private List<int> FindNeighborKeys(int currentPosition, int cacheSizeOneSide)
@@ -439,7 +439,7 @@ internal partial class PhotoDisplayController
         int noOfCachedItemsOnLeft = 0;
         int noOfCachedItemsOnRight = 0;
 
-        foreach (int key in _cachedPreviews.Keys)
+        foreach (int key in _previewTier.Done.Keys)
         {
             if (key < currentKey)
                 noOfCachedItemsOnLeft++;
@@ -587,8 +587,8 @@ internal partial class PhotoDisplayController
         var updatedKeys = new List<int>(currentKeys);
         updatedKeys.RemoveAt(currentPosition);
         _sortedPhotoKeys = updatedKeys;
-        _cachedHqImages.TryRemove(keyToDelete, out _);
-        _cachedPreviews.TryRemove(keyToDelete, out _);
+        _hqTier.Done.TryRemove(keyToDelete, out _);
+        _previewTier.Done.TryRemove(keyToDelete, out _);
 
         // --- Step 4: Navigate to the New Photo or Handle Empty State ---
         if (updatedKeys.Count > 0)
@@ -604,15 +604,18 @@ internal partial class PhotoDisplayController
         {
             // TODO - Cleanup properly. If we call dispose now, the zoom out animation during
             // app close will crash as the draw call will try to display disposed canvas bitmaps.
-            return new DeleteResult(true, true);            
+            return new DeleteResult(true, true);
         }
     }
 
     public async Task Brake()
     {
-        if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq && _cachedHqImages.TryGetValue(_photoSessionState.CurrentPhotoKey, out var hqImage))
-            await SetSourceAsync(hqImage, DisplayLevel.Hq);
-        _hqCachingCanStart.Set();
+        var currentKey = _photoSessionState.CurrentPhotoKey;
+        if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq
+            && _hqTier.Done.ContainsKey(currentKey)
+            && _photos.TryGetValue(currentKey, out var hqPhoto))
+            await SetSourceAsync(hqPhoto, DisplayLevel.Hq);
+        _hqTier.Signal.Set();
         _keyPressCounter = 0;
     }
 
@@ -620,9 +623,9 @@ internal partial class PhotoDisplayController
     {
         if (!_photos.TryGetValue(key, out var photo)) return;
 
-        if (!IsContinuousKeyPress() && _cachedHqImages.ContainsKey(key))
+        if (!IsContinuousKeyPress() && _hqTier.Done.ContainsKey(key))
             await SetSourceAsync(photo, DisplayLevel.Hq);
-        else if (_cachedPreviews.ContainsKey(key))
+        else if (_previewTier.Done.ContainsKey(key))
             await SetSourceAsync(photo, DisplayLevel.Preview);
         else
             await SetSourceAsync(photo, DisplayLevel.PlaceHolder);
@@ -631,9 +634,9 @@ internal partial class PhotoDisplayController
 
         UpdateCacheProgress();
 
-        _previewCachingCanStart.Set();
+        _previewTier.Signal.Set();
         if (triggerHqCaching)
-            _hqCachingCanStart.Set();
+            _hqTier.Signal.Set();
     }
 
     private bool IsContinuousKeyPress()
@@ -644,7 +647,7 @@ internal partial class PhotoDisplayController
 
     public bool IsSinglePhoto()
     {
-        return _cachedPreviews.Count <= 1;
+        return _photos.Count <= 1;
     }
 
     public string GetFullPathCurrentFile()
@@ -656,9 +659,9 @@ internal partial class PhotoDisplayController
     {
         _cts.Cancel();
         _firstPhotoLoadedTcs.TrySetCanceled();
-        _previewCachingCanStart.Set();
-        _hqCachingCanStart.Set();
-        _diskCachingCanStart.Set();
+        _previewTier.Signal.Set();
+        _hqTier.Signal.Set();
+        _diskCacheSignal.Set();
 
         // TODO, sort of wait for the three workers or the GetFileList thread to exit before
         // proceeding with disposing everything.
@@ -667,9 +670,9 @@ internal partial class PhotoDisplayController
         _hqTaskThrottler.Dispose();
         _diskCacheTaskThrottler.Dispose();
 
-        _previewCachingCanStart.Dispose();
-        _hqCachingCanStart.Dispose();
-        _diskCachingCanStart.Dispose();
+        _previewTier.Dispose();
+        _hqTier.Dispose();
+        _diskCacheSignal.Dispose();
 
         Logger.Info("PhotoDisplayController disposed.");
     }
