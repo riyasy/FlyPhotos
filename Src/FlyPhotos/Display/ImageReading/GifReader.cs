@@ -25,7 +25,7 @@ internal static class GifReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    // Identity transform reused across calls — avoids a COM object allocation per decode.
+    // Identity transform reused across calls ï¿½ avoids a COM object allocation per decode.
     private static readonly BitmapTransform IdentityTransform = new();
 
     /// <summary>
@@ -62,17 +62,17 @@ internal static class GifReader
     /// <returns>
     ///     A tuple of (<c>success</c>, <see cref="HqDisplayItem" />):
     ///     <list type="bullet">
-    ///         <item><see cref="StaticHqDisplayItem" /> — for single-frame GIF files.</item>
+    ///         <item><see cref="StaticHqDisplayItem" /> ï¿½ for single-frame GIF files.</item>
     ///         <item>
-    ///             <see cref="AnimatedHqDisplayItem" /> — for multi-frame (animated) GIF files,
+    ///             <see cref="AnimatedHqDisplayItem" /> ï¿½ for multi-frame (animated) GIF files,
     ///             carrying the first decoded frame and the raw file bytes for the animator.
     ///         </item>
     ///     </list>
     ///     On failure, returns <c>(false, HqDisplayItem.Empty())</c> and logs the error.
     /// </returns>
     /// <remarks>
-    ///     Frame 0 pixels are decoded via <see cref="BitmapFrame.GetPixelDataAsync" /> on the
-    ///     same decoder instance used for the frame-count check — no second decode pass needed.
+    ///     Frame 0 pixels are decoded via <see cref="BitmapFrame.GetPixelDataAsync()" /> on the
+    ///     same decoder instance used for the frame-count check ï¿½ no second decode pass needed.
     ///     EXIF orientation is applied so the resulting bitmap is always correctly oriented.
     ///     For animated files, the stream is rewound and re-read as a raw byte array for the
     ///     animator; this is cheaper than a second full pixel decode.
@@ -85,7 +85,7 @@ internal static class GifReader
 
             // One decoder, one stream read.
             // GetPixelDataAsync extracts frame 0 pixels directly from the decoder we already
-            // have — no second BitmapDecoder or second CanvasBitmap.LoadAsync needed.
+            // have ï¿½ no second BitmapDecoder or second CanvasBitmap.LoadAsync needed.
             var decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.GifDecoderId, stream);
             var frame0 = await decoder.GetFrameAsync(0);
             var pixelProvider = await frame0.GetPixelDataAsync(
@@ -105,7 +105,7 @@ internal static class GifReader
 
             if (decoder.FrameCount > 1) // Animated GIF
             {
-                // Seeking back to read the raw bytes is a simple memcpy — far cheaper
+                // Seeking back to read the raw bytes is a simple memcpy ï¿½ far cheaper
                 // than a second pixel decode pass.
                 stream.Seek(0);
                 var bytes = await StorageOps.GetInMemByteArray(stream);

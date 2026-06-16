@@ -23,8 +23,7 @@ namespace FlyPhotos.Services;
     /// <param name="filePath">The absolute path to the file you want to share.</param>
     public static void ShareFile(Window window, string filePath)
     {
-        if (window == null)
-            throw new ArgumentNullException(nameof(window));
+        ArgumentNullException.ThrowIfNull(window);
 
         if (string.IsNullOrWhiteSpace(filePath))
             throw new ArgumentException("File path cannot be empty.", nameof(filePath));

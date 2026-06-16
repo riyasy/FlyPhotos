@@ -13,7 +13,6 @@ public sealed partial class CtrlDragWindowMover : IDisposable
     private readonly UIElement _canvas;
     private readonly AppWindow _appWindow;
 
-    private bool _enabled;
     private bool _isActive;
     private PointInt32 _startWindowPos;
     private POINT _startCursorPos;
@@ -35,12 +34,12 @@ public sealed partial class CtrlDragWindowMover : IDisposable
 
     public bool Enabled
     {
-        get => _enabled;
+        get;
         set
         {
-            if (_enabled == value) return;
-            _enabled = value;
-            if (_enabled)
+            if (field == value) return;
+            field = value;
+            if (field)
             {
                 _canvas.PointerPressed  += OnPointerPressed;
                 _canvas.PointerMoved    += OnPointerMoved;
@@ -94,6 +93,5 @@ public sealed partial class CtrlDragWindowMover : IDisposable
         if (_disposed) return;
         Enabled = false;
         _disposed = true;
-        GC.SuppressFinalize(this);
     }
 }

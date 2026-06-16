@@ -41,7 +41,7 @@ internal static partial class NativeRustBridge
     /// <summary>
     /// Returns a heap-allocated array of null-terminated C strings listing every
     /// RAW file extension that rawler can decode (e.g. "ARW", "CR2", …).
-    /// The number of entries is written to <paramref name="count"/>.
+    /// The number of entries is written to <paramref name="size"/>.
     /// </summary>
     /// <remarks>
     /// The returned strings are UPPER-CASE and do NOT include a leading dot.
@@ -52,7 +52,7 @@ internal static partial class NativeRustBridge
     internal static partial nint rawler_get_supported_formats(out int size);
 
     /// <summary>
-    /// Frees a buffer previously returned by <see cref="get_supported_formats"/>.
+    /// Frees a buffer previously returned by <see cref="rawler_get_supported_formats"/>.
     /// <paramref name="size"/> MUST be the same value that was written to the
     /// <c>size</c> out-param of <c>get_supported_formats</c>.
     /// </summary>

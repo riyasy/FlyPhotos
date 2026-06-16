@@ -55,10 +55,10 @@ internal partial class StaticImageRenderer : IRenderer
     {
         _mipGenCts = new CancellationTokenSource();
         var token = _mipGenCts.Token;
-        _ = Task.Run(() => GenerateMipChainAsync(token), token);
+        _ = Task.Run(() => GenerateMipChain(token), token);
     }
 
-    private async Task GenerateMipChainAsync(CancellationToken token)
+    private void GenerateMipChain(CancellationToken token)
     {
         const int MaxLevels = 5;
         const float MinDimension = 64f;

@@ -11,7 +11,7 @@ namespace FlyPhotos.UI.Behaviors;
 ///     Manages full-screen toggling and restore for a WinUI 3 window.
 /// </summary>
 /// <remarks>
-///     Raises <see cref="PauseTrackingChanged"/> so that a companion placement
+///     Raises <see cref="FullScreenToggled"/> so that a companion placement
 ///     manager can suspend geometry capture while the window is in full-screen mode,
 ///     without either class holding a reference to the other.
 /// </remarks>

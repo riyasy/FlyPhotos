@@ -427,7 +427,7 @@ namespace FlyPhotos.UI.Behaviors
                 }
             };
 
-            var factory = compositor.CreateEffectFactory(effect, new[] { "TintColor.Color" });
+            var factory = compositor.CreateEffectFactory(effect, ["TintColor.Color"]);
             var brush = factory.CreateBrush();
             brush.SetSourceParameter("Backdrop", hostBackdrop);
 
@@ -457,7 +457,7 @@ namespace FlyPhotos.UI.Behaviors
         public void UpdateColor(Color color)
         {
             _color = color;
-            if (_brush is not null) _brush.Color = color;
+            _brush?.Color = color;
         }
 
         /// <summary>

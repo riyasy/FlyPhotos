@@ -147,7 +147,7 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     private int _rowCount = -1;
 
     /// <summary>
-    /// Disposal flag. Set atomically via <see cref="Interlocked.Exchange" /> to
+    /// Disposal flag. Set atomically via <see cref="Interlocked.Exchange(ref int, int)" /> to
     /// prevent double-disposal races on the singleton.
     /// 0 = live, 1 = disposed.
     /// </summary>

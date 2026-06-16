@@ -13,7 +13,6 @@ using FlyPhotos.Display.ImageRendering;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Utils;
-using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
@@ -35,7 +34,7 @@ namespace FlyPhotos.Display.Controllers;
 ///
 /// All public methods must be called on the UI (DispatcherQueue) thread.
 /// </summary>
-internal class CanvasController : ICanvasController
+internal partial class CanvasController : ICanvasController
 {
     public event Action<int> OnZoomChanged;
     public event Action<bool> OnFitToScreenStateChanged;
@@ -76,7 +75,6 @@ internal class CanvasController : ICanvasController
     private bool _isMultiPageActive;
 
     // W2D-owned: set inside the ZoomOutOnExit action, read in WaitForPanZoomAnimationAsync.
-    private bool _isGoingToExit;
 
     // W2D-owned: true while ZoomAtPointPrecision ticks are arriving (right-click continuous zoom).
     // Treated as animating so Draw uses mip-based quality. Cleared 700 ms after the last tick.
@@ -367,7 +365,6 @@ internal class CanvasController : ICanvasController
         var canvasSize = _d2dCanvas.GetSize();
         EnqueueW2dAction(() =>
         {
-            _isGoingToExit = true;
             _canvasViewManager.ZoomOutOnExit(exitAnimationDuration, canvasSize);
         });
     }
@@ -555,12 +552,11 @@ internal class CanvasController : ICanvasController
     public Task WaitForPanZoomAnimationAsync(int timeoutMs)
     {
         var tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        Action handler = null;
-        handler = () =>
+        void handler()
         {
             _canvasViewManager.AnimationCompleted -= handler;
             tcs.TrySetResult();
-        };
+        }
         // Subscribe on the W2D thread so the add is ordered relative to animation ticks and the
         // permanent subscriber — no cross-thread race on the event delegate.
         EnqueueW2dAction(() => _canvasViewManager.AnimationCompleted += handler);

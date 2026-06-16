@@ -876,6 +876,9 @@ internal class CanvasViewManager
     /// Starts (or re-targets) a spring that drives scale and pan together (fit / 100% / step).
     /// Velocity carries forward across re-targets, as with <see cref="StartZoomAnimation"/>.
     /// </summary>
+    /// <param name="targetScale">The scale the spring should settle at.</param>
+    /// <param name="targetPosition">The image-centre position the spring should settle at.</param>
+    /// <param name="targetCanvasSize">Canvas size used to compute the settled layout.</param>
     /// <param name="forceReseed">
     /// When true, the spring's internal scale AND pan state are re-seeded from the live view even if a
     /// spring is already running, and velocities are zeroed. Used by the launch open-zoom, which is a

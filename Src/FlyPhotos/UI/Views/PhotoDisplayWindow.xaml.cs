@@ -43,7 +43,7 @@ public sealed partial class PhotoDisplayWindow
     private readonly DispatcherTimer _repeatButtonReleaseCheckTimer = new() { Interval = new TimeSpan(0, 0, 0, 0, 100) };
     private readonly DispatcherTimer _wheelScrollBrakeTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
     private PointerUpdateKind _lastPointerDownKind;
-    private SideButtonNavBehavior _sideButtonNav = null!;
+    private readonly SideButtonNavBehavior _sideButtonNav = null!;
 
     private readonly VirtualKey _plusVk = Util.GetKeyThatProduces('+');
     private readonly VirtualKey _minusVk = Util.GetKeyThatProduces('-');
@@ -531,7 +531,7 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.Pan(deltaX, deltaY);
         _lastPoint = currentPoint;
     }
-    private async void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
+    private void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
         var currentPoint = e.GetCurrentPoint(D2dCanvas);
         var properties = currentPoint.Properties;

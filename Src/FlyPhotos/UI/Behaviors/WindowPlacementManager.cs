@@ -96,13 +96,6 @@ public sealed partial class WindowPlacementManager : IDisposable
     /// <summary>Indicates whether the manager has been disposed to prevent further event handling.</summary>
     private bool _isDisposed;
 
-    /// <summary>
-    ///     Snapshot of <c>IsMaximized</c> from the loaded saved state, captured before
-    ///     <see cref="CaptureOverlappedGeometry"/> can overwrite <see cref="_state"/>.
-    ///     Used by <see cref="WasMaximized"/> so the value is stable after <c>Activate()</c>.
-    /// </summary>
-    private readonly bool _loadedAsMaximized;
-
     // Win32 show-command constants supplementary to Win32Methods
 
     /// <summary>SW_SHOWNORMAL – activate and show in original size/position.</summary>
@@ -130,7 +123,7 @@ public sealed partial class WindowPlacementManager : IDisposable
     ///     avoiding the position jag that occurs when <c>SW_SHOWMAXIMIZED</c> is applied inside
     ///     <c>WM_SHOWWINDOW</c> during <c>Activate()</c>.
     /// </summary>
-    public bool WasMaximized => _loadedAsMaximized;
+    public bool WasMaximized { get; private set; }
 
     /// <summary>
     ///     <see langword="true" /> if the monitor layout encoded in the loaded data
@@ -176,7 +169,7 @@ public sealed partial class WindowPlacementManager : IDisposable
         // overwrite _state. WasMaximized reads this field; _state.IsMaximized is mutable
         // and will be set to false by CaptureOverlappedGeometry when ApplySavedPlacement
         // applies SW_SHOWNORMAL during Activate().
-        _loadedAsMaximized = _state?.IsMaximized == true;
+        WasMaximized = _state?.IsMaximized == true;
 
         // WM_SHOWWINDOW fires before the first paint, so placement is applied
         // in one shot with no visible flicker.

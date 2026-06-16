@@ -291,7 +291,7 @@ internal static partial class Win32Methods
     /// <see cref="System.Runtime.InteropServices.Marshal.Release"/> on this pointer after use.
     /// </param>
     /// <returns>
-    /// An HRESULT. Pass to <see cref="System.Runtime.InteropServices.Marshal.ThrowExceptionForHR"/>
+    /// An HRESULT. Pass to <see cref="System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(int)"/>
     /// to convert failures into managed exceptions.
     /// </returns>
     [LibraryImport("shcore.dll", StringMarshalling = StringMarshalling.Utf16)]

@@ -116,6 +116,5 @@ public sealed class InactivityFader : IDisposable
             _fadeOutStoryboard = null;
         }
         _isDisposed = true;
-        GC.SuppressFinalize(this);
     }
 }

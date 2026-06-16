@@ -13,7 +13,6 @@ using FlyPhotos.Core.Model;
 using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
-using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
@@ -29,7 +28,7 @@ internal partial class PhotoDisplayController
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    private sealed class PhotoCacheTier : IDisposable
+    private sealed partial class PhotoCacheTier : IDisposable
     {
         public readonly ConcurrentStack<int>            Queue    = new();
         public readonly AutoResetEvent                  Signal   = new(false);
@@ -503,7 +502,7 @@ internal partial class PhotoDisplayController
 
     public async Task Fly(NavDirection direction)
     {
-        _keyPressCounter++;
+        Interlocked.Increment(ref _keyPressCounter);
         var keys = _sortedPhotoKeys;
         if (keys.Count <= 1) return;
         int currentPosition = _photoSessionState.CurrentPhotoListPosition;

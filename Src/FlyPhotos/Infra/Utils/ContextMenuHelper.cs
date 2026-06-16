@@ -84,7 +84,7 @@ internal class ContextMenuHelper
     /// <remarks>
     /// The method attempts to find a running helper window. If none is found
     /// it will try to launch the helper executable from the application base directory and wait briefly for the
-    /// helper window to appear. The IPC payload is formatted as "x|y|<FilePath>" encoded as UTF-8 and sent via
+    /// helper window to appear. The IPC payload is formatted as "x|y|&lt;FilePath&gt;" encoded as UTF-8 and sent via
     /// WM_COPYDATA. All unmanaged memory allocations are released in a finally block.
     /// </remarks>
     public static void ShowContextMenuUsingExternalProcess(IntPtr hwndSender, string filePath, Win32Methods.POINT mousePosScreen)

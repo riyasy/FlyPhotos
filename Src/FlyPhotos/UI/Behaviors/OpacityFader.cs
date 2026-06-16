@@ -64,6 +64,7 @@ public partial class OpacityFader : IDisposable
     /// The <see cref="FrameworkElement"/> to monitor for pointer movements. This element defines
     /// the coordinate space and boundaries for the "hot zone" that triggers fading.
     /// </param>
+    /// <param name="enabled">Whether pointer tracking and fading are active immediately on construction.</param>
     /// <param name="fadeDuration">
     /// An optional <see cref="TimeSpan"/> specifying the duration of the opacity fade animation.
     /// If null, a default duration of 500 milliseconds is used.
@@ -95,7 +96,7 @@ public partial class OpacityFader : IDisposable
     }
 
     /// <summary>
-    ///     When <see langword="false"/>, <see cref="PointerMoved"/> is unsubscribed and the elements
+    ///     When <see langword="false"/>, the tracking element's <c>PointerMoved</c> is unsubscribed and the elements
     ///     are restored to full opacity. When toggled back to <see langword="true"/>, pointer tracking
     ///     and the initial-fade timer restart.
     /// </summary>

@@ -24,7 +24,7 @@ internal static class NativeAvifReader
     ///     By extracting the file into a Byte Array immediately, we ensure the file is unlocked from the filesystem for
     ///     subsequent deletion.
     /// </summary>
-    /// <param name="ctrl">The ICanvasResourceCreatorWithDpi surface context used for creating Win2D bitmaps.</param>
+    /// <param name="canvas">The ICanvasResourceCreatorWithDpi surface context used for creating Win2D bitmaps.</param>
     /// <param name="inputPath">The absolute path to the .avif or .heic file.</param>
     /// <returns>A tuple of (success, HqDisplayItem).</returns>
     public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi canvas, string inputPath)

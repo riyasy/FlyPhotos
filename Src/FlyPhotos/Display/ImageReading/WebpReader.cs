@@ -72,7 +72,7 @@ internal static class WebpReader
     /// On failure, returns <c>(false, HqDisplayItem.Empty())</c> and logs the error.
     /// </returns>
     /// <remarks>
-    /// Frame 0 pixels are decoded via <see cref="BitmapFrame.GetPixelDataAsync"/> on the
+    /// Frame 0 pixels are decoded via <see cref="BitmapFrame.GetPixelDataAsync()"/> on the
     /// same decoder instance used for the frame-count check — no second decode pass needed.
     /// EXIF orientation is applied so the resulting bitmap is always correctly oriented.
     /// For animated files, the stream is rewound and re-read as a raw byte array for the
