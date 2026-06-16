@@ -14,9 +14,9 @@ internal interface IRenderer : IDisposable
     /// </summary>
     void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating);
 
-    void RestartOffScreenDrawTimer();
-
-    void CancelOffScreenTimer();
-
-    void TryRedrawOffScreen(bool forceCreate);
+    /// <summary>
+    /// Called when the image scaling quality setting changes. Renderers that cache scaled
+    /// GPU resources (e.g. mip chains) should rebuild them with the new quality.
+    /// </summary>
+    void HandleScalingMethodChange();
 }

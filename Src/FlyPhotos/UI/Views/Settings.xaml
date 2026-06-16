@@ -184,6 +184,7 @@
                                 HorizontalAlignment="Right">
                                 <ComboBoxItem x:Uid="ComboImageScalingQualityItemNearestNeighbor" />
                                 <ComboBoxItem x:Uid="ComboImageScalingQualityItemBilinear" />
+                                <ComboBoxItem x:Uid="ComboImageScalingQualityItemAnisotropic" />
                                 <ComboBoxItem x:Uid="ComboImageScalingQualityItemHighQualityCubic" />
                             </ComboBox>
                         </controls:SettingsCard>

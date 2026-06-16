@@ -765,6 +765,9 @@ public sealed partial class PhotoDisplayWindow
             case Setting.CheckeredBackgroundShowHide:
                 _canvasController.HandleCheckeredBackgroundChange();
                 break;
+            case Setting.ImageScalingQualityChange:
+                _canvasController.HandleImageScalingQualityChange();
+                break;
             case Setting.Theme:
                 _windAppearanceManager.SetWindowTheme(AppConfig.Settings.Theme);
                 break;

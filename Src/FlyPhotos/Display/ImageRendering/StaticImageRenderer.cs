@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
+using NLog;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
-using FlyPhotos.Core;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Utils;
@@ -11,44 +12,120 @@ using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
-using Size = FlyPhotos.Core.Model.Size;
 
 namespace FlyPhotos.Display.ImageRendering;
 
-// TODO - 
+// TODO -
 // 1. Now antialiasing is disabled when drawing checkerboard. Find another way
 internal partial class StaticImageRenderer : IRenderer
 {
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
     private readonly CanvasBitmap _sourceBitmap;
     private readonly Action _invalidateCanvas;
 
-    private readonly CanvasViewState _canvasViewState;
     private CanvasImageBrush _checkeredBrush;
     public CanvasImageBrush CheckeredBrush { set => _checkeredBrush = value; }
     private readonly bool _supportsTransparency;
     private readonly CanvasAnimatedControl _canvas;
 
-    // Off-screen render target for the scaled image.
-    // Created on demand when zoomed in beyond a certain threshold,
-    // to avoid expensive real-time scaling of large images on the W2D thread.
-    // Updated asynchronously after a delay when view state changes,
-    // to avoid unnecessary repeated creation while user is actively zooming/panning.
-    private CanvasRenderTarget _offscreen;
-    private readonly bool _createOffScreen;
-    private readonly Lock _timerLock = new();
-    private CancellationTokenSource _offscreenDrawCts;
+    // Mipmap pyramid for smooth animation. Index 0 = 0.5× source, 1 = 0.25×, 2 = 0.125×, …
+    // _sourceBitmap is the implicit level 0 and is never stored here.
+    // _mipChain and _mipGenCts are swapped/cancelled under _mipChainLock; Draw also holds it while selecting a level.
+    private CanvasRenderTarget[] _mipChain = [];
+    private readonly bool _generateMipChain;
+    private readonly Lock _mipChainLock = new();
+    private CancellationTokenSource _mipGenCts;
+    private volatile bool _mipChainReady;
 
-    private Rect SourceBounds => _sourceBitmap.Bounds;
-
-    public StaticImageRenderer(CanvasAnimatedControl canvas, CanvasViewState canvasViewState, CanvasBitmap sourceBitmap,
-        bool supportsTransparency, Action invalidateCanvas, bool createOffScreen = true)
+    public StaticImageRenderer(CanvasAnimatedControl canvas, CanvasBitmap sourceBitmap,
+        bool supportsTransparency, Action invalidateCanvas, bool generateMipChain = true)
     {
         _sourceBitmap = sourceBitmap;
         _supportsTransparency = supportsTransparency;
         _invalidateCanvas = invalidateCanvas;
-        _createOffScreen = createOffScreen;
-        _canvasViewState = canvasViewState;
+        _generateMipChain = generateMipChain;
         _canvas = canvas;
+
+        if (_generateMipChain)
+            KickOffMipGeneration();
+    }
+
+    private void KickOffMipGeneration()
+    {
+        _mipGenCts = new CancellationTokenSource();
+        var token = _mipGenCts.Token;
+        Task.Run(() => GenerateMipChainAsync(token), token);
+    }
+
+    private async Task GenerateMipChainAsync(CancellationToken token)
+    {
+        const int MaxLevels = 5;
+        const float MinDimension = 64f;
+
+        try
+        {
+            // Snapshot the quality setting once so all levels use the same algorithm.
+            // If the user changes quality mid-generation, HandleScalingMethodChange will cancel and restart.
+            var genQuality = AppConfig.Settings.ImageScalingQuality.ToCanvasInterpolation(false);
+
+            var mips = new List<CanvasRenderTarget>(MaxLevels);
+            // Previous level source — starts as the full-res bitmap.
+            CanvasBitmap prevLevel = _sourceBitmap;
+            float prevWidth = (float)_sourceBitmap.Bounds.Width;
+            float prevHeight = (float)_sourceBitmap.Bounds.Height;
+
+            for (var i = 0; i < MaxLevels; i++)
+            {
+                if (token.IsCancellationRequested) break;
+
+                var halfW = prevWidth / 2f;
+                var halfH = prevHeight / 2f;
+                if (halfW < MinDimension || halfH < MinDimension) break;
+
+                var mip = new CanvasRenderTarget(_canvas.Device, halfW, halfH, 96);
+                using (var ds = mip.CreateDrawingSession())
+                {
+                    ds.Clear(Colors.Transparent);
+                    ds.DrawImage(prevLevel, new Rect(0, 0, halfW, halfH),
+                        new Rect(0, 0, prevWidth, prevHeight), 1f,
+                        genQuality);
+                }
+
+                if (token.IsCancellationRequested)
+                {
+                    mip.Dispose();
+                    break;
+                }
+
+                mips.Add(mip);
+                prevLevel = mip;
+                prevWidth = halfW;
+                prevHeight = halfH;
+            }
+
+            if (token.IsCancellationRequested)
+            {
+                foreach (var m in mips) m.Dispose();
+                return;
+            }
+
+            lock (_mipChainLock)
+            {
+                if (token.IsCancellationRequested)
+                {
+                    foreach (var m in mips) m.Dispose();
+                    return;
+                }
+                _mipChain = [.. mips];
+                _mipChainReady = true;
+            }
+            _invalidateCanvas();
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            Logger.Warn(ex, "MipChain generation failed — falling back to source bitmap");
+        }
     }
 
 
@@ -65,142 +142,56 @@ internal partial class StaticImageRenderer : IRenderer
         }
 
 
-        lock (_timerLock)
+        lock (_mipChainLock)
         {
-            if (_offscreen != null && !isAnimating)
-                session.DrawImage(_offscreen, viewState.ImageRect, _offscreen.Bounds, 1f, quality);
-            else
-                session.DrawImage(_sourceBitmap, viewState.ImageRect, _sourceBitmap.Bounds, 1f, quality);
+            var src = SelectBitmapForScale(viewState.Scale);
+            session.DrawImage(src, viewState.ImageRect, src.Bounds, 1f, quality);
         }
 
     }
 
-    public void CancelOffScreenTimer()
+    // Selects the smallest mip level whose pixel dimensions are still >= the display size,
+    // ensuring we always downscale (never upscale) from the chosen level.
+    // CanvasRenderTarget inherits CanvasBitmap, so both source and mips share the return type.
+    // Must be called inside _mipChainLock.
+    private CanvasBitmap SelectBitmapForScale(float scale)
     {
-        lock (_timerLock)
-        {
-            _offscreenDrawCts?.Cancel();
-        }
+        if (!_mipChainReady || _mipChain.Length == 0 || scale >= 1f)
+            return _sourceBitmap;
+
+        // k = floor(log2(1/scale)): 0 at scale≥1, 1 at scale<0.5, 2 at scale<0.25, …
+        var k = (int)Math.Floor(Math.Log2(1.0 / scale));
+        k = Math.Clamp(k, 0, _mipChain.Length - 1);
+        return k == 0 ? _sourceBitmap : _mipChain[k - 1];
     }
 
-    // Invoked on the W2D thread. Snapshots the W2D-owned view state up front so the deferred
-    // background task never reads it cross-thread.
-    public void RestartOffScreenDrawTimer()
+    public void HandleScalingMethodChange()
     {
-        if (!_createOffScreen) return;
-        var scale = _canvasViewState.Scale;
-        var imageRect = _canvasViewState.ImageRect;
-        var canvasSize = _canvas.GetSize();
-        lock (_timerLock)
+        if (!_generateMipChain) return;
+        lock (_mipChainLock)
         {
-            _offscreenDrawCts?.Cancel();
-            _offscreenDrawCts?.Dispose();
-            _offscreenDrawCts = new CancellationTokenSource();
-            var token = _offscreenDrawCts.Token;
-
-            Task.Run(async () =>
-            {
-                try
-                {
-                    await Task.Delay(TimeSpan.FromMilliseconds(Constants.OffScreenDrawDelayMs), token);
-                    if (token.IsCancellationRequested) return;
-
-                    lock (_timerLock)
-                    {
-                        if (token.IsCancellationRequested) return;
-                        CreateOffscreen(false, scale, imageRect, canvasSize);
-                    }
-                    _invalidateCanvas();
-                }
-                catch (TaskCanceledException) { }
-            }, token);
+            _mipGenCts?.Cancel();
+            _mipGenCts?.Dispose();
+            DestroyMipChain();
         }
+        KickOffMipGeneration();
+        _invalidateCanvas(); // wake canvas immediately; Draw falls back to source while mips rebuild
     }
 
-    // Invoked on the W2D thread. Snapshots view state and creates the off-screen synchronously.
-    public void TryRedrawOffScreen(bool forceCreate)
+    private void DestroyMipChain()
     {
-        if (!_createOffScreen) return;
-        var scale = _canvasViewState.Scale;
-        var imageRect = _canvasViewState.ImageRect;
-        var canvasSize = _canvas.GetSize();
-        lock (_timerLock)
-        {
-            _offscreenDrawCts?.Cancel();
-            CreateOffscreen(forceCreate, scale, imageRect, canvasSize);
-        }
-        _invalidateCanvas();
-    }
-
-    private void CreateOffscreen(bool forceCreate, float scale, Rect imageRect, Size canvasSize)
-    {
-        var scaledImageWidth = imageRect.Width * scale;
-        var scaledImageHeight = imageRect.Height * scale;
-
-        // Always destroy stale offscreen first, before any early-return guard.
-        // Guards below only control creation, not cleanup.
-        var offScreenDimensionsChanged =
-            _offscreen != null &&
-            (!(_offscreen.SizeInPixels.Width == (int)scaledImageWidth &&
-               _offscreen.SizeInPixels.Height == (int)scaledImageHeight));
-
-        if (forceCreate || offScreenDimensionsChanged)
-            DestroyOffscreen();
-
-        // offscreen already exists and matches current scale — reuse it
-        if (_offscreen != null)
-            return;
-
-        // image is small enough to draw directly from source with no offscreen
-        if (imageRect.Width < canvasSize.Width * 1.5 &&
-            imageRect.Height < canvasSize.Height * 1.5)
-            return;
-
-        // invalid size
-        if (scaledImageWidth <= 0 || scaledImageHeight <= 0)
-            return;
-
-        // too zoomed-in — offscreen would exceed canvas, draw from source instead
-        if (scaledImageWidth > canvasSize.Width * 1.5 &&
-            scaledImageHeight > canvasSize.Height * 1.5)
-            return;
-
-        var drawingQuality = AppConfig.Settings.ImageScalingQuality.ToCanvasInterpolation(false);
-
-        var tempOffScreen = new CanvasRenderTarget(_canvas.Device, (float)scaledImageWidth, (float)scaledImageHeight, 96);
-        using (var ds = tempOffScreen.CreateDrawingSession())
-        {
-            var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
-            ds.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
-            if (drawCheckeredBackground)
-            {
-                _checkeredBrush.Transform = Matrix3x2.Identity;
-                ds.FillRectangle(new Rect(0, 0, scaledImageWidth, scaledImageHeight), _checkeredBrush);
-            }
-            else
-            {
-                ds.Clear(Colors.Transparent);
-            }
-
-            ds.DrawImage(_sourceBitmap, new Rect(0, 0, scaledImageWidth, scaledImageHeight),
-                _sourceBitmap.Bounds, 1, drawingQuality);
-        }
-        _offscreen = tempOffScreen;
-    }
-
-    private void DestroyOffscreen()
-    {
-        _offscreen?.Dispose();
-        _offscreen = null;
+        foreach (var mip in _mipChain) mip?.Dispose();
+        _mipChain = [];
+        _mipChainReady = false;
     }
 
     public void Dispose()
     {
-        lock (_timerLock)
+        lock (_mipChainLock)
         {
-            _offscreenDrawCts?.Cancel();
-            _offscreenDrawCts?.Dispose();
-            DestroyOffscreen();
+            _mipGenCts?.Cancel();
+            _mipGenCts?.Dispose();
+            DestroyMipChain();
         }
     }
 }

@@ -68,7 +68,8 @@ public enum Setting
     CaptionButtonsAutoHideToggle,
     CtrlDragToMoveWindowToggle,
     AutoFadeToggle,
-    AutoHideMouseToggle
+    AutoHideMouseToggle,
+    ImageScalingQualityChange
 }
 
 public enum ScrollDirection
@@ -100,5 +101,6 @@ public enum ImageInterpolation
 {
     NearestNeighbor,
     Linear,
+    Anisotropic,
     HighQualityCubic
 }

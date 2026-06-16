@@ -5,18 +5,16 @@ namespace FlyPhotos.Infra.Utils;
 
 internal static class ImageInterpolationMapper
 {
-    /// <summary>
-    /// Maps the user-chosen <see cref="ImageInterpolation"/> setting to a Win2D
-    /// <see cref="CanvasImageInterpolation"/>. HighQualityCubic is too costly to run every frame,
-    /// so it is clamped to Linear while a pan/zoom animation is ongoing.
-    /// </summary>
+    // Clamp HighQualityCubic to Anisotropic while animating;
+    // the full-quality result lands once the view settles.
     public static CanvasImageInterpolation ToCanvasInterpolation(this ImageInterpolation quality, bool isAnimating)
         => quality switch
         {
             ImageInterpolation.NearestNeighbor => CanvasImageInterpolation.NearestNeighbor,
             ImageInterpolation.Linear => CanvasImageInterpolation.Linear,
+            ImageInterpolation.Anisotropic => CanvasImageInterpolation.Anisotropic,
             ImageInterpolation.HighQualityCubic => isAnimating
-                ? CanvasImageInterpolation.Linear
+                ? CanvasImageInterpolation.Anisotropic
                 : CanvasImageInterpolation.HighQualityCubic,
             _ => CanvasImageInterpolation.Linear
         };

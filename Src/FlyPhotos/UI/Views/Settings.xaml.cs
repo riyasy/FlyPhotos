@@ -312,21 +312,25 @@ internal sealed partial class Settings
     {
         AppConfig.Settings.ImageScalingQuality = GetImageScalingQualityForIndex(ComboImageScalingQuality.SelectedIndex);
         await AppConfig.SaveAsync();
+        SettingChanged?.Invoke(Setting.ImageScalingQualityChange);
     }
 
     private static int GetIndexForImageScalingQuality(ImageInterpolation quality) => quality switch
     {
         ImageInterpolation.NearestNeighbor => 0,
         ImageInterpolation.Linear => 1,
-        ImageInterpolation.HighQualityCubic => 2,
-        _ => 2
+        ImageInterpolation.Anisotropic => 2,
+        ImageInterpolation.HighQualityCubic => 3,
+        _ => 1
     };
 
     private static ImageInterpolation GetImageScalingQualityForIndex(int index) => index switch
     {
         0 => ImageInterpolation.NearestNeighbor,
         1 => ImageInterpolation.Linear,
-        _ => ImageInterpolation.HighQualityCubic
+        2 => ImageInterpolation.Anisotropic,
+        3 => ImageInterpolation.HighQualityCubic,
+        _ => ImageInterpolation.Linear
     };
 
     private async void ButtonShowZoomPercent_OnToggled(object sender, RoutedEventArgs e)

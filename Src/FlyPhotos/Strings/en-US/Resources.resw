@@ -388,9 +388,10 @@ Settings &gt; Apps &gt; Default apps.</value>
     <value>Image scaling method</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
-    <value>Nearest Neighbor: Best for pixel art.
-Bilinear: Recommended for general photo viewing.
-High Quality Cubic: Highest quality for zoomed images.</value>
+    <value>Nearest Neighbor – Use only for pixel art. Preserves sharp pixel edges.
+Bilinear – Fast and smooth image scaling suitable for general viewing.
+Anisotropic – Sharper results than Bilinear while maintaining good performance.
+High Quality Cubic – Highest-quality scaling for photos.</value>
   </data>
   <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
     <value>Nearest Neighbor</value>
@@ -400,6 +401,9 @@ High Quality Cubic: Highest quality for zoomed images.</value>
   </data>
   <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
     <value>High Quality Cubic</value>
+  </data>
+  <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
+    <value>Anisotropic</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
     <value>Set the number of high-resolution photos cached on each side.</value>

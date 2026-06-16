@@ -93,9 +93,7 @@ internal partial class MultiPageRenderer : IRenderer
         }
     }
 
-    public void RestartOffScreenDrawTimer() { }
-    public void CancelOffScreenTimer() { }
-    public void TryRedrawOffScreen(bool forceCreate) { }
+    public void HandleScalingMethodChange() => _invalidate();
 
     public void Dispose()
     {

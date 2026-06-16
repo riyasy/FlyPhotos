@@ -75,12 +75,11 @@ internal class CanvasController : ICanvasController
     private bool _realImageDisplayedForCurrentPhoto;
     private bool _isMultiPageActive;
 
-    // W2D-owned: set inside the ZoomOutOnExit action, read in the AnimationCompleted handler.
+    // W2D-owned: set inside the ZoomOutOnExit action, read in WaitForPanZoomAnimationAsync.
     private bool _isGoingToExit;
 
     // W2D-owned: true while ZoomAtPointPrecision ticks are arriving (right-click continuous zoom).
-    // Cleared 700 ms after the last tick — just after the 650 ms offscreen timer fires — so Draw
-    // skips the offscreen and uses source-bitmap quality during the zoom burst.
+    // Treated as animating so Draw uses mip-based quality. Cleared 700 ms after the last tick.
     private bool _continuousZoomActive;
     private CancellationTokenSource _continuousZoomCts;
 
@@ -109,7 +108,6 @@ internal class CanvasController : ICanvasController
             _d2dCanvas.DispatcherQueue.TryEnqueue(() => OnOneToOneStateChanged?.Invoke(isOneToOne));
         _canvasViewManager.ZoomChanged += RequestZoomUpdate;
         _canvasViewManager.ViewChanged += RequestInvalidate;
-        _canvasViewManager.AnimationCompleted += CanvasViewManager_AnimationCompleted;
     }
 
     public void Dispose()
@@ -207,8 +205,8 @@ internal class CanvasController : ICanvasController
         {
             // For animated images, first display the static first frame immediately for responsiveness.
             InstallRenderer(
-                new StaticImageRenderer(_d2dCanvas, _canvasViewState, animDispItem.Bitmap,
-                    photo.SupportsTransparency, RequestInvalidate, createOffScreen: false),
+                new StaticImageRenderer(_d2dCanvas, animDispItem.Bitmap,
+                    photo.SupportsTransparency, RequestInvalidate, generateMipChain: false),
                 _imageSize, animDispItem.Rotation, ctx, forceThumbNailRedraw: true);
 
             // Asynchronously create the appropriate animator (GIF, WebP, APNG, or AVIF).
@@ -247,7 +245,7 @@ internal class CanvasController : ICanvasController
     private void HandleHqStaticDisplayItem(Photo photo, HqDisplayItem hqDispItem, PhotoInstallContext ctx)
     {
         InstallRenderer(
-            new StaticImageRenderer(_d2dCanvas, _canvasViewState, hqDispItem.Bitmap,
+            new StaticImageRenderer(_d2dCanvas, hqDispItem.Bitmap,
                 photo.SupportsTransparency, RequestInvalidate),
             _imageSize, hqDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
@@ -269,8 +267,8 @@ internal class CanvasController : ICanvasController
         var correctedWidth = _imageSize.Height * previewAspectRatio;
 
         InstallRenderer(
-            new StaticImageRenderer(_d2dCanvas, _canvasViewState, previewDispItem.Bitmap,
-                photo.SupportsTransparency, RequestInvalidate, createOffScreen: false),
+            new StaticImageRenderer(_d2dCanvas, previewDispItem.Bitmap,
+                photo.SupportsTransparency, RequestInvalidate, generateMipChain: false),
             new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
@@ -328,12 +326,6 @@ internal class CanvasController : ICanvasController
 
             if (forceThumbNailRedraw)
                 _thumbNailController.CreateThumbnailRibbonOffScreen(); // self-marshals to the UI thread
-
-            // Skip the offscreen timer when an animation is starting — AnimationCompleted will call
-            // TryRedrawOffScreen(false) at the correct final scale. Starting the timer here while
-            // Scale is near-zero (startup zoom) would bake a tiny offscreen mid-animation.
-            if (!_canvasViewManager.PanZoomAnimationOnGoing)
-                _currentRenderer.RestartOffScreenDrawTimer();
         });
     }
 
@@ -344,7 +336,6 @@ internal class CanvasController : ICanvasController
         EnqueueW2dAction(() =>
         {
             if (_currentRenderer == null) return;
-            if (animateChange) _currentRenderer.CancelOffScreenTimer();
             _canvasViewManager.ZoomPanToFit(animateChange, imageSize, canvasSize);
         });
     }
@@ -355,7 +346,7 @@ internal class CanvasController : ICanvasController
         EnqueueW2dAction(() =>
         {
             if (_currentRenderer == null) return;
-            _currentRenderer.CancelOffScreenTimer();
+
             _canvasViewManager.ZoomToHundred(canvasSize);
         });
     }
@@ -366,7 +357,7 @@ internal class CanvasController : ICanvasController
         EnqueueW2dAction(() =>
         {
             if (_currentRenderer == null) return;
-            _currentRenderer.CancelOffScreenTimer();
+
             _canvasViewManager.ZoomToHundred(canvasSize, anchor);
         });
     }
@@ -387,7 +378,7 @@ internal class CanvasController : ICanvasController
         EnqueueW2dAction(() =>
         {
             if (_currentRenderer == null) return;
-            _currentRenderer.CancelOffScreenTimer();
+
             _canvasViewManager.ZoomAtCenter(zoomDirection, canvasSize);
         });
     }
@@ -398,7 +389,7 @@ internal class CanvasController : ICanvasController
         EnqueueW2dAction(() =>
         {
             if (_currentRenderer == null) return;
-            _currentRenderer.CancelOffScreenTimer();
+
             _canvasViewManager.StepZoom(zoomDirection, canvasSize, zoomAnchor);
         });
     }
@@ -408,7 +399,7 @@ internal class CanvasController : ICanvasController
         EnqueueW2dAction(() =>
         {
             if (_currentRenderer == null) return;
-            _currentRenderer.CancelOffScreenTimer();
+
             _canvasViewManager.ZoomAtPoint(zoomDirection, zoomAnchor);
         });
     }
@@ -420,13 +411,9 @@ internal class CanvasController : ICanvasController
             if (_currentRenderer == null) return;
             _canvasViewManager.ZoomAtPointPrecision(delta, zoomAnchor);
 
-            // No animation → no AnimationCompleted → must restart the offscreen timer manually
-            // so the offscreen is recreated 650ms after the last zoom tick.
-            _currentRenderer.RestartOffScreenDrawTimer();
-
-            // Mark the burst as active so D2dCanvas_Draw skips the offscreen and uses
-            // source-bitmap quality. Debounce the clear to 700ms (just after the 650ms
-            // offscreen timer) so Draw switches back to the fresh offscreen once zoom stops.
+            // Mark the burst as active so the render path uses mip-based quality instead of
+            // source-bitmap quality. Debounced 700ms after the last tick so Draw reverts to
+            // non-animating mip selection once the zoom burst ends.
             _continuousZoomActive = true;
             _continuousZoomCts?.Cancel();
             _continuousZoomCts?.Dispose();
@@ -488,11 +475,12 @@ internal class CanvasController : ICanvasController
         Microsoft.Graphics.Canvas.UI.CanvasCreateResourcesEventArgs args)
     {
         // Device (re)created (first load or device loss). Drop the device-bound brush so it is
-        // rebuilt lazily, and ask the current renderer to rebuild its off-screen surface.
+        // rebuilt lazily, and rebuild the mip chain with the current scaling quality.
+        // Note: CanvasBitmaps held in the photo cache are NOT re-created here (accepted risk).
         // Runs on the W2D thread.
         _checkeredBrush?.Dispose();
         _checkeredBrush = null;
-        _currentRenderer?.TryRedrawOffScreen(true);
+        _currentRenderer?.HandleScalingMethodChange();
     }
 
     /// <summary>
@@ -554,14 +542,7 @@ internal class CanvasController : ICanvasController
         {
             if (_currentRenderer == null) return;
             _canvasViewManager.HandleSizeChange(newSize, previousSize);
-            _currentRenderer.RestartOffScreenDrawTimer();
         });
-    }
-
-    private void CanvasViewManager_AnimationCompleted()
-    {
-        if (!_isGoingToExit)
-            _currentRenderer?.TryRedrawOffScreen(false);
     }
 
     /// <summary>
@@ -613,7 +594,12 @@ internal class CanvasController : ICanvasController
 
     public void HandleCheckeredBackgroundChange()
     {
-        EnqueueW2dAction(() => _currentRenderer?.TryRedrawOffScreen(true));
+        EnqueueW2dAction(() => { }); // wake the canvas; Draw() reads the setting live
+    }
+
+    public void HandleImageScalingQualityChange()
+    {
+        EnqueueW2dAction(() => _currentRenderer?.HandleScalingMethodChange());
     }
 
     /// <summary>

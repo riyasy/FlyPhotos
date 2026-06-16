@@ -92,9 +92,7 @@ internal partial class AnimatedImageRenderer : IRenderer
         }
     }
 
-    public void RestartOffScreenDrawTimer() { }
-    public void CancelOffScreenTimer() { }
-    public void TryRedrawOffScreen(bool forceCreate) { }
+    public void HandleScalingMethodChange() { }
 
     public void Dispose()
     {
