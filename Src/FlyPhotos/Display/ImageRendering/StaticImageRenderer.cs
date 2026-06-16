@@ -55,7 +55,7 @@ internal partial class StaticImageRenderer : IRenderer
     {
         _mipGenCts = new CancellationTokenSource();
         var token = _mipGenCts.Token;
-        Task.Run(() => GenerateMipChainAsync(token), token);
+        _ = Task.Run(() => GenerateMipChainAsync(token), token);
     }
 
     private async Task GenerateMipChainAsync(CancellationToken token)
@@ -142,11 +142,10 @@ internal partial class StaticImageRenderer : IRenderer
         }
 
 
+        CanvasBitmap src;
         lock (_mipChainLock)
-        {
-            var src = SelectBitmapForScale(viewState.Scale);
-            session.DrawImage(src, viewState.ImageRect, src.Bounds, 1f, quality);
-        }
+            src = SelectBitmapForScale(viewState.Scale);
+        session.DrawImage(src, viewState.ImageRect, src.Bounds, 1f, quality);
 
     }
 
@@ -161,7 +160,7 @@ internal partial class StaticImageRenderer : IRenderer
 
         // k = floor(log2(1/scale)): 0 at scale≥1, 1 at scale<0.5, 2 at scale<0.25, …
         var k = (int)Math.Floor(Math.Log2(1.0 / scale));
-        k = Math.Clamp(k, 0, _mipChain.Length - 1);
+        k = Math.Clamp(k, 0, _mipChain.Length);
         return k == 0 ? _sourceBitmap : _mipChain[k - 1];
     }
 
