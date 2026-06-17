@@ -695,9 +695,10 @@ Esc : Instellingen sluiten of App verlaten</value>
     <value>Schaalmethode voor afbeeldingen</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
-    <value>Nearest Neighbor: Ideaal voor pixel art.
-Bilinear: Aanbevolen voor algemene fotoweergave.
-High Quality Cubic: Hoogste kwaliteit voor ingezoomde afbeeldingen.</value>
+    <value>Nearest Neighbor – Alleen gebruiken voor pixel art. Behoudt scherpe pixelranden.
+Bilinear – Snelle en vloeiende beeldschaling, geschikt voor algemeen gebruik.
+Anisotropic – Scherpere resultaten dan Bilinear met behoud van goede prestaties.
+High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
   </data>
   <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
     <value>Nearest Neighbor</value>
@@ -707,5 +708,8 @@ High Quality Cubic: Hoogste kwaliteit voor ingezoomde afbeeldingen.</value>
   </data>
   <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
     <value>High Quality Cubic</value>
+  </data>
+  <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
+    <value>Anisotropic</value>
   </data>
 </root>

@@ -695,9 +695,10 @@ Esc : Sulje asetukset tai Poistu</value>
     <value>Kuvien skaalaustapa</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
-    <value>Nearest Neighbor: Paras pikselitaiteelle.
-Bilinear: Suositellaan yleiseen valokuvien katseluun.
-High Quality Cubic: Korkein laatu zoomatuille kuville.</value>
+    <value>Nearest Neighbor – Käytä vain pikselitaiteelle. Säilyttää terävät pikselin reunat.
+Bilinear – Nopea ja tasainen kuvan skaalaus, joka sopii yleiseen katseluun.
+Anisotropic – Terävämmät tulokset kuin Bilinear säilyttäen hyvän suorituskyvyn.
+High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
   </data>
   <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
     <value>Nearest Neighbor</value>
@@ -707,5 +708,8 @@ High Quality Cubic: Korkein laatu zoomatuille kuville.</value>
   </data>
   <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
     <value>High Quality Cubic</value>
+  </data>
+  <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
+    <value>Anisotropic</value>
   </data>
 </root>

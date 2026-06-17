@@ -695,9 +695,10 @@ Esc : Fermer les paramètres ou Quitter</value>
     <value>Méthode de mise à l'échelle de l'image</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
-    <value>Nearest Neighbor: Idéal pour le pixel art.
-Bilinear: Recommandé pour le visionnage général de photos.
-High Quality Cubic: Qualité maximale pour les images zoomées.</value>
+    <value>Nearest Neighbor – À utiliser uniquement pour le pixel art. Préserve la netteté des bords des pixels.
+Bilinear – Mise à l'échelle rapide et fluide, adaptée à la visualisation générale.
+Anisotropic – Résultats plus nets que Bilinear tout en maintenant de bonnes performances.
+High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les photos.</value>
   </data>
   <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
     <value>Nearest Neighbor</value>
@@ -707,5 +708,8 @@ High Quality Cubic: Qualité maximale pour les images zoomées.</value>
   </data>
   <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
     <value>High Quality Cubic</value>
+  </data>
+  <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
+    <value>Anisotropic</value>
   </data>
 </root>

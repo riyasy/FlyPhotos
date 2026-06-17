@@ -695,9 +695,10 @@ Esc：关闭设置或退出应用</value>
     <value>图像缩放方法</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
-    <value>Nearest Neighbor: 像素艺术的最佳选择。
-Bilinear: 常规照片查看的推荐选择。
-High Quality Cubic: 放大图像的最高画质。</value>
+    <value>Nearest Neighbor – 仅用于像素艺术。保留清晰的像素边缘。
+Bilinear – 快速且平滑的图像缩放，适合一般查看。
+Anisotropic – 比 Bilinear 更清晰的效果，同时保持良好的性能。
+High Quality Cubic – 适合照片的最高质量缩放。</value>
   </data>
   <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
     <value>Nearest Neighbor</value>
@@ -707,5 +708,8 @@ High Quality Cubic: 放大图像的最高画质。</value>
   </data>
   <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
     <value>High Quality Cubic</value>
+  </data>
+  <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
+    <value>Anisotropic</value>
   </data>
 </root>
