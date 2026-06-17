@@ -43,7 +43,7 @@ internal partial class ThumbNailController : IThumbnailController
     private readonly PhotoSessionState _photoSessionState;
     private CanvasRenderTarget _thumbnailOffscreen;
     private ConcurrentDictionary<int, Photo> _photos;
-    private ConcurrentDictionary<int, byte> _previewDoneKeys;
+    private Func<int, bool> _isPreviewLoaded;
     private Func<IReadOnlyList<int>> _getSortedPhotoKeys;
     private CanvasBitmap _loadingIndicatorBitmap;
 
@@ -76,9 +76,9 @@ internal partial class ThumbNailController : IThumbnailController
         _photos = photos;
     }
 
-    public void SetPreviewDoneKeysReference(ConcurrentDictionary<int, byte> previewDoneKeys)
+    public void SetPreviewLoadedProbe(Func<int, bool> isPreviewLoaded)
     {
-        _previewDoneKeys = previewDoneKeys;
+        _isPreviewLoaded = isPreviewLoaded;
     }
 
     public void SetSortedPhotoKeysProvider(Func<IReadOnlyList<int>> provider)
@@ -282,7 +282,7 @@ internal partial class ThumbNailController : IThumbnailController
 
                 var key = keys[thumbnailPosition];
                 _photos.TryGetValue(key, out var photo);
-                if (_previewDoneKeys == null || !_previewDoneKeys.ContainsKey(key)) photo = null;
+                if (_isPreviewLoaded == null || !_isPreviewLoaded(key)) photo = null;
 
                 // Lazy-create the GPU bitmap on first draw. Pixels were rendered on the main canvas
                 // device during preview load; CreateFromBytes transfers them to the thumbnail device.
@@ -370,7 +370,7 @@ internal partial class ThumbNailController : IThumbnailController
         _loadingIndicatorBitmap = null;
         ThumbnailClicked = null;
         _photos = null;
-        _previewDoneKeys = null;
+        _isPreviewLoaded = null;
         _getSortedPhotoKeys = null;
     }
 }
