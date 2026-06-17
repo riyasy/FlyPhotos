@@ -19,6 +19,7 @@
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
 		<PublishAot>true</PublishAot>
+		<IlcOptimizationPreference>Speed</IlcOptimizationPreference>
 		<DefaultLanguage>en-US</DefaultLanguage>
 		<SatelliteResourceLanguages>en-US;de-DE;fr-FR;es-ES;ja-JP;ko-KR;it-IT;pl-PL;ru-RU;uk-UA;nl-NL;sv-SE;fi-FI;zh-CN;zh-TW;ml-IN;pt-PT;pt-BR;hu-HU</SatelliteResourceLanguages>
 		<!-- InvariantGlobalization>true</InvariantGlobalization -->
@@ -46,6 +47,7 @@
 		<ItemGroup>
 			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.MachineLearning.dll" />
 			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.Imaging.dll" />
+			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.Video.dll" />
 			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.Text.dll" />
 			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.ContentSafety.dll" />
 			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.AICapabilities.dll" />
@@ -55,6 +57,7 @@
 			<_FilesToRemove Include="$(PublishDir)onnxruntime.dll" />
 			<_FilesToRemove Include="$(PublishDir)DirectML.dll" />
 			<_FilesToRemove Include="$(PublishDir)NPUDetect.dll" />
+			<_FilesToRemove Include="$(PublishDir)PerceptiveStreaming.dll" />
 			<_FilesToRemove Include="$(PublishDir)workloads.*.json" />
 			<_FilesToRemove Include="$(PublishDir)workloads.json" />
 			<_FilesToRemove Include="$(PublishDir)Microsoft.Windows.AI.*.winmd" />
