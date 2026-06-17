@@ -1,6 +1,5 @@
 #nullable enable
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -29,12 +28,9 @@ internal partial class PhotoDisplayController
     private readonly TaskCompletionSource<bool> _firstPhotoLoadedTcs = new();
     private Photo _firstPhoto;
 
-    // Immutable-snapshot field. Written only on the UI thread (initial population + DeleteCurrentPhoto).
-    // Read on ThreadPool threads (the prefetch cache, ThumbNailController.RedrawThumbNailsIfNeeded).
-    // volatile ensures ThreadPool threads always see the latest reference; the list itself is never
-    // mutated after assignment, so readers that capture the reference can iterate without a lock.
-    private volatile IReadOnlyList<int> _sortedPhotoKeys = Array.Empty<int>();
-    private readonly ConcurrentDictionary<int, Photo> _photos = [];
+    // The photo collection: Photo objects + the sorted-key snapshot. Its concurrency model (a
+    // ConcurrentDictionary for lock-free reads + a volatile copy-on-write key snapshot) lives inside it.
+    private readonly PhotoList _photoList = new();
 
     // Owns all background loading (preview/HQ/disk tiers, threads, throttling, the sliding window,
     // disk write-back). The controller keeps the photo list and navigation; it drives the cache with
@@ -59,14 +55,13 @@ internal partial class PhotoDisplayController
         _thumbNailController = thumbNailController;
         _photoSessionState = photoSessionState;
 
-        _cache = new PrefetchCache(_photos, _d2dCanvas, IsContinuousKeyPress);
+        _cache = new PrefetchCache(_photoList.GetPhoto, _d2dCanvas, IsContinuousKeyPress);
         _cache.PreviewReady += OnPreviewReady;
         _cache.HqReady += OnHqReady;
         _cache.CacheStatusChanged += status => CacheStatusChanged?.Invoke(status);
 
-        _thumbNailController.SetPhotosReference(_photos);
+        _thumbNailController.SetPhotoProvider(_photoList);
         _thumbNailController.SetPreviewLoadedProbe(_cache.IsPreviewLoaded);
-        _thumbNailController.SetSortedPhotoKeysProvider(() => _sortedPhotoKeys);
         _firstPhoto = Photo.Empty();
 
         var thread = new Thread(() => { DoStartupActivities(_photoSessionState.FirstPhotoPath, _cts.Token); });
@@ -79,14 +74,14 @@ internal partial class PhotoDisplayController
     // single place that used to be UpgradeImageIfNeeded + the thumbnail redraw inside the loader.
     private void OnPreviewReady(int key)
     {
-        if (_photoSessionState.CurrentPhotoKey == key && _photos.TryGetValue(key, out var photo))
+        if (_photoSessionState.CurrentPhotoKey == key && _photoList.GetPhoto(key) is { } photo)
             UpgradeImageIfNeeded(photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
         _thumbNailController.RedrawThumbNailsIfNeeded(key);
     }
 
     private void OnHqReady(int key)
     {
-        if (_photoSessionState.CurrentPhotoKey == key && _photos.TryGetValue(key, out var photo))
+        if (_photoSessionState.CurrentPhotoKey == key && _photoList.GetPhoto(key) is { } photo)
             UpgradeImageIfNeeded(photo, DisplayLevel.Preview, DisplayLevel.Hq);
     }
 
@@ -131,16 +126,10 @@ internal partial class PhotoDisplayController
             // No folder or Explorer-window discovery is performed.
             IReadOnlyList<string> files = AppConfig.Volatile.IsSecondaryInstance ?
                 [selectedFilePath] : FileDiscovery.DiscoverFiles(selectedFilePath, _photoSessionState.FlyLaunchedExternally);
-            
+
             _photoSessionState.PhotosCount = files.Count;
 
-            var keys = new List<int>(files.Count);
-            for (int i = 0; i < files.Count; i++)
-            {
-                keys.Add(i);
-                _photos[i] = new Photo(files[i]);
-            }
-            _sortedPhotoKeys = keys; // publish the fully populated list atomically
+            _photoList.Initialize(files);
 
             _firstPhotoLoadedTcs.Task.Wait(token);
 
@@ -148,13 +137,13 @@ internal partial class PhotoDisplayController
             // In the starting Keys and Index will be same as the keys are continous.
             _photoSessionState.SetCurrentPhotoKeyAndListPosition(currentDisplayIndex, currentDisplayIndex);
 
-            _photos[_photoSessionState.CurrentPhotoKey] = _firstPhoto;
+            _photoList.Set(_photoSessionState.CurrentPhotoKey, _firstPhoto);
             _cache.SeedHqLoaded(_photoSessionState.CurrentPhotoKey);
-            _firstPhoto = Photo.Empty(); // release redundant field reference; _photos owns it now
+            _firstPhoto = Photo.Empty(); // release redundant field reference; _photoList owns it now
 
             _initialFileListingCompleted = true;
 
-            _cache.MoveWindow(_photoSessionState.CurrentPhotoListPosition, _sortedPhotoKeys, signalHqLoading: true);
+            _cache.MoveWindow(_photoSessionState.CurrentPhotoListPosition, _photoList.Keys, signalHqLoading: true);
             UpdateFileNameAndDetails();
 
             FirstPhotoLoaded?.Invoke();
@@ -190,7 +179,7 @@ internal partial class PhotoDisplayController
 
             Photo? photo;
             if (initialFileListingCompleted)
-                _photos.TryGetValue(currentKey, out photo);
+                photo = _photoList.GetPhoto(currentKey);
             else
                 photo = _firstPhoto;
 
@@ -204,7 +193,7 @@ internal partial class PhotoDisplayController
             {
                 var currentPosition = _photoSessionState.CurrentPhotoListPosition;
                 if (currentPosition < 0) return;
-                var totalFileCount = _sortedPhotoKeys.Count;
+                var totalFileCount = _photoList.Keys.Count;
                 positionText = $"[{currentPosition + 1}/{totalFileCount}]";
             }
 
@@ -234,7 +223,7 @@ internal partial class PhotoDisplayController
 
     public Task CopyFileToClipboardAsync()
     {
-        if (!_photos.TryGetValue(_photoSessionState.CurrentPhotoKey, out var photo))
+        if (_photoList.GetPhoto(_photoSessionState.CurrentPhotoKey) is not { } photo)
             return Task.CompletedTask;
         return PhotoClipboard.CopyToClipboardAsync(photo, _photoSessionState.CurrentDisplayLevel);
     }
@@ -242,7 +231,7 @@ internal partial class PhotoDisplayController
     public async Task Fly(NavDirection direction)
     {
         Interlocked.Increment(ref _keyPressCounter);
-        var keys = _sortedPhotoKeys;
+        var keys = _photoList.Keys;
         if (keys.Count <= 1) return;
         int currentPosition = _photoSessionState.CurrentPhotoListPosition;
         if (currentPosition < 0) return; // TODO Should not happen if state is consistent
@@ -254,21 +243,21 @@ internal partial class PhotoDisplayController
 
     public async Task FlyToFirst()
     {
-        var keys = _sortedPhotoKeys;
+        var keys = _photoList.Keys;
         if (keys.Count <= 1) return;
         await FlyTo(keys[0], 0, true);
     }
 
     public async Task FlyToLast()
     {
-        var keys = _sortedPhotoKeys;
+        var keys = _photoList.Keys;
         if (keys.Count <= 1) return;
         await FlyTo(keys[^1], keys.Count - 1, true);
     }
 
     public async Task FlyBy(int shiftBy)
     {
-        var keys = _sortedPhotoKeys;
+        var keys = _photoList.Keys;
         if (keys.Count <= 1) return;
         int currentPosition = _photoSessionState.CurrentPhotoListPosition;
         if (currentPosition < 0) return;
@@ -278,14 +267,14 @@ internal partial class PhotoDisplayController
 
     private async Task FlyTo(int toKey, int toPosition, bool triggerHqCaching)
     {
-        if (!_photos.ContainsKey(toKey)) return;
+        if (!_photoList.Contains(toKey)) return;
         _photoSessionState.SetCurrentPhotoKeyAndListPosition(toKey, toPosition);
         await DisplayPhotoAtKey(_photoSessionState.CurrentPhotoKey, triggerHqCaching);
     }
 
     public bool CanDeleteCurrentPhoto()
     {
-        if (_sortedPhotoKeys.Count == 0) return false;
+        if (_photoList.Keys.Count == 0) return false;
         if (IsContinuousKeyPress()) return false;
         if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq) return false;
         return true;
@@ -302,7 +291,7 @@ internal partial class PhotoDisplayController
             return new DeleteResult(false, false, "App - Inconsistent State");
         }
 
-        if (!_photos.TryGetValue(keyToDelete, out var photo))
+        if (_photoList.GetPhoto(keyToDelete) is not { } photo)
         {
             Logger.Error($"DeleteFileFromDiskAsync failed: Key {keyToDelete} not found in the collection.");
             return new DeleteResult(false, false, "App - Inconsistent State");
@@ -312,20 +301,15 @@ internal partial class PhotoDisplayController
         if (!delResult.DeleteSuccess) return delResult;
 
         // --- Step 2: Determine the Next Photo to Display ---
-        var currentKeys = _sortedPhotoKeys; // capture snapshot before mutating
+        var currentKeys = _photoList.Keys; // capture snapshot before mutating
         int nextPosition = (currentPosition >= currentKeys.Count - 1) ? currentPosition - 1 : currentPosition;
 
-        // --- Step 3: Remove the Photo from All In-Memory Collections ---
-        _photos.TryRemove(keyToDelete, out var deletedPhoto);
-        // Build a new immutable snapshot with the deleted entry removed, then publish atomically.
-        // ThreadPool readers that captured the old reference continue to see a consistent (stale) list;
-        // they will pick up the new snapshot on their next volatile read.
-        var updatedKeys = new List<int>(currentKeys);
-        updatedKeys.RemoveAt(currentPosition);
-        _sortedPhotoKeys = updatedKeys;
+        // --- Step 3: Remove from the collection (drops the dictionary entry and republishes the snapshot) ---
+        var deletedPhoto = _photoList.RemoveAt(currentPosition);
         _cache.Evict(keyToDelete);
 
         // --- Step 4: Navigate to the New Photo or Handle Empty State ---
+        var updatedKeys = _photoList.Keys;
         if (updatedKeys.Count > 0)
         {
             await FlyTo(updatedKeys[nextPosition], nextPosition, true);
@@ -346,7 +330,7 @@ internal partial class PhotoDisplayController
         var currentKey = _photoSessionState.CurrentPhotoKey;
         if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq
             && _cache.IsHqLoaded(currentKey)
-            && _photos.TryGetValue(currentKey, out var hqPhoto))
+            && _photoList.GetPhoto(currentKey) is { } hqPhoto)
             await SetSourceAsync(hqPhoto, DisplayLevel.Hq);
         _cache.SignalHqLoading();
         _keyPressCounter = 0;
@@ -354,7 +338,7 @@ internal partial class PhotoDisplayController
 
     private async Task DisplayPhotoAtKey(int key, bool triggerHqCaching)
     {
-        if (!_photos.TryGetValue(key, out var photo)) return;
+        if (_photoList.GetPhoto(key) is not { } photo) return;
 
         if (!IsContinuousKeyPress() && _cache.IsHqLoaded(key))
             await SetSourceAsync(photo, DisplayLevel.Hq);
@@ -363,14 +347,14 @@ internal partial class PhotoDisplayController
         else
             await SetSourceAsync(photo, DisplayLevel.PlaceHolder);
 
-        _cache.MoveWindow(_photoSessionState.CurrentPhotoListPosition, _sortedPhotoKeys, signalHqLoading: triggerHqCaching);
+        _cache.MoveWindow(_photoSessionState.CurrentPhotoListPosition, _photoList.Keys, signalHqLoading: triggerHqCaching);
     }
 
     private bool IsContinuousKeyPress() => _keyPressCounter > ContinuousPressThreshold;
 
-    public bool IsSinglePhoto() => _photos.Count <= 1;
+    public bool IsSinglePhoto() => _photoList.Count <= 1;
 
-    public string GetFullPathCurrentFile() => _photos[_photoSessionState.CurrentPhotoKey].FilePath;
+    public string GetFullPathCurrentFile() => _photoList[_photoSessionState.CurrentPhotoKey].FilePath;
 
     public void Dispose()
     {

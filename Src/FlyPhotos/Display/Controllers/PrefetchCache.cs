@@ -21,7 +21,7 @@ namespace FlyPhotos.Display.Controllers;
 /// navigation moves and ask it questions with <see cref="IsHqLoaded"/> / <see cref="IsPreviewLoaded"/>;
 /// it announces completions through the ready events. See CONTEXT.md for the vocabulary.
 ///
-/// The class does not own the photo list: it reads the shared <c>_photos</c> dictionary handed in at
+/// The class does not own the photo list: it resolves keys to photos through a delegate handed in at
 /// construction, and is told the key snapshot + centre on every <see cref="MoveWindow"/> call.
 /// </summary>
 internal sealed class PrefetchCache : IDisposable
@@ -52,8 +52,9 @@ internal sealed class PrefetchCache : IDisposable
     // Reused across SyncCacheTier calls — only touched on the UI/STA thread (inside MoveWindow).
     private readonly HashSet<int> _syncKeysToKeep = new();
 
-    // Read, not owned. The controller owns the canonical list and disposal timing.
-    private readonly ConcurrentDictionary<int, Photo> _photos;
+    // Resolves a key to its Photo (or null). Read-only access into the controller's PhotoList; the
+    // controller owns the collection and disposal timing.
+    private readonly Func<int, Photo?> _getPhoto;
     private readonly ICanvasResourceCreatorWithDpi _device;
 
     // True while the user is holding a navigation key. The HQ worker re-parks while this is set so it
@@ -74,11 +75,11 @@ internal sealed class PrefetchCache : IDisposable
     /// <summary>Fired with the formatted "left/total &lt; Cache &gt; right/total" status string.</summary>
     public event Action<string>? CacheStatusChanged;
 
-    public PrefetchCache(ConcurrentDictionary<int, Photo> photos,
+    public PrefetchCache(Func<int, Photo?> getPhoto,
                          ICanvasResourceCreatorWithDpi device,
                          Func<bool> isBursting)
     {
-        _photos = photos;
+        _getPhoto = getPhoto;
         _device = device;
         _isBursting = isBursting;
     }
@@ -237,7 +238,7 @@ internal sealed class PrefetchCache : IDisposable
         try
         {
             _previewTier.InFlight[key] = 0;
-            if (!_photos.TryGetValue(key, out var photo)) return;
+            if (_getPhoto(key) is not { } photo) return;
             await photo.LoadPreview(_device);
             _previewTier.Done[key] = 0;
             _previewTier.InFlight.Remove(key, out _);
@@ -253,7 +254,7 @@ internal sealed class PrefetchCache : IDisposable
         try
         {
             _hqTier.InFlight[key] = 0;
-            if (!_photos.TryGetValue(key, out var photo)) return;
+            if (_getPhoto(key) is not { } photo) return;
             await photo.LoadHq(_device);
             _hqTier.Done[key] = 0;
             _hqTier.InFlight.Remove(key, out _);
@@ -267,7 +268,7 @@ internal sealed class PrefetchCache : IDisposable
         try
         {
             if (_previewTier.Done.ContainsKey(key) &&
-                _photos.TryGetValue(key, out var image) &&
+                _getPhoto(key) is { } image &&
                 image.Preview?.Origin == Origin.Disk)
             {
                 var (actualWidth, actualHeight) = image.GetActualSize();
@@ -290,7 +291,7 @@ internal sealed class PrefetchCache : IDisposable
         foreach (int key in tier.Done.Keys)
             if (!_syncKeysToKeep.Contains(key))
             {
-                if (_photos.TryGetValue(key, out var photo))
+                if (_getPhoto(key) is { } photo)
                     disposeAction(photo);
                 tier.Done.TryRemove(key, out _);
             }

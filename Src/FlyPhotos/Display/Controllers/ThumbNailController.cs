@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Windows.Foundation;
 using Windows.Graphics.DirectX;
@@ -42,9 +41,8 @@ internal partial class ThumbNailController : IThumbnailController
     private readonly CanvasControl _d2dCanvasThumbNail;
     private readonly PhotoSessionState _photoSessionState;
     private CanvasRenderTarget _thumbnailOffscreen;
-    private ConcurrentDictionary<int, Photo> _photos;
+    private IPhotoProvider _provider;
     private Func<int, bool> _isPreviewLoaded;
-    private Func<IReadOnlyList<int>> _getSortedPhotoKeys;
     private CanvasBitmap _loadingIndicatorBitmap;
 
     public ThumbNailController(CanvasControl d2dCanvasThumbNail, PhotoSessionState photoSessionState)
@@ -71,19 +69,14 @@ internal partial class ThumbNailController : IThumbnailController
 
     // --- Public Methods ---
 
-    public void SetPhotosReference(ConcurrentDictionary<int, Photo> photos)
+    public void SetPhotoProvider(IPhotoProvider provider)
     {
-        _photos = photos;
+        _provider = provider;
     }
 
     public void SetPreviewLoadedProbe(Func<int, bool> isPreviewLoaded)
     {
         _isPreviewLoaded = isPreviewLoaded;
-    }
-
-    public void SetSortedPhotoKeysProvider(Func<IReadOnlyList<int>> provider)
-    {
-        _getSortedPhotoKeys = provider;
     }
 
     public void ShowHideThumbnailBasedOnSettings()
@@ -124,7 +117,7 @@ internal partial class ThumbNailController : IThumbnailController
     {
         // Capture the snapshot once — this method is called from a ThreadPool continuation and the
         // list may be swapped by DeleteCurrentPhoto on the UI thread at any moment.
-        var keys = _getSortedPhotoKeys?.Invoke();
+        var keys = _provider?.Keys;
         if (keys == null || keys.Count == 0) return;
 
         // Find the POSITION of the current and updated keys.
@@ -158,7 +151,7 @@ internal partial class ThumbNailController : IThumbnailController
         if (e.GetCurrentPoint(_d2dCanvasThumbNail).Properties.PointerUpdateKind
             is not Microsoft.UI.Input.PointerUpdateKind.LeftButtonPressed) return;
 
-        var keys = _getSortedPhotoKeys?.Invoke();
+        var keys = _provider?.Keys;
         if (keys == null || keys.Count <= 1) return;
 
         var pos = e.GetCurrentPoint(_d2dCanvasThumbNail).Position;
@@ -242,7 +235,7 @@ internal partial class ThumbNailController : IThumbnailController
 
         // Capture snapshot once for the entire draw pass — always called on the UI thread so no
         // race with DeleteCurrentPhoto, but a single capture avoids repeated volatile reads.
-        var keys = _getSortedPhotoKeys?.Invoke();
+        var keys = _provider?.Keys;
         if (keys == null || keys.Count < 1 || !_canDrawThumbnails || !AppConfig.Settings.ShowThumbnails)
         {
             _thumbnailOffscreen?.Dispose();
@@ -270,7 +263,7 @@ internal partial class ThumbNailController : IThumbnailController
         using var dsThumbNail = _thumbnailOffscreen.CreateDrawingSession();
         dsThumbNail.Clear(Colors.Transparent);
 
-        if (_photos != null)
+        if (_provider != null)
         {
             var startX = (int)_d2dCanvasThumbNail.ActualWidth / 2 - _thumbnailBoxSize / 2;
             var startY = 0;
@@ -281,7 +274,7 @@ internal partial class ThumbNailController : IThumbnailController
                 if (thumbnailPosition < 0 || thumbnailPosition >= keys.Count) continue;
 
                 var key = keys[thumbnailPosition];
-                _photos.TryGetValue(key, out var photo);
+                var photo = _provider.GetPhoto(key);
                 if (_isPreviewLoaded == null || !_isPreviewLoaded(key)) photo = null;
 
                 // Lazy-create the GPU bitmap on first draw. Pixels were rendered on the main canvas
@@ -369,8 +362,7 @@ internal partial class ThumbNailController : IThumbnailController
         _loadingIndicatorBitmap?.Dispose();
         _loadingIndicatorBitmap = null;
         ThumbnailClicked = null;
-        _photos = null;
+        _provider = null;
         _isPreviewLoaded = null;
-        _getSortedPhotoKeys = null;
     }
 }
