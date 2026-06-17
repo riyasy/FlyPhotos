@@ -293,8 +293,6 @@ public partial class OpacityFader : IDisposable
     {
         if (_disposed) return;
         _disposed = true;
-        if (_isFaded)
-            FadeTo(1.0f, TimeSpan.Zero);
         Detach();
         GC.SuppressFinalize(this);
     }
