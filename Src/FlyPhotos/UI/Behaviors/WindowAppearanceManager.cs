@@ -427,7 +427,25 @@ namespace FlyPhotos.UI.Behaviors
                 }
             };
 
-            var factory = compositor.CreateEffectFactory(effect, ["TintColor.Color"]);
+            // The animatable-properties argument MUST stay a concrete string[].
+            //
+            // CreateEffectFactory's second parameter is IEnumerable<string>, which crosses the
+            // WinRT ABI as IIterable<HSTRING>; CsWinRT has to wrap it in a CCW that the native
+            // composition engine iterates lazily during brush creation. A real string[] uses
+            // CsWinRT's built-in, statically-rooted array marshaler. An untargeted collection
+            // expression (CreateEffectFactory(effect, ["TintColor.Color"])) does NOT infer
+            // string[] — it materializes a compiler-synthesized read-only wrapper
+            // (<>z__ReadOnlyArray<string>) whose IEnumerable<string> CCW vtable is not rooted
+            // under PublishAot + trimming. The missing marshaling artifact crashes the app when
+            // the Frozen backdrop's effect factory is realized (this is the only path that hits
+            // CreateEffectFactory with animatable properties).
+            //
+            // ReSharper / VS will suggest "simplify to a collection expression" here. Do NOT take
+            // the inline form. If you want collection-expression syntax, keep the explicit array
+            // target below — `string[] x = [...]` still emits a real array, which is safe.
+            string[] animatableProperties = ["TintColor.Color"];
+            var factory = compositor.CreateEffectFactory(effect, animatableProperties);
+
             var brush = factory.CreateBrush();
             brush.SetSourceParameter("Backdrop", hostBackdrop);
 
