@@ -174,14 +174,8 @@ internal partial class PhotoDisplayController
         try
         {
             var initialFileListingCompleted = _initialFileListingCompleted;
-
             var currentKey = _photoSessionState.CurrentPhotoKey;
-
-            Photo? photo;
-            if (initialFileListingCompleted)
-                photo = _photoList.GetPhoto(currentKey);
-            else
-                photo = _firstPhoto;
+            var photo = initialFileListingCompleted ? _photoList.GetPhoto(currentKey) : _firstPhoto;
 
             if (photo == null) return;
 
