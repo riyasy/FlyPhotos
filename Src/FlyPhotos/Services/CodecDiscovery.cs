@@ -169,9 +169,9 @@ internal static class CodecDiscovery
 
     }
 
-    // Native-load-free equivalent of GetImageMagickCodecs. Unline GetImageMagickCodecs,
+    // Native-load-free equivalent of GetImageMagickCodecs. Unlike GetImageMagickCodecs,
     // this method does not call MagickNET.SupportedFormats, which would cause native DLLs
-    // to be loaded. This may say a few milliseconds on startup.
+    // to be loaded. This may save a few milliseconds on startup.
     private static CodecInfo GetImageMagickCodecs_StaticSnapShot(string[] imageMagickExtensionsToCheck)
     {
         var magickExtensions = new List<string>();
