@@ -683,10 +683,10 @@ Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാ
     <value>വിൻഡോ ബട്ടണുകൾ സ്വയമേവ മറയ്ക്കുക</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>വിൻഡോ നീക്കുന്നതിനായി Ctrl അമർത്തിപ്പിടിച്ചുകൊണ്ട് ചിത്രം ഡ്രാഗ് ചെയ്യുക.</value>
+    <value>പശ്ചാത്തലം ഡ്രാഗ് ചെയ്യുക, അല്ലെങ്കിൽ Ctrl കീ അമർത്തിപ്പിടിച്ച് ചിത്രം ഡ്രാഗ് ചെയ്ത് വിൻഡോ നീക്കുക.</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>വിൻഡോ മാറ്റാൻ Ctrl+drag ചെയ്യുക</value>
+    <value>വിൻഡോ നീക്കാൻ ഡ്രാഗ് ചെയ്യുക</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>ഇമേജ് സ്കെയിലിംഗ് രീതി</value>

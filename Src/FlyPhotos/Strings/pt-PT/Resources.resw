@@ -686,10 +686,10 @@ Esc : Fechar Definições ou sair da aplicação</value>
     <value>Ocultar automaticamente os botões da janela</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Mantenha premido Ctrl e arraste a imagem para mover a janela.</value>
+    <value>Arraste o fundo ou mantenha Ctrl premido e arraste a imagem para mover a janela.</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Ctrl+arrastar para mover a janela</value>
+    <value>Arrastar para mover a janela</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Método de dimensionamento de imagem</value>

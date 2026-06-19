@@ -686,10 +686,10 @@ Esc : Cerrar ajustes o Salir</value>
     <value>Ocultar automáticamente los botones de la ventana</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Mantenga pulsado Ctrl y arrastre la imagen para mover la ventana.</value>
+    <value>Arrastre el fondo o mantenga Ctrl y arrastre la imagen para mover la ventana.</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Ctrl+arrastrar para mover la ventana</value>
+    <value>Arrastrar para mover la ventana</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Método de escala de imagen</value>

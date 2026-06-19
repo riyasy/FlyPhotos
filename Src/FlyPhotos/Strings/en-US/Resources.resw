@@ -686,10 +686,10 @@ Esc : Close Settings or Exit App</value>
     <value>Automatically hide caption buttons</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Hold Ctrl and drag the image to move the window.</value>
+    <value>Drag background or Ctrl+drag image to move the window.</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Ctrl+drag to move window</value>
+    <value>Drag to move window</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Image scaling method</value>

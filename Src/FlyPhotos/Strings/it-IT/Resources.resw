@@ -686,10 +686,10 @@ Esc : Chiudi impostazioni o Esci</value>
     <value>Nascondi automaticamente i pulsanti della finestra</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Tieni premuto Ctrl e trascina l'immagine per spostare la finestra.</value>
+    <value>Trascina lo sfondo oppure tieni premuto Ctrl e trascina l'immagine per spostare la finestra.</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Ctrl+trascinamento per spostare la finestra</value>
+    <value>Trascinare per spostare la finestra</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Metodo di ridimensionamento immagine</value>

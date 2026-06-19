@@ -686,10 +686,10 @@ Esc：關閉設定或離開應用程式</value>
     <value>自動隱藏視窗按鈕</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>按住 Ctrl 鍵並拖曳圖片即可移動視窗。</value>
+    <value>拖曳背景或按住 Ctrl 鍵拖曳圖片即可移動視窗。</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Ctrl+拖曳以移動視窗</value>
+    <value>拖曳以移動視窗</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>圖片縮放方法</value>

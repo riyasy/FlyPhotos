@@ -685,10 +685,10 @@ Esc : Beállítások bezárása vagy alkalmazás kilépése</value>
     <value>Címsor gombok automatikus elrejtése</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Tartsa lenyomva a Ctrl-t, és húzza a képet az ablak mozgatásához.</value>
+    <value>Húzza a hátteret, vagy tartsa lenyomva a Ctrl-t, és húzza a képet az ablak mozgatásához.</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Ctrl + húzás az ablak mozgatásához</value>
+    <value>Húzás az ablak mozgatásához</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Képskálázási módszer</value>

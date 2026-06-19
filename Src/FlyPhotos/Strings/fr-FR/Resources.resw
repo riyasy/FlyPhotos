@@ -686,10 +686,10 @@ Esc : Fermer les paramètres ou Quitter</value>
     <value>Masquer automatiquement les boutons de la fenêtre</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Maintenez la touche Ctrl enfoncée et glissez l'image pour déplacer la fenêtre.</value>
+    <value>Faites glisser l'arrière-plan ou maintenez la touche Ctrl enfoncée et faites glisser l'image pour déplacer la fenêtre.</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Ctrl+glisser pour déplacer la fenêtre</value>
+    <value>Faire glisser pour déplacer la fenêtre</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Méthode de mise à l'échelle de l'image</value>

@@ -686,10 +686,10 @@ Esc : Sulje asetukset tai Poistu</value>
     <value>Piilota ikkunapainikkeet automaattisesti</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Pidä Ctrl-näppäintä painettuna ja vedä kuvaa siirtääksesi ikkunaa.</value>
+    <value>Vedä taustaa tai pidä Ctrl-näppäintä painettuna ja vedä kuvaa siirtääksesi ikkunaa.</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Ctrl+vetäminen ikkunan siirtämiseksi</value>
+    <value>Vetäminen ikkunan siirtämiseksi</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Kuvien skaalaustapa</value>
