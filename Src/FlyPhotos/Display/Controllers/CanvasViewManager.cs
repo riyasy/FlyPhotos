@@ -138,6 +138,13 @@ internal class CanvasViewManager
     private readonly CanvasViewState _canvasViewState;
     private float _zoomTargetScale;
     private Point _zoomCenter;
+    // Anchored-zoom (SpringZoom) state: the PURE anchor track (pan tied to scale every frame, with NO grid
+    // offset baked in so it can't feed back and accumulate) and the constant ≤0.5 px grid-alignment offset
+    // that is blended into the displayed pan over the settle tail.
+    private double _anchorPosX;
+    private double _anchorPosY;
+    private double _zoomGridOffsetX;
+    private double _zoomGridOffsetY;
     private Point _shrugStartPosition;
     private Point _panTargetPosition;
     private int _originalImageRotation;
@@ -817,12 +824,13 @@ internal class CanvasViewManager
         var originalRotationNormalized = ((_originalImageRotation % 360) + 360) % 360;
         var isDefaultRotation = currentRotationNormalized == originalRotationNormalized;
 
-        // 4. Check if the pan position is centered on the canvas. A tolerance of 0.5 pixels
-        // is used to account for potential floating point inaccuracies.
+        // 4. Check if the pan position is centered on the canvas. A tolerance of 1 pixel covers float
+        // inaccuracy AND the ≤0.5 px pixel-grid alignment applied to the settled fit/centre position
+        // (the resting ImagePos can sit just off exact centre so the composed translation lands on the grid).
         var canvasCenterX = canvasSize.Width / 2.0;
         var canvasCenterY = canvasSize.Height / 2.0;
-        var isDefaultPan = Math.Abs(_canvasViewState.ImagePos.X - canvasCenterX) < 0.5 &&
-                           Math.Abs(_canvasViewState.ImagePos.Y - canvasCenterY) < 0.5;
+        var isDefaultPan = Math.Abs(_canvasViewState.ImagePos.X - canvasCenterX) < 1.0 &&
+                           Math.Abs(_canvasViewState.ImagePos.Y - canvasCenterY) < 1.0;
 
         // 5. The view is considered "default" only if scale, rotation, AND pan match the default state.
         if (isDefaultScale && isDefaultRotation && isDefaultPan)
@@ -863,9 +871,32 @@ internal class CanvasViewManager
     /// </summary>
     private void StartZoomAnimation(float targetScale, Point zoomAnchor)
     {
+        // A fresh anchored zoom seeds its pure anchor track from the live (already grid-aligned) position;
+        // a re-target keeps the existing track so the constant grid offset never feeds back and accumulates.
+        var fresh = _currentAnimation != AnimationType.SpringZoom;
         SeedScaleSpringIfFresh();
         _zoomTargetScale = targetScale;
         _zoomCenter = zoomAnchor;
+        if (fresh)
+        {
+            _anchorPosX = _canvasViewState.ImagePos.X;
+            _anchorPosY = _canvasViewState.ImagePos.Y;
+        }
+
+        // Precompute the constant grid-alignment offset δ (≤0.5 px/axis): take where the exact-anchor zoom
+        // would settle (P_anchor = zoomCenter − targetScale·u, u being the invariant image-space anchor
+        // offset), nudge it so the composed translation lands on whole pixels, and store the difference.
+        // AnimateSpringZoom blends this in over the settle tail so the resting frame is grid-clean.
+        var startScale = _canvasViewState.Scale;
+        if (startScale > 0f)
+        {
+            var ux = (_zoomCenter.X - _anchorPosX) / startScale;
+            var uy = (_zoomCenter.Y - _anchorPosY) / startScale;
+            var anchorFinal = new Point(_zoomCenter.X - targetScale * ux, _zoomCenter.Y - targetScale * uy);
+            var aligned = _canvasViewState.SnapImagePosToPixelGrid(targetScale, anchorFinal);
+            _zoomGridOffsetX = aligned.X - anchorFinal.X;
+            _zoomGridOffsetY = aligned.Y - anchorFinal.Y;
+        }
 
         _currentAnimation = AnimationType.SpringZoom;
         PanZoomAnimationOnGoing = true; // setter turns OFF snapping for the duration of the spring
@@ -900,7 +931,10 @@ internal class CanvasViewManager
             _springPanVelocityY = 0f;
         }
         _zoomTargetScale = targetScale;
-        _panTargetPosition = targetPosition;
+        // Land the settled pan on the device-pixel grid so the at-rest snap is a no-op (no end-of-zoom
+        // shift). Only the centred pan+zoom targets (fit / 100% / centred step / launch / exit) are
+        // pre-aligned here; anchored wheel/keyboard zoom keeps its exact per-frame anchor (SpringZoom).
+        _panTargetPosition = _canvasViewState.SnapImagePosToPixelGrid(targetScale, targetPosition);
         _springPanZoomTargetCanvasSize = targetCanvasSize;
 
         _currentAnimation = AnimationType.SpringPanAndZoom;
@@ -998,14 +1032,18 @@ internal class CanvasViewManager
         switch (_currentAnimation)
         {
             case AnimationType.SpringZoom:
-                // Final anchor-preserving step to the exact target scale.
+                // Jump the pure anchor track to the exact target scale, then apply the full grid offset so
+                // the forced-stop resting frame lands grid-clean (matches a natural settle).
                 var oldScale = _canvasViewState.Scale;
                 if (oldScale > 0)
                 {
-                    _canvasViewState.ImagePos.X = _zoomCenter.X - (_zoomTargetScale / oldScale) * (_zoomCenter.X - _canvasViewState.ImagePos.X);
-                    _canvasViewState.ImagePos.Y = _zoomCenter.Y - (_zoomTargetScale / oldScale) * (_zoomCenter.Y - _canvasViewState.ImagePos.Y);
+                    var ratio = _zoomTargetScale / oldScale;
+                    _anchorPosX = _zoomCenter.X - ratio * (_zoomCenter.X - _anchorPosX);
+                    _anchorPosY = _zoomCenter.Y - ratio * (_zoomCenter.Y - _anchorPosY);
                 }
                 _canvasViewState.Scale = _zoomTargetScale;
+                _canvasViewState.ImagePos.X = _anchorPosX + _zoomGridOffsetX;
+                _canvasViewState.ImagePos.Y = _anchorPosY + _zoomGridOffsetY;
                 _canvasViewState.UpdateTransform();
                 break;
             case AnimationType.SpringPanAndZoom:
@@ -1068,11 +1106,24 @@ internal class CanvasViewManager
             newScale = (float)Math.Exp(_springCurrentLogScale);
         }
 
-        // Keep the zoom anchor stationary as the scale changes (ratio of new to previous scale).
+        // Advance the PURE anchor track: pan tied to scale (ratio of new to previous scale) so the zoom
+        // anchor stays pinned every frame with zero wobble. The track never includes the grid offset, so
+        // it can't feed back into itself and drift.
         var oldScale = _canvasViewState.Scale;
-        _canvasViewState.ImagePos.X = _zoomCenter.X - (newScale / oldScale) * (_zoomCenter.X - _canvasViewState.ImagePos.X);
-        _canvasViewState.ImagePos.Y = _zoomCenter.Y - (newScale / oldScale) * (_zoomCenter.Y - _canvasViewState.ImagePos.Y);
+        var ratio = newScale / oldScale;
+        _anchorPosX = _zoomCenter.X - ratio * (_zoomCenter.X - _anchorPosX);
+        _anchorPosY = _zoomCenter.Y - ratio * (_zoomCenter.Y - _anchorPosY);
         _canvasViewState.Scale = newScale;
+
+        // Blend the constant ≤0.5 px grid-alignment offset in over the settle tail: w = 0 through the bulk
+        // of the zoom (anchor pinned exactly), ramping to 1 at settle so the resting frame lands on the
+        // device-pixel grid (the at-rest snap is then a no-op). No start jump, no end snap; the only drift
+        // is this ≤0.5 px glide near the very end.
+        var w = settled
+            ? 1.0
+            : Math.Clamp(1.0 - Math.Abs(_springCurrentLogScale - targetLog) / Constants.ZoomGridAlignBlendRangeLog, 0.0, 1.0);
+        _canvasViewState.ImagePos.X = _anchorPosX + w * _zoomGridOffsetX;
+        _canvasViewState.ImagePos.Y = _anchorPosY + w * _zoomGridOffsetY;
         _canvasViewState.UpdateTransform();
         ViewChanged?.Invoke();
         if (!_suppressZoomUpdateForNextAnimation) ZoomChanged?.Invoke();
