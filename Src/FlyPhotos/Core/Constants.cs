@@ -4,7 +4,7 @@ namespace FlyPhotos.Core;
 
 internal static class Constants
 {
-    public const string AppVersion = "2.6.3";
+    public const string AppVersion = "2.6.4";
 
     // ───────────────────────── Pan / Zoom animation ─────────────────────────
     // The full model is documented on CanvasViewManager. In short: every user-triggered zoom/pan is a
