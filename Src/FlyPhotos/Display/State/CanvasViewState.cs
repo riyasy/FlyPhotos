@@ -31,27 +31,21 @@ internal class CanvasViewState
     public void UpdateTransform()
     {
         Mat = Matrix3x2.Identity;
-
-        // Centering translation. Round to whole pixels when snapping (at rest) to avoid subpixel rendering.
-        // This term is constant for a given image, so it never contributes to settle-shiver; gating it keeps
-        // the matrix fully unsnapped during animation for consistency.
-        float translateX1 = SnapTranslation ? MathF.Round((float)(-ImageRect.Width * 0.5f)) : (float)(-ImageRect.Width * 0.5f);
-        float translateY1 = SnapTranslation ? MathF.Round((float)(-ImageRect.Height * 0.5f)) : (float)(-ImageRect.Height * 0.5f);
-        Mat *= Matrix3x2.CreateTranslation(translateX1, translateY1);
-
-        // Scale operation remains unchanged
+        Mat *= Matrix3x2.CreateTranslation((float)(-ImageRect.Width * 0.5f), (float)(-ImageRect.Height * 0.5f));
         Mat *= Matrix3x2.CreateScale(Scale, Scale);
-
-        // Rotation remains unchanged
         Mat *= Matrix3x2.CreateRotation((float)(Math.PI * Rotation / 180f));
+        Mat *= Matrix3x2.CreateTranslation((float)ImagePos.X, (float)ImagePos.Y);
 
-        // Pan translation. Per-frame rounding of this term during an animation is what causes the
-        // settle-shiver, so round only when settled (SnapTranslation == true); see SnapTranslation.
-        float translateX2 = SnapTranslation ? MathF.Round((float)ImagePos.X) : (float)ImagePos.X;
-        float translateY2 = SnapTranslation ? MathF.Round((float)ImagePos.Y) : (float)ImagePos.Y;
-        Mat *= Matrix3x2.CreateTranslation(translateX2, translateY2);
+        // Snap the final screen-space translation to whole pixels to avoid the NVIDIA nearest-neighbour
+        // glitch (#55). Snapping pre-scale terms amplifies the rounding by Scale (e.g. ±10 px at 2000%),
+        // so we snap Mat.M31/M32 after full composition — always exactly ±0.5 screen px regardless of zoom.
+        // SnapTranslation is cleared during animations to prevent a 1-px staircase shiver in the settle tail.
+        if (SnapTranslation)
+        {
+            Mat.M31 = MathF.Round(Mat.M31);
+            Mat.M32 = MathF.Round(Mat.M32);
+        }
 
-        // Calculate inverse transform
         Matrix3x2.Invert(Mat, out MatInv);
     }
 }
