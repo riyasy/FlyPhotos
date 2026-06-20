@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Windows.Foundation;
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
@@ -33,9 +32,10 @@ namespace FlyPhotos.Display.Controllers;
 /// </list>
 /// Pan, rotate, and precision-touchpad zoom are applied directly (no animation).</para>
 ///
-/// <para><b>Spring physics.</b> Each axis is a damped harmonic oscillator integrated per frame in
-/// <see cref="StepSpringAxis"/> (<c>accel = -k·displacement - c·velocity</c>), with <c>k</c>/<c>c</c> from
-/// <see cref="Constants.SpringStiffness"/>/<see cref="Constants.SpringDamping"/>. Key choices:
+/// <para><b>Spring physics.</b> Each axis is a damped harmonic oscillator (a <see cref="SpringAxis"/>)
+/// integrated per frame in <see cref="SpringAxis.Step"/> (<c>accel = -k·displacement - c·velocity</c>), with
+/// <c>k</c>/<c>c</c> from <see cref="Constants.SpringStiffness"/>/<see cref="Constants.SpringDamping"/>.
+/// Scale is one <see cref="SpringAxis"/> (in log space), pan X/Y two more. Key choices:
 /// <list type="bullet">
 ///   <item><b>Scale springs in LOG space</b> (and is rebuilt via <c>exp</c>): zoom is perceived
 ///     multiplicatively, so log space gives a uniform perceived rate and can never reach ≤ 0. Pan springs
@@ -45,8 +45,8 @@ namespace FlyPhotos.Display.Controllers;
 ///     — e.g. the first frame after launch — can't make one Euler step overshoot. This is pure math; the
 ///     canvas still draws once per frame. It also makes the motion frame-rate-independent (50 Hz vs 180 Hz
 ///     differ only in smoothness, not duration/path).</item>
-///   <item><b>Output-only spring state</b> (the <c>_springCurrent*</c> fields): the spring WRITES scale/pan
-///     into <see cref="CanvasViewState"/> each tick and never reads them back, so an external mid-flight
+///   <item><b>Output-only spring state</b> (each <see cref="SpringAxis"/>'s Position/Velocity): the spring
+///     WRITES scale/pan into <see cref="CanvasViewState"/> each tick and never reads them back, so an external mid-flight
 ///     write can't perturb it. State is seeded from the live view only when starting fresh
 ///     (<see cref="SeedScaleSpringIfFresh"/>); a running spring keeps its velocity so re-targets (e.g. rapid
 ///     wheel notches) stay continuous instead of restarting with a lurch.</item>
@@ -155,12 +155,9 @@ internal class CanvasViewManager
     // tween is, by recomputing from a captured start). Scale runs in LOG space for a uniform perceived
     // zoom rate; pan runs in linear (pixel) space.
     private double _lastSpringElapsedMs;
-    private float _springCurrentLogScale;
-    private float _springLogScaleVelocity;
-    private float _springCurrentPanX;
-    private float _springCurrentPanY;
-    private float _springPanVelocityX;
-    private float _springPanVelocityY;
+    private readonly SpringAxis _scaleSpring = new();   // springs LOG(scale)
+    private readonly SpringAxis _panXSpring = new();    // springs ImagePos.X (pixels)
+    private readonly SpringAxis _panYSpring = new();    // springs ImagePos.Y (pixels)
     private Size _springPanZoomTargetCanvasSize;
 
     // --- State Management Properties ---
@@ -294,8 +291,8 @@ internal class CanvasViewManager
             _canvasViewState.Rotation += imageRotation - _originalImageRotation;
             _originalImageRotation = imageRotation;
 
-            var oldFitScale = CalculateScreenFitScale(canvasSize, oldImageSize, oldRotation);
-            var newFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+            var oldFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, oldImageSize, oldRotation);
+            var newFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
             var scaleRatio = oldFitScale > 0 ? newFitScale / oldFitScale : 1f;
 
             if (animating)
@@ -381,7 +378,7 @@ internal class CanvasViewManager
     /// </summary>
     private void SetDefaultView(Size imageSize, int imageRotation, Size canvasSize, bool isFirstPhotoEver)
     {
-        var defaultFitScale = CalculateScreenFitScale(canvasSize, imageSize, imageRotation);
+        var defaultFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, imageRotation);
         var initialScale = AppConfig.Settings.StretchSmallImages ? defaultFitScale : Math.Min(defaultFitScale, 1.0f);
 
         _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
@@ -431,7 +428,7 @@ internal class CanvasViewManager
         _canvasViewState.ImagePos = new Point(canvasSize.Width / 2.0 + panOffsetX, canvasSize.Height / 2.0 + panOffsetY);
 
         // Recalculate fitted/1:1 flags. Must check both scale AND pan: a panned-at-fit-scale photo is not "fitted".
-        var fitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+        var fitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
         IsFittedToScreen = Math.Abs(_canvasViewState.Scale - fitScale) < ScaleTolerance
                            && Math.Abs(normalizedPanX) < 0.001
                            && Math.Abs(normalizedPanY) < 0.001;
@@ -447,7 +444,7 @@ internal class CanvasViewManager
     {
         if (IsFittedToScreen)
         {
-            var newScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+            var newScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
             _canvasViewState.Scale = newScale;
             _canvasViewState.LastScaleTo = newScale;
             _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
@@ -475,7 +472,7 @@ internal class CanvasViewManager
         {
             // If the image is fitted, recalculate the fit for the new window size.
             var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
-            var newScale = CalculateScreenFitScale(newSize, imageSize, _canvasViewState.Rotation);
+            var newScale = ZoomGeometry.CalculateScreenFitScale(newSize, imageSize, _canvasViewState.Rotation);
 
             _canvasViewState.Scale = newScale;
             _canvasViewState.LastScaleTo = newScale;
@@ -505,41 +502,6 @@ internal class CanvasViewManager
     /// </summary>
     private const float ScaleTolerance = 0.001f;
 
-    /// <summary>
-    /// The core anchored-zoom primitive: returns the pan (image-centre) position that keeps the screen point
-    /// <paramref name="anchor"/> over the same image pixel when the scale changes from <paramref name="oldScale"/>
-    /// to <paramref name="newScale"/>. Used by every cursor/anchor-preserving zoom path.
-    /// </summary>
-    private static Point AnchorPreservingPan(Point anchor, Point currentPos, float oldScale, float newScale)
-    {
-        var k = newScale / oldScale;
-        return new Point(anchor.X - k * (anchor.X - currentPos.X),
-                         anchor.Y - k * (anchor.Y - currentPos.Y));
-    }
-
-    private static readonly float[] ZoomSnapPoints = [0.5f, 1.0f, 2.0f, 5.0f, 10.0f];
-
-    private static float ApplyZoomSnap(float newScale, float oldScale, ZoomDirection direction)
-    {
-        if (direction == ZoomDirection.In)
-        {
-            float? snap = ZoomSnapPoints
-                .Where(s => s > oldScale && s <= newScale)
-                .Cast<float?>()
-                .FirstOrDefault();
-            if (snap.HasValue) return snap.Value;
-        }
-        else
-        {
-            float? snap = ZoomSnapPoints
-                .Where(s => s < oldScale && s >= newScale)
-                .Cast<float?>()
-                .LastOrDefault();
-            if (snap.HasValue) return snap.Value;
-        }
-        return newScale;
-    }
-
     public void ZoomAtCenter(ZoomDirection zoomDirection, Size canvasSize) =>
         ZoomAtPoint(zoomDirection, new Point(canvasSize.Width / 2, canvasSize.Height / 2));
 
@@ -551,7 +513,7 @@ internal class CanvasViewManager
         var scalePercentage = (zoomDirection == ZoomDirection.In) ? 1.25f : 0.8f;
         var rawScaleTo = _canvasViewState.LastScaleTo * scalePercentage;
         var scaleTo = AppConfig.Settings.StickyZoomLevels
-            ? ApplyZoomSnap(rawScaleTo, _canvasViewState.LastScaleTo, zoomDirection)
+            ? ZoomGeometry.ApplyZoomSnap(rawScaleTo, _canvasViewState.LastScaleTo, zoomDirection)
             : rawScaleTo;
         if (scaleTo < 0.05) return;
         _canvasViewState.LastScaleTo = scaleTo;
@@ -582,7 +544,7 @@ internal class CanvasViewManager
         // 1. Capture the scale *before* it's changed.
         float oldScale = _canvasViewState.Scale;
         // 2. Calculate the new position so the cursor anchor stays put as the scale changes.
-        var newPos = AnchorPreservingPan(zoomAnchor, _canvasViewState.ImagePos, oldScale, newScale);
+        var newPos = ZoomGeometry.AnchorPreservingPan(zoomAnchor, _canvasViewState.ImagePos, oldScale, newScale);
         // 3. Now, update the state with the new values.
         _canvasViewState.Scale = newScale;
         _canvasViewState.LastScaleTo = newScale; // Keep LastScaleTo in sync
@@ -608,9 +570,8 @@ internal class CanvasViewManager
     {
         // 1. Establish the ordered list of zoom stops, including the dynamic "screen fit" size.
         var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
-        var screenFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
-        var zoomStops = new List<float> { screenFitScale, 1.0f, 4.0f }
-            .Distinct().OrderBy(s => s).ToList();
+        var screenFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+        var zoomStops = ZoomGeometry.BuildZoomStops(screenFitScale);
 
         // 2. Find the index of the next logical stop based on the current scale and direction.
         const float tolerance = ScaleTolerance;
@@ -663,7 +624,7 @@ internal class CanvasViewManager
     public void ZoomPanToFit(bool animateChange, Size imageSize, Size canvasSize)
     {
         // This is the EXPLICIT user action, so it DOES upscale small images.
-        var scaleFactor = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+        var scaleFactor = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
 
         if (!animateChange)
         {
@@ -702,7 +663,7 @@ internal class CanvasViewManager
 
         // Set state immediately. The view is fitted only if 100% happens to be the fit scale.
         var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
-        var screenFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+        var screenFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
         IsFittedToScreen = Math.Abs(1.0f - screenFitScale) < ScaleTolerance;
         IsAtOneToOne = true;
         _isStateModifiedByUser = true;
@@ -727,12 +688,12 @@ internal class CanvasViewManager
         }
         else
         {
-            var targetPos = AnchorPreservingPan(anchor, _canvasViewState.ImagePos, oldScale, targetScale);
+            var targetPos = ZoomGeometry.AnchorPreservingPan(anchor, _canvasViewState.ImagePos, oldScale, targetScale);
             StartSpringPanAndZoomAnimation(targetScale, targetPos, canvasSize);
         }
 
         var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
-        var screenFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+        var screenFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
         IsFittedToScreen = Math.Abs(targetScale - screenFitScale) < ScaleTolerance;
         IsAtOneToOne = true;
         _isStateModifiedByUser = true;
@@ -788,38 +749,6 @@ internal class CanvasViewManager
     // --- Helper & Animation Methods ---
 
     /// <summary>
-    /// Calculates the scale factor required to fit an image fully within the canvas.
-    /// This calculation considers three key factors:
-    /// 1.  The current rotation of the image (e.g., a tall image rotated 90 degrees becomes wide).
-    /// 2.  The dimensions of the canvas area available for display.
-    /// 3.  A user-configurable padding percentage (`ImageFitPercentage`) that reduces the effective canvas area.
-    /// The function determines whether to fit the image based on its width or height, choosing the
-    /// scale that ensures the entire image remains visible.
-    /// </summary>
-    private static float CalculateScreenFitScale(Size canvasSize, Size imageSize, int imageRotation)
-    {
-        // Determine if the image is rotated to a vertical orientation (e.g., 90 or 270 degrees).
-        var isVertical = (imageRotation % 180) != 0;
-
-        // Calculate the "effective" dimensions of the image after rotation.
-        // If vertical, the original width becomes the new height, and vice-versa.
-        var effectiveWidth = isVertical ? imageSize.Height : imageSize.Width;
-        var effectiveHeight = isVertical ? imageSize.Width : imageSize.Height;
-
-        // Calculate the usable canvas dimensions, applying the padding from user settings.
-        var paddedCanvasWidth = canvasSize.Width * (AppConfig.Settings.ImageFitPercentage / 100.0f);
-        var paddedCanvasHeight = canvasSize.Height * (AppConfig.Settings.ImageFitPercentage / 100.0f);
-
-        // Determine the scale factor needed to fit the image horizontally and vertically.
-        var horizontalScale = paddedCanvasWidth / effectiveWidth;
-        var verticalScale = paddedCanvasHeight / effectiveHeight;
-
-        // Return the smaller of the two scale factors. This ensures that the image fits
-        // completely on the canvas without being cropped on either axis.
-        return (float)Math.Min(horizontalScale, verticalScale);
-    }
-
-    /// <summary>
     /// Checks if the current view state matches the photo's default view. If it does,
     /// it resets the modified flag and removes the photo from the cache.
     /// Otherwise, it marks the state as user-modified.
@@ -827,7 +756,7 @@ internal class CanvasViewManager
     private void CheckIfViewBackToDefaultState(float finalScale, Size canvasSize, Size imageSize)
     {
         // 1. Calculate the scale of the *actual* default view (which doesn't upscale small images).
-        var defaultFitScale = CalculateScreenFitScale(canvasSize, imageSize, _originalImageRotation);
+        var defaultFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _originalImageRotation);
         var defaultInitialScale = AppConfig.Settings.StretchSmallImages ? defaultFitScale : Math.Min(defaultFitScale, 1.0f);
 
         // 2. Check if the final scale from the user action matches the default scale.
@@ -905,7 +834,7 @@ internal class CanvasViewManager
         var startScale = _canvasViewState.Scale;
         if (startScale > 0f)
         {
-            var anchorFinal = AnchorPreservingPan(_zoomCenter, new Point(_anchorPosX, _anchorPosY), startScale, targetScale);
+            var anchorFinal = ZoomGeometry.AnchorPreservingPan(_zoomCenter, new Point(_anchorPosX, _anchorPosY), startScale, targetScale);
             var aligned = _canvasViewState.SnapImagePosToPixelGrid(targetScale, anchorFinal);
             _zoomGridOffsetX = aligned.X - anchorFinal.X;
             _zoomGridOffsetY = aligned.Y - anchorFinal.Y;
@@ -938,10 +867,8 @@ internal class CanvasViewManager
         // forced reseed.
         if (forceReseed || _currentAnimation != AnimationType.SpringPanAndZoom)
         {
-            _springCurrentPanX = (float)_canvasViewState.ImagePos.X;
-            _springCurrentPanY = (float)_canvasViewState.ImagePos.Y;
-            _springPanVelocityX = 0f;
-            _springPanVelocityY = 0f;
+            _panXSpring.Reset((float)_canvasViewState.ImagePos.X);
+            _panYSpring.Reset((float)_canvasViewState.ImagePos.Y);
         }
         _zoomTargetScale = targetScale;
         // Land the settled pan on the device-pixel grid so the at-rest snap is a no-op (no end-of-zoom
@@ -963,8 +890,7 @@ internal class CanvasViewManager
     private void SeedScaleSpringIfFresh(bool force = false)
     {
         if (!force && _currentAnimation is AnimationType.SpringZoom or AnimationType.SpringPanAndZoom) return;
-        _springCurrentLogScale = (float)Math.Log(_canvasViewState.Scale);
-        _springLogScaleVelocity = 0f;
+        _scaleSpring.Reset((float)Math.Log(_canvasViewState.Scale));
         _animationStopwatch.Restart();
         _lastSpringElapsedMs = 0;
     }
@@ -992,25 +918,6 @@ internal class CanvasViewManager
         dt = (float)Math.Min((elapsed - _lastSpringElapsedMs) / 1000.0, Constants.SpringMaxDtSeconds);
         _lastSpringElapsedMs = elapsed;
         return dt > 0f;
-    }
-
-    /// <summary>
-    /// Advances one axis of a critically/over-damped harmonic oscillator one step toward <paramref name="target"/>.
-    /// </summary>
-    private static void StepSpringAxis(ref float current, ref float velocity, float target, float dt)
-    {
-        // Sub-step so each integration step is small enough to stay accurate (no overshoot) even when a
-        // single frame's dt is large — e.g. the first frame after launch, where dt hits the clamp and a
-        // one-shot Euler step would explode the velocity and overshoot the target.
-        var steps = Math.Max(1, (int)Math.Ceiling(dt / Constants.SpringMaxSubStepSeconds));
-        var h = dt / steps;
-        for (var i = 0; i < steps; i++)
-        {
-            var displacement = current - target;
-            var acceleration = -Constants.SpringStiffness * displacement - Constants.SpringDamping * velocity;
-            velocity += acceleration * h;
-            current += velocity * h;
-        }
     }
 
     /// <summary>
@@ -1050,7 +957,7 @@ internal class CanvasViewManager
                 var oldScale = _canvasViewState.Scale;
                 if (oldScale > 0)
                 {
-                    var track = AnchorPreservingPan(_zoomCenter, new Point(_anchorPosX, _anchorPosY), oldScale, _zoomTargetScale);
+                    var track = ZoomGeometry.AnchorPreservingPan(_zoomCenter, new Point(_anchorPosX, _anchorPosY), oldScale, _zoomTargetScale);
                     _anchorPosX = track.X;
                     _anchorPosY = track.Y;
                 }
@@ -1088,7 +995,7 @@ internal class CanvasViewManager
         {
             case AnimationType.SpringZoom:
             case AnimationType.SpringPanAndZoom:
-                _springCurrentLogScale += (float)Math.Log(scaleFactor);
+                _scaleSpring.Position += (float)Math.Log(scaleFactor);
                 break;
         }
     }
@@ -1102,26 +1009,24 @@ internal class CanvasViewManager
         if (!TryGetSpringDt(out var dt)) return;
 
         var targetLog = (float)Math.Log(_zoomTargetScale);
-        StepSpringAxis(ref _springCurrentLogScale, ref _springLogScaleVelocity, targetLog, dt);
+        _scaleSpring.Step(targetLog, dt);
 
-        var settled = Math.Abs(_springCurrentLogScale - targetLog) < Constants.SpringScaleSettleEpsilon
-                      && Math.Abs(_springLogScaleVelocity) < Constants.SpringScaleVelocitySettle;
+        var settled = _scaleSpring.IsSettled(targetLog, Constants.SpringScaleSettleEpsilon, Constants.SpringScaleVelocitySettle);
 
         float newScale;
         if (settled)
         {
-            _springCurrentLogScale = targetLog;
-            _springLogScaleVelocity = 0f;
+            _scaleSpring.SettleTo(targetLog);
             newScale = _zoomTargetScale;
         }
         else
         {
-            newScale = (float)Math.Exp(_springCurrentLogScale);
+            newScale = (float)Math.Exp(_scaleSpring.Position);
         }
 
         // Advance the PURE anchor track: pan tied to scale so the zoom anchor stays pinned every frame with
         // zero wobble. The track never includes the grid offset, so it can't feed back into itself and drift.
-        var track = AnchorPreservingPan(_zoomCenter, new Point(_anchorPosX, _anchorPosY), _canvasViewState.Scale, newScale);
+        var track = ZoomGeometry.AnchorPreservingPan(_zoomCenter, new Point(_anchorPosX, _anchorPosY), _canvasViewState.Scale, newScale);
         _anchorPosX = track.X;
         _anchorPosY = track.Y;
         _canvasViewState.Scale = newScale;
@@ -1132,7 +1037,7 @@ internal class CanvasViewManager
         // is this ≤0.5 px glide near the very end.
         var w = settled
             ? 1.0
-            : Math.Clamp(1.0 - Math.Abs(_springCurrentLogScale - targetLog) / Constants.ZoomGridAlignBlendRangeLog, 0.0, 1.0);
+            : Math.Clamp(1.0 - Math.Abs(_scaleSpring.Position - targetLog) / Constants.ZoomGridAlignBlendRangeLog, 0.0, 1.0);
         _canvasViewState.ImagePos.X = _anchorPosX + w * _zoomGridOffsetX;
         _canvasViewState.ImagePos.Y = _anchorPosY + w * _zoomGridOffsetY;
         _canvasViewState.UpdateTransform();
@@ -1151,34 +1056,28 @@ internal class CanvasViewManager
         if (!TryGetSpringDt(out var dt)) return;
 
         var targetLog = (float)Math.Log(_zoomTargetScale);
-        StepSpringAxis(ref _springCurrentLogScale, ref _springLogScaleVelocity, targetLog, dt);
-        StepSpringAxis(ref _springCurrentPanX, ref _springPanVelocityX, (float)_panTargetPosition.X, dt);
-        StepSpringAxis(ref _springCurrentPanY, ref _springPanVelocityY, (float)_panTargetPosition.Y, dt);
+        _scaleSpring.Step(targetLog, dt);
+        _panXSpring.Step((float)_panTargetPosition.X, dt);
+        _panYSpring.Step((float)_panTargetPosition.Y, dt);
 
-        var scaleSettled = Math.Abs(_springCurrentLogScale - targetLog) < Constants.SpringScaleSettleEpsilon
-                           && Math.Abs(_springLogScaleVelocity) < Constants.SpringScaleVelocitySettle;
-        var panSettled = Math.Abs(_springCurrentPanX - _panTargetPosition.X) < Constants.SpringPanSettleEpsilon
-                         && Math.Abs(_springPanVelocityX) < Constants.SpringPanVelocitySettle
-                         && Math.Abs(_springCurrentPanY - _panTargetPosition.Y) < Constants.SpringPanSettleEpsilon
-                         && Math.Abs(_springPanVelocityY) < Constants.SpringPanVelocitySettle;
+        var scaleSettled = _scaleSpring.IsSettled(targetLog, Constants.SpringScaleSettleEpsilon, Constants.SpringScaleVelocitySettle);
+        var panSettled = _panXSpring.IsSettled((float)_panTargetPosition.X, Constants.SpringPanSettleEpsilon, Constants.SpringPanVelocitySettle)
+                         && _panYSpring.IsSettled((float)_panTargetPosition.Y, Constants.SpringPanSettleEpsilon, Constants.SpringPanVelocitySettle);
         var settled = scaleSettled && panSettled;
 
         if (settled)
         {
-            _springCurrentLogScale = targetLog;
-            _springLogScaleVelocity = 0f;
-            _springCurrentPanX = (float)_panTargetPosition.X;
-            _springCurrentPanY = (float)_panTargetPosition.Y;
-            _springPanVelocityX = 0f;
-            _springPanVelocityY = 0f;
+            _scaleSpring.SettleTo(targetLog);
+            _panXSpring.SettleTo((float)_panTargetPosition.X);
+            _panYSpring.SettleTo((float)_panTargetPosition.Y);
             _canvasViewState.Scale = _zoomTargetScale;
         }
         else
         {
-            _canvasViewState.Scale = (float)Math.Exp(_springCurrentLogScale);
+            _canvasViewState.Scale = (float)Math.Exp(_scaleSpring.Position);
         }
-        _canvasViewState.ImagePos.X = _springCurrentPanX;
-        _canvasViewState.ImagePos.Y = _springCurrentPanY;
+        _canvasViewState.ImagePos.X = _panXSpring.Position;
+        _canvasViewState.ImagePos.Y = _panYSpring.Position;
         _canvasViewState.UpdateTransform();
         ViewChanged?.Invoke();
         if (!_suppressZoomUpdateForNextAnimation) ZoomChanged?.Invoke();
@@ -1189,7 +1088,7 @@ internal class CanvasViewManager
             var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
             if (_springPanZoomTargetCanvasSize.Width > 0 && _springPanZoomTargetCanvasSize.Height > 0)
             {
-                var screenFitScale = CalculateScreenFitScale(_springPanZoomTargetCanvasSize, imageSize, _canvasViewState.Rotation);
+                var screenFitScale = ZoomGeometry.CalculateScreenFitScale(_springPanZoomTargetCanvasSize, imageSize, _canvasViewState.Rotation);
                 IsFittedToScreen = Math.Abs(_zoomTargetScale - screenFitScale) < ScaleTolerance;
                 IsAtOneToOne = Math.Abs(_zoomTargetScale - 1.0f) < ScaleTolerance;
             }
