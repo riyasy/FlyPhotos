@@ -308,14 +308,14 @@ internal class CanvasViewManager
                 _canvasViewState.Scale *= scaleRatio;
                 _canvasViewState.LastScaleTo *= scaleRatio;
                 RebaseAnimationScale(scaleRatio);
-                IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < 0.001f;
+                IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < ScaleTolerance;
             }
             else if (IsFittedToScreen)
             {
                 _canvasViewState.Scale = newFitScale;
                 _canvasViewState.LastScaleTo = newFitScale;
                 _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
-                IsAtOneToOne = Math.Abs(newFitScale - 1.0f) < 0.001f;
+                IsAtOneToOne = Math.Abs(newFitScale - 1.0f) < ScaleTolerance;
             }
             else
             {
@@ -324,7 +324,7 @@ internal class CanvasViewManager
                 // pixel on screen regardless of the change in image resolution.
                 _canvasViewState.Scale *= scaleRatio;
                 _canvasViewState.LastScaleTo *= scaleRatio;
-                IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < 0.001f;
+                IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < ScaleTolerance;
             }
             _canvasViewState.UpdateTransform();
         }
@@ -405,8 +405,8 @@ internal class CanvasViewManager
             _canvasViewState.Scale = initialScale;
         }
         _canvasViewState.UpdateTransform();
-        IsFittedToScreen = Math.Abs(initialScale - defaultFitScale) < 0.001f;
-        IsAtOneToOne = Math.Abs(initialScale - 1.0f) < 0.001f;
+        IsFittedToScreen = Math.Abs(initialScale - defaultFitScale) < ScaleTolerance;
+        IsAtOneToOne = Math.Abs(initialScale - 1.0f) < ScaleTolerance;
         _isStateModifiedByUser = false; // This is a default state, not a user-modified one.
     }
 
@@ -432,10 +432,10 @@ internal class CanvasViewManager
 
         // Recalculate fitted/1:1 flags. Must check both scale AND pan: a panned-at-fit-scale photo is not "fitted".
         var fitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
-        IsFittedToScreen = Math.Abs(_canvasViewState.Scale - fitScale) < 0.001f
+        IsFittedToScreen = Math.Abs(_canvasViewState.Scale - fitScale) < ScaleTolerance
                            && Math.Abs(normalizedPanX) < 0.001
                            && Math.Abs(normalizedPanY) < 0.001;
-        IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < 0.001f;
+        IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < ScaleTolerance;
         _canvasViewState.UpdateTransform();
         _isStateModifiedByUser = true; // A cached state is by definition user-modified.
     }
@@ -451,7 +451,7 @@ internal class CanvasViewManager
             _canvasViewState.Scale = newScale;
             _canvasViewState.LastScaleTo = newScale;
             _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
-            IsAtOneToOne = Math.Abs(newScale - 1.0f) < 0.001f;
+            IsAtOneToOne = Math.Abs(newScale - 1.0f) < ScaleTolerance;
         }
         else if (oldImageSize.Width > 0 && oldImageSize.Height > 0 && oldImageSize != imageSize)
         {
@@ -484,7 +484,7 @@ internal class CanvasViewManager
             _canvasViewState.UpdateTransform();
             ViewChanged?.Invoke();
             ZoomChanged?.Invoke();
-            IsAtOneToOne = Math.Abs(newScale - 1.0f) < 0.001f;
+            IsAtOneToOne = Math.Abs(newScale - 1.0f) < ScaleTolerance;
         }
         else if (previousSize.Width > 0 && previousSize.Height > 0)
         {
@@ -496,6 +496,25 @@ internal class CanvasViewManager
             _canvasViewState.UpdateTransform();
             ViewChanged?.Invoke();
         }
+    }
+
+    /// <summary>
+    /// Tolerance for treating two scale values as equal (fit / 1:1 / default-state checks). Scales are
+    /// floats derived from divisions and log/exp round-trips, so exact equality never holds; 0.001 = 0.1%
+    /// of scale is well below a visible difference yet far above float noise.
+    /// </summary>
+    private const float ScaleTolerance = 0.001f;
+
+    /// <summary>
+    /// The core anchored-zoom primitive: returns the pan (image-centre) position that keeps the screen point
+    /// <paramref name="anchor"/> over the same image pixel when the scale changes from <paramref name="oldScale"/>
+    /// to <paramref name="newScale"/>. Used by every cursor/anchor-preserving zoom path.
+    /// </summary>
+    private static Point AnchorPreservingPan(Point anchor, Point currentPos, float oldScale, float newScale)
+    {
+        var k = newScale / oldScale;
+        return new Point(anchor.X - k * (anchor.X - currentPos.X),
+                         anchor.Y - k * (anchor.Y - currentPos.Y));
     }
 
     private static readonly float[] ZoomSnapPoints = [0.5f, 1.0f, 2.0f, 5.0f, 10.0f];
@@ -562,14 +581,12 @@ internal class CanvasViewManager
 
         // 1. Capture the scale *before* it's changed.
         float oldScale = _canvasViewState.Scale;
-        // 2. Calculate the new position based on the ratio of the new scale to the old scale.
-        // This is the core formula for zooming at a point.
-        var newPosX = zoomAnchor.X - (newScale / oldScale) * (zoomAnchor.X - _canvasViewState.ImagePos.X);
-        var newPosY = zoomAnchor.Y - (newScale / oldScale) * (zoomAnchor.Y - _canvasViewState.ImagePos.Y);
+        // 2. Calculate the new position so the cursor anchor stays put as the scale changes.
+        var newPos = AnchorPreservingPan(zoomAnchor, _canvasViewState.ImagePos, oldScale, newScale);
         // 3. Now, update the state with the new values.
         _canvasViewState.Scale = newScale;
         _canvasViewState.LastScaleTo = newScale; // Keep LastScaleTo in sync
-        _canvasViewState.ImagePos = new Point(newPosX, newPosY);
+        _canvasViewState.ImagePos = newPos;
         // 4. Update transform and notify for redraw.
         _canvasViewState.UpdateTransform();
         ViewChanged?.Invoke();
@@ -596,7 +613,7 @@ internal class CanvasViewManager
             .Distinct().OrderBy(s => s).ToList();
 
         // 2. Find the index of the next logical stop based on the current scale and direction.
-        const float tolerance = 0.001f;
+        const float tolerance = ScaleTolerance;
         var currentScale = _canvasViewState.LastScaleTo;
 
         int nextStopIndex = zoomDirection == ZoomDirection.In
@@ -619,8 +636,8 @@ internal class CanvasViewManager
             StartSpringPanAndZoomAnimation(targetScale, anchor, canvasSize);
 
         // Set state immediately for responsive UI.
-        IsFittedToScreen = Math.Abs(targetScale - screenFitScale) < 0.001f;
-        IsAtOneToOne = Math.Abs(targetScale - 1.0f) < 0.001f;
+        IsFittedToScreen = Math.Abs(targetScale - screenFitScale) < ScaleTolerance;
+        IsAtOneToOne = Math.Abs(targetScale - 1.0f) < ScaleTolerance;
         _isStateModifiedByUser = true;
     }
 
@@ -658,7 +675,7 @@ internal class CanvasViewManager
             ViewChanged?.Invoke();
             ZoomChanged?.Invoke();
             IsFittedToScreen = true;
-            IsAtOneToOne = Math.Abs(scaleFactor - 1.0f) < 0.001f;
+            IsAtOneToOne = Math.Abs(scaleFactor - 1.0f) < ScaleTolerance;
             return;
         }
 
@@ -668,7 +685,7 @@ internal class CanvasViewManager
 
         // Set state immediately for responsive UI, even when animating.
         IsFittedToScreen = true;
-        IsAtOneToOne = Math.Abs(scaleFactor - 1.0f) < 0.001f;
+        IsAtOneToOne = Math.Abs(scaleFactor - 1.0f) < ScaleTolerance;
         _isStateModifiedByUser = true;
         CheckIfViewBackToDefaultState(scaleFactor, canvasSize, imageSize);
     }
@@ -686,7 +703,7 @@ internal class CanvasViewManager
         // Set state immediately. The view is fitted only if 100% happens to be the fit scale.
         var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
         var screenFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
-        IsFittedToScreen = Math.Abs(1.0f - screenFitScale) < 0.001f;
+        IsFittedToScreen = Math.Abs(1.0f - screenFitScale) < ScaleTolerance;
         IsAtOneToOne = true;
         _isStateModifiedByUser = true;
         CheckIfViewBackToDefaultState(targetScale, canvasSize, imageSize);
@@ -701,7 +718,7 @@ internal class CanvasViewManager
         _canvasViewState.LastScaleTo = 1.0f;
 
         // Compute the target image position so that the provided anchor remains at the same
-        // screen coordinate after scaling to 1:1. Use the same formula as in precision zoom.
+        // screen coordinate after scaling to 1:1.
         var oldScale = _canvasViewState.Scale;
         // If already at 1:1, just center on anchor
         if (Math.Abs(oldScale - targetScale) < 0.0001f)
@@ -710,15 +727,13 @@ internal class CanvasViewManager
         }
         else
         {
-            var newPosX = anchor.X - (targetScale / oldScale) * (anchor.X - _canvasViewState.ImagePos.X);
-            var newPosY = anchor.Y - (targetScale / oldScale) * (anchor.Y - _canvasViewState.ImagePos.Y);
-            var targetPos = new Point(newPosX, newPosY);
+            var targetPos = AnchorPreservingPan(anchor, _canvasViewState.ImagePos, oldScale, targetScale);
             StartSpringPanAndZoomAnimation(targetScale, targetPos, canvasSize);
         }
 
         var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
         var screenFitScale = CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
-        IsFittedToScreen = Math.Abs(targetScale - screenFitScale) < 0.001f;
+        IsFittedToScreen = Math.Abs(targetScale - screenFitScale) < ScaleTolerance;
         IsAtOneToOne = true;
         _isStateModifiedByUser = true;
         CheckIfViewBackToDefaultState(targetScale, canvasSize, imageSize);
@@ -816,7 +831,7 @@ internal class CanvasViewManager
         var defaultInitialScale = AppConfig.Settings.StretchSmallImages ? defaultFitScale : Math.Min(defaultFitScale, 1.0f);
 
         // 2. Check if the final scale from the user action matches the default scale.
-        var isDefaultScale = Math.Abs(finalScale - defaultInitialScale) < 0.001f;
+        var isDefaultScale = Math.Abs(finalScale - defaultInitialScale) < ScaleTolerance;
 
         // 3. Check if the current rotation matches the original, unmodified rotation.
         // The modulo logic handles cases like 360 vs 0 and -90 vs 270.
@@ -884,15 +899,13 @@ internal class CanvasViewManager
         }
 
         // Precompute the constant grid-alignment offset δ (≤0.5 px/axis): take where the exact-anchor zoom
-        // would settle (P_anchor = zoomCenter − targetScale·u, u being the invariant image-space anchor
-        // offset), nudge it so the composed translation lands on whole pixels, and store the difference.
-        // AnimateSpringZoom blends this in over the settle tail so the resting frame is grid-clean.
+        // would settle (the anchor-preserving pan at the target scale), nudge it so the composed translation
+        // lands on whole pixels, and store the difference. AnimateSpringZoom blends this in over the settle
+        // tail so the resting frame is grid-clean.
         var startScale = _canvasViewState.Scale;
         if (startScale > 0f)
         {
-            var ux = (_zoomCenter.X - _anchorPosX) / startScale;
-            var uy = (_zoomCenter.Y - _anchorPosY) / startScale;
-            var anchorFinal = new Point(_zoomCenter.X - targetScale * ux, _zoomCenter.Y - targetScale * uy);
+            var anchorFinal = AnchorPreservingPan(_zoomCenter, new Point(_anchorPosX, _anchorPosY), startScale, targetScale);
             var aligned = _canvasViewState.SnapImagePosToPixelGrid(targetScale, anchorFinal);
             _zoomGridOffsetX = aligned.X - anchorFinal.X;
             _zoomGridOffsetY = aligned.Y - anchorFinal.Y;
@@ -1037,9 +1050,9 @@ internal class CanvasViewManager
                 var oldScale = _canvasViewState.Scale;
                 if (oldScale > 0)
                 {
-                    var ratio = _zoomTargetScale / oldScale;
-                    _anchorPosX = _zoomCenter.X - ratio * (_zoomCenter.X - _anchorPosX);
-                    _anchorPosY = _zoomCenter.Y - ratio * (_zoomCenter.Y - _anchorPosY);
+                    var track = AnchorPreservingPan(_zoomCenter, new Point(_anchorPosX, _anchorPosY), oldScale, _zoomTargetScale);
+                    _anchorPosX = track.X;
+                    _anchorPosY = track.Y;
                 }
                 _canvasViewState.Scale = _zoomTargetScale;
                 _canvasViewState.ImagePos.X = _anchorPosX + _zoomGridOffsetX;
@@ -1106,13 +1119,11 @@ internal class CanvasViewManager
             newScale = (float)Math.Exp(_springCurrentLogScale);
         }
 
-        // Advance the PURE anchor track: pan tied to scale (ratio of new to previous scale) so the zoom
-        // anchor stays pinned every frame with zero wobble. The track never includes the grid offset, so
-        // it can't feed back into itself and drift.
-        var oldScale = _canvasViewState.Scale;
-        var ratio = newScale / oldScale;
-        _anchorPosX = _zoomCenter.X - ratio * (_zoomCenter.X - _anchorPosX);
-        _anchorPosY = _zoomCenter.Y - ratio * (_zoomCenter.Y - _anchorPosY);
+        // Advance the PURE anchor track: pan tied to scale so the zoom anchor stays pinned every frame with
+        // zero wobble. The track never includes the grid offset, so it can't feed back into itself and drift.
+        var track = AnchorPreservingPan(_zoomCenter, new Point(_anchorPosX, _anchorPosY), _canvasViewState.Scale, newScale);
+        _anchorPosX = track.X;
+        _anchorPosY = track.Y;
         _canvasViewState.Scale = newScale;
 
         // Blend the constant ≤0.5 px grid-alignment offset in over the settle tail: w = 0 through the bulk
@@ -1179,8 +1190,8 @@ internal class CanvasViewManager
             if (_springPanZoomTargetCanvasSize.Width > 0 && _springPanZoomTargetCanvasSize.Height > 0)
             {
                 var screenFitScale = CalculateScreenFitScale(_springPanZoomTargetCanvasSize, imageSize, _canvasViewState.Rotation);
-                IsFittedToScreen = Math.Abs(_zoomTargetScale - screenFitScale) < 0.001f;
-                IsAtOneToOne = Math.Abs(_zoomTargetScale - 1.0f) < 0.001f;
+                IsFittedToScreen = Math.Abs(_zoomTargetScale - screenFitScale) < ScaleTolerance;
+                IsAtOneToOne = Math.Abs(_zoomTargetScale - 1.0f) < ScaleTolerance;
             }
             FinishSpringAnimation();
         }
