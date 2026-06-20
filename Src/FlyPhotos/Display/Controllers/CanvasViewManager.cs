@@ -22,14 +22,17 @@ namespace FlyPhotos.Display.Controllers;
 /// frame from that thread and advances whatever animation is active. So there is no locking here; treat the
 /// whole class as single-threaded.</para>
 ///
-/// <para><b>Animation models.</b> There are three, selected by <c>AnimationType</c>:
+/// <para><b>Animation models.</b> There are three <see cref="IViewAnimation"/> strategies; at most one is
+/// active at a time (<see cref="_active"/>), advanced each frame via <see cref="OnUpdate"/>:
 /// <list type="bullet">
-///   <item><b>SpringZoom</b> — scale-only damped spring; pan is recomputed each tick to keep a zoom anchor
-///     point stationary (wheel/keyboard/anchored-step zoom).</item>
-///   <item><b>SpringPanAndZoom</b> — three independent springs (scale + panX + panY) toward a target
+///   <item><see cref="AnchoredZoomAnimation"/> — scale-only damped spring; pan is recomputed each tick to keep
+///     a zoom anchor point stationary (wheel/keyboard/anchored-step zoom).</item>
+///   <item><see cref="PanZoomAnimation"/> — three independent springs (scale + panX + panY) toward a target
 ///     (Fit, 100%, centred step, double-click, AND launch open-zoom / exit zoom-out).</item>
-///   <item><b>Shrug</b> — a decaying sine wiggle for "action rejected" feedback (not a spring).</item>
+///   <item><see cref="ShrugAnimation"/> — a decaying sine wiggle for "action rejected" feedback (not a spring).</item>
 /// </list>
+/// The animations own their type-specific geometry; this class is their <see cref="IAnimationHost"/>, holding
+/// the shared spring bank, frame clock, target scale, and all event / snapping / completion plumbing.
 /// Pan, rotate, and precision-touchpad zoom are applied directly (no animation).</para>
 ///
 /// <para><b>Spring physics.</b> Each axis is a damped harmonic oscillator (a <see cref="SpringAxis"/>)
@@ -73,35 +76,51 @@ namespace FlyPhotos.Display.Controllers;
 /// <para><b>Tuning</b> lives entirely in <see cref="Constants"/> (each spring constant documents the effect
 /// of raising/lowering it). A fuller write-up is in <c>docs/pan-zoom-physics.md</c>.</para>
 /// </remarks>
-internal class CanvasViewManager
+internal class CanvasViewManager : IAnimationHost
 {
-    // --- Public Properties & Events ---
+    // ───────────────────────── Fields ─────────────────────────
 
-    /// <summary>
-    /// File path of current photo
-    /// </summary>
+    // Collaborators & current photo.
+    private readonly CanvasViewState _canvasViewState;
     private string _photoPath = string.Empty;
+    private int _originalImageRotation;
 
     /// <summary>
-    /// Indicates if a pan or zoom animation is currently in progress.
+    /// Per-session memory of user-modified views for "RememberPerPhoto" mode (see <see cref="PerPhotoViewStore"/>).
+    /// Populated on navigate-away (<see cref="CacheCurrentViewState"/>), consumed on revisit
+    /// (<see cref="ApplyRestoredView"/>), and pruned when a photo returns to its default view
+    /// (<see cref="CheckIfViewBackToDefaultState"/>).
     /// </summary>
-    /// <remarks>
-    /// This is the SINGLE SOURCE OF TRUTH for pixel snapping: the setter keeps
-    /// <see cref="CanvasViewState.SnapTranslation"/> equal to <c>!value</c>, so snapping is on exactly when
-    /// no animation is running. That makes it structurally impossible to leave snapping off at rest — every
-    /// path that ends an animation flips this back to <c>false</c> and thereby re-enables snapping. Stop
-    /// paths must still rebuild the transform (<c>UpdateTransform()</c>) AFTER setting this false so the
-    /// resting frame is rebuilt with rounding applied.
-    /// </remarks>
-    public bool PanZoomAnimationOnGoing
-    {
-        get;
-        private set
-        {
-            field = value;
-            _canvasViewState.SnapTranslation = !value;
-        }
-    }
+    private readonly PerPhotoViewStore _viewStore = new();
+
+    /// <summary>
+    /// Tracks if the view state has been modified by user input (pan, zoom, rotate).
+    /// Used to determine if the state is worth caching for "RememberPerPhoto" mode.
+    /// </summary>
+    private bool _isStateModifiedByUser;
+
+    // Animation substrate. At most one animation is active (null at rest); its concrete type encodes "which
+    // kind", replacing the old AnimationType enum + switch. The animation owns its type-specific geometry; the
+    // shared spring bank / clock / target scale below stay here so velocity and clock carry continuously across
+    // re-targets AND across animation types. The springs are output-only: they write scale/pan into
+    // _canvasViewState each tick and never read it back, so an external mid-flight write can't perturb them.
+    private IViewAnimation _active;
+    private readonly Stopwatch _animationStopwatch = new();
+    private bool _suppressZoomUpdateForNextAnimation;
+    private float _zoomTargetScale;
+    private double _lastSpringElapsedMs;
+    private readonly SpringAxis _scaleSpring = new();   // springs LOG(scale)
+    private readonly SpringAxis _panXSpring = new();    // springs ImagePos.X (pixels)
+    private readonly SpringAxis _panYSpring = new();    // springs ImagePos.Y (pixels)
+
+    /// <summary>
+    /// Tolerance for treating two scale values as equal (fit / 1:1 / default-state checks). Scales are
+    /// floats derived from divisions and log/exp round-trips, so exact equality never holds; 0.001 = 0.1%
+    /// of scale is well below a visible difference yet far above float noise.
+    /// </summary>
+    private const float ScaleTolerance = 0.001f;
+
+    // ───────────────────────── Events ─────────────────────────
 
     /// <summary>
     /// Fires when the view's "fitted to screen" state changes.
@@ -128,53 +147,21 @@ internal class CanvasViewManager
     /// </summary>
     public event Action AnimationCompleted;
 
-    // --- Animation & State Fields ---
-
-    private enum AnimationType { None, SpringZoom, SpringPanAndZoom, Shrug }
-    private AnimationType _currentAnimation = AnimationType.None;
-    private readonly Stopwatch _animationStopwatch = new();
-    private bool _suppressZoomUpdateForNextAnimation;
-
-    private readonly CanvasViewState _canvasViewState;
-    private float _zoomTargetScale;
-    private Point _zoomCenter;
-    // Anchored-zoom (SpringZoom) state: the PURE anchor track (pan tied to scale every frame, with NO grid
-    // offset baked in so it can't feed back and accumulate) and the constant ≤0.5 px grid-alignment offset
-    // that is blended into the displayed pan over the settle tail.
-    private double _anchorPosX;
-    private double _anchorPosY;
-    private double _zoomGridOffsetX;
-    private double _zoomGridOffsetY;
-    private Point _shrugStartPosition;
-    private Point _panTargetPosition;
-    private int _originalImageRotation;
-
-    // --- Spring state ---
-    // Output-only: the spring keeps its own scale/pan and writes them into _canvasViewState each tick,
-    // never reading them back. This makes it immune to external mid-flight writes (the way the cubic
-    // tween is, by recomputing from a captured start). Scale runs in LOG space for a uniform perceived
-    // zoom rate; pan runs in linear (pixel) space.
-    private double _lastSpringElapsedMs;
-    private readonly SpringAxis _scaleSpring = new();   // springs LOG(scale)
-    private readonly SpringAxis _panXSpring = new();    // springs ImagePos.X (pixels)
-    private readonly SpringAxis _panYSpring = new();    // springs ImagePos.Y (pixels)
-    private Size _springPanZoomTargetCanvasSize;
-
-    // --- State Management Properties ---
+    // ───────────────────────── Properties ─────────────────────────
 
     /// <summary>
-    /// Per-session memory of user-modified views for "RememberPerPhoto" mode (see <see cref="PerPhotoViewStore"/>).
-    /// Populated on navigate-away (<see cref="CacheCurrentViewState"/>), consumed on revisit
-    /// (<see cref="ApplyRestoredView"/>), and pruned when a photo returns to its default view
-    /// (<see cref="CheckIfViewBackToDefaultState"/>).
+    /// Indicates if a pan or zoom animation is currently in progress (i.e. an <see cref="IViewAnimation"/> is
+    /// active). Read by <c>CanvasController</c> to decide whether to keep ticking the render loop.
     /// </summary>
-    private readonly PerPhotoViewStore _viewStore = new();
-
-    /// <summary>
-    /// Tracks if the view state has been modified by user input (pan, zoom, rotate).
-    /// Used to determine if the state is worth caching for "RememberPerPhoto" mode.
-    /// </summary>
-    private bool _isStateModifiedByUser;
+    /// <remarks>
+    /// Pixel snapping is the inverse of this: <see cref="BeginAnimation"/> turns
+    /// <see cref="CanvasViewState.SnapTranslation"/> off for the duration and <see cref="ClearActiveAnimation"/>
+    /// turns it back on, so snapping is on exactly when no animation is running. That makes it structurally
+    /// impossible to leave snapping off at rest — every path that ends an animation goes through
+    /// <see cref="ClearActiveAnimation"/>. Stop paths must rebuild the transform (<c>UpdateTransform()</c>)
+    /// AFTER clearing so the resting frame is rebuilt with rounding applied.
+    /// </remarks>
+    public bool PanZoomAnimationOnGoing => _active != null;
 
     /// <summary>
     /// Tracks if the image is perfectly fitted to the canvas (respecting padding).
@@ -206,14 +193,14 @@ internal class CanvasViewManager
         }
     }
 
-    // --- Constructor ---
+    // ───────────────────────── Constructor ─────────────────────────
 
     public CanvasViewManager(CanvasViewState canvasViewState)
     {
         _canvasViewState = canvasViewState;
     }
 
-    // --- Public API Methods ---
+    // ───────────────────────── Lifecycle: new photo / upgrade / resize ─────────────────────────
 
     /// <summary>
     /// Saves the current view for <paramref name="photoPath"/> if "RememberPerPhoto" is enabled and the
@@ -231,119 +218,129 @@ internal class CanvasViewManager
     }
 
     /// <summary>
-    /// Sets the initial scale and position for a new image.
+    /// Applies the initial scale and position for a newly displayed image, dispatching on how it arrived:
+    /// the first launch photo, a pure quality upgrade of the current photo, or navigation to new content.
     /// </summary>
     public void SetScaleAndPosition(string photoPath, Size imageSize, int imageRotation, Size canvasSize,
         bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
     {
         _photoPath = photoPath;
 
-        // The very first photo on launch always opens from a clean, fitted view.
         if (isFirstPhotoEver)
-        {
-            _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
-            _canvasViewState.Rotation = imageRotation;
-            _originalImageRotation = imageRotation;
-            SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver: true);
-        }
-        // A pure quality upgrade (Preview → HQ of the same already-displayed photo) must preserve
-        // the live visual view exactly. Scale is adjusted so the scene-relative zoom (Scale / fitScale)
-        // is unchanged; pan stays fixed in canvas coordinates; rotation is re-based onto the new EXIF
-        // baseline. Routing this through SetViewFromPrevious would apply an image-size ratio to the
-        // pan offset, which is wrong — preview thumbnails can be 10–15× smaller than the HQ image,
-        // making a 300 px pan become 3000+ px after the upgrade.
+            ApplyFirstPhotoView(imageSize, imageRotation, canvasSize);
         else if (!isNewPhoto && !isUpgradeFromPlaceholder)
+            ApplyQualityUpgrade(imageSize, imageRotation, canvasSize);
+        else
+            ApplyNavigationView(photoPath, imageSize, imageRotation, canvasSize, isNewPhoto);
+
+        ViewChanged?.Invoke();
+    }
+
+    /// <summary>The very first photo on launch always opens from a clean, fitted view.</summary>
+    private void ApplyFirstPhotoView(Size imageSize, int imageRotation, Size canvasSize)
+    {
+        _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+        _canvasViewState.Rotation = imageRotation;
+        _originalImageRotation = imageRotation;
+        SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver: true);
+    }
+
+    /// <summary>
+    /// A pure quality upgrade (Preview → HQ of the same already-displayed photo) must preserve the live visual
+    /// view exactly — never reset or jump, even when a zoom/pan animation is still in flight as the HQ buffer
+    /// arrives. Scale is adjusted so the scene-relative zoom (Scale / fitScale) is unchanged; pan stays fixed in
+    /// canvas coordinates; rotation is re-based onto the new EXIF baseline. (Routing this through
+    /// <see cref="SetViewFromPrevious"/> would wrongly apply an image-size ratio to the pan offset — preview
+    /// thumbnails can be 10–15× smaller than the HQ image, turning a 300 px pan into 3000+ px after the upgrade.)
+    /// </summary>
+    private void ApplyQualityUpgrade(Size imageSize, int imageRotation, Size canvasSize)
+    {
+        var animating = _active is AnchoredZoomAnimation or PanZoomAnimation;
+
+        var oldImageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
+        var oldRotation = _canvasViewState.Rotation;
+        _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+        _canvasViewState.Rotation += imageRotation - _originalImageRotation;
+        _originalImageRotation = imageRotation;
+
+        var oldFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, oldImageSize, oldRotation);
+        var newFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+        var scaleRatio = oldFitScale > 0 ? newFitScale / oldFitScale : 1f;
+
+        if (animating)
         {
-            // Pure quality upgrade (Preview → HQ of the same photo). Must be visually seamless — never
-            // reset or jump, even when a zoom/pan animation is still in flight as the HQ buffer arrives.
-            var animating = _currentAnimation is AnimationType.SpringZoom or AnimationType.SpringPanAndZoom;
-
-            var oldImageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
-            var oldRotation = _canvasViewState.Rotation;
-            _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
-            _canvasViewState.Rotation += imageRotation - _originalImageRotation;
-            _originalImageRotation = imageRotation;
-
-            var oldFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, oldImageSize, oldRotation);
-            var newFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
-            var scaleRatio = oldFitScale > 0 ? newFitScale / oldFitScale : 1f;
-
-            if (animating)
-            {
-                // An animation is running: keep it alive. Rescale BOTH the displayed scale and the
-                // animation's internal scale/target by the resolution ratio, so the image keeps the same
-                // visual size and the spring/tween keeps converging to the resolution-adjusted target.
-                // Pan is screen-space (unchanged here), so the animation's pan state stays valid.
-                // Snapping to fit (the IsFittedToScreen path below) would visibly reset mid-animation.
-                _canvasViewState.Scale *= scaleRatio;
-                _canvasViewState.LastScaleTo *= scaleRatio;
-                RebaseAnimationScale(scaleRatio);
-                IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < ScaleTolerance;
-            }
-            else if (IsFittedToScreen)
-            {
-                _canvasViewState.Scale = newFitScale;
-                _canvasViewState.LastScaleTo = newFitScale;
-                _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
-                IsAtOneToOne = Math.Abs(newFitScale - 1.0f) < ScaleTolerance;
-            }
-            else
-            {
-                // Preserve scene-relative zoom: multiply scale by (newFitScale / oldFitScale).
-                // Pan stays unchanged in canvas coordinates — the image centre remains at the same
-                // pixel on screen regardless of the change in image resolution.
-                _canvasViewState.Scale *= scaleRatio;
-                _canvasViewState.LastScaleTo *= scaleRatio;
-                IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < ScaleTolerance;
-            }
-            _canvasViewState.UpdateTransform();
+            // Keep the animation alive: rescale BOTH the displayed scale and the animation's internal
+            // scale/target by the resolution ratio, so the image keeps the same visual size and the spring
+            // keeps converging. Pan is screen-space (unchanged), so the animation's pan state stays valid.
+            // Snapping to fit (the IsFittedToScreen path) would visibly reset mid-animation.
+            _canvasViewState.Scale *= scaleRatio;
+            _canvasViewState.LastScaleTo *= scaleRatio;
+            RebaseAnimationScale(scaleRatio);
+            IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < ScaleTolerance;
+        }
+        else if (IsFittedToScreen)
+        {
+            _canvasViewState.Scale = newFitScale;
+            _canvasViewState.LastScaleTo = newFitScale;
+            _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
+            IsAtOneToOne = Math.Abs(newFitScale - 1.0f) < ScaleTolerance;
         }
         else
         {
-            // Navigating to a genuinely new photo (or first real content after a placeholder): cancel any
-            // in-flight animation so its stale internal state can't clobber the freshly-applied view.
-            StopAnimationSnappingToTarget();
+            // Preserve scene-relative zoom: multiply scale by (newFitScale / oldFitScale). Pan stays unchanged
+            // in canvas coordinates — the image centre remains at the same pixel on screen.
+            _canvasViewState.Scale *= scaleRatio;
+            _canvasViewState.LastScaleTo *= scaleRatio;
+            IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < ScaleTolerance;
+        }
+        _canvasViewState.UpdateTransform();
+    }
 
-            // New photo navigation or upgrade from placeholder: apply the configured behaviour.
-            switch (AppConfig.Settings.PanZoomBehaviourOnNavigation)
-            {
-                case PanZoomBehaviourOnNavigation.RememberPerPhoto:
-                    // Reached for a photo's initial display or first real content after a placeholder.
-                    // Establish the EXIF baseline before TryRestore re-bases the stored user-rotation.
-                    _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
-                    _originalImageRotation = imageRotation;
+    /// <summary>
+    /// Navigation to genuinely new content (a new photo, or first real content after a placeholder): cancels
+    /// any in-flight animation, then applies the configured <see cref="PanZoomBehaviourOnNavigation"/>.
+    /// </summary>
+    private void ApplyNavigationView(string photoPath, Size imageSize, int imageRotation, Size canvasSize, bool isNewPhoto)
+    {
+        // Cancel any in-flight animation so its stale internal state can't clobber the freshly-applied view.
+        StopAnimationSnappingToTarget();
 
-                    if (_viewStore.TryRestore(photoPath, _originalImageRotation, canvasSize, out var restored))
-                        ApplyRestoredView(imageSize, canvasSize, restored);
-                    else
-                        SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver: false);
-                    break;
+        switch (AppConfig.Settings.PanZoomBehaviourOnNavigation)
+        {
+            case PanZoomBehaviourOnNavigation.RememberPerPhoto:
+                // Establish the EXIF baseline before TryRestore re-bases the stored user-rotation.
+                _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+                _originalImageRotation = imageRotation;
 
-                case PanZoomBehaviourOnNavigation.Reset:
-                    _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+                if (_viewStore.TryRestore(photoPath, _originalImageRotation, canvasSize, out var restored))
+                    ApplyRestoredView(imageSize, canvasSize, restored);
+                else
+                    SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver: false);
+                break;
+
+            case PanZoomBehaviourOnNavigation.Reset:
+                _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+                _canvasViewState.Rotation = imageRotation;
+                _originalImageRotation = imageRotation;
+                SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver: false);
+                break;
+
+            case PanZoomBehaviourOnNavigation.RetainFromLastPhoto:
+                var oldImageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
+                _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+                if (isNewPhoto)
+                {
                     _canvasViewState.Rotation = imageRotation;
                     _originalImageRotation = imageRotation;
-                    SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver: false);
-                    break;
-
-                case PanZoomBehaviourOnNavigation.RetainFromLastPhoto:
-                    var oldImageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
-                    _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
-                    if (isNewPhoto)
-                    {
-                        _canvasViewState.Rotation = imageRotation;
-                        _originalImageRotation = imageRotation;
-                    }
-                    else // isUpgradeFromPlaceholder
-                    {
-                        _canvasViewState.Rotation += imageRotation - _originalImageRotation;
-                        _originalImageRotation = imageRotation;
-                    }
-                    SetViewFromPrevious(oldImageSize, imageSize, canvasSize);
-                    break;
-            }
+                }
+                else // isUpgradeFromPlaceholder
+                {
+                    _canvasViewState.Rotation += imageRotation - _originalImageRotation;
+                    _originalImageRotation = imageRotation;
+                }
+                SetViewFromPrevious(oldImageSize, imageSize, canvasSize);
+                break;
         }
-        ViewChanged?.Invoke();
     }
 
     /// <summary>
@@ -460,11 +457,44 @@ internal class CanvasViewManager
     }
 
     /// <summary>
-    /// Tolerance for treating two scale values as equal (fit / 1:1 / default-state checks). Scales are
-    /// floats derived from divisions and log/exp round-trips, so exact equality never holds; 0.001 = 0.1%
-    /// of scale is well below a visible difference yet far above float noise.
+    /// Checks if the current view state matches the photo's default view. If it does,
+    /// it resets the modified flag and removes the photo from the cache.
+    /// Otherwise, it marks the state as user-modified.
     /// </summary>
-    private const float ScaleTolerance = 0.001f;
+    private void CheckIfViewBackToDefaultState(float finalScale, Size canvasSize, Size imageSize)
+    {
+        // 1. Calculate the scale of the *actual* default view (which doesn't upscale small images).
+        var defaultFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _originalImageRotation);
+        var defaultInitialScale = AppConfig.Settings.StretchSmallImages ? defaultFitScale : Math.Min(defaultFitScale, 1.0f);
+
+        // 2. Check if the final scale from the user action matches the default scale.
+        var isDefaultScale = Math.Abs(finalScale - defaultInitialScale) < ScaleTolerance;
+
+        // 3. Check if the current rotation matches the original, unmodified rotation.
+        // The modulo logic handles cases like 360 vs 0 and -90 vs 270.
+        var currentRotationNormalized = ((_canvasViewState.Rotation % 360) + 360) % 360;
+        var originalRotationNormalized = ((_originalImageRotation % 360) + 360) % 360;
+        var isDefaultRotation = currentRotationNormalized == originalRotationNormalized;
+
+        // 4. Check if the pan position is centered on the canvas. A tolerance of 1 pixel covers float
+        // inaccuracy AND the ≤0.5 px pixel-grid alignment applied to the settled fit/centre position
+        // (the resting ImagePos can sit just off exact centre so the composed translation lands on the grid).
+        var canvasCenterX = canvasSize.Width / 2.0;
+        var canvasCenterY = canvasSize.Height / 2.0;
+        var isDefaultPan = Math.Abs(_canvasViewState.ImagePos.X - canvasCenterX) < 1.0 &&
+                           Math.Abs(_canvasViewState.ImagePos.Y - canvasCenterY) < 1.0;
+
+        // 5. The view is considered "default" only if scale, rotation, AND pan match the default state.
+        if (isDefaultScale && isDefaultRotation && isDefaultPan)
+        {
+            _isStateModifiedByUser = false;
+            if (!string.IsNullOrEmpty(_photoPath))
+                _viewStore.Remove(_photoPath);
+        }
+        else { _isStateModifiedByUser = true; }
+    }
+
+    // ───────────────────────── Public commands: zoom / pan / rotate ─────────────────────────
 
     public void ZoomAtCenter(ZoomDirection zoomDirection, Size canvasSize) =>
         ZoomAtPoint(zoomDirection, new Point(canvasSize.Width / 2, canvasSize.Height / 2));
@@ -710,66 +740,26 @@ internal class CanvasViewManager
         StartShrugAnimation();
     }
 
-    // --- Helper & Animation Methods ---
-
-    /// <summary>
-    /// Checks if the current view state matches the photo's default view. If it does,
-    /// it resets the modified flag and removes the photo from the cache.
-    /// Otherwise, it marks the state as user-modified.
-    /// </summary>
-    private void CheckIfViewBackToDefaultState(float finalScale, Size canvasSize, Size imageSize)
-    {
-        // 1. Calculate the scale of the *actual* default view (which doesn't upscale small images).
-        var defaultFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _originalImageRotation);
-        var defaultInitialScale = AppConfig.Settings.StretchSmallImages ? defaultFitScale : Math.Min(defaultFitScale, 1.0f);
-
-        // 2. Check if the final scale from the user action matches the default scale.
-        var isDefaultScale = Math.Abs(finalScale - defaultInitialScale) < ScaleTolerance;
-
-        // 3. Check if the current rotation matches the original, unmodified rotation.
-        // The modulo logic handles cases like 360 vs 0 and -90 vs 270.
-        var currentRotationNormalized = ((_canvasViewState.Rotation % 360) + 360) % 360;
-        var originalRotationNormalized = ((_originalImageRotation % 360) + 360) % 360;
-        var isDefaultRotation = currentRotationNormalized == originalRotationNormalized;
-
-        // 4. Check if the pan position is centered on the canvas. A tolerance of 1 pixel covers float
-        // inaccuracy AND the ≤0.5 px pixel-grid alignment applied to the settled fit/centre position
-        // (the resting ImagePos can sit just off exact centre so the composed translation lands on the grid).
-        var canvasCenterX = canvasSize.Width / 2.0;
-        var canvasCenterY = canvasSize.Height / 2.0;
-        var isDefaultPan = Math.Abs(_canvasViewState.ImagePos.X - canvasCenterX) < 1.0 &&
-                           Math.Abs(_canvasViewState.ImagePos.Y - canvasCenterY) < 1.0;
-
-        // 5. The view is considered "default" only if scale, rotation, AND pan match the default state.
-        if (isDefaultScale && isDefaultRotation && isDefaultPan)
-        {
-            _isStateModifiedByUser = false;
-            if (!string.IsNullOrEmpty(_photoPath))
-                _viewStore.Remove(_photoPath);
-        }
-        else { _isStateModifiedByUser = true; }
-    }
+    // ───────────────────────── Animation orchestration ─────────────────────────
 
     /// <summary>
     /// Called by CanvasController on the Win2D background thread each Update tick.
     /// Advances whichever pan/zoom/shrug animation is currently active.
     /// </summary>
-    public void OnUpdate()
-    {
-        if (!PanZoomAnimationOnGoing) return; // Fast exit — no animation running
+    public void OnUpdate() => _active?.Tick();
 
-        switch (_currentAnimation)
-        {
-            case AnimationType.SpringZoom:
-                AnimateSpringZoom();
-                break;
-            case AnimationType.SpringPanAndZoom:
-                AnimateSpringPanAndZoom();
-                break;
-            case AnimationType.Shrug:
-                AnimateShrug();
-                break;
-        }
+    /// <summary>Installs <paramref name="animation"/> as the active one and turns off pixel snapping for its duration.</summary>
+    private void BeginAnimation(IViewAnimation animation)
+    {
+        _active = animation;
+        _canvasViewState.SnapTranslation = false; // smooth sub-pixel motion while animating (no 1px shiver)
+    }
+
+    /// <summary>Clears the active animation and re-enables pixel snapping (callers rebuild the transform after).</summary>
+    private void ClearActiveAnimation()
+    {
+        _active = null;
+        _canvasViewState.SnapTranslation = true;
     }
 
     /// <summary>
@@ -779,33 +769,20 @@ internal class CanvasViewManager
     /// </summary>
     private void StartZoomAnimation(float targetScale, Point zoomAnchor)
     {
-        // A fresh anchored zoom seeds its pure anchor track from the live (already grid-aligned) position;
-        // a re-target keeps the existing track so the constant grid offset never feeds back and accumulates.
-        var fresh = _currentAnimation != AnimationType.SpringZoom;
+        // Seed the (shared) scale spring only if no spring is running — a re-target keeps its velocity. Detect
+        // a fresh anchored zoom (vs. a re-target of one already running) BEFORE swapping _active, so the anchor
+        // track is reset only when starting fresh and kept on a re-target (so the grid offset can't feed back).
         SeedScaleSpringIfFresh();
-        _zoomTargetScale = targetScale;
-        _zoomCenter = zoomAnchor;
-        if (fresh)
+        if (_active is AnchoredZoomAnimation zoom)
         {
-            _anchorPosX = _canvasViewState.ImagePos.X;
-            _anchorPosY = _canvasViewState.ImagePos.Y;
+            zoom.Aim(targetScale, zoomAnchor, resetAnchorTrack: false);
         }
-
-        // Precompute the constant grid-alignment offset δ (≤0.5 px/axis): take where the exact-anchor zoom
-        // would settle (the anchor-preserving pan at the target scale), nudge it so the composed translation
-        // lands on whole pixels, and store the difference. AnimateSpringZoom blends this in over the settle
-        // tail so the resting frame is grid-clean.
-        var startScale = _canvasViewState.Scale;
-        if (startScale > 0f)
+        else
         {
-            var anchorFinal = ZoomGeometry.AnchorPreservingPan(_zoomCenter, new Point(_anchorPosX, _anchorPosY), startScale, targetScale);
-            var aligned = _canvasViewState.SnapImagePosToPixelGrid(targetScale, anchorFinal);
-            _zoomGridOffsetX = aligned.X - anchorFinal.X;
-            _zoomGridOffsetY = aligned.Y - anchorFinal.Y;
+            zoom = new AnchoredZoomAnimation(this);
+            zoom.Aim(targetScale, zoomAnchor, resetAnchorTrack: true);
+            BeginAnimation(zoom);
         }
-
-        _currentAnimation = AnimationType.SpringZoom;
-        PanZoomAnimationOnGoing = true; // setter turns OFF snapping for the duration of the spring
         ViewChanged?.Invoke();
     }
 
@@ -826,23 +803,12 @@ internal class CanvasViewManager
     private void StartSpringPanAndZoomAnimation(float targetScale, Point targetPosition, Size targetCanvasSize, bool forceReseed = false)
     {
         SeedScaleSpringIfFresh(forceReseed);
-        // Pan state must be seeded whenever the previous animation wasn't already a pan spring
-        // (e.g. coming from a scale-only SpringZoom, which doesn't track pan velocity) — or always on a
-        // forced reseed.
-        if (forceReseed || _currentAnimation != AnimationType.SpringPanAndZoom)
-        {
-            _panXSpring.Reset((float)_canvasViewState.ImagePos.X);
-            _panYSpring.Reset((float)_canvasViewState.ImagePos.Y);
-        }
-        _zoomTargetScale = targetScale;
-        // Land the settled pan on the device-pixel grid so the at-rest snap is a no-op (no end-of-zoom
-        // shift). Only the centred pan+zoom targets (fit / 100% / centred step / launch / exit) are
-        // pre-aligned here; anchored wheel/keyboard zoom keeps its exact per-frame anchor (SpringZoom).
-        _panTargetPosition = _canvasViewState.SnapImagePosToPixelGrid(targetScale, targetPosition);
-        _springPanZoomTargetCanvasSize = targetCanvasSize;
-
-        _currentAnimation = AnimationType.SpringPanAndZoom;
-        PanZoomAnimationOnGoing = true; // setter turns OFF snapping for the duration of the spring
+        // Pan state must be seeded whenever the previous animation wasn't already a pan spring (e.g. coming
+        // from an anchored zoom, which doesn't track pan velocity) — or always on a forced reseed.
+        var reseedPan = forceReseed || _active is not PanZoomAnimation;
+        var panZoom = _active as PanZoomAnimation ?? new PanZoomAnimation(this);
+        panZoom.Aim(targetScale, targetPosition, targetCanvasSize, reseedPan);
+        BeginAnimation(panZoom);
         ViewChanged?.Invoke();
     }
 
@@ -853,7 +819,7 @@ internal class CanvasViewManager
     /// </summary>
     private void SeedScaleSpringIfFresh(bool force = false)
     {
-        if (!force && _currentAnimation is AnimationType.SpringZoom or AnimationType.SpringPanAndZoom) return;
+        if (!force && _active is AnchoredZoomAnimation or PanZoomAnimation) return;
         _scaleSpring.Reset((float)Math.Log(_canvasViewState.Scale));
         _animationStopwatch.Restart();
         _lastSpringElapsedMs = 0;
@@ -864,10 +830,10 @@ internal class CanvasViewManager
     /// </summary>
     private void StartShrugAnimation()
     {
-        _shrugStartPosition = _canvasViewState.ImagePos;
-        _currentAnimation = AnimationType.Shrug;
-        PanZoomAnimationOnGoing = true; // setter turns OFF snapping for the duration of the wiggle
+        var shrug = new ShrugAnimation(this);
+        shrug.Start();
         _animationStopwatch.Restart();
+        BeginAnimation(shrug);
         ViewChanged?.Invoke();
     }
 
@@ -885,22 +851,6 @@ internal class CanvasViewManager
     }
 
     /// <summary>
-    /// Finalizes any spring animation: stops the clock, clears state, and fires AnimationCompleted.
-    /// </summary>
-    private void FinishSpringAnimation()
-    {
-        _animationStopwatch.Stop();
-        _currentAnimation = AnimationType.None;
-        PanZoomAnimationOnGoing = false; // setter re-enables snapping now that we are at rest
-        _suppressZoomUpdateForNextAnimation = false;
-        // Rebuild the transform AFTER snapping is back on so the final resting frame lands on the
-        // device-pixel grid (crisp 1:1 / NVIDIA fix). The settled branch already wrote the exact target
-        // Scale/ImagePos, so this just re-snaps them. See CanvasViewState.SnapTranslation.
-        _canvasViewState.UpdateTransform();
-        AnimationCompleted?.Invoke();
-    }
-
-    /// <summary>
     /// Immediately terminates any in-flight animation, snapping the view to that animation's intended
     /// target first (so a subsequent RetainFromLastPhoto navigation inherits the settled view rather than
     /// a mid-flight frame). Used when navigating to a genuinely new photo — see <see cref="SetScaleAndPosition"/>.
@@ -909,199 +859,90 @@ internal class CanvasViewManager
     /// </summary>
     private void StopAnimationSnappingToTarget()
     {
-        // We are forcing the view to its settled target. Clear the animation flag FIRST (its setter
-        // re-enables snapping) so the per-case UpdateTransform calls below build a snapped, device-pixel
-        // aligned resting frame.
-        PanZoomAnimationOnGoing = false;
-        switch (_currentAnimation)
-        {
-            case AnimationType.SpringZoom:
-                // Jump the pure anchor track to the exact target scale, then apply the full grid offset so
-                // the forced-stop resting frame lands grid-clean (matches a natural settle).
-                var oldScale = _canvasViewState.Scale;
-                if (oldScale > 0)
-                {
-                    var track = ZoomGeometry.AnchorPreservingPan(_zoomCenter, new Point(_anchorPosX, _anchorPosY), oldScale, _zoomTargetScale);
-                    _anchorPosX = track.X;
-                    _anchorPosY = track.Y;
-                }
-                _canvasViewState.Scale = _zoomTargetScale;
-                _canvasViewState.ImagePos.X = _anchorPosX + _zoomGridOffsetX;
-                _canvasViewState.ImagePos.Y = _anchorPosY + _zoomGridOffsetY;
-                _canvasViewState.UpdateTransform();
-                break;
-            case AnimationType.SpringPanAndZoom:
-                _canvasViewState.Scale = _zoomTargetScale;
-                _canvasViewState.ImagePos = _panTargetPosition;
-                _canvasViewState.UpdateTransform();
-                break;
-            case AnimationType.None:
-            case AnimationType.Shrug:
-                break;
-        }
-
+        // Re-enable snapping FIRST so CompleteImmediately's UpdateTransform builds a snapped, device-pixel
+        // aligned resting frame. CompleteImmediately is a no-op for a shrug (it has no settled target).
+        _canvasViewState.SnapTranslation = true;
+        _active?.CompleteImmediately();
         _animationStopwatch.Stop();
-        _currentAnimation = AnimationType.None;
+        _active = null;
         _suppressZoomUpdateForNextAnimation = false;
     }
 
     /// <summary>
-    /// Re-bases an in-flight animation's scale by <paramref name="scaleFactor"/> after a resolution change
-    /// (Preview → HQ). The displayed scale is rescaled by the caller; this keeps the animation's internal
-    /// scale state and target consistent so it keeps converging to the same *visual* zoom without a jump.
-    /// Pan is in screen space and so is unaffected.
+    /// Re-bases an in-flight spring's scale by <paramref name="scaleFactor"/> after a resolution change
+    /// (Preview → HQ). The displayed scale is rescaled by the caller; this keeps the spring's internal scale
+    /// state and target consistent so it keeps converging to the same *visual* zoom without a jump. Pan is in
+    /// screen space and so is unaffected. Only ever called while a spring is active (guarded by the caller).
     /// </summary>
     private void RebaseAnimationScale(float scaleFactor)
     {
         if (scaleFactor <= 0f) return;
         _zoomTargetScale *= scaleFactor;
-        switch (_currentAnimation)
-        {
-            case AnimationType.SpringZoom:
-            case AnimationType.SpringPanAndZoom:
-                _scaleSpring.Position += (float)Math.Log(scaleFactor);
-                break;
-        }
+        _scaleSpring.Position += (float)Math.Log(scaleFactor);
     }
 
-    /// <summary>
-    /// The rendering loop logic for pure spring zoom. Scale springs in log space; pan is derived each
-    /// tick to keep <see cref="_zoomCenter"/> stationary on screen.
-    /// </summary>
-    private void AnimateSpringZoom()
+    // ───────────────────────── IAnimationHost ─────────────────────────
+    // The slice of this class the IViewAnimation strategies drive each frame (see IViewAnimation).
+
+    CanvasViewState IAnimationHost.View => _canvasViewState;
+    SpringAxis IAnimationHost.ScaleSpring => _scaleSpring;
+    SpringAxis IAnimationHost.PanXSpring => _panXSpring;
+    SpringAxis IAnimationHost.PanYSpring => _panYSpring;
+    double IAnimationHost.ElapsedMs => _animationStopwatch.Elapsed.TotalMilliseconds;
+
+    float IAnimationHost.TargetScale
     {
-        if (!TryGetSpringDt(out var dt)) return;
+        get => _zoomTargetScale;
+        set => _zoomTargetScale = value;
+    }
 
-        var targetLog = (float)Math.Log(_zoomTargetScale);
-        _scaleSpring.Step(targetLog, dt);
+    bool IAnimationHost.TryGetDt(out float dt) => TryGetSpringDt(out dt);
 
-        var settled = _scaleSpring.IsSettled(targetLog, Constants.SpringScaleSettleEpsilon, Constants.SpringScaleVelocitySettle);
+    void IAnimationHost.RaiseViewChanged() => ViewChanged?.Invoke();
 
-        float newScale;
-        if (settled)
-        {
-            _scaleSpring.SettleTo(targetLog);
-            newScale = _zoomTargetScale;
-        }
-        else
-        {
-            newScale = (float)Math.Exp(_scaleSpring.Position);
-        }
-
-        // Advance the PURE anchor track: pan tied to scale so the zoom anchor stays pinned every frame with
-        // zero wobble. The track never includes the grid offset, so it can't feed back into itself and drift.
-        var track = ZoomGeometry.AnchorPreservingPan(_zoomCenter, new Point(_anchorPosX, _anchorPosY), _canvasViewState.Scale, newScale);
-        _anchorPosX = track.X;
-        _anchorPosY = track.Y;
-        _canvasViewState.Scale = newScale;
-
-        // Blend the constant ≤0.5 px grid-alignment offset in over the settle tail: w = 0 through the bulk
-        // of the zoom (anchor pinned exactly), ramping to 1 at settle so the resting frame lands on the
-        // device-pixel grid (the at-rest snap is then a no-op). No start jump, no end snap; the only drift
-        // is this ≤0.5 px glide near the very end.
-        var w = settled
-            ? 1.0
-            : Math.Clamp(1.0 - Math.Abs(_scaleSpring.Position - targetLog) / Constants.ZoomGridAlignBlendRangeLog, 0.0, 1.0);
-        _canvasViewState.ImagePos.X = _anchorPosX + w * _zoomGridOffsetX;
-        _canvasViewState.ImagePos.Y = _anchorPosY + w * _zoomGridOffsetY;
-        _canvasViewState.UpdateTransform();
-        ViewChanged?.Invoke();
+    void IAnimationHost.RaiseZoomChanged()
+    {
         if (!_suppressZoomUpdateForNextAnimation) ZoomChanged?.Invoke();
-
-        if (settled) FinishSpringAnimation();
     }
 
-    /// <summary>
-    /// The rendering loop logic for the combined spring pan+zoom (fit / 100% / step). Scale springs in
-    /// log space; pan X and pan Y spring independently in pixel space.
-    /// </summary>
-    private void AnimateSpringPanAndZoom()
+    void IAnimationHost.ReportSettledFit(Size canvasSize)
     {
-        if (!TryGetSpringDt(out var dt)) return;
+        // Final "truth-setter" for the fitted / 1:1 flags from the settled scale, using the stored canvas size.
+        if (canvasSize.Width <= 0 || canvasSize.Height <= 0) return;
+        var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
+        var screenFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
+        IsFittedToScreen = Math.Abs(_zoomTargetScale - screenFitScale) < ScaleTolerance;
+        IsAtOneToOne = Math.Abs(_zoomTargetScale - 1.0f) < ScaleTolerance;
+    }
 
-        var targetLog = (float)Math.Log(_zoomTargetScale);
-        _scaleSpring.Step(targetLog, dt);
-        _panXSpring.Step((float)_panTargetPosition.X, dt);
-        _panYSpring.Step((float)_panTargetPosition.Y, dt);
-
-        var scaleSettled = _scaleSpring.IsSettled(targetLog, Constants.SpringScaleSettleEpsilon, Constants.SpringScaleVelocitySettle);
-        var panSettled = _panXSpring.IsSettled((float)_panTargetPosition.X, Constants.SpringPanSettleEpsilon, Constants.SpringPanVelocitySettle)
-                         && _panYSpring.IsSettled((float)_panTargetPosition.Y, Constants.SpringPanSettleEpsilon, Constants.SpringPanVelocitySettle);
-        var settled = scaleSettled && panSettled;
-
-        if (settled)
-        {
-            _scaleSpring.SettleTo(targetLog);
-            _panXSpring.SettleTo((float)_panTargetPosition.X);
-            _panYSpring.SettleTo((float)_panTargetPosition.Y);
-            _canvasViewState.Scale = _zoomTargetScale;
-        }
-        else
-        {
-            _canvasViewState.Scale = (float)Math.Exp(_scaleSpring.Position);
-        }
-        _canvasViewState.ImagePos.X = _panXSpring.Position;
-        _canvasViewState.ImagePos.Y = _panYSpring.Position;
+    void IAnimationHost.FinishSpring()
+    {
+        _animationStopwatch.Stop();
+        _suppressZoomUpdateForNextAnimation = false;
+        // Re-enable snapping, then rebuild the transform so the final resting frame lands on the device-pixel
+        // grid (crisp 1:1 / NVIDIA fix). The animation already wrote the exact target Scale/ImagePos.
+        ClearActiveAnimation();
         _canvasViewState.UpdateTransform();
-        ViewChanged?.Invoke();
-        if (!_suppressZoomUpdateForNextAnimation) ZoomChanged?.Invoke();
-
-        if (settled)
-        {
-            // Final "truth-setter" for the fitted / 1:1 flags using the stored canvas size.
-            var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
-            if (_springPanZoomTargetCanvasSize.Width > 0 && _springPanZoomTargetCanvasSize.Height > 0)
-            {
-                var screenFitScale = ZoomGeometry.CalculateScreenFitScale(_springPanZoomTargetCanvasSize, imageSize, _canvasViewState.Rotation);
-                IsFittedToScreen = Math.Abs(_zoomTargetScale - screenFitScale) < ScaleTolerance;
-                IsAtOneToOne = Math.Abs(_zoomTargetScale - 1.0f) < ScaleTolerance;
-            }
-            FinishSpringAnimation();
-        }
+        AnimationCompleted?.Invoke();
     }
 
-    /// <summary>
-    /// The rendering loop callback for the shrug animation.
-    /// </summary>
-    private void AnimateShrug()
+    void IAnimationHost.FinishShrug()
     {
-        var elapsed = _animationStopwatch.Elapsed.TotalMilliseconds;
-        var t = Math.Clamp(elapsed / Constants.ShrugAnimationDurationMs, 0.0, 1.0);
-
-        if (t >= 1.0)
-        {
-            _animationStopwatch.Stop();
-            // Animation finished. Ensure the image is back to its exact starting position.
-            _canvasViewState.ImagePos = _shrugStartPosition;
-            _currentAnimation = AnimationType.None;
-            PanZoomAnimationOnGoing = false; // setter re-enables snapping BEFORE the rebuild below
-            _canvasViewState.UpdateTransform();
-            ViewChanged?.Invoke();
-            return;
-        }
-
-        // --- The Shrug Logic ---
-        // 1. Damping factor: (1 - t) makes the shake fade out over time.
-        var damping = 1 - t;
-        // 2. Sine wave: Creates the oscillating (back and forth) motion.
-        var wave = Math.Sin(t * Constants.ShrugFrequency * 2 * Math.PI);
-        // 3. Combine them to get the final offset from the original position.
-        var xOffset = Constants.ShrugAmplitude * wave * damping;
-
-        // Apply the offset to the original X position. Y position remains unchanged.
-        _canvasViewState.ImagePos.X = _shrugStartPosition.X + xOffset;
-
+        _animationStopwatch.Stop();
+        // Re-enable snapping BEFORE the rebuild; the animation already restored the exact start position.
+        ClearActiveAnimation();
         _canvasViewState.UpdateTransform();
         ViewChanged?.Invoke();
     }
+
+    // ───────────────────────── Dispose ─────────────────────────
 
     /// <summary>
     /// Cleans up resources.
     /// </summary>
     public void Dispose()
     {
-        PanZoomAnimationOnGoing = false;
-        _currentAnimation = AnimationType.None;
+        ClearActiveAnimation(); // drop the active animation and re-enable snapping
         _animationStopwatch.Stop();
     }
 }
