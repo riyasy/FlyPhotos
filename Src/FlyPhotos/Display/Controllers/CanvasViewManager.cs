@@ -68,7 +68,7 @@ namespace FlyPhotos.Display.Controllers;
 ///
 /// <para><b>Per-photo view cache</b> (<c>RememberPerPhoto</c> mode): a navigated-away photo's view is stored
 /// normalized (pan relative to canvas size, rotation relative to the EXIF baseline) and restored on revisit
-/// — see <c>PerPhotoViewState</c>.</para>
+/// — see <see cref="PerPhotoViewStore"/>.</para>
 ///
 /// <para><b>Tuning</b> lives entirely in <see cref="Constants"/> (each spring constant documents the effect
 /// of raising/lowering it). A fuller write-up is in <c>docs/pan-zoom-physics.md</c>.</para>
@@ -163,28 +163,12 @@ internal class CanvasViewManager
     // --- State Management Properties ---
 
     /// <summary>
-    /// A photo's remembered view, used only by <see cref="PanZoomBehaviourOnNavigation.RememberPerPhoto"/>.
-    /// Two fields are stored in a deliberately *relative* form so the view restores correctly even when
-    /// conditions differ between caching and restoring:
-    /// <list type="bullet">
-    ///   <item><see cref="NormalizedPan"/> — pan offset from the canvas centre divided by canvas size
-    ///     (not absolute pixels), so it survives window resizing.</item>
-    ///   <item><see cref="UserRotation"/> — the user's manual rotation only (total rotation minus the
-    ///     image's EXIF baseline), so re-applying it onto a different baseline (e.g. a preview whose
-    ///     embedded thumbnail is pre-oriented vs. an HQ image whose EXIF rotation is applied at render)
-    ///     never double-counts the EXIF orientation.</item>
-    /// </list>
-    /// </summary>
-    private readonly record struct PerPhotoViewState(
-        float Scale, float LastScaleTo, Point NormalizedPan, int UserRotation);
-
-    /// <summary>
-    /// Per-session cache of user-modified views, keyed by photo file path.
+    /// Per-session memory of user-modified views for "RememberPerPhoto" mode (see <see cref="PerPhotoViewStore"/>).
     /// Populated on navigate-away (<see cref="CacheCurrentViewState"/>), consumed on revisit
-    /// (<see cref="SetCachedView"/>), and pruned when a photo returns to its default view
+    /// (<see cref="ApplyRestoredView"/>), and pruned when a photo returns to its default view
     /// (<see cref="CheckIfViewBackToDefaultState"/>).
     /// </summary>
-    private readonly Dictionary<string, PerPhotoViewState> _perPhotoStateCache = [];
+    private readonly PerPhotoViewStore _viewStore = new();
 
     /// <summary>
     /// Tracks if the view state has been modified by user input (pan, zoom, rotate).
@@ -234,7 +218,7 @@ internal class CanvasViewManager
     /// <summary>
     /// Saves the current view for <paramref name="photoPath"/> if "RememberPerPhoto" is enabled and the
     /// user has actually modified the view (panned, zoomed, or rotated). Pan is stored normalized to the
-    /// canvas size and rotation relative to the EXIF baseline — see <see cref="PerPhotoViewState"/>.
+    /// canvas size and rotation relative to the EXIF baseline — see <see cref="PerPhotoViewStore"/>.
     /// </summary>
     public void CacheCurrentViewState(string photoPath, Size canvasSize)
     {
@@ -242,19 +226,8 @@ internal class CanvasViewManager
             || !_isStateModifiedByUser)
             return;
 
-        // Convert the absolute pan to a canvas-size-independent offset from the centre.
-        var panOffsetX = _canvasViewState.ImagePos.X - canvasSize.Width / 2.0;
-        var panOffsetY = _canvasViewState.ImagePos.Y - canvasSize.Height / 2.0;
-        var normalizedPanX = canvasSize.Width > 0 ? panOffsetX / canvasSize.Width : 0; // guard div-by-zero
-        var normalizedPanY = canvasSize.Height > 0 ? panOffsetY / canvasSize.Height : 0;
-
-        // Strip the EXIF baseline so only the user's manual rotation is remembered; SetCachedView
-        // re-bases it onto whatever baseline the image presents on the next visit.
-        var userRotation = _canvasViewState.Rotation - _originalImageRotation;
-
-        _perPhotoStateCache[photoPath] = new PerPhotoViewState(
-            _canvasViewState.Scale, _canvasViewState.LastScaleTo,
-            new Point(normalizedPanX, normalizedPanY), userRotation);
+        _viewStore.Save(photoPath, _canvasViewState.Scale, _canvasViewState.LastScaleTo,
+            _canvasViewState.ImagePos, _canvasViewState.Rotation, _originalImageRotation, canvasSize);
     }
 
     /// <summary>
@@ -336,12 +309,12 @@ internal class CanvasViewManager
             {
                 case PanZoomBehaviourOnNavigation.RememberPerPhoto:
                     // Reached for a photo's initial display or first real content after a placeholder.
-                    // Establish the EXIF baseline before SetCachedView re-bases the stored user-rotation.
+                    // Establish the EXIF baseline before TryRestore re-bases the stored user-rotation.
                     _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
                     _originalImageRotation = imageRotation;
 
-                    if (_perPhotoStateCache.TryGetValue(photoPath, out var cachedState))
-                        SetCachedView(imageSize, canvasSize, cachedState);
+                    if (_viewStore.TryRestore(photoPath, _originalImageRotation, canvasSize, out var restored))
+                        ApplyRestoredView(imageSize, canvasSize, restored);
                     else
                         SetDefaultView(imageSize, imageRotation, canvasSize, isFirstPhotoEver: false);
                     break;
@@ -408,30 +381,21 @@ internal class CanvasViewManager
     }
 
     /// <summary>
-    /// Restores a remembered view (see <see cref="PerPhotoViewState"/>) onto the current photo.
-    /// Pan is de-normalized for the current canvas size, and the remembered user-rotation is re-based
-    /// onto this image's EXIF baseline (<see cref="_originalImageRotation"/>, which the caller has just
-    /// set). Re-basing keeps Rotation and _originalImageRotation consistent, so a subsequent Preview → HQ
-    /// upgrade's rotation delta nets to zero error even when the preview and HQ baselines differ.
+    /// Applies a remembered view (de-normalized by <see cref="PerPhotoViewStore"/> for the current canvas and
+    /// EXIF baseline) onto the current photo. The rotation has already been re-based onto
+    /// <see cref="_originalImageRotation"/>, so Rotation and the baseline stay consistent and a subsequent
+    /// Preview → HQ upgrade's rotation delta nets to zero even when the preview and HQ baselines differ.
     /// </summary>
-    private void SetCachedView(Size imageSize, Size canvasSize, PerPhotoViewState cachedState)
+    private void ApplyRestoredView(Size imageSize, Size canvasSize, PerPhotoViewStore.RestoredView restored)
     {
-        _canvasViewState.Scale = cachedState.Scale;
-        _canvasViewState.LastScaleTo = cachedState.LastScaleTo;
-        _canvasViewState.Rotation = _originalImageRotation + cachedState.UserRotation;
-
-        // Re-hydrate the absolute pan position from the normalized offset for the current canvas size.
-        var normalizedPanX = cachedState.NormalizedPan.X;
-        var normalizedPanY = cachedState.NormalizedPan.Y;
-        var panOffsetX = normalizedPanX * canvasSize.Width;
-        var panOffsetY = normalizedPanY * canvasSize.Height;
-        _canvasViewState.ImagePos = new Point(canvasSize.Width / 2.0 + panOffsetX, canvasSize.Height / 2.0 + panOffsetY);
+        _canvasViewState.Scale = restored.Scale;
+        _canvasViewState.LastScaleTo = restored.LastScaleTo;
+        _canvasViewState.Rotation = restored.Rotation;
+        _canvasViewState.ImagePos = restored.ImagePos;
 
         // Recalculate fitted/1:1 flags. Must check both scale AND pan: a panned-at-fit-scale photo is not "fitted".
         var fitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
-        IsFittedToScreen = Math.Abs(_canvasViewState.Scale - fitScale) < ScaleTolerance
-                           && Math.Abs(normalizedPanX) < 0.001
-                           && Math.Abs(normalizedPanY) < 0.001;
+        IsFittedToScreen = Math.Abs(_canvasViewState.Scale - fitScale) < ScaleTolerance && restored.PanIsCentered;
         IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < ScaleTolerance;
         _canvasViewState.UpdateTransform();
         _isStateModifiedByUser = true; // A cached state is by definition user-modified.
@@ -781,7 +745,7 @@ internal class CanvasViewManager
         {
             _isStateModifiedByUser = false;
             if (!string.IsNullOrEmpty(_photoPath))
-                _perPhotoStateCache.Remove(_photoPath);
+                _viewStore.Remove(_photoPath);
         }
         else { _isStateModifiedByUser = true; }
     }
