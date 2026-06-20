@@ -1,7 +1,7 @@
 using System;
 using FlyPhotos.Core;
 
-namespace FlyPhotos.Display.Controllers;
+namespace FlyPhotos.Display.Controllers.Animation;
 
 /// <summary>
 /// One axis of a damped harmonic oscillator: a <see cref="Position"/> and <see cref="Velocity"/> that you

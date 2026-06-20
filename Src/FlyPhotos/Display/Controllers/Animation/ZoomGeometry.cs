@@ -6,7 +6,7 @@ using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
 using Size = FlyPhotos.Core.Model.Size;
 
-namespace FlyPhotos.Display.Controllers;
+namespace FlyPhotos.Display.Controllers.Animation;
 
 /// <summary>
 /// Stateless geometry for zoom / fit: fit-scale, the anchor-preserving pan primitive, sticky-zoom snapping,

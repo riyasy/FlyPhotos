@@ -2,7 +2,7 @@ using System;
 using Windows.Foundation;
 using FlyPhotos.Core;
 
-namespace FlyPhotos.Display.Controllers;
+namespace FlyPhotos.Display.Controllers.Animation;
 
 /// <summary>
 /// Cursor/keyboard/side-button anchored zoom: scale springs in log space while the pan is derived each frame

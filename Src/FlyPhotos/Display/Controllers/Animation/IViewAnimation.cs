@@ -1,7 +1,7 @@
 using FlyPhotos.Display.State;
 using Size = FlyPhotos.Core.Model.Size;
 
-namespace FlyPhotos.Display.Controllers;
+namespace FlyPhotos.Display.Controllers.Animation;
 
 /// <summary>
 /// A view animation (anchored zoom, pan+zoom, or shrug) advanced once per frame by

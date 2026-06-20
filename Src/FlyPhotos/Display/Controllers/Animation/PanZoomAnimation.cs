@@ -3,7 +3,7 @@ using Windows.Foundation;
 using FlyPhotos.Core;
 using Size = FlyPhotos.Core.Model.Size;
 
-namespace FlyPhotos.Display.Controllers;
+namespace FlyPhotos.Display.Controllers.Animation;
 
 /// <summary>
 /// Combined pan+zoom toward an explicit target (Fit, 100%, centred step, double-click, launch open-zoom,

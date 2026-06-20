@@ -4,6 +4,7 @@ using System.Diagnostics;
 using Windows.Foundation;
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Display.Controllers.Animation;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
 using Size = FlyPhotos.Core.Model.Size;

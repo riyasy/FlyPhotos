@@ -2,7 +2,7 @@ using System;
 using Windows.Foundation;
 using FlyPhotos.Core;
 
-namespace FlyPhotos.Display.Controllers;
+namespace FlyPhotos.Display.Controllers.Animation;
 
 /// <summary>
 /// A decaying horizontal sine "shake" that signals a rejected action (e.g. a failed delete). Time-based
