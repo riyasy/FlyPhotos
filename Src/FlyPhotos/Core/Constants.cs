@@ -65,6 +65,13 @@ internal static class Constants
     public const double SpringPanSettleEpsilon = 0.1;      // pan closeness, pixels
     public const float SpringPanVelocitySettle = 2f;       // pan speed, pixels/sec
 
+    // Anchored zoom (wheel / keyboard / side-button) lands its resting frame on the device-pixel grid by
+    // blending a constant ≤0.5 px grid-alignment offset into the pan over the settle tail. This is the
+    // log-scale window (distance to target) over which that offset ramps 0→1: OUTSIDE it the cursor anchor
+    // is pinned exactly (zero drift); INSIDE it the offset glides in so the landing is grid-clean with no
+    // end-snap. Larger = gentler/longer glide; smaller = the ≤0.5 px correction comes in more abruptly.
+    public const double ZoomGridAlignBlendRangeLog = 0.08;
+
     // Related to Shrug Animation for Delete Failure
     public const double ShrugAnimationDurationMs = 350;
     public const double ShrugAmplitude = 20; // How many pixels to shake
