@@ -67,6 +67,7 @@
             VerticalAlignment="Center"
             Background="#66000000"
             CornerRadius="5"
+            IsHitTestVisible="False"
             Visibility="Collapsed">
             <TextBlock
                 x:Name="TxtZoom"
