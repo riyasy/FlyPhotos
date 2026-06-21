@@ -78,6 +78,7 @@
                 VerticalAlignment="Center"
                 FontSize="12"
                 Foreground="White"
+                Typography.NumeralAlignment="Tabular"
                 Text="" />
         </Border>
         <StackPanel
