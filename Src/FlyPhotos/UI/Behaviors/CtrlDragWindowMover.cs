@@ -4,6 +4,7 @@ using FlyPhotos.Infra.Utils;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
+using Windows.Foundation;
 using Windows.Graphics;
 
 namespace FlyPhotos.UI.Behaviors;
@@ -32,6 +33,8 @@ public sealed partial class CtrlDragWindowMover : IDisposable
         Enabled = enabled;
     }
 
+    public Func<Point, bool>? IsOnBackground { get; set; }
+
     public bool Enabled
     {
         get;
@@ -57,9 +60,10 @@ public sealed partial class CtrlDragWindowMover : IDisposable
 
     private void OnPointerPressed(object sender, PointerRoutedEventArgs e)
     {
-        if (!Util.IsControlPressed()) return;
         var point = e.GetCurrentPoint(_canvas);
         if (point.Properties.PointerUpdateKind != Microsoft.UI.Input.PointerUpdateKind.LeftButtonPressed) return;
+        bool onBackground = IsOnBackground?.Invoke(point.Position) ?? false;
+        if (!Util.IsControlPressed() && !onBackground) return;
         // The `{ State: Restored }` member read roots the OverlappedPresenter projection so this cast
         // resolves under NativeAOT + Release; a memberless `is/as OverlappedPresenter` can silently
         // return null there (Debug/non-AOT are fine). Refs: CsWinRT#1930, microsoft-ui-xaml#10471.

@@ -685,10 +685,10 @@ Esc : 設定を閉じる / アプリを終了</value>
     <value>ウィンドウボタンを自動的に隠す</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Ctrlキーを押しながら画像をドラッグすると、ウィンドウの位置を移動できます。</value>
+    <value>背景をドラッグするか、Ctrl キーを押しながら画像をドラッグしてウィンドウを移動できます。</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Ctrl+ドラッグでウィンドウを移動</value>
+    <value>ドラッグしてウィンドウを移動</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>画像拡大縮小方法</value>

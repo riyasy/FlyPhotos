@@ -686,10 +686,10 @@ Esc : Stäng inställningar eller Avsluta</value>
     <value>Dölj fönsterknappar automatiskt</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Håll ned Ctrl och dra bilden för att flytta fönstret.</value>
+    <value>Dra bakgrunden eller håll ned Ctrl och dra bilden för att flytta fönstret.</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Ctrl+dra för att flytta fönstret</value>
+    <value>Dra för att flytta fönstret</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Skalningsmetod för bilder</value>

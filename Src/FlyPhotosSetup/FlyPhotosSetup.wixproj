@@ -20,7 +20,7 @@
     <!-- The installer's own version string: it becomes both the MSI ProductVersion
          and the version in the output file name. >>> BUMP THIS FOR EACH RELEASE <<<
          Override per build with -p:BuildVersion=x.y.z. -->
-    <BuildVersion Condition="'$(BuildVersion)' == ''">2.6.3</BuildVersion>
+    <BuildVersion Condition="'$(BuildVersion)' == ''">2.6.5</BuildVersion>
     <!-- Source folder harvested by Files.wxs (the AOT publish output). -->
     <PublishDir>$(MSBuildThisFileDirectory)..\FlyPhotos\bin\$(PublishRid)\publish</PublishDir>
     <!-- Output file: FlyPhotosInstaller_<version>_<Platform>.msi. WiX overwrites

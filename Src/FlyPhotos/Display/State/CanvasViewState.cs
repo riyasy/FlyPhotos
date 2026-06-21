@@ -25,33 +25,58 @@ internal class CanvasViewState
     /// displays). Rounding buys nothing mid-animation anyway — the fractional Scale already sub-pixel-samples
     /// the image — so we round only when settled. This mirrors how the XAML Image element behaves (layout
     /// rounding at rest, smooth sub-pixel resampling during a composition scale animation).
+    /// <para>
+    /// Animation settle targets are pre-quantized via <see cref="SnapImagePosToPixelGrid"/> so the settled
+    /// frame already lands on the grid; the round below is then a no-op for those paths (a pure guard) and
+    /// the image no longer visibly "snaps" by ±0.5 px when an animation completes. The guard still fires for
+    /// direct-set paths (drag-pan, touchpad precision zoom, restored views).
+    /// </para>
     /// </summary>
     public bool SnapTranslation = true;
 
     public void UpdateTransform()
     {
-        Mat = Matrix3x2.Identity;
+        Mat = ComposeUnsnapped(Scale, ImagePos);
 
-        // Centering translation. Round to whole pixels when snapping (at rest) to avoid subpixel rendering.
-        // This term is constant for a given image, so it never contributes to settle-shiver; gating it keeps
-        // the matrix fully unsnapped during animation for consistency.
-        float translateX1 = SnapTranslation ? MathF.Round((float)(-ImageRect.Width * 0.5f)) : (float)(-ImageRect.Width * 0.5f);
-        float translateY1 = SnapTranslation ? MathF.Round((float)(-ImageRect.Height * 0.5f)) : (float)(-ImageRect.Height * 0.5f);
-        Mat *= Matrix3x2.CreateTranslation(translateX1, translateY1);
+        // Snap the final screen-space translation to whole pixels to avoid the NVIDIA nearest-neighbour
+        // glitch (#55). Snapping pre-scale terms amplifies the rounding by Scale (e.g. ±10 px at 2000%),
+        // so we snap Mat.M31/M32 after full composition — always exactly ±0.5 screen px regardless of zoom.
+        // SnapTranslation is cleared during animations to prevent a 1-px staircase shiver in the settle tail.
+        if (SnapTranslation)
+        {
+            Mat.M31 = MathF.Round(Mat.M31);
+            Mat.M32 = MathF.Round(Mat.M32);
+        }
 
-        // Scale operation remains unchanged
-        Mat *= Matrix3x2.CreateScale(Scale, Scale);
-
-        // Rotation remains unchanged
-        Mat *= Matrix3x2.CreateRotation((float)(Math.PI * Rotation / 180f));
-
-        // Pan translation. Per-frame rounding of this term during an animation is what causes the
-        // settle-shiver, so round only when settled (SnapTranslation == true); see SnapTranslation.
-        float translateX2 = SnapTranslation ? MathF.Round((float)ImagePos.X) : (float)ImagePos.X;
-        float translateY2 = SnapTranslation ? MathF.Round((float)ImagePos.Y) : (float)ImagePos.Y;
-        Mat *= Matrix3x2.CreateTranslation(translateX2, translateY2);
-
-        // Calculate inverse transform
         Matrix3x2.Invert(Mat, out MatInv);
+    }
+
+    /// <summary>
+    /// Builds the full image→screen transform (centre origin → scale → rotate → pan) WITHOUT the pixel-grid
+    /// snap. Shared by <see cref="UpdateTransform"/> and <see cref="SnapImagePosToPixelGrid"/> so the two can
+    /// never disagree about how translation is composed.
+    /// </summary>
+    private Matrix3x2 ComposeUnsnapped(float scale, Point imagePos)
+    {
+        var m = Matrix3x2.Identity;
+        m *= Matrix3x2.CreateTranslation((float)(-ImageRect.Width * 0.5f), (float)(-ImageRect.Height * 0.5f));
+        m *= Matrix3x2.CreateScale(scale, scale);
+        m *= Matrix3x2.CreateRotation((float)(Math.PI * Rotation / 180f));
+        m *= Matrix3x2.CreateTranslation((float)imagePos.X, (float)imagePos.Y);
+        return m;
+    }
+
+    /// <summary>
+    /// Returns <paramref name="imagePos"/> nudged (≤0.5 px) so that the fully-composed translation
+    /// (Mat.M31/M32) at <paramref name="scale"/> lands on whole device pixels. ImagePos enters the composed
+    /// translation with coefficient 1, so subtracting the fractional residual of M31/M32 from it is exact.
+    /// Feeding an animation this as its settle target makes the at-rest <see cref="SnapTranslation"/> round a
+    /// no-op, so there is no end-of-zoom shift.
+    /// </summary>
+    public Point SnapImagePosToPixelGrid(float scale, Point imagePos)
+    {
+        var m = ComposeUnsnapped(scale, imagePos);
+        return new Point(imagePos.X - (m.M31 - MathF.Round(m.M31)),
+                         imagePos.Y - (m.M32 - MathF.Round(m.M32)));
     }
 }

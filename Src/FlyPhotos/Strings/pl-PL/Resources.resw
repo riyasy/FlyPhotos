@@ -686,10 +686,10 @@ Esc : Zamknij ustawienia lub Wyjdź</value>
     <value>Automatycznie ukrywaj przyciski okna</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Przytrzymaj klawisz Ctrl i przeciągnij obraz, aby przenieść okno.</value>
+    <value>Przeciągnij tło lub przytrzymaj Ctrl i przeciągnij obraz, aby przenieść okno.</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Ctrl+przeciągnięcie, aby przenieść okno</value>
+    <value>Przeciąganie, aby przenieść okno</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Metoda skalowania obrazu</value>

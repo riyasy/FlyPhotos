@@ -686,10 +686,10 @@ Esc : Einstellungen schließen oder App beenden</value>
     <value>Fensterschaltflächen automatisch ausblenden</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Halten Sie die Strg-Taste gedrückt und ziehen Sie das Bild, um das Fenster zu verschieben.</value>
+    <value>Ziehen Sie den Hintergrund, oder halten Sie die Strg-Taste gedrückt und ziehen Sie das Bild, um das Fenster zu verschieben.</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Strg+Ziehen zum Verschieben des Fensters</value>
+    <value>Fenster verschieben durch Ziehen</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Skalierungsmethode</value>

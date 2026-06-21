@@ -685,10 +685,10 @@ Esc : 설정 닫기 또는 앱 종료</value>
     <value>창 버튼 자동 숨기기</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Ctrl 키를 누른 상태에서 이미지를 드래그하면 창을 이동할 수 있습니다.</value>
+    <value>배경을 드래그하거나 Ctrl 키를 누른 상태에서 이미지를 드래그하면 창을 이동할 수 있습니다.</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Ctrl+드래그하여 창 이동</value>
+    <value>드래그하여 창 이동</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>이미지 크기 조절 방법</value>

@@ -686,10 +686,10 @@ Esc：关闭设置或退出应用</value>
     <value>自动隐藏窗口按钮</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>按住 Ctrl 键并拖动图片即可移动窗口。</value>
+    <value>拖动背景或按住 Ctrl 键拖动图片即可移动窗口。</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Ctrl+拖动以移动窗口</value>
+    <value>拖动以移动窗口</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>图像缩放方法</value>

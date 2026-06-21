@@ -152,6 +152,7 @@ public sealed partial class PhotoDisplayWindow
         _windFullScreenManager = new WindowFullScreenManager(this);
         _captionButtonFader = new WindowCaptionButtonFader(AppWindow.TitleBar, MainLayout, AppConfig.Settings.AutoHideCaptionButtons);
         _ctrlDragWindowMover = new CtrlDragWindowMover(D2dCanvas, AppWindow, AppConfig.Settings.CtrlDragToMoveWindow);
+        _ctrlDragWindowMover.IsOnBackground = pos => !_canvasController.IsPressedOnImage(pos.AdjustForDpi(D2dCanvas));
         _windFullScreenManager.FullScreenToggled += isFullScreen =>
         {
             _windPlacementManager.PauseTracking = isFullScreen;

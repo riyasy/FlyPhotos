@@ -686,10 +686,10 @@ Esc : Instellingen sluiten of App verlaten</value>
     <value>Vensterknoppen automatisch verbergen</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Houd Ctrl ingedrukt en sleep de afbeelding om het venster te verplaatsen.</value>
+    <value>Sleep de achtergrond of houd Ctrl ingedrukt en sleep de afbeelding om het venster te verplaatsen.</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Ctrl+slepen om venster te verplaatsen</value>
+    <value>Slepen om venster te verplaatsen</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Schaalmethode voor afbeeldingen</value>
