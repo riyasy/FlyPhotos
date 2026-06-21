@@ -18,7 +18,7 @@
       3. Times each launch until a top-level window appears and reports the results,
          including the active Power Mode.
 
-    It can also be driven non-interactively (this is how Measure-CommonApps.ps1 calls it):
+    It can also be driven non-interactively for scripted use:
         -Aumid <AUMID> [-ProcessName <name>] [-PassThru]
 
 .PARAMETER Aumid
@@ -59,7 +59,7 @@
     (default: 1500).
 
 .PARAMETER PassThru
-    Emit a summary object on the success stream (for callers like Measure-CommonApps.ps1).
+    Emit a summary object on the success stream (for scripted/programmatic use).
     Suppresses the extra environment/power-mode banner and final table.
 
 .PARAMETER Force
@@ -68,11 +68,11 @@
     work). The prompt only appears in interactive/standalone use, never under -PassThru.
 
 .EXAMPLE
-    .\Measure-StoreAppLaunch.ps1
+    .\measure_a_store_app.ps1
     # Interactive: search an app, optionally give a file, measure.
 
 .EXAMPLE
-    .\Measure-StoreAppLaunch.ps1 -Aumid "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App" -Runs 5
+    .\measure_a_store_app.ps1 -Aumid "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App" -Runs 5
 
 .NOTES
     "Window up" is detected via MainWindowHandle != 0, which fires when the window is

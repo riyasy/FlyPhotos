@@ -13,9 +13,9 @@
     Mode (the Best efficiency / Balanced / Best performance slider) that was active during
     the run, so you can record the conditions the numbers were measured under.
 
-    Each app is measured via launch activation (IApplicationActivationManager) using the
-    shared Measure-StoreAppLaunch.ps1 in the same folder, which returns the real PID and
-    times until MainWindowHandle appears.
+    Each app is measured via launch activation (IApplicationActivationManager), which
+    returns the real PID; the script then times until a top-level window appears. It is
+    fully self-contained -- no other scripts are required.
 
 .PARAMETER Runs
     Measured launch iterations per app (default: 5).
@@ -34,10 +34,10 @@
     discard unsaved work in e.g. Notepad or Paint.
 
 .EXAMPLE
-    .\Measure-CommonApps.ps1
+    .\measure_microsoft_common_apps.ps1
 
 .EXAMPLE
-    .\Measure-CommonApps.ps1 -Apps Calculator, Notepad -Runs 20
+    .\measure_microsoft_common_apps.ps1 -Apps Calculator, Notepad -Runs 20
 
 .NOTES
     To measure a true cold launch, this benchmark force-closes running instances of the
@@ -58,10 +58,42 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$childScript = Join-Path $PSScriptRoot "Measure-StoreAppLaunch.ps1"
-if (-not (Test-Path $childScript)) {
-    Write-Error "Required script not found next to this one: $childScript"
-    exit 1
+# --- Launch activation interop (self-contained) -------------------------------
+# IApplicationActivationManager::ActivateApplication returns the activated PID, the
+# reliable way to get a handle on a packaged app's real process.
+if (-not ([System.Management.Automation.PSTypeName]'CommonApps.Activator').Type) {
+    Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+namespace CommonApps
+{
+    public enum ActivateOptions { None = 0 }
+
+    [ComImport, Guid("2e941141-7f97-4756-ba1d-9decde894a3d"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IApplicationActivationManager
+    {
+        IntPtr ActivateApplication(
+            [In] string appUserModelId, [In] string arguments,
+            [In] ActivateOptions options, [Out] out uint processId);
+    }
+
+    [ComImport, Guid("45BA127D-10A8-46EA-8AB7-56EA9078943C")]
+    public class ApplicationActivationManager { }
+
+    public static class Activator
+    {
+        public static uint Activate(string aumid, string args)
+        {
+            var mgr = (IApplicationActivationManager)new ApplicationActivationManager();
+            uint pid;
+            IntPtr hr = mgr.ActivateApplication(aumid, args, ActivateOptions.None, out pid);
+            if (hr.ToInt64() != 0)
+                throw new Exception("ActivateApplication failed, HRESULT=0x" + hr.ToInt64().ToString("X8"));
+            return pid;
+        }
+    }
+}
+"@
 }
 
 # --- Power Mode overlay (read-only) -------------------------------------------
@@ -109,6 +141,112 @@ function Get-PowerModeReport {
         }
     } catch {
         return "unknown (read failed)"
+    }
+}
+
+# --- Measurement --------------------------------------------------------------
+function Clear-RunningInstances {
+    param([string]$Name, [int]$SettleMs)
+    if ([string]::IsNullOrEmpty($Name)) { return }
+    $running = @(Get-Process -Name $Name -ErrorAction SilentlyContinue)
+    if ($running.Count -gt 0) {
+        $running | Stop-Process -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Milliseconds $SettleMs
+    }
+}
+
+function Invoke-LaunchRun {
+    # One cold launch via activation. Polls BOTH the returned PID and the process name --
+    # single-instance apps (e.g. Notepad) hand off to a different PID, and some apps' PID
+    # owns the window but their process name doesn't match Get-Process (e.g. Photos).
+    param([string]$AppId, [string]$ProcName, [int]$TimeoutMs, [int]$KillDelayMs)
+
+    $proc = $null; $windowMs = $null
+    $sw   = [System.Diagnostics.Stopwatch]::StartNew()
+    $appPid  = [CommonApps.Activator]::Activate($AppId, "")
+    $spawnMs = $sw.ElapsedMilliseconds
+
+    $pidProc = $null
+    try { $pidProc = [System.Diagnostics.Process]::GetProcessById([int]$appPid) } catch {}
+
+    while ($sw.ElapsedMilliseconds -lt $TimeoutMs) {
+        if ($pidProc) {
+            try { $pidProc.Refresh() } catch { $pidProc = $null }
+            if ($pidProc -and -not $pidProc.HasExited -and $pidProc.MainWindowHandle -ne [IntPtr]::Zero) {
+                $proc = $pidProc; $windowMs = $sw.ElapsedMilliseconds; break
+            }
+        }
+        if ($ProcName -ne '') {
+            $p = Get-Process -Name $ProcName -ErrorAction SilentlyContinue |
+                 Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero } |
+                 Select-Object -First 1
+            if ($p) { $proc = $p; $windowMs = $sw.ElapsedMilliseconds; break }
+        }
+        if (-not $pidProc -and $ProcName -eq '') { break }
+        Start-Sleep -Milliseconds 15
+    }
+
+    Start-Sleep -Milliseconds $KillDelayMs
+    if ($proc -and -not $proc.HasExited) {
+        try { $proc.Kill() } catch {}
+        $proc.WaitForExit(3000) | Out-Null
+    }
+    return [PSCustomObject]@{ SpawnMs = $spawnMs; WindowMs = $windowMs; TimedOut = ($null -eq $windowMs) }
+}
+
+function Measure-App {
+    # Warm-up + measured runs for one app; prints progress and returns a result row.
+    param($App, [int]$Runs, [int]$WarmupRuns, [int]$TimeoutMs, [int]$KillAfterMs, [int]$SettleMs)
+
+    for ($i = 1; $i -le $WarmupRuns; $i++) {
+        Clear-RunningInstances -Name $App.ProcessName -SettleMs $SettleMs
+        [void](Invoke-LaunchRun -AppId $App.Aumid -ProcName $App.ProcessName -TimeoutMs $TimeoutMs -KillDelayMs $KillAfterMs)
+        Start-Sleep -Milliseconds $SettleMs
+    }
+
+    $samples = @()
+    for ($i = 1; $i -le $Runs; $i++) {
+        Clear-RunningInstances -Name $App.ProcessName -SettleMs $SettleMs
+        $r = Invoke-LaunchRun -AppId $App.Aumid -ProcName $App.ProcessName -TimeoutMs $TimeoutMs -KillDelayMs $KillAfterMs
+        $samples += $r
+        if ($r.TimedOut) {
+            Write-Host ("      run {0,-3}: TIMEOUT" -f $i) -ForegroundColor Red
+        } else {
+            Write-Host ("      run {0,-3}: {1} ms" -f $i, $r.WindowMs) -ForegroundColor DarkGray
+        }
+        Start-Sleep -Milliseconds $SettleMs
+    }
+
+    $valid = @($samples | Where-Object { -not $_.TimedOut })
+    if ($valid.Count -eq 0) {
+        return [PSCustomObject]@{
+            App = $App.Name; ValidRuns = "0/$Runs"; MedianMs = $null; AvgMs = $null
+            MinMs = $null; MaxMs = $null; P95Ms = $null; LaunchMs = $null; Rating = "All timed out"
+        }
+    }
+
+    $w        = @($valid | ForEach-Object { $_.WindowMs })
+    $sorted   = @($w | Sort-Object)
+    $avg      = [math]::Round(($w | Measure-Object -Average).Average, 1)
+    $p95Index = [math]::Min([math]::Floor($sorted.Count * 0.95), $sorted.Count - 1)
+    $spawnAvg = [math]::Round((@($valid | ForEach-Object { $_.SpawnMs }) | Measure-Object -Average).Average, 1)
+
+    $rating = "Very slow  (>= 4s)"
+    if     ($avg -lt 500)  { $rating = "Excellent  (< 0.5s)" }
+    elseif ($avg -lt 1000) { $rating = "Good       (< 1s)"   }
+    elseif ($avg -lt 2000) { $rating = "Acceptable (< 2s)"   }
+    elseif ($avg -lt 4000) { $rating = "Slow       (< 4s)"   }
+
+    return [PSCustomObject]@{
+        App       = $App.Name
+        ValidRuns = "$($valid.Count)/$Runs"
+        MedianMs  = $sorted[[math]::Floor($sorted.Count / 2)]
+        AvgMs     = $avg
+        MinMs     = ($w | Measure-Object -Minimum).Minimum
+        MaxMs     = ($w | Measure-Object -Maximum).Maximum
+        P95Ms     = $sorted[$p95Index]
+        LaunchMs  = $spawnAvg
+        Rating    = $rating
     }
 }
 
@@ -231,22 +369,8 @@ foreach ($app in $targets) {
     Write-Host ("  >>> {0}" -f $app.Name) -ForegroundColor Magenta
 
     try {
-        $summary = & $childScript -Aumid $app.Aumid -ProcessName $app.ProcessName `
-                    -Runs $Runs -WarmupRuns $WarmupRuns -KillAfterMs 800 -SettleMs 1000 -PassThru
-
-        if ($summary) {
-            $results += [PSCustomObject]@{
-                App        = $app.Name
-                ValidRuns  = "$($summary.ValidRuns)/$($summary.Runs)"
-                MedianMs   = $summary.MedianMs
-                AvgMs      = $summary.AvgMs
-                MinMs      = $summary.MinMs
-                MaxMs      = $summary.MaxMs
-                P95Ms      = $summary.P95Ms
-                LaunchMs   = $summary.SpawnAvgMs
-                Rating     = $summary.Rating
-            }
-        }
+        $results += Measure-App -App $app -Runs $Runs -WarmupRuns $WarmupRuns `
+                        -TimeoutMs 30000 -KillAfterMs 800 -SettleMs 1000
     } catch {
         Write-Warning ("{0} failed: {1}" -f $app.Name, $_.Exception.Message)
         $results += [PSCustomObject]@{

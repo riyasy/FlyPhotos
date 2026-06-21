@@ -13,7 +13,7 @@
     It can also be driven non-interactively with -AppPath / -AppArgs.
 
     (For Store / UWP / MSIX-packaged apps -- which cannot be launched by exe path -- use
-    Measure-StoreAppLaunch.ps1 instead.)
+    the Store app profiler script instead.)
 
 .PARAMETER AppPath
     Full path to the executable to profile. When supplied, the interactive prompts are
@@ -47,11 +47,11 @@
     work). The prompt only appears in interactive/standalone use, never under -PassThru.
 
 .EXAMPLE
-    .\Measure-AppLaunch.ps1
+    .\measure_an_exe.ps1
     # Interactive: enter an exe path, optionally a file, measure.
 
 .EXAMPLE
-    .\Measure-AppLaunch.ps1 -AppPath "C:\Tools\iview\i_view64.exe" -AppArgs "C:\pics\a.jpg" -Runs 5
+    .\measure_an_exe.ps1 -AppPath "C:\Tools\iview\i_view64.exe" -AppArgs "C:\pics\a.jpg" -Runs 5
 
 .NOTES
     "Window up" is detected via MainWindowHandle != 0, which fires when the window is
@@ -210,7 +210,7 @@ if ($AppPath -eq '') {
         if ($raw -eq '') { Write-Host "  Please enter a path." -ForegroundColor Yellow; continue }
         if (-not (Test-Path -LiteralPath $raw -PathType Leaf)) { Write-Host "  File not found. Try again." -ForegroundColor Yellow; continue }
         if ([System.IO.Path]::GetExtension($raw) -ne '.exe') {
-            Write-Host "  That isn't an .exe. For Store apps use Measure-StoreAppLaunch.ps1." -ForegroundColor Yellow
+            Write-Host "  That isn't an .exe. For Store / packaged apps use the Store app profiler." -ForegroundColor Yellow
             continue
         }
         $AppPath = (Resolve-Path -LiteralPath $raw).Path
