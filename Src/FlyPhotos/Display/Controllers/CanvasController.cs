@@ -51,28 +51,12 @@ internal partial class CanvasController : ICanvasController
     // W2D-owned: swapped/read only on the W2D thread (install action + Draw).
     private IRenderer _currentRenderer;
 
-    // Published W2D -> UI for synchronous pointer hit-testing (IsPressedOnImage).
-    // Written every Update on the W2D thread; read on the UI thread during pointer events.
-    // A Lock is used because Matrix3x2 (6 floats) and Rect (4 doubles) are not atomically writable,
-    // making volatile inadequate. Contention is negligible: pointer events are rare vs. 144 Hz Update.
-    private Matrix3x2 _hitTestMatInv = Matrix3x2.Identity;
-    private Rect _hitTestImageRect;
-    private readonly Lock _hitTestLock = new();
-
-    private int _latestSetSourceOperationId;
-
     // W2D-owned: created lazily in the install action, disposed on device loss in CreateResources.
     private CanvasImageBrush _checkeredBrush;
 
     // W2D-owned view state and view logic.
     private readonly CanvasViewState _canvasViewState;
     private readonly CanvasViewManager _canvasViewManager;
-
-    // UI-owned orchestration fields — touched only inside SetSource / InstallRenderer on the UI thread.
-    private Size _imageSize;
-    private string _currentPhotoPath = string.Empty;
-    private bool _realImageDisplayedForCurrentPhoto;
-    private bool _isMultiPageActive;
 
     // W2D-owned: set inside the ZoomOutOnExit action, read in WaitForPanZoomAnimationAsync.
 
@@ -81,7 +65,27 @@ internal partial class CanvasController : ICanvasController
     private bool _continuousZoomActive;
     private CancellationTokenSource _continuousZoomCts;
 
-    #region Construction and Destruction
+    private int _latestSetSourceOperationId;
+
+    // UI-owned orchestration fields — touched only inside SetSource / InstallRenderer on the UI thread.
+    private Size _imageSize;
+    private string _currentPhotoPath = string.Empty;
+    private bool _realImageDisplayedForCurrentPhoto;
+    private bool _isMultiPageActive;
+
+    // Published W2D -> UI for synchronous pointer hit-testing (IsPressedOnImage).
+    // Written every Update on the W2D thread; read on the UI thread during pointer events.
+    // A Lock is used because Matrix3x2 (6 floats) and Rect (4 doubles) are not atomically writable,
+    // making volatile inadequate. Contention is negligible: pointer events are rare vs. 144 Hz Update.
+    private Matrix3x2 _hitTestMatInv = Matrix3x2.Identity;
+    private Rect _hitTestImageRect;
+    private readonly Lock _hitTestLock = new();
+
+    private int _zoomPercentUiUpdatePending;
+    private int _pendingZoomPercent;
+    private int _lastDispatchedZoomPercent = -1;
+
+    // --- Initialization ---
 
     public CanvasController(CanvasAnimatedControl d2dCanvas, IThumbnailController thumbNailController,
         PhotoSessionState photoSessionState)
@@ -108,33 +112,7 @@ internal partial class CanvasController : ICanvasController
         _canvasViewManager.ViewChanged += RequestInvalidate;
     }
 
-    public void Dispose()
-    {
-        try
-        {
-            // Stop and join the Win2D worker thread BEFORE freeing GPU resources, so no in-flight
-            // Update/Draw can observe a disposed renderer or brush. After this returns there is no
-            // concurrency, so disposal needs no lock.
-            _d2dCanvas.RemoveFromVisualTree();
-            _d2dCanvas.CreateResources -= D2dCanvas_CreateResources;
-            _d2dCanvas.Update -= D2dCanvas_Update;
-            _d2dCanvas.Draw -= D2dCanvas_Draw;
-            _d2dCanvas.SizeChanged -= D2dCanvas_SizeChanged;
-
-            _continuousZoomCts?.Cancel();
-            _continuousZoomCts?.Dispose();
-            _canvasViewManager?.Dispose();
-            _currentRenderer?.Dispose();
-            _currentRenderer = null;
-            _checkeredBrush?.Dispose();
-            _checkeredBrush = null;
-        }
-        catch (Exception ex) { Debug.WriteLine(ex); }
-    }
-
-    #endregion
-
-    #region Public API
+    // --- Photo display ---
 
     /// <summary>
     /// Sets the image source for the canvas, handling different display levels and content types.
@@ -327,76 +305,13 @@ internal partial class CanvasController : ICanvasController
         });
     }
 
-    public void FitToScreen(bool animateChange)
-    {
-        var canvasSize = _d2dCanvas.GetSize();
-        var imageSize = _imageSize;
-        EnqueueW2dAction(() =>
-        {
-            if (_currentRenderer == null) return;
-            _canvasViewManager.ZoomPanToFit(animateChange, imageSize, canvasSize);
-        });
-    }
-
-    public void ZoomToHundred()
-    {
-        var canvasSize = _d2dCanvas.GetSize();
-        EnqueueW2dAction(() =>
-        {
-            if (_currentRenderer == null) return;
-
-            _canvasViewManager.ZoomToHundred(canvasSize);
-        });
-    }
-
-    public void ZoomToHundred(Point anchor)
-    {
-        var canvasSize = _d2dCanvas.GetSize();
-        EnqueueW2dAction(() =>
-        {
-            if (_currentRenderer == null) return;
-
-            _canvasViewManager.ZoomToHundred(canvasSize, anchor);
-        });
-    }
-
-    public void ZoomOutOnExit(double exitAnimationDuration)
-    {
-        var canvasSize = _d2dCanvas.GetSize();
-        EnqueueW2dAction(() =>
-        {
-            _canvasViewManager.ZoomOutOnExit(exitAnimationDuration, canvasSize);
-        });
-    }
-
-    public void ZoomByKeyboard(ZoomDirection zoomDirection)
-    {
-        var canvasSize = _d2dCanvas.GetSize();
-        EnqueueW2dAction(() =>
-        {
-            if (_currentRenderer == null) return;
-
-            _canvasViewManager.ZoomAtCenter(zoomDirection, canvasSize);
-        });
-    }
-
-    public void StepZoom(ZoomDirection zoomDirection, Point? zoomAnchor = null)
-    {
-        var canvasSize = _d2dCanvas.GetSize();
-        EnqueueW2dAction(() =>
-        {
-            if (_currentRenderer == null) return;
-
-            _canvasViewManager.StepZoom(zoomDirection, canvasSize, zoomAnchor);
-        });
-    }
+    // --- Zoom & pan ---
 
     public void ZoomAtPoint(ZoomDirection zoomDirection, Point zoomAnchor)
     {
         EnqueueW2dAction(() =>
         {
             if (_currentRenderer == null) return;
-
             _canvasViewManager.ZoomAtPoint(zoomDirection, zoomAnchor);
         });
     }
@@ -422,6 +337,66 @@ internal partial class CanvasController : ICanvasController
                 catch (TaskCanceledException) { return; }
                 EnqueueW2dAction(() => _continuousZoomActive = false);
             }, token);
+        });
+    }
+
+    public void ZoomByKeyboard(ZoomDirection zoomDirection)
+    {
+        var canvasSize = _d2dCanvas.GetSize();
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.ZoomAtCenter(zoomDirection, canvasSize);
+        });
+    }
+
+    public void StepZoom(ZoomDirection zoomDirection, Point? zoomAnchor = null)
+    {
+        var canvasSize = _d2dCanvas.GetSize();
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.StepZoom(zoomDirection, canvasSize, zoomAnchor);
+        });
+    }
+
+    public void ZoomToHundred()
+    {
+        var canvasSize = _d2dCanvas.GetSize();
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.ZoomToHundred(canvasSize);
+        });
+    }
+
+    public void ZoomToHundred(Point anchor)
+    {
+        var canvasSize = _d2dCanvas.GetSize();
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.ZoomToHundred(canvasSize, anchor);
+        });
+    }
+
+    public void ZoomOutOnExit(double exitAnimationDuration)
+    {
+        var canvasSize = _d2dCanvas.GetSize();
+        EnqueueW2dAction(() =>
+        {
+            _canvasViewManager.ZoomOutOnExit(exitAnimationDuration, canvasSize);
+        });
+    }
+
+    public void FitToScreen(bool animateChange)
+    {
+        var canvasSize = _d2dCanvas.GetSize();
+        var imageSize = _imageSize;
+        EnqueueW2dAction(() =>
+        {
+            if (_currentRenderer == null) return;
+            _canvasViewManager.ZoomPanToFit(animateChange, imageSize, canvasSize);
         });
     }
 
@@ -464,9 +439,7 @@ internal partial class CanvasController : ICanvasController
         });
     }
 
-    #endregion
-
-    #region Win2D Event Handlers
+    // --- Win2D event loop ---
 
     private void D2dCanvas_CreateResources(CanvasAnimatedControl sender,
         Microsoft.Graphics.Canvas.UI.CanvasCreateResourcesEventArgs args)
@@ -570,9 +543,7 @@ internal partial class CanvasController : ICanvasController
         return tcs.Task;
     }
 
-    #endregion
-
-    #region Rendering And State Management
+    // --- Hit-testing ---
 
     public bool IsPressedOnImage(Point position)
     {
@@ -588,15 +559,13 @@ internal partial class CanvasController : ICanvasController
                                    && tp.X <= imageRect.Right && tp.Y <= imageRect.Bottom;
     }
 
-    public void HandleCheckeredBackgroundChange()
-    {
-        EnqueueW2dAction(() => { }); // wake the canvas; Draw() reads the setting live
-    }
+    // --- Settings ---
 
-    public void HandleImageScalingQualityChange()
-    {
-        EnqueueW2dAction(() => _currentRenderer?.HandleScalingMethodChange());
-    }
+    public void HandleCheckeredBackgroundChange() => EnqueueW2dAction(() => { }); // wake the canvas; Draw() reads the setting live
+
+    public void HandleImageScalingQualityChange() => EnqueueW2dAction(() => _currentRenderer?.HandleScalingMethodChange());
+
+    // --- Threading helpers ---
 
     /// <summary>
     /// Posts an action to the W2D thread and wakes the render loop. Safe to call from the UI thread.
@@ -616,9 +585,7 @@ internal partial class CanvasController : ICanvasController
         _d2dCanvas.Paused = false;
     }
 
-    private int _zoomPercentUiUpdatePending;
-    private int _pendingZoomPercent;
-    private int _lastDispatchedZoomPercent = -1;
+    // --- Zoom UI publishing ---
 
     private void RequestZoomUpdate()
     {
@@ -638,6 +605,29 @@ internal partial class CanvasController : ICanvasController
             });
     }
 
+    // --- Cleanup ---
 
-    #endregion
+    public void Dispose()
+    {
+        try
+        {
+            // Stop and join the Win2D worker thread BEFORE freeing GPU resources, so no in-flight
+            // Update/Draw can observe a disposed renderer or brush. After this returns there is no
+            // concurrency, so disposal needs no lock.
+            _d2dCanvas.RemoveFromVisualTree();
+            _d2dCanvas.CreateResources -= D2dCanvas_CreateResources;
+            _d2dCanvas.Update -= D2dCanvas_Update;
+            _d2dCanvas.Draw -= D2dCanvas_Draw;
+            _d2dCanvas.SizeChanged -= D2dCanvas_SizeChanged;
+
+            _continuousZoomCts?.Cancel();
+            _continuousZoomCts?.Dispose();
+            _canvasViewManager?.Dispose();
+            _currentRenderer?.Dispose();
+            _currentRenderer = null;
+            _checkeredBrush?.Dispose();
+            _checkeredBrush = null;
+        }
+        catch (Exception ex) { Debug.WriteLine(ex); }
+    }
 }
