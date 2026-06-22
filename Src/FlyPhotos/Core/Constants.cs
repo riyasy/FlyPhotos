@@ -106,6 +106,7 @@ internal static class Constants
         "ko-KR", // Korean
         "zh-CN", // Chinese (Simplified, China)
         "zh-TW", // Chinese (Traditional, Taiwan)
-        "ml-IN"  // Malayalam
+        "ml-IN", // Malayalam
+        "ar-SA"  // Arabic (Saudi Arabia)
     ];
 }

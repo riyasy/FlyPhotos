@@ -37,6 +37,9 @@ public sealed partial class InitWindow
         titleBar.ButtonForegroundColor = Colors.Gray;
 
         ((FrameworkElement)Content).RequestedTheme = AppConfig.Settings.Theme;
+        ((FrameworkElement)Content).FlowDirection = Localizer.IsRtl(AppConfig.Settings.Language)
+            ? FlowDirection.RightToLeft
+            : FlowDirection.LeftToRight;
 
         MainLayout.KeyDown += delegate(object _, KeyRoutedEventArgs args)
         {

@@ -12,6 +12,9 @@ internal class Localizer
 
     private const string DefaultLang = "en-US";
 
+    public static bool IsRtl(string language) =>
+        !string.IsNullOrEmpty(language) && language.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
+
     public static string ApplyLanguage(string currentLang)
     {
         try

@@ -21,7 +21,7 @@
 		<PublishAot>true</PublishAot>
 		<IlcOptimizationPreference>Speed</IlcOptimizationPreference>
 		<DefaultLanguage>en-US</DefaultLanguage>
-		<SatelliteResourceLanguages>en-US;de-DE;fr-FR;es-ES;ja-JP;ko-KR;it-IT;pl-PL;ru-RU;uk-UA;nl-NL;sv-SE;fi-FI;zh-CN;zh-TW;ml-IN;pt-PT;pt-BR;hu-HU</SatelliteResourceLanguages>
+		<SatelliteResourceLanguages>en-US;de-DE;fr-FR;es-ES;ja-JP;ko-KR;it-IT;pl-PL;ru-RU;uk-UA;nl-NL;sv-SE;fi-FI;zh-CN;zh-TW;ml-IN;pt-PT;pt-BR;hu-HU;ar-SA</SatelliteResourceLanguages>
 		<!-- InvariantGlobalization>true</InvariantGlobalization -->
 		<GenerateTestArtifacts>True</GenerateTestArtifacts>
 		<NoWarn>$(NoWarn);CA1416</NoWarn>

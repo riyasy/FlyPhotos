@@ -1,0 +1,715 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppSelectionDialog.PrimaryButtonText" xml:space="preserve">
+    <value>تحديد</value>
+  </data>
+  <data name="AppSelectionDialog.SecondaryButtonText" xml:space="preserve">
+    <value>إلغاء</value>
+  </data>
+  <data name="AppSelectionDialog.Title" xml:space="preserve">
+    <value>حدد تطبيقًا</value>
+  </data>
+  <data name="BrowseBtn.Content" xml:space="preserve">
+    <value>استعراض تطبيق…</value>
+  </data>
+  <data name="BtnCheckVersion.Content" xml:space="preserve">
+    <value>التحقق من وجود تحديثات</value>
+  </data>
+  <data name="BtnGitHubRepo.Content" xml:space="preserve">
+    <value>فتح مستودع GitHub</value>
+  </data>
+  <data name="BtnReportBugs.Content" xml:space="preserve">
+    <value>الإبلاغ عن مشكلة على GitHub</value>
+  </data>
+  <data name="BtnThirdPartyLicenses.Content" xml:space="preserve">
+    <value>عرض تراخيص الجهات الخارجية</value>
+  </data>
+  <data name="ButtonBackToolTip.Content" xml:space="preserve">
+    <value>الصورة السابقة</value>
+  </data>
+  <data name="ButtonClearDiskCache.Content" xml:space="preserve">
+    <value>مسح</value>
+  </data>
+  <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
+    <value>حالة التخزين المؤقت</value>
+  </data>
+  <data name="ButtonNextPageToolTip.Content" xml:space="preserve">
+    <value>الصفحة التالية</value>
+  </data>
+  <data name="ButtonNextToolTip.Content" xml:space="preserve">
+    <value>الصورة التالية</value>
+  </data>
+  <data name="ButtonOneIsToOneToolTip.Content" xml:space="preserve">
+    <value>تكبير/تصغير إلى الحجم الفعلي</value>
+  </data>
+  <data name="ButtonOpenLog.Content" xml:space="preserve">
+    <value>فتح ملف السجل</value>
+  </data>
+  <data name="ButtonPrevPageToolTip.Content" xml:space="preserve">
+    <value>الصفحة السابقة</value>
+  </data>
+  <data name="ButtonRotateToolTip.Content" xml:space="preserve">
+    <value>تدوير الصورة</value>
+  </data>
+  <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
+    <value>ملاءمة للنافذة</value>
+  </data>
+  <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
+    <value>الإعدادات</value>
+  </data>
+  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
+    <value>فتح باستخدام تطبيق آخر</value>
+  </data>
+  <data name="ChangeLanguageAlert.Description" xml:space="preserve">
+    <value>يجب إعادة تشغيل التطبيق لتغيير لغة العرض.</value>
+  </data>
+  <data name="ChangeLanguageAlert.Title" xml:space="preserve">
+    <value>تغيير اللغة</value>
+  </data>
+  <data name="ColorPickerFlyoutCancelButton.Content" xml:space="preserve">
+    <value>إلغاء</value>
+  </data>
+  <data name="ColorPickerFlyoutOkButton.Content" xml:space="preserve">
+    <value>موافق</value>
+  </data>
+  <data name="ComboBackgroundItemAcrylic.Content" xml:space="preserve">
+    <value>Acrylic</value>
+  </data>
+  <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
+    <value>Acrylic Thin</value>
+  </data>
+  <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
+    <value>متجمد</value>
+  </data>
+  <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
+    <value>Mica</value>
+  </data>
+  <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
+    <value>Mica Alt</value>
+  </data>
+  <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
+    <value>بلا</value>
+  </data>
+  <data name="ComboBackgroundItemTransparent.Content" xml:space="preserve">
+    <value>شفاف</value>
+  </data>
+  <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
+    <value>عرض التالي أو السابق</value>
+  </data>
+  <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
+    <value>عرض التالي أو السابق</value>
+  </data>
+  <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
+    <value>تكبير أو تصغير</value>
+  </data>
+  <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
+    <value>تذكر التحريك/التكبير والتصغير/التدوير لكل صورة</value>
+  </data>
+  <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
+    <value>إعادة تعيين التحريك/التكبير والتصغير/التدوير</value>
+  </data>
+  <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
+    <value>الاحتفاظ بالتحريك/التكبير والتصغير من الصورة السابقة</value>
+  </data>
+  <data name="ComboThemeItemDark.Content" xml:space="preserve">
+    <value>داكن</value>
+  </data>
+  <data name="ComboThemeItemDefault.Content" xml:space="preserve">
+    <value>افتراضي</value>
+  </data>
+  <data name="ComboThemeItemLight.Content" xml:space="preserve">
+    <value>فاتح</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
+    <value>ملء الشاشة</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
+    <value>الحالة الأخيرة</value>
+  </data>
+  <data name="ComboWindowLaunchModeItemMaximized.Content" xml:space="preserve">
+    <value>مكبرة</value>
+  </data>
+  <data name="ConfirmDeletion.CancelButton" xml:space="preserve">
+    <value>إلغاء</value>
+  </data>
+  <data name="ConfirmDeletion.DeleteButton" xml:space="preserve">
+    <value>حذف</value>
+  </data>
+  <data name="ConfirmDeletion.Message" xml:space="preserve">
+    <value>هل أنت متأكد من أنك تريد حذف هذا الملف؟</value>
+  </data>
+  <data name="ConfirmDeletion.Title" xml:space="preserve">
+    <value>تأكيد الحذف</value>
+  </data>
+  <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
+    <value>لتعيين FlyPhotos كتطبيق افتراضي:
+انقر بزر الماوس الأيمن فوق صورة &gt; فتح باستخدام &gt; اختيار تطبيق آخر.
+حدد FlyPhotos وحدد دائمًا.</value>
+  </data>
+  <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
+    <value>في Windows 11، يمكنك أيضًا تعيين FlyPhotos كتطبيق افتراضي في
+الإعدادات &gt; التطبيقات &gt; التطبيقات الافتراضية.</value>
+  </data>
+  <data name="DeletionFailed.CloseButton" xml:space="preserve">
+    <value>موافق</value>
+  </data>
+  <data name="DeletionFailed.Message" xml:space="preserve">
+    <value>تعذر حذف الملف.</value>
+  </data>
+  <data name="DeletionFailed.Title" xml:space="preserve">
+    <value>فشل الحذف</value>
+  </data>
+  <data name="DonateButton.Content" xml:space="preserve">
+    <value>تبرع</value>
+  </data>
+  <data name="DropAreaRun.Text" xml:space="preserve">
+    <value>اسحب صورة وأفلتها هنا أو</value>
+  </data>
+  <data name="HeaderCodec.Text" xml:space="preserve">
+    <value>برنامج الترميز</value>
+  </data>
+  <data name="HeaderExtensions.Text" xml:space="preserve">
+    <value>الامتدادات</value>
+  </data>
+  <data name="HeaderType.Text" xml:space="preserve">
+    <value>النوع</value>
+  </data>
+  <data name="LoadingHighQuality.Message" xml:space="preserve">
+    <value>جارٍ تحميل إصدار عالي الدقة. يرجى الانتظار…</value>
+  </data>
+  <data name="MessageClose_Ok" xml:space="preserve">
+    <value>موافق</value>
+  </data>
+  <data name="NoShortcutsCreated.Message" xml:space="preserve">
+    <value>لم يتم إنشاء أي اختصارات. قم بتكوينها في الإعدادات.</value>
+  </data>
+  <data name="OpenFileHyperlink.Text" xml:space="preserve">
+    <value>فتح ملف</value>
+  </data>
+  <data name="RightClickInstruction.Text" xml:space="preserve">
+    <value>لاستخدام FlyPhotos، انقر بزر الماوس الأيمن فوق صورة وحدد فتح باستخدام &gt; FlyPhotos.</value>
+  </data>
+  <data name="ScanningTextBlock.Text" xml:space="preserve">
+    <value>جارٍ فحص التطبيقات…</value>
+  </data>
+  <data name="SearchBox.PlaceholderText" xml:space="preserve">
+    <value>البحث عن التطبيقات…</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
+    <value>تعرض المثيلات الإضافية الصورة المحددة فقط (بدون تنقل أو حذف أو إعدادات).</value>
+  </data>
+  <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
+    <value>السماح بمثيلات متعددة (تجريبي)</value>
+  </data>
+  <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
+    <value>إخفاء مؤشر الماوس إذا كان غير نشط.</value>
+  </data>
+  <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
+    <value>إخفاء مؤشر الماوس تلقائيًا</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
+    <value>حذف جميع المعاينات من ذاكرة التخزين المؤقت على القرص.</value>
+  </data>
+  <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
+    <value>مسح التخزين المؤقت على القرص</value>
+  </data>
+  <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
+    <value>طلب تأكيد قبل حذف أي ملف.</value>
+  </data>
+  <data name="SettingsCardConfirmBeforeDelete.Header" xml:space="preserve">
+    <value>تأكيد قبل حذف الملفات</value>
+  </data>
+  <data name="SettingsCardCredits.Description" xml:space="preserve">
+    <value>يشكر FlyPhotos كلاً من Resvg وMagick.NET وMagicScaler وRawler وNLog وWinUIEx.</value>
+  </data>
+  <data name="SettingsCardCredits.Header" xml:space="preserve">
+    <value>المساهمون</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
+    <value>استخدام بيانات RAW الفعلية بدلاً من JPEG المضمنة داخل ملف RAW.</value>
+  </data>
+  <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
+    <value>فك ترميز صور RAW من الكاميرا</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
+    <value>WIC (Windows Imaging Component) : برامج ترميز النظام • Rawler : الأسرع • ImageMagick : أفضل توافق</value>
+  </data>
+  <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
+    <value>ضبط أولوية فك ترميز RAW (اسحب لإعادة الترتيب)</value>
+  </data>
+  <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
+    <value>اجعل Fly أكثر روعة.</value>
+  </data>
+  <data name="SettingsCardDeveloperSupport.Header" xml:space="preserve">
+    <value>دعم FlyPhotos</value>
+  </data>
+  <data name="SettingsCardExternalApps.Description" xml:space="preserve">
+    <value>اختيار التطبيقات الخارجية لإضافتها كاختصارات.</value>
+  </data>
+  <data name="SettingsCardExternalApps.Header" xml:space="preserve">
+    <value>اختيار التطبيقات الخارجية</value>
+  </data>
+  <data name="SettingsCardExternalShortcuts.Description" xml:space="preserve">
+    <value>فتح الصورة الحالية باستخدام تطبيق آخر</value>
+  </data>
+  <data name="SettingsCardExternalShortcuts.Header" xml:space="preserve">
+    <value>اختصارات التطبيقات الخارجية</value>
+  </data>
+  <data name="SettingsCardFadeControls.Description" xml:space="preserve">
+    <value>تلاشي عناصر التحكم عند ابتعاد مؤشر الماوس.</value>
+  </data>
+  <data name="SettingsCardFadeControls.Header" xml:space="preserve">
+    <value>تلاشي عناصر تحكم واجهة المستخدم تلقائيًا</value>
+  </data>
+  <data name="SettingsCardFadeIntensity.Description" xml:space="preserve">
+    <value>ضبط قوة تأثير التلاشي التلقائي.</value>
+  </data>
+  <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
+    <value>مستوى التلاشي التلقائي (%)</value>
+  </data>
+  <data name="SettingsCardHighResCache.Description" xml:space="preserve">
+    <value>تعيين عدد الصور عالية الدقة المخزنة مؤقتًا على كل جانب.</value>
+  </data>
+  <data name="SettingsCardHighResCache.Header" xml:space="preserve">
+    <value>التخزين المؤقت عالي الدقة</value>
+  </data>
+  <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
+    <value>اختر النسبة التي تملؤها الصورة من الشاشة. (%)</value>
+  </data>
+  <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
+    <value>ملاءمة الصورة للشاشة</value>
+  </data>
+  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
+    <value>مفاتيح الأسهم لليسار/لليمين : التنقل بين الصور
+مفاتيح الأسهم للأعلى/للأسفل : التكبير أو التصغير
+النقر بزر الماوس الأيسر والسحب : تحريك الصورة
+النقر بزر الماوس الأيمن مع الاستمرار : تكبير
+النقر بزر الماوس الأيمن : قائمة السياق لمستكشف Windows
+
+عجلة الماوس : التكبير أو التصغير / التنقل بين الصور (حسب الإعداد)
+Ctrl + عجلة الماوس : التكبير أو التصغير
+Alt + عجلة الماوس : التنقل بين الصور
+إمالة عجلة الماوس لليسار أو لليمين : التنقل بين الصور
+النقر بعجلة الماوس : ملء الشاشة
+
+Ctrl + مفاتيح الأسهم : تحريك الصورة
+Ctrl + + : تكبير
+Ctrl + - : تصغير
+
+Alt + مفاتيح الأسهم لليسار/لليمين : التنقل بين الصفحات في ملفات TIFF متعددة الصفحات
+
+Page Up/Page Down : التكبير/التصغير إلى الإعداد المسبق التالي (100%، 400%، ملاءمة)
+Home : الانتقال إلى الصورة الأولى
+End : الانتقال إلى الصورة الأخيرة
+
+عجلة الماوس على شريط الصور المصغرة : التنقل بين الصور
+عجلة الماوس على الزر الأيسر/الأيمن على الشاشة : التنقل بين الصور
+عجلة الماوس على زر التدوير على الشاشة : تدوير الصورة
+
+التمرير بإصبعين على لوحة اللمس لليسار أو لليمين : التنقل بين الصور
+التمرير بإصبعين على لوحة اللمس للأعلى أو للأسفل : التكبير أو التصغير / التنقل بين الصور (حسب إعداد عجلة الماوس)
+ضم أو مباعدة الإصبعين على لوحة اللمس : التكبير أو التصغير
+
+F11 : ملء الشاشة
+
+Alt + Enter : عرض خصائص الملف (علامة التبويب "عام")
+D : عرض خصائص الملف (علامة التبويب "التفاصيل")
+
+W : عرض الملف في مستكشف ملفات Windows
+S : عرض مربع حوار مشاركة Windows للملف
+A : تكبير/تصغير الصورة إلى الحجم الفعلي
+F : ملاءمة للنافذة
+E : عرض لوحة التطبيقات الخارجية
+Ctrl + 1–4: الفتح في التطبيق الخارجي 1–4
+
+Del : حذف الصورة
+
+Esc : إغلاق الإعدادات أو الخروج من التطبيق</value>
+  </data>
+  <data name="SettingsCardLanguage.Header" xml:space="preserve">
+    <value>اللغة</value>
+  </data>
+  <data name="SettingsCardLog.Description" xml:space="preserve">
+    <value>افتح لعرض ملف السجل</value>
+  </data>
+  <data name="SettingsCardLog.Header" xml:space="preserve">
+    <value>ملف السجل</value>
+  </data>
+  <data name="SettingsCardLowResCache.Description" xml:space="preserve">
+    <value>تعيين عدد الصور منخفضة الدقة المخزنة مؤقتًا على كل جانب.</value>
+  </data>
+  <data name="SettingsCardLowResCache.Header" xml:space="preserve">
+    <value>التخزين المؤقت منخفض الدقة</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
+    <value>اختر السلوك الافتراضي لعجلة الماوس.</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
+    <value>عجلة الماوس</value>
+  </data>
+  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
+    <value>👉 Ctrl + عجلة الماوس للتكبير أو التصغير دائمًا.
+👉 Alt + عجلة الماوس للتنقل دائمًا.</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
+    <value>⚠ قد يؤدي ذلك إلى إبطاء بدء التشغيل. ينتظر التطبيق تحميل الصورة بالدقة الكاملة عند تشغيله.</value>
+  </data>
+  <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
+    <value>حركة التكبير عند بدء التشغيل والتصغير عند الخروج</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
+    <value>⚠ استخدم خيار الاحتفاظ فقط للمجلدات التي تحتوي على صور متقاربة الحجم.</value>
+  </data>
+  <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
+    <value>سلوك التحريك والتكبير/التصغير والتدوير أثناء التنقل</value>
+  </data>
+  <data name="SettingsCardReportBugs.Description" xml:space="preserve">
+    <value>أبلغ عن المشاكل على GitHub أو أرسل بريدًا إلكترونيًا إلى ryftools@outlook.com</value>
+  </data>
+  <data name="SettingsCardReportBugs.Header" xml:space="preserve">
+    <value>الإبلاغ عن المشكلات</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
+    <value>عرض حالة ذاكرة التخزين المؤقت في اللوحة السفلية.</value>
+  </data>
+  <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
+    <value>حالة التخزين المؤقت</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
+    <value>عرض خلفية مربعات للصور الشفافة. 
+⚠ قد يؤثر ذلك على الأداء.</value>
+  </data>
+  <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
+    <value>عرض خلفية مربعات</value>
+  </data>
+  <data name="SettingsCardShowFileName.Description" xml:space="preserve">
+    <value>عرض اسم الملف للملف المفتوح حاليًا</value>
+  </data>
+  <data name="SettingsCardShowFileName.Header" xml:space="preserve">
+    <value>اسم الملف</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
+    <value>عرض عرض الصورة وارتفاعها بجانب اسم الملف.</value>
+  </data>
+  <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
+    <value>أبعاد الصورة</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
+    <value>عرض شريط الصور المصغرة في أسفل النافذة</value>
+  </data>
+  <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
+    <value>شريط الصور المصغرة</value>
+  </data>
+  <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
+    <value>عرض نسبة التكبير/التصغير في وسط الشاشة أثناء التكبير/التصغير.</value>
+  </data>
+  <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
+    <value>نسبة التكبير/التصغير</value>
+  </data>
+  <data name="SettingsCardSourceCode.Description" xml:space="preserve">
+    <value>تطبيق FlyPhotos مفتوح المصدر ومستضاف على GitHub</value>
+  </data>
+  <data name="SettingsCardSourceCode.Header" xml:space="preserve">
+    <value>مستودع GitHub</value>
+  </data>
+  <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
+    <value>تتلاءم الصور الكبيرة دائمًا مع منطقة العرض. تُعرض الصور الصغيرة بنسبة 1:1 افتراضيًا؛ قم بتمكين هذا الخيار لتكبيرها وملاءمتها.</value>
+  </data>
+  <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
+    <value>تكبير الصور الصغيرة لملاءمة منطقة العرض</value>
+  </data>
+  <data name="SettingsCardTheme.Description" xml:space="preserve">
+    <value>تحديد مظهر التطبيق.</value>
+  </data>
+  <data name="SettingsCardTheme.Header" xml:space="preserve">
+    <value>المظهر</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
+    <value>تعيين لون التمييز المستخدم للصور المصغرة المحددة.</value>
+  </data>
+  <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
+    <value>لون تحديد الصور المصغرة</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
+    <value>ضبط حجم الصور المصغرة في عارض الصور.</value>
+  </data>
+  <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
+    <value>حجم الصور المصغرة</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
+    <value>ينطبق فقط على خلفية النافذة الشفافة.</value>
+  </data>
+  <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
+    <value>الشفافية (%)</value>
+  </data>
+  <data name="SettingsCardVersion.Description" xml:space="preserve">
+    <value>الإصدار الحالي هو {0}</value>
+  </data>
+  <data name="SettingsCardVersion.Header" xml:space="preserve">
+    <value>الإصدار الحالي</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
+    <value>اختر خلفية النافذة.</value>
+  </data>
+  <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
+    <value>خلفية النافذة</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
+    <value>يستعيد خيار "الحالة الأخيرة" الحجم الأخير للنافذة (عادية أو مكبرة) وموقعها والشاشة المستخدمة.</value>
+  </data>
+  <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
+    <value>حالة النافذة عند التشغيل</value>
+  </data>
+  <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
+    <value>التلاشي والإخفاء التلقائي</value>
+  </data>
+  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
+    <value>تكوين كيفية معالجة التطبيق للتخزين المؤقت للصور.</value>
+  </data>
+  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
+    <value>التخزين المؤقت</value>
+  </data>
+  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
+    <value>اختصارات لوحة المفاتيح</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
+    <value>تخصيص سلوك التحريك والتكبير/التصغير.</value>
+  </data>
+  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
+    <value>التحريك والتكبير/التصغير</value>
+  </data>
+  <data name="SettingsPage.Title" xml:space="preserve">
+    <value>FlyPhotos - الإعدادات</value>
+  </data>
+  <data name="SettingsPivotItemAbout.Header" xml:space="preserve">
+    <value>حول</value>
+  </data>
+  <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
+    <value>برامج الترميز</value>
+  </data>
+  <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
+    <value>عام</value>
+  </data>
+  <data name="Status_FileNotFound" xml:space="preserve">
+    <value>الملف غير موجود</value>
+  </data>
+  <data name="Status_InvalidFile" xml:space="preserve">
+    <value>ملف غير صالح</value>
+  </data>
+  <data name="Status_Loading" xml:space="preserve">
+    <value>جارٍ التحميل…</value>
+  </data>
+  <data name="Status_PreviewFailed" xml:space="preserve">
+    <value>فشل تحميل المعاينة</value>
+  </data>
+  <data name="TextBlockLog.Text" xml:space="preserve">
+    <value>التشخيصات</value>
+  </data>
+  <data name="TextBlockCaching.Text" xml:space="preserve">
+    <value>التخزين المؤقت</value>
+  </data>
+  <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
+    <value>يستخدم FlyPhotos برامج ترميز مكون تصوير Windows (WIC) المدمج بشكل أساسي.</value>
+  </data>
+  <data name="TextBlockAdvanced.Text" xml:space="preserve">
+    <value>متقدم</value>
+  </data>
+  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
+    <value>لوحة المفاتيح والماوس</value>
+  </data>
+  <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
+    <value>عرض الصور</value>
+  </data>
+  <data name="TextBlockStartupAndAppearance.Text" xml:space="preserve">
+    <value>التشغيل والمظهر</value>
+  </data>
+  <data name="TextBlockUIControls.Text" xml:space="preserve">
+    <value>عناصر التحكم</value>
+  </data>
+  <data name="TitleTextBlock.Text" xml:space="preserve">
+    <value>FlyPhotos - فتح ملف صورة</value>
+  </data>
+  <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
+    <value>موافق</value>
+  </data>
+  <data name="TrialExpiredMessage.Content" xml:space="preserve">
+    <value>لقد انتهت صلاحية الفترة التجريبية المجانية. يرجى شراء الإصدار الكامل من Microsoft Store.</value>
+  </data>
+  <data name="TrialExpiredMessage.Title" xml:space="preserve">
+    <value>انتهت صلاحية الفترة التجريبية</value>
+  </data>
+  <data name="UnsupportedFileAlert.Description" xml:space="preserve">
+    <value>الملف الذي تم إفلاته ليس من أنواع الصور المدعومة.</value>
+  </data>
+  <data name="UnsupportedFileAlert.Title" xml:space="preserve">
+    <value>ملف غير مدعوم</value>
+  </data>
+  <data name="_end" xml:space="preserve">
+    <value>نهاية</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
+    <value>زر التقدم/الرجوع للماوس</value>
+  </data>
+  <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
+    <value>اختر ما تفعله أزرار التقدم والرجوع للماوس (متوفر في بعض أنواع الماوس).</value>
+  </data>
+  <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
+    <value>تكبير/تصغير تدريجي</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+    <value>يؤدي النقر خارج الصورة إلى استعادة النافذة من حالة ملء الشاشة أو التكبير.</value>
+  </data>
+  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+    <value>النقر خارج الصورة لاستعادة النافذة</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
+    <value>تظهر أزرار التصغير والتكبير والإغلاق فقط عندما يكون مؤشر الماوس قريبًا من الجزء العلوي للنافذة.</value>
+  </data>
+  <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
+    <value>إخفاء أزرار التحكم في النافذة تلقائيًا</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
+    <value>اسحب الخلفية أو Ctrl + اسحب الصورة لتحريك النافذة.</value>
+  </data>
+  <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
+    <value>السحب لتحريك النافذة</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
+    <value>طريقة تحجيم الصورة</value>
+  </data>
+  <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
+    <value>Nearest Neighbor – يستخدم فقط لرسومات البكسل (pixel art). يحافظ على حواف البكسل الحادة.
+Bilinear – تحجيم سريع وسلس للصورة ومناسب للعرض العام.
+Anisotropic – نتائج أكثر حدة من Bilinear مع الحفاظ على أداء جيد.
+High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
+  </data>
+  <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
+    <value>Nearest Neighbor</value>
+  </data>
+  <data name="ComboImageScalingQualityItemBilinear.Content" xml:space="preserve">
+    <value>Bilinear</value>
+  </data>
+  <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
+    <value>High Quality Cubic</value>
+  </data>
+  <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
+    <value>Anisotropic</value>
+  </data>
+</root>

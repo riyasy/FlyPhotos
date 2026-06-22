@@ -50,6 +50,10 @@ internal sealed partial class Settings
     {
         InitializeComponent();
 
+        ((FrameworkElement)Content).FlowDirection = Localizer.IsRtl(AppConfig.Settings.Language)
+            ? FlowDirection.RightToLeft
+            : FlowDirection.LeftToRight;
+
         // Title property is used only by TaskBar label. Actual TitleBar is customized using AppWindow.TitleBar.
         Title = L.Get("SettingsPage/Title").Replace("FlyPhotos - ", string.Empty);
 
