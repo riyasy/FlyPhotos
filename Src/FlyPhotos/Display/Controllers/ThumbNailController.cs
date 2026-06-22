@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using Windows.Foundation;
 using Windows.Graphics.DirectX;
 using Windows.UI;
@@ -20,32 +18,27 @@ namespace FlyPhotos.Display.Controllers;
 
 internal partial class ThumbNailController : IThumbnailController
 {
-    // --- Events ---
     public event Action<int> ThumbnailClicked;
 
-    // --- Private Settings ---
-    private int _numOfThumbNailsInOneDirection = 20;
-    private Color _thumbNailSelectionColor;
-    private int _thumbnailBoxSize = AppConfig.Settings.ThumbnailSize;
-
-    // --- Drawing Optimization related ---
-    private bool _invalidatePending;
-    private bool _redrawNeeded;
-    private bool _canDrawThumbnails;
-    private static readonly TimeSpan ThrottleInterval = TimeSpan.FromMilliseconds(150);
-    private readonly DispatcherTimer _throttledRedrawTimer = new()
-    {
-        Interval = ThrottleInterval
-    };
-
-    // --- References ---
     private readonly CanvasControl _d2dCanvasThumbNail;
     private readonly PhotoSessionState _photoSessionState;
+    private IPhotoProvider _provider;
+    private Func<int, bool> _isPreviewLoaded;
+
+    private int _numOfThumbNailsInOneDirection = 20;
+    private int _thumbnailBoxSize = AppConfig.Settings.ThumbnailSize;
+    private Color _thumbNailSelectionColor;
+
     private CanvasRenderTarget _thumbnailOffscreen;
-    private ConcurrentDictionary<int, Photo> _photos;
-    private ConcurrentDictionary<int, byte> _previewDoneKeys;
-    private Func<IReadOnlyList<int>> _getSortedPhotoKeys;
     private CanvasBitmap _loadingIndicatorBitmap;
+
+    private static readonly TimeSpan ThrottleInterval = TimeSpan.FromMilliseconds(150);
+    private readonly DispatcherTimer _throttledRedrawTimer = new() { Interval = ThrottleInterval };
+    private bool _redrawNeeded;
+    private bool _invalidatePending;
+    private bool _canDrawThumbnails;
+
+    // --- Initialization ---
 
     public ThumbNailController(CanvasControl d2dCanvasThumbNail, PhotoSessionState photoSessionState)
     {
@@ -59,32 +52,67 @@ internal partial class ThumbNailController : IThumbnailController
         _thumbNailSelectionColor = ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor);
     }
 
-    private void RunOnUiThread(Action action)
+    public void SetPhotoProvider(IPhotoProvider provider) => _provider = provider;
+
+    public void SetPreviewLoadedProbe(Func<int, bool> isPreviewLoaded) => _isPreviewLoaded = isPreviewLoaded;
+
+    // --- Canvas event handlers ---
+
+    private void D2dCanvasThumbNail_Loaded(object sender, RoutedEventArgs e)
     {
-        if (!_d2dCanvasThumbNail.DispatcherQueue.HasThreadAccess)
+        _d2dCanvasThumbNail.Visibility = AppConfig.Settings.ShowThumbnails ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void D2dCanvasThumbNail_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * _thumbnailBoxSize)) + 1;
+        CreateThumbnailRibbonOffScreen();
+    }
+
+    private void D2dCanvasThumbNail_Draw(CanvasControl sender, CanvasDrawEventArgs args)
+    {
+        if (_thumbnailOffscreen != null && AppConfig.Settings.ShowThumbnails)
         {
-            _d2dCanvasThumbNail.DispatcherQueue.TryEnqueue(() => action());
-            return;
+            var drawRect = _thumbnailOffscreen.Bounds;
+            args.DrawingSession.Transform = System.Numerics.Matrix3x2.Identity;
+            args.DrawingSession.DrawImage(_thumbnailOffscreen, drawRect, _thumbnailOffscreen.Bounds, 0.8f,
+                CanvasImageInterpolation.Linear);
         }
-        action();
     }
 
-    // --- Public Methods ---
-
-    public void SetPhotosReference(ConcurrentDictionary<int, Photo> photos)
+    private void D2dCanvasThumbNail_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
-        _photos = photos;
+        if (e.GetCurrentPoint(_d2dCanvasThumbNail).Properties.PointerUpdateKind
+            is not Microsoft.UI.Input.PointerUpdateKind.LeftButtonPressed) return;
+
+        var keys = _provider?.Keys;
+        if (keys == null || keys.Count <= 1) return;
+
+        var pos = e.GetCurrentPoint(_d2dCanvasThumbNail).Position;
+        double canvasCenterX = _d2dCanvasThumbNail.ActualWidth / 2;
+        double clickedX = pos.X;
+
+        // 1. Calculate the positional offset. This logic was correct.
+        int offset = (int)Math.Round((clickedX - canvasCenterX) / _thumbnailBoxSize);
+
+        if (offset == 0) return; // No navigation needed if the center thumbnail is clicked.
+
+        // 2. Find the POSITION of the current key.
+        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
+        if (currentPosition < 0) return;
+
+        // 3. Calculate the new target POSITION.
+        int newPosition = currentPosition + offset;
+
+        // 4. Validate the NEW POSITION against the bounds of the sorted key list.
+        if (newPosition >= 0 && newPosition < keys.Count)
+        {
+            // 5. Fire the event. The PhotoDisplayController will handle the navigation.
+            ThumbnailClicked?.Invoke(offset);
+        }
     }
 
-    public void SetPreviewDoneKeysReference(ConcurrentDictionary<int, byte> previewDoneKeys)
-    {
-        _previewDoneKeys = previewDoneKeys;
-    }
-
-    public void SetSortedPhotoKeysProvider(Func<IReadOnlyList<int>> provider)
-    {
-        _getSortedPhotoKeys = provider;
-    }
+    // --- Public API ---
 
     public void ShowHideThumbnailBasedOnSettings()
     {
@@ -124,7 +152,7 @@ internal partial class ThumbNailController : IThumbnailController
     {
         // Capture the snapshot once — this method is called from a ThreadPool continuation and the
         // list may be swapped by DeleteCurrentPhoto on the UI thread at any moment.
-        var keys = _getSortedPhotoKeys?.Invoke();
+        var keys = _provider?.Keys;
         if (keys == null || keys.Count == 0) return;
 
         // Find the POSITION of the current and updated keys.
@@ -150,81 +178,6 @@ internal partial class ThumbNailController : IThumbnailController
         }
     }
 
-    // --- Event Handlers ---
-
-
-    private void D2dCanvasThumbNail_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
-    {
-        if (e.GetCurrentPoint(_d2dCanvasThumbNail).Properties.PointerUpdateKind
-            is not Microsoft.UI.Input.PointerUpdateKind.LeftButtonPressed) return;
-
-        var keys = _getSortedPhotoKeys?.Invoke();
-        if (keys == null || keys.Count <= 1) return;
-
-        var pos = e.GetCurrentPoint(_d2dCanvasThumbNail).Position;
-        double canvasCenterX = _d2dCanvasThumbNail.ActualWidth / 2;
-        double clickedX = pos.X;
-
-        // 1. Calculate the positional offset. This logic was correct.
-        int offset = (int)Math.Round((clickedX - canvasCenterX) / _thumbnailBoxSize);
-
-        if (offset == 0) return; // No navigation needed if the center thumbnail is clicked.
-
-        // 2. Find the POSITION of the current key.
-        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
-        if (currentPosition < 0) return;
-
-        // 3. Calculate the new target POSITION.
-        int newPosition = currentPosition + offset;
-
-        // 4. Validate the NEW POSITION against the bounds of the sorted key list.
-        if (newPosition >= 0 && newPosition < keys.Count)
-        {
-            // 5. Fire the event. The PhotoDisplayController will handle the navigation.
-            ThumbnailClicked?.Invoke(offset);
-        }
-    }
-
-    private void D2dCanvasThumbNail_Loaded(object sender, RoutedEventArgs e)
-    {
-        _d2dCanvasThumbNail.Visibility = AppConfig.Settings.ShowThumbnails ? Visibility.Visible : Visibility.Collapsed;
-    }
-
-    private void D2dCanvasThumbNail_SizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * _thumbnailBoxSize)) + 1;
-        CreateThumbnailRibbonOffScreen();
-    }
-
-    private void D2dCanvasThumbNail_Draw(CanvasControl sender, CanvasDrawEventArgs args)
-    {
-        if (_thumbnailOffscreen != null && AppConfig.Settings.ShowThumbnails)
-        {
-            var drawRect = _thumbnailOffscreen.Bounds;
-            args.DrawingSession.Transform = System.Numerics.Matrix3x2.Identity;
-            args.DrawingSession.DrawImage(_thumbnailOffscreen, drawRect, _thumbnailOffscreen.Bounds, 0.8f,
-                CanvasImageInterpolation.Linear);
-        }
-    }
-
-    // --- Drawing Logic ---
-
-    /// <summary>
-    /// This now fires once per throttled interval.
-    /// </summary>
-    private void ThrottledRedrawTimer_Tick(object sender, object e)
-    {
-        // Stop the timer, making it a one-shot. It will be restarted by the next call
-        // to RedrawThumbNailsIfNeeded if more updates come in.
-        _throttledRedrawTimer.Stop();
-
-        if (!_redrawNeeded) return;
-
-        _redrawNeeded = false; // Reset the flag
-
-        CreateThumbnailRibbonOffScreen();
-    }
-
     /// <summary>
     /// Renders the entire visible thumbnail strip to an off-screen bitmap.
     /// This is the expensive operation that we are throttling.
@@ -242,7 +195,7 @@ internal partial class ThumbNailController : IThumbnailController
 
         // Capture snapshot once for the entire draw pass — always called on the UI thread so no
         // race with DeleteCurrentPhoto, but a single capture avoids repeated volatile reads.
-        var keys = _getSortedPhotoKeys?.Invoke();
+        var keys = _provider?.Keys;
         if (keys == null || keys.Count < 1 || !_canDrawThumbnails || !AppConfig.Settings.ShowThumbnails)
         {
             _thumbnailOffscreen?.Dispose();
@@ -270,7 +223,7 @@ internal partial class ThumbNailController : IThumbnailController
         using var dsThumbNail = _thumbnailOffscreen.CreateDrawingSession();
         dsThumbNail.Clear(Colors.Transparent);
 
-        if (_photos != null)
+        if (_provider != null)
         {
             var startX = (int)_d2dCanvasThumbNail.ActualWidth / 2 - _thumbnailBoxSize / 2;
             var startY = 0;
@@ -281,8 +234,8 @@ internal partial class ThumbNailController : IThumbnailController
                 if (thumbnailPosition < 0 || thumbnailPosition >= keys.Count) continue;
 
                 var key = keys[thumbnailPosition];
-                _photos.TryGetValue(key, out var photo);
-                if (_previewDoneKeys == null || !_previewDoneKeys.ContainsKey(key)) photo = null;
+                var photo = _provider.GetPhoto(key);
+                if (_isPreviewLoaded == null || !_isPreviewLoaded(key)) photo = null;
 
                 // Lazy-create the GPU bitmap on first draw. Pixels were rendered on the main canvas
                 // device during preview load; CreateFromBytes transfers them to the thumbnail device.
@@ -323,6 +276,21 @@ internal partial class ThumbNailController : IThumbnailController
         RequestInvalidate();
     }
 
+    // --- Rendering internals ---
+
+    /// <summary>
+    /// This now fires once per throttled interval.
+    /// </summary>
+    private void ThrottledRedrawTimer_Tick(object sender, object e)
+    {
+        // Stop the timer, making it a one-shot. It will be restarted by the next call
+        // to RedrawThumbNailsIfNeeded if more updates come in.
+        _throttledRedrawTimer.Stop();
+        if (!_redrawNeeded) return;
+        _redrawNeeded = false; // Reset the flag
+        CreateThumbnailRibbonOffScreen();
+    }
+
     private CanvasBitmap GetOrCreateLoadingIndicatorBitmap()
     {
         if (_loadingIndicatorBitmap != null) return _loadingIndicatorBitmap;
@@ -349,7 +317,17 @@ internal partial class ThumbNailController : IThumbnailController
         });
     }
 
-    // --- Cleanup ---
+    private void RunOnUiThread(Action action)
+    {
+        if (!_d2dCanvasThumbNail.DispatcherQueue.HasThreadAccess)
+        {
+            _d2dCanvasThumbNail.DispatcherQueue.TryEnqueue(() => action());
+            return;
+        }
+        action();
+    }
+
+    // --- Lifecycle ---
 
     public void Dispose()
     {
@@ -369,8 +347,7 @@ internal partial class ThumbNailController : IThumbnailController
         _loadingIndicatorBitmap?.Dispose();
         _loadingIndicatorBitmap = null;
         ThumbnailClicked = null;
-        _photos = null;
-        _previewDoneKeys = null;
-        _getSortedPhotoKeys = null;
+        _provider = null;
+        _isPreviewLoaded = null;
     }
 }

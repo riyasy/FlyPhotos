@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿#nullable enable
+using System;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Display.State;
 
 namespace FlyPhotos.Display.Controllers;
 
@@ -16,7 +16,6 @@ internal interface IThumbnailController : IDisposable
 {
     void CreateThumbnailRibbonOffScreen();
     void RedrawThumbNailsIfNeeded(int key);
-    void SetPhotosReference(ConcurrentDictionary<int, Photo> photos);
-    void SetPreviewDoneKeysReference(ConcurrentDictionary<int, byte> previewDoneKeys);
-    void SetSortedPhotoKeysProvider(Func<IReadOnlyList<int>> provider);
+    void SetPhotoProvider(IPhotoProvider provider);
+    void SetPreviewLoadedProbe(Func<int, bool> isPreviewLoaded);
 }
