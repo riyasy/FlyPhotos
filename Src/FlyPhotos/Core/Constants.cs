@@ -83,6 +83,11 @@ internal static class Constants
     public const float ThumbnailSelectionBorderThickness = 3.0f;
     public const float ThumbnailCornerRadius = 4.0f;
 
+    // Extra thumbnail boxes rendered beyond each visible edge so the sliding strip never exposes a
+    // transparent gap. The slide offset is clamped to this many boxes, so a fast held-key navigation
+    // can lag at most this far before the strip catches up — always covered by these rendered boxes.
+    public const int ThumbnailSlideMarginBoxes = 3;
+
     // Others
     public const int CheckerSize = 10;
 

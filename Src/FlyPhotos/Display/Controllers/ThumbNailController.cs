@@ -4,6 +4,7 @@ using Windows.Graphics.DirectX;
 using Windows.UI;
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Display.Controllers.Animation;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Utils;
@@ -37,6 +38,19 @@ internal partial class ThumbNailController : IThumbnailController
     private bool _redrawNeeded;
     private bool _invalidatePending;
     private bool _canDrawThumbnails;
+
+    // Slide animation: the strip is always rendered centered on the current photo, but on navigation
+    // we seed a horizontal offset (delta * boxSize) so it appears to start at the old position, then
+    // spring it back to 0 — a damped pixel-space slide driven per-frame by CompositionTarget.Rendering.
+    private readonly SpringAxis _slideOffset = new();
+    private int _lastRenderedPosition = -1;
+    private bool _slideAnimating;
+    private bool _slideFrameSeen;
+    private TimeSpan _lastFrameTime;
+
+    // Off-screen is rendered this many pixels wider than the canvas on each side (see
+    // ThumbnailSlideMarginBoxes) so the sliding strip never exposes a transparent edge.
+    private int _offscreenMarginPx;
 
     // --- Initialization ---
 
@@ -73,8 +87,10 @@ internal partial class ThumbNailController : IThumbnailController
     {
         if (_thumbnailOffscreen != null && AppConfig.Settings.ShowThumbnails)
         {
-            var drawRect = _thumbnailOffscreen.Bounds;
-            args.DrawingSession.Transform = System.Numerics.Matrix3x2.Identity;
+            // The off-screen is wider than the canvas by _offscreenMarginPx on each side; shift it left
+            // by that margin so its center thumbnail lands at the canvas center, then add the slide offset.
+            var drawRect = new Rect(-_offscreenMarginPx, 0, _thumbnailOffscreen.Size.Width, _thumbnailOffscreen.Size.Height);
+            args.DrawingSession.Transform = System.Numerics.Matrix3x2.CreateTranslation(_slideOffset.Position, 0f);
             args.DrawingSession.DrawImage(_thumbnailOffscreen, drawRect, _thumbnailOffscreen.Bounds, 0.8f,
                 CanvasImageInterpolation.Linear);
         }
@@ -127,6 +143,8 @@ internal partial class ThumbNailController : IThumbnailController
             else
             {
                 _d2dCanvasThumbNail.Visibility = Visibility.Collapsed;
+                StopSlide();
+                _lastRenderedPosition = -1;
                 _thumbnailOffscreen?.Dispose();
                 _thumbnailOffscreen = null;
             }
@@ -139,6 +157,9 @@ internal partial class ThumbNailController : IThumbnailController
         {
             _thumbNailSelectionColor = ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor);
             _thumbnailBoxSize = AppConfig.Settings.ThumbnailSize;
+            // Box size changed → pixel-space offset is stale; reset so the next render doesn't slide.
+            StopSlide();
+            _lastRenderedPosition = -1;
             if (AppConfig.Settings.ShowThumbnails)
                 CreateThumbnailRibbonOffScreen();
         });
@@ -206,14 +227,17 @@ internal partial class ThumbNailController : IThumbnailController
 
         if (_d2dCanvasThumbNail.ActualWidth <= 0) return; // Guard against drawing with no size
 
+        _offscreenMarginPx = Constants.ThumbnailSlideMarginBoxes * _thumbnailBoxSize;
+        var offscreenWidth = (float)_d2dCanvasThumbNail.ActualWidth + 2 * _offscreenMarginPx;
+
         // Recreate render target if needed (e.g., after size change)
         if (_thumbnailOffscreen == null ||
-            (int)Math.Round(_thumbnailOffscreen.Size.Width) != (int)Math.Round(_d2dCanvasThumbNail.ActualWidth) ||
-            (int)Math.Round(_thumbnailOffscreen.Size.Height) != (int)Math.Round(_d2dCanvasThumbNail.ActualHeight))
+            (int)Math.Round(_thumbnailOffscreen.Size.Width) != (int)Math.Round(offscreenWidth) ||
+            (int)Math.Round(_thumbnailOffscreen.Size.Height) != _thumbnailBoxSize)
         {
             _thumbnailOffscreen?.Dispose();
             _numOfThumbNailsInOneDirection = (int)(_d2dCanvasThumbNail.ActualWidth / (2 * _thumbnailBoxSize)) + 1;
-            _thumbnailOffscreen = new CanvasRenderTarget(_d2dCanvasThumbNail, (float)_d2dCanvasThumbNail.ActualWidth, _thumbnailBoxSize);
+            _thumbnailOffscreen = new CanvasRenderTarget(_d2dCanvasThumbNail, offscreenWidth, _thumbnailBoxSize);
         }
 
         // Find the position of the currently displayed photo.
@@ -225,10 +249,13 @@ internal partial class ThumbNailController : IThumbnailController
 
         if (_provider != null)
         {
-            var startX = (int)_d2dCanvasThumbNail.ActualWidth / 2 - _thumbnailBoxSize / 2;
+            // Center thumbnail sits at the canvas center, offset by the margin baked into the wider surface.
+            var startX = _offscreenMarginPx + (int)_d2dCanvasThumbNail.ActualWidth / 2 - _thumbnailBoxSize / 2;
             var startY = 0;
 
-            for (var i = -_numOfThumbNailsInOneDirection; i <= _numOfThumbNailsInOneDirection; i++)
+            // Render the visible boxes plus the slide margin on each side so a lagging slide shows no gap.
+            var renderHalfCount = _numOfThumbNailsInOneDirection + Constants.ThumbnailSlideMarginBoxes;
+            for (var i = -renderHalfCount; i <= renderHalfCount; i++)
             {
                 var thumbnailPosition = currentPosition + i;
                 if (thumbnailPosition < 0 || thumbnailPosition >= keys.Count) continue;
@@ -273,7 +300,69 @@ internal partial class ThumbNailController : IThumbnailController
             }
         }
 
+        // The strip is now centered on currentPosition. If the position changed since the last render,
+        // slide it in from where it used to be. Preview-load redraws leave the position unchanged
+        // (delta == 0) and so don't animate.
+        var delta = _lastRenderedPosition < 0 ? 0 : currentPosition - _lastRenderedPosition;
+        _lastRenderedPosition = currentPosition;
+        BeginSlide(delta);
+
         RequestInvalidate();
+    }
+
+    // --- Slide animation ---
+
+    /// <summary>
+    /// Seeds and starts (or feeds) the slide spring for a navigation of <paramref name="delta"/>
+    /// positions. Small steps glide; large jumps (Home/End, far clicks) snap to avoid a long slide
+    /// and transparent edge gaps beyond the single off-screen buffer box.
+    /// </summary>
+    private void BeginSlide(int delta)
+    {
+        if (delta == 0) return;
+
+        if (Math.Abs(delta) > _numOfThumbNailsInOneDirection)
+        {
+            StopSlide();
+            return;
+        }
+
+        // Start the new strip shifted to the old position, then spring back to 0. Keep any existing
+        // velocity so rapid repeated steps (held arrow key) compound into one smooth flow. Clamp to the
+        // rendered margin so the strip never lags further than the boxes we drew — otherwise a gap shows.
+        _slideOffset.Position += delta * _thumbnailBoxSize;
+        _slideOffset.Position = Math.Clamp(_slideOffset.Position, -_offscreenMarginPx, _offscreenMarginPx);
+
+        if (_slideAnimating) return;
+        _slideAnimating = true;
+        _slideFrameSeen = false;
+        Microsoft.UI.Xaml.Media.CompositionTarget.Rendering += OnSlideFrame;
+    }
+
+    private void OnSlideFrame(object sender, object e)
+    {
+        var now = ((Microsoft.UI.Xaml.Media.RenderingEventArgs)e).RenderingTime;
+        var dt = _slideFrameSeen ? (float)(now - _lastFrameTime).TotalSeconds : 1f / 60f;
+        _slideFrameSeen = true;
+        _lastFrameTime = now;
+        if (dt > Constants.SpringMaxDtSeconds) dt = Constants.SpringMaxDtSeconds;
+
+        _slideOffset.Step(0f, dt);
+
+        if (_slideOffset.IsSettled(0f, Constants.SpringPanSettleEpsilon, Constants.SpringPanVelocitySettle))
+        {
+            StopSlide();
+        }
+
+        _d2dCanvasThumbNail.Invalidate();
+    }
+
+    private void StopSlide()
+    {
+        _slideOffset.SettleTo(0f);
+        if (!_slideAnimating) return;
+        _slideAnimating = false;
+        Microsoft.UI.Xaml.Media.CompositionTarget.Rendering -= OnSlideFrame;
     }
 
     // --- Rendering internals ---
@@ -333,6 +422,7 @@ internal partial class ThumbNailController : IThumbnailController
     {
         _throttledRedrawTimer.Stop();
         _throttledRedrawTimer.Tick -= ThrottledRedrawTimer_Tick;
+        StopSlide();
 
         if (_d2dCanvasThumbNail != null)
         {
