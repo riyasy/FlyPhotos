@@ -4,7 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <cassert>
-#include "BGRAEncoder.h"
+#include "PixelBufferEncoder.h"
 #include <libheif/heif_sequences.h>
 
 
@@ -17,10 +17,10 @@ HeifReader::~HeifReader() {
 }
 
 /**
- * @brief Extracts the thumbnail and decodes it into a raw BGRA buffer.
+ * @brief Extracts the thumbnail and decodes it into a raw RGBA buffer.
  * If no embedded thumbnail is found, it generates one by scaling the primary image.
  */
-HeifError HeifReader::ExtractThumbnailBGRA(const std::string& input_filename, PixelBuffer& out_buffer) {
+HeifError HeifReader::ExtractThumbnail(const std::string& input_filename, PixelBuffer& out_buffer) {
     // 1. Open the file and create the context.
     std::shared_ptr<heif_context> context(heif_context_alloc(),
         [](heif_context* c) { heif_context_free(c); });
@@ -51,7 +51,7 @@ HeifError HeifReader::ExtractThumbnailBGRA(const std::string& input_filename, Pi
         if (err.code == 0) {
             // Success: an embedded thumbnail was found and retrieved.
             // Delegate to the helper, which will take ownership of thumbnail_handle.
-            HeifError thumb_decode_result = ExtractImageToBGRA(thumbnail_handle, out_buffer);
+            HeifError thumb_decode_result = ExtractImageToBuffer(thumbnail_handle, out_buffer);
             if (thumb_decode_result == HeifError::Ok) {
                 // SUCCESS: The embedded thumbnail was found, retrieved, AND decoded successfully.
                 // We are done, so we can return immediately.
@@ -114,9 +114,9 @@ HeifError HeifReader::ExtractThumbnailBGRA(const std::string& input_filename, Pi
 }
 
 /**
- * @brief Extracts the primary image and decodes it into a raw BGRA buffer.
+ * @brief Extracts the primary image and decodes it into a raw RGBA buffer.
  */
-HeifError HeifReader::ExtractPrimaryImageBGRA(const std::string& input_filename, PixelBuffer& out_buffer) {
+HeifError HeifReader::ExtractPrimaryImage(const std::string& input_filename, PixelBuffer& out_buffer) {
     // 1. Open the file and create the context.
     std::shared_ptr<heif_context> context(heif_context_alloc(),
         [](heif_context* c) { heif_context_free(c); });
@@ -139,14 +139,14 @@ HeifError HeifReader::ExtractPrimaryImageBGRA(const std::string& input_filename,
 
     // 4. Delegate the decoding and buffer allocation to the shared helper function.
     //    The helper will take ownership of the primary_image_handle.
-    return ExtractImageToBGRA(primary_image_handle, out_buffer);
+    return ExtractImageToBuffer(primary_image_handle, out_buffer);
 }
 
 /**
- * @brief Extracts the primary image and decodes it into a raw BGRA buffer directly from memory.
+ * @brief Extracts the primary image and decodes it into a raw RGBA buffer directly from memory.
  *        Also outputs a fast check for sequence tracks (animations).
  */
-HeifError HeifReader::ExtractPrimaryImageBGRAMemory(const uint8_t* data, size_t size, PixelBuffer& out_buffer, bool& out_is_animated) {
+HeifError HeifReader::ExtractPrimaryImageFromMemory(const uint8_t* data, size_t size, PixelBuffer& out_buffer, bool& out_is_animated) {
     // 1. Create a memory-mapped context.
     std::shared_ptr<heif_context> context(heif_context_alloc(), [](heif_context* c) { heif_context_free(c); });
 
@@ -169,15 +169,15 @@ HeifError HeifReader::ExtractPrimaryImageBGRAMemory(const uint8_t* data, size_t 
     out_buffer.primaryImageHeight = heif_image_handle_get_height(primary_image_handle);
 
     // 4. Delegate the decoding and buffer allocation to the shared helper function.
-    // The ExtractImageToBGRA function takes ownership of primary_image_handle and will release it via its own std::shared_ptr.
-    return ExtractImageToBGRA(primary_image_handle, out_buffer);
+    // The ExtractImageToBuffer function takes ownership of primary_image_handle and will release it via its own std::shared_ptr.
+    return ExtractImageToBuffer(primary_image_handle, out_buffer);
 }
 
 /**
- * @brief Private helper to decode any image handle into a BGRA buffer.
- * This function contains the common logic for decoding, buffer allocation, and BGRA conversion.
+ * @brief Private helper to decode any image handle into a packed RGBA buffer.
+ * This function contains the common logic for decoding, buffer allocation, and pixel copy.
  */
-HeifError HeifReader::ExtractImageToBGRA(heif_image_handle* image_handle, PixelBuffer& out_buffer) {
+HeifError HeifReader::ExtractImageToBuffer(heif_image_handle* image_handle, PixelBuffer& out_buffer) {
     // Take ownership of the incoming handle and ensure it's released upon exit.
     std::shared_ptr<heif_image_handle> handle_guard(image_handle, heif_image_handle_release);
 
@@ -202,7 +202,7 @@ HeifError HeifReader::ExtractImageToBGRA(heif_image_handle* image_handle, PixelB
 /**
  * @brief [NEW HELPER] Fills a PixelBuffer from a decoded heif_image.
  * This function contains the common logic for allocating the buffer and
- * using BGRAEncoder to fill it with pixel data.
+ * using PixelBufferEncoder to fill it with pixel data.
  */
 void HeifReader::FillPixelBufferFromImage(const heif_image* image, int width, int height, PixelBuffer& out_buffer) {
     // Set the dimensions for the output buffer.
@@ -217,7 +217,7 @@ void HeifReader::FillPixelBufferFromImage(const heif_image* image, int width, in
     }
     out_buffer.data = new uint8_t[out_buffer.dataSize];
 
-    // Use the BGRAEncoder to fill the allocated buffer.
-    BGRAEncoder encoder;
+    // Use the PixelBufferEncoder to fill the allocated buffer.
+    PixelBufferEncoder encoder;
     encoder.Encode(image, width, height, out_buffer.data);
 }

@@ -21,7 +21,7 @@
     <ClCompile Include="AnimatedAvifReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BGRAEncoder.cpp">
+    <ClCompile Include="PixelBufferEncoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dllmain.cpp">
@@ -41,7 +41,7 @@
     <ClInclude Include="AnimatedAvifReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BGRAEncoder.h">
+    <ClInclude Include="PixelBufferEncoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DllGlobals.h">

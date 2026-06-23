@@ -70,7 +70,7 @@ public partial class AvifAnimator : IAnimator
 
     /// <summary>
     ///     CPU-side pixel buffer that receives decoded frame data from the native decoder.
-    ///     Sized to <c>PixelWidth � PixelHeight � 4</c> bytes (BGRA8, one byte per channel).
+    ///     Sized to <c>PixelWidth � PixelHeight � 4</c> bytes (RGBA8, one byte per channel).
     ///     Allocated on the Pinned Object Heap (<see cref="GC.AllocateArray{T}(int, bool)" />),
     ///     so the buffer never moves and its address is stable for the object's lifetime �
     ///     the native decoder writes into <see cref="_pixelBufferPtr" /> without marshalling,
@@ -183,7 +183,7 @@ public partial class AvifAnimator : IAnimator
         _frameBitmap = CanvasBitmap.CreateFromBytes(
             canvas.Device, _pixelBuffer,
             (int)PixelWidth, (int)PixelHeight,
-            DirectXPixelFormat.B8G8R8A8UIntNormalized);
+            DirectXPixelFormat.R8G8B8A8UIntNormalized); // RGBA passthrough from native decoder
 
         _compositedSurface = new CanvasRenderTarget(canvas, PixelWidth, PixelHeight, 96);
         using var ds = _compositedSurface.CreateDrawingSession();

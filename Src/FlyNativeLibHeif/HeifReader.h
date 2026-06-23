@@ -26,7 +26,7 @@ enum class HeifError {
 /// @brief A C-style struct to pass raw image data to C#.
 /// @note The `data` buffer is allocated in C++ and must be freed by the caller.
 struct PixelBuffer {
-    uint8_t* data;            ///< Pointer to the raw BGRA pixel data.
+    uint8_t* data;            ///< Pointer to the raw RGBA pixel data.
     int dataSize;             ///< Total size of the data buffer in bytes.
     int width;                ///< Width of the decoded image in pixels.
     int height;               ///< Height of the decoded image in pixels.
@@ -40,18 +40,18 @@ public:
     HeifReader();
     ~HeifReader();
 
-	/// @brief Extracts the thumbnail into a raw BGRA pixel buffer. If no thumbnail exists, generates one from primary image.
-    HeifError ExtractThumbnailBGRA(const std::string& input_filename, PixelBuffer& out_buffer);
+	/// @brief Extracts the thumbnail into a raw RGBA pixel buffer. If no thumbnail exists, generates one from primary image.
+    HeifError ExtractThumbnail(const std::string& input_filename, PixelBuffer& out_buffer);
 
-    /// @brief Extracts the primary image into a raw BGRA pixel buffer.
-    HeifError ExtractPrimaryImageBGRA(const std::string& input_filename, PixelBuffer& out_buffer);
+    /// @brief Extracts the primary image into a raw RGBA pixel buffer.
+    HeifError ExtractPrimaryImage(const std::string& input_filename, PixelBuffer& out_buffer);
 
-    /// @brief Extracts the primary image into a raw BGRA pixel buffer directly from memory, and outputs whether it contains sequence tracks.
-    HeifError ExtractPrimaryImageBGRAMemory(const uint8_t* data, size_t size, PixelBuffer& out_buffer, bool& out_is_animated);
+    /// @brief Extracts the primary image into a raw RGBA pixel buffer directly from memory, and outputs whether it contains sequence tracks.
+    HeifError ExtractPrimaryImageFromMemory(const uint8_t* data, size_t size, PixelBuffer& out_buffer, bool& out_is_animated);
 
 private:
-    ///@brief Internal helper to decode any image handle into a BGRA buffer.
-    HeifError ExtractImageToBGRA(heif_image_handle* image_handle, PixelBuffer& out_buffer);
+    ///@brief Internal helper to decode any image handle into a packed RGBA buffer.
+    HeifError ExtractImageToBuffer(heif_image_handle* image_handle, PixelBuffer& out_buffer);
 
     ///@brief Fills a PixelBuffer from a decoded heif_image.
     void FillPixelBufferFromImage(const heif_image* image, int width, int height, PixelBuffer& out_buffer);

@@ -95,31 +95,31 @@ internal static partial class NativeHeifBridge
     private const string DllName = "FlyNativeLibHeif.dll";
 
     /// <summary>
-    /// Imports the native `ExtractPrimaryImageBGRA` function from `FlyNativeLibHeif.dll`.
-    /// This function decodes the primary image from a HEIF file into 32-bit BGRA pixel format.
+    /// Imports the native `ExtractPrimaryImage` function from `FlyNativeLibHeif.dll`.
+    /// This function decodes the primary image from a HEIF file into 32-bit RGBA pixel format.
     /// </summary>
     /// <param name="heicPath">The file path to the HEIC/HEIF image.</param>
     /// <param name="outBuffer">An output <see cref="PixelBuffer"/> struct containing the pointer to the decoded pixel data and image metadata.</param>
     /// <returns>A <see cref="HeifError"/> indicating the success or failure of the operation.</returns>
-    [LibraryImport(DllName, EntryPoint = "ExtractPrimaryImageBGRA", StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport(DllName, EntryPoint = "ExtractPrimaryImage", StringMarshalling = StringMarshalling.Utf16)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial HeifError ExtractPrimaryImageBGRA(string heicPath, out PixelBuffer outBuffer);
+    public static partial HeifError ExtractPrimaryImage(string heicPath, out PixelBuffer outBuffer);
 
     /// <summary>
-    /// Imports the native `ExtractThumbnailBGRA` function from `FlyNativeLibHeif.dll`.
-    /// This function decodes the thumbnail image from a HEIF file into 32-bit BGRA pixel format.
+    /// Imports the native `ExtractThumbnail` function from `FlyNativeLibHeif.dll`.
+    /// This function decodes the thumbnail image from a HEIF file into 32-bit RGBA pixel format.
     /// </summary>
     /// <param name="heicPath">The file path to the HEIC/HEIF image.</param>
     /// <param name="outBuffer">An output <see cref="PixelBuffer"/> struct containing the pointer to the decoded pixel data and image metadata.</param>
     /// <returns>A <see cref="HeifError"/> indicating the success or failure of the operation.</returns>
-    [LibraryImport(DllName, EntryPoint = "ExtractThumbnailBGRA", StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport(DllName, EntryPoint = "ExtractThumbnail", StringMarshalling = StringMarshalling.Utf16)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial HeifError ExtractThumbnailBGRA(string heicPath, out PixelBuffer outBuffer);
+    public static partial HeifError ExtractThumbnail(string heicPath, out PixelBuffer outBuffer);
 
     /// <summary>
     /// Imports the native `FreePixelBuffer` function from `FlyNativeLibHeif.dll`.
     /// This critical function is responsible for freeing the unmanaged memory allocated by
-    /// `ExtractPrimaryImageBGRA` or `ExtractThumbnailBGRA` to prevent memory leaks.
+    /// `ExtractPrimaryImage` or `ExtractThumbnail` to prevent memory leaks.
     /// </summary>
     /// <param name="buffer">A reference to the <see cref="PixelBuffer"/> struct whose `data` pointer needs to be freed.</param>
     [LibraryImport(DllName, EntryPoint = "FreePixelBuffer")]
@@ -128,7 +128,7 @@ internal static partial class NativeHeifBridge
 
     /// <summary>
     /// Imports the native `ExtractPrimaryImageAndAnimationStatusFromMemory` function from `FlyNativeLibHeif.dll`.
-    /// This function decodes the primary image from an in-memory byte array into 32-bit BGRA pixel format,
+    /// This function decodes the primary image from an in-memory byte array into 32-bit RGBA pixel format,
     /// and simultaneously checks if the file contains an animated sequence track.
     /// </summary>
     /// <param name="data">A pointer to the unmanaged memory block containing the raw file bytes.</param>
@@ -160,8 +160,8 @@ public static class NativeHeifWrapper
     public class HeifImage
     {
         /// <summary>
-        /// The raw pixel data of the decoded image. The data is in 32-bit BGRA format,
-        /// meaning each pixel consists of 4 bytes: Blue, Green, Red, Alpha.
+        /// The raw pixel data of the decoded image. The data is in 32-bit RGBA format,
+        /// meaning each pixel consists of 4 bytes: Red, Green, Blue, Alpha.
         /// </summary>
         public byte[] Pixels { get; internal set; }
 
@@ -193,12 +193,12 @@ public static class NativeHeifWrapper
     /// Handles calling the native DLL, copying data to managed memory, and freeing native resources.
     /// </summary>
     /// <param name="filePath">The full path to the .heic, .heif or .hif file.</param>
-    /// <returns>A <see cref="HeifImage"/> object containing the decoded BGRA pixel data and dimensions, or null if the image data is empty.</returns>
+    /// <returns>A <see cref="HeifImage"/> object containing the decoded RGBA pixel data and dimensions, or null if the image data is empty.</returns>
     /// <exception cref="Exception">Thrown if the native DLL returns an error code during decoding,
     /// indicating issues like file not found, decoding errors, or no primary image.</exception>
     public static HeifImage DecodePrimaryImage(string filePath)
     {
-        HeifError result = NativeHeifBridge.ExtractPrimaryImageBGRA(filePath, out NativeHeifBridge.PixelBuffer buffer);
+        HeifError result = NativeHeifBridge.ExtractPrimaryImage(filePath, out NativeHeifBridge.PixelBuffer buffer);
 
         if (result != HeifError.Ok)
             throw new Exception($"Native HEIF decoder failed to decode primary image. Error: {result}");
@@ -233,12 +233,12 @@ public static class NativeHeifWrapper
     /// Handles calling the native DLL, copying data to managed memory, and freeing native resources.
     /// </summary>
     /// <param name="filePath">The full path to the .heic, heif or .hif file.</param>
-    /// <returns>A <see cref="HeifImage"/> object containing the decoded BGRA pixel data and dimensions, or null if no thumbnail data is found or is empty.</returns>
+    /// <returns>A <see cref="HeifImage"/> object containing the decoded RGBA pixel data and dimensions, or null if no thumbnail data is found or is empty.</returns>
     /// <exception cref="Exception">Thrown if the native DLL returns an error code during decoding,
     /// indicating issues like file not found, decoding errors, or no thumbnail found.</exception>
     public static HeifImage DecodeThumbnail(string filePath)
     {
-        HeifError result = NativeHeifBridge.ExtractThumbnailBGRA(filePath, out NativeHeifBridge.PixelBuffer buffer);
+        HeifError result = NativeHeifBridge.ExtractThumbnail(filePath, out NativeHeifBridge.PixelBuffer buffer);
 
         if (result != HeifError.Ok)
             throw new Exception($"Native HEIF decoder failed to decode thumbnail. Error: {result}");
@@ -274,7 +274,7 @@ public static class NativeHeifWrapper
     /// </summary>
     /// <param name="fileData">The raw byte array containing the entire file.</param>
     /// <param name="isAnimated">Output parameter indicating whether the sequence has animation tracks.</param>
-    /// <returns>A <see cref="HeifImage"/> object containing the decoded BGRA pixel data and dimensions, or null if empty.</returns>
+    /// <returns>A <see cref="HeifImage"/> object containing the decoded RGBA pixel data and dimensions, or null if empty.</returns>
     public static HeifImage DecodePrimaryImageFromMemory(byte[] fileData, out bool isAnimated)
     {
         isAnimated = false;

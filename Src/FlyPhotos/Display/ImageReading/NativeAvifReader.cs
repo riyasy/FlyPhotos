@@ -43,7 +43,7 @@ internal static class NativeAvifReader
 
             var firstFrameBitmap = CanvasBitmap.CreateFromBytes(
                 canvas, heifImage.Pixels, heifImage.Width, heifImage.Height,
-                DirectXPixelFormat.B8G8R8A8UIntNormalized
+                DirectXPixelFormat.R8G8B8A8UIntNormalized // RGBA passthrough from native decoder
             );
 
             if (isAnimated)

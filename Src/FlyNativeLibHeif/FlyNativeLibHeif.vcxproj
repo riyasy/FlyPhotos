@@ -164,7 +164,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DllGlobals.h" />
-    <ClInclude Include="BGRAEncoder.h" />
+    <ClInclude Include="PixelBufferEncoder.h" />
     <ClInclude Include="HeifReader.h" />
     <ClInclude Include="AnimatedAvifReader.h" />
     <ClInclude Include="pch.h" />
@@ -173,7 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="BGRAEncoder.cpp" />
+    <ClCompile Include="PixelBufferEncoder.cpp" />
     <ClCompile Include="HeifReader.cpp" />
     <ClCompile Include="AnimatedAvifReader.cpp" />
     <ClCompile Include="NativeExports.cpp" />

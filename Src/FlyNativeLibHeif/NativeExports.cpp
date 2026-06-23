@@ -15,11 +15,11 @@ static std::string WStringToString(const std::wstring& wstr)
 }
 
 /**
- * @brief C-API function to extract the primary image into a raw BGRA buffer.
+ * @brief C-API function to extract the primary image into a raw RGBA buffer.
  * This function serves as the boundary between managed C# and native C++,
  * wrapping the object-oriented C++ HeifReader class in a simple C-style function.
  */
-HeifError ExtractPrimaryImageBGRA(const wchar_t* heic_path, PixelBuffer* out_buffer) {
+HeifError ExtractPrimaryImage(const wchar_t* heic_path, PixelBuffer* out_buffer) {
     // Basic input validation to prevent null pointer dereferences.
     if (!heic_path || !out_buffer) { return HeifError::InvalidInput; }
     // Zero out the output buffer to ensure it's in a known-good state, especially on failure.
@@ -33,7 +33,7 @@ HeifError ExtractPrimaryImageBGRA(const wchar_t* heic_path, PixelBuffer* out_buf
     const std::string input_file = WStringToString(heic_path);
 
     // Call the main C++ implementation. This allocates memory for pixel data inside cppBuffer.
-    HeifError result = reader.ExtractPrimaryImageBGRA(input_file, cppBuffer);
+    HeifError result = reader.ExtractPrimaryImage(input_file, cppBuffer);
 
     // If successful, just copy the pointer and dimensions directly. NO memcpy!
     // This step effectively transfers ownership of the allocated memory (cppBuffer.data)
@@ -47,10 +47,10 @@ HeifError ExtractPrimaryImageBGRA(const wchar_t* heic_path, PixelBuffer* out_buf
 }
 
 /**
- * @brief C-API function to extract the thumbnail image into a raw BGRA buffer.
+ * @brief C-API function to extract the thumbnail image into a raw RGBA buffer.
  * This is the C-style wrapper for the thumbnail extraction functionality.
  */
-HeifError ExtractThumbnailBGRA(const wchar_t* heic_path, PixelBuffer* out_buffer) {
+HeifError ExtractThumbnail(const wchar_t* heic_path, PixelBuffer* out_buffer) {
     // Basic input validation.
     if (!heic_path || !out_buffer) { return HeifError::InvalidInput; }
     // Ensure the output buffer is clean before proceeding.
@@ -63,7 +63,7 @@ HeifError ExtractThumbnailBGRA(const wchar_t* heic_path, PixelBuffer* out_buffer
     const std::string input_file = WStringToString(heic_path);
 
     // Call the C++ method to extract the thumbnail, which allocates memory inside cppBuffer.
-    HeifError result = reader.ExtractThumbnailBGRA(input_file, cppBuffer);
+    HeifError result = reader.ExtractThumbnail(input_file, cppBuffer);
 
     // If successful, just copy the pointer and dimensions directly. NO memcpy!
     // This transfers ownership of the heap-allocated pixel buffer to the C# caller.
@@ -93,7 +93,7 @@ void FreePixelBuffer(PixelBuffer* buffer) {
 }
 
 /**
- * @brief C-API function to extract the primary image into a raw BGRA buffer directly from memory, reporting sequence status.
+ * @brief C-API function to extract the primary image into a raw RGBA buffer directly from memory, reporting sequence status.
  * This function serves as the boundary between managed C# and native C++ memory for in-RAM decodes.
  */
 HeifError ExtractPrimaryImageAndAnimationStatusFromMemory(const uint8_t* data, size_t size, PixelBuffer* out_buffer, bool* out_is_animated) {
@@ -104,7 +104,7 @@ HeifError ExtractPrimaryImageAndAnimationStatusFromMemory(const uint8_t* data, s
     HeifReader reader;
     PixelBuffer cppBuffer;
 
-    HeifError result = reader.ExtractPrimaryImageBGRAMemory(data, size, cppBuffer, *out_is_animated);
+    HeifError result = reader.ExtractPrimaryImageFromMemory(data, size, cppBuffer, *out_is_animated);
 
     if (result == HeifError::Ok) {
         *out_buffer = *reinterpret_cast<PixelBuffer*>(&cppBuffer);

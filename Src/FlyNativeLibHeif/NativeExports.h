@@ -19,25 +19,25 @@
 extern "C" {
 #endif
 
-    /// @brief Decodes the primary HEIC image into a raw BGRA pixel buffer.
+    /// @brief Decodes the primary HEIC image into a raw RGBA pixel buffer.
     /// @param heic_path Path to the input .heic file (UTF-16).
     /// @param out_buffer Pointer to a struct to receive the decoded image data.
     /// @return A HeifError code indicating the result.
     /// @note The caller MUST call FreePixelBuffer() on the out_buffer to prevent a memory leak.
-    __declspec(dllexport) HeifError ExtractPrimaryImageBGRA(const wchar_t* heic_path, PixelBuffer* out_buffer);
+    __declspec(dllexport) HeifError ExtractPrimaryImage(const wchar_t* heic_path, PixelBuffer* out_buffer);
 
-    /// @brief Decodes the thumbnail from a HEIC image into a raw BGRA pixel buffer.
+    /// @brief Decodes the thumbnail from a HEIC image into a raw RGBA pixel buffer.
     /// @param heic_path Path to the input .heic file (UTF-16).
     /// @param out_buffer Pointer to a struct to receive the decoded image data.
     /// @return A HeifError code indicating the result.
     /// @note The caller MUST call FreePixelBuffer() on the out_buffer to prevent a memory leak.
-    __declspec(dllexport) HeifError ExtractThumbnailBGRA(const wchar_t* heic_path, PixelBuffer* out_buffer);
+    __declspec(dllexport) HeifError ExtractThumbnail(const wchar_t* heic_path, PixelBuffer* out_buffer);
 
     /// @brief Frees the native memory allocated within a PixelBuffer struct.
     /// @param buffer Pointer to the PixelBuffer whose internal data buffer needs to be freed.
     __declspec(dllexport) void FreePixelBuffer(PixelBuffer* buffer);
 
-    /// @brief Decodes the primary image into a raw BGRA pixel buffer directly from memory, reporting sequence status.
+    /// @brief Decodes the primary image into a raw RGBA pixel buffer directly from memory, reporting sequence status.
     /// @param data Pointer to the file data in memory.
     /// @param size Size of the file data in bytes.
     /// @param out_buffer Pointer to a struct to receive the decoded image data.

@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "AnimatedAvifReader.h"
-#include "BGRAEncoder.h"
+#include "PixelBufferEncoder.h"
 #include "DllGlobals.h"
 
 /**
@@ -109,7 +109,7 @@ int AnimatedAvifReader::GetHeight() const {
 }
 
 /**
- * @brief Extracts, decodes, and interleaves the next sequence frame into the provided BGRA buffer.
+ * @brief Extracts, decodes, and interleaves the next sequence frame into the provided RGBA buffer.
  * @param out_bgra_buffer Pointer to the pre-allocated byte array of size (width * height * 4).
  * @return The duration of the decoded frame in milliseconds.
  */
@@ -129,7 +129,7 @@ int AnimatedAvifReader::DecodeNextFrame(uint8_t* out_bgra_buffer) {
     }
     
     // Copy/encode the frame's pixels to the out buffer for C#
-    BGRAEncoder encoder;
+    PixelBufferEncoder encoder;
     encoder.Encode(current_image, width, height, out_bgra_buffer);
 
     // Calculate the frame's exact display duration using the track timescale

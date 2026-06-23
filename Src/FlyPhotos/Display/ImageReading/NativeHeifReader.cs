@@ -30,14 +30,14 @@ internal static class NativeHeifReader
                 return (false, PreviewDisplayItem.Empty());
             }
 
-            // 3. Create the Win2D bitmap directly from the raw BGRA byte array.
+            // 3. Create the Win2D bitmap directly from the raw RGBA byte array.
             //    This is extremely fast as no further decoding is needed.
             var canvasBitmap = CanvasBitmap.CreateFromBytes(
                 ctrl, // The resource creator
                 heifImage.Pixels,
                 heifImage.Width,
                 heifImage.Height,
-                Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized // This MUST match our C++ output
+                Windows.Graphics.DirectX.DirectXPixelFormat.R8G8B8A8UIntNormalized // This MUST match our C++ output (RGBA passthrough)
             );
 
             // 4. Create the metadata using the primary image dimensions, which our native code provides.
@@ -70,13 +70,13 @@ internal static class NativeHeifReader
                 return (false, HqDisplayItem.Empty());
             }
 
-            // 3. Create the Win2D bitmap directly from the raw BGRA byte array.
+            // 3. Create the Win2D bitmap directly from the raw RGBA byte array.
             var canvasBitmap = CanvasBitmap.CreateFromBytes(
                 ctrl,
                 heifImage.Pixels,
                 heifImage.Width,
                 heifImage.Height,
-                Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized
+                Windows.Graphics.DirectX.DirectXPixelFormat.R8G8B8A8UIntNormalized // RGBA passthrough from native decoder
             );
 
             // 4. Return the complete display item.
