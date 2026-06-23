@@ -1,11 +1,11 @@
-# Contributing to Fly Photos
+# Contributing to FlyPhotos
 
 
 ## 1. Reporting Bugs
 
 A good bug report includes:
 
-- Fly Photos version, and whether it's the **Microsoft Store** or **GitHub MSI** build.
+- FlyPhotos version, and whether it's the **Microsoft Store** or **GitHub MSI** build.
 - Windows version and architecture (x64 / ARM64).
 - The image format involved (e.g. JPEG, HEIC, PSD, AVIF) and, if possible, a sample file.
 - Steps to reproduce, what you expected, and what actually happened.
@@ -17,7 +17,7 @@ A good bug report includes:
 
 ### Quick build notes
 
-Fly Photos is WinUI 3 + Win2D on **.NET 10** with Native AOT, plus native C++ and a Rust bridge. You need **Visual Studio 2022**, the **.NET 10 SDK**, **vcpkg**, and **Rust/cargo**.
+FlyPhotos is WinUI 3 + Win2D on **.NET 10** with Native AOT, plus native C++ and a Rust bridge. You need **Visual Studio 2022**, the **.NET 10 SDK**, **vcpkg**, and **Rust/cargo**.
 
 
 ### Guidelines
@@ -75,4 +75,4 @@ Each string is a `<data>` entry — keep the `name` untouched and translate the 
 
 ---
 
-Thank you for helping make Fly Photos better! 🚀
+Thank you for helping make FlyPhotos better! 🚀

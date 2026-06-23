@@ -1,5 +1,5 @@
 <!--
-Thanks for contributing to Fly Photos!
+Thanks for contributing to FlyPhotos!
 Please read CONTRIBUTING.md before opening this PR.
 -->
 

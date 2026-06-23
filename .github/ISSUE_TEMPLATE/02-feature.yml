@@ -8,11 +8,7 @@ body:
       value: |
         Thanks for the suggestion!
 
-        Before filling this in, please search the existing open and closed
-        [issues](https://github.com/riyasy/FlyPhotos/issues?q=is%3Aissue) first.
-        Someone may have already suggested this, it may already be planned or
-        available in a newer version, or it may have been declined before for
-        reasons explained there.
+        Before filling this in, please search the existing open and closed [issues](https://github.com/riyasy/FlyPhotos/issues?q=is%3Aissue) first. Someone may have already suggested this, it may already be planned or available in a newer version, or it may have been declined before for reasons explained there.
 
   - type: textarea
     id: problem

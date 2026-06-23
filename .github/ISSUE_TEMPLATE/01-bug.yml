@@ -8,9 +8,7 @@ body:
       value: |
         Thanks for taking the time to report a bug!
 
-        Before filling this in, please search the existing open and closed
-        [issues](https://github.com/riyasy/FlyPhotos/issues?q=is%3Aissue) first.
-        Your problem may already be reported, answered, or fixed in a newer version.
+        Before filling this in, please search the existing open and closed [issues](https://github.com/riyasy/FlyPhotos/issues?q=is%3Aissue) first. Your problem may already be reported, answered, or fixed in a newer version.
 
   - type: textarea
     id: description
@@ -60,7 +58,7 @@ body:
   - type: input
     id: app-version
     attributes:
-      label: Fly Photos version
+      label: FlyPhotos version
       placeholder: e.g. 2.6.5
     validations:
       required: true

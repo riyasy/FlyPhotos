@@ -6,9 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Translations are very welcome! If you can edit the `.resw` file yourself,
-        consider opening a pull request instead — see
-        [CONTRIBUTING.md > Localization](https://github.com/riyasy/FlyPhotos/blob/main/CONTRIBUTING.md#3-localization).
+        Translations are very welcome! If you can edit the `.resw` file yourself, consider opening a pull request instead — see [CONTRIBUTING.md > Localization](https://github.com/riyasy/FlyPhotos/blob/main/CONTRIBUTING.md#3-localization).
 
   - type: input
     id: language
