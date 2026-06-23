@@ -1,0 +1,39 @@
+name: 🌐 Translation / Localization
+description: Report a wrong translation, missing text, or request a new language
+title: "[Localization]: "
+labels: ["localization"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Translations are very welcome! If you can edit the `.resw` file yourself,
+        consider opening a pull request instead — see
+        [CONTRIBUTING.md > Localization](https://github.com/riyasy/FlyPhotos/blob/main/CONTRIBUTING.md#3-localization).
+
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      placeholder: e.g. German (de-DE)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - Wrong / awkward translation
+        - Missing text (shows English or is blank)
+        - Request to add a new language
+        - Text doesn't fit in the UI
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Where in the app does this appear? What does it say now, and what should it say?
+    validations:
+      required: true

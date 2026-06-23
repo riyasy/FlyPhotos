@@ -1,0 +1,103 @@
+name: 🐞 Bug report
+description: Report something that isn't working correctly
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug!
+
+        Before filling this in, please search the existing open and closed
+        [issues](https://github.com/riyasy/FlyPhotos/issues?q=is%3Aissue) first.
+        Your problem may already be reported, answered, or fixed in a newer version.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce the problem?
+      placeholder: |
+        1. Open '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened? Screenshots or a short screen recording help a lot for visual issues.
+    validations:
+      required: false
+
+  - type: input
+    id: image-format
+    attributes:
+      label: Image format (if related to a specific file)
+      description: e.g. JPEG, HEIC, PSD, AVIF. If you can, attach a sample file in a comment.
+      placeholder: e.g. HEIC
+    validations:
+      required: false
+
+  - type: input
+    id: app-version
+    attributes:
+      label: Fly Photos version
+      placeholder: e.g. 2.6.5
+    validations:
+      required: true
+
+  - type: dropdown
+    id: build
+    attributes:
+      label: Build source
+      options:
+        - Microsoft Store
+        - GitHub MSI
+        - Built from source
+    validations:
+      required: true
+
+  - type: input
+    id: windows-version
+    attributes:
+      label: Windows version
+      placeholder: e.g. Windows 11 23H2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: Architecture
+      options:
+        - x64
+        - ARM64
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Anything else that might help.
+    validations:
+      required: false

@@ -1,0 +1,47 @@
+name: 🪄 Feature request
+description: Suggest an idea or improvement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion!
+
+        Before filling this in, please search the existing open and closed
+        [issues](https://github.com/riyasy/FlyPhotos/issues?q=is%3Aissue) first.
+        Someone may have already suggested this, it may already be planned or
+        available in a newer version, or it may have been declined before for
+        reasons explained there.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the use case or the frustration this addresses.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What you'd like to see happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you've thought about, if any.
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Mockups, examples from other apps, or anything else.
+    validations:
+      required: false
