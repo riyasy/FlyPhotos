@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Email feedback
+    url: mailto:ryftools@outlook.com
+    about: General feedback or questions you'd rather not file as an issue.
