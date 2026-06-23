@@ -128,7 +128,7 @@ public class ShellAppProvider
 
         if (File.Exists(path))
         {
-            app.Icon = await Util.ExtractIconFromExe(path);
+            app.Icon = await ExeIconExtractor.ExtractAsync(path);
         }
 
         return app;

@@ -3,10 +3,10 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.System;
+using FlyPhotos.Infra.Utils;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using NLog;
@@ -115,11 +115,8 @@ public class Win32App : InstalledApp
     {
         if (IconData != null)
         {
-            var bmp = new WriteableBitmap(IconData.Width, IconData.Height);
-            using var stream = bmp.PixelBuffer.AsStream();
-            stream.Write(IconData.IconPixels, 0, IconData.IconPixels.Length);
-            Icon = bmp;
-            
+            Icon = Util.CreateBitmapFromBgra(IconData.Width, IconData.Height, IconData.IconPixels);
+
             // Allow garbage collection of the raw byte array now that the texture is created.
             IconData = null;
         }
@@ -201,11 +198,8 @@ public class StoreApp : InstalledApp
     {
         if (RawIconData != null)
         {
-            var bmp = new WriteableBitmap(RawIconData.Width, RawIconData.Height);
-            await using var stream = bmp.PixelBuffer.AsStream();
-            await stream.WriteAsync(RawIconData.IconPixels, 0, RawIconData.IconPixels.Length);
-            Icon = bmp;
-            
+            Icon = Util.CreateBitmapFromBgra(RawIconData.Width, RawIconData.Height, RawIconData.IconPixels);
+
             // Allow garbage collection
             RawIconData = null;
             return;

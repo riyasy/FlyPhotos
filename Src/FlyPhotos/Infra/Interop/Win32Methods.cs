@@ -337,6 +337,109 @@ internal static partial class Win32Methods
         [MarshalAs(UnmanagedType.LPWStr)] public string? lpszProgressTitle;
     }
 
+    // -------------------------------------------------------------------------
+    // Icon extraction — pull the associated icon out of an .exe and rasterise it
+    // to a BGRA pixel buffer using GDI, replacing System.Drawing.
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Extracts icons from the specified executable, DLL, or icon file.
+    /// </summary>
+    /// <param name="lpszFile">Path to the file to extract icons from.</param>
+    /// <param name="nIconIndex">Zero-based index of the first icon to extract.</param>
+    /// <param name="phiconLarge">Receives the handle to the large icon, or <see cref="IntPtr.Zero"/>.</param>
+    /// <param name="phiconSmall">Receives the handle to the small icon, or <see cref="IntPtr.Zero"/>.</param>
+    /// <param name="nIcons">The number of icons to extract.</param>
+    /// <returns>The number of icons successfully extracted, or the total icon count when <paramref name="nIconIndex"/> is -1.</returns>
+    [LibraryImport("shell32.dll", EntryPoint = "ExtractIconExW", StringMarshalling = StringMarshalling.Utf16)]
+    internal static partial int ExtractIconEx(string lpszFile, int nIconIndex, out IntPtr phiconLarge, out IntPtr phiconSmall, uint nIcons);
+
+    /// <summary>Destroys an icon and frees any memory the icon occupied.</summary>
+    [LibraryImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool DestroyIcon(IntPtr hIcon);
+
+    /// <summary>Retrieves the colour and mask bitmaps backing an icon.</summary>
+    [LibraryImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool GetIconInfo(IntPtr hIcon, out ICONINFO piconinfo);
+
+    /// <summary>
+    /// Contains information about an icon. The <c>fIcon</c> member is declared as <see cref="int"/>
+    /// (a Win32 <c>BOOL</c>) to keep the struct blittable for the <c>LibraryImport</c> source generator.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct ICONINFO
+    {
+        public int fIcon;
+        public int xHotspot;
+        public int yHotspot;
+        public IntPtr hbmMask;
+        public IntPtr hbmColor;
+    }
+
+    /// <summary>Retrieves information for the specified graphics object; used here to read a <see cref="BITMAP"/>.</summary>
+    [LibraryImport("gdi32.dll", EntryPoint = "GetObjectW")]
+    internal static partial int GetObject(IntPtr hgdiobj, int cbBuffer, ref BITMAP lpvObject);
+
+    /// <summary>Describes the dimensions and colour format of a GDI bitmap.</summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct BITMAP
+    {
+        public int bmType;
+        public int bmWidth;
+        public int bmHeight;
+        public int bmWidthBytes;
+        public ushort bmPlanes;
+        public ushort bmBitsPixel;
+        public IntPtr bmBits;
+    }
+
+    /// <summary>Creates a memory device context compatible with the specified device.</summary>
+    [LibraryImport("gdi32.dll")]
+    internal static partial IntPtr CreateCompatibleDC(IntPtr hdc);
+
+    /// <summary>Deletes the specified device context.</summary>
+    [LibraryImport("gdi32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool DeleteDC(IntPtr hdc);
+
+    /// <summary>Deletes a GDI object (pen, brush, bitmap, etc.) and frees its resources.</summary>
+    [LibraryImport("gdi32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool DeleteObject(IntPtr hObject);
+
+    /// <summary>
+    /// Copies the bits of a bitmap into a buffer in the device-independent format described by
+    /// <paramref name="lpbi"/>. Used to read 32-bpp top-down BGRA pixels from an icon's colour bitmap.
+    /// </summary>
+    [LibraryImport("gdi32.dll")]
+    internal static partial int GetDIBits(IntPtr hdc, IntPtr hbm, uint uStartScan, uint cScanLines,
+        [Out] byte[] lpvBits, ref BITMAPINFOHEADER lpbi, uint uUsage);
+
+    /// <summary>Bitmap header passed to <see cref="GetDIBits"/>. For 32-bpp BI_RGB no colour table follows.</summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct BITMAPINFOHEADER
+    {
+        public uint biSize;
+        public int biWidth;
+        public int biHeight;
+        public ushort biPlanes;
+        public ushort biBitCount;
+        public uint biCompression;
+        public uint biSizeImage;
+        public int biXPelsPerMeter;
+        public int biYPelsPerMeter;
+        public uint biClrUsed;
+        public uint biClrImportant;
+    }
+
+    /// <summary>Uncompressed RGB format for <see cref="BITMAPINFOHEADER.biCompression"/>.</summary>
+    internal const uint BI_RGB = 0;
+
+    /// <summary>Colour table contains literal RGB values; the <c>uUsage</c> value for <see cref="GetDIBits"/>.</summary>
+    internal const uint DIB_RGB_COLORS = 0;
+
     /// <summary>Operation code for <see cref="SHFILEOPSTRUCT.wFunc"/>: delete the specified files.</summary>
     internal const uint FO_DELETE = 0x0003;
 

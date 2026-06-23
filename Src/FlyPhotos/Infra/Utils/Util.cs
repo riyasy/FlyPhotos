@@ -1,9 +1,8 @@
 #nullable enable
 using System;
-using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Graphics;
 using Windows.System;
 using Windows.UI.Core;
@@ -14,7 +13,6 @@ using Microsoft.UI;
 using Microsoft.UI.Input;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using NLog;
 using Color = Windows.UI.Color;
@@ -139,39 +137,15 @@ internal static class Util
     }
 
     /// <summary>
-    /// Extracts an icon from an executable file and converts it to an <see cref="ImageSource"/>.
+    /// Builds a <see cref="WriteableBitmap"/> from a premultiplied BGRA8 pixel buffer.
+    /// Must be called on the UI thread.
     /// </summary>
-    /// <param name="exePath">The path to the executable.</param>
-    /// <returns>A task returning the <see cref="ImageSource"/> or null if extraction fails.</returns>
-    public static async Task<ImageSource?> ExtractIconFromExe(string exePath)
+    public static WriteableBitmap CreateBitmapFromBgra(int width, int height, byte[] bgraPixels)
     {
-        if (string.IsNullOrEmpty(exePath) || !File.Exists(exePath))
-            return null;
-
-        byte[]? iconBytes = await Task.Run(() =>
-        {
-            try
-            {
-                using var icon = Icon.ExtractAssociatedIcon(exePath);
-                if (icon == null) return null;
-
-                using var bitmap = icon.ToBitmap();
-                using var ms = new MemoryStream();
-                bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                return ms.ToArray();
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, "ExtractIconFromExe Error Error");
-                return null;
-            }
-        });
-
-        if (iconBytes == null) return null;
-
-        var bmp = new BitmapImage();
-        using var ms = new MemoryStream(iconBytes);
-        await bmp.SetSourceAsync(ms.AsRandomAccessStream());
+        var bmp = new WriteableBitmap(width, height);
+        using (var stream = bmp.PixelBuffer.AsStream())
+            stream.Write(bgraPixels, 0, bgraPixels.Length);
+        bmp.Invalidate();
         return bmp;
     }
 

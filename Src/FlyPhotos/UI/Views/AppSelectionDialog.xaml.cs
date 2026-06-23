@@ -110,7 +110,7 @@ public sealed partial class AppSelectionDialog
             var file = await picker.PickSingleFileAsync();
             if (file == null) return;
             
-            var icon = await Util.ExtractIconFromExe(file.Path);
+            var icon = await ExeIconExtractor.ExtractAsync(file.Path);
 
             _pendingSelection = new Win32App
             {
