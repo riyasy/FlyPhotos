@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Runtime.InteropServices;
 
@@ -8,8 +8,16 @@ namespace FlyPhotos.Infra.Interop;
 /// Provides access to various Win32 API methods through P/Invoke.
 /// This class encapsulates native functions from `user32.dll` and other system libraries.
 /// </summary>
+/// <remarks>
+/// This is a <c>partial</c> class organised into <c>#region</c> blocks by functional area
+/// (keyboard, cursor, window messaging, shell execute, window placement, native streams,
+/// shell file operations, icon extraction). Each region is self-contained and can be split
+/// into its own partial-class file if this grows further.
+/// </remarks>
 internal static partial class Win32Methods
 {
+    #region Keyboard & input (user32.dll)
+
     /// <summary>
     /// Imports the `GetKeyboardLayout` function from `user32.dll`.
     /// This function retrieves the active input locale identifier (formerly called the keyboard layout handle) for the specified thread.
@@ -33,6 +41,10 @@ internal static partial class Win32Methods
     [LibraryImport("user32.dll", EntryPoint = "VkKeyScanExA")]
     internal static partial short VkKeyScanEx(byte ch, IntPtr dwhkl);
 
+    #endregion
+
+    #region Cursor position (user32.dll)
+
     /// <summary>
     /// Represents a point on the screen with X and Y coordinates.
     /// This structure is used for various GDI and user interface functions.
@@ -53,11 +65,73 @@ internal static partial class Win32Methods
     [return: MarshalAs(UnmanagedType.Bool)] // Specifies how the boolean return value is marshalled.
     internal static partial bool GetCursorPos(out POINT lpPoint);
 
+    #endregion
+
+    #region Window messages & inter-process communication (user32.dll)
+
     /// <summary>
     /// Defines the constant for the `WM_SETICON` window message.
     /// This message is sent to a window to associate a new large or small icon with the window.
     /// </summary>
     internal const uint WM_SETICON = 0x0080;
+
+    /// <summary>
+    /// Constant value for the <c>WM_COPYDATA</c> message used to send data between processes.
+    /// Applications send this message to pass data blocks to another application.
+    /// </summary>
+    internal const int WM_COPYDATA = 0x004A;
+
+    /// <summary>
+    /// Structure used with the <c>WM_COPYDATA</c> message to send data to another process.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct COPYDATASTRUCT
+    {
+        /// <summary>
+        /// User-defined data. Applications can use this field to pass a value identifying the data type.
+        /// </summary>
+        public IntPtr dwData;
+
+        /// <summary>
+        /// Size, in bytes, of the data pointed to by <see cref="lpData"/>.
+        /// </summary>
+        public int cbData;
+
+        /// <summary>
+        /// Pointer to data to be passed to the receiving application. The data is copied into the address space of the receiving process.
+        /// </summary>
+        public IntPtr lpData;
+    }
+
+    /// <summary>
+    /// Finds a top-level window whose class name and/or window name match the specified strings.
+    /// This is a managed declaration of the Win32 <c>FindWindow</c> function from <c>user32.dll</c>.
+    /// </summary>
+    /// <param name="lpClassName">The class name or a class atom created by a previous call to RegisterClass. If this parameter is null, it finds any window whose title matches <paramref name="lpWindowName"/>.</param>
+    /// <param name="lpWindowName">The window name (the window's title). If this parameter is null, all window names match.</param>
+    /// <returns>
+    /// A handle to the window that has the specified class name and window name. If no such window exists, <see cref="IntPtr.Zero"/> is returned.
+    /// </returns>
+    [LibraryImport("user32.dll", EntryPoint = "FindWindowW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    internal static partial IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+    /// <summary>
+    /// Sends the specified message to a window or windows. This overload is used to send a <see cref="COPYDATASTRUCT"/> with the <c>WM_COPYDATA</c> message.
+    /// This is a managed declaration of the Win32 <c>SendMessage</c> function from <c>user32.dll</c>.
+    /// </summary>
+    /// <param name="hWnd">A handle to the window whose window procedure will receive the message.</param>
+    /// <param name="Msg">The message to be sent. Use <see cref="WM_COPYDATA"/> to send data blocks.</param>
+    /// <param name="wParam">Additional message-specific information. When sending <c>WM_COPYDATA</c>, this is typically the sender window handle.</param>
+    /// <param name="lParam">A reference to a <see cref="COPYDATASTRUCT"/> that contains the data to be passed to the receiving application.</param>
+    /// <returns>
+    /// The return value specifies the result of the message processing; its value depends on the message sent. For <c>WM_COPYDATA</c>, the return value is typically the value returned by the receiving window procedure.
+    /// </returns>
+    [LibraryImport("user32.dll", EntryPoint = "SendMessageW")]
+    internal static partial IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, ref COPYDATASTRUCT lParam);
+
+    #endregion
+
+    #region Shell execute — open / properties (shell32.dll)
 
     /// <summary>
     /// Performs an operation on a specified file, such as opening a file or showing its properties.
@@ -119,59 +193,9 @@ internal static partial class Win32Methods
     /// </summary>
     internal const uint SEE_MASK_INVOKEIDLIST = 12;
 
-    /// <summary>
-    /// Constant value for the <c>WM_COPYDATA</c> message used to send data between processes.
-    /// Applications send this message to pass data blocks to another application.
-    /// </summary>
-    internal const int WM_COPYDATA = 0x004A;
+    #endregion
 
-    /// <summary>
-    /// Structure used with the <c>WM_COPYDATA</c> message to send data to another process.
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct COPYDATASTRUCT
-    {
-        /// <summary>
-        /// User-defined data. Applications can use this field to pass a value identifying the data type.
-        /// </summary>
-        public IntPtr dwData;
-
-        /// <summary>
-        /// Size, in bytes, of the data pointed to by <see cref="lpData"/>.
-        /// </summary>
-        public int cbData;
-
-        /// <summary>
-        /// Pointer to data to be passed to the receiving application. The data is copied into the address space of the receiving process.
-        /// </summary>
-        public IntPtr lpData;
-    }
-
-    /// <summary>
-    /// Finds a top-level window whose class name and/or window name match the specified strings.
-    /// This is a managed declaration of the Win32 <c>FindWindow</c> function from <c>user32.dll</c>.
-    /// </summary>
-    /// <param name="lpClassName">The class name or a class atom created by a previous call to RegisterClass. If this parameter is null, it finds any window whose title matches <paramref name="lpWindowName"/>.</param>
-    /// <param name="lpWindowName">The window name (the window's title). If this parameter is null, all window names match.</param>
-    /// <returns>
-    /// A handle to the window that has the specified class name and window name. If no such window exists, <see cref="IntPtr.Zero"/> is returned.
-    /// </returns>
-    [LibraryImport("user32.dll", EntryPoint = "FindWindowW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
-    internal static partial IntPtr FindWindow(string lpClassName, string lpWindowName);
-
-    /// <summary>
-    /// Sends the specified message to a window or windows. This overload is used to send a <see cref="COPYDATASTRUCT"/> with the <c>WM_COPYDATA</c> message.
-    /// This is a managed declaration of the Win32 <c>SendMessage</c> function from <c>user32.dll</c>.
-    /// </summary>
-    /// <param name="hWnd">A handle to the window whose window procedure will receive the message.</param>
-    /// <param name="Msg">The message to be sent. Use <see cref="WM_COPYDATA"/> to send data blocks.</param>
-    /// <param name="wParam">Additional message-specific information. When sending <c>WM_COPYDATA</c>, this is typically the sender window handle.</param>
-    /// <param name="lParam">A reference to a <see cref="COPYDATASTRUCT"/> that contains the data to be passed to the receiving application.</param>
-    /// <returns>
-    /// The return value specifies the result of the message processing; its value depends on the message sent. For <c>WM_COPYDATA</c>, the return value is typically the value returned by the receiving window procedure.
-    /// </returns>
-    [LibraryImport("user32.dll", EntryPoint = "SendMessageW")]
-    internal static partial IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, ref COPYDATASTRUCT lParam);
+    #region Window placement (user32.dll)
 
 #pragma warning disable SYSLIB1054
     /// <summary>
@@ -198,9 +222,6 @@ internal static partial class Win32Methods
     [DllImport("user32.dll")]
     internal static extern bool SetWindowPlacement(nint hWnd, in WINDOWPLACEMENT lpwndpl);
 #pragma warning restore SYSLIB1054
-
-    //[StructLayout(LayoutKind.Sequential)]
-    //private struct POINT { public int X, Y; }
 
     /// <summary>
     /// Defines a rectangle by the coordinates of its upper-left and lower-right corners.
@@ -265,9 +286,9 @@ internal static partial class Win32Methods
     /// </summary>
     internal const uint SW_SHOWMAXIMIZED = 3;
 
-    // -------------------------------------------------------------------------
-    // shcore.dll — Native stream access (bypasses Windows Storage Broker)
-    // -------------------------------------------------------------------------
+    #endregion
+
+    #region Native stream access — bypasses Windows Storage Broker (shcore.dll)
 
     /// <summary>
     /// The interface ID (IID) for <c>Windows.Storage.Streams.IRandomAccessStream</c>.
@@ -298,9 +319,9 @@ internal static partial class Win32Methods
     internal static partial int CreateRandomAccessStreamOnFile(
         string filePath, uint accessMode, ref Guid riid, out IntPtr stream);
 
-    // -------------------------------------------------------------------------
-    // shell32.dll — Shell file operations (copy, move, delete to Recycle Bin)
-    // -------------------------------------------------------------------------
+    #endregion
+
+    #region Shell file operations — copy / move / delete to Recycle Bin (shell32.dll)
 
     /// <summary>
     /// Contains information used by <see cref="SHFileOperation"/> to perform file system
@@ -337,10 +358,40 @@ internal static partial class Win32Methods
         [MarshalAs(UnmanagedType.LPWStr)] public string? lpszProgressTitle;
     }
 
-    // -------------------------------------------------------------------------
-    // Icon extraction — pull the associated icon out of an .exe and rasterise it
-    // to a BGRA pixel buffer using GDI, replacing System.Drawing.
-    // -------------------------------------------------------------------------
+    /// <summary>Operation code for <see cref="SHFILEOPSTRUCT.wFunc"/>: delete the specified files.</summary>
+    internal const uint FO_DELETE = 0x0003;
+
+    /// <summary>Flag for <see cref="SHFILEOPSTRUCT.fFlags"/>: allows the operation to be undone, sending the file to the Recycle Bin.</summary>
+    internal const ushort FOF_ALLOWUNDO = 0x0040;
+
+    /// <summary>Flag for <see cref="SHFILEOPSTRUCT.fFlags"/>: suppresses all confirmation dialogs.</summary>
+    internal const ushort FOF_NOCONFIRMATION = 0x0010;
+
+    /// <summary>Flag for <see cref="SHFILEOPSTRUCT.fFlags"/>: suppresses the progress dialog box.</summary>
+    internal const ushort FOF_SILENT = 0x0004;
+
+    /// <summary>
+    /// Copies, moves, renames, or deletes a file system object. Used here to send files
+    /// to the Recycle Bin for hidden and system files that the Storage Broker rejects.
+    /// </summary>
+    /// <param name="op">
+    /// A reference to a <see cref="SHFILEOPSTRUCT"/> that describes the operation to perform.
+    /// </param>
+    /// <returns>Zero on success; a non-zero Shell error code on failure.</returns>
+    /// <remarks>
+    /// This function uses <c>[DllImport]</c> instead of <c>[LibraryImport]</c> because its
+    /// struct parameter (<see cref="SHFILEOPSTRUCT"/>) is non-blittable (contains strings) and
+    /// is passed by reference (<c>ref</c>). This specific scenario is not yet supported by the
+    /// <c>[LibraryImport]</c> source generator, making <c>[DllImport]</c> the correct choice here.
+    /// </remarks>
+#pragma warning disable SYSLIB1054
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    internal static extern int SHFileOperation(ref SHFILEOPSTRUCT op);
+#pragma warning restore SYSLIB1054
+
+    #endregion
+
+    #region Icon extraction — .exe icon to BGRA via GDI (shell32 / user32 / gdi32)
 
     /// <summary>
     /// Extracts icons from the specified executable, DLL, or icon file.
@@ -440,34 +491,5 @@ internal static partial class Win32Methods
     /// <summary>Colour table contains literal RGB values; the <c>uUsage</c> value for <see cref="GetDIBits"/>.</summary>
     internal const uint DIB_RGB_COLORS = 0;
 
-    /// <summary>Operation code for <see cref="SHFILEOPSTRUCT.wFunc"/>: delete the specified files.</summary>
-    internal const uint FO_DELETE = 0x0003;
-
-    /// <summary>Flag for <see cref="SHFILEOPSTRUCT.fFlags"/>: allows the operation to be undone, sending the file to the Recycle Bin.</summary>
-    internal const ushort FOF_ALLOWUNDO = 0x0040;
-
-    /// <summary>Flag for <see cref="SHFILEOPSTRUCT.fFlags"/>: suppresses all confirmation dialogs.</summary>
-    internal const ushort FOF_NOCONFIRMATION = 0x0010;
-
-    /// <summary>Flag for <see cref="SHFILEOPSTRUCT.fFlags"/>: suppresses the progress dialog box.</summary>
-    internal const ushort FOF_SILENT = 0x0004;
-
-    /// <summary>
-    /// Copies, moves, renames, or deletes a file system object. Used here to send files
-    /// to the Recycle Bin for hidden and system files that the Storage Broker rejects.
-    /// </summary>
-    /// <param name="op">
-    /// A reference to a <see cref="SHFILEOPSTRUCT"/> that describes the operation to perform.
-    /// </param>
-    /// <returns>Zero on success; a non-zero Shell error code on failure.</returns>
-    /// <remarks>
-    /// This function uses <c>[DllImport]</c> instead of <c>[LibraryImport]</c> because its
-    /// struct parameter (<see cref="SHFILEOPSTRUCT"/>) is non-blittable (contains strings) and
-    /// is passed by reference (<c>ref</c>). This specific scenario is not yet supported by the
-    /// <c>[LibraryImport]</c> source generator, making <c>[DllImport]</c> the correct choice here.
-    /// </remarks>
-#pragma warning disable SYSLIB1054
-    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
-    internal static extern int SHFileOperation(ref SHFILEOPSTRUCT op);
-#pragma warning restore SYSLIB1054
+    #endregion
 }
