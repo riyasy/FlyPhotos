@@ -24,8 +24,8 @@ namespace FlyPhotos.Display.Animators;
 ///     </para>
 ///     <para>
 ///         <b>Zero managed allocation on the hot path.</b>
-///         The pixel buffer (<see cref="_pixelBuffer" />) is permanently pinned at construction
-///         via a <see cref="GCHandle" />. The native decoder writes directly into it via
+///         The pixel buffer (<see cref="_pixelBuffer" />) is allocated on the Pinned Object Heap
+///         (no <see cref="GCHandle" />). The native decoder writes directly into it via
 ///         <see cref="_pixelBufferPtr" />, and Win2D uploads from it via <c>SetPixelBytes</c>.
 ///         <see cref="UpdateAsync" /> returns <c>Task.CompletedTask</c> � no async state machine
 ///         is allocated per call. The combination achieves zero managed heap allocation during
@@ -71,25 +71,21 @@ public partial class AvifAnimator : IAnimator
     /// <summary>
     ///     CPU-side pixel buffer that receives decoded frame data from the native decoder.
     ///     Sized to <c>PixelWidth � PixelHeight � 4</c> bytes (BGRA8, one byte per channel).
-    ///     Permanently pinned at construction so the GC never relocates it, allowing the
-    ///     native decoder to write into <see cref="_pixelBufferPtr" /> without marshalling,
-    ///     and allowing Win2D's <c>SetPixelBytes</c> to upload without additional pinning.
-    ///     Permanent pinning of a single object is preferable to repeated transient pinning,
-    ///     which causes LOH fragmentation for buffers of this size.
+    ///     Allocated on the Pinned Object Heap (<see cref="GC.AllocateArray{T}(int, bool)" />),
+    ///     so the buffer never moves and its address is stable for the object's lifetime �
+    ///     the native decoder writes into <see cref="_pixelBufferPtr" /> without marshalling,
+    ///     and Win2D's <c>SetPixelBytes</c> uploads without additional pinning. Using the POH
+    ///     avoids a <see cref="GCHandle" /> pinning an object inside the regular heap, which
+    ///     would contribute to heap/LOH fragmentation for buffers of this size.
     /// </summary>
     private readonly byte[] _pixelBuffer;
 
     /// <summary>
-    ///     GC pin handle for <see cref="_pixelBuffer" />.
-    ///     Allocated once at construction and freed in <see cref="Dispose(bool)" /> after
-    ///     the native handle is closed to ensure the native side has stopped writing.
-    /// </summary>
-    private GCHandle _pixelBufferPin;
-
-    /// <summary>
     ///     Raw pointer to the start of the pinned <see cref="_pixelBuffer" />.
     ///     Passed directly to <c>DecodeNextAvifFrame</c>, eliminating the managed
-    ///     array as an intermediary on the decode path.
+    ///     array as an intermediary on the decode path. Stable because the buffer
+    ///     lives on the Pinned Object Heap and the field holds it alive for the
+    ///     object's lifetime.
     /// </summary>
     private readonly IntPtr _pixelBufferPtr;
 
@@ -176,9 +172,11 @@ public partial class AvifAnimator : IAnimator
         PixelHeight = (uint)NativeAvifBridge.GetAvifCanvasHeight(handle);
         _canvasRect = new Rect(0, 0, PixelWidth, PixelHeight);
 
-        _pixelBuffer = new byte[PixelWidth * PixelHeight * 4];
-        _pixelBufferPin = GCHandle.Alloc(_pixelBuffer, GCHandleType.Pinned);
-        _pixelBufferPtr = _pixelBufferPin.AddrOfPinnedObject();
+        // Pinned Object Heap allocation: zero-initialised (so the _frameBitmap created below
+        // has defined contents before the first decode) and never relocated, giving a stable
+        // pointer without a GCHandle.
+        _pixelBuffer = GC.AllocateArray<byte>((int)(PixelWidth * PixelHeight * 4), pinned: true);
+        _pixelBufferPtr = Marshal.UnsafeAddrOfPinnedArrayElement(_pixelBuffer, 0);
 
         // GPU resources created here, on the Win2D device thread. Creating them inside
         // Task.Run (threadpool) would race against the device's dispatcher queue.
@@ -350,8 +348,8 @@ public partial class AvifAnimator : IAnimator
     {
         if (_nativeHandle == IntPtr.Zero || _compositedSurface.Device == null) return;
 
-        // SetPixelBytes reads from _pixelBuffer. Because the buffer is permanently pinned,
-        // no additional GC pin/unpin occurs here � zero GC pressure on this call.
+        // SetPixelBytes reads from _pixelBuffer. Because the buffer lives on the Pinned
+        // Object Heap, no GC pin/unpin occurs here � zero GC pressure on this call.
         _frameBitmap.SetPixelBytes(_pixelBuffer);
 
         using var ds = _compositedSurface.CreateDrawingSession();
@@ -397,10 +395,9 @@ public partial class AvifAnimator : IAnimator
             _unmanagedFileData = IntPtr.Zero;
         }
 
-        // Release the GC pin after closing the native handle, ensuring the native side
-        // has stopped writing into _pixelBuffer before we allow the GC to move it.
-        if (_pixelBufferPin.IsAllocated)
-            _pixelBufferPin.Free();
+        // _pixelBuffer lives on the Pinned Object Heap: there is no GCHandle to release,
+        // and it is reclaimed by the GC once this instance becomes unreachable. The native
+        // handle was zeroed above, so the decoder can no longer write into it.
 
         // Managed Win2D GPU resources � only safe to release when explicitly disposed.
         // Releasing Win2D objects from a finalizer thread races against the device dispatcher.

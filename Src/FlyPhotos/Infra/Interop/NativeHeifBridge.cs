@@ -208,7 +208,9 @@ public static class NativeHeifWrapper
             if (buffer.data == IntPtr.Zero || buffer.dataSize == 0)
                 return null;
 
-            byte[] managedPixels = new byte[buffer.dataSize];
+            // AllocateUninitializedArray skips zeroing a buffer that Marshal.Copy
+            // overwrites in full (up to 100 MB+ for an 8K HEIC).
+            byte[] managedPixels = GC.AllocateUninitializedArray<byte>(buffer.dataSize);
             Marshal.Copy(buffer.data, managedPixels, 0, buffer.dataSize);
             return new HeifImage
             {
@@ -246,7 +248,9 @@ public static class NativeHeifWrapper
             if (buffer.data == IntPtr.Zero || buffer.dataSize == 0)
                 return null;
 
-            byte[] managedPixels = new byte[buffer.dataSize];
+            // AllocateUninitializedArray skips zeroing a buffer that Marshal.Copy
+            // overwrites in full (up to 100 MB+ for an 8K HEIC).
+            byte[] managedPixels = GC.AllocateUninitializedArray<byte>(buffer.dataSize);
             Marshal.Copy(buffer.data, managedPixels, 0, buffer.dataSize);
 
             return new HeifImage
@@ -300,7 +304,9 @@ public static class NativeHeifWrapper
                 if (buffer.data == IntPtr.Zero || buffer.dataSize == 0)
                     return null;
 
-                byte[] managedPixels = new byte[buffer.dataSize];
+                // AllocateUninitializedArray skips zeroing a buffer that Marshal.Copy
+                // overwrites in full (up to 100 MB+ for an 8K HEIC).
+                byte[] managedPixels = GC.AllocateUninitializedArray<byte>(buffer.dataSize);
                 Marshal.Copy(buffer.data, managedPixels, 0, buffer.dataSize);
 
                 return new HeifImage
