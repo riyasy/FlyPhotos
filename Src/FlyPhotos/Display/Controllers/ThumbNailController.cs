@@ -43,10 +43,10 @@ internal partial class ThumbNailController : IThumbnailController
     // we seed a horizontal offset (delta * boxSize) so it appears to start at the old position, then
     // spring it back to 0 — a damped pixel-space slide driven per-frame by CompositionTarget.Rendering.
     private readonly SpringAxis _slideOffset = new();
+    private readonly System.Diagnostics.Stopwatch _slideClock = new();
     private int _lastRenderedPosition = -1;
     private bool _slideAnimating;
-    private bool _slideFrameSeen;
-    private TimeSpan _lastFrameTime;
+    private TimeSpan _lastSlideElapsed;
 
     // Off-screen is rendered this many pixels wider than the canvas on each side (see
     // ThumbnailSlideMarginBoxes) so the sliding strip never exposes a transparent edge.
@@ -61,6 +61,7 @@ internal partial class ThumbNailController : IThumbnailController
         _d2dCanvasThumbNail.Draw += D2dCanvasThumbNail_Draw;
         _d2dCanvasThumbNail.SizeChanged += D2dCanvasThumbNail_SizeChanged;
         _d2dCanvasThumbNail.Loaded += D2dCanvasThumbNail_Loaded;
+        _d2dCanvasThumbNail.Unloaded += D2dCanvasThumbNail_Unloaded;
         _throttledRedrawTimer.Tick += ThrottledRedrawTimer_Tick;
         _d2dCanvasThumbNail.PointerPressed += D2dCanvasThumbNail_PointerPressed;
         _thumbNailSelectionColor = ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor);
@@ -75,6 +76,15 @@ internal partial class ThumbNailController : IThumbnailController
     private void D2dCanvasThumbNail_Loaded(object sender, RoutedEventArgs e)
     {
         _d2dCanvasThumbNail.Visibility = AppConfig.Settings.ShowThumbnails ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    // Safety net for the static CompositionTarget.Rendering subscription: if the canvas ever leaves the
+    // visual tree before Dispose runs, end any in-flight slide so the handler can't keep this instance
+    // alive (or keep firing). A later Loaded simply starts fresh on the next navigation.
+    private void D2dCanvasThumbNail_Unloaded(object sender, RoutedEventArgs e)
+    {
+        StopSlide();
+        _lastRenderedPosition = -1;
     }
 
     private void D2dCanvasThumbNail_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -335,16 +345,19 @@ internal partial class ThumbNailController : IThumbnailController
 
         if (_slideAnimating) return;
         _slideAnimating = true;
-        _slideFrameSeen = false;
+        _lastSlideElapsed = TimeSpan.Zero;
+        _slideClock.Restart();
         Microsoft.UI.Xaml.Media.CompositionTarget.Rendering += OnSlideFrame;
     }
 
     private void OnSlideFrame(object sender, object e)
     {
-        var now = ((Microsoft.UI.Xaml.Media.RenderingEventArgs)e).RenderingTime;
-        var dt = _slideFrameSeen ? (float)(now - _lastFrameTime).TotalSeconds : 1f / 60f;
-        _slideFrameSeen = true;
-        _lastFrameTime = now;
+        // Time frames with a Stopwatch rather than the event args. Casting the projected WinRT
+        // RenderingEventArgs (to read RenderingTime) crashes under Native AOT, so leave `e` untouched.
+        var now = _slideClock.Elapsed;
+        var dt = (float)(now - _lastSlideElapsed).TotalSeconds;
+        _lastSlideElapsed = now;
+        if (dt <= 0f) return;                                    // no time elapsed yet — nothing to step
         if (dt > Constants.SpringMaxDtSeconds) dt = Constants.SpringMaxDtSeconds;
 
         _slideOffset.Step(0f, dt);
@@ -362,6 +375,7 @@ internal partial class ThumbNailController : IThumbnailController
         _slideOffset.SettleTo(0f);
         if (!_slideAnimating) return;
         _slideAnimating = false;
+        _slideClock.Stop();
         Microsoft.UI.Xaml.Media.CompositionTarget.Rendering -= OnSlideFrame;
     }
 
@@ -429,6 +443,7 @@ internal partial class ThumbNailController : IThumbnailController
             _d2dCanvasThumbNail.Draw -= D2dCanvasThumbNail_Draw;
             _d2dCanvasThumbNail.SizeChanged -= D2dCanvasThumbNail_SizeChanged;
             _d2dCanvasThumbNail.Loaded -= D2dCanvasThumbNail_Loaded;
+            _d2dCanvasThumbNail.Unloaded -= D2dCanvasThumbNail_Unloaded;
             _d2dCanvasThumbNail.PointerPressed -= D2dCanvasThumbNail_PointerPressed;
         }
 
