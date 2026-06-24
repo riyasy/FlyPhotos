@@ -19,7 +19,7 @@
  * @param out_buffer A pre-allocated buffer (>= width * height * 4 bytes) that
  *                   receives the RGBA data.
  */
-void PixelBufferEncoder::Encode(const heif_image* image, int width, int height, uint8_t* out_buffer) {
+/* static */ void PixelBufferEncoder::Encode(const heif_image* image, int width, int height, uint8_t* out_buffer) {
     // Ensure the output buffer is valid before proceeding.
     if (!out_buffer) {
         return;

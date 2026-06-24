@@ -18,7 +18,10 @@ fontdb = "0.23.0"
 opt-level = 3
 lto = true
 codegen-units = 1
-# Highly recommended for a Rust cdylib consumed by C#:
-panic = "abort"
+# Must stay "unwind": the FFI entry points in lib.rs rely on std::panic::catch_unwind
+# to turn a panic inside rawler/resvg into a null return instead of aborting the C#
+# host process. catch_unwind is a no-op under panic = "abort". The boundary is still
+# safe because catch_unwind stops any unwind before it crosses the extern "C" frame.
+panic = "unwind"
 strip = true
 

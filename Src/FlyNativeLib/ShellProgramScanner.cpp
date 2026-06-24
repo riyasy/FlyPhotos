@@ -27,7 +27,9 @@
 #include <propkey.h>
 #include <propvarutil.h>
 #include <algorithm>
+#include <shlwapi.h>   // StrStrIW: case-insensitive substring search without allocating
 
+#pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "shell32.lib")
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "comctl32.lib")
@@ -170,14 +172,16 @@ std::vector<ShortcutData> ShellProgramScanner::Scan()
                             && varTarget.vt == VT_LPWSTR
                             && varTarget.pwszVal != nullptr)
                         {
-                            std::wstring exePath  = varTarget.pwszVal;
-                            std::wstring lowerPath = exePath;
-                            std::transform(lowerPath.begin(), lowerPath.end(),
-                                           lowerPath.begin(), ::towlower);
+                            std::wstring exePath = varTarget.pwszVal;
 
-                            if (lowerPath.size() >= 4
-                                && lowerPath.substr(lowerPath.size() - 4) == L".exe"
-                                && lowerPath.find(L"\\installer\\") == std::wstring::npos)
+                            // Case-insensitive ".exe" suffix test and "\installer\" search,
+                            // both done in place on the original buffer with no temporaries.
+                            const bool endsWithExe = exePath.size() >= 4
+                                && CompareStringOrdinal(exePath.c_str() + (exePath.size() - 4), 4,
+                                                        L".exe", 4, TRUE) == CSTR_EQUAL;
+
+                            if (endsWithExe
+                                && StrStrIW(exePath.c_str(), L"\\installer\\") == nullptr)
                             {
                                 ExtractWin32Icon(results, exePath, displayName);
                             }

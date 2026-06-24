@@ -129,8 +129,7 @@ int AnimatedAvifReader::DecodeNextFrame(uint8_t* out_bgra_buffer) {
     }
     
     // Copy/encode the frame's pixels to the out buffer for C#
-    PixelBufferEncoder encoder;
-    encoder.Encode(current_image, width, height, out_bgra_buffer);
+    PixelBufferEncoder::Encode(current_image, width, height, out_bgra_buffer);
 
     // Calculate the frame's exact display duration using the track timescale
     uint32_t timescale = heif_track_get_timescale(track);
