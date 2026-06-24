@@ -290,7 +290,7 @@
                     </Button>
                 </StackPanel>
             </Border>
-            <win2d:CanvasControl
+            <win2d:CanvasAnimatedControl
                 x:Name="D2dCanvasThumbNail"
                 Width="Auto"
                 Height="40"
