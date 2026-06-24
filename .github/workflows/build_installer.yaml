@@ -110,7 +110,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: vcpkg_cache
-          key: vcpkg-${{ matrix.vcpkg-triplet }}-${{ hashFiles('Src/build_libheif/vcpkg.json', 'Src/build_libheif/ports/libheif/**', 'Src/build_libheif/triplets/**') }}
+          key: vcpkg-${{ matrix.vcpkg-triplet }}-${{ hashFiles('Src/build_libheif/vcpkg.json', 'Src/build_libheif/vcpkg-configuration.json', 'Src/build_libheif/ports/libheif/**', 'Src/build_libheif/triplets/**') }}
           restore-keys: |
             vcpkg-${{ matrix.vcpkg-triplet }}-
 
