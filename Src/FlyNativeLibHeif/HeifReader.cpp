@@ -218,6 +218,5 @@ void HeifReader::FillPixelBufferFromImage(const heif_image* image, int width, in
     out_buffer.data = new uint8_t[out_buffer.dataSize];
 
     // Use the PixelBufferEncoder to fill the allocated buffer.
-    PixelBufferEncoder encoder;
-    encoder.Encode(image, width, height, out_buffer.data);
+    PixelBufferEncoder::Encode(image, width, height, out_buffer.data);
 }

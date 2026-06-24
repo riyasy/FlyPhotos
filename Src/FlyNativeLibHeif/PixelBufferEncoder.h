@@ -20,16 +20,15 @@
  ///       CreateFromBytes call declares.
 class PixelBufferEncoder {
 public:
-    /// @brief Constructs a new PixelBufferEncoder.
-    PixelBufferEncoder() = default;
-
     /// @brief Fills a user-provided buffer with RGBA pixel data from a `heif_image`.
+    /// @details Stateless: declared static so callers don't construct a throwaway
+    ///          instance on each (potentially per-frame) call.
     /// @param image The decoded heif_image containing the source pixels.
     /// @param width The width of the image.
     /// @param height The height of the image.
     /// @param out_buffer Pointer to a pre-allocated buffer to receive the RGBA data.
     ///                   This buffer must be at least `width * height * 4` bytes in size.
-    void Encode(const heif_image* image, int width, int height, uint8_t* out_buffer);
+    static void Encode(const heif_image* image, int width, int height, uint8_t* out_buffer);
 };
 
 #endif // PIXEL_BUFFER_ENCODER_H

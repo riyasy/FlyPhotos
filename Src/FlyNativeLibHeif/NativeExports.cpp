@@ -35,11 +35,11 @@ HeifError ExtractPrimaryImage(const wchar_t* heic_path, PixelBuffer* out_buffer)
     // Call the main C++ implementation. This allocates memory for pixel data inside cppBuffer.
     HeifError result = reader.ExtractPrimaryImage(input_file, cppBuffer);
 
-    // If successful, just copy the pointer and dimensions directly. NO memcpy!
-    // This step effectively transfers ownership of the allocated memory (cppBuffer.data)
+    // If successful, copy the pointer and dimensions directly. NO memcpy of pixels!
+    // This struct copy transfers ownership of the allocated memory (cppBuffer.data)
     // from the C++ side to the C# caller.
     if (result == HeifError::Ok) {
-        *out_buffer = *reinterpret_cast<PixelBuffer*>(&cppBuffer);
+        *out_buffer = cppBuffer;
     }
 
     // Return the result code to the caller.
@@ -65,12 +65,10 @@ HeifError ExtractThumbnail(const wchar_t* heic_path, PixelBuffer* out_buffer) {
     // Call the C++ method to extract the thumbnail, which allocates memory inside cppBuffer.
     HeifError result = reader.ExtractThumbnail(input_file, cppBuffer);
 
-    // If successful, just copy the pointer and dimensions directly. NO memcpy!
+    // If successful, copy the pointer and dimensions directly. NO memcpy of pixels!
     // This transfers ownership of the heap-allocated pixel buffer to the C# caller.
     if (result == HeifError::Ok) {
-        // Since the memory layout of PixelBuffer and PixelBuffer are now identical,
-        // we can safely copy the struct's contents (pointer and metadata).
-        *out_buffer = *reinterpret_cast<PixelBuffer*>(&cppBuffer);
+        *out_buffer = cppBuffer;
     }
 
     return result;
@@ -107,7 +105,7 @@ HeifError ExtractPrimaryImageAndAnimationStatusFromMemory(const uint8_t* data, s
     HeifError result = reader.ExtractPrimaryImageFromMemory(data, size, cppBuffer, *out_is_animated);
 
     if (result == HeifError::Ok) {
-        *out_buffer = *reinterpret_cast<PixelBuffer*>(&cppBuffer);
+        *out_buffer = cppBuffer;
     }
 
     return result;
