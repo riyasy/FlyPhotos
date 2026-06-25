@@ -86,6 +86,25 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      # The native C++ projects include ATL headers (<atlstr.h>, <atlcoll.h> in
+      # FlyNativeLib). The windows-latest runner image no longer ships the C++ ATL
+      # component by default, so install it into the runner's VS before building.
+      # The .ARM64 component is added too so the ARM64 leg of a "Both" build works
+      # on windows-11-arm; it is harmless on the x64 runner.
+      - name: Install C++ ATL
+        if: ${{ inputs.native == 'Build fresh' }}
+        shell: pwsh
+        run: |
+          $vsInstaller = "C:\Program Files (x86)\Microsoft Visual Studio\Installer"
+          $vsPath = & "$vsInstaller\vswhere.exe" -latest -property installationPath
+          $args = @(
+            "modify", "--installPath", "$vsPath",
+            "--add", "Microsoft.VisualStudio.Component.VC.ATL",
+            "--add", "Microsoft.VisualStudio.Component.VC.ATL.ARM64",
+            "--quiet", "--norestart", "--nocache"
+          )
+          Start-Process -FilePath "$vsInstaller\setup.exe" -ArgumentList $args -Wait -PassThru
+
       # Install the stable Rust toolchain and pre-add the cross-compilation
       # target for this platform. On windows-latest the host IS x86_64 so
       # the target is native; on windows-11-arm the host IS aarch64 so same.
