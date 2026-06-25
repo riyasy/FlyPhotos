@@ -106,11 +106,16 @@ jobs:
             $components += "Microsoft.VisualStudio.Component.VC.ATL.ARM64"
           }
 
-          $vsArgs = @("modify", "--installPath", $vsPath, "--quiet", "--norestart", "--force", "--nocache")
-          foreach ($c in $components) { $vsArgs += @("--add", $c) }
+          # Build a single argument string so the install path (which contains
+          # spaces, e.g. "C:\Program Files\Microsoft Visual Studio\18\Enterprise")
+          # is passed quoted. Start-Process with an -ArgumentList ARRAY does not
+          # quote elements that contain spaces, which truncated --installPath to
+          # "C:\Program" and made the modify fail with "product cannot be found".
+          $addArgs = ($components | ForEach-Object { "--add $_" }) -join " "
+          $argString = "modify --installPath `"$vsPath`" --quiet --norestart --force --nocache $addArgs"
 
           Write-Host "Installing ATL components: $($components -join ', ')"
-          $proc = Start-Process -FilePath "$vsInstaller\setup.exe" -ArgumentList $vsArgs -Wait -PassThru -NoNewWindow
+          $proc = Start-Process -FilePath "$vsInstaller\setup.exe" -ArgumentList $argString -Wait -PassThru -NoNewWindow
           Write-Host "VS Installer exit code: $($proc.ExitCode)"
           if ($proc.ExitCode -ne 0 -and $proc.ExitCode -ne 3010) {
             Write-Error "VS Installer modify failed with exit code $($proc.ExitCode)."
@@ -195,8 +200,8 @@ jobs:
       # Step 2 -- Native C++: FlyNativeLib.dll, FlyNativeLibHeif.dll,
       #                         FlyContextMenuHelper.exe
       # -----------------------------------------------------------------------
-      # PlatformToolset=v143 targets VS 2022 (all versions). The local scripts
-      # use v145 but CI uses v143 for broader runner compatibility.
+      # PlatformToolset=v145 matches the toolset shipped with Visual Studio 18
+      # (now on the windows-latest / windows-11-arm runners) and the local scripts.
       # Build order matters: FlyNativeLib has no vcpkg dependency and must be
       # built before FlyNativeLibHeif which links against heif.lib.
       # Output lands in Src/<Platform>/Release/ (not Src/<Project>/<Platform>/Release/).
@@ -208,7 +213,7 @@ jobs:
           msbuild FlyNativeLib.vcxproj `
             /p:Configuration=Release `
             /p:Platform=${{ matrix.platform }} `
-            /p:PlatformToolset=v143
+            /p:PlatformToolset=v145
 
       - name: Build FlyNativeLibHeif
         if: ${{ inputs.native == 'Build fresh' }}
@@ -217,7 +222,7 @@ jobs:
           msbuild FlyNativeLibHeif.vcxproj `
             /p:Configuration=Release `
             /p:Platform=${{ matrix.platform }} `
-            /p:PlatformToolset=v143
+            /p:PlatformToolset=v145
 
       - name: Build FlyContextMenuHelper
         if: ${{ inputs.native == 'Build fresh' }}
@@ -226,7 +231,7 @@ jobs:
           msbuild FlyContextMenuHelper.vcxproj `
             /p:Configuration=Release `
             /p:Platform=${{ matrix.platform }} `
-            /p:PlatformToolset=v143
+            /p:PlatformToolset=v145
 
       # -----------------------------------------------------------------------
       # Step 3 -- Rust: fly_rust_bridge.dll  (RAW decode + SVG render)
