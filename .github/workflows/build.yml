@@ -85,56 +85,6 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      # The native C++ projects include ATL headers (<atlstr.h>, <atlcoll.h> in
-      # FlyNativeLib). The windows-latest runner image no longer ships the C++ ATL
-      # component by default, so install it into the runner's VS before building.
-      - name: Install C++ ATL
-        if: ${{ inputs.native == 'Build fresh' }}
-        shell: pwsh
-        run: |
-          $vsInstaller = "C:\Program Files (x86)\Microsoft Visual Studio\Installer"
-          $vsPath = & "$vsInstaller\vswhere.exe" -latest -property installationPath
-          if (-not $vsPath) { Write-Error "Could not locate Visual Studio via vswhere."; exit 1 }
-
-          # Base ATL provides the headers (atlstr.h etc.) FlyNativeLib needs. The
-          # ARM64 variant (ATL link libs for ARM64 targets) is added ONLY on the
-          # ARM64 runner -- requesting it on the x64 runner can make the whole
-          # modify fail, leaving even base ATL uninstalled.
-          $components = @("Microsoft.VisualStudio.Component.VC.ATL")
-          if ("${{ matrix.platform }}" -eq "ARM64") {
-            $components += "Microsoft.VisualStudio.Component.VC.ATL.ARM64"
-          }
-
-          # Build a single argument string so the install path (which contains
-          # spaces, e.g. "C:\Program Files\Microsoft Visual Studio\18\Enterprise")
-          # is passed quoted. Start-Process with an -ArgumentList ARRAY does not
-          # quote elements that contain spaces, which truncated --installPath to
-          # "C:\Program" and made the modify fail with "product cannot be found".
-          $addArgs = ($components | ForEach-Object { "--add $_" }) -join " "
-          $argString = "modify --installPath `"$vsPath`" --quiet --norestart --force --nocache $addArgs"
-
-          Write-Host "Installing ATL components: $($components -join ', ')"
-          $proc = Start-Process -FilePath "$vsInstaller\setup.exe" -ArgumentList $argString -Wait -PassThru -NoNewWindow
-          Write-Host "VS Installer exit code: $($proc.ExitCode)"
-          if ($proc.ExitCode -ne 0 -and $proc.ExitCode -ne 3010) {
-            Write-Error "VS Installer modify failed with exit code $($proc.ExitCode)."
-            exit $proc.ExitCode
-          }
-
-          # Verify the header is actually present -- fail here with a clear message
-          # rather than letting the later C++ compile fail on a missing include.
-          # The VS Installer can land files slightly after setup.exe returns, so
-          # poll for up to ~60s before giving up.
-          $vcRoot = Join-Path $vsPath "VC\Tools\MSVC"
-          $atl = $null
-          foreach ($i in 1..12) {
-            $atl = Get-ChildItem -Path $vcRoot -Recurse -Filter "atlstr.h" -ErrorAction SilentlyContinue | Select-Object -First 1
-            if ($atl) { break }
-            Start-Sleep -Seconds 5
-          }
-          if (-not $atl) { Write-Error "atlstr.h still not found under $vcRoot after install."; exit 1 }
-          Write-Host "Found ATL header: $($atl.FullName)"
-
       # Install the stable Rust toolchain and pre-add the cross-compilation
       # target for this platform. On windows-latest the host IS x86_64 so
       # the target is native; on windows-11-arm the host IS aarch64 so same.
