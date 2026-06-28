@@ -301,7 +301,7 @@ internal partial class CanvasController : ICanvasController
                 ctx.CanvasSize, ctx.IsFirstPhotoEver, ctx.IsNewPhoto, ctx.IsUpgradeFromPlaceholder);
 
             if (forceThumbNailRedraw)
-                _thumbNailController.CreateThumbnailRibbonOffScreen(); // self-marshals to the UI thread
+                _thumbNailController.RequestThumbnailRedraw(); // just flags the strip's own W2D loop; thread-safe
         });
     }
 

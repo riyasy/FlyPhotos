@@ -754,7 +754,7 @@ public sealed partial class PhotoDisplayWindow
         {
             case Setting.ThumbnailSizeSize:
                 D2dCanvasThumbNail.Height = AppConfig.Settings.ThumbnailSize;
-                D2dCanvasThumbNail.Invalidate();
+                // CanvasAnimatedControl has no Invalidate(); RefreshThumbnail() flags a rebuild on its loop.
                 _thumbNailController.RefreshThumbnail();
                 break;
             case Setting.ThumbnailSelectionColor:

@@ -14,7 +14,7 @@ internal interface ICanvasController : IDisposable
 
 internal interface IThumbnailController : IDisposable
 {
-    void CreateThumbnailRibbonOffScreen();
+    void RequestThumbnailRedraw();
     void RedrawThumbNailsIfNeeded(int key);
     void SetPhotoProvider(IPhotoProvider provider);
     void SetPreviewLoadedProbe(Func<int, bool> isPreviewLoaded);
