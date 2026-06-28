@@ -41,6 +41,13 @@ internal static partial class Win32Methods
     [LibraryImport("user32.dll", EntryPoint = "VkKeyScanExA")]
     internal static partial short VkKeyScanEx(byte ch, IntPtr dwhkl);
 
+    /// <summary>
+    /// Returns the maximum number of milliseconds that may occur between the first and second clicks
+    /// of a double-click, as configured in the system's mouse settings.
+    /// </summary>
+    [LibraryImport("user32.dll")]
+    internal static partial uint GetDoubleClickTime();
+
     #endregion
 
     #region Cursor position (user32.dll)

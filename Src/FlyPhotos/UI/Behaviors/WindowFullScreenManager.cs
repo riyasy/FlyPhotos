@@ -32,6 +32,21 @@ internal sealed class WindowFullScreenManager
         _window = window;
     }
 
+    // .Kind discriminates without a memberless cast; { State: ... } reads a member to root the
+    // OverlappedPresenter projection under NativeAOT+Release. See the full note in Restore().
+    internal bool IsMaximizedOrFullScreen =>
+        AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen ||
+        (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped &&
+         AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Maximized });
+
+    internal void Maximize()
+    {
+        // { State: ... } reads a member to root the projection under NativeAOT+Release. See Restore().
+        if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped &&
+            AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Restored } op)
+            op.Maximize();
+    }
+
     /// <summary>
     ///     Restores the window from a maximized or full-screen state to its normal overlapped (windowed) state.
     /// </summary>

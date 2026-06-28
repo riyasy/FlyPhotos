@@ -12,6 +12,7 @@ using FlyPhotos.Core.Model;
 using FlyPhotos.Display.Controllers;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
+using FlyPhotos.Infra.Interop;
 using FlyPhotos.Infra.Localization;
 using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
@@ -72,6 +73,7 @@ public sealed partial class PhotoDisplayWindow
     // For Dragging
     private Point _lastPoint;
     private bool _isDragging;
+    private bool _doubleTapHandled;
 
     // For Right Click Zoom
     private CancellationTokenSource? _rightClickCts;
@@ -576,13 +578,12 @@ public sealed partial class PhotoDisplayWindow
                     }
                     else
                     {
-                        if (!_canvasController.IsPressedOnImage(dpiAdjustedPosition))
-                        {
-                            var pointerY = currentPoint.Position.Y;
-                            if (pointerY >= AppTitlebar.ActualHeight
-                                && AppConfig.Settings.ClickOutsideImageToRestoreWindow)
-                                _windFullScreenManager.Restore(ButtonFullScreenClose);
-                        }
+                        if (_doubleTapHandled) { _doubleTapHandled = false; break; }
+                        if (AppConfig.Settings.ClickOutsideImageToRestoreWindow &&
+                            !(currentPoint.Position.Y < AppTitlebar.ActualHeight) &&
+                            !_canvasController.IsPressedOnImage(dpiAdjustedPosition) &&
+                            _windFullScreenManager.IsMaximizedOrFullScreen)
+                            _windFullScreenManager.Restore(ButtonFullScreenClose);
                     }
                     break;
                 }
@@ -639,22 +640,32 @@ public sealed partial class PhotoDisplayWindow
     private void D2dCanvas_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
     {
         if (_lastPointerDownKind is PointerUpdateKind.XButton1Pressed or PointerUpdateKind.XButton2Pressed) return;
-        var point = e.GetPosition(D2dCanvas).AdjustForDpi(D2dCanvas);
-        // Only handle double click if inside image bounds
-        if (!_canvasController.IsPressedOnImage(point)) return;
+        var rawPosition = e.GetPosition(D2dCanvas);
+        var point = rawPosition.AdjustForDpi(D2dCanvas);
 
-        // Toggle between 1:1 and Fit
-        // If currently one-to-one, then fit. Otherwise zoom to 100%.
-        // CanvasController raises events to update button states.
-        if (ButtonOneIsToOne.IsChecked == true)
+        if (_canvasController.IsPressedOnImage(point))
         {
-            _canvasController.FitToScreen(true);
+            _doubleTapHandled = true;
+            // Double-tap on image: toggle between 1:1 and Fit.
+            // CanvasController raises events to update button states.
+            if (ButtonOneIsToOne.IsChecked == true)
+                _canvasController.FitToScreen(true);
+            else
+                _canvasController.ZoomToHundred(point);
         }
         else
         {
-            _canvasController.ZoomToHundred(point);
+            if (AppConfig.Settings.ClickOutsideImageToRestoreWindow &&
+                !(rawPosition.Y < AppTitlebar.ActualHeight) &&
+                !_windFullScreenManager.IsMaximizedOrFullScreen)
+            {
+                _windFullScreenManager.Maximize();
+                _doubleTapHandled = true;
+            }
         }
     }
+
+
 
     private async void Thumbnail_Clicked(int shiftIndex)
     {
