@@ -171,6 +171,7 @@ public sealed partial class PhotoDisplayWindow
         _handledKeys =
         [
             (VirtualKey.C,      true,  false),  // Ctrl+C — prevent browser-style copy
+            (VirtualKey.Enter,  false, false),  // Enter — prevent WinUI default button activation
             (VirtualKey.Enter,  false, true),   // Alt+Enter — prevent default Enter handling
             (VirtualKey.Delete, false, false),  // Delete — prevent WinUI focus-loss default
         ];
@@ -187,6 +188,7 @@ public sealed partial class PhotoDisplayWindow
             // Window
             [(VirtualKey.Escape, false, false)] = AnimatePhotoDisplayWindowClose,
             [(VirtualKey.F11,    false, false)] = Act(() => _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose)),
+            [(VirtualKey.Enter,  false, false)] = Act(ToggleMaximizeRestore),
 
             // Photo navigation
             [(VirtualKey.Right, false, false)] = () => _photoController.Fly(NavDirection.Next),
@@ -910,6 +912,14 @@ public sealed partial class PhotoDisplayWindow
     {
         _wheelScrollBrakeTimer.Stop();
         _wheelScrollBrakeTimer.Start();
+    }
+
+    private void ToggleMaximizeRestore()
+    {
+        if (_windFullScreenManager.IsMaximizedOrFullScreen)
+            _windFullScreenManager.Restore(ButtonFullScreenClose);
+        else
+            _windFullScreenManager.Maximize();
     }
 
     private async Task AnimatePhotoDisplayWindowClose()
