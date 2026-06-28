@@ -42,6 +42,13 @@ internal sealed class ShrugAnimation : IViewAnimation
         _host.RaiseViewChanged();
     }
 
+    /// <summary>Shift the position the wiggle oscillates around so a drag during a shrug isn't lost.</summary>
+    public void NudgePan(double dx, double dy)
+    {
+        _startPosition.X += dx;
+        _startPosition.Y += dy;
+    }
+
     /// <summary>A shrug has no settled target to jump to, so a forced stop simply ends the wiggle.</summary>
     public void CompleteImmediately() { }
 }

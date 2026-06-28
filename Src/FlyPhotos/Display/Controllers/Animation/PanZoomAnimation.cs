@@ -80,6 +80,22 @@ internal sealed class PanZoomAnimation : IViewAnimation
         }
     }
 
+    public void NudgePan(double dx, double dy)
+    {
+        // Translate the pan target AND the current pan-spring state by the drag delta so the whole pan
+        // trajectory shifts with the cursor; the springs keep converging (now toward the shifted target)
+        // instead of dragging the image back to the original target next Tick.
+        _panTarget.X += dx;
+        _panTarget.Y += dy;
+        _host.PanXSpring.Position += (float)dx;
+        _host.PanYSpring.Position += (float)dy;
+
+        var view = _host.View;
+        view.ImagePos.X += dx;
+        view.ImagePos.Y += dy;
+        view.UpdateTransform();
+    }
+
     public void CompleteImmediately()
     {
         var view = _host.View;

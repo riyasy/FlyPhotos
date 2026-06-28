@@ -697,9 +697,19 @@ internal class CanvasViewManager : IAnimationHost
     /// </summary>
     public void Pan(double dx, double dy)
     {
-        _canvasViewState.ImagePos.X += dx;
-        _canvasViewState.ImagePos.Y += dy;
-        _canvasViewState.UpdateTransform();
+        if (_activeAnimation != null)
+        {
+            // A drag arriving mid-animation must not be discarded by the next Tick. Fold the delta into the
+            // active animation's own pan state so the image follows the cursor while the animation (e.g. a
+            // wheel-zoom spring) keeps converging — instead of the pan flickering and snapping back.
+            _activeAnimation.NudgePan(dx, dy);
+        }
+        else
+        {
+            _canvasViewState.ImagePos.X += dx;
+            _canvasViewState.ImagePos.Y += dy;
+            _canvasViewState.UpdateTransform();
+        }
         ViewChanged?.Invoke();
 
         // Any manual pan breaks the fitted state.

@@ -97,6 +97,24 @@ internal sealed class AnchoredZoomAnimation : IViewAnimation
         if (settled) _host.FinishSpring();
     }
 
+    public void NudgePan(double dx, double dy)
+    {
+        // Shift BOTH the fixed screen anchor and the pure anchor track by the drag delta. Because the
+        // anchor-preserving pan is affine, translating anchor + track by δ translates the recomputed pan
+        // output by exactly δ at every scale — so the drag persists instead of being snapped back next Tick,
+        // while the zoom keeps converging around the now-shifted anchor.
+        _zoomCenter.X += dx;
+        _zoomCenter.Y += dy;
+        _anchorX += dx;
+        _anchorY += dy;
+
+        // Apply δ to the live view too for immediate feedback this frame (Tick may not run if dt == 0).
+        var view = _host.View;
+        view.ImagePos.X += dx;
+        view.ImagePos.Y += dy;
+        view.UpdateTransform();
+    }
+
     public void CompleteImmediately()
     {
         var view = _host.View;

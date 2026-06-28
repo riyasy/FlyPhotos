@@ -19,6 +19,13 @@ internal interface IViewAnimation
     /// new photo so the inherited view is the settled one rather than a mid-flight frame.
     /// </summary>
     void CompleteImmediately();
+
+    /// <summary>
+    /// Folds a user pan delta (in canvas pixels) into the animation's own pan state so a drag that arrives
+    /// mid-animation isn't discarded by the next <see cref="Tick"/>. The image follows the cursor while the
+    /// animation (e.g. a wheel-zoom spring) keeps converging to its scale target.
+    /// </summary>
+    void NudgePan(double dx, double dy);
 }
 
 /// <summary>
