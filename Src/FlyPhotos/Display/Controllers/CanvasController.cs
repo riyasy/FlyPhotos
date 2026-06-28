@@ -340,13 +340,18 @@ internal partial class CanvasController : ICanvasController
         });
     }
 
-    public void ZoomByKeyboard(ZoomDirection zoomDirection)
+    public void ZoomByKeyboard(ZoomDirection zoomDirection, Point? zoomAnchor = null)
     {
         var canvasSize = _d2dCanvas.GetSize();
         EnqueueW2dAction(() =>
         {
             if (_currentRenderer == null) return;
-            _canvasViewManager.ZoomAtCenter(zoomDirection, canvasSize);
+            // While the user is dragging, anchor the keyboard zoom at the cursor (like wheel zoom) so the image
+            // doesn't jump away from the point being dragged; otherwise fall back to the canvas centre.
+            if (zoomAnchor.HasValue)
+                _canvasViewManager.ZoomAtPoint(zoomDirection, zoomAnchor.Value);
+            else
+                _canvasViewManager.ZoomAtCenter(zoomDirection, canvasSize);
         });
     }
 

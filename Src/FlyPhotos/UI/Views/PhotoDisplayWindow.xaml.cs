@@ -197,12 +197,12 @@ public sealed partial class PhotoDisplayWindow
             [(VirtualKey.Left,  false, true)] = Act(() => _canvasController.ChangePage(NavDirection.Prev)),
 
             // Zoom
-            [(VirtualKey.Add,      true,  false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In)),
-            [(VirtualKey.Subtract, true,  false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out)),
-            [(VirtualKey.Up,       false, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In)),
-            [(VirtualKey.Down,     false, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out)),
-            [(VirtualKey.PageUp,   false, false)] = Act(() => _canvasController.StepZoom(ZoomDirection.In)),
-            [(VirtualKey.PageDown, false, false)] = Act(() => _canvasController.StepZoom(ZoomDirection.Out)),
+            [(VirtualKey.Add,      true,  false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In, CurrentDragAnchor())),
+            [(VirtualKey.Subtract, true,  false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out, CurrentDragAnchor())),
+            [(VirtualKey.Up,       false, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In, CurrentDragAnchor())),
+            [(VirtualKey.Down,     false, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out, CurrentDragAnchor())),
+            [(VirtualKey.PageUp,   false, false)] = Act(() => _canvasController.StepZoom(ZoomDirection.In, CurrentDragAnchor())),
+            [(VirtualKey.PageDown, false, false)] = Act(() => _canvasController.StepZoom(ZoomDirection.Out, CurrentDragAnchor())),
 
             // Pan (Ctrl+Arrow)
             [(VirtualKey.Up,    true, false)] = Act(() => _canvasController.Pan(0,   -20)),
@@ -517,6 +517,14 @@ public sealed partial class PhotoDisplayWindow
         }
 
     }
+    /// <summary>
+    /// The DPI-adjusted cursor position to anchor a keyboard zoom at while a left-button drag is in progress,
+    /// or null when not dragging (so the zoom falls back to the canvas centre). Keeps keyboard zoom anchored at
+    /// the same point the user is panning, matching wheel-zoom behaviour.
+    /// </summary>
+    private Point? CurrentDragAnchor() =>
+        _isDragging ? _lastPoint.AdjustForDpi(D2dCanvas) : null;
+
     private void D2dCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
         if (!_isDragging) return;
