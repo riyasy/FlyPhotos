@@ -15,6 +15,7 @@ public sealed partial class CtrlDragWindowMover : IDisposable
     private readonly AppWindow _appWindow;
 
     private bool _isActive;
+    private bool _pointerCaptured;
     private PointInt32 _startWindowPos;
     private POINT _startCursorPos;
     private bool _disposed;
@@ -71,12 +72,18 @@ public sealed partial class CtrlDragWindowMover : IDisposable
         GetCursorPos(out _startCursorPos);
         _startWindowPos = _appWindow.Position;
         _isActive = true;
+        _pointerCaptured = true;
         _canvas.CapturePointer(e.Pointer);
     }
 
     private void OnPointerMoved(object sender, PointerRoutedEventArgs e)
     {
         if (!_isActive) return;
+        if (_appWindow.Presenter is not OverlappedPresenter { State: OverlappedPresenterState.Restored })
+        {
+            _isActive = false;
+            return;
+        }
         GetCursorPos(out var cur);
         _appWindow.Move(new PointInt32(
             _startWindowPos.X + (cur.X - _startCursorPos.X),
@@ -85,8 +92,9 @@ public sealed partial class CtrlDragWindowMover : IDisposable
 
     private void OnPointerReleased(object sender, PointerRoutedEventArgs e)
     {
-        if (!_isActive) return;
         _isActive = false;
+        if (!_pointerCaptured) return;
+        _pointerCaptured = false;
         _canvas.ReleasePointerCapture(e.Pointer);
     }
 
