@@ -325,7 +325,7 @@ Settings &gt; Apps &gt; Default apps.</value>
     <value>Automatically hide mouse pointer</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Delete all previews from disk cache.</value>
+    <value>Fly caches recent quick previews to disk for faster loading next time. Clear removes all cached previews from the disk cache.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Clear Disk Cache</value>
@@ -385,10 +385,10 @@ Settings &gt; Apps &gt; Default apps.</value>
     <value>Auto Fade intensity (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Set the number of high-resolution photos cached on each side.</value>
+    <value>Number of full-resolution images preloaded on each side.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>High-resolution cache</value>
+    <value>High-resolution preload (In-memory)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Choose how much of the screen the photo fills. (%)</value>
@@ -455,10 +455,10 @@ Esc : Close Settings or Exit App</value>
     <value>Log File</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Set the number of low-resolution photos cached on each side.</value>
+    <value>Number of quick previews preloaded on each side.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Low-resolution cache</value>
+    <value>Low-resolution preload (In-memory)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Choose the default mouse wheel behaviour.</value>

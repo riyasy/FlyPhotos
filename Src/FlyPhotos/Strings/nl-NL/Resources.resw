@@ -325,7 +325,7 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Muisaanwijzer automatisch verbergen</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Verwijder alle voorvertoningen uit de schijfcache.</value>
+    <value>Fly slaat recente snelle voorvertoningen op schijf op voor sneller laden de volgende keer. Wissen verwijdert alle gecachte voorvertoningen uit de schijfcache.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Schijfcache wissen</value>
@@ -385,10 +385,10 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Intensiteit automatisch vervagen (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Stel het aantal foto's in hoge resolutie in dat aan elke kant is opgeslagen.</value>
+    <value>Aantal afbeeldingen in volledige resolutie dat aan elke kant wordt voorgeladen.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Cache in hoge resolutie</value>
+    <value>Voorladen in hoge resolutie (In geheugen)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Kies hoeveel van het scherm de foto vult. (%)</value>
@@ -455,10 +455,10 @@ Esc : Instellingen sluiten of App verlaten</value>
     <value>Logboekbestand</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Stel het aantal foto's in lage resolutie in dat aan elke kant is opgeslagen.</value>
+    <value>Aantal snelle voorvertoningen dat aan elke kant wordt voorgeladen.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Cache in lage resolutie</value>
+    <value>Voorladen in lage resolutie (In geheugen)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Kies het standaardgedrag van het muiswiel.</value>

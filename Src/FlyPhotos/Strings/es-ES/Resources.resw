@@ -325,7 +325,7 @@ Configuración &gt; Aplicaciones &gt; Aplicaciones predeterminadas.</value>
     <value>Ocultar automáticamente el puntero del ratón</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Eliminar todas las vistas previas del caché de disco.</value>
+    <value>Fly almacena en caché las vistas previas rápidas recientes en el disco para una carga más rápida la próxima vez. Limpiar elimina todas las vistas previas almacenadas en caché del disco.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Vaciar caché de disco</value>
@@ -385,10 +385,10 @@ Configuración &gt; Aplicaciones &gt; Aplicaciones predeterminadas.</value>
     <value>Intensidad de atenuación automática (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Establecer el número de fotos de alta resolución en caché en cada lado.</value>
+    <value>Número de imágenes en resolución completa precargadas en cada lado.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Caché de alta resolución</value>
+    <value>Precarga de alta resolución (En memoria)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Elija cuánto de la pantalla llena la foto. (%)</value>
@@ -455,10 +455,10 @@ Esc : Cerrar ajustes o Salir</value>
     <value>Archivo de registro</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Establecer el número de fotos de baja resolución en caché en cada lado.</value>
+    <value>Número de vistas previas rápidas precargadas en cada lado.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Caché de baja resolución</value>
+    <value>Precarga de baja resolución (En memoria)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Elija el comportamiento predeterminado de la rueda del ratón.</value>

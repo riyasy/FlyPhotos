@@ -325,7 +325,7 @@
     <value>自動隱藏滑鼠指標</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>從磁碟快取刪除所有預覽。</value>
+    <value>Fly 將最近的快速預覽快取至磁碟，以便下次更快載入。清除會移除磁碟快取中所有已快取的預覽。</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>清除磁碟快取</value>
@@ -385,10 +385,10 @@
     <value>淡出強度（％）</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>設定每側快取的高解析度照片數量。</value>
+    <value>每側預先載入的完整解析度影像數量。</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>高解析度快取</value>
+    <value>高解析度預先載入（記憶體內）</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>選擇照片在螢幕中所佔的比例（％）。</value>
@@ -455,10 +455,10 @@ Esc：關閉設定或離開應用程式</value>
     <value>記錄檔</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>設定每側快取的低解析度照片數量。</value>
+    <value>每側預先載入的快速預覽數量。</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>低解析度快取</value>
+    <value>低解析度預先載入（記憶體內）</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>選擇預設的滑鼠滾輪行為。</value>

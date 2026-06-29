@@ -325,7 +325,7 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Masquer automatiquement le pointeur de la souris</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Supprimer toutes les prévisualisations du cache du disque.</value>
+    <value>Fly met en cache les aperçus rapides récents sur le disque pour un chargement plus rapide la prochaine fois. Effacer supprime tous les aperçus mis en cache du cache disque.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Vider le cache disque</value>
@@ -385,10 +385,10 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Intensité d'estompage automatique (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Définir le nombre de photos haute résolution mises en cache de chaque côté.</value>
+    <value>Nombre d'images en pleine résolution préchargées de chaque côté.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Cache haute résolution</value>
+    <value>Préchargement haute résolution (En mémoire)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Choisir la quantité d'écran que la photo remplit. (%)</value>
@@ -455,10 +455,10 @@ Esc : Fermer les paramètres ou Quitter</value>
     <value>Fichier journal</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Définir le nombre de photos basse résolution mises en cache de chaque côté.</value>
+    <value>Nombre d'aperçus rapides préchargés de chaque côté.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Cache basse résolution</value>
+    <value>Préchargement basse résolution (En mémoire)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Choisir le comportement par défaut de la molette de la souris.</value>

@@ -324,7 +324,7 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Egérmutató automatikus elrejtése</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Az összes előnézet törlése a lemezgyorsítótárból.</value>
+    <value>A Fly a legutóbbi gyors előnézeteket lemezre menti a következő alkalommal gyorsabb betöltés érdekében. A törlés eltávolítja az összes gyorsítótárazott előnézetet a lemezes gyorsítótárból.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Lemezgyorsítótár törlése</value>
@@ -384,10 +384,10 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Automatikus elhalványítás intenzitása (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Állítsa be a nagy felbontású képek gyorsítótárának méretét oldalanként.</value>
+    <value>Oldalanként előtöltött teljes felbontású képek száma.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Nagy felbontású gyorsítótár</value>
+    <value>Nagy felbontású előtöltés (Memóriában)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Válassza ki, hogy a kép mennyire töltse ki a képernyőt. (%)</value>
@@ -454,10 +454,10 @@ Esc : Beállítások bezárása vagy alkalmazás kilépése</value>
     <value>Naplófájl</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Állítsa be az alacsony felbontású képek gyorsítótárának méretét oldalanként.</value>
+    <value>Oldalanként előtöltött gyors előnézetek száma.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Alacsony felbontású gyorsítótár</value>
+    <value>Alacsony felbontású előtöltés (Memóriában)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Válassza ki az alapértelmezett egérgörgő viselkedést.</value>

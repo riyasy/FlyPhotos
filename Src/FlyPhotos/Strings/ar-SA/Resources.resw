@@ -325,7 +325,7 @@
     <value>إخفاء مؤشر الماوس تلقائيًا</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>حذف جميع المعاينات من ذاكرة التخزين المؤقت على القرص.</value>
+    <value>يخزّن Fly معاينات سريعة حديثة على القرص لتحميل أسرع في المرة القادمة. يؤدي المسح إلى إزالة جميع المعاينات المخزنة مؤقتًا من ذاكرة التخزين المؤقت على القرص.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>مسح التخزين المؤقت على القرص</value>
@@ -385,10 +385,10 @@
     <value>مستوى التلاشي التلقائي (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>تعيين عدد الصور عالية الدقة المخزنة مؤقتًا على كل جانب.</value>
+    <value>عدد الصور بالدقة الكاملة المحملة مسبقًا على كل جانب.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>التخزين المؤقت عالي الدقة</value>
+    <value>التحميل المسبق عالي الدقة (في الذاكرة)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>اختر النسبة التي تملؤها الصورة من الشاشة. (%)</value>
@@ -455,10 +455,10 @@ Esc : إغلاق الإعدادات أو الخروج من التطبيق</value
     <value>ملف السجل</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>تعيين عدد الصور منخفضة الدقة المخزنة مؤقتًا على كل جانب.</value>
+    <value>عدد المعاينات السريعة المحملة مسبقًا على كل جانب.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>التخزين المؤقت منخفض الدقة</value>
+    <value>التحميل المسبق منخفض الدقة (في الذاكرة)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>اختر السلوك الافتراضي لعجلة الماوس.</value>

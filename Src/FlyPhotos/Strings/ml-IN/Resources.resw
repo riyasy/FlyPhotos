@@ -322,7 +322,7 @@
     <value>മൗസ് പോയിന്റർ ഓട്ടോ ഹൈഡ് ചെയ്യുക</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>ഡിസ്‌ക് ക്യാഷിൽ നിന്നുള്ള എല്ലാ പ്രിവ്യൂകളും ഇല്ലാതാക്കുക.</value>
+    <value>Fly അടുത്ത തവണ വേഗത്തിൽ ലോഡ് ചെയ്യാൻ ഏറ്റവും പുതിയ ദ്രുത പ്രിവ്യൂകൾ ഡിസ്‌കിൽ സംഭരിക്കുന്നു. ക്ലിയർ ചെയ്യുന്നത് ഡിസ്‌ക് ക്യാഷിൽ നിന്ന് എല്ലാ ക്യാഷ് ചെയ്ത പ്രിവ്യൂകളും നീക്കം ചെയ്യുന്നു.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>ഡിസ്‌ക് ക്യാഷ് മായ്ക്കുക</value>
@@ -382,10 +382,10 @@
     <value>മങ്ങൽ തീവ്രത %</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>ഓരോ വശത്തും കാഷെ ചെയ്ത ഹൈ-റെസല്യൂഷൻ ഫോട്ടോകളുടെ എണ്ണം സജ്ജമാക്കുക.</value>
+    <value>ഓരോ വശത്തും പ്രിലോഡ് ചെയ്യുന്ന പൂർണ്ണ-റെസല്യൂഷൻ ചിത്രങ്ങളുടെ എണ്ണം.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>ഹൈ-റെസ് കാഷെ</value>
+    <value>ഹൈ-റെസ് പ്രിലോഡ് (മെമ്മറിയിൽ)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>ഇമേജ് സ്ക്രീനിന്റെ എത്ര % നിറയ്ക്കണമെന്ന് തിരഞ്ഞെടുക്കുക</value>
@@ -452,10 +452,10 @@ Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാ
     <value>ലോഗ് ഫയൽ</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>ഓരോ വശത്തും കാഷെ ചെയ്ത ലോ-റെസല്യൂഷൻ ഫോട്ടോകളുടെ എണ്ണം സജ്ജമാക്കുക.</value>
+    <value>ഓരോ വശത്തും പ്രിലോഡ് ചെയ്യുന്ന ദ്രുത പ്രിവ്യൂകളുടെ എണ്ണം.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>ലോ-റെസ് കാഷെ</value>
+    <value>ലോ-റെസ് പ്രിലോഡ് (മെമ്മറിയിൽ)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>ഡിഫോൾട്ട് മൗസ് വീൽ പ്രവർത്തി രീതി തിരഞ്ഞെടുക്കുക.</value>

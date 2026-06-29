@@ -325,7 +325,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Dölj muspekaren automatiskt</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Ta bort alla förhandsvisningar från diskcachen.</value>
+    <value>Fly cachar senaste snabbförhandsvisningar till disk för snabbare laddning nästa gång. Rensa tar bort alla cachade förhandsvisningar från diskcachen.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Rensa diskcache</value>
@@ -385,10 +385,10 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Automatisk toningintensitet (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Ställ in antalet högupplösta foton som cachas på varje sida.</value>
+    <value>Antal bilder i full upplösning som förinläses på varje sida.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Högupplöst cache</value>
+    <value>Högupplöst förinläsning (I minnet)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Välj hur stor del av skärmen fotot fyller. (%)</value>
@@ -455,10 +455,10 @@ Esc : Stäng inställningar eller Avsluta</value>
     <value>Loggfil</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Ställ in antalet lågupplösta foton som cachas på varje sida.</value>
+    <value>Antal snabbförhandsvisningar som förinläses på varje sida.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Lågupplöst cache</value>
+    <value>Lågupplöst förinläsning (I minnet)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Välj standardbeteende för mushjulet.</value>

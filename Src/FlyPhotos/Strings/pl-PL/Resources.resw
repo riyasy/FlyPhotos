@@ -325,7 +325,7 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Automatycznie ukryj wskaźnik myszy</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Usuń wszystkie podglądy z pamięci podręcznej dysku.</value>
+    <value>Fly zapisuje ostatnie szybkie podglądy na dysku, aby przyspieszyć ładowanie przy następnym otwarciu. Wyczyść usuwa wszystkie zbuforowane podglądy z pamięci podręcznej dysku.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Wyczyść pamięć podręczną dysku</value>
@@ -385,10 +385,10 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Intensywność automatycznego wygaszania (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Ustaw liczbę zdjęć w wysokiej rozdzielczości buforowanych po każdej stronie.</value>
+    <value>Liczba obrazów w pełnej rozdzielczości wstępnie załadowanych po każdej stronie.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Pamięć podręczna wysokiej rozdzielczości</value>
+    <value>Wstępne ładowanie w wysokiej rozdzielczości (W pamięci)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Wybierz, jaką część ekranu wypełnia zdjęcie. (%)</value>
@@ -455,10 +455,10 @@ Esc : Zamknij ustawienia lub Wyjdź</value>
     <value>Plik dziennika</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Ustaw liczbę zdjęć w niskiej rozdzielczości buforowanych po każdej stronie.</value>
+    <value>Liczba szybkich podglądów wstępnie załadowanych po każdej stronie.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Pamięć podręczna niskiej rozdzielczości</value>
+    <value>Wstępne ładowanie w niskiej rozdzielczości (W pamięci)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Wybierz domyślne zachowanie kółka myszy.</value>

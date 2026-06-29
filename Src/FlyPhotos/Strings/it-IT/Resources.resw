@@ -325,7 +325,7 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Nascondi automaticamente il puntatore del mouse</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Elimina tutte le anteprime dalla cache del disco.</value>
+    <value>Fly memorizza nella cache le anteprime veloci recenti su disco per un caricamento più rapido la prossima volta. Cancella rimuove tutte le anteprime memorizzate dalla cache del disco.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Svuota la cache del disco</value>
@@ -385,10 +385,10 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Intensità dissolvenza automatica (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Imposta il numero di foto ad alta risoluzione memorizzate nella cache su ciascun lato.</value>
+    <value>Numero di immagini a piena risoluzione precaricate per ogni lato.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Cache ad alta risoluzione</value>
+    <value>Precaricamento ad alta risoluzione (In memoria)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Scegli quanto dello schermo riempie la foto. (%)</value>
@@ -455,10 +455,10 @@ Esc : Chiudi impostazioni o Esci</value>
     <value>File di registro</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Imposta il numero di foto a bassa risoluzione memorizzate nella cache su ciascun lato.</value>
+    <value>Numero di anteprime veloci precaricate per ogni lato.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Cache a bassa risoluzione</value>
+    <value>Precaricamento a bassa risoluzione (In memoria)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Scegli il comportamento predefinito della rotellina del mouse.</value>

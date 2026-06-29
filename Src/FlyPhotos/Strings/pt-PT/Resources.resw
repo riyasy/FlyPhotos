@@ -325,7 +325,7 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Ocultar ponteiro do rato automaticamente</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Eliminar todas as pré-visualizações da cache do disco.</value>
+    <value>O Fly guarda em cache as pré-visualizações rápidas recentes no disco para um carregamento mais rápido da próxima vez. Limpar remove todas as pré-visualizações em cache da cache do disco.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Limpar cache do disco</value>
@@ -385,10 +385,10 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Intensidade de ocultação gradual (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Definir o número de fotografias de alta resolução em cache de cada lado.</value>
+    <value>Número de imagens em resolução completa pré-carregadas em cada lado.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Cache de alta resolução</value>
+    <value>Pré-carregamento de alta resolução (Na memória)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Escolher a percentagem do ecrã preenchida pela fotografia. (%)</value>
@@ -455,10 +455,10 @@ Esc : Fechar Definições ou sair da aplicação</value>
     <value>Ficheiro de registo</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Definir o número de fotografias de baixa resolução em cache de cada lado.</value>
+    <value>Número de pré-visualizações rápidas pré-carregadas em cada lado.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Cache de baixa resolução</value>
+    <value>Pré-carregamento de baixa resolução (Na memória)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Escolher o comportamento predefinido da roda do rato.</value>

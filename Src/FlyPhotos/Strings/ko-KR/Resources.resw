@@ -324,7 +324,7 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
     <value>마우스 포인터 자동 숨기기</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>디스크 캐시에서 모든 미리보기를 삭제합니다.</value>
+    <value>Fly는 다음에 더 빠르게 로드할 수 있도록 최근 빠른 미리보기를 디스크에 캐시합니다. 지우기를 누르면 디스크 캐시에서 모든 캐시된 미리보기가 제거됩니다.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>디스크 캐시 지우기</value>
@@ -384,10 +384,10 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
     <value>자동 페이드 강도(%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>각 측면에 캐시된 고해상도 사진 수를 설정합니다.</value>
+    <value>각 측면에 미리 로드되는 전체 해상도 이미지 수.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>고해상도 캐시</value>
+    <value>고해상도 미리 로드 (메모리)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>사진이 화면을 채우는 정도를 선택합니다.(%)</value>
@@ -454,10 +454,10 @@ Esc : 설정 닫기 또는 앱 종료</value>
     <value>로그 파일</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>각 측면에 캐시된 저해상도 사진 수를 설정합니다.</value>
+    <value>각 측면에 미리 로드되는 빠른 미리보기 수.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>저해상도 캐시</value>
+    <value>저해상도 미리 로드 (메모리)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>기본 마우스 휠 동작 선택</value>

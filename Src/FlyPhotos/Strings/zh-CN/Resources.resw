@@ -325,7 +325,7 @@
     <value>自动隐藏鼠标指针</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>删除磁盘缓存中的所有预览图。</value>
+    <value>Fly 将最近的快速预览缓存到磁盘，以便下次更快加载。清除将删除磁盘缓存中的所有已缓存预览。</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>清除磁盘缓存</value>
@@ -385,10 +385,10 @@
     <value>自动淡出强度 (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>设置两侧缓存的高分辨率照片数量。</value>
+    <value>每侧预加载的全分辨率图像数量。</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>高分辨率缓存</value>
+    <value>高分辨率预加载（内存）</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>选择照片占据屏幕的比例 (%)。</value>
@@ -455,10 +455,10 @@ Esc：关闭设置或退出应用</value>
     <value>日志文件</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>设置两侧缓存的低分辨率照片数量。</value>
+    <value>每侧预加载的快速预览数量。</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>低分辨率缓存</value>
+    <value>低分辨率预加载（内存）</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>选择鼠标滚轮的默认行为。</value>

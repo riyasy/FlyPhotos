@@ -325,7 +325,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Mauszeiger automatisch ausblenden</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Löschen Sie alle Vorschauen aus dem Festplatten-Cache.</value>
+    <value>Fly speichert aktuelle schnelle Vorschauen auf dem Datenträger für ein schnelleres Laden beim nächsten Mal. „Löschen" entfernt alle zwischengespeicherten Vorschauen aus dem Festplatten-Cache.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Festplatten-Cache leeren</value>
@@ -385,10 +385,10 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Intensität des automatischen Ausblendens %</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Legen Sie die Anzahl der auf jeder Seite zwischengespeicherten hochauflösenden Fotos fest.</value>
+    <value>Anzahl der vollauflösenden Bilder, die auf jeder Seite vorgeladen werden.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Cache mit hoher Auflösung</value>
+    <value>Hochauflösungs-Vorabladen (Im Arbeitsspeicher)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Legt fest, wie viel % des Bildschirms das Foto ausfüllt.</value>
@@ -455,10 +455,10 @@ Esc : Einstellungen schließen oder App beenden</value>
     <value>Protokolldatei</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Legen Sie die Anzahl der auf jeder Seite zwischengespeicherten Fotos mit niedriger Auflösung fest.</value>
+    <value>Anzahl der schnellen Vorschauen, die auf jeder Seite vorgeladen werden.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Cache mit niedriger Auflösung</value>
+    <value>Niedrigauflösungs-Vorabladen (Im Arbeitsspeicher)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Wählen Sie das Standardverhalten des Mausrads.</value>
