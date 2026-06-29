@@ -612,7 +612,10 @@ public sealed partial class PhotoDisplayWindow
                 await HandleMouseWheelNavigation(delta, false);
                 break;
             case ScrollDirection.Vertical when AppConfig.Settings.DefaultMouseWheelBehavior == DefaultMouseWheelBehavior.Zoom:
-                HandleMouseWheelZoom(delta, currentPoint);
+                if (props.IsLeftButtonPressed) // A quirky interaction to ease one-handed mouse operation.
+                    await HandleMouseWheelNavigation(delta, false);
+                else
+                    HandleMouseWheelZoom(delta, currentPoint);
                 break;
         }
     }
