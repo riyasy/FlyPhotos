@@ -406,6 +406,7 @@ Clic droit de la souris : Menu contextuel de l'explorateur Windows
 Molette de la souris : Zoomer / Naviguer (selon paramètres)
 Ctrl + Molette : Zoom avant ou arrière
 Alt + Molette : Naviguer entre les photos
+Clic gauche + Molette : Naviguer entre les photos
 Incliner la molette (Gauche/Droite) : Naviguer entre les photos
 Clic sur la molette : Plein écran
 
@@ -428,6 +429,7 @@ Touchpad balayage 2 doigts Haut/Bas : Zoomer / Naviguer (selon paramètres)
 Touchpad pincement : Zoom avant ou arrière
 
 F11 : Plein écran
+Entrée : Agrandir
 
 Alt + Entrée : Propriétés du fichier (Général)
 D : Propriétés du fichier (Détails)
@@ -674,7 +676,7 @@ Esc : Fermer les paramètres ou Quitter</value>
     <value>Zoom par paliers</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
-    <value>Cliquer en dehors de la photo restaure la fenêtre depuis le mode plein écran ou maximisé.</value>
+    <value>Cliquer en dehors de la photo restaure la fenêtre depuis le mode plein écran ou depuis un état maximisé. Un double-clic la maximise à nouveau.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>Cliquer en dehors de l'image pour restaurer la fenêtre</value>

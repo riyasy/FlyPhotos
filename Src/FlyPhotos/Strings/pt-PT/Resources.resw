@@ -406,6 +406,7 @@ Clique direito do rato : Menu de contexto do Explorador de Ficheiros do Windows
 Roda do rato : Aumentar ou diminuir zoom / Navegar nas fotografias (depende da definição)
 Ctrl + Roda do rato : Aumentar ou diminuir zoom
 Alt + Roda do rato : Navegar nas fotografias
+Clique esquerdo + Roda do rato : Navegar nas fotografias
 Inclinar roda do rato para a esquerda ou direita : Navegar nas fotografias
 Clique na roda do rato : Ecrã inteiro
 
@@ -428,6 +429,7 @@ Deslizar com dois dedos no touchpad para cima ou baixo : Aumentar ou diminuir zo
 Afastar ou juntar os dedos no touchpad : Aumentar ou diminuir zoom
 
 F11 : Ecrã inteiro
+Enter : Maximizar
 
 Alt + Enter : Mostrar propriedades do ficheiro (separador Geral)
 D : Mostrar propriedades do ficheiro (separador Detalhes)
@@ -674,7 +676,7 @@ Esc : Fechar Definições ou sair da aplicação</value>
     <value>Zoom por etapas</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
-    <value>Clicar fora da foto restaura a janela a partir do modo ecrã inteiro ou maximizado.</value>
+    <value>Clicar fora da foto restaura a janela a partir do modo ecrã inteiro ou maximizado. Clicar duas vezes maximiza-a novamente.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>Clique fora da imagem para restaurar a janela</value>

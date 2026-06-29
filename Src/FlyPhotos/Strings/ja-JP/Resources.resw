@@ -405,6 +405,7 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
 マウスホイール : ズーム / 切り替え (設定による)
 Ctrl + マウスホイール : ズームイン / アウト
 Alt + マウスホイール : 写真を切り替え
+左クリック + マウスホイール : 写真を切り替え
 マウスホイールを左右に倒す : 写真を切り替え
 マウスホイールクリック : 全画面表示
 
@@ -427,6 +428,7 @@ End : 最後の写真へ移動
 タッチパッド ピンチ操作 (開く/閉じる) : ズームイン / アウト
 
 F11 : 全画面表示
+Enter : 最大化
 
 Alt + Enter : ファイルのプロパティを表示 (全般)
 D : ファイルのプロパティを表示 (詳細)
@@ -673,7 +675,7 @@ Esc : 設定を閉じる / アプリを終了</value>
     <value>段階的ズーム</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
-    <value>写真の枠外をクリックすると、全画面表示または最大化された状態からウィンドウが元のサイズに復元されます。</value>
+    <value>写真の枠外をクリックすると、全画面表示または最大化された状態からウィンドウが元のサイズに復元されます。ダブルクリックすると再度最大化されます。</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>画像の枠外をクリックしてウィンドウを元に戻す</value>

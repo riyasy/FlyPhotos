@@ -406,6 +406,7 @@ Högerklicka : Windows Explorer snabbmeny
 Mushjul : Zooma / Bläddra (beroende på inställning)
 Ctrl + Mushjul : Zooma in eller ut
 Alt + Mushjul : Bläddra bland bilder
+Vänsterklick + Mushjul : Bläddra bland bilder
 Luta mushjul Vänster/Höger : Bläddra bland bilder
 Klick på mushjulet : Helskärm
 
@@ -428,6 +429,7 @@ Pekplatta tvåfingerssvep Upp/Ner : Zooma / Bläddra (beroende på inställning)
 Pekplatta nyp (Pinch) : Zooma in eller ut
 
 F11 : Helskärm
+Enter : Maximera
 
 Alt + Enter : Visa filegenskaper (Allmänt)
 D : Visa filegenskaper (Detaljer)
@@ -674,7 +676,7 @@ Esc : Stäng inställningar eller Avsluta</value>
     <value>Stegvis zoom</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
-    <value>Genom att klicka utanför fotot återställs fönstret från helskärmsläge eller maximerat läge.</value>
+    <value>Genom att klicka utanför fotot återställs fönstret från helskärmsläge eller maximerat läge. Dubbelklick maximerar det igen.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>Klicka utanför bilden för att återställa fönstret</value>

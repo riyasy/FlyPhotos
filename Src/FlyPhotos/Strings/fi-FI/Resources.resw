@@ -406,6 +406,7 @@ Hiiren oikea painike : Windowsin Resurssienhallinnan pikavalikko
 Hiiren rulla : Zoomaa / Selaa (asetuksesta riippuen)
 Ctrl + Hiiren rulla : Zoomaa sisään tai ulos
 Alt + Hiiren rulla : Selaa kuvia
+Hiiren vasen painike + Hiiren rulla : Selaa kuvia
 Hiiren rullan kallistus Vasen/Oikea : Selaa kuvia
 Hiiren rullan painallus : Koko näyttö
 
@@ -428,6 +429,7 @@ Kosketuslevy kahden sormen pyyhkäisy (Ylös/Alas) : Zoomaa / Selaa
 Kosketuslevy nipistys (Pinch) : Zoomaa sisään tai ulos
 
 F11 : Koko näyttö
+Enter : Suurenna
 
 Alt + Enter : Näytä tiedoston ominaisuudet (Yleiset)
 D : Näytä tiedoston ominaisuudet (Tiedot)
@@ -674,7 +676,7 @@ Esc : Sulje asetukset tai Poistu</value>
     <value>Portaittainen zoomaus</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
-    <value>Kuvan ulkopuolelle napsauttaminen palauttaa ikkunan kokonäytön tilasta tai maksimoidusta tilasta.</value>
+    <value>Kuvan ulkopuolelle napsauttaminen palauttaa ikkunan kokonäytön tilasta tai maksimoidusta tilasta. Kaksoisnapsauttaminen maksimoi sen uudelleen.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>Napsauta kuvan ulkopuolelle palauttaaksesi ikkunan</value>

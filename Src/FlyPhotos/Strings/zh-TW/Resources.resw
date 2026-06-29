@@ -406,6 +406,7 @@
 滑鼠滾輪：放大或縮小／切換照片（依設定）
 Ctrl + 滑鼠滾輪：放大或縮小
 Alt + 滑鼠滾輪：切換照片
+左鍵 + 滑鼠滾輪：切換照片
 滑鼠滾輪左右傾斜：切換照片
 點擊滑鼠滾輪：全螢幕
 
@@ -428,6 +429,7 @@ End：前往最後一張照片
 觸控板雙指開合：放大或縮小
 
 F11：全螢幕
+Enter：最大化
 
 Alt + Enter：顯示檔案內容（一般）
 D：顯示檔案內容（詳細資料）
@@ -674,7 +676,7 @@ Esc：關閉設定或離開應用程式</value>
     <value>分段縮放</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
-    <value>按一下相片外部可將視窗從全螢幕或最大化狀態還原。</value>
+    <value>按一下相片外部可將視窗從全螢幕或最大化狀態還原。按兩下可再次最大化。</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>按一下圖片外部以還原視窗</value>

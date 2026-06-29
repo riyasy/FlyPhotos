@@ -406,6 +406,7 @@ Rechte Maustaste : Windows-Explorer-Kontextmenü
 Mausrad : Zoomen / Blättern (je nach Einstellung)
 Strg + Mausrad : Vergrößern oder Verkleinern
 Alt + Mausrad : Durch Fotos blättern
+Linke Maustaste + Mausrad : Durch Fotos blättern
 Mausrad nach links/rechts neigen : Durch Fotos blättern
 Mausrad-Klick : Vollbild
 
@@ -428,6 +429,7 @@ Touchpad Zweifinger-Wischen Oben/Unten : Zoomen / Blättern (je nach Einstellung
 Touchpad Auf- oder Zuziehen (Pinch) : Vergrößern oder Verkleinern
 
 F11 : Vollbild
+Eingabetaste : Maximieren
 
 Alt + Eingabetaste : Dateieigenschaften anzeigen (Allgemein)
 D : Dateieigenschaften anzeigen (Details)
@@ -674,7 +676,7 @@ Esc : Einstellungen schließen oder App beenden</value>
     <value>Stufenweises Zoomen</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
-    <value>Ein Klick außerhalb des Fotos stellt das Fenster aus dem Vollbildmodus oder dem maximierten Zustand wieder her.</value>
+    <value>Ein Klick außerhalb des Fotos stellt das Fenster aus dem Vollbildmodus oder dem maximierten Zustand wieder her. Ein Doppelklick maximiert es erneut.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>Außerhalb des Bildes klicken, um das Fenster wiederherzustellen</value>

@@ -406,6 +406,7 @@ Clic derecho : Menú contextual del Explorador de Windows
 Rueda del ratón : Zoom / Navegar (según configuración)
 Ctrl + Rueda : Zoom dentro o fuera
 Alt + Rueda : Navegar por las fotos
+Clic izquierdo + Rueda : Navegar por las fotos
 Inclinar rueda Izquierda/Derecha : Navegar por las fotos
 Clic en la rueda del ratón : Pantalla completa
 
@@ -428,8 +429,9 @@ Panel táctil deslizar 2 dedos Arriba/Abajo : Zoom / Navegar (según config.)
 Panel táctil pellizcar : Zoom dentro o fuera
 
 F11 : Pantalla completa
+Intro : Maximizar
 
-Alt + Enter : Ver propiedades del archivo (General)
+Alt + Intro : Ver propiedades del archivo (General)
 D : Ver propiedades del archivo (Detalles)
 
 W : Mostrar archivo en el Explorador de Windows
@@ -674,7 +676,7 @@ Esc : Cerrar ajustes o Salir</value>
     <value>Zoom por pasos</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
-    <value>Al hacer clic fuera de la foto, se restaura la ventana desde el estado de pantalla completa o maximizada.</value>
+    <value>Al hacer clic fuera de la foto, se restaura la ventana desde el estado de pantalla completa o maximizada. Hacer doble clic la vuelve a maximizar.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>Hacer clic fuera de la imagen para restaurar la ventana</value>

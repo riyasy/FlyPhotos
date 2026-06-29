@@ -406,6 +406,7 @@ Rechtermuisknop : Windows Verkenner contextmenu
 Muiswiel : Zoomen / Bladeren (afhankelijk van instelling)
 Ctrl + Muiswiel : In- of uitzoomen
 Alt + Muiswiel : Door foto's bladeren
+Linker muisknop + Muiswiel : Door foto's bladeren
 Muiswiel kantelen Links/Rechts : Door foto's bladeren
 Klik op muiswiel : Volledig scherm
 
@@ -428,6 +429,7 @@ TouchPad twee vingers vegen Omhoog/Omlaag : Zoomen / Bladeren
 TouchPad knijpen (Pinch) : In- of uitzoomen
 
 F11 : Volledig scherm
+Enter : Maximaliseren
 
 Alt + Enter : Bestandseigenschappen tonen (Algemeen)
 D : Bestandseigenschappen tonen (Details)
@@ -674,7 +676,7 @@ Esc : Instellingen sluiten of App verlaten</value>
     <value>Stapsgewijs zoomen</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
-    <value>Als u buiten de foto klikt, wordt het venster hersteld vanuit de modus Volledig scherm of Gemaximaliseerd.</value>
+    <value>Als u buiten de foto klikt, wordt het venster hersteld vanuit de modus Volledig scherm of vanuit een gemaximaliseerd venster. Dubbelklikken maximaliseert het weer.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>Klik buiten de afbeelding om het venster te herstellen</value>

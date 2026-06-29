@@ -406,6 +406,7 @@ Clique direito : Menu de contexto do Windows Explorer
 Roda do mouse : Ampliar ou reduzir / Navegar nas fotos (conforme as configurações)
 Ctrl + Roda do mouse : Ampliar ou reduzir
 Alt + Roda do mouse : Navegar nas fotos
+Clique esquerdo + Roda do mouse : Navegar nas fotos
 Inclinar a roda do mouse para a esquerda ou direita : Navegar nas fotos
 Clique da roda do mouse : Tela inteira
 
@@ -428,6 +429,7 @@ Deslizar dois dedos para cima ou para baixo no touchpad : Ampliar ou reduzir / N
 Movimento de pinça no touchpad : Ampliar ou reduzir
 
 F11 : Tela inteira
+Enter : Maximizar
 
 Alt + Enter : Mostrar propriedades do arquivo (Guia Geral)
 D : Mostrar propriedades do arquivo (Guia Detalhes)
@@ -674,7 +676,7 @@ Esc : Fechar Configurações ou sair do aplicativo</value>
     <value>Zoom em etapas</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
-    <value>Clicar fora da foto restaura a janela a partir do modo tela cheia ou maximizado.</value>
+    <value>Clicar fora da foto restaura a janela a partir do modo tela cheia ou maximizado. Clicar duas vezes a maximiza novamente.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>Clique fora da imagem para restaurar a janela</value>

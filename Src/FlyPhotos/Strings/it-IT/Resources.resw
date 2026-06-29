@@ -406,6 +406,7 @@ Clic destro del mouse : Menu contestuale di Esplora file di Windows
 Rotellina del mouse : Zoom / Scorri (secondo impostazioni)
 Ctrl + Rotellina : Zoom avanti o indietro
 Alt + Rotellina : Scorri foto
+Clic sinistro + Rotellina : Scorri foto
 Inclinare rotellina Sinistra/Destra : Scorri foto
 Clic sulla rotellina : Schermo intero
 
@@ -428,6 +429,7 @@ TouchPad scorri 2 dita Su/Giù : Zoom / Scorri (secondo imp. rotellina)
 TouchPad pizzica (Pinch) : Zoom avanti o indietro
 
 F11 : Schermo intero
+Invio : Ingrandisci
 
 Alt + Invio : Proprietà del file (Generale)
 D : Proprietà del file (Dettagli)
@@ -674,7 +676,7 @@ Esc : Chiudi impostazioni o Esci</value>
     <value>Zoom a livelli</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
-    <value>Facendo clic all'esterno della foto si ripristina la finestra dallo stato a schermo intero o massimizzato.</value>
+    <value>Facendo clic all'esterno della foto si ripristina la finestra dallo stato a schermo intero o massimizzato. Un doppio clic la massimizza di nuovo.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>Fai clic all'esterno dell'immagine per ripristinare la finestra</value>

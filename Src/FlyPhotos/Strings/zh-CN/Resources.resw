@@ -406,6 +406,7 @@
 鼠标滚轮：放大/缩小或切换照片（取决于设置）
 Ctrl + 鼠标滚轮：放大或缩小
 Alt + 鼠标滚轮：切换照片
+左键 + 鼠标滚轮：切换照片
 鼠标滚轮左右倾斜：切换照片
 点击鼠标滚轮：全屏
 
@@ -428,6 +429,7 @@ End：跳转到最后一张照片
 触控板双指捏合或张开：放大或缩小
 
 F11：全屏
+Enter：最大化
 
 Alt + Enter：显示文件属性（常规）
 D：显示文件属性（详细信息）
@@ -674,7 +676,7 @@ Esc：关闭设置或退出应用</value>
     <value>分级缩放</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
-    <value>点击照片外部可将窗口从全屏或最大化状态恢复。</value>
+    <value>点击照片外部可将窗口从全屏或最大化状态恢复。双击可再次最大化。</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>点击图片外部以恢复窗口</value>

@@ -406,6 +406,7 @@ Prawy przycisk myszy : Menu kontekstowe Eksploratora Windows
 Kółko myszy : Zoom / Przełączanie (zależnie od ustawień)
 Ctrl + Kółko myszy : Powiększ lub pomniejsz
 Alt + Kółko myszy : Przełączanie zdjęć
+Lewy przycisk myszy + Kółko myszy : Przełączanie zdjęć
 Przechyl kółko w lewo/prawo : Przełączanie zdjęć
 Kliknięcie kółka myszy : Tryb pełnoekranowy
 
@@ -428,6 +429,7 @@ TouchPad przesunięcie 2 palcami (Góra/Dół) : Zoom / Przełączanie (zależni
 TouchPad uszczypnięcie (Pinch) : Powiększ lub pomniejsz
 
 F11 : Tryb pełnoekranowy
+Enter : Maksymalizuj
 
 Alt + Enter : Pokaż właściwości pliku (Ogólne)
 D : Pokaż właściwości pliku (Szczegóły)
@@ -674,7 +676,7 @@ Esc : Zamknij ustawienia lub Wyjdź</value>
     <value>Powiększanie krokowe</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
-    <value>Kliknięcie poza zdjęciem przywraca okno z trybu pełnoekranowego lub zmaksymalizowanego.</value>
+    <value>Kliknięcie poza zdjęciem przywraca okno z trybu pełnoekranowego lub zmaksymalizowanego. Dwukrotne kliknięcie ponownie maksymalizuje okno.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>Kliknij poza obrazem, aby przywrócić okno</value>
