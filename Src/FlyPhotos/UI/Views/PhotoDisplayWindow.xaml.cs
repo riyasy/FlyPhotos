@@ -472,54 +472,46 @@ public sealed partial class PhotoDisplayWindow
         var dpiAdjustedPos = pointerPoint.Position.AdjustForDpi(D2dCanvas);
         var updateKind = pointerPoint.Properties.PointerUpdateKind;
         _lastPointerDownKind = updateKind;
+        var pointerOverImage = _canvasController.IsPressedOnImage(dpiAdjustedPos);
 
-        if (updateKind == Microsoft.UI.Input.PointerUpdateKind.RightButtonPressed)
+        switch (updateKind)
         {
-            if (!_canvasController.IsPressedOnImage(dpiAdjustedPos)) return;
-            D2dCanvas.CapturePointer(e.Pointer);
-
-            _rightClickCts?.Cancel();
-            _rightClickCts?.Dispose();
-            _rightClickCts = new CancellationTokenSource();
-            var token = _rightClickCts.Token;
-
-            _rightClickPosition = dpiAdjustedPos;
-            _isRightClickZooming = false;
-
-            _ = Task.Run(async () =>
-            {
-                try
+            case PointerUpdateKind.RightButtonPressed when pointerOverImage:
+                D2dCanvas.CapturePointer(e.Pointer);
+                _rightClickCts?.Cancel();
+                _rightClickCts?.Dispose();
+                _rightClickCts = new CancellationTokenSource();
+                var token = _rightClickCts.Token;
+                _rightClickPosition = dpiAdjustedPos;
+                _isRightClickZooming = false;
+                _ = Task.Run(async () =>
                 {
-                    await Task.Delay(1000, token);
-                    if (token.IsCancellationRequested) return;
-
-                    _isRightClickZooming = true;
-                    while (!token.IsCancellationRequested)
+                    try
                     {
-                        DispatcherQueue.TryEnqueue(() =>
+                        await Task.Delay(1000, token);
+                        if (token.IsCancellationRequested) return;
+                        _isRightClickZooming = true;
+                        while (!token.IsCancellationRequested)
                         {
-                            if (!token.IsCancellationRequested)
-                                _canvasController.ZoomAtPointPrecision(10, _rightClickPosition);
-                        });
-                        await Task.Delay(16, token);
+                            DispatcherQueue.TryEnqueue(() =>
+                            {
+                                if (!token.IsCancellationRequested)
+                                    _canvasController.ZoomAtPointPrecision(10, _rightClickPosition);
+                            });
+                            await Task.Delay(16, token);
+                        }
                     }
-                }
-                catch (TaskCanceledException) { }
-            }, token);
+                    catch (TaskCanceledException) { }
+                }, token);
+                break;
 
-            return;
+            case PointerUpdateKind.LeftButtonPressed when pointerOverImage:
+                if (_ctrlDragWindowMover.Enabled && Util.IsControlPressed()) break;
+                D2dCanvas.CapturePointer(e.Pointer);
+                _lastPoint = pointerPoint.Position;
+                _isDragging = true;
+                break;
         }
-
-        if (updateKind == Microsoft.UI.Input.PointerUpdateKind.LeftButtonPressed)
-        {
-            if (!_canvasController.IsPressedOnImage(dpiAdjustedPos)) return;
-            if (_ctrlDragWindowMover.Enabled && Util.IsControlPressed()) return;
-            D2dCanvas.CapturePointer(e.Pointer);
-            _lastPoint = pointerPoint.Position;
-            _isDragging = true;
-            return;
-        }
-
     }
     /// <summary>
     /// The DPI-adjusted cursor position to anchor a keyboard zoom at while a left-button drag is in progress,
@@ -552,60 +544,46 @@ public sealed partial class PhotoDisplayWindow
 
         switch (properties.PointerUpdateKind)
         {
-            case Microsoft.UI.Input.PointerUpdateKind.RightButtonReleased:
+            case PointerUpdateKind.RightButtonReleased:
+                _rightClickCts?.Cancel();
+                D2dCanvas.ReleasePointerCapture(e.Pointer);
+                if (!_isRightClickZooming && _canvasController.IsPressedOnImage(dpiAdjustedPosition))
                 {
-                    _rightClickCts?.Cancel();
-                    D2dCanvas.ReleasePointerCapture(e.Pointer);
+                    var filePath = _photoController.GetFullPathCurrentFile();
+                    if (File.Exists(filePath))
+                        ContextMenuHelper.ShowContextMenu(this, filePath);
+                }
+                _isRightClickZooming = false;
+                break;
 
-                    if (!_isRightClickZooming)
-                    {
-                        if (_canvasController.IsPressedOnImage(dpiAdjustedPosition))
-                        {
-                            var filePath = _photoController.GetFullPathCurrentFile();
-                            if (File.Exists(filePath))
-                            {
-                                ContextMenuHelper.ShowContextMenu(this, filePath);
-                            }
-                        }
-                    }
-                    _isRightClickZooming = false;
-                    break;
-                }
-            case Microsoft.UI.Input.PointerUpdateKind.LeftButtonReleased:
-                {
-                    if (_isDragging)
-                    {
-                        D2dCanvas.ReleasePointerCapture(e.Pointer);
-                        _isDragging = false;
-                    }
-                    else
-                    {
-                        if (_doubleTapHandled) { _doubleTapHandled = false; break; }
-                        if (AppConfig.Settings.ClickOutsideImageToRestoreWindow &&
-                            !(currentPoint.Position.Y < AppTitlebar.ActualHeight) &&
-                            !_canvasController.IsPressedOnImage(dpiAdjustedPosition) &&
-                            _windFullScreenManager.IsMaximizedOrFullScreen)
-                            _windFullScreenManager.Restore(ButtonFullScreenClose);
-                    }
-                    break;
-                }
-            case Microsoft.UI.Input.PointerUpdateKind.MiddleButtonReleased:
-                {
-                    _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
-                    break;
-                }
-            case Microsoft.UI.Input.PointerUpdateKind.XButton1Released:
-                {
-                    if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom)
-                        _canvasController.StepZoom(ZoomDirection.Out, dpiAdjustedPosition);
-                    break;
-                }
-            case Microsoft.UI.Input.PointerUpdateKind.XButton2Released:
-                {
-                    if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom)
-                        _canvasController.StepZoom(ZoomDirection.In, dpiAdjustedPosition);
-                    break;
-                }
+            case PointerUpdateKind.LeftButtonReleased when _isDragging:
+                D2dCanvas.ReleasePointerCapture(e.Pointer);
+                _isDragging = false;
+                break;
+
+            case PointerUpdateKind.LeftButtonReleased:
+                if (_doubleTapHandled) { _doubleTapHandled = false; break; }
+
+                if (AppConfig.Settings.ClickOutsideImageToRestoreWindow &&
+                    !(currentPoint.Position.Y < AppTitlebar.ActualHeight) &&
+                    !_canvasController.IsPressedOnImage(dpiAdjustedPosition) &&
+                    _windFullScreenManager.IsMaximizedOrFullScreen)
+                    _windFullScreenManager.Restore(ButtonFullScreenClose);
+                break;
+
+            case PointerUpdateKind.MiddleButtonReleased:
+                _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
+                break;
+
+            case PointerUpdateKind.XButton1Released:
+                if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom)
+                    _canvasController.StepZoom(ZoomDirection.Out, dpiAdjustedPosition);
+                break;
+
+            case PointerUpdateKind.XButton2Released:
+                if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom)
+                    _canvasController.StepZoom(ZoomDirection.In, dpiAdjustedPosition);
+                break;
         }
     }
 
