@@ -543,6 +543,12 @@ Esc : Cerrar ajustes o Salir</value>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>Tema de la ventana</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>Desplazar suavemente la tira de miniaturas al navegar entre fotos.</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>Animar la tira de miniaturas</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>Establecer el color de resaltado utilizado para las miniaturas seleccionadas.</value>
   </data>

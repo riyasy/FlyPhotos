@@ -543,6 +543,12 @@ Esc : Fermer les paramètres ou Quitter</value>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>Thème de la fenêtre</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>Faire défiler la bande de miniatures en douceur lors de la navigation entre les photos.</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>Animer la bande de miniatures</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>Définir la couleur de surbrillance utilisée pour les miniatures sélectionnées.</value>
   </data>

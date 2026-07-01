@@ -543,6 +543,12 @@ Esc : Fechar Configurações ou sair do aplicativo</value>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>Tema da janela</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>Deslizar suavemente a faixa de miniaturas ao navegar entre as fotos.</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>Animar a faixa de miniaturas</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>Definir a cor de destaque usada para miniaturas selecionadas.</value>
   </data>

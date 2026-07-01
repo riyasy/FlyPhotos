@@ -419,7 +419,7 @@ Page Up / Page Down : 다음 프리셋으로 줌 (100%, 400%, 맞춤)
 Home : 첫 번째 사진으로 이동
 End : 마지막 사진으로 이동
 
-썸네일 스트립에서 마우스 휠 : 사진 탐색
+축소판 그림 표시줄에서 마우스 휠 : 사진 탐색
 화면의 왼쪽/오른쪽 버튼에서 휠 : 사진 탐색
 화면의 회전 버튼에서 휠 : 사진 회전
 
@@ -541,6 +541,12 @@ Esc : 설정 닫기 또는 앱 종료</value>
   </data>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>창 테마</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>사진 사이를 탐색할 때 축소판 그림 표시줄을 부드럽게 슬라이드합니다.</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>축소판 그림 표시줄 애니메이션</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>선택한 축소판 그림에 사용되는 강조 색상 설정</value>

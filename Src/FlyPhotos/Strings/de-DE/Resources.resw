@@ -543,6 +543,12 @@ Esc : Einstellungen schließen oder App beenden</value>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>Fensterdesign</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>Die Miniaturansichtsleiste beim Navigieren zwischen Fotos sanft verschieben.</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>Miniaturansichtsleiste animieren</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>Legen Sie die Hervorhebungsfarbe für ausgewählte Miniaturansichten fest.</value>
   </data>

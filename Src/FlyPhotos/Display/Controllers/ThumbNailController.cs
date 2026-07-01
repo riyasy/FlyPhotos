@@ -311,6 +311,14 @@ internal partial class ThumbNailController : IThumbnailController
     {
         if (delta == 0) return;
 
+        // Animation disabled → snap: settle the offset to 0 and leave _slideAnimating false so the
+        // render loop pauses after this single frame (see GPU-idle invariant). Reuses the snap path.
+        if (!AppConfig.Settings.EnableThumbnailAnimation)
+        {
+            StopSlide();
+            return;
+        }
+
         if (Math.Abs(delta) > _numOfThumbNailsInOneDirection)
         {
             StopSlide();

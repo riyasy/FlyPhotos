@@ -543,6 +543,12 @@ Esc : Stäng inställningar eller Avsluta</value>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>Fönstertema</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>Låt miniatyrraden glida mjukt när du navigerar mellan foton.</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>Animera miniatyrraden</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>Ställ in markeringsfärgen som används för valda miniatyrer.</value>
   </data>

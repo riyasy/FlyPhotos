@@ -543,6 +543,12 @@ Esc : Sulje asetukset tai Poistu</value>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>Ikkunan teema</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>Liu'uta pienoiskuvariviä pehmeästi kuvien välillä siirryttäessä.</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>Animoi pienoiskuvarivi</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>Aseta valittuihin pikkukuviin käytettävä korostusväri.</value>
   </data>

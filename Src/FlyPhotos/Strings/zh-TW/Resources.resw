@@ -543,6 +543,12 @@ Esc：關閉設定或離開應用程式</value>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>視窗主題</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>在相片之間瀏覽時平滑滑動縮圖列。</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>縮圖列動畫</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>設定選取縮圖時使用的強調色。</value>
   </data>

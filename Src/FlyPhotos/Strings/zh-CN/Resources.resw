@@ -543,6 +543,12 @@ Esc：关闭设置或退出应用</value>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>窗口主题</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>在照片之间导航时平滑滑动缩略图条。</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>缩略图条动画</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>设置选中缩略图的高亮颜色。</value>
   </data>

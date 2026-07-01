@@ -83,6 +83,7 @@ internal sealed partial class Settings
         ComboMouseWheelBehaviour.SelectedIndex = GetIndexForMouseWheelBehaviour(AppConfig.Settings.DefaultMouseWheelBehavior);
         ComboMouseFwdBackBehaviour.SelectedIndex = GetIndexForMouseFwdBackBehavior(AppConfig.Settings.MouseFwdBackBehavior);
         ButtonShowThumbnail.IsOn = AppConfig.Settings.ShowThumbnails;
+        ButtonThumbnailAnimation.IsOn = AppConfig.Settings.EnableThumbnailAnimation;
         ButtonEnableAutoFade.IsOn = AppConfig.Settings.AutoFade;
         ButtonOpenExitZoom.IsOn = AppConfig.Settings.OpenExitZoom;
         SliderFadeIntensity.Value = AppConfig.Settings.FadeIntensity;
@@ -117,6 +118,7 @@ internal sealed partial class Settings
         ComboMouseWheelBehaviour.SelectionChanged += ComboMouseWheel_OnSelectionChanged;
         ComboMouseFwdBackBehaviour.SelectionChanged += ComboMouseFwdBackBehaviour_OnSelectionChanged;
         ButtonShowThumbnail.Toggled += ButtonShowThumbnail_OnToggled;
+        ButtonThumbnailAnimation.Toggled += ButtonThumbnailAnimation_OnToggled;
         ButtonOpenExitZoom.Toggled += ButtonOpenExitZoom_OnToggled;
         ButtonEnableAutoFade.Toggled += ButtonEnableAutoFade_OnToggled;
         SliderFadeIntensity.ValueChanged += SliderFadeIntensity_ValueChanged;
@@ -398,6 +400,13 @@ internal sealed partial class Settings
         AppConfig.Settings.ShowThumbnails = ButtonShowThumbnail.IsOn;
         await AppConfig.SaveAsync();
         SettingChanged?.Invoke(Setting.ThumbnailShowHide);
+    }
+
+    private async void ButtonThumbnailAnimation_OnToggled(object sender, RoutedEventArgs e)
+    {
+        // Read live in ThumbNailController.BeginSlide, so persisting is enough — no SettingChanged needed.
+        AppConfig.Settings.EnableThumbnailAnimation = ButtonThumbnailAnimation.IsOn;
+        await AppConfig.SaveAsync();
     }
 
     private async void SliderLowResCacheSize_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)

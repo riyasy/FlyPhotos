@@ -377,6 +377,13 @@
                             <ToggleSwitch x:Name="ButtonShowThumbnail" HorizontalAlignment="Right" />
                             <controls:SettingsExpander.Items>
                                 <controls:SettingsCard
+                                    x:Name="SettingsCardThumbnailAnimation"
+                                    x:Uid="SettingsCardThumbnailAnimation"
+                                    HeaderIcon="{ui:FontIcon Glyph=&#xF4A5;}"
+                                    IsEnabled="{x:Bind ButtonShowThumbnail.IsOn, Mode=OneWay}">
+                                    <ToggleSwitch x:Name="ButtonThumbnailAnimation" HorizontalAlignment="Right" />
+                                </controls:SettingsCard>
+                                <controls:SettingsCard
                                     x:Name="SettingsCardThumbnailSize"
                                     x:Uid="SettingsCardThumbnailSize"
                                     HeaderIcon="{ui:FontIcon Glyph=&#xE620;}"

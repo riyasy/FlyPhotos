@@ -542,6 +542,12 @@ Esc : 設定を閉じる / アプリを終了</value>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>ウィンドウのテーマ</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>写真間を移動するときにサムネイルストリップを滑らかにスライドします。</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>サムネイルストリップをアニメーション化</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>選択したサムネイルに使用する強調表示色を設定します。</value>
   </data>

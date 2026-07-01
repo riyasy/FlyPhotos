@@ -540,6 +540,12 @@ Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാ
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>വിൻഡോ തീം</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>ഫോട്ടോകൾക്കിടയിൽ നാവിഗേറ്റ് ചെയ്യുമ്പോൾ തംബ്‌നെയിൽ സ്ട്രിപ്പ് സുഗമമായി സ്ലൈഡ് ചെയ്യുക.</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>തംബ്‌നെയിൽ സ്ട്രിപ്പ് ആനിമേറ്റ് ചെയ്യുക</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>തിരഞ്ഞെടുത്ത തമ്പ്‌നെയിലിനുള്ള ഹൈലൈറ്റ് നിറം സജ്ജമാക്കുക.</value>
   </data>

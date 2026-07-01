@@ -543,6 +543,12 @@ Esc : Close Settings or Exit App</value>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>Window Theme</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>Slide the thumbnail strip smoothly when navigating between photos.</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>Animate thumbnail strip</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>Set the highlight color used for selected thumbnails.</value>
   </data>

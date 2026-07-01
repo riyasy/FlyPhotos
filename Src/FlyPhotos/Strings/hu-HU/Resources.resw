@@ -542,6 +542,12 @@ Esc : Beállítások bezárása vagy alkalmazás kilépése</value>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>Ablaktéma</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>A bélyegképsáv finom csúsztatása a fényképek közötti navigáláskor.</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>Bélyegképsáv animálása</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>Állítsa be a kiválasztott bélyegképek kiemelő színét.</value>
   </data>

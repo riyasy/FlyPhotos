@@ -543,6 +543,12 @@ Esc : Instellingen sluiten of App verlaten</value>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>Vensterthema</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>De miniatuurbalk soepel laten schuiven bij het navigeren tussen foto's.</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>Miniatuurbalk animeren</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>Stel de accentkleur in die wordt gebruikt voor geselecteerde miniaturen.</value>
   </data>

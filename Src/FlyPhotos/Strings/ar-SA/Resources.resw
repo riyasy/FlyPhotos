@@ -543,6 +543,12 @@ Esc : إغلاق الإعدادات أو الخروج من التطبيق</value
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>المظهر</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>تحريك شريط الصور المصغّرة بسلاسة عند التنقل بين الصور.</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>تحريك شريط الصور المصغّرة</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>تعيين لون التمييز المستخدم للصور المصغرة المحددة.</value>
   </data>

@@ -543,6 +543,12 @@ Esc : Chiudi impostazioni o Esci</value>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>Tema della finestra</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>Scorri fluidamente la striscia delle miniature durante la navigazione tra le foto.</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>Anima la striscia delle miniature</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>Imposta il colore di evidenziazione utilizzato per le miniature selezionate.</value>
   </data>

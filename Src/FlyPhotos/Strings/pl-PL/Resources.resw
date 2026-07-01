@@ -543,6 +543,12 @@ Esc : Zamknij ustawienia lub Wyjdź</value>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>Motyw okna</value>
   </data>
+  <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
+    <value>Płynne przesuwanie paska miniatur podczas nawigacji między zdjęciami.</value>
+  </data>
+  <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
+    <value>Animuj pasek miniatur</value>
+  </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>Ustaw kolor wyróżnienia używany dla wybranych miniatur.</value>
   </data>
