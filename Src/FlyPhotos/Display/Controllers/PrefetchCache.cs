@@ -347,10 +347,20 @@ internal sealed class PrefetchCache : IDisposable
                 tier.Queue.Push(key);
     }
 
+    // Membership test for the HQ window. Called from a ThreadPool thread (the stale-RAW-decode discard
+    // path), so it snapshots the copy-on-write key list and centre once and scans only that snapshot —
+    // never re-reading the shared fields or indexing a list that may have been swapped underneath it.
     private bool IsInDesiredHqWindow(int key)
     {
-        if (_windowKeys.Count == 0 || _windowCentre < 0) return false;
-        return FindNeighborKeys(_windowCentre, AppConfig.Settings.CacheSizeOneSideHqImages).Contains(key);
+        var keys = _windowKeys;
+        int centre = _windowCentre;
+        if (centre < 0 || centre >= keys.Count) return false;
+        int side = AppConfig.Settings.CacheSizeOneSideHqImages;
+        int lo = Math.Max(0, centre - side);
+        int hi = Math.Min(keys.Count - 1, centre + side);
+        for (int pos = lo; pos <= hi; pos++)
+            if (keys[pos] == key) return true;
+        return false;
     }
 
     private List<int> FindNeighborKeys(int currentPosition, int cacheSizeOneSide)
