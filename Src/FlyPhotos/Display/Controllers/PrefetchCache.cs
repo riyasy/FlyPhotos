@@ -281,26 +281,31 @@ internal sealed class PrefetchCache : IDisposable
             int gen = _hqGeneration;
             if (_getPhoto(key) is not { } photo) return;
             await photo.LoadHq(_device);
-
-            // RAW decode settings changed mid-flight: this bitmap used the old settings.
-            // Discard it and requeue if the key is still in the HQ window.
-            if (gen != _hqGeneration && photo.IsRaw)
-            {
-                photo.DisposeHqOnly();
-                _hqTier.InFlight.Remove(key, out _);
-                if (IsInDesiredHqWindow(key))
-                {
-                    _hqTier.Queue.Push(key);
-                    _hqTier.Signal.Set();
-                }
-                return;
-            }
-
+            if (DiscardedStaleRawDecode(key, photo, gen)) return;
             _hqTier.Done[key] = 0;
             _hqTier.InFlight.Remove(key, out _);
             HqReady?.Invoke(key);
         }
         finally { _hqThrottler.Release(); }
+    }
+
+    /// <summary>
+    /// If RAW decode settings changed while this RAW HQ decode was in flight, the bitmap used the old
+    /// settings. Discards it (and requeues the key if still in the HQ window) and returns true, so the
+    /// caller skips committing the stale result. Returns false for the normal case.
+    /// </summary>
+    private bool DiscardedStaleRawDecode(int key, Photo photo, int gen)
+    {
+        if (gen == _hqGeneration || !photo.IsRaw) return false;
+
+        photo.DisposeHqOnly();
+        _hqTier.InFlight.Remove(key, out _);
+        if (IsInDesiredHqWindow(key))
+        {
+            _hqTier.Queue.Push(key);
+            _hqTier.Signal.Set();
+        }
+        return true;
     }
 
     private async Task DiskCachePreviewAsync(int key)
