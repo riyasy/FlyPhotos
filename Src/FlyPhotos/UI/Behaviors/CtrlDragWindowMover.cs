@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Runtime.InteropServices;
 using FlyPhotos.Infra.Utils;
