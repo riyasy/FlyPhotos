@@ -266,15 +266,15 @@ internal partial class PhotoDisplayController
                 positionText = $"[{currentPosition + 1}/{totalFileCount}]";
             }
 
-            var hideDimension = !AppConfig.Settings.ShowImageDimensions ||
-                                 _photoSessionState.CurrentDisplayLevel == DisplayLevel.PlaceHolder ||
-                                 photo.IsVector ||
-                                 photo.IsErrorScreen(_photoSessionState.CurrentDisplayLevel);
+            var showDimension = AppConfig.Settings.ShowImageDimensions &&
+                                _photoSessionState.CurrentDisplayLevel != DisplayLevel.PlaceHolder &&
+                                !photo.IsVector &&
+                                !photo.IsErrorScreen(_photoSessionState.CurrentDisplayLevel);
 
-            if (!hideDimension)
+            if (showDimension)
             {
-                var dimension = photo.GetActualSize();
-                dimensionText = $"({dimension.Item1} x {dimension.Item2})";
+                var (w, h) = photo.GetActualSize();
+                dimensionText = $"({w} x {h})";
             }
 
             FileNameOrDetailsChanged?.Invoke(new FileDisplayDetails(positionText, fileName, dimensionText));

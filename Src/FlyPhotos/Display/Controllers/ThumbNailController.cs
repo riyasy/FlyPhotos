@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using Windows.Foundation;
 using Windows.Graphics.DirectX;
@@ -384,54 +385,13 @@ internal partial class ThumbNailController : IThumbnailController
 
             // Center thumbnail sits at the canvas center, offset by the margin baked into the wider surface.
             var startX = _offscreenMarginPx + (int)canvasWidth / 2 - _thumbnailBoxSize / 2;
-            var startY = 0;
 
             // Render the visible boxes plus the slide margin on each side so a lagging slide shows no gap.
+            // The selection border is NOT baked here — it is drawn as a fixed frame in D2dCanvasThumbNail_Draw,
+            // so it stays put while the strip slides beneath it.
             var renderHalfCount = _numOfThumbNailsInOneDirection + Constants.ThumbnailSlideMarginBoxes;
             for (var i = -renderHalfCount; i <= renderHalfCount; i++)
-            {
-                var thumbnailPosition = currentPosition + i;
-                if (thumbnailPosition < 0 || thumbnailPosition >= keys.Count) continue;
-
-                var key = keys[thumbnailPosition];
-                var photo = _provider?.GetPhoto(key);
-                if (_isPreviewLoaded == null || !_isPreviewLoaded(key)) photo = null;
-
-                // Lazy-create the GPU bitmap on first draw. Pixels were rendered on the main canvas
-                // device during preview load; CreateFromBytes transfers them to the thumbnail device.
-                if (photo?.Thumbnail != null && photo.Thumbnail.Bitmap == null)
-                {
-                    try
-                    {
-                        int s = Constants.ThumbnailPixelBufferSize;
-                        photo.Thumbnail.Bitmap = CanvasBitmap.CreateFromBytes(sender,
-                            photo.Thumbnail.Pixels, s, s, DirectXPixelFormat.B8G8R8A8UIntNormalized);
-                    }
-                    catch { }
-                }
-
-                var bitmapToDraw = photo?.Thumbnail?.Bitmap ?? GetOrCreateLoadingIndicatorBitmap(sender);
-                if (bitmapToDraw == null) continue;
-
-                var sourceRect = new Rect(0, 0, bitmapToDraw.SizeInPixels.Width, bitmapToDraw.SizeInPixels.Height);
-                var destX = startX + i * _thumbnailBoxSize;
-                var destRect = new Rect(
-                    destX + Constants.ThumbnailPadding,
-                    startY + Constants.ThumbnailPadding,
-                    _thumbnailBoxSize - (Constants.ThumbnailPadding * 2),
-                    _thumbnailBoxSize - (Constants.ThumbnailPadding * 2));
-
-                using (var clipGeometry = CanvasGeometry.CreateRoundedRectangle(dsThumbNail, destRect, Constants.ThumbnailCornerRadius, Constants.ThumbnailCornerRadius))
-                using (dsThumbNail.CreateLayer(1.0f, clipGeometry))
-                {
-                    // Rotation is baked into the bitmap at creation time — plain DrawImage suffices.
-                    dsThumbNail.DrawImage(bitmapToDraw, destRect, sourceRect, 1f, CanvasImageInterpolation.HighQualityCubic);
-                }
-
-                // The selection border is NOT baked here. It is drawn as a fixed frame at the screen
-                // center in D2dCanvasThumbNail_Draw, so it stays put while the strip slides beneath it
-                // (a baked border would ride the slide and appear in two places during fast held nav).
-            }
+                DrawThumbnailSlot(dsThumbNail, sender, startX, i, keys, currentPosition);
         }
 
         // The strip is now centered on currentPosition. If the position changed since the last render,
@@ -464,6 +424,47 @@ internal partial class ThumbNailController : IThumbnailController
         _loadingIndicatorBitmap = CanvasBitmap.CreateFromBytes(resourceCreator,
             pixels, (int)src.SizeInPixels.Width, (int)src.SizeInPixels.Height, src.Format);
         return _loadingIndicatorBitmap;
+    }
+
+    private static CanvasBitmap EnsureThumbnailBitmap(Photo photo, ICanvasResourceCreator creator)
+    {
+        if (photo.Thumbnail == null) return null;
+        if (photo.Thumbnail.Bitmap != null) return photo.Thumbnail.Bitmap;
+        try
+        {
+            int s = Constants.ThumbnailPixelBufferSize;
+            photo.Thumbnail.Bitmap = CanvasBitmap.CreateFromBytes(creator,
+                photo.Thumbnail.Pixels, s, s, DirectXPixelFormat.B8G8R8A8UIntNormalized);
+        }
+        catch { }
+        return photo.Thumbnail.Bitmap;
+    }
+
+    private void DrawThumbnailSlot(CanvasDrawingSession ds, ICanvasResourceCreator creator,
+        int startX, int slotIndex, IReadOnlyList<int> keys, int currentPosition)
+    {
+        var thumbnailPosition = currentPosition + slotIndex;
+        if (thumbnailPosition < 0 || thumbnailPosition >= keys.Count) return;
+
+        var key = keys[thumbnailPosition];
+        var photo = _isPreviewLoaded?.Invoke(key) == true ? _provider?.GetPhoto(key) : null;
+
+        var bitmap = (photo != null ? EnsureThumbnailBitmap(photo, creator) : null)
+                     ?? GetOrCreateLoadingIndicatorBitmap(creator);
+        if (bitmap == null) return;
+
+        var destX = startX + slotIndex * _thumbnailBoxSize;
+        var destRect = new Rect(
+            destX + Constants.ThumbnailPadding,
+            Constants.ThumbnailPadding,
+            _thumbnailBoxSize - (Constants.ThumbnailPadding * 2),
+            _thumbnailBoxSize - (Constants.ThumbnailPadding * 2));
+        var srcRect = new Rect(0, 0, bitmap.SizeInPixels.Width, bitmap.SizeInPixels.Height);
+
+        using var clip = CanvasGeometry.CreateRoundedRectangle(ds, destRect,
+            Constants.ThumbnailCornerRadius, Constants.ThumbnailCornerRadius);
+        using var layer = ds.CreateLayer(1.0f, clip);
+        ds.DrawImage(bitmap, destRect, srcRect, 1f, CanvasImageInterpolation.HighQualityCubic);
     }
 
     // --- Threading helpers ---

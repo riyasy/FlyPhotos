@@ -311,16 +311,13 @@ internal class CanvasViewManager : IAnimationHost
             case PanZoomBehaviourOnNavigation.RetainFromLastPhoto:
                 var oldImageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
                 _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+
                 if (isNewPhoto)
-                {
                     _canvasViewState.Rotation = imageRotation;
-                    _originalImageRotation = imageRotation;
-                }
                 else // isUpgradeFromPlaceholder
-                {
                     _canvasViewState.Rotation += imageRotation - _originalImageRotation;
-                    _originalImageRotation = imageRotation;
-                }
+
+                _originalImageRotation = imageRotation;
                 SetViewFromPrevious(oldImageSize, imageSize, canvasSize);
                 break;
         }
