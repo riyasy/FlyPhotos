@@ -69,7 +69,8 @@ public enum Setting
     CtrlDragToMoveWindowToggle,
     AutoFadeToggle,
     AutoHideMouseToggle,
-    ImageScalingQualityChange
+    ImageScalingQualityChange,
+    RawDecodingChange
 }
 
 public enum ScrollDirection

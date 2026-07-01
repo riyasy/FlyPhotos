@@ -52,6 +52,10 @@ internal sealed class PrefetchCache : IDisposable
     // Reused across SyncCacheTier calls — only touched on the UI/STA thread (inside MoveWindow).
     private readonly HashSet<int> _syncKeysToKeep = new();
 
+    // Bumped (on the UI/STA thread) whenever RAW decode settings change so any RAW HQ decode that was
+    // already in flight is discarded on completion instead of committing a stale bitmap.
+    private volatile int _hqGeneration;
+
     // Resolves a key to its Photo (or null). Read-only access into the controller's PhotoList; the
     // controller owns the collection and disposal timing.
     private readonly Func<int, Photo?> _getPhoto;
@@ -151,6 +155,26 @@ internal sealed class PrefetchCache : IDisposable
 
     public bool IsHqLoaded(int key)      => _hqTier.Done.ContainsKey(key);
     public bool IsPreviewLoaded(int key) => _previewTier.Done.ContainsKey(key);
+
+    /// <summary>
+    /// Drop every cached RAW-file HQ bitmap so the new decoder settings take effect, and bump the
+    /// generation so any in-flight RAW decode is discarded on completion. Requeues the in-window keys
+    /// via <see cref="MoveWindow"/>. Called on the UI/STA thread.
+    /// </summary>
+    public void InvalidateHqForRawFiles()
+    {
+        _hqGeneration++;
+
+        foreach (int key in _hqTier.Done.Keys)
+            if (_getPhoto(key) is { IsRaw: true } photo)
+            {
+                photo.DisposeHqOnly();
+                _hqTier.Done.TryRemove(key, out _);
+            }
+
+        // Reuse the window sync to requeue the in-window keys we just dropped.
+        MoveWindow(_windowCentre, _windowKeys, signalHqLoading: true);
+    }
 
     // -------------------------------------------------------------------------
     // Worker threads
@@ -254,8 +278,24 @@ internal sealed class PrefetchCache : IDisposable
         try
         {
             _hqTier.InFlight[key] = 0;
+            int gen = _hqGeneration;
             if (_getPhoto(key) is not { } photo) return;
             await photo.LoadHq(_device);
+
+            // RAW decode settings changed mid-flight: this bitmap used the old settings.
+            // Discard it and requeue if the key is still in the HQ window.
+            if (gen != _hqGeneration && photo.IsRaw)
+            {
+                photo.DisposeHqOnly();
+                _hqTier.InFlight.Remove(key, out _);
+                if (IsInDesiredHqWindow(key))
+                {
+                    _hqTier.Queue.Push(key);
+                    _hqTier.Signal.Set();
+                }
+                return;
+            }
+
             _hqTier.Done[key] = 0;
             _hqTier.InFlight.Remove(key, out _);
             HqReady?.Invoke(key);
@@ -300,6 +340,12 @@ internal sealed class PrefetchCache : IDisposable
         foreach (int key in desiredKeys)
             if (!tier.Done.ContainsKey(key) && !tier.InFlight.ContainsKey(key))
                 tier.Queue.Push(key);
+    }
+
+    private bool IsInDesiredHqWindow(int key)
+    {
+        if (_windowKeys.Count == 0 || _windowCentre < 0) return false;
+        return FindNeighborKeys(_windowCentre, AppConfig.Settings.CacheSizeOneSideHqImages).Contains(key);
     }
 
     private List<int> FindNeighborKeys(int currentPosition, int cacheSizeOneSide)

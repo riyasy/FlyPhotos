@@ -165,6 +165,7 @@ internal sealed partial class Settings
     private async void RawDecoderPriority_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
         await AppConfig.SaveAsync();
+        SettingChanged?.Invoke(Setting.RawDecodingChange);
     }
 
     private async void ButtonEnableExternalShortcut_OnToggled(object sender, RoutedEventArgs e)
@@ -204,6 +205,7 @@ internal sealed partial class Settings
     {
         AppConfig.Settings.DecodeRawData = ButtonDecodeRawData.IsOn;
         await AppConfig.SaveAsync();
+        SettingChanged?.Invoke(Setting.RawDecodingChange);
     }
 
     private async void ButtonEnableAutoHideMouse_OnToggled(object sender, RoutedEventArgs e)

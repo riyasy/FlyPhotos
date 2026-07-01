@@ -290,6 +290,28 @@ internal partial class PhotoDisplayController
         UpdateFileNameAndDetails();
     }
 
+    // --- RAW decode settings changed ---
+
+    // Drops cached RAW HQ bitmaps so the new decoder settings take effect, and re-decodes them.
+    // Called from the UI thread when a RAW decode setting (DecodeRawData / decoder priority) changes.
+    public async Task InvalidateRawHqCache()
+    {
+        var currentKey = _photoSessionState.CurrentPhotoKey;
+        var currentPhoto = _photoList.GetPhoto(currentKey);
+
+        // If a RAW HQ bitmap we're about to dispose is on screen, step the display down first so the
+        // renderer isn't holding a disposed CanvasBitmap. OnHqReady upgrades it back once re-decoded.
+        if (currentPhoto is { IsRaw: true } &&
+            _photoSessionState.CurrentDisplayLevel == DisplayLevel.Hq)
+        {
+            var level = _cache.IsPreviewLoaded(currentKey)
+                ? DisplayLevel.Preview : DisplayLevel.PlaceHolder;
+            await SetSourceAsync(currentPhoto, level);
+        }
+
+        _cache.InvalidateHqForRawFiles();
+    }
+
     // --- Deletion ---
 
     public bool CanDeleteCurrentPhoto()

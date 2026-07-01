@@ -135,6 +135,9 @@ internal static class CodecDiscovery
 
     public static bool IsRawlerRaw(string extension) => _rawlerRawExtensions.Contains(extension);
 
+    public static bool IsRawFile(string extension) =>
+        IsRawlerRaw(extension) || IsWicRaw(extension) || IsMagickRaw(extension);
+
     public static IReadOnlyList<CodecInfo> GetAllCodecs()
     {
         return _codecInfoList;
