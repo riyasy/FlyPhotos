@@ -342,6 +342,12 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Erkenningen</value>
   </data>
+  <data name="RawDecodeTeachingTip.Subtitle" xml:space="preserve">
+    <value>De huidige foto wordt zo opnieuw geladen.</value>
+  </data>
+  <data name="RawDecodeTeachingTip.Title" xml:space="preserve">
+    <value>Decoder gewijzigd</value>
+  </data>
   <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
     <value>Gebruik echte RAW-gegevens in plaats van de ingesloten JPEG in het RAW-bestand</value>
   </data>

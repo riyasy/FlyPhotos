@@ -566,6 +566,11 @@
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
 
+                        <TeachingTip
+                            x:Name="RawDecodeTeachingTip"
+                            x:Uid="RawDecodeTeachingTip"
+                            IsLightDismissEnabled="True" />
+
                         <controls:SettingsCard
                             x:Name="SettingsCardAllowMultiInstance"
                             x:Uid="SettingsCardAllowMultiInstance"

@@ -391,6 +391,7 @@ public sealed partial class PhotoDisplayWindow
             _settingWindow.Closed += SettingWindow_Closed;
             _settingWindow.Activate();
             _settingWindow.SettingChanged += SettingWindow_SettingChanged;
+            _settingWindow.IsCurrentPhotoRaw = () => _photoController.CurrentPhotoIsRaw;
         }
         else
         {

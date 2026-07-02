@@ -339,6 +339,12 @@
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>കടപ്പാടുകൾ</value>
   </data>
+  <data name="RawDecodeTeachingTip.Subtitle" xml:space="preserve">
+    <value>നിലവിലെ ഫോട്ടോ ഉടൻ വീണ്ടും ലോഡ് ചെയ്യും.</value>
+  </data>
+  <data name="RawDecodeTeachingTip.Title" xml:space="preserve">
+    <value>ഡീകോഡർ മാറ്റി</value>
+  </data>
   <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
     <value>RAW ഫയലിനുള്ളിലെ എംബെഡഡ് JPEG നു പകരം യഥാർത്ഥ RAW ഡാറ്റ ഉപയോഗിക്കുക</value>
   </data>

@@ -342,6 +342,12 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Kiitokset</value>
   </data>
+  <data name="RawDecodeTeachingTip.Subtitle" xml:space="preserve">
+    <value>Nykyinen kuva ladataan uudelleen hetken kuluttua.</value>
+  </data>
+  <data name="RawDecodeTeachingTip.Title" xml:space="preserve">
+    <value>Dekooderi vaihdettu</value>
+  </data>
   <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
     <value>Käytä todellisia RAW-tietoja RAW-tiedoston sisällä olevan upotetun JPEG-kuvan sijaan.</value>
   </data>

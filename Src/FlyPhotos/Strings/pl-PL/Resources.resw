@@ -342,6 +342,12 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Kredyty</value>
   </data>
+  <data name="RawDecodeTeachingTip.Subtitle" xml:space="preserve">
+    <value>Bieżące zdjęcie zostanie za chwilę załadowane ponownie.</value>
+  </data>
+  <data name="RawDecodeTeachingTip.Title" xml:space="preserve">
+    <value>Zmieniono dekoder</value>
+  </data>
   <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
     <value>Użyj rzeczywistych danych RAW zamiast osadzonego pliku JPEG w pliku RAW.</value>
   </data>

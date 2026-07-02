@@ -384,6 +384,10 @@ internal partial class PhotoDisplayController
 
     public string GetFullPathCurrentFile() => _photoList[_photoSessionState.CurrentPhotoKey].FilePath;
 
+    /// <summary>Whether the on-screen photo is a RAW file. Lock-free read; safe to call cross-thread.</summary>
+    public bool CurrentPhotoIsRaw =>
+        _photoList.GetPhoto(_photoSessionState.CurrentPhotoKey) is { IsRaw: true };
+
     // --- Cleanup ---
 
     public void Dispose()

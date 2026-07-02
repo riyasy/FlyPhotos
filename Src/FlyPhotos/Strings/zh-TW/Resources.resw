@@ -342,6 +342,12 @@
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>致謝</value>
   </data>
+  <data name="RawDecodeTeachingTip.Subtitle" xml:space="preserve">
+    <value>目前的相片將在稍後重新載入。</value>
+  </data>
+  <data name="RawDecodeTeachingTip.Title" xml:space="preserve">
+    <value>解碼器已變更</value>
+  </data>
   <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
     <value>使用實際 RAW 資料，而不是 RAW 檔案內嵌的 JPEG</value>
   </data>
