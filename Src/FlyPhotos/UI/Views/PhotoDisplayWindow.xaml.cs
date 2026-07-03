@@ -225,7 +225,7 @@ public sealed partial class PhotoDisplayWindow
             // File properties
             [(VirtualKey.Enter, false, true)] = Act(() => Util.ShowFileProperties(_photoController.GetFullPathCurrentFile())),
             [(VirtualKey.D,     false, false)] = Act(() => Util.ShowFileProperties(_photoController.GetFullPathCurrentFile(), true)),
-            [(VirtualKey.I,     false, false)] = Act(ToggleExifPanel),
+            [(VirtualKey.I,     false, false)] = Act(() => ExifInfoPanel.Toggle(_photoController.GetFullPathCurrentFile())),
 
             // External apps
             [(VirtualKey.E,          false, false)] = Act(() => ButtonShortcuts_OnClick(ButtonShortcuts, new RoutedEventArgs())),
@@ -379,28 +379,6 @@ public sealed partial class PhotoDisplayWindow
         _cacheStatusExpanded = !_cacheStatusExpanded;
         IconExpander.Text = ((char)(_cacheStatusExpanded ? 0xE760 : 0xE761)).ToString();
         CacheStatusProgress.Visibility = _cacheStatusExpanded ? Visibility.Visible : Visibility.Collapsed;
-    }
-
-    private void ExifInfoPanel_CloseRequested() => CloseExifPanel();
-
-    private bool ExifPanelOpen => ExifInfoPanel.Visibility == Visibility.Visible;
-
-    private void ToggleExifPanel()
-    {
-        if (ExifPanelOpen) CloseExifPanel();
-        else OpenExifPanel();
-    }
-
-    private void OpenExifPanel()
-    {
-        ExifInfoPanel.Visibility = Visibility.Visible;
-        _ = ExifInfoPanel.LoadAsync(_photoController.GetFullPathCurrentFile());
-    }
-
-    private void CloseExifPanel()
-    {
-        if (!ExifPanelOpen) return;
-        ExifInfoPanel.Visibility = Visibility.Collapsed;
     }
 
     private void ButtonSettings_OnClick(object sender, RoutedEventArgs e)
@@ -737,9 +715,7 @@ public sealed partial class PhotoDisplayWindow
     {
         DispatcherQueue.TryEnqueue(() =>
         {
-            // This event also fires when the same photo upgrades from preview to HQ, not just on
-            // real navigation; comparing against the still-previous Title tells the two apart.
-            if (ExifPanelOpen && Title != fileDisplayDetails.FileName) CloseExifPanel();
+            ExifInfoPanel.CloseIfFileChanged(_photoController.GetFullPathCurrentFile());
             TxtFileName.Text = fileDisplayDetails.DisplayText;
             Title = fileDisplayDetails.FileName;
         });

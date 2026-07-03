@@ -28,9 +28,22 @@ public static class ExifReader
         {
             var directories = ImageMetadataReader.ReadMetadata(filePath);
             var summary = BuildSummary(filePath, directories);
-            // Deferred: formatting every tag's description across every directory is only
-            // worth paying for if the user actually clicks "Show All".
-            var all = new Lazy<IReadOnlyList<ExifFieldGroup>>(() => BuildAll(directories));
+            // Deferred: formatting every tag across every directory is only worth paying for if
+            // the user clicks "Show All". This runs later on the UI thread, outside this
+            // try/catch, so guard it here — a descriptor throwing on a malformed tag must not
+            // crash the app, and Lazy would otherwise cache that exception permanently.
+            var all = new Lazy<IReadOnlyList<ExifFieldGroup>>(() =>
+            {
+                try
+                {
+                    return BuildAll(directories);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "Failed to build full EXIF tag list for {0}", filePath);
+                    return [];
+                }
+            });
             return new ExifData(summary, all);
         }
         catch (Exception ex)

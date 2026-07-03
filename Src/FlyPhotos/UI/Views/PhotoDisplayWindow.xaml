@@ -287,7 +287,6 @@
             x:Name="ExifInfoPanel"
             HorizontalAlignment="Right"
             VerticalAlignment="Stretch"
-            CloseRequested="ExifInfoPanel_CloseRequested"
             Visibility="Collapsed" />
 
         <Button
