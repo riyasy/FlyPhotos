@@ -167,6 +167,8 @@ internal sealed partial class Settings
 
     private async void RawDecoderPriority_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
+        // A ListView reorder raises twice (Remove + Add). Handle only the Add part so the save/notify runs once.
+        if (e.Action != System.Collections.Specialized.NotifyCollectionChangedAction.Add) return;
         await AppConfig.SaveAsync();
         SettingChanged?.Invoke(Setting.RawDecodingChange);
         NotifyRawDecodeChangeIfViewingRaw(PriorityListView);
