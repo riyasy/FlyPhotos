@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -289,6 +289,72 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
   </data>
   <data name="HeaderType.Text" xml:space="preserve">
     <value>Típus</value>
+  </data>
+  <data name="ExifPanelTitle.Text" xml:space="preserve">
+    <value>Fénykép adatai</value>
+  </data>
+  <data name="ExifPanelClose.Content" xml:space="preserve">
+    <value>Bezárás</value>
+  </data>
+  <data name="Exif_ShowAll" xml:space="preserve">
+    <value>Összes megjelenítése</value>
+  </data>
+  <data name="Exif_ShowSummary" xml:space="preserve">
+    <value>Összefoglaló megjelenítése</value>
+  </data>
+  <data name="Exif_FileName" xml:space="preserve">
+    <value>Fájlnév</value>
+  </data>
+  <data name="Exif_FileSize" xml:space="preserve">
+    <value>Fájlméret</value>
+  </data>
+  <data name="Exif_DateTaken" xml:space="preserve">
+    <value>Készítés dátuma</value>
+  </data>
+  <data name="Exif_CameraMake" xml:space="preserve">
+    <value>Fényképezőgép gyártója</value>
+  </data>
+  <data name="Exif_CameraModel" xml:space="preserve">
+    <value>Fényképezőgép modellje</value>
+  </data>
+  <data name="Exif_LensModel" xml:space="preserve">
+    <value>Objektív modellje</value>
+  </data>
+  <data name="Exif_FocalLength" xml:space="preserve">
+    <value>Gyújtótávolság</value>
+  </data>
+  <data name="Exif_Aperture" xml:space="preserve">
+    <value>Rekesz</value>
+  </data>
+  <data name="Exif_ShutterSpeed" xml:space="preserve">
+    <value>Záridő</value>
+  </data>
+  <data name="Exif_Iso" xml:space="preserve">
+    <value>ISO</value>
+  </data>
+  <data name="Exif_ExposureBias" xml:space="preserve">
+    <value>Expozíciókorrekció</value>
+  </data>
+  <data name="Exif_MeteringMode" xml:space="preserve">
+    <value>Fénymérési mód</value>
+  </data>
+  <data name="Exif_ExposureProgram" xml:space="preserve">
+    <value>Expozíciós program</value>
+  </data>
+  <data name="Exif_Flash" xml:space="preserve">
+    <value>Vaku</value>
+  </data>
+  <data name="Exif_Dimensions" xml:space="preserve">
+    <value>Méretek</value>
+  </data>
+  <data name="Exif_Orientation" xml:space="preserve">
+    <value>Tájolás</value>
+  </data>
+  <data name="Exif_ColorSpace" xml:space="preserve">
+    <value>Színtér</value>
+  </data>
+  <data name="Exif_GpsLocation" xml:space="preserve">
+    <value>GPS-hely</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Nagy felbontású verzió betöltése. Kérem, várjon…</value>

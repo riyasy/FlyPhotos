@@ -291,6 +291,72 @@
   <data name="HeaderType.Text" xml:space="preserve">
     <value>Тип</value>
   </data>
+  <data name="ExifPanelTitle.Text" xml:space="preserve">
+    <value>Информация о фото</value>
+  </data>
+  <data name="ExifPanelClose.Content" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
+  <data name="Exif_ShowAll" xml:space="preserve">
+    <value>Показать все</value>
+  </data>
+  <data name="Exif_ShowSummary" xml:space="preserve">
+    <value>Показать сводку</value>
+  </data>
+  <data name="Exif_FileName" xml:space="preserve">
+    <value>Имя файла</value>
+  </data>
+  <data name="Exif_FileSize" xml:space="preserve">
+    <value>Размер файла</value>
+  </data>
+  <data name="Exif_DateTaken" xml:space="preserve">
+    <value>Дата съемки</value>
+  </data>
+  <data name="Exif_CameraMake" xml:space="preserve">
+    <value>Производитель камеры</value>
+  </data>
+  <data name="Exif_CameraModel" xml:space="preserve">
+    <value>Модель камеры</value>
+  </data>
+  <data name="Exif_LensModel" xml:space="preserve">
+    <value>Модель объектива</value>
+  </data>
+  <data name="Exif_FocalLength" xml:space="preserve">
+    <value>Фокусное расстояние</value>
+  </data>
+  <data name="Exif_Aperture" xml:space="preserve">
+    <value>Диафрагма</value>
+  </data>
+  <data name="Exif_ShutterSpeed" xml:space="preserve">
+    <value>Выдержка</value>
+  </data>
+  <data name="Exif_Iso" xml:space="preserve">
+    <value>ISO</value>
+  </data>
+  <data name="Exif_ExposureBias" xml:space="preserve">
+    <value>Компенсация экспозиции</value>
+  </data>
+  <data name="Exif_MeteringMode" xml:space="preserve">
+    <value>Режим экспозамера</value>
+  </data>
+  <data name="Exif_ExposureProgram" xml:space="preserve">
+    <value>Программа экспозиции</value>
+  </data>
+  <data name="Exif_Flash" xml:space="preserve">
+    <value>Вспышка</value>
+  </data>
+  <data name="Exif_Dimensions" xml:space="preserve">
+    <value>Размеры</value>
+  </data>
+  <data name="Exif_Orientation" xml:space="preserve">
+    <value>Ориентация</value>
+  </data>
+  <data name="Exif_ColorSpace" xml:space="preserve">
+    <value>Цветовое пространство</value>
+  </data>
+  <data name="Exif_GpsLocation" xml:space="preserve">
+    <value>Местоположение GPS</value>
+  </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Загрузка версии в высоком разрешении. Пожалуйста, подождите…</value>
   </data>

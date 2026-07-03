@@ -290,6 +290,72 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
   <data name="HeaderType.Text" xml:space="preserve">
     <value>種類</value>
   </data>
+  <data name="ExifPanelTitle.Text" xml:space="preserve">
+    <value>写真情報</value>
+  </data>
+  <data name="ExifPanelClose.Content" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="Exif_ShowAll" xml:space="preserve">
+    <value>すべて表示</value>
+  </data>
+  <data name="Exif_ShowSummary" xml:space="preserve">
+    <value>概要を表示</value>
+  </data>
+  <data name="Exif_FileName" xml:space="preserve">
+    <value>ファイル名</value>
+  </data>
+  <data name="Exif_FileSize" xml:space="preserve">
+    <value>ファイル サイズ</value>
+  </data>
+  <data name="Exif_DateTaken" xml:space="preserve">
+    <value>撮影日時</value>
+  </data>
+  <data name="Exif_CameraMake" xml:space="preserve">
+    <value>カメラのメーカー</value>
+  </data>
+  <data name="Exif_CameraModel" xml:space="preserve">
+    <value>カメラのモデル</value>
+  </data>
+  <data name="Exif_LensModel" xml:space="preserve">
+    <value>レンズのモデル</value>
+  </data>
+  <data name="Exif_FocalLength" xml:space="preserve">
+    <value>焦点距離</value>
+  </data>
+  <data name="Exif_Aperture" xml:space="preserve">
+    <value>絞り値</value>
+  </data>
+  <data name="Exif_ShutterSpeed" xml:space="preserve">
+    <value>シャッタースピード</value>
+  </data>
+  <data name="Exif_Iso" xml:space="preserve">
+    <value>ISO</value>
+  </data>
+  <data name="Exif_ExposureBias" xml:space="preserve">
+    <value>露出補正</value>
+  </data>
+  <data name="Exif_MeteringMode" xml:space="preserve">
+    <value>測光モード</value>
+  </data>
+  <data name="Exif_ExposureProgram" xml:space="preserve">
+    <value>露出プログラム</value>
+  </data>
+  <data name="Exif_Flash" xml:space="preserve">
+    <value>フラッシュ</value>
+  </data>
+  <data name="Exif_Dimensions" xml:space="preserve">
+    <value>寸法</value>
+  </data>
+  <data name="Exif_Orientation" xml:space="preserve">
+    <value>向き</value>
+  </data>
+  <data name="Exif_ColorSpace" xml:space="preserve">
+    <value>色空間</value>
+  </data>
+  <data name="Exif_GpsLocation" xml:space="preserve">
+    <value>GPS位置情報</value>
+  </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>高解像度バージョンを読み込み中。お待ちください…</value>
   </data>
