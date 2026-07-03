@@ -99,7 +99,6 @@ internal sealed partial class Settings
         RectThumbnailSelection.Stroke = new SolidColorBrush(ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor));
         SliderThumbnailSize.Value = AppConfig.Settings.ThumbnailSize;
         ComboWindowLaunchMode.SelectedIndex = GetIndexForWindowLaunchMode(AppConfig.Settings.WindowLaunchMode);
-        SettingsCardWindowLaunchMode.Description = ComboWindowLaunchMode.SelectedIndex == 2 ? L.Get("SettingsCardWindowLaunchMode/Description") : String.Empty;
         ButtonAllowMultiInstance.IsOn = AppConfig.Settings.AllowMultiInstance;
         ButtonConfirmBeforeDelete.IsOn = AppConfig.Settings.ConfirmForDelete;
         ButtonShowFileName.IsOn = AppConfig.Settings.ShowFileName;
@@ -292,7 +291,6 @@ internal sealed partial class Settings
     private async void ComboWindowLaunchMode_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         AppConfig.Settings.WindowLaunchMode = GetWindowLaunchModeForIndex(ComboWindowLaunchMode.SelectedIndex);
-        SettingsCardWindowLaunchMode.Description = ComboWindowLaunchMode.SelectedIndex == 2 ? L.Get("SettingsCardWindowLaunchMode/Description") : String.Empty;
         await AppConfig.SaveAsync();
     }
 
@@ -465,6 +463,9 @@ internal sealed partial class Settings
     {
         return index == 0;
     }
+
+    // Show the "Previous state" explanation only for the LastWindowState option (index 2).
+    private string LaunchModeDescription(int index) => index == 2 ? L.Get("SettingsCardWindowLaunchMode/Description") : string.Empty;
 
     // Mapping helpers to use index-based combo box handling while keeping AppSettings stored as enum names
     private static int GetIndexForTheme(ElementTheme theme)
