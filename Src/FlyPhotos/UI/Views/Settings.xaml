@@ -530,6 +530,7 @@
                                         Width="Auto"
                                         HorizontalAlignment="Left"
                                         AllowDrop="True"
+                                        IsEnabled="{x:Bind ButtonDecodeRawData.IsOn, Mode=OneWay}"
                                         Background="{ThemeResource LayerFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         BorderThickness="1"
