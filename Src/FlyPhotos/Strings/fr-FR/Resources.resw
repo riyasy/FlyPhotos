@@ -342,6 +342,12 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Crédits</value>
   </data>
+  <data name="RawDecodeTeachingTip.Subtitle" xml:space="preserve">
+    <value>La photo actuelle sera rechargée dans un instant.</value>
+  </data>
+  <data name="RawDecodeTeachingTip.Title" xml:space="preserve">
+    <value>Décodeur modifié</value>
+  </data>
   <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
     <value>Utiliser les données RAW réelles au lieu du JPEG intégré dans le fichier RAW.</value>
   </data>

@@ -342,6 +342,12 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Bidrag</value>
   </data>
+  <data name="RawDecodeTeachingTip.Subtitle" xml:space="preserve">
+    <value>Det aktuella fotot laddas snart om.</value>
+  </data>
+  <data name="RawDecodeTeachingTip.Title" xml:space="preserve">
+    <value>Avkodare ändrad</value>
+  </data>
   <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
     <value>Använd faktisk RAW-data istället för den inbäddade JPEG-bilden i RAW-filen.</value>
   </data>

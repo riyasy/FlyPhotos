@@ -38,6 +38,9 @@ internal sealed partial class Settings
 {
     public event Action<Setting>? SettingChanged;
 
+    /// <summary>Set by the owner so the RAW handlers can tell whether the on-screen photo is RAW.</summary>
+    public Func<bool>? IsCurrentPhotoRaw { get; set; }
+
     private readonly List<LanguageInfo> _supportedLanguages = [];
 
     private readonly WindowAppearanceManager _windAppearanceManager;
@@ -96,7 +99,6 @@ internal sealed partial class Settings
         RectThumbnailSelection.Stroke = new SolidColorBrush(ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor));
         SliderThumbnailSize.Value = AppConfig.Settings.ThumbnailSize;
         ComboWindowLaunchMode.SelectedIndex = GetIndexForWindowLaunchMode(AppConfig.Settings.WindowLaunchMode);
-        SettingsCardWindowLaunchMode.Description = ComboWindowLaunchMode.SelectedIndex == 2 ? L.Get("SettingsCardWindowLaunchMode/Description") : String.Empty;
         ButtonAllowMultiInstance.IsOn = AppConfig.Settings.AllowMultiInstance;
         ButtonConfirmBeforeDelete.IsOn = AppConfig.Settings.ConfirmForDelete;
         ButtonShowFileName.IsOn = AppConfig.Settings.ShowFileName;
@@ -164,7 +166,11 @@ internal sealed partial class Settings
 
     private async void RawDecoderPriority_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
+        // A ListView reorder raises twice (Remove + Add). Handle only the Add part so the save/notify runs once.
+        if (e.Action != System.Collections.Specialized.NotifyCollectionChangedAction.Add) return;
         await AppConfig.SaveAsync();
+        SettingChanged?.Invoke(Setting.RawDecodingChange);
+        NotifyRawDecodeChangeIfViewingRaw(PriorityListView);
     }
 
     private async void ButtonEnableExternalShortcut_OnToggled(object sender, RoutedEventArgs e)
@@ -204,6 +210,20 @@ internal sealed partial class Settings
     {
         AppConfig.Settings.DecodeRawData = ButtonDecodeRawData.IsOn;
         await AppConfig.SaveAsync();
+        SettingChanged?.Invoke(Setting.RawDecodingChange);
+        NotifyRawDecodeChangeIfViewingRaw(ButtonDecodeRawData);
+    }
+
+    // Point the shared teaching tip at the control the user just changed and show it, but only when the
+    // on-screen photo is a RAW file, so the user learns the change will re-decode the current image
+    // shortly. Re-target then reopen so it repositions even if it was already showing (a drag reorder
+    // fires CollectionChanged several times).
+    private void NotifyRawDecodeChangeIfViewingRaw(FrameworkElement target)
+    {
+        if (IsCurrentPhotoRaw?.Invoke() != true) return;
+        RawDecodeTeachingTip.IsOpen = false;
+        RawDecodeTeachingTip.Target = target;
+        RawDecodeTeachingTip.IsOpen = true;
     }
 
     private async void ButtonEnableAutoHideMouse_OnToggled(object sender, RoutedEventArgs e)
@@ -271,7 +291,6 @@ internal sealed partial class Settings
     private async void ComboWindowLaunchMode_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         AppConfig.Settings.WindowLaunchMode = GetWindowLaunchModeForIndex(ComboWindowLaunchMode.SelectedIndex);
-        SettingsCardWindowLaunchMode.Description = ComboWindowLaunchMode.SelectedIndex == 2 ? L.Get("SettingsCardWindowLaunchMode/Description") : String.Empty;
         await AppConfig.SaveAsync();
     }
 
@@ -444,6 +463,9 @@ internal sealed partial class Settings
     {
         return index == 0;
     }
+
+    // Show the "Previous state" explanation only for the LastWindowState option (index 2).
+    private string LaunchModeDescription(int index) => index == 2 ? L.Get("SettingsCardWindowLaunchMode/Description") : string.Empty;
 
     // Mapping helpers to use index-based combo box handling while keeping AppSettings stored as enum names
     private static int GetIndexForTheme(ElementTheme theme)

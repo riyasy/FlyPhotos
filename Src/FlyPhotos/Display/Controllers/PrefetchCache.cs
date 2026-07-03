@@ -52,6 +52,10 @@ internal sealed class PrefetchCache : IDisposable
     // Reused across SyncCacheTier calls — only touched on the UI/STA thread (inside MoveWindow).
     private readonly HashSet<int> _syncKeysToKeep = new();
 
+    // Bumped (on the UI/STA thread) whenever RAW decode settings change so any RAW HQ decode that was
+    // already in flight is discarded on completion instead of committing a stale bitmap.
+    private volatile int _hqGeneration;
+
     // Resolves a key to its Photo (or null). Read-only access into the controller's PhotoList; the
     // controller owns the collection and disposal timing.
     private readonly Func<int, Photo?> _getPhoto;
@@ -151,6 +155,26 @@ internal sealed class PrefetchCache : IDisposable
 
     public bool IsHqLoaded(int key)      => _hqTier.Done.ContainsKey(key);
     public bool IsPreviewLoaded(int key) => _previewTier.Done.ContainsKey(key);
+
+    /// <summary>
+    /// Drop every cached RAW-file HQ bitmap so the new decoder settings take effect, and bump the
+    /// generation so any in-flight RAW decode is discarded on completion. Requeues the in-window keys
+    /// via <see cref="MoveWindow"/>. Called on the UI/STA thread.
+    /// </summary>
+    public void InvalidateHqForRawFiles()
+    {
+        _hqGeneration++;
+
+        foreach (int key in _hqTier.Done.Keys)
+            if (_getPhoto(key) is { IsRaw: true } photo)
+            {
+                photo.DisposeHqOnly();
+                _hqTier.Done.TryRemove(key, out _);
+            }
+
+        // Reuse the window sync to requeue the in-window keys we just dropped.
+        MoveWindow(_windowCentre, _windowKeys, signalHqLoading: true);
+    }
 
     // -------------------------------------------------------------------------
     // Worker threads
@@ -254,13 +278,34 @@ internal sealed class PrefetchCache : IDisposable
         try
         {
             _hqTier.InFlight[key] = 0;
+            int gen = _hqGeneration;
             if (_getPhoto(key) is not { } photo) return;
             await photo.LoadHq(_device);
+            if (DiscardedStaleRawDecode(key, photo, gen)) return;
             _hqTier.Done[key] = 0;
             _hqTier.InFlight.Remove(key, out _);
             HqReady?.Invoke(key);
         }
         finally { _hqThrottler.Release(); }
+    }
+
+    /// <summary>
+    /// If RAW decode settings changed while this RAW HQ decode was in flight, the bitmap used the old
+    /// settings. Discards it (and requeues the key if still in the HQ window) and returns true, so the
+    /// caller skips committing the stale result. Returns false for the normal case.
+    /// </summary>
+    private bool DiscardedStaleRawDecode(int key, Photo photo, int gen)
+    {
+        if (gen == _hqGeneration || !photo.IsRaw) return false;
+
+        photo.DisposeHqOnly();
+        _hqTier.InFlight.Remove(key, out _);
+        if (IsInDesiredHqWindow(key))
+        {
+            _hqTier.Queue.Push(key);
+            _hqTier.Signal.Set();
+        }
+        return true;
     }
 
     private async Task DiskCachePreviewAsync(int key)
@@ -300,6 +345,22 @@ internal sealed class PrefetchCache : IDisposable
         foreach (int key in desiredKeys)
             if (!tier.Done.ContainsKey(key) && !tier.InFlight.ContainsKey(key))
                 tier.Queue.Push(key);
+    }
+
+    // Membership test for the HQ window. Called from a ThreadPool thread (the stale-RAW-decode discard
+    // path), so it snapshots the copy-on-write key list and centre once and scans only that snapshot —
+    // never re-reading the shared fields or indexing a list that may have been swapped underneath it.
+    private bool IsInDesiredHqWindow(int key)
+    {
+        var keys = _windowKeys;
+        int centre = _windowCentre;
+        if (centre < 0 || centre >= keys.Count) return false;
+        int side = AppConfig.Settings.CacheSizeOneSideHqImages;
+        int lo = Math.Max(0, centre - side);
+        int hi = Math.Min(keys.Count - 1, centre + side);
+        for (int pos = lo; pos <= hi; pos++)
+            if (keys[pos] == key) return true;
+        return false;
     }
 
     private List<int> FindNeighborKeys(int currentPosition, int cacheSizeOneSide)

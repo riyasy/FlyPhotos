@@ -342,6 +342,12 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Danksagung</value>
   </data>
+  <data name="RawDecodeTeachingTip.Subtitle" xml:space="preserve">
+    <value>Das aktuelle Foto wird gleich neu geladen.</value>
+  </data>
+  <data name="RawDecodeTeachingTip.Title" xml:space="preserve">
+    <value>Decoder geändert</value>
+  </data>
   <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
     <value>Verwenden Sie echte RAW-Daten anstelle des eingebetteten JPEGs in der RAW-Datei</value>
   </data>

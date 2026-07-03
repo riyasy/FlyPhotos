@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Display.ImageReading;
+using FlyPhotos.Services;
 using Microsoft.Graphics.Canvas;
 using Windows.Foundation;
 
@@ -20,12 +21,15 @@ internal partial class Photo : IDisposable
 
     public bool IsVector { get; }
 
+    public bool IsRaw { get; }
+
     public Photo(string selectedFilePath)
     {
         FilePath = selectedFilePath;
         string extension = Path.GetExtension(FilePath);
         SupportsTransparency = !string.IsNullOrEmpty(extension) && FormatsSupportingTransparency.Contains(extension);
         IsVector = extension.Contains(".svg", StringComparison.OrdinalIgnoreCase);
+        IsRaw = !string.IsNullOrEmpty(extension) && CodecDiscovery.IsRawFile(extension);
     }
 
     private static readonly Photo _empty = new(string.Empty);

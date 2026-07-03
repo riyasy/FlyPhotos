@@ -342,6 +342,12 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Credits</value>
   </data>
+  <data name="RawDecodeTeachingTip.Subtitle" xml:space="preserve">
+    <value>The current photo will reload in a moment.</value>
+  </data>
+  <data name="RawDecodeTeachingTip.Title" xml:space="preserve">
+    <value>Decoder Changed</value>
+  </data>
   <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
     <value>Use actual RAW data instead of the embedded JPEG inside the RAW file.</value>
   </data>
