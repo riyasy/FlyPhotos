@@ -11,6 +11,8 @@ namespace FlyPhotos.UI.Controls;
 
 public sealed partial class ExifPanel : UserControl
 {
+    private const double FieldFontSize = 12;
+
     public event Action? CloseRequested;
 
     private ExifData _data = ExifData.Empty;
@@ -33,9 +35,9 @@ public sealed partial class ExifPanel : UserControl
         Render();
     }
 
-    private void ButtonClose_Click(object sender, RoutedEventArgs e) => CloseRequested?.Invoke();
+    private void ButtonClose_Click(object _, RoutedEventArgs _1) => CloseRequested?.Invoke();
 
-    private void ButtonToggleMode_Click(object sender, RoutedEventArgs e)
+    private void ButtonToggleMode_Click(object _, RoutedEventArgs _1)
     {
         _showAll = !_showAll;
         ButtonToggleMode.Content = L.Get(_showAll ? "Exif_ShowSummary" : "Exif_ShowAll");
@@ -60,7 +62,7 @@ public sealed partial class ExifPanel : UserControl
         }
     }
 
-    private static UIElement CreateCategoryHeader(string category)
+    private static TextBlock CreateCategoryHeader(string category)
     {
         return new TextBlock
         {
@@ -70,7 +72,7 @@ public sealed partial class ExifPanel : UserControl
         };
     }
 
-    private static UIElement CreateFieldRow(ExifField field)
+    private static Grid CreateFieldRow(ExifField field)
     {
         var grid = new Grid { ColumnSpacing = 12 };
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110) });
@@ -81,20 +83,36 @@ public sealed partial class ExifPanel : UserControl
             Text = field.Label,
             TextWrapping = TextWrapping.Wrap,
             Opacity = 0.7,
-            FontSize = 12
+            FontSize = FieldFontSize
         };
         Grid.SetColumn(label, 0);
 
-        var value = new TextBlock
-        {
-            Text = field.Value,
-            TextWrapping = TextWrapping.Wrap,
-            FontSize = 12
-        };
+        FrameworkElement value = field.LinkUrl == null ? CreateValueText(field.Value) : CreateValueLink(field.Value, field.LinkUrl);
         Grid.SetColumn(value, 1);
 
         grid.Children.Add(label);
         grid.Children.Add(value);
         return grid;
+    }
+
+    private static TextBlock CreateValueText(string text)
+    {
+        return new TextBlock
+        {
+            Text = text,
+            TextWrapping = TextWrapping.Wrap,
+            FontSize = FieldFontSize
+        };
+    }
+
+    private static HyperlinkButton CreateValueLink(string text, Uri url)
+    {
+        return new HyperlinkButton
+        {
+            Content = text,
+            NavigateUri = url,
+            Padding = new Thickness(0),
+            FontSize = FieldFontSize
+        };
     }
 }

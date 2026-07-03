@@ -331,7 +331,7 @@
     <value>快门速度</value>
   </data>
   <data name="Exif_Iso" xml:space="preserve">
-    <value>ISO</value>
+    <value>ISO 感光度</value>
   </data>
   <data name="Exif_ExposureBias" xml:space="preserve">
     <value>曝光补偿</value>
