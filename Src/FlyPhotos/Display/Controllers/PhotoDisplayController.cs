@@ -382,7 +382,12 @@ internal partial class PhotoDisplayController
 
     public bool IsSinglePhoto() => _photoList.Count <= 1;
 
-    public string GetFullPathCurrentFile() => _photoList[_photoSessionState.CurrentPhotoKey].FilePath;
+    // Before the initial file listing completes, CurrentPhotoKey is still its default (0), which
+    // does not necessarily correspond to the first photo's real position in the sorted list (e.g.
+    // it isn't 0 whenever the opened file isn't alphabetically first). Mirror the same fallback
+    // UpdateFileNameAndDetails uses so callers see the actual on-screen file during that window.
+    public string GetFullPathCurrentFile() =>
+        _initialFileListingCompleted ? _photoList[_photoSessionState.CurrentPhotoKey].FilePath : _firstPhoto.FilePath;
 
     /// <summary>Whether the on-screen photo is a RAW file. Lock-free read; safe to call cross-thread.</summary>
     public bool CurrentPhotoIsRaw =>
