@@ -174,9 +174,6 @@
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>설정</value>
   </data>
-  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
-    <value>다른 앱에서 열기</value>
-  </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>앱을 다시 시작해야 표시 언어가 변경됩니다.</value>
   </data>
@@ -790,5 +787,29 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
   </data>
   <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
     <value>Anisotropic</value>
+  </data>
+  <data name="MenuItemFileInfo.Text" xml:space="preserve">
+    <value>속성</value>
+  </data>
+  <data name="MenuItemDelete.Text" xml:space="preserve">
+    <value>삭제</value>
+  </data>
+  <data name="ButtonMoreToolTip.Content" xml:space="preserve">
+    <value>추가 작업</value>
+  </data>
+  <data name="MenuItemPhotoInfo.Text" xml:space="preserve">
+    <value>사진 정보</value>
+  </data>
+  <data name="MenuItemOpenFileLocation.Text" xml:space="preserve">
+    <value>파일 위치 열기</value>
+  </data>
+  <data name="MenuItemOpenWithHeader.Text" xml:space="preserve">
+    <value>연결 프로그램</value>
+  </data>
+  <data name="MenuItemPrint.Text" xml:space="preserve">
+    <value>인쇄</value>
+  </data>
+  <data name="MenuItemShare.Text" xml:space="preserve">
+    <value>공유</value>
   </data>
 </root>

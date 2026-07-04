@@ -174,9 +174,6 @@
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Inställningar</value>
   </data>
-  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
-    <value>Öppna i andra appar</value>
-  </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>Appen måste startas om för att ändra visningsspråk.</value>
   </data>
@@ -791,5 +788,29 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
   </data>
   <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
     <value>Anisotropic</value>
+  </data>
+  <data name="MenuItemFileInfo.Text" xml:space="preserve">
+    <value>Egenskaper</value>
+  </data>
+  <data name="MenuItemDelete.Text" xml:space="preserve">
+    <value>Ta bort</value>
+  </data>
+  <data name="ButtonMoreToolTip.Content" xml:space="preserve">
+    <value>Fler åtgärder</value>
+  </data>
+  <data name="MenuItemPhotoInfo.Text" xml:space="preserve">
+    <value>Fotoinfo</value>
+  </data>
+  <data name="MenuItemOpenFileLocation.Text" xml:space="preserve">
+    <value>Öppna filens plats</value>
+  </data>
+  <data name="MenuItemOpenWithHeader.Text" xml:space="preserve">
+    <value>Öppna med</value>
+  </data>
+  <data name="MenuItemPrint.Text" xml:space="preserve">
+    <value>Skriv ut</value>
+  </data>
+  <data name="MenuItemShare.Text" xml:space="preserve">
+    <value>Dela</value>
   </data>
 </root>

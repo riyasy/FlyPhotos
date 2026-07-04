@@ -174,9 +174,6 @@
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Settings</value>
   </data>
-  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
-    <value>Open in other apps</value>
-  </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>App needs to be restarted to change display language.</value>
   </data>
@@ -791,5 +788,29 @@ High Quality Cubic – Highest-quality scaling for photos.</value>
   </data>
   <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
     <value>Anisotropic</value>
+  </data>
+  <data name="ButtonMoreToolTip.Content" xml:space="preserve">
+    <value>More actions</value>
+  </data>
+  <data name="MenuItemPrint.Text" xml:space="preserve">
+    <value>Print</value>
+  </data>
+  <data name="MenuItemShare.Text" xml:space="preserve">
+    <value>Share</value>
+  </data>
+  <data name="MenuItemPhotoInfo.Text" xml:space="preserve">
+    <value>Photo Info</value>
+  </data>
+  <data name="MenuItemFileInfo.Text" xml:space="preserve">
+    <value>Properties</value>
+  </data>
+  <data name="MenuItemOpenFileLocation.Text" xml:space="preserve">
+    <value>Open File Location</value>
+  </data>
+  <data name="MenuItemOpenWithHeader.Text" xml:space="preserve">
+    <value>Open with</value>
+  </data>
+  <data name="MenuItemDelete.Text" xml:space="preserve">
+    <value>Delete</value>
   </data>
 </root>

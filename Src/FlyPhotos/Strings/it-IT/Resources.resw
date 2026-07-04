@@ -174,9 +174,6 @@
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Impostazioni</value>
   </data>
-  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
-    <value>Apri in altre app</value>
-  </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>L'app deve essere riavviata per cambiare la lingua di visualizzazione.</value>
   </data>
@@ -791,5 +788,29 @@ High Quality Cubic – Ridimensionamento della massima qualità per le foto.</va
   </data>
   <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
     <value>Anisotropic</value>
+  </data>
+  <data name="MenuItemFileInfo.Text" xml:space="preserve">
+    <value>Proprietà</value>
+  </data>
+  <data name="MenuItemDelete.Text" xml:space="preserve">
+    <value>Elimina</value>
+  </data>
+  <data name="ButtonMoreToolTip.Content" xml:space="preserve">
+    <value>Altre azioni</value>
+  </data>
+  <data name="MenuItemPhotoInfo.Text" xml:space="preserve">
+    <value>Info foto</value>
+  </data>
+  <data name="MenuItemOpenFileLocation.Text" xml:space="preserve">
+    <value>Apri percorso file</value>
+  </data>
+  <data name="MenuItemOpenWithHeader.Text" xml:space="preserve">
+    <value>Apri con</value>
+  </data>
+  <data name="MenuItemPrint.Text" xml:space="preserve">
+    <value>Stampa</value>
+  </data>
+  <data name="MenuItemShare.Text" xml:space="preserve">
+    <value>Condividi</value>
   </data>
 </root>

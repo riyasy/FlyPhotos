@@ -174,9 +174,6 @@
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>الإعدادات</value>
   </data>
-  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
-    <value>فتح باستخدام تطبيق آخر</value>
-  </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>يجب إعادة تشغيل التطبيق لتغيير لغة العرض.</value>
   </data>
@@ -791,5 +788,29 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
   </data>
   <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
     <value>Anisotropic</value>
+  </data>
+  <data name="MenuItemFileInfo.Text" xml:space="preserve">
+    <value>خصائص</value>
+  </data>
+  <data name="MenuItemDelete.Text" xml:space="preserve">
+    <value>حذف</value>
+  </data>
+  <data name="ButtonMoreToolTip.Content" xml:space="preserve">
+    <value>مزيد من الإجراءات</value>
+  </data>
+  <data name="MenuItemPhotoInfo.Text" xml:space="preserve">
+    <value>معلومات الصورة</value>
+  </data>
+  <data name="MenuItemOpenFileLocation.Text" xml:space="preserve">
+    <value>فتح موقع الملف</value>
+  </data>
+  <data name="MenuItemOpenWithHeader.Text" xml:space="preserve">
+    <value>فتح باستخدام</value>
+  </data>
+  <data name="MenuItemPrint.Text" xml:space="preserve">
+    <value>طباعة</value>
+  </data>
+  <data name="MenuItemShare.Text" xml:space="preserve">
+    <value>مشاركة</value>
   </data>
 </root>

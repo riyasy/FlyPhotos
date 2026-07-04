@@ -63,8 +63,8 @@
                 VerticalAlignment="Center"
                 FontSize="12"
                 Foreground="White"
-                Typography.NumeralAlignment="Tabular"
-                Text="" />
+                Text=""
+                Typography.NumeralAlignment="Tabular" />
         </Border>
         <StackPanel
             HorizontalAlignment="Stretch"
@@ -101,6 +101,60 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Orientation="Horizontal">
+                    <StackPanel.Resources>
+                        <MenuFlyout x:Name="ButtonMoreMenuFlyout" Placement="Top">
+                            <MenuFlyoutSeparator x:Name="SeparatorAfterOpenWith" Padding="12,8,12,8" />
+                            <MenuFlyoutItem
+                                x:Uid="MenuItemPrint"
+                                Click="MenuItemPrint_OnClick"
+                                Text="Print">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="&#xE749;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem
+                                x:Uid="MenuItemShare"
+                                Click="MenuItemShare_OnClick"
+                                Text="Share">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="&#xE72D;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem
+                                x:Uid="MenuItemPhotoInfo"
+                                Click="MenuItemPhotoInfo_OnClick"
+                                Text="Photo Info">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="&#xE946;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem
+                                x:Uid="MenuItemFileInfo"
+                                Click="MenuItemFileInfo_OnClick"
+                                Text="File Info">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="&#xF167;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem
+                                x:Uid="MenuItemOpenFileLocation"
+                                Click="MenuItemOpenFileLocation_OnClick"
+                                Text="Open File Location">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="&#xE8DA;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutSeparator Padding="12,8,12,8" />
+                            <MenuFlyoutItem
+                                x:Uid="MenuItemDelete"
+                                Click="MenuItemDelete_OnClick"
+                                Text="Delete">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="&#xE74D;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                        </MenuFlyout>
+                    </StackPanel.Resources>
                     <RepeatButton
                         x:Name="ButtonBack"
                         Width="Auto"
@@ -216,6 +270,23 @@
                         </ToolTipService.ToolTip>
                     </ToggleButton>
                     <Button
+                        x:Name="ButtonMore"
+                        Width="Auto"
+                        Margin="10,0,10,0"
+                        Click="ButtonMore_OnClick"
+                        Content="&#xE712;"
+                        FlyoutBase.AttachedFlyout="{StaticResource ButtonMoreMenuFlyout}"
+                        FontFamily="{StaticResource FluentIcons}"
+                        FontSize="16">
+                        <ToolTipService.ToolTip>
+                            <ToolTip
+                                x:Uid="ButtonMoreToolTip"
+                                AutomationProperties.FullDescription="Non-occluding tooltip"
+                                Content="More actions"
+                                Placement="Right" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+                    <Button
                         x:Name="ButtonSettings"
                         Width="Auto"
                         Click="ButtonSettings_OnClick"
@@ -227,22 +298,6 @@
                                 x:Uid="ButtonSettingsToolTip"
                                 AutomationProperties.FullDescription="Non-occluding tooltip"
                                 Content="Settings"
-                                Placement="Right" />
-                        </ToolTipService.ToolTip>
-                    </Button>
-                    <Button
-                        x:Name="ButtonShortcuts"
-                        Width="Auto"
-                        Margin="10,0,0,0"
-                        Click="ButtonShortcuts_OnClick"
-                        Content="&#xE7AC;"
-                        FontFamily="{StaticResource FluentIcons}"
-                        FontSize="16">
-                        <ToolTipService.ToolTip>
-                            <ToolTip
-                                x:Uid="ButtonShortcutsToolTip"
-                                AutomationProperties.FullDescription="Non-occluding tooltip"
-                                Content="Open in other apps"
                                 Placement="Right" />
                         </ToolTipService.ToolTip>
                     </Button>

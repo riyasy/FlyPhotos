@@ -137,6 +137,37 @@ internal static class Util
     }
 
     /// <summary>
+    /// Invokes the OS "print" shell verb for the specified file, sending it to the user's
+    /// default printer via the associated application's print handler.
+    /// </summary>
+    /// <param name="filePath">The path to the file.</param>
+    public static void PrintFile(string filePath)
+    {
+        if (!File.Exists(filePath))
+            return;
+
+        try
+        {
+            var info = new Win32Methods.SHELLEXECUTEINFO();
+            info.cbSize = Marshal.SizeOf(info);
+            info.lpVerb = "print";
+            info.lpFile = filePath;
+            info.nShow = Win32Methods.SW_SHOW;
+            info.fMask = Win32Methods.SEE_MASK_INVOKEIDLIST;
+
+            if (!Win32Methods.ShellExecuteEx(ref info))
+            {
+                var error = Marshal.GetLastWin32Error();
+                Logger.Error($"PrintFile: ShellExecuteEx failed for '{filePath}' with Win32 error {error}.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex);
+        }
+    }
+
+    /// <summary>
     /// Builds a <see cref="WriteableBitmap"/> from a premultiplied BGRA8 pixel buffer.
     /// Must be called on the UI thread.
     /// </summary>

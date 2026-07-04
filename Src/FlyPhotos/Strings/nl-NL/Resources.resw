@@ -174,9 +174,6 @@
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Instellingen</value>
   </data>
-  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
-    <value>Openen in andere apps</value>
-  </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>App moet opnieuw worden opgestart om de weergavetaal te wijzigen.</value>
   </data>
@@ -791,5 +788,29 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
   </data>
   <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
     <value>Anisotropic</value>
+  </data>
+  <data name="MenuItemFileInfo.Text" xml:space="preserve">
+    <value>Eigenschappen</value>
+  </data>
+  <data name="MenuItemDelete.Text" xml:space="preserve">
+    <value>Verwijderen</value>
+  </data>
+  <data name="ButtonMoreToolTip.Content" xml:space="preserve">
+    <value>Meer acties</value>
+  </data>
+  <data name="MenuItemPhotoInfo.Text" xml:space="preserve">
+    <value>Foto-info</value>
+  </data>
+  <data name="MenuItemOpenFileLocation.Text" xml:space="preserve">
+    <value>Bestandslocatie openen</value>
+  </data>
+  <data name="MenuItemOpenWithHeader.Text" xml:space="preserve">
+    <value>Openen met</value>
+  </data>
+  <data name="MenuItemPrint.Text" xml:space="preserve">
+    <value>Afdrukken</value>
+  </data>
+  <data name="MenuItemShare.Text" xml:space="preserve">
+    <value>Delen</value>
   </data>
 </root>

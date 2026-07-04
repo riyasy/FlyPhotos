@@ -174,9 +174,6 @@
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>ക്രമീകരണങ്ങൾ</value>
   </data>
-  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
-    <value>മറ്റ് ആപ്പുകളിൽ തുറക്കുക</value>
-  </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>ഭാഷ മാറ്റാൻ ആപ്പ് റീസ്റ്റാർട് ചെയ്യുക</value>
   </data>
@@ -788,5 +785,29 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
   </data>
   <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
     <value>Anisotropic</value>
+  </data>
+  <data name="MenuItemFileInfo.Text" xml:space="preserve">
+    <value>പ്രോപ്പർട്ടികൾ</value>
+  </data>
+  <data name="MenuItemDelete.Text" xml:space="preserve">
+    <value>ഇല്ലാതാക്കുക</value>
+  </data>
+  <data name="ButtonMoreToolTip.Content" xml:space="preserve">
+    <value>കൂടുതൽ പ്രവർത്തനങ്ങൾ</value>
+  </data>
+  <data name="MenuItemPhotoInfo.Text" xml:space="preserve">
+    <value>ഫോട്ടോ വിവരങ്ങൾ</value>
+  </data>
+  <data name="MenuItemOpenFileLocation.Text" xml:space="preserve">
+    <value>ഫയലിന്റെ സ്ഥാനം തുറക്കുക</value>
+  </data>
+  <data name="MenuItemOpenWithHeader.Text" xml:space="preserve">
+    <value>ഇതുപയോഗിച്ച് തുറക്കുക</value>
+  </data>
+  <data name="MenuItemPrint.Text" xml:space="preserve">
+    <value>പ്രിന്റ് ചെയ്യുക</value>
+  </data>
+  <data name="MenuItemShare.Text" xml:space="preserve">
+    <value>പങ്കിടുക</value>
   </data>
 </root>

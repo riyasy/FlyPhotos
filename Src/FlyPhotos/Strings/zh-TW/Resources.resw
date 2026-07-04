@@ -174,9 +174,6 @@
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>設定</value>
   </data>
-  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
-    <value>以其他應用程式開啟</value>
-  </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>變更顯示語言需要重新啟動應用程式。</value>
   </data>
@@ -791,5 +788,29 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
   </data>
   <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
     <value>Anisotropic</value>
+  </data>
+  <data name="MenuItemFileInfo.Text" xml:space="preserve">
+    <value>內容</value>
+  </data>
+  <data name="MenuItemDelete.Text" xml:space="preserve">
+    <value>刪除</value>
+  </data>
+  <data name="ButtonMoreToolTip.Content" xml:space="preserve">
+    <value>其他動作</value>
+  </data>
+  <data name="MenuItemPhotoInfo.Text" xml:space="preserve">
+    <value>相片資訊</value>
+  </data>
+  <data name="MenuItemOpenFileLocation.Text" xml:space="preserve">
+    <value>開啟檔案位置</value>
+  </data>
+  <data name="MenuItemOpenWithHeader.Text" xml:space="preserve">
+    <value>開啟方式</value>
+  </data>
+  <data name="MenuItemPrint.Text" xml:space="preserve">
+    <value>列印</value>
+  </data>
+  <data name="MenuItemShare.Text" xml:space="preserve">
+    <value>共用</value>
   </data>
 </root>

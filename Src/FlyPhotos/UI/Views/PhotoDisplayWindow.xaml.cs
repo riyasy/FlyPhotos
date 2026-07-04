@@ -41,6 +41,12 @@ public sealed partial class PhotoDisplayWindow
 
     private Settings? _settingWindow;
 
+    private (string, string, string, string) _cachedExternalAppKey;
+    private InstalledApp?[]? _cachedExternalApps;
+    private readonly SingleFlightGate _shortcutsGate = new();
+    private readonly SingleFlightGate _moreMenuGate = new();
+    private Flyout? _shortcutsFlyout;
+
     private readonly DispatcherTimer _repeatButtonReleaseCheckTimer = new() { Interval = new TimeSpan(0, 0, 0, 0, 100) };
     private readonly DispatcherTimer _wheelScrollBrakeTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
     private PointerUpdateKind _lastPointerDownKind;
@@ -112,7 +118,6 @@ public sealed partial class PhotoDisplayWindow
         TxtFileName.Text = Path.GetFileName(firstPhotoPath);
         BorderTxtFileName.Visibility = AppConfig.Settings.ShowFileName ? Visibility.Visible : Visibility.Collapsed;
         ButtonExpander.Visibility = AppConfig.Settings.ShowCacheStatus ? Visibility.Visible : Visibility.Collapsed;
-        ButtonShortcuts.Visibility = AppConfig.Settings.ShowExternalAppShortcuts ? Visibility.Visible : Visibility.Collapsed;
 
         // Secondary instances are restricted: no Settings, no cache status.
         if (AppConfig.Volatile.IsSecondaryInstance)
@@ -184,6 +189,8 @@ public sealed partial class PhotoDisplayWindow
             [(VirtualKey.Delete, false, false)] = DeleteCurrentlyDisplayedPhoto,
             [(VirtualKey.W,      false, false)] = Act(OpenFileInExplorer),
             [(VirtualKey.S,      false, false)] = Act(() => FileShareDialogService.ShareFile(this, _photoController.GetFullPathCurrentFile())),
+            [(VirtualKey.P,      false, false)] = Act(() => Util.PrintFile(_photoController.GetFullPathCurrentFile())),
+            [(VirtualKey.M,      false, false)] = ShowMoreMenuAsync,
 
             // Window
             [(VirtualKey.Escape, false, false)] = AnimatePhotoDisplayWindowClose,
@@ -228,7 +235,7 @@ public sealed partial class PhotoDisplayWindow
             [(VirtualKey.I,     false, false)] = Act(() => ExifInfoPanel.Toggle(_photoController.GetFullPathCurrentFile())),
 
             // External apps
-            [(VirtualKey.E,          false, false)] = Act(() => ButtonShortcuts_OnClick(ButtonShortcuts, new RoutedEventArgs())),
+            [(VirtualKey.E,          false, false)] = ShowShortcutsPanelAsync,
             [(VirtualKey.Number1,    true,  false)] = () => LaunchExternalAppAsync(0),
             [(VirtualKey.NumberPad1, true,  false)] = () => LaunchExternalAppAsync(0),
             [(VirtualKey.Number2,    true,  false)] = () => LaunchExternalAppAsync(1),
@@ -400,50 +407,43 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
-    private async void ButtonShortcuts_OnClick(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// This event handler is for the buttons INSIDE the shortcuts flyout.
+    /// It launches the application stored in the button's Tag property.
+    /// </summary>
+    private void ShortcutsFlyoutButton_OnClick(object sender, RoutedEventArgs e)
     {
-        if (!File.Exists(_photoController.GetFullPathCurrentFile())) return;
-
-        var senderButton = sender as Button;
-        if (senderButton == null) return;
-        var stackPanel = new StackPanel { Spacing = 4, };
-        var appShortCuts = new List<string> { AppConfig.Settings.ExternalApp1, AppConfig.Settings.ExternalApp2, AppConfig.Settings.ExternalApp3, AppConfig.Settings.ExternalApp4 };
-
-        foreach (var shortCut in appShortCuts)
-        {
-            if (string.IsNullOrEmpty(shortCut)) continue;
-            
-            var app = await ShellAppProvider.GetAppAsync(shortCut);
-
-            if (app == null) continue;
-
-            var flyoutButton = new Button { Width = 60, Height = 50, Tag = shortCut };
-            var bmp = app.Icon;
-            flyoutButton.Content = bmp != null
-                ? new Image { Source = bmp, Width = 32, Height = 32 }
-                : new FontIcon { Glyph = "\uED35", FontSize = 32 }; // Default icon
-            ToolTipService.SetToolTip(flyoutButton, app.DisplayName);
-            flyoutButton.Tag = app;
-            flyoutButton.Click += FlyoutButton_OnClick;
-            stackPanel.Children.Add(flyoutButton);
-        }
-
-        UIElement content = stackPanel.Children.Count != 0 ? stackPanel : new TextBlock { Text = L.Get("NoShortcutsCreated/Message") };
-        var flyout = new Flyout { Content = content };        
-        FlyoutBase.SetAttachedFlyout(senderButton, flyout);
-        FlyoutBase.ShowAttachedFlyout(senderButton);
+        LaunchExternalAppFromSender(sender);
+        _shortcutsFlyout?.Hide();
     }
 
-    /// <summary>
-    /// This event handler is for the buttons INSIDE the flyout.
-    /// It launches the application path stored in the button's Tag property.
-    /// </summary>
-    private void FlyoutButton_OnClick(object sender, RoutedEventArgs e)
+    private async void ButtonMore_OnClick(object sender, RoutedEventArgs e)
     {
-		string filePathArgument = _photoController.GetFullPathCurrentFile();
-        var clickedButton = sender as Button;
-        if (clickedButton?.Tag is InstalledApp appToLaunch)
-            _ = appToLaunch.LaunchAsync(filePathArgument); // Fire and forget the launch, we don't need to await it here
+        try { await ShowMoreMenuAsync(); }catch (Exception ex) { Logger.Error(ex); }
+    }
+
+    private void MenuItemOpenWithApp_OnClick(object sender, RoutedEventArgs e) =>
+        LaunchExternalAppFromSender(sender);
+
+    private void MenuItemPrint_OnClick(object sender, RoutedEventArgs e) =>
+        Util.PrintFile(_photoController.GetFullPathCurrentFile());
+
+    private void MenuItemShare_OnClick(object sender, RoutedEventArgs e) =>
+        FileShareDialogService.ShareFile(this, _photoController.GetFullPathCurrentFile());
+
+    private void MenuItemPhotoInfo_OnClick(object sender, RoutedEventArgs e) =>
+        ExifInfoPanel.Toggle(_photoController.GetFullPathCurrentFile());
+
+    private void MenuItemFileInfo_OnClick(object sender, RoutedEventArgs e) =>
+        Util.ShowFileProperties(_photoController.GetFullPathCurrentFile());
+
+    private void MenuItemOpenFileLocation_OnClick(object sender, RoutedEventArgs e) =>
+        OpenFileInExplorer();
+
+    private async void MenuItemDelete_OnClick(object sender, RoutedEventArgs e)
+    {
+        try { await DeleteCurrentlyDisplayedPhoto(); }
+        catch (Exception ex) { Logger.Error(ex); }
     }
 
     private void SettingWindow_Closed(object sender, WindowEventArgs args)
@@ -468,6 +468,7 @@ public sealed partial class PhotoDisplayWindow
             _ = _photoController.LoadFirstPhoto();
         }
     }
+
     private void D2dCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
         var pointerPoint = e.GetCurrentPoint(D2dCanvas);
@@ -795,9 +796,6 @@ public sealed partial class PhotoDisplayWindow
             case Setting.CacheStatusShowHide:
                 ButtonExpander.Visibility = AppConfig.Settings.ShowCacheStatus ? Visibility.Visible : Visibility.Collapsed;
                 break;
-            case Setting.ExtShortcutsShowHide:
-                ButtonShortcuts.Visibility = AppConfig.Settings.ShowExternalAppShortcuts ? Visibility.Visible : Visibility.Collapsed;
-                break;
             case Setting.CaptionButtonsAutoHideToggle:
                 _captionButtonFader.Enabled = AppConfig.Settings.AutoHideCaptionButtons;
                 break;
@@ -822,18 +820,167 @@ public sealed partial class PhotoDisplayWindow
         var filePathArgument = _photoController.GetFullPathCurrentFile();
         if (!File.Exists(filePathArgument)) return;
 
-        var appShortCuts = new List<string> { AppConfig.Settings.ExternalApp1, AppConfig.Settings.ExternalApp2, AppConfig.Settings.ExternalApp3, AppConfig.Settings.ExternalApp4 };
-        if (index < 0 || index >= appShortCuts.Count) return;
+        var apps = await GetConfiguredExternalAppsAsync();
+        if (index < 0 || index >= apps.Length) return;
 
-        var shortCut = appShortCuts[index];
-        if (string.IsNullOrEmpty(shortCut)) return;
-
-        var app = await ShellAppProvider.GetAppAsync(shortCut);
+        var app = apps[index];
         if (app != null)
-        {
             _ = app.LaunchAsync(filePathArgument);
+    }
+
+    /// <summary>
+    /// Ensures only one async run of a guarded action is in flight at a time; a call that
+    /// arrives while one is already running is dropped instead of overlapping with it.
+    /// </summary>
+    private sealed class SingleFlightGate
+    {
+        private bool _isRunning;
+
+        public async Task RunAsync(Func<Task> action)
+        {
+            if (_isRunning) return;
+            _isRunning = true;
+            try
+            {
+                await action();
+            }
+            finally
+            {
+                _isRunning = false;
+            }
         }
     }
+
+    private const string DefaultAppIconGlyph = "\uED35";
+
+    private static IconElement BuildAppIcon(InstalledApp app, double? size = null)
+    {
+        if (app.Icon != null)
+        {
+            var icon = new ImageIcon { Source = app.Icon };
+            if (size.HasValue) { icon.Width = size.Value; icon.Height = size.Value; }
+            return icon;
+        }
+
+        var fallback = new FontIcon { Glyph = DefaultAppIconGlyph };
+        if (size.HasValue) fallback.FontSize = size.Value;
+        return fallback;
+    }
+
+    private void LaunchExternalAppFromSender(object sender)
+    {
+        var filePathArgument = _photoController.GetFullPathCurrentFile();
+        if (sender is FrameworkElement { Tag: InstalledApp app })
+            _ = app.LaunchAsync(filePathArgument); // Fire and forget the launch, we don't need to await it here
+    }
+
+    /// <summary>
+    /// Shows a Flyout of configured external-app shortcuts, anchored to the bottom toolbar
+    /// panel (always visible/laid-out, unlike the zoom-percentage OSD). A plain Flyout gives
+    /// light-dismiss (click-outside/Escape) and keyboard navigation for free, unlike a
+    /// hand-rolled overlay.
+    /// </summary>
+    private Task ShowShortcutsPanelAsync() => _shortcutsGate.RunAsync(async () =>
+    {
+        if (!File.Exists(_photoController.GetFullPathCurrentFile())) return;
+
+        var stackPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4 };
+        foreach (var app in await GetConfiguredExternalAppsAsync())
+        {
+            if (app == null) continue;
+
+            var flyoutButton = new Button { Width = 60, Height = 50, Tag = app, Content = BuildAppIcon(app, 32) };
+            ToolTipService.SetToolTip(flyoutButton, app.DisplayName);
+            flyoutButton.Click += ShortcutsFlyoutButton_OnClick;
+            stackPanel.Children.Add(flyoutButton);
+        }
+
+        UIElement content = stackPanel.Children.Count != 0
+            ? stackPanel
+            : new TextBlock { Text = L.Get("NoShortcutsCreated/Message") };
+
+        _shortcutsFlyout = new Flyout { Content = content, Placement = FlyoutPlacementMode.Top };
+        _shortcutsFlyout.ShowAt(BorderButtonPanel);
+    });
+
+    private Task ShowMoreMenuAsync() => _moreMenuGate.RunAsync(async () =>
+    {
+        if (!File.Exists(_photoController.GetFullPathCurrentFile())) return;
+        await PopulateOpenWithSectionAsync();
+        FlyoutBase.ShowAttachedFlyout(ButtonMore);
+    });
+
+    /// <summary>
+    /// Resolves the 4 configured external-app shortcut slots (Settings &gt; External apps) in
+    /// parallel and caches the result by position (an empty/unresolved slot is null at that
+    /// index), since resolving an app involves off-UI-thread work (icon extraction for Win32
+    /// apps, native lookups for Store apps) and callers like Ctrl+1..4 depend on slot identity.
+    /// </summary>
+    private async Task<InstalledApp?[]> GetConfiguredExternalAppsAsync()
+    {
+        var shortCuts = new[]
+        {
+            AppConfig.Settings.ExternalApp1, AppConfig.Settings.ExternalApp2,
+            AppConfig.Settings.ExternalApp3, AppConfig.Settings.ExternalApp4
+        };
+        var key = (shortCuts[0], shortCuts[1], shortCuts[2], shortCuts[3]);
+        if (_cachedExternalApps != null && _cachedExternalAppKey.Equals(key))
+            return _cachedExternalApps;
+
+        var resolveTasks = new Task<InstalledApp?>[shortCuts.Length];
+        for (var i = 0; i < shortCuts.Length; i++)
+            resolveTasks[i] = string.IsNullOrEmpty(shortCuts[i])
+                ? Task.FromResult<InstalledApp?>(null)
+                : ShellAppProvider.GetAppAsync(shortCuts[i]);
+
+        var apps = await Task.WhenAll(resolveTasks);
+
+        _cachedExternalAppKey = key;
+        _cachedExternalApps = apps;
+        return apps;
+    }
+
+    private async Task PopulateOpenWithSectionAsync()
+    {
+        while (ButtonMoreMenuFlyout.Items[0] != SeparatorAfterOpenWith)
+            ButtonMoreMenuFlyout.Items.RemoveAt(0);
+
+        if (!AppConfig.Settings.ShowExternalAppShortcuts)
+        {
+            SeparatorAfterOpenWith.Visibility = Visibility.Collapsed;
+            return;
+        }
+        SeparatorAfterOpenWith.Visibility = Visibility.Visible;
+
+        var insertAt = 0;
+        ButtonMoreMenuFlyout.Items.Insert(insertAt++,
+            new MenuFlyoutItem { Text = L.Get("MenuItemOpenWithHeader/Text"), IsEnabled = false });
+
+        var apps = await GetConfiguredExternalAppsAsync();
+        var anyAdded = false;
+        foreach (var app in apps)
+        {
+            if (app == null) continue;
+
+            var item = new MenuFlyoutItem
+            {
+                Text = TruncateAppName(app.DisplayName),
+                Tag = app,
+                Icon = BuildAppIcon(app)
+            };
+            ToolTipService.SetToolTip(item, app.DisplayName);
+            item.Click += MenuItemOpenWithApp_OnClick;
+            ButtonMoreMenuFlyout.Items.Insert(insertAt++, item);
+            anyAdded = true;
+        }
+
+        if (!anyAdded)
+            ButtonMoreMenuFlyout.Items.Insert(insertAt,
+                new MenuFlyoutItem { Text = L.Get("NoShortcutsCreated/Message"), IsEnabled = false });
+    }
+
+    private static string TruncateAppName(string name, int maxLength = 24) =>
+        name.Length > maxLength ? name[..maxLength] + "…" : name;
 
     /// <summary>
     ///     Activates the window and applies the configured launch mode (maximized, full-screen,

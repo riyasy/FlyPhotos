@@ -174,9 +174,6 @@
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Asetukset</value>
   </data>
-  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
-    <value>Avaa muissa sovelluksissa</value>
-  </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>Sovellus on käynnistettävä uudelleen näytön kielen vaihtamiseksi.</value>
   </data>
@@ -791,5 +788,29 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
   </data>
   <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
     <value>Anisotropic</value>
+  </data>
+  <data name="MenuItemFileInfo.Text" xml:space="preserve">
+    <value>Ominaisuudet</value>
+  </data>
+  <data name="MenuItemDelete.Text" xml:space="preserve">
+    <value>Poista</value>
+  </data>
+  <data name="ButtonMoreToolTip.Content" xml:space="preserve">
+    <value>Lisää toimintoja</value>
+  </data>
+  <data name="MenuItemPhotoInfo.Text" xml:space="preserve">
+    <value>Valokuvan tiedot</value>
+  </data>
+  <data name="MenuItemOpenFileLocation.Text" xml:space="preserve">
+    <value>Avaa tiedoston sijainti</value>
+  </data>
+  <data name="MenuItemOpenWithHeader.Text" xml:space="preserve">
+    <value>Avaa sovelluksessa</value>
+  </data>
+  <data name="MenuItemPrint.Text" xml:space="preserve">
+    <value>Tulosta</value>
+  </data>
+  <data name="MenuItemShare.Text" xml:space="preserve">
+    <value>Jaa</value>
   </data>
 </root>

@@ -174,9 +174,6 @@
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Параметры</value>
   </data>
-  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
-    <value>Открыть в других приложениях</value>
-  </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>Для изменения языка интерфейса, необходимо перезапустить приложение.</value>
   </data>
@@ -792,5 +789,29 @@ High Quality Cubic – Масштабирование наивысшего ка�
   </data>
   <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
     <value>Anisotropic</value>
+  </data>
+  <data name="MenuItemFileInfo.Text" xml:space="preserve">
+    <value>Свойства</value>
+  </data>
+  <data name="MenuItemDelete.Text" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
+  <data name="ButtonMoreToolTip.Content" xml:space="preserve">
+    <value>Дополнительные действия</value>
+  </data>
+  <data name="MenuItemPhotoInfo.Text" xml:space="preserve">
+    <value>Сведения о фото</value>
+  </data>
+  <data name="MenuItemOpenFileLocation.Text" xml:space="preserve">
+    <value>Открыть расположение файла</value>
+  </data>
+  <data name="MenuItemOpenWithHeader.Text" xml:space="preserve">
+    <value>Открыть с помощью</value>
+  </data>
+  <data name="MenuItemPrint.Text" xml:space="preserve">
+    <value>Печать</value>
+  </data>
+  <data name="MenuItemShare.Text" xml:space="preserve">
+    <value>Поделиться</value>
   </data>
 </root>

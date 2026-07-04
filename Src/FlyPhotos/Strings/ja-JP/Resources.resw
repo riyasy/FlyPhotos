@@ -174,9 +174,6 @@
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>設定</value>
   </data>
-  <data name="ButtonShortcutsToolTip.Content" xml:space="preserve">
-    <value>他のアプリで開く</value>
-  </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>表示言語を変更するには、アプリを再起動する必要があります。</value>
   </data>
@@ -790,5 +787,29 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
   </data>
   <data name="ComboImageScalingQualityItemAnisotropic.Content" xml:space="preserve">
     <value>Anisotropic</value>
+  </data>
+  <data name="MenuItemFileInfo.Text" xml:space="preserve">
+    <value>プロパティ</value>
+  </data>
+  <data name="MenuItemDelete.Text" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="ButtonMoreToolTip.Content" xml:space="preserve">
+    <value>その他の操作</value>
+  </data>
+  <data name="MenuItemPhotoInfo.Text" xml:space="preserve">
+    <value>写真情報</value>
+  </data>
+  <data name="MenuItemOpenFileLocation.Text" xml:space="preserve">
+    <value>ファイルの場所を開く</value>
+  </data>
+  <data name="MenuItemOpenWithHeader.Text" xml:space="preserve">
+    <value>プログラムから開く</value>
+  </data>
+  <data name="MenuItemPrint.Text" xml:space="preserve">
+    <value>印刷</value>
+  </data>
+  <data name="MenuItemShare.Text" xml:space="preserve">
+    <value>共有</value>
   </data>
 </root>
