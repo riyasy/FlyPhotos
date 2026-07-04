@@ -56,28 +56,32 @@ public static class ExifReader
     private static List<ExifField> BuildSummary(string filePath, IReadOnlyList<MetadataExtractor.Directory> directories)
     {
         var ifd0 = directories.OfType<ExifIfd0Directory>().FirstOrDefault();
-        var subIfd = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault();
+        // TIFF-based RAW (ARW, NEF, CR2, DNG) emits multiple Exif SubIFD directories: one
+        // describing the raw/preview image structure (no capture settings) and a separate one
+        // holding the real DateTimeOriginal / lens / exposure tags. FirstOrDefault() would pick
+        // the wrong (empty) one, so read each tag from whichever SubIFD actually contains it.
+        var subIfds = directories.OfType<ExifSubIfdDirectory>().ToList();
         var gps = directories.OfType<GpsDirectory>().FirstOrDefault();
         var fileInfo = new FileInfo(filePath);
 
         var fields = new List<ExifField>();
         AddField(fields, L.Get("Exif_FileName"), fileInfo.Name);
         AddField(fields, L.Get("Exif_FileSize"), FormatFileSize(fileInfo.Length));
-        AddField(fields, L.Get("Exif_Dimensions"), GetDimensions(subIfd));
+        AddField(fields, L.Get("Exif_Dimensions"), GetDimensions(subIfds));
         AddField(fields, L.Get("Exif_CameraMake"), ifd0?.GetDescription(ExifDirectoryBase.TagMake));
         AddField(fields, L.Get("Exif_CameraModel"), ifd0?.GetDescription(ExifDirectoryBase.TagModel));
-        AddField(fields, L.Get("Exif_DateTaken"), FormatExifDate(subIfd?.GetDescription(ExifDirectoryBase.TagDateTimeOriginal)));
-        AddField(fields, L.Get("Exif_LensModel"), subIfd?.GetDescription(ExifDirectoryBase.TagLensModel));
-        AddField(fields, L.Get("Exif_FocalLength"), subIfd?.GetDescription(ExifDirectoryBase.TagFocalLength));
-        AddField(fields, L.Get("Exif_Aperture"), subIfd?.GetDescription(ExifDirectoryBase.TagFNumber));
-        AddField(fields, L.Get("Exif_ShutterSpeed"), GetShutterSpeed(subIfd));
-        AddField(fields, L.Get("Exif_Iso"), subIfd?.GetDescription(ExifDirectoryBase.TagIsoEquivalent));
-        AddField(fields, L.Get("Exif_ExposureBias"), subIfd?.GetDescription(ExifDirectoryBase.TagExposureBias));
-        AddField(fields, L.Get("Exif_MeteringMode"), subIfd?.GetDescription(ExifDirectoryBase.TagMeteringMode));
-        AddField(fields, L.Get("Exif_ExposureProgram"), subIfd?.GetDescription(ExifDirectoryBase.TagExposureProgram));
-        AddField(fields, L.Get("Exif_Flash"), subIfd?.GetDescription(ExifDirectoryBase.TagFlash));
+        AddField(fields, L.Get("Exif_DateTaken"), FormatExifDate(SubDescription(subIfds, ExifDirectoryBase.TagDateTimeOriginal)));
+        AddField(fields, L.Get("Exif_LensModel"), SubDescription(subIfds, ExifDirectoryBase.TagLensModel));
+        AddField(fields, L.Get("Exif_FocalLength"), SubDescription(subIfds, ExifDirectoryBase.TagFocalLength));
+        AddField(fields, L.Get("Exif_Aperture"), SubDescription(subIfds, ExifDirectoryBase.TagFNumber));
+        AddField(fields, L.Get("Exif_ShutterSpeed"), GetShutterSpeed(subIfds));
+        AddField(fields, L.Get("Exif_Iso"), SubDescription(subIfds, ExifDirectoryBase.TagIsoEquivalent));
+        AddField(fields, L.Get("Exif_ExposureBias"), SubDescription(subIfds, ExifDirectoryBase.TagExposureBias));
+        AddField(fields, L.Get("Exif_MeteringMode"), SubDescription(subIfds, ExifDirectoryBase.TagMeteringMode));
+        AddField(fields, L.Get("Exif_ExposureProgram"), SubDescription(subIfds, ExifDirectoryBase.TagExposureProgram));
+        AddField(fields, L.Get("Exif_Flash"), SubDescription(subIfds, ExifDirectoryBase.TagFlash));
         AddField(fields, L.Get("Exif_Orientation"), ifd0?.GetDescription(ExifDirectoryBase.TagOrientation));
-        AddField(fields, L.Get("Exif_ColorSpace"), subIfd?.GetDescription(ExifDirectoryBase.TagColorSpace));
+        AddField(fields, L.Get("Exif_ColorSpace"), SubDescription(subIfds, ExifDirectoryBase.TagColorSpace));
         AddGpsField(fields, gps);
         return fields;
     }
@@ -114,10 +118,19 @@ public static class ExifReader
         return groups;
     }
 
-    private static string? GetDimensions(ExifSubIfdDirectory? subIfd)
+    // Finds the SubIFD that carries a given tag (see BuildSummary for why more than one
+    // SubIFD can exist). Null when no SubIFD holds the tag.
+    private static ExifSubIfdDirectory? SubIfdWith(List<ExifSubIfdDirectory> subIfds, int tag)
+        => subIfds.FirstOrDefault(s => s.ContainsTag(tag));
+
+    private static string? SubDescription(List<ExifSubIfdDirectory> subIfds, int tag)
+        => SubIfdWith(subIfds, tag)?.GetDescription(tag);
+
+    private static string? GetDimensions(List<ExifSubIfdDirectory> subIfds)
     {
         // Use the raw pixel counts rather than GetDescription(), which appends
         // a " pixels" unit suffix to each value (e.g. "5472 pixels x 3648 pixels").
+        var subIfd = SubIfdWith(subIfds, ExifDirectoryBase.TagExifImageWidth);
         if (subIfd == null) return null;
         if (!subIfd.TryGetInt32(ExifDirectoryBase.TagExifImageWidth, out var width)) return null;
         if (!subIfd.TryGetInt32(ExifDirectoryBase.TagExifImageHeight, out var height)) return null;
@@ -128,8 +141,9 @@ public static class ExifReader
     // instead of the conventional "1/N sec" notation most viewers show, since many cameras store
     // exposure time as an unreduced fraction rather than a clean 1/N value. Fall back to the raw
     // description for degenerate values (e.g. a bulb-mode 0/1 sentinel) instead of hiding the field.
-    private static string? GetShutterSpeed(ExifSubIfdDirectory? subIfd)
+    private static string? GetShutterSpeed(List<ExifSubIfdDirectory> subIfds)
     {
+        var subIfd = SubIfdWith(subIfds, ExifDirectoryBase.TagExposureTime);
         if (subIfd == null) return null;
         if (subIfd.TryGetDouble(ExifDirectoryBase.TagExposureTime, out var seconds) && seconds > 0)
         {
