@@ -502,13 +502,16 @@ Enter : Maksymalizuj
 
 Alt + Enter : Pokaż właściwości pliku (Ogólne)
 D : Pokaż właściwości pliku (Szczegóły)
+I : Pokaż panel informacji o zdjęciu (metadane)
 
 W : Pokaż plik w Eksploratorze Windows
 S : Otwórz okno udostępniania Windows dla pliku
+P : Drukuj zdjęcie
 A : Powiększ do rzeczywistego rozmiaru
 F : Dopasuj do okna
 E : Pokaż panel aplikacji zewnętrznych
 Ctrl + 1–4: Otwórz w aplikacji zewnętrznej 1–4
+M : Pokaż menu Więcej akcji
 
 Del : Usuń zdjęcie
 

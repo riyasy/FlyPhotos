@@ -502,13 +502,16 @@ Enter : Maximera
 
 Alt + Enter : Visa filegenskaper (Allmänt)
 D : Visa filegenskaper (Detaljer)
+I : Visa panelen Fotoinfo (metadata)
 
 W : Visa fil i Windows Explorer
 S : Öppna Windows delningsfönster för filen
+P : Skriv ut foto
 A : Zooma till faktisk storlek
 F : Anpassa till fönster
 E : Visa panel för externa appar
 Ctrl + 1–4: Öppna i extern app 1–4
+M : Visa menyn Fler åtgärder
 
 Del : Ta bort bild
 

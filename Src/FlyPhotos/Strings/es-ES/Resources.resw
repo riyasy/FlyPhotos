@@ -502,13 +502,16 @@ Intro : Maximizar
 
 Alt + Intro : Ver propiedades del archivo (General)
 D : Ver propiedades del archivo (Detalles)
+I : Mostrar panel de información de la foto (metadatos)
 
 W : Mostrar archivo en el Explorador de Windows
 S : Abrir el cuadro de compartir de Windows para el archivo
+P : Imprimir foto
 A : Zoom a tamaño real
 F : Ajustar a la ventana
 E : Mostrar panel de aplicaciones externas
 Ctrl + 1–4: Abrir en la aplicación externa 1–4
+M : Mostrar el menú Más acciones
 
 Supr (Del) : Eliminar foto
 

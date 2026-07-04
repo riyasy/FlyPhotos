@@ -502,13 +502,16 @@ Enter : Maximize
 
 Alt + Enter : Show File Properties (General Tab)
 D : Show File Properties (Details Tab)
+I : Show Photo Info (metadata) panel
 
 W : Show file in Windows File Explorer
 S : Show Windows Share dialog for the file
+P : Print photo
 A : Zoom photo to actual size
 F : Fit to window
 E : Show external apps panel
 Ctrl + 1–4: Open in external app 1–4
+M : Show more actions menu
 
 Del : Delete Photo
 

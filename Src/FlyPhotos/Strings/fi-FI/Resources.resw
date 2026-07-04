@@ -502,13 +502,16 @@ Enter : Suurenna
 
 Alt + Enter : Näytä tiedoston ominaisuudet (Yleiset)
 D : Näytä tiedoston ominaisuudet (Tiedot)
+I : Näytä Valokuvan tiedot (metatiedot) -paneeli
 
 W : Näytä tiedosto Windowsin Resurssienhallinnassa
 S : Avaa Windowsin jakovalinta tiedostolle
+P : Tulosta valokuva
 A : Zoomaa todelliseen kokoon
 F : Sovita ikkunaan
 E : Näytä ulkoisten sovellusten paneeli
 Ctrl + 1–4: Avaa ulkoisessa sovelluksessa 1–4
+M : Näytä Lisää toimintoja -valikko
 
 Del : Poista kuva
 

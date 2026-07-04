@@ -502,13 +502,16 @@ Enter : Maximizar
 
 Alt + Enter : Mostrar propriedades do ficheiro (separador Geral)
 D : Mostrar propriedades do ficheiro (separador Detalhes)
+I : Mostrar painel de informações da foto (metadados)
 
 W : Mostrar ficheiro no Explorador de Ficheiros do Windows
 S : Mostrar caixa de diálogo de partilha do Windows para o ficheiro
+P : Imprimir foto
 A : Zoom da fotografia para o tamanho real
 F : Ajustar à janela
 E : Mostrar painel de aplicações externas
 Ctrl + 1–4 : Abrir na aplicação externa 1–4
+M : Mostrar o menu "Mais ações"
 
 Del : Eliminar fotografia
 

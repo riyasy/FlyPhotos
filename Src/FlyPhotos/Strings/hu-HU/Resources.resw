@@ -501,13 +501,16 @@ Enter : Maximalizál
 
 Alt + Enter : Fájltulajdonságok megjelenítése (Általános lap)
 D : Fájltulajdonságok megjelenítése (Részletek lap)
+I : Fénykép adatai (metaadatok) panel megjelenítése
 
 W : Fájl megjelenítése a Windows Intézőben
 S : Windows Megosztás párbeszédablak megjelenítése a fájlhoz
+P : Fénykép nyomtatása
 A : Kép nagyítása tényleges méretre
 F : Illesztés az ablakhoz
 E : Külső alkalmazások panel megjelenítése
 Ctrl + 1–4 : Megnyitás a(z) 1–4. külső alkalmazásban
+M : További műveletek menü megjelenítése
 
 Del : Kép törlése
 
