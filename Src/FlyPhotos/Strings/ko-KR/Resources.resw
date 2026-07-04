@@ -290,6 +290,72 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
   <data name="HeaderType.Text" xml:space="preserve">
     <value>유형</value>
   </data>
+  <data name="ExifPanelTitle.Text" xml:space="preserve">
+    <value>사진 정보</value>
+  </data>
+  <data name="ExifPanelClose.Content" xml:space="preserve">
+    <value>닫기</value>
+  </data>
+  <data name="Exif_ShowAll" xml:space="preserve">
+    <value>모두 표시</value>
+  </data>
+  <data name="Exif_ShowSummary" xml:space="preserve">
+    <value>요약 표시</value>
+  </data>
+  <data name="Exif_FileName" xml:space="preserve">
+    <value>파일 이름</value>
+  </data>
+  <data name="Exif_FileSize" xml:space="preserve">
+    <value>파일 크기</value>
+  </data>
+  <data name="Exif_DateTaken" xml:space="preserve">
+    <value>촬영 일시</value>
+  </data>
+  <data name="Exif_CameraMake" xml:space="preserve">
+    <value>카메라 제조업체</value>
+  </data>
+  <data name="Exif_CameraModel" xml:space="preserve">
+    <value>카메라 모델</value>
+  </data>
+  <data name="Exif_LensModel" xml:space="preserve">
+    <value>렌즈 모델</value>
+  </data>
+  <data name="Exif_FocalLength" xml:space="preserve">
+    <value>초점 거리</value>
+  </data>
+  <data name="Exif_Aperture" xml:space="preserve">
+    <value>조리개</value>
+  </data>
+  <data name="Exif_ShutterSpeed" xml:space="preserve">
+    <value>셔터 속도</value>
+  </data>
+  <data name="Exif_Iso" xml:space="preserve">
+    <value>ISO</value>
+  </data>
+  <data name="Exif_ExposureBias" xml:space="preserve">
+    <value>노출 보정</value>
+  </data>
+  <data name="Exif_MeteringMode" xml:space="preserve">
+    <value>측광 모드</value>
+  </data>
+  <data name="Exif_ExposureProgram" xml:space="preserve">
+    <value>노출 프로그램</value>
+  </data>
+  <data name="Exif_Flash" xml:space="preserve">
+    <value>플래시</value>
+  </data>
+  <data name="Exif_Dimensions" xml:space="preserve">
+    <value>크기</value>
+  </data>
+  <data name="Exif_Orientation" xml:space="preserve">
+    <value>방향</value>
+  </data>
+  <data name="Exif_ColorSpace" xml:space="preserve">
+    <value>색 공간</value>
+  </data>
+  <data name="Exif_GpsLocation" xml:space="preserve">
+    <value>GPS 위치</value>
+  </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>고해상도 버전을 로드 중입니다. 잠시 기다려 주세요…</value>
   </data>

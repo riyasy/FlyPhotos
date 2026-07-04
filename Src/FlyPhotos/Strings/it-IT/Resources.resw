@@ -291,6 +291,72 @@ Impostazioni &gt; App &gt; App predefinite.</value>
   <data name="HeaderType.Text" xml:space="preserve">
     <value>Tipo</value>
   </data>
+  <data name="ExifPanelTitle.Text" xml:space="preserve">
+    <value>Informazioni foto</value>
+  </data>
+  <data name="ExifPanelClose.Content" xml:space="preserve">
+    <value>Chiudi</value>
+  </data>
+  <data name="Exif_ShowAll" xml:space="preserve">
+    <value>Mostra tutto</value>
+  </data>
+  <data name="Exif_ShowSummary" xml:space="preserve">
+    <value>Mostra riepilogo</value>
+  </data>
+  <data name="Exif_FileName" xml:space="preserve">
+    <value>Nome file</value>
+  </data>
+  <data name="Exif_FileSize" xml:space="preserve">
+    <value>Dimensione file</value>
+  </data>
+  <data name="Exif_DateTaken" xml:space="preserve">
+    <value>Data acquisizione</value>
+  </data>
+  <data name="Exif_CameraMake" xml:space="preserve">
+    <value>Marca fotocamera</value>
+  </data>
+  <data name="Exif_CameraModel" xml:space="preserve">
+    <value>Modello fotocamera</value>
+  </data>
+  <data name="Exif_LensModel" xml:space="preserve">
+    <value>Modello obiettivo</value>
+  </data>
+  <data name="Exif_FocalLength" xml:space="preserve">
+    <value>Lunghezza focale</value>
+  </data>
+  <data name="Exif_Aperture" xml:space="preserve">
+    <value>Apertura</value>
+  </data>
+  <data name="Exif_ShutterSpeed" xml:space="preserve">
+    <value>Velocità otturatore</value>
+  </data>
+  <data name="Exif_Iso" xml:space="preserve">
+    <value>ISO</value>
+  </data>
+  <data name="Exif_ExposureBias" xml:space="preserve">
+    <value>Compensazione esposizione</value>
+  </data>
+  <data name="Exif_MeteringMode" xml:space="preserve">
+    <value>Metodo di misurazione</value>
+  </data>
+  <data name="Exif_ExposureProgram" xml:space="preserve">
+    <value>Programma di esposizione</value>
+  </data>
+  <data name="Exif_Flash" xml:space="preserve">
+    <value>Flash</value>
+  </data>
+  <data name="Exif_Dimensions" xml:space="preserve">
+    <value>Dimensioni</value>
+  </data>
+  <data name="Exif_Orientation" xml:space="preserve">
+    <value>Orientamento</value>
+  </data>
+  <data name="Exif_ColorSpace" xml:space="preserve">
+    <value>Spazio colore</value>
+  </data>
+  <data name="Exif_GpsLocation" xml:space="preserve">
+    <value>Posizione GPS</value>
+  </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Caricamento della versione ad alta risoluzione. Attendere prego…</value>
   </data>

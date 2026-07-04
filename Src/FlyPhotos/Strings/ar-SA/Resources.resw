@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -290,6 +290,72 @@
   </data>
   <data name="HeaderType.Text" xml:space="preserve">
     <value>النوع</value>
+  </data>
+  <data name="ExifPanelTitle.Text" xml:space="preserve">
+    <value>معلومات الصورة</value>
+  </data>
+  <data name="ExifPanelClose.Content" xml:space="preserve">
+    <value>إغلاق</value>
+  </data>
+  <data name="Exif_ShowAll" xml:space="preserve">
+    <value>عرض الكل</value>
+  </data>
+  <data name="Exif_ShowSummary" xml:space="preserve">
+    <value>عرض الملخص</value>
+  </data>
+  <data name="Exif_FileName" xml:space="preserve">
+    <value>اسم الملف</value>
+  </data>
+  <data name="Exif_FileSize" xml:space="preserve">
+    <value>حجم الملف</value>
+  </data>
+  <data name="Exif_DateTaken" xml:space="preserve">
+    <value>تاريخ الالتقاط</value>
+  </data>
+  <data name="Exif_CameraMake" xml:space="preserve">
+    <value>الشركة المصنعة للكاميرا</value>
+  </data>
+  <data name="Exif_CameraModel" xml:space="preserve">
+    <value>طراز الكاميرا</value>
+  </data>
+  <data name="Exif_LensModel" xml:space="preserve">
+    <value>طراز العدسة</value>
+  </data>
+  <data name="Exif_FocalLength" xml:space="preserve">
+    <value>البعد البؤري</value>
+  </data>
+  <data name="Exif_Aperture" xml:space="preserve">
+    <value>فتحة العدسة</value>
+  </data>
+  <data name="Exif_ShutterSpeed" xml:space="preserve">
+    <value>سرعة الغالق</value>
+  </data>
+  <data name="Exif_Iso" xml:space="preserve">
+    <value>ISO</value>
+  </data>
+  <data name="Exif_ExposureBias" xml:space="preserve">
+    <value>تعويض التعريض الضوئي</value>
+  </data>
+  <data name="Exif_MeteringMode" xml:space="preserve">
+    <value>وضع القياس</value>
+  </data>
+  <data name="Exif_ExposureProgram" xml:space="preserve">
+    <value>برنامج التعريض الضوئي</value>
+  </data>
+  <data name="Exif_Flash" xml:space="preserve">
+    <value>الفلاش</value>
+  </data>
+  <data name="Exif_Dimensions" xml:space="preserve">
+    <value>الأبعاد</value>
+  </data>
+  <data name="Exif_Orientation" xml:space="preserve">
+    <value>الاتجاه</value>
+  </data>
+  <data name="Exif_ColorSpace" xml:space="preserve">
+    <value>مساحة الألوان</value>
+  </data>
+  <data name="Exif_GpsLocation" xml:space="preserve">
+    <value>موقع GPS</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>جارٍ تحميل إصدار عالي الدقة. يرجى الانتظار…</value>

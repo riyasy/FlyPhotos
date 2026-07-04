@@ -291,6 +291,72 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   <data name="HeaderType.Text" xml:space="preserve">
     <value>Typ</value>
   </data>
+  <data name="ExifPanelTitle.Text" xml:space="preserve">
+    <value>Fotoinformation</value>
+  </data>
+  <data name="ExifPanelClose.Content" xml:space="preserve">
+    <value>Stäng</value>
+  </data>
+  <data name="Exif_ShowAll" xml:space="preserve">
+    <value>Visa alla</value>
+  </data>
+  <data name="Exif_ShowSummary" xml:space="preserve">
+    <value>Visa sammanfattning</value>
+  </data>
+  <data name="Exif_FileName" xml:space="preserve">
+    <value>Filnamn</value>
+  </data>
+  <data name="Exif_FileSize" xml:space="preserve">
+    <value>Filstorlek</value>
+  </data>
+  <data name="Exif_DateTaken" xml:space="preserve">
+    <value>Datum taget</value>
+  </data>
+  <data name="Exif_CameraMake" xml:space="preserve">
+    <value>Kameratillverkare</value>
+  </data>
+  <data name="Exif_CameraModel" xml:space="preserve">
+    <value>Kameramodell</value>
+  </data>
+  <data name="Exif_LensModel" xml:space="preserve">
+    <value>Objektivmodell</value>
+  </data>
+  <data name="Exif_FocalLength" xml:space="preserve">
+    <value>Brännvidd</value>
+  </data>
+  <data name="Exif_Aperture" xml:space="preserve">
+    <value>Bländare</value>
+  </data>
+  <data name="Exif_ShutterSpeed" xml:space="preserve">
+    <value>Slutartid</value>
+  </data>
+  <data name="Exif_Iso" xml:space="preserve">
+    <value>ISO</value>
+  </data>
+  <data name="Exif_ExposureBias" xml:space="preserve">
+    <value>Exponeringskompensation</value>
+  </data>
+  <data name="Exif_MeteringMode" xml:space="preserve">
+    <value>Ljusmätarmetod</value>
+  </data>
+  <data name="Exif_ExposureProgram" xml:space="preserve">
+    <value>Exponeringsprogram</value>
+  </data>
+  <data name="Exif_Flash" xml:space="preserve">
+    <value>Blixt</value>
+  </data>
+  <data name="Exif_Dimensions" xml:space="preserve">
+    <value>Mått</value>
+  </data>
+  <data name="Exif_Orientation" xml:space="preserve">
+    <value>Orientering</value>
+  </data>
+  <data name="Exif_ColorSpace" xml:space="preserve">
+    <value>Färgrymd</value>
+  </data>
+  <data name="Exif_GpsLocation" xml:space="preserve">
+    <value>GPS-plats</value>
+  </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Laddar högupplöst version. Vänta…</value>
   </data>

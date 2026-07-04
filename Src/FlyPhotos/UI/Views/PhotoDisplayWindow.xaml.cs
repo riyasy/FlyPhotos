@@ -225,6 +225,7 @@ public sealed partial class PhotoDisplayWindow
             // File properties
             [(VirtualKey.Enter, false, true)] = Act(() => Util.ShowFileProperties(_photoController.GetFullPathCurrentFile())),
             [(VirtualKey.D,     false, false)] = Act(() => Util.ShowFileProperties(_photoController.GetFullPathCurrentFile(), true)),
+            [(VirtualKey.I,     false, false)] = Act(() => ExifInfoPanel.Toggle(_photoController.GetFullPathCurrentFile())),
 
             // External apps
             [(VirtualKey.E,          false, false)] = Act(() => ButtonShortcuts_OnClick(ButtonShortcuts, new RoutedEventArgs())),
@@ -714,6 +715,7 @@ public sealed partial class PhotoDisplayWindow
     {
         DispatcherQueue.TryEnqueue(() =>
         {
+            ExifInfoPanel.CloseIfFileChanged(_photoController.GetFullPathCurrentFile());
             TxtFileName.Text = fileDisplayDetails.DisplayText;
             Title = fileDisplayDetails.FileName;
         });

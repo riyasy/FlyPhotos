@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="FlyPhotos.UI.Controls.ExifPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="ExifPanelBackgroundBrush" Color="#CCFFFFFF" />
+                    <SolidColorBrush x:Key="ExifPanelForegroundBrush" Color="Black" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="ExifPanelBackgroundBrush" Color="#CC1E1E1E" />
+                    <SolidColorBrush x:Key="ExifPanelForegroundBrush" Color="White" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Border
+        Width="320"
+        Padding="16"
+        Background="{ThemeResource ExifPanelBackgroundBrush}"
+        CornerRadius="8,0,0,8">
+        <!-- Grid has no Foreground property, so text color is wrapped in a ContentControl
+             (which does) and relies on WinUI's text-property inheritance down to the
+             code-behind-generated field-row TextBlocks. -->
+        <ContentControl
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch"
+            Foreground="{ThemeResource ExifPanelForegroundBrush}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock
+                x:Uid="ExifPanelTitle"
+                Grid.Row="0"
+                Margin="0,0,0,12"
+                FontSize="16"
+                FontWeight="SemiBold" />
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="FieldsPanel" Spacing="6" />
+            </ScrollViewer>
+
+            <Button
+                x:Name="ButtonToggleMode"
+                Grid.Row="2"
+                Margin="0,12,0,0"
+                HorizontalAlignment="Stretch"
+                Click="ButtonToggleMode_Click" />
+
+            <Button
+                x:Uid="ExifPanelClose"
+                x:Name="ButtonClose"
+                Grid.Row="3"
+                Margin="0,8,0,0"
+                HorizontalAlignment="Stretch"
+                Click="ButtonClose_Click" />
+        </Grid>
+        </ContentControl>
+    </Border>
+</UserControl>

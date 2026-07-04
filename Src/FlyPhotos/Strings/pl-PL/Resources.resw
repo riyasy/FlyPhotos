@@ -291,6 +291,72 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   <data name="HeaderType.Text" xml:space="preserve">
     <value>Typ</value>
   </data>
+  <data name="ExifPanelTitle.Text" xml:space="preserve">
+    <value>Informacje o zdjęciu</value>
+  </data>
+  <data name="ExifPanelClose.Content" xml:space="preserve">
+    <value>Zamknij</value>
+  </data>
+  <data name="Exif_ShowAll" xml:space="preserve">
+    <value>Pokaż wszystko</value>
+  </data>
+  <data name="Exif_ShowSummary" xml:space="preserve">
+    <value>Pokaż podsumowanie</value>
+  </data>
+  <data name="Exif_FileName" xml:space="preserve">
+    <value>Nazwa pliku</value>
+  </data>
+  <data name="Exif_FileSize" xml:space="preserve">
+    <value>Rozmiar pliku</value>
+  </data>
+  <data name="Exif_DateTaken" xml:space="preserve">
+    <value>Data zrobienia</value>
+  </data>
+  <data name="Exif_CameraMake" xml:space="preserve">
+    <value>Producent aparatu</value>
+  </data>
+  <data name="Exif_CameraModel" xml:space="preserve">
+    <value>Model aparatu</value>
+  </data>
+  <data name="Exif_LensModel" xml:space="preserve">
+    <value>Model obiektywu</value>
+  </data>
+  <data name="Exif_FocalLength" xml:space="preserve">
+    <value>Ogniskowa</value>
+  </data>
+  <data name="Exif_Aperture" xml:space="preserve">
+    <value>Przysłona</value>
+  </data>
+  <data name="Exif_ShutterSpeed" xml:space="preserve">
+    <value>Czas otwarcia migawki</value>
+  </data>
+  <data name="Exif_Iso" xml:space="preserve">
+    <value>ISO</value>
+  </data>
+  <data name="Exif_ExposureBias" xml:space="preserve">
+    <value>Kompensacja ekspozycji</value>
+  </data>
+  <data name="Exif_MeteringMode" xml:space="preserve">
+    <value>Tryb pomiaru</value>
+  </data>
+  <data name="Exif_ExposureProgram" xml:space="preserve">
+    <value>Program ekspozycji</value>
+  </data>
+  <data name="Exif_Flash" xml:space="preserve">
+    <value>Lampa błyskowa</value>
+  </data>
+  <data name="Exif_Dimensions" xml:space="preserve">
+    <value>Wymiary</value>
+  </data>
+  <data name="Exif_Orientation" xml:space="preserve">
+    <value>Orientacja</value>
+  </data>
+  <data name="Exif_ColorSpace" xml:space="preserve">
+    <value>Przestrzeń kolorów</value>
+  </data>
+  <data name="Exif_GpsLocation" xml:space="preserve">
+    <value>Lokalizacja GPS</value>
+  </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Ładowanie wersji w wysokiej rozdzielczości. Proszę czekać…</value>
   </data>

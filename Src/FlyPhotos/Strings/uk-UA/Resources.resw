@@ -291,6 +291,72 @@
   <data name="HeaderType.Text" xml:space="preserve">
     <value>Тип</value>
   </data>
+  <data name="ExifPanelTitle.Text" xml:space="preserve">
+    <value>Інформація про фото</value>
+  </data>
+  <data name="ExifPanelClose.Content" xml:space="preserve">
+    <value>Закрити</value>
+  </data>
+  <data name="Exif_ShowAll" xml:space="preserve">
+    <value>Показати все</value>
+  </data>
+  <data name="Exif_ShowSummary" xml:space="preserve">
+    <value>Показати зведення</value>
+  </data>
+  <data name="Exif_FileName" xml:space="preserve">
+    <value>Ім'я файлу</value>
+  </data>
+  <data name="Exif_FileSize" xml:space="preserve">
+    <value>Розмір файлу</value>
+  </data>
+  <data name="Exif_DateTaken" xml:space="preserve">
+    <value>Дата зйомки</value>
+  </data>
+  <data name="Exif_CameraMake" xml:space="preserve">
+    <value>Виробник камери</value>
+  </data>
+  <data name="Exif_CameraModel" xml:space="preserve">
+    <value>Модель камери</value>
+  </data>
+  <data name="Exif_LensModel" xml:space="preserve">
+    <value>Модель об'єктива</value>
+  </data>
+  <data name="Exif_FocalLength" xml:space="preserve">
+    <value>Фокусна відстань</value>
+  </data>
+  <data name="Exif_Aperture" xml:space="preserve">
+    <value>Діафрагма</value>
+  </data>
+  <data name="Exif_ShutterSpeed" xml:space="preserve">
+    <value>Витримка</value>
+  </data>
+  <data name="Exif_Iso" xml:space="preserve">
+    <value>ISO</value>
+  </data>
+  <data name="Exif_ExposureBias" xml:space="preserve">
+    <value>Компенсація експозиції</value>
+  </data>
+  <data name="Exif_MeteringMode" xml:space="preserve">
+    <value>Режим експозаміру</value>
+  </data>
+  <data name="Exif_ExposureProgram" xml:space="preserve">
+    <value>Програма експозиції</value>
+  </data>
+  <data name="Exif_Flash" xml:space="preserve">
+    <value>Спалах</value>
+  </data>
+  <data name="Exif_Dimensions" xml:space="preserve">
+    <value>Розміри</value>
+  </data>
+  <data name="Exif_Orientation" xml:space="preserve">
+    <value>Орієнтація</value>
+  </data>
+  <data name="Exif_ColorSpace" xml:space="preserve">
+    <value>Колірний простір</value>
+  </data>
+  <data name="Exif_GpsLocation" xml:space="preserve">
+    <value>Розташування GPS</value>
+  </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Завантаження версії у високій роздільній здатності. Будь ласка, зачекайте…</value>
   </data>
