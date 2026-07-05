@@ -124,7 +124,7 @@ public sealed partial class ExifPanel : UserControl
         {
             foreach (var group in _data.All.Value)
             {
-                AddHeaderRow(CreateCategoryHeader(group.Category));
+                AddHeaderRow(group.Category);
                 foreach (var field in group.Fields) AddFieldRow(field);
             }
         }
@@ -141,8 +141,14 @@ public sealed partial class ExifPanel : UserControl
         return row;
     }
 
-    private void AddHeaderRow(FrameworkElement header)
+    private void AddHeaderRow(string category)
     {
+        var header = new TextBlock
+        {
+            Text = category,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            Margin = new Thickness(0, 10, 0, 2)
+        };
         var row = NextRow();
         Grid.SetRow(header, row);
         Grid.SetColumnSpan(header, 2);
@@ -170,16 +176,6 @@ public sealed partial class ExifPanel : UserControl
 
         FieldsPanel.Children.Add(label);
         FieldsPanel.Children.Add(value);
-    }
-
-    private static TextBlock CreateCategoryHeader(string category)
-    {
-        return new TextBlock
-        {
-            Text = category,
-            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-            Margin = new Thickness(0, 10, 0, 2)
-        };
     }
 
     private static TextBlock CreateValueText(string text)
