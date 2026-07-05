@@ -293,6 +293,9 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Bezárás</value>
   </data>
+  <data name="Exif_CopyTooltip" xml:space="preserve">
+    <value>Másolás a vágólapra</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Összes megjelenítése</value>
   </data>

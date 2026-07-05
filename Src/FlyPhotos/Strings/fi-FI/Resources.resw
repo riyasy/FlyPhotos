@@ -294,6 +294,9 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Sulje</value>
   </data>
+  <data name="Exif_CopyTooltip" xml:space="preserve">
+    <value>Kopioi leikepöydälle</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Näytä kaikki</value>
   </data>

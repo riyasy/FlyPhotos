@@ -294,6 +294,9 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Close</value>
   </data>
+  <data name="Exif_CopyTooltip" xml:space="preserve">
+    <value>Copy to clipboard</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Show All</value>
   </data>

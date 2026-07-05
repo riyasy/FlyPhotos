@@ -294,6 +294,9 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Stäng</value>
   </data>
+  <data name="Exif_CopyTooltip" xml:space="preserve">
+    <value>Kopiera till Urklipp</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Visa alla</value>
   </data>

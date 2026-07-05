@@ -27,47 +27,73 @@
         Padding="16"
         Background="{ThemeResource ExifPanelBackgroundBrush}"
         CornerRadius="8,0,0,8">
-        <!-- Grid has no Foreground property, so text color is wrapped in a ContentControl
-             (which does) and relies on WinUI's text-property inheritance down to the
-             code-behind-generated field-row TextBlocks. -->
+        <!--
+            Grid has no Foreground property, so text color is wrapped in a ContentControl
+            (which does) and relies on WinUI's text-property inheritance down to the
+            code-behind-generated field-row TextBlocks.
+        -->
         <ContentControl
             HorizontalContentAlignment="Stretch"
             VerticalContentAlignment="Stretch"
             Foreground="{ThemeResource ExifPanelForegroundBrush}">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-            <TextBlock
-                x:Uid="ExifPanelTitle"
-                Grid.Row="0"
-                Margin="0,0,0,12"
-                FontSize="16"
-                FontWeight="SemiBold" />
+                <TextBlock
+                    x:Uid="ExifPanelTitle"
+                    Grid.Row="0"
+                    Margin="0,0,0,12"
+                    FontSize="16"
+                    FontWeight="SemiBold" />
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                <StackPanel x:Name="FieldsPanel" Spacing="6" />
-            </ScrollViewer>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <Grid
+                        x:Name="FieldsPanel"
+                        ColumnSpacing="12"
+                        RowSpacing="6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ScrollViewer>
 
-            <Button
-                x:Name="ButtonToggleMode"
-                Grid.Row="2"
-                Margin="0,12,0,0"
-                HorizontalAlignment="Stretch"
-                Click="ButtonToggleMode_Click" />
+                <Grid
+                    Grid.Row="2"
+                    Margin="0,12,0,0"
+                    ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-            <Button
-                x:Uid="ExifPanelClose"
-                x:Name="ButtonClose"
-                Grid.Row="3"
-                Margin="0,8,0,0"
-                HorizontalAlignment="Stretch"
-                Click="ButtonClose_Click" />
-        </Grid>
+                    <Button
+                        x:Name="ButtonCopy"
+                        Grid.Column="0"
+                        Height="{Binding ElementName=ButtonToggleMode, Path=ActualHeight}"
+                        Click="ButtonCopy_Click"
+                        Content="&#xE8C8;"
+                        FontFamily="{StaticResource FluentIcons}" />
+
+                    <Button
+                        x:Name="ButtonToggleMode"
+                        Grid.Column="1"
+                        HorizontalAlignment="Stretch"
+                        Click="ButtonToggleMode_Click" />
+                </Grid>
+                <Button
+                    x:Name="ButtonClose"
+                    x:Uid="ExifPanelClose"
+                    Grid.Row="3"
+                    Margin="0,8,0,0"
+                    HorizontalAlignment="Stretch"
+                    Click="ButtonClose_Click" />
+            </Grid>
         </ContentControl>
     </Border>
 </UserControl>

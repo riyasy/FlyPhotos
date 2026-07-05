@@ -294,6 +294,9 @@ Configuración &gt; Aplicaciones &gt; Aplicaciones predeterminadas.</value>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Cerrar</value>
   </data>
+  <data name="Exif_CopyTooltip" xml:space="preserve">
+    <value>Copiar al portapapeles</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Mostrar todo</value>
   </data>

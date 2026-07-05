@@ -293,6 +293,9 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>閉じる</value>
   </data>
+  <data name="Exif_CopyTooltip" xml:space="preserve">
+    <value>クリップボードにコピー</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>すべて表示</value>
   </data>

@@ -294,6 +294,9 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Schließen</value>
   </data>
+  <data name="Exif_CopyTooltip" xml:space="preserve">
+    <value>In die Zwischenablage kopieren</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Alle anzeigen</value>
   </data>

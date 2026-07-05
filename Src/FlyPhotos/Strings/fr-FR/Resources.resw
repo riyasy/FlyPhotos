@@ -294,6 +294,9 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Fermer</value>
   </data>
+  <data name="Exif_CopyTooltip" xml:space="preserve">
+    <value>Copier dans le Presse-papiers</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Tout afficher</value>
   </data>

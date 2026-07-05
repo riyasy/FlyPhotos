@@ -293,6 +293,9 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>닫기</value>
   </data>
+  <data name="Exif_CopyTooltip" xml:space="preserve">
+    <value>클립보드에 복사</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>모두 표시</value>
   </data>

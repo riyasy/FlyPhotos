@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Display.ExifReading;
@@ -7,7 +8,9 @@ using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Localization;
 using FlyPhotos.UI.Behaviors;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace FlyPhotos.UI.Controls;
 
@@ -24,6 +27,10 @@ public sealed partial class ExifPanel : UserControl
     {
         InitializeComponent();
         RtlLayoutBehavior.ApplyFlowDirection(this, AppConfig.Settings.Language);
+
+        var copyTooltip = L.Get("Exif_CopyTooltip");
+        ToolTipService.SetToolTip(ButtonCopy, copyTooltip);
+        AutomationProperties.SetName(ButtonCopy, copyTooltip);
     }
 
     public void Toggle(string filePath)
@@ -73,6 +80,34 @@ public sealed partial class ExifPanel : UserControl
 
     private void ButtonClose_Click(object _, RoutedEventArgs _1) => Close();
 
+    private void ButtonCopy_Click(object _, RoutedEventArgs _1)
+    {
+        var dataPackage = new DataPackage();
+        dataPackage.SetText(BuildClipboardText());
+        Clipboard.SetContent(dataPackage);
+    }
+
+    private string BuildClipboardText()
+    {
+        var sb = new StringBuilder();
+
+        if (_showAll)
+        {
+            foreach (var group in _data.All.Value)
+            {
+                sb.AppendLine(group.Category);
+                foreach (var field in group.Fields) sb.AppendLine($"{field.Label}: {field.Value}");
+                sb.AppendLine();
+            }
+        }
+        else
+        {
+            foreach (var field in _data.Summary) sb.AppendLine($"{field.Label}: {field.Value}");
+        }
+
+        return sb.ToString().TrimEnd();
+    }
+
     private void ButtonToggleMode_Click(object _, RoutedEventArgs _1)
     {
         _showAll = !_showAll;
@@ -83,19 +118,58 @@ public sealed partial class ExifPanel : UserControl
     private void Render()
     {
         FieldsPanel.Children.Clear();
+        FieldsPanel.RowDefinitions.Clear();
 
         if (_showAll)
         {
             foreach (var group in _data.All.Value)
             {
-                FieldsPanel.Children.Add(CreateCategoryHeader(group.Category));
-                foreach (var field in group.Fields) FieldsPanel.Children.Add(CreateFieldRow(field));
+                AddHeaderRow(CreateCategoryHeader(group.Category));
+                foreach (var field in group.Fields) AddFieldRow(field);
             }
         }
         else
         {
-            foreach (var field in _data.Summary) FieldsPanel.Children.Add(CreateFieldRow(field));
+            foreach (var field in _data.Summary) AddFieldRow(field);
         }
+    }
+
+    private int NextRow()
+    {
+        var row = FieldsPanel.RowDefinitions.Count;
+        FieldsPanel.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        return row;
+    }
+
+    private void AddHeaderRow(FrameworkElement header)
+    {
+        var row = NextRow();
+        Grid.SetRow(header, row);
+        Grid.SetColumnSpan(header, 2);
+        FieldsPanel.Children.Add(header);
+    }
+
+    private void AddFieldRow(ExifField field)
+    {
+        var row = NextRow();
+
+        var label = new TextBlock
+        {
+            Text = field.Label,
+            TextWrapping = TextWrapping.Wrap,
+            MaxWidth = 160,
+            Opacity = 0.7,
+            FontSize = FieldFontSize
+        };
+        Grid.SetRow(label, row);
+        Grid.SetColumn(label, 0);
+
+        FrameworkElement value = field.LinkUrl == null ? CreateValueText(field.Value) : CreateValueLink(field.Value, field.LinkUrl);
+        Grid.SetRow(value, row);
+        Grid.SetColumn(value, 1);
+
+        FieldsPanel.Children.Add(label);
+        FieldsPanel.Children.Add(value);
     }
 
     private static TextBlock CreateCategoryHeader(string category)
@@ -106,29 +180,6 @@ public sealed partial class ExifPanel : UserControl
             FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
             Margin = new Thickness(0, 10, 0, 2)
         };
-    }
-
-    private static Grid CreateFieldRow(ExifField field)
-    {
-        var grid = new Grid { ColumnSpacing = 12 };
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-        var label = new TextBlock
-        {
-            Text = field.Label,
-            TextWrapping = TextWrapping.Wrap,
-            Opacity = 0.7,
-            FontSize = FieldFontSize
-        };
-        Grid.SetColumn(label, 0);
-
-        FrameworkElement value = field.LinkUrl == null ? CreateValueText(field.Value) : CreateValueLink(field.Value, field.LinkUrl);
-        Grid.SetColumn(value, 1);
-
-        grid.Children.Add(label);
-        grid.Children.Add(value);
-        return grid;
     }
 
     private static TextBlock CreateValueText(string text)

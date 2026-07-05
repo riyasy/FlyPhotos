@@ -294,6 +294,9 @@ Impostazioni &gt; App &gt; App predefinite.</value>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Chiudi</value>
   </data>
+  <data name="Exif_CopyTooltip" xml:space="preserve">
+    <value>Copia negli appunti</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Mostra tutto</value>
   </data>

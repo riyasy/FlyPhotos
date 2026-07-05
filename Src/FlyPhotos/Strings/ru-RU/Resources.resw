@@ -294,6 +294,9 @@
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Закрыть</value>
   </data>
+  <data name="Exif_CopyTooltip" xml:space="preserve">
+    <value>Копировать в буфер обмена</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Показать все</value>
   </data>

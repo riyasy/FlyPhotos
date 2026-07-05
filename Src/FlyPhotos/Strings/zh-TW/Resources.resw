@@ -294,6 +294,9 @@
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>關閉</value>
   </data>
+  <data name="Exif_CopyTooltip" xml:space="preserve">
+    <value>複製到剪貼簿</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>顯示全部</value>
   </data>

@@ -294,6 +294,9 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Sluiten</value>
   </data>
+  <data name="Exif_CopyTooltip" xml:space="preserve">
+    <value>Kopiëren naar het Klembord</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Alles tonen</value>
   </data>

@@ -294,6 +294,9 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Zamknij</value>
   </data>
+  <data name="Exif_CopyTooltip" xml:space="preserve">
+    <value>Kopiuj do schowka</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Pokaż wszystko</value>
   </data>

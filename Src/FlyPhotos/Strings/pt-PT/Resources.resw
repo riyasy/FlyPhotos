@@ -294,6 +294,9 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Fechar</value>
   </data>
+  <data name="Exif_CopyTooltip" xml:space="preserve">
+    <value>Copiar para a área de transferência</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Mostrar tudo</value>
   </data>
