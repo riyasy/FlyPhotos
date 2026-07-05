@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.System;
@@ -82,8 +81,11 @@ public sealed partial class PhotoDisplayWindow
     private bool _doubleTapHandled;
 
     // For Right Click Zoom
-    private CancellationTokenSource? _rightClickCts;
-    private bool _isRightClickZooming;
+    private readonly DispatcherTimer _rightClickZoomHoldTimer = new() { Interval = TimeSpan.FromMilliseconds(1000) };
+    private readonly DispatcherTimer _rightClickZoomRepeatTimer = new() { Interval = TimeSpan.FromMilliseconds(16) };
+    // True for as long as the right button is physically held; guards a Tick that was already
+    // queued on the dispatcher at the moment the button is released from acting on stale state.
+    private bool _isRightClickHeld;
     private Point _rightClickPosition;
 
     public PhotoDisplayWindow(string firstPhotoPath, bool extLaunch)
@@ -151,6 +153,8 @@ public sealed partial class PhotoDisplayWindow
 
         _repeatButtonReleaseCheckTimer.Tick += RepeatButtonReleaseCheckTimer_Tick;
         _wheelScrollBrakeTimer.Tick += WheelScrollBrakeTimer_Tick;
+        _rightClickZoomHoldTimer.Tick += RightClickZoomHoldTimer_Tick;
+        _rightClickZoomRepeatTimer.Tick += RightClickZoomRepeatTimer_Tick;
 
         _sideButtonNav = new SideButtonNavBehavior(
             MainLayout,
@@ -165,11 +169,7 @@ public sealed partial class PhotoDisplayWindow
         _captionButtonFader = new WindowCaptionButtonFader(AppWindow.TitleBar, MainLayout, AppConfig.Settings.AutoHideCaptionButtons);
         _ctrlDragWindowMover = new CtrlDragWindowMover(D2dCanvas, AppWindow, AppConfig.Settings.CtrlDragToMoveWindow);
         _ctrlDragWindowMover.IsOnBackground = pos => !_canvasController.IsPressedOnImage(pos.AdjustForDpi(D2dCanvas));
-        _windFullScreenManager.FullScreenToggled += isFullScreen =>
-        {
-            _windPlacementManager.PauseTracking = isFullScreen;
-            _captionButtonFader.Suspended = isFullScreen;
-        };
+        _windFullScreenManager.FullScreenToggled += WindFullScreenManager_FullScreenToggled;
         InitKeyActions();
     }
 
@@ -275,9 +275,11 @@ public sealed partial class PhotoDisplayWindow
         _repeatButtonReleaseCheckTimer.Tick -= RepeatButtonReleaseCheckTimer_Tick;
         _wheelScrollBrakeTimer.Stop();
         _wheelScrollBrakeTimer.Tick -= WheelScrollBrakeTimer_Tick;
+        _rightClickZoomHoldTimer.Stop();
+        _rightClickZoomHoldTimer.Tick -= RightClickZoomHoldTimer_Tick;
+        _rightClickZoomRepeatTimer.Stop();
+        _rightClickZoomRepeatTimer.Tick -= RightClickZoomRepeatTimer_Tick;
         _sideButtonNav.Detach();
-        _rightClickCts?.Cancel();
-        _rightClickCts?.Dispose();
 
         AppWindow.Closing -= PhotoDisplayWindow_Closing;
 
@@ -304,6 +306,8 @@ public sealed partial class PhotoDisplayWindow
         MainLayout.Loaded -= MainLayout_Loaded;
         MainLayout.KeyDown -= HandleKeyDown;
         MainLayout.KeyUp -= HandleKeyUp;
+
+        _windFullScreenManager.FullScreenToggled -= WindFullScreenManager_FullScreenToggled;
 
         _canvasController.Dispose();
         _thumbNailController.Dispose();
@@ -333,6 +337,7 @@ public sealed partial class PhotoDisplayWindow
         _repeatButtonReleaseCheckTimer.Stop();
         _repeatButtonReleaseCheckTimer.Start();
     }
+
     private async void ButtonBackNext_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
@@ -486,31 +491,11 @@ public sealed partial class PhotoDisplayWindow
         {
             case PointerUpdateKind.RightButtonPressed when pointerOverImage:
                 D2dCanvas.CapturePointer(e.Pointer);
-                _rightClickCts?.Cancel();
-                _rightClickCts?.Dispose();
-                _rightClickCts = new CancellationTokenSource();
-                var token = _rightClickCts.Token;
+                _rightClickZoomHoldTimer.Stop();
+                _rightClickZoomRepeatTimer.Stop();
                 _rightClickPosition = dpiAdjustedPos;
-                _isRightClickZooming = false;
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        await Task.Delay(1000, token);
-                        if (token.IsCancellationRequested) return;
-                        _isRightClickZooming = true;
-                        while (!token.IsCancellationRequested)
-                        {
-                            DispatcherQueue.TryEnqueue(() =>
-                            {
-                                if (!token.IsCancellationRequested)
-                                    _canvasController.ZoomAtPointPrecision(10, _rightClickPosition);
-                            });
-                            await Task.Delay(16, token);
-                        }
-                    }
-                    catch (TaskCanceledException) { }
-                }, token);
+                _isRightClickHeld = true;
+                _rightClickZoomHoldTimer.Start();
                 break;
 
             case PointerUpdateKind.LeftButtonPressed when pointerOverImage:
@@ -553,15 +538,17 @@ public sealed partial class PhotoDisplayWindow
         switch (properties.PointerUpdateKind)
         {
             case PointerUpdateKind.RightButtonReleased:
-                _rightClickCts?.Cancel();
+                _isRightClickHeld = false;
+                var wasZooming = _rightClickZoomRepeatTimer.IsEnabled;
+                _rightClickZoomHoldTimer.Stop();
+                _rightClickZoomRepeatTimer.Stop();
                 D2dCanvas.ReleasePointerCapture(e.Pointer);
-                if (!_isRightClickZooming && _canvasController.IsPressedOnImage(dpiAdjustedPosition))
+                if (!wasZooming && _canvasController.IsPressedOnImage(dpiAdjustedPosition))
                 {
                     var filePath = _photoController.GetFullPathCurrentFile();
                     if (File.Exists(filePath))
                         ContextMenuHelper.ShowContextMenu(this, filePath);
                 }
-                _isRightClickZooming = false;
                 break;
 
             case PointerUpdateKind.LeftButtonReleased when _isDragging:
@@ -713,6 +700,20 @@ public sealed partial class PhotoDisplayWindow
         await _photoController.Brake();
     }
 
+    // Long-press threshold before right-click-hold starts zooming.
+    private void RightClickZoomHoldTimer_Tick(object? sender, object e)
+    {
+        _rightClickZoomHoldTimer.Stop();
+        if (!_isRightClickHeld) return; // button was released before this queued tick ran
+        _rightClickZoomRepeatTimer.Start();
+    }
+
+    private void RightClickZoomRepeatTimer_Tick(object? sender, object e)
+    {
+        if (!_isRightClickHeld) { _rightClickZoomRepeatTimer.Stop(); return; } // released before this queued tick ran
+        _canvasController.ZoomAtPointPrecision(10, _rightClickPosition);
+    }
+
     #endregion
 
     #region callbacks
@@ -759,6 +760,13 @@ public sealed partial class PhotoDisplayWindow
         ButtonNextPage.Visibility = visibilityState;
         ButtonPrevPage.Visibility = visibilityState;
     }
+
+    private void WindFullScreenManager_FullScreenToggled(bool isFullScreen)
+    {
+        _windPlacementManager.PauseTracking = isFullScreen;
+        _captionButtonFader.Suspended = isFullScreen;
+    }
+
     private void SettingWindow_SettingChanged(Setting setting)
     {
         switch (setting)
