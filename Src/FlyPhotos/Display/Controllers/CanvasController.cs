@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
@@ -28,9 +27,9 @@ namespace FlyPhotos.Display.Controllers;
 /// is the only door in". The CanvasAnimatedControl runs an Update/Draw worker thread (the "W2D
 /// thread"). <see cref="_currentRenderer"/>, <see cref="_checkeredBrush"/>, <see cref="_canvasViewState"/>
 /// and <see cref="_canvasViewManager"/> are W2D-owned: they are only ever touched inside actions
-/// drained from <see cref="_pendingW2dActions"/> at the top of <see cref="D2dCanvas_Update"/>,
+/// drained from <see cref="_pump"/> at the top of <see cref="D2dCanvas_Update"/>,
 /// or inside Update/Draw itself. The UI thread never touches them directly — it posts work via
-/// <see cref="EnqueueW2dAction"/>. There is therefore no lock on the render hot path.
+/// <see cref="_pump"/>. There is therefore no lock on the render hot path.
 ///
 /// All public methods must be called on the UI (DispatcherQueue) thread.
 /// </summary>
@@ -46,7 +45,7 @@ internal partial class CanvasController : ICanvasController
     private readonly CanvasAnimatedControl _d2dCanvas;
 
     // The single UI -> W2D handoff. Drained at the top of every Update on the W2D thread.
-    private readonly ConcurrentQueue<Action> _pendingW2dActions = new();
+    private readonly W2dActionPump _pump;
 
     // W2D-owned: swapped/read only on the W2D thread (install action + Draw).
     private IRenderer _currentRenderer;
@@ -93,6 +92,7 @@ internal partial class CanvasController : ICanvasController
         _d2dCanvas = d2dCanvas;
         _thumbNailController = thumbNailController;
         _photoSessionState = photoSessionState;
+        _pump = new W2dActionPump(_d2dCanvas);
 
         _d2dCanvas.CreateResources += D2dCanvas_CreateResources;
         _d2dCanvas.Update += D2dCanvas_Update;
@@ -279,7 +279,7 @@ internal partial class CanvasController : ICanvasController
             OnMutliPagePhotoLoaded?.Invoke(isMultiPage);
         }
 
-        EnqueueW2dAction(() =>
+        _pump.Enqueue(() =>
         {
             _checkeredBrush ??= Util.CreateCheckeredBrush(_d2dCanvas, Constants.CheckerSize);
             newRenderer.CheckeredBrush = _checkeredBrush;
@@ -307,18 +307,12 @@ internal partial class CanvasController : ICanvasController
 
     // --- Zoom & pan ---
 
-    public void ZoomAtPoint(ZoomDirection zoomDirection, Point zoomAnchor)
-    {
-        EnqueueW2dAction(() =>
-        {
-            if (_currentRenderer == null) return;
-            _canvasViewManager.ZoomAtPoint(zoomDirection, zoomAnchor);
-        });
-    }
+    public void ZoomAtPoint(ZoomDirection zoomDirection, Point zoomAnchor) =>
+        SafeEnqueue(v => v.ZoomAtPoint(zoomDirection, zoomAnchor));
 
     public void ZoomAtPointPrecision(int delta, Point zoomAnchor)
     {
-        EnqueueW2dAction(() =>
+        _pump.Enqueue(() =>
         {
             if (_currentRenderer == null) return;
             _canvasViewManager.ZoomAtPointPrecision(delta, zoomAnchor);
@@ -335,7 +329,7 @@ internal partial class CanvasController : ICanvasController
             {
                 try { await Task.Delay(700, token); }
                 catch (TaskCanceledException) { return; }
-                EnqueueW2dAction(() => _continuousZoomActive = false);
+                _pump.Enqueue(() => _continuousZoomActive = false);
             }, token);
         });
     }
@@ -343,98 +337,57 @@ internal partial class CanvasController : ICanvasController
     public void ZoomByKeyboard(ZoomDirection zoomDirection, Point? zoomAnchor = null)
     {
         var canvasSize = _d2dCanvas.GetSize();
-        EnqueueW2dAction(() =>
+        // While the user is dragging, anchor the keyboard zoom at the cursor (like wheel zoom) so the image
+        // doesn't jump away from the point being dragged; otherwise fall back to the canvas centre.
+        SafeEnqueue(v =>
         {
-            if (_currentRenderer == null) return;
-            // While the user is dragging, anchor the keyboard zoom at the cursor (like wheel zoom) so the image
-            // doesn't jump away from the point being dragged; otherwise fall back to the canvas centre.
             if (zoomAnchor.HasValue)
-                _canvasViewManager.ZoomAtPoint(zoomDirection, zoomAnchor.Value);
+                v.ZoomAtPoint(zoomDirection, zoomAnchor.Value);
             else
-                _canvasViewManager.ZoomAtCenter(zoomDirection, canvasSize);
+                v.ZoomAtCenter(zoomDirection, canvasSize);
         });
     }
 
     public void StepZoom(ZoomDirection zoomDirection, Point? zoomAnchor = null)
     {
         var canvasSize = _d2dCanvas.GetSize();
-        EnqueueW2dAction(() =>
-        {
-            if (_currentRenderer == null) return;
-            _canvasViewManager.StepZoom(zoomDirection, canvasSize, zoomAnchor);
-        });
+        SafeEnqueue(v => v.StepZoom(zoomDirection, canvasSize, zoomAnchor));
     }
 
     public void ZoomToHundred()
     {
         var canvasSize = _d2dCanvas.GetSize();
-        EnqueueW2dAction(() =>
-        {
-            if (_currentRenderer == null) return;
-            _canvasViewManager.ZoomToHundred(canvasSize);
-        });
+        SafeEnqueue(v => v.ZoomToHundred(canvasSize));
     }
 
     public void ZoomToHundred(Point anchor)
     {
         var canvasSize = _d2dCanvas.GetSize();
-        EnqueueW2dAction(() =>
-        {
-            if (_currentRenderer == null) return;
-            _canvasViewManager.ZoomToHundred(canvasSize, anchor);
-        });
+        SafeEnqueue(v => v.ZoomToHundred(canvasSize, anchor));
     }
 
     public void ZoomOutOnExit(double exitAnimationDuration)
     {
         var canvasSize = _d2dCanvas.GetSize();
-        EnqueueW2dAction(() =>
-        {
-            _canvasViewManager.ZoomOutOnExit(exitAnimationDuration, canvasSize);
-        });
+        SafeEnqueue(v => v.ZoomOutOnExit(exitAnimationDuration, canvasSize));
     }
 
     public void FitToScreen(bool animateChange)
     {
         var canvasSize = _d2dCanvas.GetSize();
         var imageSize = _imageSize;
-        EnqueueW2dAction(() =>
-        {
-            if (_currentRenderer == null) return;
-            _canvasViewManager.ZoomPanToFit(animateChange, imageSize, canvasSize);
-        });
+        SafeEnqueue(v => v.ZoomPanToFit(animateChange, imageSize, canvasSize));
     }
 
-    public void Pan(double dx, double dy)
-    {
-        EnqueueW2dAction(() =>
-        {
-            if (_currentRenderer == null) return;
-            _canvasViewManager.Pan(dx, dy);
-        });
-    }
+    public void Pan(double dx, double dy) => SafeEnqueue(v => v.Pan(dx, dy));
 
-    public void RotateCurrentPhotoBy90(bool clockWise)
-    {
-        EnqueueW2dAction(() =>
-        {
-            if (_currentRenderer == null) return;
-            _canvasViewManager.RotateBy(clockWise ? 90 : -90);
-        });
-    }
+    public void RotateCurrentPhotoBy90(bool clockWise) => SafeEnqueue(v => v.RotateBy(clockWise ? 90 : -90));
 
-    public void Shrug()
-    {
-        EnqueueW2dAction(() =>
-        {
-            if (_currentRenderer == null) return;
-            _canvasViewManager.Shrug();
-        });
-    }
+    public void Shrug() => SafeEnqueue(v => v.Shrug());
 
     public void ChangePage(NavDirection navDirection)
     {
-        EnqueueW2dAction(() =>
+        _pump.Enqueue(() =>
         {
             if (_currentRenderer is not MultiPageRenderer multiPageRenderer) return;
             var targetIndex = navDirection == NavDirection.Next
@@ -465,8 +418,7 @@ internal partial class CanvasController : ICanvasController
     private void D2dCanvas_Update(ICanvasAnimatedControl sender, CanvasAnimatedUpdateEventArgs args)
     {
         // ① Apply all queued UI-thread requests. Every view-state / renderer change happens here.
-        while (_pendingW2dActions.TryDequeue(out var action))
-            action();
+        _pump.Drain();
 
         // ② Drive pan/zoom/shrug animation ticks.
         _canvasViewManager.OnUpdate();
@@ -484,12 +436,7 @@ internal partial class CanvasController : ICanvasController
         // ⑤ Pause when there is nothing to do. Re-check the queue after pausing: an item enqueued
         //    during the pause decision stays in the queue until drained, so this closes the
         //    enqueue/pause lost-wakeup race without a lock.
-        if (_pendingW2dActions.IsEmpty && !_canvasViewManager.PanZoomAnimationOnGoing && !animatedFrameReady)
-        {
-            sender.Paused = true;
-            if (!_pendingW2dActions.IsEmpty)
-                sender.Paused = false;
-        }
+        _pump.PauseIfIdle(_canvasViewManager.PanZoomAnimationOnGoing || animatedFrameReady);
     }
 
     /// <summary>
@@ -513,11 +460,7 @@ internal partial class CanvasController : ICanvasController
     {
         var newSize = args.NewSize.AdjustForDpi(_d2dCanvas);
         var previousSize = args.PreviousSize.AdjustForDpi(_d2dCanvas);
-        EnqueueW2dAction(() =>
-        {
-            if (_currentRenderer == null) return;
-            _canvasViewManager.HandleSizeChange(newSize, previousSize);
-        });
+        SafeEnqueue(v => v.HandleSizeChange(newSize, previousSize));
     }
 
     /// <summary>
@@ -537,13 +480,13 @@ internal partial class CanvasController : ICanvasController
         }
         // Subscribe on the W2D thread so the add is ordered relative to animation ticks and the
         // permanent subscriber — no cross-thread race on the event delegate.
-        EnqueueW2dAction(() => _canvasViewManager.AnimationCompleted += handler);
+        _pump.Enqueue(() => _canvasViewManager.AnimationCompleted += handler);
 
         // Safety net: never hang if AnimationCompleted is missed. Unsubscribe back on the W2D thread.
         _ = Task.Delay(timeoutMs).ContinueWith(_ =>
         {
             if (tcs.TrySetResult())
-                EnqueueW2dAction(() => _canvasViewManager.AnimationCompleted -= handler);
+                _pump.Enqueue(() => _canvasViewManager.AnimationCompleted -= handler);
         });
         return tcs.Task;
     }
@@ -566,28 +509,31 @@ internal partial class CanvasController : ICanvasController
 
     // --- Settings ---
 
-    public void HandleCheckeredBackgroundChange() => EnqueueW2dAction(() => { }); // wake the canvas; Draw() reads the setting live
+    public void HandleCheckeredBackgroundChange() => _pump.Wake(); // wake the canvas; Draw() reads the setting live
 
-    public void HandleImageScalingQualityChange() => EnqueueW2dAction(() => _currentRenderer?.HandleScalingMethodChange());
+    public void HandleImageScalingQualityChange() => _pump.Enqueue(() => _currentRenderer?.HandleScalingMethodChange());
 
     // --- Threading helpers ---
-
-    /// <summary>
-    /// Posts an action to the W2D thread and wakes the render loop. Safe to call from the UI thread.
-    /// </summary>
-    private void EnqueueW2dAction(Action action)
-    {
-        _pendingW2dActions.Enqueue(action);
-        _d2dCanvas.Paused = false; // thread-safe; Win2D documents this as safe to call from any thread
-    }
 
     /// <summary>
     /// Wakes the render loop for at least one more Update+Draw. Safe to call from any thread; used
     /// when a renderer's off-screen surface or animation frame becomes ready.
     /// </summary>
-    private void RequestInvalidate()
+    private void RequestInvalidate() => _pump.Wake();
+
+    /// <summary>
+    /// Posts a view-manager mutation to the W2D thread, guarded by the standard
+    /// "_currentRenderer == null => no-op" check every uniform forwarder needs. Callers that must
+    /// capture UI-thread state (e.g. canvas size) do so before calling this and close over it in
+    /// <paramref name="apply"/>.
+    /// </summary>
+    private void SafeEnqueue(Action<CanvasViewManager> apply)
     {
-        _d2dCanvas.Paused = false;
+        _pump.Enqueue(() =>
+        {
+            if (_currentRenderer == null) return;
+            apply(_canvasViewManager);
+        });
     }
 
     // --- Zoom UI publishing ---

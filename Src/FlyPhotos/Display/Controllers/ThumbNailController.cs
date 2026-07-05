@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using Windows.Foundation;
@@ -24,7 +23,7 @@ namespace FlyPhotos.Display.Controllers;
 /// Renders the thumbnail strip on its own <see cref="CanvasAnimatedControl"/> — a dedicated swap-chain
 /// render thread (the "W2D thread"), separate from the main canvas. This mirrors the threading model on
 /// <see cref="CanvasController"/>: everything that touches rendering state runs on the W2D thread and the
-/// only door in is <see cref="_pendingW2dActions"/> (drained at the top of <see cref="D2dCanvasThumbNail_Update"/>)
+/// only door in is <see cref="_pump"/> (drained at the top of <see cref="D2dCanvasThumbNail_Update"/>)
 /// plus the <see cref="_rebuildRequested"/> flag. The UI thread never touches the offscreen, the cached
 /// bitmaps, or the slide state directly — it posts work and wakes the loop. The control is paused whenever
 /// it isn't sliding or rebuilding, so at rest it costs nothing.
@@ -58,7 +57,7 @@ internal partial class ThumbNailController : IThumbnailController
     // The single UI/other-thread -> W2D handoff. Arbitrary device-free work (slide reset, offscreen
     // disposal) is queued here; the heavier offscreen rebuild is flagged via _rebuildRequested because it
     // needs the live W2D `sender` for the device and render size. Both are drained at the top of Update.
-    private readonly ConcurrentQueue<Action> _pendingW2dActions = new();
+    private readonly W2dActionPump _pump;
     private int _rebuildRequested;
 
     // Slide animation (W2D-owned): the strip is always rendered centered on the current photo, but on
@@ -78,6 +77,7 @@ internal partial class ThumbNailController : IThumbnailController
     {
         _d2dCanvasThumbNail = d2dCanvasThumbNail;
         _photoSessionState = photoSessionState;
+        _pump = new W2dActionPump(_d2dCanvasThumbNail);
         _d2dCanvasThumbNail.CreateResources += D2dCanvasThumbNail_CreateResources;
         _d2dCanvasThumbNail.Update += D2dCanvasThumbNail_Update;
         _d2dCanvasThumbNail.Draw += D2dCanvasThumbNail_Draw;
@@ -128,8 +128,7 @@ internal partial class ThumbNailController : IThumbnailController
     private void D2dCanvasThumbNail_Update(ICanvasAnimatedControl sender, CanvasAnimatedUpdateEventArgs args)
     {
         // ① Apply queued UI -> W2D requests (slide reset, offscreen disposal).
-        while (_pendingW2dActions.TryDequeue(out var action))
-            action();
+        _pump.Drain();
 
         // ② Rebuild the offscreen ribbon if asked. Needs the live `sender` for the device + render size.
         if (Interlocked.Exchange(ref _rebuildRequested, 0) == 1)
@@ -150,16 +149,11 @@ internal partial class ThumbNailController : IThumbnailController
 
         // ④ Pause when idle. Re-check after pausing so an enqueue/flag that landed during the decision
         //    isn't lost (closes the lost-wakeup race without a lock, mirroring CanvasController).
-        if (!WorkPending())
-        {
-            sender.Paused = true;
-            if (WorkPending())
-                sender.Paused = false;
-        }
+        _pump.PauseIfIdle(WorkPending());
     }
 
     private bool WorkPending() =>
-        !_pendingW2dActions.IsEmpty || Volatile.Read(ref _rebuildRequested) == 1 || _slideAnimating;
+        Volatile.Read(ref _rebuildRequested) == 1 || _slideAnimating;
 
     /// <summary>W2D thread. Blits the pre-rendered ribbon, shifted by the current slide offset.</summary>
     private void D2dCanvasThumbNail_Draw(ICanvasAnimatedControl sender, CanvasAnimatedDrawEventArgs args)
@@ -236,7 +230,7 @@ internal partial class ThumbNailController : IThumbnailController
             {
                 _d2dCanvasThumbNail.Visibility = Visibility.Collapsed;
                 // Reset slide + dispose the offscreen on the W2D thread so there's no race with Draw.
-                EnqueueW2dAction(() =>
+                _pump.Enqueue(() =>
                 {
                     ResetSlide();
                     _thumbnailOffscreen?.Dispose();
@@ -253,7 +247,7 @@ internal partial class ThumbNailController : IThumbnailController
             _thumbNailSelectionColor = ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor);
             _thumbnailBoxSize = AppConfig.Settings.ThumbnailSize;
             // Box size changed → pixel-space offset is stale; reset so the next render doesn't slide.
-            EnqueueW2dAction(ResetSlide);
+            _pump.Enqueue(ResetSlide);
             if (AppConfig.Settings.ShowThumbnails)
                 RequestRebuild();
         });
@@ -477,18 +471,11 @@ internal partial class ThumbNailController : IThumbnailController
 
     // --- Threading helpers ---
 
-    /// <summary>Posts device-free work to the W2D thread and wakes the loop. Safe from any thread.</summary>
-    private void EnqueueW2dAction(Action action)
-    {
-        _pendingW2dActions.Enqueue(action);
-        _d2dCanvasThumbNail.Paused = false; // thread-safe per Win2D
-    }
-
     /// <summary>Flags an offscreen rebuild and wakes the loop. Safe from any thread.</summary>
     private void RequestRebuild()
     {
         Interlocked.Exchange(ref _rebuildRequested, 1);
-        _d2dCanvasThumbNail.Paused = false; // thread-safe per Win2D
+        _pump.Wake();
     }
 
     private void RunOnUiThread(Action action)
