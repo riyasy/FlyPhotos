@@ -4,6 +4,7 @@ using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Localization;
 using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
+using FlyPhotos.UI.Behaviors;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -37,9 +38,7 @@ public sealed partial class InitWindow
         titleBar.ButtonForegroundColor = Colors.Gray;
 
         ((FrameworkElement)Content).RequestedTheme = AppConfig.Settings.Theme;
-        ((FrameworkElement)Content).FlowDirection = Localizer.IsRtl(AppConfig.Settings.Language)
-            ? FlowDirection.RightToLeft
-            : FlowDirection.LeftToRight;
+        RtlLayoutBehavior.ApplyFlowDirection((FrameworkElement)Content, AppConfig.Settings.Language);
 
         MainLayout.KeyDown += delegate(object _, KeyRoutedEventArgs args)
         {

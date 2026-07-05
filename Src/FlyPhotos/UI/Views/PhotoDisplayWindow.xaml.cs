@@ -119,6 +119,9 @@ public sealed partial class PhotoDisplayWindow
         BorderTxtFileName.Visibility = AppConfig.Settings.ShowFileName ? Visibility.Visible : Visibility.Collapsed;
         ButtonExpander.Visibility = AppConfig.Settings.ShowCacheStatus ? Visibility.Visible : Visibility.Collapsed;
 
+        if (RtlLayoutBehavior.ApplyFlowDirection((FrameworkElement)Content, AppConfig.Settings.Language))
+            RtlLayoutBehavior.MirrorIcon(ButtonBack, ButtonNext, ButtonPrevPage, ButtonNextPage);
+
         // Secondary instances are restricted: no Settings, no cache status.
         if (AppConfig.Volatile.IsSecondaryInstance)
         {
