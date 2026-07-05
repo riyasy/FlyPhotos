@@ -3,7 +3,9 @@ using System;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Display.ExifReading;
+using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Localization;
+using FlyPhotos.UI.Behaviors;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -21,6 +23,7 @@ public sealed partial class ExifPanel : UserControl
     public ExifPanel()
     {
         InitializeComponent();
+        RtlLayoutBehavior.ApplyFlowDirection(this, AppConfig.Settings.Language);
     }
 
     public void Toggle(string filePath)
