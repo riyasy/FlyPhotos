@@ -26,6 +26,15 @@ public partial class App
     private PhotoDisplayWindow _photoDisplayWindow;
 
     /// <summary>
+    ///     Bundled Segoe Fluent Icons font, loaded from the app package path (the "FluentIcons"
+    ///     resource in App.xaml). Use for code-behind FontIcons so they render identically on
+    ///     Windows 10/11 and in both packaged and unpackaged builds, independent of any
+    ///     system-installed font.
+    /// </summary>
+    public static Microsoft.UI.Xaml.Media.FontFamily FluentIconFont =>
+        (Microsoft.UI.Xaml.Media.FontFamily)Current.Resources["FluentIcons"];
+
+    /// <summary>
     ///     Initializes the singleton application object.  This is the first line of authored code
     ///     executed, and as such is the logical equivalent of main() or WinMain().
     /// </summary>

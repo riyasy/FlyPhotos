@@ -875,7 +875,7 @@ public sealed partial class PhotoDisplayWindow
             return icon;
         }
 
-        var fallback = new FontIcon { Glyph = DefaultAppIconGlyph };
+        var fallback = new FontIcon { Glyph = DefaultAppIconGlyph, FontFamily = App.FluentIconFont };
         if (size.HasValue) fallback.FontSize = size.Value;
         return fallback;
     }

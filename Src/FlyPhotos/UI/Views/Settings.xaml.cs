@@ -200,7 +200,7 @@ internal sealed partial class Settings
         var bmp = app.Icon;
         btnShortcut.Content = bmp != null
             ? new Image { Source = bmp, Width = 32, Height = 32 }
-            : new FontIcon { Glyph = "\uED35", FontSize = 32 }; // Default icon
+            : new FontIcon { Glyph = "\uED35", FontSize = 32, FontFamily = App.FluentIconFont }; // Default icon
         
     }
 
@@ -630,7 +630,7 @@ internal sealed partial class Settings
         var bmp = dialog.SelectedApp.Icon;
         button.Content = bmp != null
             ? new Image { Source = bmp, Width = 32, Height = 32 }
-            : new FontIcon { Glyph = "\uED35", FontSize = 32 };
+            : new FontIcon { Glyph = "\uED35", FontSize = 32, FontFamily = App.FluentIconFont };
     }
 
     private static void SetShortCutSettingForButton(Button button, string shortCut)

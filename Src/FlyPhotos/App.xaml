@@ -12,6 +12,9 @@
             </ResourceDictionary.MergedDictionaries>
             <!--  Other app resources here  -->
             <FontFamily x:Key="FluentIcons">/Assets/Fonts/Segoe Fluent Icons.ttf#Segoe Fluent Icons</FontFamily>
+            <!--  Load the bundled font from our package path so icons look identical on Win10 (no system Segoe Fluent Icons) as on Win11.
+                  FontIcon and CommunityToolkit's ui:FontIcon both default FontFamily to this resource.  -->
+            <FontFamily x:Key="SymbolThemeFontFamily">/Assets/Fonts/Segoe Fluent Icons.ttf#Segoe Fluent Icons</FontFamily>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

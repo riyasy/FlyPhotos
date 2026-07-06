@@ -44,6 +44,7 @@
                                     x:Name="HeartIcon"
                                     MinWidth="32"
                                     MinHeight="32"
+                                    FontFamily="{StaticResource FluentIcons}"
                                     Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                                     Glyph="&#xEB51;" />
                             </controls:SettingsCard.HeaderIcon>
@@ -61,7 +62,7 @@
                             x:Name="SettingsCardLanguage"
                             x:Uid="SettingsCardLanguage"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE774;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE774;, FontFamily={StaticResource FluentIcons}}">
                             <ComboBox
                                 x:Name="ComboLanguage"
                                 MinWidth="200"
@@ -78,7 +79,7 @@
                             x:Name="SettingsCardTheme"
                             x:Uid="SettingsCardTheme"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE790;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE790;, FontFamily={StaticResource FluentIcons}}">
                             <ComboBox
                                 x:Name="ComboTheme"
                                 MinWidth="150"
@@ -93,7 +94,7 @@
                             x:Name="SettingsCardWindowBackground"
                             x:Uid="SettingsCardWindowBackground"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE70A;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE70A;, FontFamily={StaticResource FluentIcons}}">
                             <ComboBox
                                 x:Name="ComboBackGround"
                                 MinWidth="150"
@@ -129,7 +130,7 @@
                             x:Uid="SettingsCardWindowLaunchMode"
                             Margin="0,5,0,0"
                             Description="{x:Bind LaunchModeDescription(ComboWindowLaunchMode.SelectedIndex), Mode=OneWay}"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xEC77;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xEC77;, FontFamily={StaticResource FluentIcons}}">
                             <ComboBox
                                 x:Name="ComboWindowLaunchMode"
                                 MinWidth="150"
@@ -144,7 +145,7 @@
                             x:Name="SettingsCardOpenExitZoom"
                             x:Uid="SettingsCardOpenExitZoom"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE740;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE740;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonOpenExitZoom" />
                         </controls:SettingsCard>
 
@@ -159,7 +160,7 @@
                             x:Name="SettingsCardImageFitPercentage"
                             x:Uid="SettingsCardImageFitPercentage"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE9A6;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE9A6;, FontFamily={StaticResource FluentIcons}}">
                             <Slider
                                 x:Name="SliderImageFitPercentage"
                                 MinWidth="150"
@@ -178,7 +179,7 @@
                             x:Name="SettingsCardImageScalingQuality"
                             x:Uid="SettingsCardImageScalingQuality"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE794;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE794;, FontFamily={StaticResource FluentIcons}}">
                             <ComboBox
                                 x:Name="ComboImageScalingQuality"
                                 MinWidth="150"
@@ -193,7 +194,7 @@
                             x:Name="SettingsCardPanZoomNavBehaviour"
                             x:Uid="SettingsCardPanZoomNavBehaviour"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE7C5;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE7C5;, FontFamily={StaticResource FluentIcons}}">
                             <ComboBox
                                 x:Name="ComboPanZoomNavBehaviour"
                                 MinWidth="150"
@@ -208,7 +209,7 @@
                             x:Name="SettingsCardShowCheckeredBackground"
                             x:Uid="SettingsCardShowCheckeredBackground"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE80A;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE80A;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonShowCheckeredBackground" />
                         </controls:SettingsCard>
 
@@ -222,7 +223,7 @@
                         <controls:SettingsExpander
                             x:Uid="SettingsExpanderKeyboardShortcuts"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE765;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE765;, FontFamily={StaticResource FluentIcons}}">
                             <controls:SettingsExpander.Items>
                                 <controls:SettingsCard
                                     x:Name="SettingsCardKeyboardShortCuts"
@@ -235,7 +236,7 @@
                             x:Name="SettingsCardMouseWheelBehaviour"
                             x:Uid="SettingsCardMouseWheelBehaviour"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;, FontFamily={StaticResource FluentIcons}}">
                             <ComboBox
                                 x:Name="ComboMouseWheelBehaviour"
                                 MinWidth="150"
@@ -252,7 +253,7 @@
                             x:Name="SettingsCardMouseFwdBackBehaviour"
                             x:Uid="SettingsCardMouseFwdBackBehaviour"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;, FontFamily={StaticResource FluentIcons}}">
                             <ComboBox
                                 x:Name="ComboMouseFwdBackBehaviour"
                                 MinWidth="150"
@@ -266,7 +267,7 @@
                             x:Name="SettingsCardConfirmBeforeDelete"
                             x:Uid="SettingsCardConfirmBeforeDelete"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE74D;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE74D;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonConfirmBeforeDelete" />
                         </controls:SettingsCard>
 
@@ -274,7 +275,7 @@
                             x:Name="SettingsCardClickOutsideImageToRestoreWindow"
                             x:Uid="SettingsCardClickOutsideImageToRestoreWindow"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE944;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE944;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonClickOutsideImageToRestoreWindow" />
                         </controls:SettingsCard>
 
@@ -282,7 +283,7 @@
                             x:Name="SettingsCardCtrlDragToMoveWindow"
                             x:Uid="SettingsCardCtrlDragToMoveWindow"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE7C2;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE7C2;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonCtrlDragToMoveWindow" HorizontalAlignment="Right" />
                         </controls:SettingsCard>
 
@@ -297,7 +298,7 @@
                             x:Name="SettingsCardShowFileName"
                             x:Uid="SettingsCardShowFileName"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xED1E;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonShowFileName" />
                         </controls:SettingsCard>
 
@@ -305,7 +306,7 @@
                             x:Name="SettingsCardShowImageDimensions"
                             x:Uid="SettingsCardShowImageDimensions"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xED1E;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonShowImageDimensions" />
                         </controls:SettingsCard>
 
@@ -313,7 +314,7 @@
                             x:Name="SettingsCardShowCacheStatusExpander"
                             x:Uid="SettingsCardShowCacheStatusExpander"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xED1E;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xED1E;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonShowCacheStatusExpander" />
                         </controls:SettingsCard>
 
@@ -321,7 +322,7 @@
                             x:Name="SettingsCardShowZoomPercent"
                             x:Uid="SettingsCardShowZoomPercent"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE94C;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE94C;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonShowZoomPercent" />
                         </controls:SettingsCard>
 
@@ -329,7 +330,7 @@
                             x:Name="SettingsCardExternalShortcuts"
                             x:Uid="SettingsCardExternalShortcuts"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE8A7;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE8A7;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonEnableExternalShortcut" HorizontalAlignment="Right" />
                             <controls:SettingsExpander.Items>
                                 <controls:SettingsCard
@@ -342,28 +343,28 @@
                                             Height="50"
                                             Margin="2"
                                             Click="OnShortcutButtonClick">
-                                            <FontIcon Glyph="&#xE8E5;" />
+                                            <FontIcon Glyph="&#xE8E5;" FontFamily="{StaticResource FluentIcons}" />
                                         </Button>
                                         <Button
                                             x:Name="BtnShortcut2"
                                             Height="50"
                                             Margin="2"
                                             Click="OnShortcutButtonClick">
-                                            <FontIcon Glyph="&#xE8E5;" />
+                                            <FontIcon Glyph="&#xE8E5;" FontFamily="{StaticResource FluentIcons}" />
                                         </Button>
                                         <Button
                                             x:Name="BtnShortcut3"
                                             Height="50"
                                             Margin="2"
                                             Click="OnShortcutButtonClick">
-                                            <FontIcon Glyph="&#xE8E5;" />
+                                            <FontIcon Glyph="&#xE8E5;" FontFamily="{StaticResource FluentIcons}" />
                                         </Button>
                                         <Button
                                             x:Name="BtnShortcut4"
                                             Height="50"
                                             Margin="2"
                                             Click="OnShortcutButtonClick">
-                                            <FontIcon Glyph="&#xE8E5;" />
+                                            <FontIcon Glyph="&#xE8E5;" FontFamily="{StaticResource FluentIcons}" />
                                         </Button>
                                     </StackPanel>
                                 </controls:SettingsCard>
@@ -374,20 +375,20 @@
                             x:Name="SettingsCardShowThumbnail"
                             x:Uid="SettingsCardShowThumbnail"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xF597;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xF597;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonShowThumbnail" HorizontalAlignment="Right" />
                             <controls:SettingsExpander.Items>
                                 <controls:SettingsCard
                                     x:Name="SettingsCardThumbnailAnimation"
                                     x:Uid="SettingsCardThumbnailAnimation"
-                                    HeaderIcon="{ui:FontIcon Glyph=&#xF4A5;}"
+                                    HeaderIcon="{ui:FontIcon Glyph=&#xF4A5;, FontFamily={StaticResource FluentIcons}}"
                                     IsEnabled="{x:Bind ButtonShowThumbnail.IsOn, Mode=OneWay}">
                                     <ToggleSwitch x:Name="ButtonThumbnailAnimation" HorizontalAlignment="Right" />
                                 </controls:SettingsCard>
                                 <controls:SettingsCard
                                     x:Name="SettingsCardThumbnailSize"
                                     x:Uid="SettingsCardThumbnailSize"
-                                    HeaderIcon="{ui:FontIcon Glyph=&#xE620;}"
+                                    HeaderIcon="{ui:FontIcon Glyph=&#xE620;, FontFamily={StaticResource FluentIcons}}"
                                     IsEnabled="{x:Bind ButtonShowThumbnail.IsOn, Mode=OneWay}">
                                     <Slider
                                         x:Name="SliderThumbnailSize"
@@ -401,7 +402,7 @@
                                 <controls:SettingsCard
                                     x:Name="SettingsCardThumbnailSelectionColor"
                                     x:Uid="SettingsCardThumbnailSelectionColor"
-                                    HeaderIcon="{ui:FontIcon Glyph=&#xE790;}"
+                                    HeaderIcon="{ui:FontIcon Glyph=&#xE790;, FontFamily={StaticResource FluentIcons}}"
                                     IsEnabled="{x:Bind ButtonShowThumbnail.IsOn, Mode=OneWay}">
                                     <Button
                                         x:Name="ButtonSetThumbnailSelColor"
@@ -432,7 +433,7 @@
                             x:Name="SettingsCardFadeControls"
                             x:Uid="SettingsCardFadeControls"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE754;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE754;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonEnableAutoFade" HorizontalAlignment="Right" />
                             <controls:SettingsExpander.Items>
                                 <controls:SettingsCard
@@ -454,14 +455,14 @@
                             x:Name="SettingsCardAutoHideMouse"
                             x:Uid="SettingsCardAutoHideMouse"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xED1A;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xED1A;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonEnableAutoHideMouse" HorizontalAlignment="Right" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
                             x:Name="SettingsCardAutoHideCaptionButtons"
                             x:Uid="SettingsCardAutoHideCaptionButtons"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xED1A;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xED1A;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonEnableAutoHideCaptionButtons" HorizontalAlignment="Right" />
                         </controls:SettingsCard>
 
@@ -476,7 +477,7 @@
                             x:Name="SettingsCardLowResCache"
                             x:Uid="SettingsCardLowResCache"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xF16A;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xF16A;, FontFamily={StaticResource FluentIcons}}">
                             <Slider
                                 x:Name="SliderLowResCacheSize"
                                 MinWidth="150"
@@ -490,7 +491,7 @@
                             x:Name="SettingsCardHighResCache"
                             x:Uid="SettingsCardHighResCache"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xF16A;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xF16A;, FontFamily={StaticResource FluentIcons}}">
                             <Slider
                                 x:Name="SliderHighResCacheSize"
                                 MinWidth="150"
@@ -504,7 +505,7 @@
                             x:Name="SettingsCardClearDiskCache"
                             x:Uid="SettingsCardClearDiskCache"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE74D;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE74D;, FontFamily={StaticResource FluentIcons}}">
                             <Button
                                 x:Name="ButtonClearDiskCache"
                                 x:Uid="ButtonClearDiskCache"
@@ -522,7 +523,7 @@
                             x:Name="SettingsCardDecodeRawData"
                             x:Uid="SettingsCardDecodeRawData"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE722;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE722;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonDecodeRawData" />
                             <controls:SettingsExpander.Items>
                                 <controls:SettingsCard x:Name="SettingsCardDecoderPriority" x:Uid="SettingsCardDecoderPriority">
@@ -557,6 +558,7 @@
                                                     <!--  We can keep the same icon or change it to a horizontal drag handle  -->
                                                     <FontIcon
                                                         Margin="0,0,12,0"
+                                                        FontFamily="{StaticResource FluentIcons}"
                                                         FontSize="16"
                                                         Glyph="&#xE76F;" />
                                                     <TextBlock VerticalAlignment="Center" Text="{x:Bind}" />
@@ -577,7 +579,7 @@
                             x:Name="SettingsCardAllowMultiInstance"
                             x:Uid="SettingsCardAllowMultiInstance"
                             Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE7AA;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE7AA;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonAllowMultiInstance" />
                         </controls:SettingsCard>
 
@@ -592,7 +594,7 @@
                             x:Name="SettingsCardLog"
                             x:Uid="SettingsCardLog"
                             Margin="0,5,0,30"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE81C;}">
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE81C;, FontFamily={StaticResource FluentIcons}}">
                             <StackPanel Orientation="Vertical">
                                 <Button
                                     x:Name="ButtonOpenLog"
@@ -650,7 +652,7 @@
                         x:Name="SettingsCardVersion"
                         x:Uid="SettingsCardVersion"
                         Margin="0,5,0,0"
-                        HeaderIcon="{ui:FontIcon Glyph=&#xF133;}">
+                        HeaderIcon="{ui:FontIcon Glyph=&#xF133;, FontFamily={StaticResource FluentIcons}}">
                         <HyperlinkButton
                             x:Name="BtnCheckVersion"
                             x:Uid="BtnCheckVersion"
@@ -669,14 +671,14 @@
                         x:Name="SettingsCardReportBugs"
                         x:Uid="SettingsCardReportBugs"
                         Margin="0,5,0,0"
-                        HeaderIcon="{ui:FontIcon Glyph=&#xE730;}">
+                        HeaderIcon="{ui:FontIcon Glyph=&#xE730;, FontFamily={StaticResource FluentIcons}}">
                         <HyperlinkButton x:Uid="BtnReportBugs" NavigateUri="https://github.com/riyasy/FlyPhotos/issues" />
                     </controls:SettingsCard>
                     <controls:SettingsCard
                         x:Name="SettingsCardCredits"
                         x:Uid="SettingsCardCredits"
                         Margin="0,5,0,0"
-                        HeaderIcon="{ui:FontIcon Glyph=&#xE728;}">
+                        HeaderIcon="{ui:FontIcon Glyph=&#xE728;, FontFamily={StaticResource FluentIcons}}">
                         <HyperlinkButton x:Uid="BtnThirdPartyLicenses" Click="ButtonThirdPartyLicenses_Click" />
                     </controls:SettingsCard>
                 </StackPanel>
