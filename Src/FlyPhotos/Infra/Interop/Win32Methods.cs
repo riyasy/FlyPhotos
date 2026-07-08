@@ -328,6 +328,27 @@ internal static partial class Win32Methods
 
     #endregion
 
+    #region Package identity (kernel32.dll)
+
+    /// <summary>
+    /// <c>GetCurrentPackageFullName</c> return code indicating the process has no package
+    /// identity (i.e. it is running unpackaged).
+    /// </summary>
+    internal const int APPMODEL_ERROR_NO_PACKAGE = 15700;
+
+    /// <summary>
+    /// Non-throwing packaging probe. Unlike <c>Package.Current</c> (which throws
+    /// <see cref="System.InvalidOperationException"/> for unpackaged processes), this returns a
+    /// status code. Call with <paramref name="packageFullNameLength"/> = 0 and
+    /// <paramref name="packageFullName"/> = <see cref="IntPtr.Zero"/> to probe: a return of
+    /// <see cref="APPMODEL_ERROR_NO_PACKAGE"/> means unpackaged; any other value (e.g.
+    /// <c>ERROR_INSUFFICIENT_BUFFER</c>) means the process is packaged.
+    /// </summary>
+    [LibraryImport("kernel32.dll")]
+    internal static partial int GetCurrentPackageFullName(ref uint packageFullNameLength, IntPtr packageFullName);
+
+    #endregion
+
     #region Shell file operations — copy / move / delete to Recycle Bin (shell32.dll)
 
     /// <summary>
