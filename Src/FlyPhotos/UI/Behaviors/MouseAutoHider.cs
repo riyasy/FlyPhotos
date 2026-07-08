@@ -66,9 +66,7 @@ public partial class MouseAutoHider : IDisposable
     {
         _host = host ?? throw new ArgumentNullException(nameof(host));
 
-        var cursorPath = Path.Combine(PathResolver.IsPackagedApp
-            ? Windows.ApplicationModel.Package.Current.InstalledLocation.Path
-            : AppContext.BaseDirectory, "Assets", "transparent.cur");
+        var cursorPath = Path.Combine(AppContext.BaseDirectory, "Assets", "transparent.cur");
         _transparentCursor = Win32CursorMethods.LoadCursor(cursorPath);
         if (_transparentCursor == null)
             Debug.WriteLine($"MouseAutoHider: failed to load transparent cursor from '{cursorPath}'. Cursor hiding will be a no-op.");
