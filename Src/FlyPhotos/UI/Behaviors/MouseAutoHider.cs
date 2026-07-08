@@ -130,13 +130,15 @@ public partial class MouseAutoHider : IDisposable
     private void OnInactivityTimeout(object sender, object e)
     {
         _inActivityTimer.Stop();
-        if (_isCursorShown)
-        {
-            SetCursorVisible(false);
-            // Start ignoring subsequent pointer events for a short duration.
-            _isIgnoringActivity = true;
-            _ignoreActivityTimer.Start();
-        }
+        if (!_isCursorShown) return;
+
+        // Raise the ignore flag BEFORE swapping the cursor. The swap makes WinUI
+        // raise a synthetic PointerMoved; setting the flag first guarantees that
+        // move is swallowed whether it's delivered synchronously (re-entrant) or
+        // queued — otherwise it re-shows the cursor the instant we hide it.
+        _isIgnoringActivity = true;
+        _ignoreActivityTimer.Start();
+        SetCursorVisible(false);
     }
 
     /// <summary>
