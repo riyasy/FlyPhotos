@@ -97,10 +97,12 @@ internal sealed class WindowFullScreenManager
         // Do NOT reduce the State read to a memberless `is/as OverlappedPresenter`.
         if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped)
         {
-            FullScreenToggled?.Invoke(true);
             _wasMaximizedBeforeFullScreen = AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Maximized };
             AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
             exitFullScreenButton?.Visibility = Visibility.Visible;
+            // Fires last so a subscribed caption-button fader's hide decision (if auto-hide is
+            // enabled) is the one that sticks, instead of being clobbered by the Visible set above.
+            FullScreenToggled?.Invoke(true);
         }
         else if (AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen)
         {

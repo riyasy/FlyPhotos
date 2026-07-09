@@ -166,7 +166,7 @@ public sealed partial class PhotoDisplayWindow
         _mouseAutoHider = new MouseAutoHider(MainLayout, AppConfig.Settings.AutoHideMouse, TimeSpan.FromSeconds(1));
         _windPlacementManager = new WindowPlacementManager(this, AppConfig.Settings.WindowState);
         _windFullScreenManager = new WindowFullScreenManager(this);
-        _captionButtonFader = new WindowCaptionButtonFader(AppWindow.TitleBar, MainLayout, AppConfig.Settings.AutoHideCaptionButtons);
+        _captionButtonFader = new WindowCaptionButtonFader(AppWindow.TitleBar, MainLayout, AppConfig.Settings.AutoHideCaptionButtons, ButtonFullScreenClose);
         _ctrlDragWindowMover = new CtrlDragWindowMover(D2dCanvas, AppWindow, AppConfig.Settings.CtrlDragToMoveWindow);
         _ctrlDragWindowMover.IsOnBackground = pos => !_canvasController.IsPressedOnImage(pos.AdjustForDpi(D2dCanvas));
         _windFullScreenManager.FullScreenToggled += WindFullScreenManager_FullScreenToggled;
@@ -764,7 +764,7 @@ public sealed partial class PhotoDisplayWindow
     private void WindFullScreenManager_FullScreenToggled(bool isFullScreen)
     {
         _windPlacementManager.PauseTracking = isFullScreen;
-        _captionButtonFader.Suspended = isFullScreen;
+        _captionButtonFader.IsFullScreen = isFullScreen;
     }
 
     private void SettingWindow_SettingChanged(Setting setting)
