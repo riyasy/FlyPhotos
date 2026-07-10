@@ -713,6 +713,9 @@ public sealed partial class PhotoDisplayWindow
     private async void WheelScrollBrakeTimer_Tick(object? sender, object e)
     {
         _wheelScrollBrakeTimer.Stop();
+        // The gesture ended: drop any sub-threshold delta so it can't carry into the next one.
+        _verticalDeltaAccumulator = 0;
+        _horizontalDeltaAccumulator = 0;
         await _photoController.Brake();
     }
 

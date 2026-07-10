@@ -189,9 +189,11 @@ internal partial class PhotoDisplayController
 
     public async Task Fly(NavDirection direction)
     {
-        Interlocked.Increment(ref _keyPressCounter);
         var keys = _photoList.Keys;
         if (keys.Count <= 1) return;
+        // A list that can't be navigated must never open a burst: the HQ worker parks on
+        // IsContinuousKeyPress, and only a Brake() would unwind it.
+        Interlocked.Increment(ref _keyPressCounter);
         int currentPosition = _photoSessionState.CurrentPhotoListPosition;
         if (currentPosition < 0) return; // TODO Should not happen if state is consistent
         int newPosition = currentPosition + (direction == NavDirection.Next ? 1 : -1);
