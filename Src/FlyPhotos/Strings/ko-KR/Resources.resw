@@ -818,4 +818,25 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>공유</value>
   </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>이름 바꾸기</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>확인</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>파일 이름을 바꿀 수 없습니다.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>이름 바꾸기 실패</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>파일 이름에 유효하지 않은 문자가 포함되어 있습니다.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>같은 이름의 파일이 이미 있습니다.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>확인</value>
+  </data>
 </root>

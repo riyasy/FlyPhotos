@@ -820,4 +820,25 @@ High Quality Cubic – Масштабирование наивысшего ка�
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>Поделиться</value>
   </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>Переименовать</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>ОК</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>Не удалось переименовать файл.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>Ошибка переименования</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>Имя файла содержит недопустимые символы.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>Файл с таким именем уже существует.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>ОК</value>
+  </data>
 </root>

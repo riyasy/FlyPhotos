@@ -819,4 +819,25 @@ High Quality Cubic – Redimensionamento de alta qualidade para fotos.</value>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>Partilhar</value>
   </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>Mudar o nome</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>Não foi possível mudar o nome do ficheiro.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>Falha ao mudar o nome</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>O nome do ficheiro contém carateres inválidos.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>Já existe um ficheiro com este nome.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
 </root>

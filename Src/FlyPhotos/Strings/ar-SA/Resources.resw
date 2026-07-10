@@ -819,4 +819,25 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>مشاركة</value>
   </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>إعادة تسمية</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>موافق</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>تعذرت إعادة تسمية الملف.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>فشلت إعادة التسمية</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>يحتوي اسم الملف على أحرف غير صالحة.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>يوجد ملف بهذا الاسم بالفعل.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>موافق</value>
+  </data>
 </root>

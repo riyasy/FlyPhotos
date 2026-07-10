@@ -146,6 +146,14 @@
                             </MenuFlyoutItem>
                             <MenuFlyoutSeparator Padding="12,8,12,8" />
                             <MenuFlyoutItem
+                                x:Uid="MenuItemRename"
+                                Click="MenuItemRename_OnClick"
+                                Text="Rename">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="&#xE8AC;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem
                                 x:Uid="MenuItemDelete"
                                 Click="MenuItemDelete_OnClick"
                                 Text="Delete">

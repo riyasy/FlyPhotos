@@ -367,6 +367,35 @@ internal partial class PhotoDisplayController
         }
     }
 
+    // --- Rename ---
+
+    public bool CanRenameCurrentPhoto()
+    {
+        if (_photoList.Keys.Count == 0) return false;
+        if (IsContinuousKeyPress()) return false;
+        if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq) return false;
+        return true;
+    }
+
+    public async Task<RenameResult> RenameCurrentPhoto(string newFileName)
+    {
+        var currentKey = _photoSessionState.CurrentPhotoKey;
+        if (_photoList.GetPhoto(currentKey) is not { } photo)
+        {
+            Logger.Error($"RenameCurrentPhoto failed: Key {currentKey} not found in the collection.");
+            return new RenameResult(false, "App - Inconsistent State");
+        }
+
+        var newPath = Path.Combine(Path.GetDirectoryName(photo.FilePath) ?? "", newFileName);
+        var result = await StorageOps.RenameFileOnDisk(photo.FilePath, newPath);
+        if (result.Success)
+        {
+            photo.Rename(newPath);
+            UpdateFileNameAndDetails();
+        }
+        return result;
+    }
+
     // --- Clipboard ---
 
     public Task CopyFileToClipboardAsync()

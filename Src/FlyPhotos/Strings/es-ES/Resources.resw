@@ -819,4 +819,25 @@ High Quality Cubic – Escalado de la más alta calidad para fotos.</value>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>Compartir</value>
   </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>Cambiar nombre</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>Aceptar</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>No se pudo cambiar el nombre del archivo.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>Error al cambiar el nombre</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>El nombre del archivo contiene caracteres no válidos.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>Ya existe un archivo con ese nombre.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>Aceptar</value>
+  </data>
 </root>

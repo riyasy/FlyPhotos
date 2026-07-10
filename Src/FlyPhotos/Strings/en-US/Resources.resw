@@ -819,4 +819,25 @@ High Quality Cubic – Highest-quality scaling for photos.</value>
   <data name="MenuItemDelete.Text" xml:space="preserve">
     <value>Delete</value>
   </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>The file could not be renamed.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>Rename Failed</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>The file name contains invalid characters.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>A file with that name already exists.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
 </root>

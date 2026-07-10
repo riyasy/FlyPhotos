@@ -819,4 +819,25 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>Delen</value>
   </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>Naam wijzigen</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>Het bestand kon niet worden hernoemd.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>Naam wijzigen mislukt</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>De bestandsnaam bevat ongeldige tekens.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>Er bestaat al een bestand met deze naam.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
 </root>

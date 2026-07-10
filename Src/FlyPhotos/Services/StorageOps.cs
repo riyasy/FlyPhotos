@@ -78,6 +78,7 @@
 #nullable enable
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Interop;
+using FlyPhotos.Infra.Localization;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -297,6 +298,30 @@ internal class StorageOps
             }
         }
     }
+
+    /// <summary>
+    /// Renames (moves within the same directory) the file at <paramref name="oldPath"/> to
+    /// <paramref name="newPath"/> via a plain <see cref="File.Move(string, string)"/>. Unlike
+    /// <see cref="DeleteFileFromDisk"/> this isn't a Recycle-Bin operation, so no WinRT/shell
+    /// fallback is needed.
+    /// </summary>
+    public static Task<RenameResult> RenameFileOnDisk(string oldPath, string newPath) => Task.Run(() =>
+    {
+        try
+        {
+            if (File.Exists(newPath))
+                return new RenameResult(false, L.Get("RenameFailed/FileAlreadyExists"));
+
+            File.Move(oldPath, newPath);
+            Logger.Info($"Successfully renamed file: {oldPath} -> {newPath}");
+            return new RenameResult(true);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Failed to rename '{oldPath}' to '{newPath}': {ex.Message}");
+            return new RenameResult(false, ex.Message);
+        }
+    });
 
     /// <summary>
     /// Determines if a file should be buffered into RAM.

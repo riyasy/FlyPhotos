@@ -818,4 +818,25 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>共有</value>
   </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>名前の変更</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>ファイルの名前を変更できませんでした。</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>名前の変更に失敗しました</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>ファイル名に無効な文字が含まれています。</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>同じ名前のファイルが既に存在します。</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
 </root>

@@ -819,4 +819,25 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>共用</value>
   </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>重新命名</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>確定</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>無法重新命名檔案。</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>重新命名失敗</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>檔案名稱包含無效的字元。</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>已經有相同名稱的檔案。</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>確定</value>
+  </data>
 </root>
