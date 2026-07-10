@@ -215,7 +215,7 @@
                     <RepeatButton
                         x:Name="ButtonPrevPage"
                         Width="Auto"
-                        Click="ButtonPrevPage_OnClick"
+                        Click="ButtonPrevNextPage_OnClick"
                         Content="&#xF587;"
                         FontFamily="{StaticResource FluentIcons}"
                         FontSize="16"
@@ -233,7 +233,7 @@
                         x:Name="ButtonNextPage"
                         Width="Auto"
                         Margin="0,0,10,0"
-                        Click="ButtonNextPage_OnClick"
+                        Click="ButtonPrevNextPage_OnClick"
                         Content="&#xF586;"
                         FontFamily="{StaticResource FluentIcons}"
                         FontSize="16"

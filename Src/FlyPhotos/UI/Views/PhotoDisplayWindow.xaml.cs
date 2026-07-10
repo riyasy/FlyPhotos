@@ -11,7 +11,6 @@ using FlyPhotos.Core.Model;
 using FlyPhotos.Display.Controllers;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
-using FlyPhotos.Infra.Interop;
 using FlyPhotos.Infra.Localization;
 using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
@@ -275,10 +274,8 @@ public sealed partial class PhotoDisplayWindow
         await AnimatePhotoDisplayWindowClose();
     }
 
-    private async void ButtonFullScreenClose_Click(object sender, RoutedEventArgs e)
-    {
+    private async void ButtonFullScreenClose_Click(object sender, RoutedEventArgs e) => 
         await AnimatePhotoDisplayWindowClose();
-    }
 
     private void PhotoDisplayWindow_Closed(object sender, WindowEventArgs args)
     {
@@ -364,10 +361,8 @@ public sealed partial class PhotoDisplayWindow
         await HandleMouseWheelNavigation(props.MouseWheelDelta, props.IsHorizontalMouseWheel);
     }
 
-    private void ButtonRotate_OnClick(object sender, RoutedEventArgs e)
-    {
+    private void ButtonRotate_OnClick(object sender, RoutedEventArgs e) => 
         _canvasController.RotateCurrentPhotoBy90(true);
-    }
 
     private void ButtonRotate_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
@@ -376,15 +371,8 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.RotateCurrentPhotoBy90(delta > 0);
     }
 
-    private void ButtonPrevPage_OnClick(object sender, RoutedEventArgs e)
-    {
-        _canvasController.ChangePage(NavDirection.Prev);
-    }
-
-    private void ButtonNextPage_OnClick(object sender, RoutedEventArgs e)
-    {
-        _canvasController.ChangePage(NavDirection.Next);
-    }
+    private void ButtonPrevNextPage_OnClick(object sender, RoutedEventArgs e) => 
+        _canvasController.ChangePage(ReferenceEquals(sender, ButtonPrevPage) ? NavDirection.Prev : NavDirection.Next);
 
     private void ButtonBackNextPage_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
@@ -419,19 +407,12 @@ public sealed partial class PhotoDisplayWindow
     {
         if (_settingWindow == null)
         {
-            _settingWindow = new Settings();
-            _settingWindow.SetWindowSize(900, 768);
-            Util.MoveWindowToMonitor(_settingWindow, Util.GetMonitorForWindow(this));
-            _settingWindow.CenterOnScreen();
+            _settingWindow = new Settings { IsCurrentPhotoRaw = () => _photoController.CurrentPhotoIsRaw };
             _settingWindow.Closed += SettingWindow_Closed;
-            _settingWindow.Activate();
             _settingWindow.SettingChanged += SettingWindow_SettingChanged;
-            _settingWindow.IsCurrentPhotoRaw = () => _photoController.CurrentPhotoIsRaw;
+            _settingWindow.Initialize(Util.GetMonitorForWindow(this));
         }
-        else
-        {
-            _settingWindow.Activate();
-        }
+        _settingWindow.Activate();
     }
 
     /// <summary>
@@ -534,8 +515,7 @@ public sealed partial class PhotoDisplayWindow
     /// or null when not dragging (so the zoom falls back to the canvas centre). Keeps keyboard zoom anchored at
     /// the same point the user is panning, matching wheel-zoom behaviour.
     /// </summary>
-    private Point? CurrentDragAnchor() =>
-        _isDragging ? _lastPoint.AdjustForDpi(D2dCanvas) : null;
+    private Point? CurrentDragAnchor() => _isDragging ? _lastPoint.AdjustForDpi(D2dCanvas) : null;
 
     private void D2dCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
@@ -668,17 +648,13 @@ public sealed partial class PhotoDisplayWindow
 
 
 
-    private async void Thumbnail_Clicked(int shiftIndex)
-    {
-        await _photoController.FlyBy(shiftIndex);
-    }
+    private async void Thumbnail_Clicked(int shiftIndex) => await _photoController.FlyBy(shiftIndex);
 
     private async void ThumbNail_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         var props = e.GetCurrentPoint(D2dCanvasThumbNail).Properties;
         int delta = props.MouseWheelDelta;
         bool isHorizontal = props.IsHorizontalMouseWheel;
-
         await HandleMouseWheelNavigation(delta, isHorizontal);
     }
 
@@ -749,10 +725,8 @@ public sealed partial class PhotoDisplayWindow
         });
     }
 
-    private void PhotoController_CacheStatusChanged(string cacheProgressStatus)
-    {
+    private void PhotoController_CacheStatusChanged(string cacheProgressStatus) => 
         DispatcherQueue.TryEnqueue(() => { CacheStatusProgress.Text = cacheProgressStatus; });
-    }
 
     private void CanvasController_OnZoomChanged(int zoomPercent)
     {
@@ -763,17 +737,11 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
-    private void CanvasController_OnFitToScreenStateChanged(bool isFitted)
-    {
-        // CanvasController marshals this event to the UI thread.
-        ButtonScaleSet.IsChecked = isFitted;
-    }
+    // CanvasController marshals this event to the UI thread.
+    private void CanvasController_OnFitToScreenStateChanged(bool isFitted) => ButtonScaleSet.IsChecked = isFitted;
 
-    private void CanvasController_OnOneToOneStateChanged(bool isOneToOne)
-    {
-        // CanvasController marshals this event to the UI thread.
-        ButtonOneIsToOne.IsChecked = isOneToOne;
-    }
+    // CanvasController marshals this event to the UI thread.
+    private void CanvasController_OnOneToOneStateChanged(bool isOneToOne) => ButtonOneIsToOne.IsChecked = isOneToOne;
 
     private void CanvasController_OnMultiPagePhotoLoaded(bool isMultiPagePhoto)
     {
@@ -869,7 +837,6 @@ public sealed partial class PhotoDisplayWindow
     private sealed class SingleFlightGate
     {
         private bool _isRunning;
-
         public async Task RunAsync(Func<Task> action)
         {
             if (_isRunning) return;

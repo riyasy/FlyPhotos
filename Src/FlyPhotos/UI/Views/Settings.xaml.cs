@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.System;
 using Microsoft.UI.Composition;
+using WinUIEx;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -160,6 +161,14 @@ internal sealed partial class Settings
 
         (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumWidth = 600;
         (AppWindow.Presenter as OverlappedPresenter)?.PreferredMinimumHeight = 600;
+    }
+
+    /// <summary>Sizes and positions the window on the given monitor. Call once, before Activate().</summary>
+    public void Initialize(ulong monitorId)
+    {
+        this.SetWindowSize(900, 768);
+        Util.MoveWindowToMonitor(this, monitorId);
+        this.CenterOnScreen();
     }
 
     private async void RawDecoderPriority_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
