@@ -53,7 +53,8 @@ public sealed partial class PhotoDisplayWindow
     private FrameworkElement? _renamePanel;
     private string? _renameTargetPath;
 
-    private readonly DispatcherTimer _repeatButtonReleaseCheckTimer = new() { Interval = new TimeSpan(0, 0, 0, 0, 100) };
+    private readonly long _backIsPressedToken;
+    private readonly long _nextIsPressedToken;
     private readonly DispatcherTimer _wheelScrollBrakeTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
     private PointerUpdateKind _lastPointerDownKind;
     private readonly SideButtonNavBehavior _sideButtonNav = null!;
@@ -158,7 +159,9 @@ public sealed partial class PhotoDisplayWindow
         MainLayout.KeyDown += HandleKeyDown;
         MainLayout.KeyUp += HandleKeyUp;
 
-        _repeatButtonReleaseCheckTimer.Tick += RepeatButtonReleaseCheckTimer_Tick;
+        _backIsPressedToken = ButtonBack.RegisterPropertyChangedCallback(ButtonBase.IsPressedProperty, ButtonBackNext_IsPressedChanged);
+        _nextIsPressedToken = ButtonNext.RegisterPropertyChangedCallback(ButtonBase.IsPressedProperty, ButtonBackNext_IsPressedChanged);
+
         _wheelScrollBrakeTimer.Tick += WheelScrollBrakeTimer_Tick;
         _rightClickZoomHoldTimer.Tick += RightClickZoomHoldTimer_Tick;
         _rightClickZoomRepeatTimer.Tick += RightClickZoomRepeatTimer_Tick;
@@ -279,8 +282,8 @@ public sealed partial class PhotoDisplayWindow
 
     private void PhotoDisplayWindow_Closed(object sender, WindowEventArgs args)
     {
-        _repeatButtonReleaseCheckTimer.Stop();
-        _repeatButtonReleaseCheckTimer.Tick -= RepeatButtonReleaseCheckTimer_Tick;
+        ButtonBack.UnregisterPropertyChangedCallback(ButtonBase.IsPressedProperty, _backIsPressedToken);
+        ButtonNext.UnregisterPropertyChangedCallback(ButtonBase.IsPressedProperty, _nextIsPressedToken);
         _wheelScrollBrakeTimer.Stop();
         _wheelScrollBrakeTimer.Tick -= WheelScrollBrakeTimer_Tick;
         _rightClickZoomHoldTimer.Stop();
@@ -330,29 +333,35 @@ public sealed partial class PhotoDisplayWindow
         _windPlacementManager.Dispose();
     }
 
-    private async void ButtonBack_OnClick(object sender, RoutedEventArgs e)
+    private async void ButtonBackNext_OnClick(object sender, RoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
-        await _photoController.Fly(NavDirection.Prev);
-        _repeatButtonReleaseCheckTimer.Stop();
-        _repeatButtonReleaseCheckTimer.Start();
+        await _photoController.Fly(ReferenceEquals(sender, ButtonBack) ? NavDirection.Prev : NavDirection.Next);
     }
 
-    private async void ButtonNext_OnClick(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Brakes once neither nav RepeatButton is held. RepeatButton has no "released" event, but
+    /// IsPressed is a DependencyProperty, so its transition is observable directly. The brake is
+    /// enqueued rather than run inline: this callback sits on ButtonBase's own SetValue stack, and
+    /// the re-check on the next dispatcher turn debounces a pointer that drags off a held button
+    /// and back on — without it, every edge crossing zeroes the burst counter mid-flight.
+    /// </summary>
+    private void ButtonBackNext_IsPressedChanged(DependencyObject sender, DependencyProperty dp)
     {
-        if (_photoController.IsSinglePhoto()) return;
-        await _photoController.Fly(NavDirection.Next);
-        _repeatButtonReleaseCheckTimer.Stop();
-        _repeatButtonReleaseCheckTimer.Start();
+        if (ButtonBack.IsPressed || ButtonNext.IsPressed) return;
+        DispatcherQueue.TryEnqueue(async () =>
+        {
+            if (ButtonBack.IsPressed || ButtonNext.IsPressed) return; // re-pressed before this ran
+            if (_photoController.IsSinglePhoto()) return;             // no navigation happened, nothing to brake
+            try { await _photoController.Brake(); }
+            catch (Exception ex) { Logger.Error(ex); }
+        });
     }
 
     private async void ButtonBackNext_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
-        if (_photoController.IsSinglePhoto()) return;
-        var delta = e.GetCurrentPoint(ButtonBack).Properties.MouseWheelDelta;
-        await _photoController.Fly(delta > 0 ? NavDirection.Prev : NavDirection.Next);
-        _wheelScrollBrakeTimer.Stop();
-        _wheelScrollBrakeTimer.Start();
+        var props = e.GetCurrentPoint((UIElement)sender).Properties;
+        await HandleMouseWheelNavigation(props.MouseWheelDelta, props.IsHorizontalMouseWheel);
     }
 
     private void ButtonRotate_OnClick(object sender, RoutedEventArgs e)
@@ -700,13 +709,6 @@ public sealed partial class PhotoDisplayWindow
     #endregion
 
     #region Timer Ticks
-
-    private async void RepeatButtonReleaseCheckTimer_Tick(object? sender, object e)
-    {
-        if (ButtonBack.IsPressed || ButtonNext.IsPressed) return;
-        _repeatButtonReleaseCheckTimer.Stop();
-        await _photoController.Brake();
-    }
 
     private async void WheelScrollBrakeTimer_Tick(object? sender, object e)
     {

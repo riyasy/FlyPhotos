@@ -166,7 +166,7 @@
                     <RepeatButton
                         x:Name="ButtonBack"
                         Width="Auto"
-                        Click="ButtonBack_OnClick"
+                        Click="ButtonBackNext_OnClick"
                         Content="&#xE96f;"
                         FontFamily="{StaticResource FluentIcons}"
                         FontSize="16"
@@ -199,7 +199,7 @@
                         x:Name="ButtonNext"
                         Width="Auto"
                         Margin="0,0,10,0"
-                        Click="ButtonNext_OnClick"
+                        Click="ButtonBackNext_OnClick"
                         Content="&#xE970;"
                         FontFamily="{StaticResource FluentIcons}"
                         FontSize="16"
