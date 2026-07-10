@@ -140,10 +140,8 @@ public partial class App
                 catch (Exception ex) { Debug.WriteLine($"Failed to kill previous instance {process.Id} {ex.Message}"); }
     }
 
-    private static string GetFilePathFromCommandLine()
-    {
-        return Environment.GetCommandLineArgs().Skip(1).FirstOrDefault();
-    }
+    private static string GetFilePathFromCommandLine() => 
+        Environment.GetCommandLineArgs().Skip(1).FirstOrDefault();
 
     private static string GetFilePathFromArgsPackaged(IFileActivatedEventArgs fileArgs)
     {

@@ -123,11 +123,7 @@ public class Win32App : InstalledApp
         return Task.CompletedTask;
     }
 
-    public override string GetSerializedState()
-    {
-        return $"Win32|{DisplayName}|{ExePath}";
-    }
-
+    public override string GetSerializedState() => $"Win32|{DisplayName}|{ExePath}";
 }
 
 /// <summary>
@@ -224,8 +220,5 @@ public class StoreApp : InstalledApp
 
     }
 
-    public override string GetSerializedState()
-    {
-        return $"Store|{DisplayName}|{AppUserModelId}|{PackageFamilyName}";
-    }
+    public override string GetSerializedState() => $"Store|{DisplayName}|{AppUserModelId}|{PackageFamilyName}";
 }

@@ -138,10 +138,7 @@ internal static class CodecDiscovery
     public static bool IsRawFile(string extension) =>
         IsRawlerRaw(extension) || IsWicRaw(extension) || IsMagickRaw(extension);
 
-    public static IReadOnlyList<CodecInfo> GetAllCodecs()
-    {
-        return _codecInfoList;
-    }
+    public static IReadOnlyList<CodecInfo> GetAllCodecs() => _codecInfoList;
 
     private static List<CodecInfo> GetWicCodecs() => NativeWrapper.GetWicDecoders();
 

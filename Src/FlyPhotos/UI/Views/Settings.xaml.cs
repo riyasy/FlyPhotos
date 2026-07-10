@@ -466,10 +466,7 @@ internal sealed partial class Settings
         if (e.Key == VirtualKey.Escape) Close();
     }
 
-    private bool ShouldEnableTransparencySlider(int index)
-    {
-        return index == 0;
-    }
+    private bool ShouldEnableTransparencySlider(int index) => index == 0;
 
     // Show the "Previous state" explanation only for the LastWindowState option (index 2).
     private string LaunchModeDescription(int index) => index == 2 ? L.Get("SettingsCardWindowLaunchMode/Description") : string.Empty;
@@ -535,10 +532,8 @@ internal sealed partial class Settings
         };
     }
 
-    private static DefaultMouseWheelBehavior GetMouseWheelForIndex(int index)
-    {
-        return index == 1 ? DefaultMouseWheelBehavior.Navigate : DefaultMouseWheelBehavior.Zoom;
-    }
+    private static DefaultMouseWheelBehavior GetMouseWheelForIndex(int index) => 
+        index == 1 ? DefaultMouseWheelBehavior.Navigate : DefaultMouseWheelBehavior.Zoom;
 
     private static int GetIndexForMouseFwdBackBehavior(MouseFwdBackBehavior behaviour)
     {
@@ -550,10 +545,8 @@ internal sealed partial class Settings
         };
     }
 
-    private static MouseFwdBackBehavior GetMouseFwdBackBehaviorForIndex(int index)
-    {
-        return index == 1 ? MouseFwdBackBehavior.StepZoom : MouseFwdBackBehavior.Navigate;
-    }
+    private static MouseFwdBackBehavior GetMouseFwdBackBehaviorForIndex(int index) => 
+        index == 1 ? MouseFwdBackBehavior.StepZoom : MouseFwdBackBehavior.Navigate;
 
     private static int GetIndexForPanZoomBehaviour(PanZoomBehaviourOnNavigation behaviour)
     {

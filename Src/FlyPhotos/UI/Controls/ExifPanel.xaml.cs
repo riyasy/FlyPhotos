@@ -178,24 +178,18 @@ public sealed partial class ExifPanel : UserControl
         FieldsPanel.Children.Add(value);
     }
 
-    private static TextBlock CreateValueText(string text)
+    private static TextBlock CreateValueText(string text) => new TextBlock
     {
-        return new TextBlock
-        {
-            Text = text,
-            TextWrapping = TextWrapping.Wrap,
-            FontSize = FieldFontSize
-        };
-    }
+        Text = text,
+        TextWrapping = TextWrapping.Wrap,
+        FontSize = FieldFontSize
+    };
 
-    private static HyperlinkButton CreateValueLink(string text, Uri url)
+    private static HyperlinkButton CreateValueLink(string text, Uri url) => new HyperlinkButton
     {
-        return new HyperlinkButton
-        {
-            Content = text,
-            NavigateUri = url,
-            Padding = new Thickness(0),
-            FontSize = FieldFontSize
-        };
-    }
+        Content = text,
+        NavigateUri = url,
+        Padding = new Thickness(0),
+        FontSize = FieldFontSize
+    };
 }

@@ -11,10 +11,8 @@ internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, 
     public Origin Origin { get; } = origin;
     public int Rotation { get; } = rotation;
 
-    public bool IsErrorOrUndefined()
-    {
-        return Origin == Origin.ErrorScreen || Origin == Origin.Undefined;
-    }
+    public bool IsErrorOrUndefined() => 
+        Origin == Origin.ErrorScreen || Origin == Origin.Undefined;
 
     public void Dispose()
     {

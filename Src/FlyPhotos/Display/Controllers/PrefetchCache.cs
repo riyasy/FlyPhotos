@@ -313,8 +313,7 @@ internal sealed class PrefetchCache : IDisposable
         try
         {
             if (_previewTier.Done.ContainsKey(key) &&
-                _getPhoto(key) is { } image &&
-                image.Preview?.Origin == Origin.Disk)
+                _getPhoto(key) is { Preview.Origin: Origin.Disk } image)
             {
                 var (actualWidth, actualHeight) = image.GetActualSize();
                 await DiskCacherWithSqlite.Instance.PutInCache(image.FilePath, image.Preview.Bitmap,

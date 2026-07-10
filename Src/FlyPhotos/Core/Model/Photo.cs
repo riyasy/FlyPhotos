@@ -119,10 +119,7 @@ internal partial class Photo : IDisposable
         return (100, 100);
     }
 
-    public static DisplayItem GetLoadingIndicator()
-    {
-        return ImageReader.GetLoadingIndicator();
-    }
+    public static DisplayItem GetLoadingIndicator() => ImageReader.GetLoadingIndicator();
 
     private static readonly HashSet<string> FormatsSupportingTransparency =
         new(StringComparer.OrdinalIgnoreCase)
