@@ -16,6 +16,7 @@ using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
 using FlyPhotos.Services.ExternalAppListing;
 using FlyPhotos.UI.Behaviors;
+using FlyPhotos.UI.Controls;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI.Input;
@@ -24,8 +25,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
 using NLog;
 using WinUIEx;
 
@@ -41,16 +40,11 @@ public sealed partial class PhotoDisplayWindow
 
     private Settings? _settingWindow;
 
-    private (string, string, string, string) _cachedExternalAppKey;
-    private InstalledApp?[]? _cachedExternalApps;
     private readonly SingleFlightGate _shortcutsGate = new();
     private readonly SingleFlightGate _moreMenuGate = new();
     private readonly SingleFlightGate _renameGate = new();
-    private Flyout? _shortcutsFlyout;
-    private Flyout? _renameFlyout;
-    private TextBox? _renameTextBox;
-    private FrameworkElement? _renamePanel;
-    private string? _renameTargetPath;
+    private RenameFlyoutControl? _renameControl;
+    private ShortcutsFlyoutControl? _shortcutsControl;
 
     private readonly long _backIsPressedToken;
     private readonly long _nextIsPressedToken;
@@ -413,16 +407,6 @@ public sealed partial class PhotoDisplayWindow
             _settingWindow.Initialize(Util.GetMonitorForWindow(this));
         }
         _settingWindow.Activate();
-    }
-
-    /// <summary>
-    /// This event handler is for the buttons INSIDE the shortcuts flyout.
-    /// It launches the application stored in the button's Tag property.
-    /// </summary>
-    private void ShortcutsFlyoutButton_OnClick(object sender, RoutedEventArgs e)
-    {
-        LaunchExternalAppFromSender(sender);
-        _shortcutsFlyout?.Hide();
     }
 
     private async void ButtonMore_OnClick(object sender, RoutedEventArgs e)
@@ -822,7 +806,7 @@ public sealed partial class PhotoDisplayWindow
         var filePathArgument = _photoController.GetFullPathCurrentFile();
         if (!File.Exists(filePathArgument)) return;
 
-        var apps = await GetConfiguredExternalAppsAsync();
+        var apps = await ExternalAppResolver.GetConfiguredAsync();
         if (index < 0 || index >= apps.Length) return;
 
         var app = apps[index];
@@ -852,22 +836,6 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
-    private const string DefaultAppIconGlyph = "\uED35";
-
-    private static IconElement BuildAppIcon(InstalledApp app, double? size = null)
-    {
-        if (app.Icon != null)
-        {
-            var icon = new ImageIcon { Source = app.Icon };
-            if (size.HasValue) { icon.Width = size.Value; icon.Height = size.Value; }
-            return icon;
-        }
-
-        var fallback = new FontIcon { Glyph = DefaultAppIconGlyph, FontFamily = App.FluentIconFont };
-        if (size.HasValue) fallback.FontSize = size.Value;
-        return fallback;
-    }
-
     private void LaunchExternalAppFromSender(object sender)
     {
         var filePathArgument = _photoController.GetFullPathCurrentFile();
@@ -876,33 +844,25 @@ public sealed partial class PhotoDisplayWindow
     }
 
     /// <summary>
-    /// Shows a Flyout of configured external-app shortcuts, anchored to the bottom toolbar
-    /// panel (always visible/laid-out, unlike the zoom-percentage OSD). A plain Flyout gives
-    /// light-dismiss (click-outside/Escape) and keyboard navigation for free, unlike a
-    /// hand-rolled overlay.
+    /// Shows a Flyout of configured external-app shortcuts, anchored to the bottom toolbar panel.
+    /// App resolution stays here (shared with the More menu / Ctrl+1..4 cache); the control lays
+    /// out the buttons and raises <see cref="ShortcutsFlyoutControl.AppLaunchRequested"/> on click.
     /// </summary>
     private Task ShowShortcutsPanelAsync() => _shortcutsGate.RunAsync(async () =>
     {
         if (!File.Exists(_photoController.GetFullPathCurrentFile())) return;
 
-        var stackPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4 };
-        foreach (var app in await GetConfiguredExternalAppsAsync())
-        {
-            if (app == null) continue;
-
-            var flyoutButton = new Button { Width = 60, Height = 50, Tag = app, Content = BuildAppIcon(app, 32) };
-            ToolTipService.SetToolTip(flyoutButton, app.DisplayName);
-            flyoutButton.Click += ShortcutsFlyoutButton_OnClick;
-            stackPanel.Children.Add(flyoutButton);
-        }
-
-        UIElement content = stackPanel.Children.Count != 0
-            ? stackPanel
-            : new TextBlock { Text = L.Get("NoShortcutsCreated/Message") };
-
-        _shortcutsFlyout = new Flyout { Content = content, Placement = FlyoutPlacementMode.Top };
-        _shortcutsFlyout.ShowAt(BorderButtonPanel);
+        var apps = await ExternalAppResolver.GetConfiguredAsync();
+        _shortcutsControl ??= CreateShortcutsControl();
+        _shortcutsControl.Show(BorderButtonPanel, apps);
     });
+
+    private ShortcutsFlyoutControl CreateShortcutsControl()
+    {
+        var control = new ShortcutsFlyoutControl();
+        control.AppLaunchRequested += app => _ = app.LaunchAsync(_photoController.GetFullPathCurrentFile());
+        return control;
+    }
 
     private Task ShowMoreMenuAsync() => _moreMenuGate.RunAsync(async () =>
     {
@@ -912,9 +872,10 @@ public sealed partial class PhotoDisplayWindow
     });
 
     /// <summary>
-    /// Shows the rename Flyout, anchored to the bottom toolbar panel (same mechanism as
-    /// <see cref="ShowShortcutsPanelAsync"/>). The extension is fixed and shown read-only — only
-    /// the file-name stem is editable — so a rename can never change the file's format.
+    /// Shows the rename Flyout, anchored to the bottom toolbar panel. The secondary-instance and
+    /// <see cref="PhotoDisplayController.CanRenameCurrentPhoto"/> guards (with the canvas shrug)
+    /// stay here; the control owns the layout, validation, shake and error dialog and asks us to
+    /// perform the actual rename via <see cref="RenameFlyoutControl.RenameRequested"/>.
     /// </summary>
     private Task ShowRenameFlyoutAsync() => _renameGate.RunAsync(() =>
     {
@@ -925,162 +886,22 @@ public sealed partial class PhotoDisplayWindow
             return Task.CompletedTask;
         }
 
-        var currentPath = _photoController.GetFullPathCurrentFile();
-        var stem = Path.GetFileNameWithoutExtension(currentPath);
-        var extension = Path.GetExtension(currentPath);
-        _renameTargetPath = currentPath;
-
-        _renameTextBox = new TextBox { Text = stem, Width = 220 };
-        _renameTextBox.KeyDown += RenameTextBox_OnKeyDown;
-
-        var okButton = new Button { Content = L.Get("RenameFlyout/OkButton") };
-        okButton.Click += RenameFlyoutOk_OnClick;
-
-        var panel = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 8,
-            RenderTransform = new TranslateTransform()
-        };
-        panel.Children.Add(_renameTextBox);
-        panel.Children.Add(new TextBlock { Text = extension, VerticalAlignment = VerticalAlignment.Center });
-        panel.Children.Add(okButton);
-        _renamePanel = panel;
-
-        _renameFlyout = new Flyout { Content = panel, Placement = FlyoutPlacementMode.Top };
-        _renameFlyout.Opened += (_, _) => _renameTextBox.SelectAll();
-        _renameFlyout.ShowAt(BorderButtonPanel);
+        _renameControl ??= CreateRenameControl();
+        _renameControl.Show(BorderButtonPanel, _photoController.GetFullPathCurrentFile());
         return Task.CompletedTask;
     });
 
-    // Dismiss the rename flyout when the app navigates to a different file — same rationale and
-    // pattern as ExifPanel.CloseIfFileChanged: the flyout's target must not silently drift onto
-    // whatever photo happens to be displayed by the time OK is pressed.
-    private void CloseRenameFlyoutIfFileChanged(string currentFilePath)
+    private RenameFlyoutControl CreateRenameControl()
     {
-        if (_renameTargetPath != null &&
-            !string.Equals(_renameTargetPath, currentFilePath, StringComparison.OrdinalIgnoreCase))
-            _renameFlyout?.Hide();
+        var control = new RenameFlyoutControl();
+        control.RenameRequested += _photoController.RenameCurrentPhoto;
+        return control;
     }
 
-    private async void RenameFlyoutOk_OnClick(object sender, RoutedEventArgs e)
-    {
-        try { await TrySubmitRenameAsync(); }
-        catch (Exception ex) { Logger.Error(ex); }
-    }
-
-    private async void RenameTextBox_OnKeyDown(object sender, KeyRoutedEventArgs e)
-    {
-        if (e.Key != VirtualKey.Enter) return;
-        e.Handled = true;
-        try { await TrySubmitRenameAsync(); }
-        catch (Exception ex) { Logger.Error(ex); }
-    }
-
-    private async Task TrySubmitRenameAsync()
-    {
-        var newStem = _renameTextBox?.Text.Trim() ?? "";
-        var currentPath = _photoController.GetFullPathCurrentFile();
-        var currentStem = Path.GetFileNameWithoutExtension(currentPath);
-
-        if (newStem.Length == 0 || newStem == currentStem)
-        {
-            _renameFlyout?.Hide();
-            return;
-        }
-        if (newStem.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
-        {
-            await ShrugFlyoutAsync();
-            await ShowRenameErrorDialogAsync(L.Get("RenameFailed/InvalidCharacters"));
-            return;
-        }
-
-        var newFileName = newStem + Path.GetExtension(currentPath);
-        var result = await _photoController.RenameCurrentPhoto(newFileName);
-        if (result.Success)
-        {
-            _renameFlyout?.Hide();
-        }
-        else
-        {
-            Logger.Error($"Rename failed: {result.FailMessage}");
-            await ShrugFlyoutAsync();
-            await ShowRenameErrorDialogAsync(result.FailMessage);
-        }
-    }
-
-    /// <summary>Shows the rename-failure dialog. The flyout is left open behind it so the user can retry.</summary>
-    private async Task ShowRenameErrorDialogAsync(string failMessage)
-    {
-        var errorDialog = new ContentDialog
-        {
-            XamlRoot = Content.XamlRoot,
-            Title = L.Get("RenameFailed/Title"),
-            Content = $"{L.Get("RenameFailed/Message")}{Environment.NewLine}{failMessage}",
-            CloseButtonText = L.Get("RenameFailed/CloseButton")
-        };
-        await errorDialog.ShowAsync();
-    }
-
-    /// <summary>
-    /// Decaying horizontal shake on the rename flyout's own content, matching the feel of
-    /// <see cref="CanvasController.Shrug"/> (used to signal a rejected action) but scaled down and
-    /// applied to the flyout itself rather than the (unrelated) photo underneath. Awaitable so a
-    /// caller can show a dialog only once the shake has actually played out.
-    /// </summary>
-    private Task ShrugFlyoutAsync()
-    {
-        if (_renamePanel?.RenderTransform is not TranslateTransform transform) return Task.CompletedTask;
-
-        var animation = new DoubleAnimationUsingKeyFrames();
-        void AddKey(double timeMs, double value) => animation.KeyFrames.Add(
-            new EasingDoubleKeyFrame { KeyTime = TimeSpan.FromMilliseconds(timeMs), Value = value });
-        AddKey(0, 0);
-        AddKey(60, 8);
-        AddKey(120, -8);
-        AddKey(180, 5);
-        AddKey(240, -5);
-        AddKey(350, 0);
-
-        Storyboard.SetTarget(animation, transform);
-        Storyboard.SetTargetProperty(animation, "X");
-
-        var storyboard = new Storyboard { Children = { animation } };
-        var tcs = new TaskCompletionSource();
-        storyboard.Completed += (_, _) => tcs.TrySetResult();
-        storyboard.Begin();
-        return tcs.Task;
-    }
-
-    /// <summary>
-    /// Resolves the 4 configured external-app shortcut slots (Settings &gt; External apps) in
-    /// parallel and caches the result by position (an empty/unresolved slot is null at that
-    /// index), since resolving an app involves off-UI-thread work (icon extraction for Win32
-    /// apps, native lookups for Store apps) and callers like Ctrl+1..4 depend on slot identity.
-    /// </summary>
-    private async Task<InstalledApp?[]> GetConfiguredExternalAppsAsync()
-    {
-        var shortCuts = new[]
-        {
-            AppConfig.Settings.ExternalApp1, AppConfig.Settings.ExternalApp2,
-            AppConfig.Settings.ExternalApp3, AppConfig.Settings.ExternalApp4
-        };
-        var key = (shortCuts[0], shortCuts[1], shortCuts[2], shortCuts[3]);
-        if (_cachedExternalApps != null && _cachedExternalAppKey.Equals(key))
-            return _cachedExternalApps;
-
-        var resolveTasks = new Task<InstalledApp?>[shortCuts.Length];
-        for (var i = 0; i < shortCuts.Length; i++)
-            resolveTasks[i] = string.IsNullOrEmpty(shortCuts[i])
-                ? Task.FromResult<InstalledApp?>(null)
-                : ShellAppProvider.GetAppAsync(shortCuts[i]);
-
-        var apps = await Task.WhenAll(resolveTasks);
-
-        _cachedExternalAppKey = key;
-        _cachedExternalApps = apps;
-        return apps;
-    }
+    // Dismiss the rename flyout when the app navigates to a different file (see
+    // RenameFlyoutControl.CloseIfFileChanged / ExifPanel.CloseIfFileChanged for the rationale).
+    private void CloseRenameFlyoutIfFileChanged(string currentFilePath) =>
+        _renameControl?.CloseIfFileChanged(currentFilePath);
 
     private async Task PopulateOpenWithSectionAsync()
     {
@@ -1098,18 +919,12 @@ public sealed partial class PhotoDisplayWindow
         ButtonMoreMenuFlyout.Items.Insert(insertAt++,
             new MenuFlyoutItem { Text = L.Get("MenuItemOpenWithHeader/Text"), IsEnabled = false });
 
-        var apps = await GetConfiguredExternalAppsAsync();
+        var apps = await ExternalAppResolver.GetConfiguredAsync();
         var anyAdded = false;
         foreach (var app in apps)
         {
             if (app == null) continue;
-
-            var item = new MenuFlyoutItem
-            {
-                Text = TruncateAppName(app.DisplayName),
-                Tag = app,
-                Icon = BuildAppIcon(app)
-            };
+            var item = new MenuFlyoutItem { Text = TruncateAppName(app.DisplayName), Tag = app, Icon = AppIconFactory.Build(app) };
             ToolTipService.SetToolTip(item, app.DisplayName);
             item.Click += MenuItemOpenWithApp_OnClick;
             ButtonMoreMenuFlyout.Items.Insert(insertAt++, item);
@@ -1117,7 +932,7 @@ public sealed partial class PhotoDisplayWindow
         }
 
         if (!anyAdded)
-            ButtonMoreMenuFlyout.Items.Insert(insertAt,
+            ButtonMoreMenuFlyout.Items.Insert(insertAt, 
                 new MenuFlyoutItem { Text = L.Get("NoShortcutsCreated/Message"), IsEnabled = false });
     }
 
