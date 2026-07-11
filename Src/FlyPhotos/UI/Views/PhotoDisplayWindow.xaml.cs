@@ -46,11 +46,9 @@ public sealed partial class PhotoDisplayWindow
 
     private readonly SingleFlightGate _shortcutsGate = new();
     private readonly SingleFlightGate _moreMenuGate = new();
-    private readonly SingleFlightGate _renameGate = new();
-    private RenameFlyoutControl? _renameControl;
     private ShortcutsFlyoutControl? _shortcutsControl;
     private FileActionDelete? _fileActionDelete;
-
+    private FileActionRename? _fileActionRename;
     private readonly long _backIsPressedToken;
     private readonly long _nextIsPressedToken;
     private readonly DispatcherTimer _wheelScrollBrakeTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
@@ -74,8 +72,6 @@ public sealed partial class PhotoDisplayWindow
     private readonly CtrlDragWindowMover _ctrlDragWindowMover;
 
     private bool _loadingStarted;
-    private bool _firstPhotoLoaded;
-    private bool _licenseCheckDone;
 
     // Accumulators for smooth scrolling
     private int _verticalDeltaAccumulator;
@@ -897,38 +893,19 @@ public sealed partial class PhotoDisplayWindow
         try { await ShowRenameFlyoutAsync(); }
         catch (Exception ex) { Logger.Error(ex); }
     }
-
-    /// <summary>
-    /// Shows the rename Flyout, anchored to the bottom toolbar panel. The secondary-instance and
-    /// <see cref="PhotoDisplayController.CanRenameCurrentPhoto"/> guards (with the canvas shrug)
-    /// stay here; the control owns the layout, validation, shake and error dialog and asks us to
-    /// perform the actual rename via <see cref="RenameFlyoutControl.RenameRequested"/>.
-    /// </summary>
-    private Task ShowRenameFlyoutAsync() => _renameGate.RunAsync(() =>
+    private Task ShowRenameFlyoutAsync()
     {
-        if (AppConfig.Volatile.IsSecondaryInstance) return Task.CompletedTask;
-        if (!_photoController.CanRenameCurrentPhoto())
-        {
-            _canvasController.Shrug();
-            return Task.CompletedTask;
-        }
-
-        _renameControl ??= CreateRenameControl();
-        _renameControl.Show(BorderButtonPanel, _photoController.GetFullPathCurrentFile());
-        return Task.CompletedTask;
-    });
-
-    private RenameFlyoutControl CreateRenameControl()
-    {
-        var control = new RenameFlyoutControl();
-        control.RenameRequested += _photoController.RenameCurrentPhoto;
-        return control;
+        _fileActionRename ??= new FileActionRename(
+            preExecute:       _photoController.CanRenameCurrentPhoto,
+            preExecuteFailed: () => _canvasController.Shrug(),
+            anchorProvider:   () => BorderButtonPanel,
+            filePathProvider: _photoController.GetFullPathCurrentFile,
+            execute:          _photoController.RenameCurrentPhoto);
+        return _fileActionRename.ExecuteAsync();
     }
 
-    // Dismiss the rename flyout when the app navigates to a different file (see
-    // RenameFlyoutControl.CloseIfFileChanged / ExifPanel.CloseIfFileChanged for the rationale).
     private void CloseRenameFlyoutIfFileChanged(string currentFilePath) =>
-        _renameControl?.CloseIfFileChanged(currentFilePath);
+        _fileActionRename?.Close(currentFilePath);
 
     #endregion
 
@@ -1094,32 +1071,20 @@ public sealed partial class PhotoDisplayWindow
 
     #region License
 
-    private void OnFirstPhotoLoaded() => DispatcherQueue.TryEnqueue(() =>
+    private ActionCheckLicense LicenseAction => field ??= new ActionCheckLicense(
+        xamlRootProvider: () => Content?.XamlRoot, onTrialExpired: AnimatePhotoDisplayWindowClose);
+
+    // FirstPhotoLoaded fires on the controller's STA thread; marshal to the UI thread.
+    private void OnFirstPhotoLoaded() => DispatcherQueue.TryEnqueue(async () =>
     {
-        _firstPhotoLoaded = true;
-        if (_licenseCheckDone) CheckLicense();
+        try { await LicenseAction.PhotoLoadedAsync(); }
+        catch (Exception ex) { Logger.Error(ex); }
     });
 
     private async void MainLayout_Loaded(object sender, RoutedEventArgs e)
     {
-        await LicenseService.Instance.RefreshLicenseStateAsync();
-        _licenseCheckDone = true;
-        if (_firstPhotoLoaded) CheckLicense();
-    }
-
-    private async void CheckLicense()
-    {
-        if (LicenseService.Instance.State != LicenseState.TrialExpired) return;
-        if (Content?.XamlRoot == null) return; // window may be closing
-        var dialog = new ContentDialog
-        {
-            Title = L.Get("TrialExpiredMessage/Title"),
-            Content = L.Get("TrialExpiredMessage/Content"),
-            CloseButtonText = L.Get("TrialExpiredMessage/CloseButton"),
-            XamlRoot = Content.XamlRoot
-        };
-        await dialog.ShowAsync();
-        await AnimatePhotoDisplayWindowClose();
+        try { await LicenseAction.WindowLoadedAsync(); }
+        catch (Exception ex) { Logger.Error(ex); }
     }
 
     #endregion
