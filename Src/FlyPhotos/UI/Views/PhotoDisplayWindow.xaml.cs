@@ -11,6 +11,7 @@ using FlyPhotos.Core.Model;
 using FlyPhotos.Display.Controllers;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
+using FlyPhotos.Infra.Interop;
 using FlyPhotos.Infra.Localization;
 using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
@@ -81,7 +82,9 @@ public sealed partial class PhotoDisplayWindow
     // For Dragging
     private Point _lastPoint;
     private bool _isDragging;
-    private bool _doubleTapHandled;
+
+    // Last double tapped tick count, used to differentiate single/double taps
+    private long _lastDoubleTappedAt;
 
     // For Right Click Zoom
     private readonly DispatcherTimer _rightClickZoomHoldTimer = new() { Interval = TimeSpan.FromMilliseconds(1000) };
@@ -595,7 +598,7 @@ public sealed partial class PhotoDisplayWindow
                 break;
 
             case PointerUpdateKind.LeftButtonReleased:
-                if (_doubleTapHandled) { _doubleTapHandled = false; break; }
+                if (Environment.TickCount64 - _lastDoubleTappedAt < Win32Methods.GetDoubleClickTime()) break;
 
                 if (AppConfig.Settings.ClickOutsideImageToRestoreWindow &&
                     !(currentPoint.Position.Y < AppTitlebar.ActualHeight) &&
@@ -661,7 +664,7 @@ public sealed partial class PhotoDisplayWindow
 
         if (_canvasController.IsPressedOnImage(point))
         {
-            _doubleTapHandled = true;
+            _lastDoubleTappedAt = Environment.TickCount64;
             // Double-tap on image: toggle between 1:1 and Fit.
             // CanvasController raises events to update button states.
             if (ButtonOneIsToOne.IsChecked == true)
@@ -676,7 +679,7 @@ public sealed partial class PhotoDisplayWindow
                 !_windFullScreenManager.IsMaximizedOrFullScreen)
             {
                 _windFullScreenManager.Maximize();
-                _doubleTapHandled = true;
+                _lastDoubleTappedAt = Environment.TickCount64;
             }
         }
     }
