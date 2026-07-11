@@ -16,6 +16,7 @@ using FlyPhotos.Infra.Localization;
 using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
 using FlyPhotos.Services.ExternalAppListing;
+using FlyPhotos.UI.Actions;
 using FlyPhotos.UI.Behaviors;
 using FlyPhotos.UI.Controls;
 using Microsoft.Graphics.Canvas.UI;
@@ -48,6 +49,7 @@ public sealed partial class PhotoDisplayWindow
     private readonly SingleFlightGate _renameGate = new();
     private RenameFlyoutControl? _renameControl;
     private ShortcutsFlyoutControl? _shortcutsControl;
+    private FileActionDelete? _fileActionDelete;
 
     private readonly long _backIsPressedToken;
     private readonly long _nextIsPressedToken;
@@ -938,58 +940,19 @@ public sealed partial class PhotoDisplayWindow
         catch (Exception ex) { Logger.Error(ex); }
     }
 
-    private async Task DeleteCurrentlyDisplayedPhoto()
+    private Task DeleteCurrentlyDisplayedPhoto()
     {
-        if (AppConfig.Volatile.IsSecondaryInstance) return;
-        if (!_photoController.CanDeleteCurrentPhoto())
-        {
-            TxtZoom.Text = L.Get("LoadingHighQuality/Message");
-            _inactivityFader.ReportActivity();
-            _canvasController.Shrug();
-            return;
-        }
+        _fileActionDelete ??= new FileActionDelete(
+            xamlRootProvider: () => Content.XamlRoot,
+            preExecute: _photoController.CanDeleteCurrentPhoto,
+            preExecuteFailed: () => { TxtZoom.Text = L.Get("LoadingHighQuality/Message");
+                                      _inactivityFader.ReportActivity(); _canvasController.Shrug(); },
+            execute: _photoController.DeleteCurrentPhoto,
+            executeFailed: () => _canvasController.Shrug(),
+            postExecute: () => Task.CompletedTask,                 // no-op today
+            postExecuteLastItem: AnimatePhotoDisplayWindowClose);
 
-        if (AppConfig.Settings.ConfirmForDelete)
-        {
-            var confirmDialog = new ContentDialog
-            {
-                XamlRoot = Content.XamlRoot,
-                Title = L.Get("ConfirmDeletion/Title"),
-                Content = L.Get("ConfirmDeletion/Message"),
-                PrimaryButtonText = L.Get("ConfirmDeletion/DeleteButton"),
-                CloseButtonText = L.Get("ConfirmDeletion/CancelButton"),
-                DefaultButton = ContentDialogButton.Close
-            };
-            var result = await confirmDialog.ShowAsync();
-            if (result != ContentDialogResult.Primary)
-            {
-                Logger.Info("User cancelled file deletion.");
-                return;
-            }
-        }
-
-        var delResult = await _photoController.DeleteCurrentPhoto();
-
-        if (delResult.DeleteSuccess)
-        {
-            if (delResult.IsLastPhoto)
-            {
-                await AnimatePhotoDisplayWindowClose();
-            }
-        }
-        else
-        {
-            _canvasController.Shrug();
-            Logger.Error("Failed to delete file");
-            var errorDialog = new ContentDialog
-            {
-                XamlRoot = Content.XamlRoot,
-                Title = L.Get("DeletionFailed/Title"),
-                Content = $"{L.Get("DeletionFailed/Message")}{Environment.NewLine}{delResult.FailMessage}",
-                CloseButtonText = L.Get("DeletionFailed/CloseButton")
-            };
-            await errorDialog.ShowAsync();
-        }
+        return _fileActionDelete.ExecuteAsync();
     }
 
     #endregion
