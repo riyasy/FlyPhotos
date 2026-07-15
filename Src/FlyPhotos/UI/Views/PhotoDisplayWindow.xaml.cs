@@ -112,7 +112,7 @@ public sealed partial class PhotoDisplayWindow
 
         DispatcherQueue.EnsureSystemDispatcherQueue();
 
-        var photoSessionState = new PhotoSessionState() { FirstPhotoPath = firstPhotoPath, FlyLaunchedExternally = extLaunch };
+        var photoSessionState = new PhotoSessionState { FirstPhotoPath = firstPhotoPath, FlyLaunchedExternally = extLaunch };
         _thumbNailController = new ThumbNailController(D2dCanvasThumbNail, photoSessionState);
         _canvasController = new CanvasController(D2dCanvas, _thumbNailController, photoSessionState);
         _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, photoSessionState);
@@ -183,59 +183,63 @@ public sealed partial class PhotoDisplayWindow
         InitKeyActions();
     }
 
-    private static Func<Task> Act(Action a) => () => { a(); return Task.CompletedTask; };
+    private static Func<Task> Act(Action a) => () =>
+    {
+        a();
+        return Task.CompletedTask;
+    };
 
     private void InitKeyActions()
     {
         // KEY, CTRL, ALT, whether to mark event as handled after executing the action
         _handledKeys =
         [
-            (VirtualKey.C,      true,  false),  // Ctrl+C — prevent browser-style copy
-            (VirtualKey.Enter,  false, false),  // Enter — prevent WinUI default button activation
-            (VirtualKey.Enter,  false, true),   // Alt+Enter — prevent default Enter handling
-            (VirtualKey.Delete, false, false),  // Delete — prevent WinUI focus-loss default
+            (VirtualKey.C, true, false), // Ctrl+C — prevent browser-style copy
+            (VirtualKey.Enter, false, false), // Enter — prevent WinUI default button activation
+            (VirtualKey.Enter, false, true), // Alt+Enter — prevent default Enter handling
+            (VirtualKey.Delete, false, false) // Delete — prevent WinUI focus-loss default
         ];
 
         // KEY, CTRL, ALT, Action
         _keyActions = new Dictionary<(VirtualKey, bool, bool), Func<Task>>
         {
             // File operations
-            [(VirtualKey.C,      true,  false)] = () => _photoController.CopyFileToClipboardAsync(),
+            [(VirtualKey.C, true, false)] = () => _photoController.CopyFileToClipboardAsync(),
             [(VirtualKey.Delete, false, false)] = DeleteCurrentlyDisplayedPhoto,
-            [(VirtualKey.F2,     false, false)] = ShowRenameFlyoutAsync,
-            [(VirtualKey.W,      false, false)] = Act(OpenFileInExplorer),
-            [(VirtualKey.S,      false, false)] = Act(() => FileShareDialogService.ShareFile(this, _photoController.GetFullPathCurrentFile())),
-            [(VirtualKey.P,      false, false)] = Act(() => Util.PrintFile(_photoController.GetFullPathCurrentFile())),
-            [(VirtualKey.M,      false, false)] = ShowMoreMenuAsync,
+            [(VirtualKey.F2, false, false)] = ShowRenameFlyoutAsync,
+            [(VirtualKey.W, false, false)] = Act(OpenFileInExplorer),
+            [(VirtualKey.S, false, false)] = Act(() => FileShareDialogService.ShareFile(this, _photoController.GetFullPathCurrentFile())),
+            [(VirtualKey.P, false, false)] = Act(() => Util.PrintFile(_photoController.GetFullPathCurrentFile())),
+            [(VirtualKey.M, false, false)] = ShowMoreMenuAsync,
 
             // Window
             [(VirtualKey.Escape, false, false)] = AnimatePhotoDisplayWindowClose,
-            [(VirtualKey.F11,    false, false)] = Act(() => _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose)),
-            [(VirtualKey.Enter,  false, false)] = Act(ToggleMaximizeRestore),
+            [(VirtualKey.F11, false, false)] = Act(() => _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose)),
+            [(VirtualKey.Enter, false, false)] = Act(ToggleMaximizeRestore),
 
             // Photo navigation
             [(VirtualKey.Right, false, false)] = () => _photoController.Fly(NavDirection.Next),
-            [(VirtualKey.Left,  false, false)] = () => _photoController.Fly(NavDirection.Prev),
-            [(VirtualKey.Home,  false, false)] = () => _photoController.FlyToFirst(),
-            [(VirtualKey.End,   false, false)] = () => _photoController.FlyToLast(),
+            [(VirtualKey.Left, false, false)] = () => _photoController.Fly(NavDirection.Prev),
+            [(VirtualKey.Home, false, false)] = () => _photoController.FlyToFirst(),
+            [(VirtualKey.End, false, false)] = () => _photoController.FlyToLast(),
 
             // Multi-page navigation (Alt+Arrow)
             [(VirtualKey.Right, false, true)] = Act(() => _canvasController.ChangePage(NavDirection.Next)),
-            [(VirtualKey.Left,  false, true)] = Act(() => _canvasController.ChangePage(NavDirection.Prev)),
+            [(VirtualKey.Left, false, true)] = Act(() => _canvasController.ChangePage(NavDirection.Prev)),
 
             // Zoom
-            [(VirtualKey.Add,      true,  false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In, CurrentDragAnchor())),
-            [(VirtualKey.Subtract, true,  false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out, CurrentDragAnchor())),
-            [(VirtualKey.Up,       false, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In, CurrentDragAnchor())),
-            [(VirtualKey.Down,     false, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out, CurrentDragAnchor())),
-            [(VirtualKey.PageUp,   false, false)] = Act(() => _canvasController.StepZoom(ZoomDirection.In, CurrentDragAnchor())),
+            [(VirtualKey.Add, true, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In, CurrentDragAnchor())),
+            [(VirtualKey.Subtract, true, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out, CurrentDragAnchor())),
+            [(VirtualKey.Up, false, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In, CurrentDragAnchor())),
+            [(VirtualKey.Down, false, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out, CurrentDragAnchor())),
+            [(VirtualKey.PageUp, false, false)] = Act(() => _canvasController.StepZoom(ZoomDirection.In, CurrentDragAnchor())),
             [(VirtualKey.PageDown, false, false)] = Act(() => _canvasController.StepZoom(ZoomDirection.Out, CurrentDragAnchor())),
 
             // Pan (Ctrl+Arrow)
-            [(VirtualKey.Up,    true, false)] = Act(() => _canvasController.Pan(0,   -20)),
-            [(VirtualKey.Down,  true, false)] = Act(() => _canvasController.Pan(0,    20)),
-            [(VirtualKey.Left,  true, false)] = Act(() => _canvasController.Pan(-20,   0)),
-            [(VirtualKey.Right, true, false)] = Act(() => _canvasController.Pan(20,    0)),
+            [(VirtualKey.Up, true, false)] = Act(() => _canvasController.Pan(0, -20)),
+            [(VirtualKey.Down, true, false)] = Act(() => _canvasController.Pan(0, 20)),
+            [(VirtualKey.Left, true, false)] = Act(() => _canvasController.Pan(-20, 0)),
+            [(VirtualKey.Right, true, false)] = Act(() => _canvasController.Pan(20, 0)),
 
             // Rotate
             [(VirtualKey.L, false, false)] = Act(() => _canvasController.RotateCurrentPhotoBy90(false)),
@@ -247,23 +251,23 @@ public sealed partial class PhotoDisplayWindow
 
             // File properties
             [(VirtualKey.Enter, false, true)] = Act(() => Util.ShowFileProperties(_photoController.GetFullPathCurrentFile())),
-            [(VirtualKey.D,     false, false)] = Act(() => Util.ShowFileProperties(_photoController.GetFullPathCurrentFile(), true)),
-            [(VirtualKey.I,     false, false)] = Act(() => ExifInfoPanel.Toggle(_photoController.GetFullPathCurrentFile())),
+            [(VirtualKey.D, false, false)] = Act(() => Util.ShowFileProperties(_photoController.GetFullPathCurrentFile(), true)),
+            [(VirtualKey.I, false, false)] = Act(() => ExifInfoPanel.Toggle(_photoController.GetFullPathCurrentFile())),
 
             // External apps
-            [(VirtualKey.E,          false, false)] = ShowShortcutsPanelAsync,
-            [(VirtualKey.Number1,    true,  false)] = () => LaunchExternalAppAsync(0),
-            [(VirtualKey.NumberPad1, true,  false)] = () => LaunchExternalAppAsync(0),
-            [(VirtualKey.Number2,    true,  false)] = () => LaunchExternalAppAsync(1),
-            [(VirtualKey.NumberPad2, true,  false)] = () => LaunchExternalAppAsync(1),
-            [(VirtualKey.Number3,    true,  false)] = () => LaunchExternalAppAsync(2),
-            [(VirtualKey.NumberPad3, true,  false)] = () => LaunchExternalAppAsync(2),
-            [(VirtualKey.Number4,    true,  false)] = () => LaunchExternalAppAsync(3),
-            [(VirtualKey.NumberPad4, true,  false)] = () => LaunchExternalAppAsync(3),
+            [(VirtualKey.E, false, false)] = ShowShortcutsPanelAsync,
+            [(VirtualKey.Number1, true, false)] = () => LaunchExternalAppAsync(0),
+            [(VirtualKey.NumberPad1, true, false)] = () => LaunchExternalAppAsync(0),
+            [(VirtualKey.Number2, true, false)] = () => LaunchExternalAppAsync(1),
+            [(VirtualKey.NumberPad2, true, false)] = () => LaunchExternalAppAsync(1),
+            [(VirtualKey.Number3, true, false)] = () => LaunchExternalAppAsync(2),
+            [(VirtualKey.NumberPad3, true, false)] = () => LaunchExternalAppAsync(2),
+            [(VirtualKey.Number4, true, false)] = () => LaunchExternalAppAsync(3),
+            [(VirtualKey.NumberPad4, true, false)] = () => LaunchExternalAppAsync(3),
 
             // Layout-aware zoom (keyboard-layout-dependent keys for + and -)
-            [(_plusVk,  true, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In)),
-            [(_minusVk, true, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out)),
+            [(_plusVk, true, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In)),
+            [(_minusVk, true, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out))
         };
     }
 
@@ -546,6 +550,7 @@ public sealed partial class PhotoDisplayWindow
                 break;
         }
     }
+
     /// <summary>
     /// The DPI-adjusted cursor position to anchor a keyboard zoom at while a left-button drag is in progress,
     /// or null when not dragging (so the zoom falls back to the canvas centre). Keeps keyboard zoom anchored at
@@ -568,6 +573,7 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.Pan(deltaX, deltaY);
         _lastPoint = currentPoint;
     }
+
     private void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
         var currentPoint = e.GetCurrentPoint(D2dCanvas);
@@ -698,7 +704,7 @@ public sealed partial class PhotoDisplayWindow
     {
         if (_photoController.IsSinglePhoto()) return;
 
-        ref int accumulator = ref (isHorizontalScroll ? ref _horizontalDeltaAccumulator : ref _verticalDeltaAccumulator);
+        ref int accumulator = ref isHorizontalScroll ? ref _horizontalDeltaAccumulator : ref _verticalDeltaAccumulator;
         accumulator += delta;
 
         if (Math.Abs(accumulator) < AppConfig.Settings.ScrollThreshold) return;
