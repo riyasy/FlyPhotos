@@ -86,22 +86,22 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
-		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.14.0" Condition="'$(Platform)' == 'x64'" />
-		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-arm64" Version="14.14.0" Condition="'$(Platform)' == 'ARM64'" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.9" />
+		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.15.0" Condition="'$(Platform)' == 'x64'" />
+		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-arm64" Version="14.15.0" Condition="'$(Platform)' == 'ARM64'" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.10" />
 		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.9" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.9" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.9" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.10" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.10" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.10" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.10" />
 		<PackageReference Include="MetadataExtractor" Version="2.9.3" />
 		<PackageReference Include="Microsoft.Graphics.Win2D" Version="1.4.0" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
 		<PackageReference Include="PhotoSauce.MagicScaler" Version="0.15.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
-		<PackageReference Include="NLog.Extensions.Logging" Version="6.1.3" />
-		<PackageReference Include="WinUIEx" Version="2.9.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.10" />
+		<PackageReference Include="NLog.Extensions.Logging" Version="6.1.4" />
+		<PackageReference Include="WinUIEx" Version="2.9.2" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 
