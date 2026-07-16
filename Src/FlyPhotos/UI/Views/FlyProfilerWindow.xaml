@@ -6,30 +6,136 @@
     xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="FlyProfiler"
+    Title="FlyPhotos Profiler"
     mc:Ignorable="d">
 
-    <Grid Margin="20">
+    <Grid Padding="20" RowSpacing="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <!--  Header  -->
+            <RowDefinition Height="Auto" />
+            <!--  Folder profiling card  -->
+            <RowDefinition Height="Auto" />
+            <!--  CSV test card  -->
+            <RowDefinition Height="Auto" />
+            <!--  spacer / hidden canvas  -->
+            <RowDefinition Height="Auto" />
+            <!--  status bar  -->
         </Grid.RowDefinitions>
 
-        <StackPanel
-            Margin="0,0,0,20"
-            Orientation="Horizontal"
-            Spacing="10">
-            <Button
-                x:Name="TestButton"
-                Click="TestButton_Click"
-                Content="Test" />
-            <TextBlock x:Name="StatusText" VerticalAlignment="Center" />
+        <!--  Header  -->
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock
+                FontSize="24"
+                FontWeight="SemiBold"
+                Text="FlyPhotos Profiler" />
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="Measure how the app decodes images: which reader wins, how long HQ and Preview take, and where it falls back."
+                TextWrapping="Wrap" />
         </StackPanel>
 
-        <!--  Hidden canvas control just to provide ICanvasResourceCreator / context if needed by image decoding  -->
+        <!--  Card 1: Profile a whole folder  -->
+        <Border
+            Grid.Row="1"
+            Padding="14"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="8">
+            <StackPanel Spacing="8">
+                <TextBlock
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Text="Profile a folder" />
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="Pick a folder, then run the profiler over every supported image in it (top level only). Results are written to a timestamped CSV on your Desktop."
+                    TextWrapping="Wrap" />
+
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Button
+                        x:Name="BrowseFolderButton"
+                        Click="BrowseFolderButton_Click"
+                        Content="Browse Folder…" />
+                    <TextBlock
+                        x:Name="FolderPathText"
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="No folder selected."
+                        TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+
+                <RadioButtons
+                    x:Name="ModeSelector"
+                    Header="What to measure"
+                    MaxColumns="3"
+                    SelectedIndex="2">
+                    <RadioButton Content="HQ only" />
+                    <RadioButton Content="Preview only" />
+                    <RadioButton Content="Both" />
+                </RadioButtons>
+
+                <CheckBox
+                    x:Name="CheckLockBox"
+                    Content="Check for file locked (rename test while the image is still held)" />
+
+                <Button
+                    x:Name="ProfileAllButton"
+                    Click="ProfileAllButton_Click"
+                    Content="Profile All Files"
+                    IsEnabled="False"
+                    Style="{ThemeResource AccentButtonStyle}" />
+
+                <ProgressBar
+                    x:Name="ProfileProgress"
+                    Maximum="1"
+                    Value="0"
+                    Visibility="Collapsed" />
+            </StackPanel>
+        </Border>
+
+        <!--  Card 2: Advanced per-reader CSV benchmark  -->
+        <Border
+            Grid.Row="2"
+            Padding="14"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="8">
+            <StackPanel Spacing="8">
+                <TextBlock
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Text="Advanced: per-reader CSV benchmark" />
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="Load a CSV that lists image paths (column 1) and reader methods (header row). Cells marked &quot;Yes&quot; are timed individually. A *_Result.csv is written next to the input."
+                    TextWrapping="Wrap" />
+                <Button
+                    x:Name="TestButton"
+                    Click="TestButton_Click"
+                    Content="Run CSV Benchmark…" />
+            </StackPanel>
+        </Border>
+
+        <!--  Hidden canvas: provides the ICanvasResourceCreatorWithDpi used by the decoders  -->
         <canvas:CanvasControl
             x:Name="TestCanvas"
-            Grid.Row="1"
+            Grid.Row="3"
             Visibility="Collapsed" />
+
+        <!--  Status bar  -->
+        <Border
+            Grid.Row="4"
+            Padding="12,8"
+            Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+            CornerRadius="6">
+            <TextBlock
+                x:Name="StatusText"
+                VerticalAlignment="Center"
+                Text="Ready."
+                TextTrimming="CharacterEllipsis" />
+        </Border>
     </Grid>
 </Window>
