@@ -159,7 +159,7 @@ internal partial class PhotoDisplayController
     {
         if (_photoList.GetPhoto(key) is not { } photo) return;
 
-        if (!IsContinuousKeyPress() && _cache.IsHqLoaded(key))
+        if (cache.IsHqLoaded(key))
             await SetSourceAsync(photo, DisplayLevel.Hq);
         else if (_cache.IsPreviewLoaded(key))
             await SetSourceAsync(photo, DisplayLevel.Preview);
