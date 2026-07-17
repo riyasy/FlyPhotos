@@ -280,6 +280,15 @@
                         </controls:SettingsCard>
 
                         <controls:SettingsCard
+                            x:Name="SettingsCardSizeWindowToImageOnRestore"
+                            x:Uid="SettingsCardSizeWindowToImageOnRestore"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE8A7;, FontFamily={StaticResource FluentIcons}}"
+                            IsEnabled="{x:Bind ButtonClickOutsideImageToRestoreWindow.IsOn, Mode=OneWay}">
+                            <ToggleSwitch x:Name="ButtonSizeWindowToImageOnRestore" />
+                        </controls:SettingsCard>
+
+                        <controls:SettingsCard
                             x:Name="SettingsCardCtrlDragToMoveWindow"
                             x:Uid="SettingsCardCtrlDragToMoveWindow"
                             Margin="0,5,0,0"

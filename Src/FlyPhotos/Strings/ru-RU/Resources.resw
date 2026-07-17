@@ -763,6 +763,12 @@ Esc : Закрыть параметры или выйти из приложен�
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>Клик вне изображения для восстановления окна</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>При восстановлении окна кликом вне изображения изменять его размер под отображаемое изображение.</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>Размер окна по изображению</value>
+  </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>Кнопки свертывания, развертывания и закрытия отображаются только тогда, когда мышь находится у верхнего края окна.</value>
   </data>

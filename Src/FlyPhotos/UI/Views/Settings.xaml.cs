@@ -107,6 +107,7 @@ internal sealed partial class Settings
         ButtonEnableAutoHideCaptionButtons.IsOn = AppConfig.Settings.AutoHideCaptionButtons;
         ButtonCtrlDragToMoveWindow.IsOn = AppConfig.Settings.CtrlDragToMoveWindow;
         ButtonClickOutsideImageToRestoreWindow.IsOn = AppConfig.Settings.ClickOutsideImageToRestoreWindow;
+        ButtonSizeWindowToImageOnRestore.IsOn = AppConfig.Settings.SizeWindowToImageOnRestore;
         ButtonEnableExternalShortcut.IsOn = AppConfig.Settings.ShowExternalAppShortcuts;
         ButtonDecodeRawData.IsOn = AppConfig.Settings.DecodeRawData;
 
@@ -140,6 +141,7 @@ internal sealed partial class Settings
         ButtonEnableAutoHideCaptionButtons.Toggled += ButtonEnableAutoHideCaptionButtons_OnToggled;
         ButtonCtrlDragToMoveWindow.Toggled += ButtonCtrlDragToMoveWindow_OnToggled;
         ButtonClickOutsideImageToRestoreWindow.Toggled += ButtonClickOutsideImageToRestoreWindow_OnToggled;
+        ButtonSizeWindowToImageOnRestore.Toggled += ButtonSizeWindowToImageOnRestore_OnToggled;
         ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
         ButtonDecodeRawData.Toggled += ButtonDecodeRawData_OnToggled;
         AppConfig.Settings.RawDecoderPriority.CollectionChanged += RawDecoderPriority_CollectionChanged;
@@ -248,6 +250,13 @@ internal sealed partial class Settings
     private async void ButtonClickOutsideImageToRestoreWindow_OnToggled(object sender, RoutedEventArgs e)
     {
         AppConfig.Settings.ClickOutsideImageToRestoreWindow = ButtonClickOutsideImageToRestoreWindow.IsOn;
+        await AppConfig.SaveAsync();
+    }
+
+    /// <summary>Persists whether image-sized restoration is enabled.</summary>
+    private async void ButtonSizeWindowToImageOnRestore_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.SizeWindowToImageOnRestore = ButtonSizeWindowToImageOnRestore.IsOn;
         await AppConfig.SaveAsync();
     }
 

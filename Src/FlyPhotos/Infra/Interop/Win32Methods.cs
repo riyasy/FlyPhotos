@@ -204,6 +204,33 @@ internal static partial class Win32Methods
 
     #region Window placement (user32.dll)
 
+    /// <summary>Retrieves the dimensions of a window's client area.</summary>
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool GetClientRect(nint hWnd, out RECT lpRect);
+
+    /// <summary>Converts client-area coordinates to screen coordinates.</summary>
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool ClientToScreen(nint hWnd, ref POINT lpPoint);
+
+    /// <summary>Retrieves the DPI value for a window.</summary>
+    [LibraryImport("user32.dll")]
+    internal static partial uint GetDpiForWindow(nint hWnd);
+
+    /// <summary>Retrieves a system metric for the specified DPI.</summary>
+    [LibraryImport("user32.dll")]
+    internal static partial int GetSystemMetricsForDpi(int nIndex, uint dpi);
+
+    /// <summary>Width of a sizing window frame.</summary>
+    internal const int SM_CXSIZEFRAME = 32;
+
+    /// <summary>Height of a sizing window frame.</summary>
+    internal const int SM_CYSIZEFRAME = 33;
+
+    /// <summary>Thickness of the padded border around a resizable window.</summary>
+    internal const int SM_CXPADDEDBORDER = 92;
+
 #pragma warning disable SYSLIB1054
     /// <summary>
     /// Retrieves the show state and the restored, minimized, and maximized positions of the specified window.
@@ -292,6 +319,9 @@ internal static partial class Win32Methods
     /// This is one of the command flags used in the <see cref="WINDOWPLACEMENT.showCmd"/> member.
     /// </summary>
     internal const uint SW_SHOWMAXIMIZED = 3;
+
+    /// <summary>Activates and displays a window in its normal position and size.</summary>
+    internal const uint SW_SHOWNORMAL = 1;
 
     #endregion
 

@@ -3,6 +3,7 @@ using System;
 using FlyPhotos.Infra.Interop;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Windows.Graphics;
 using WinRT.Interop;
 
 namespace FlyPhotos.UI.Behaviors;
@@ -78,6 +79,45 @@ internal sealed class WindowFullScreenManager
             exitFullScreenButton?.Visibility = Visibility.Collapsed;
             AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
             (AppWindow.Presenter as OverlappedPresenter)?.Restore();
+        }
+    }
+
+    /// <summary>
+    /// Restores the window and makes its client area match the requested screen-space rectangle.
+    /// </summary>
+    /// <param name="clientRect">The desired client-area rectangle in physical screen pixels.</param>
+    /// <param name="exitFullScreenButton">The optional button to hide when leaving full-screen mode.</param>
+    internal void RestoreToClientRect(RectInt32 clientRect, UIElement? exitFullScreenButton = null)
+    {
+        var hwnd = WindowNative.GetWindowHandle(_window);
+        var dpi = Win32Methods.GetDpiForWindow(hwnd);
+        var frameX = Win32Methods.GetSystemMetricsForDpi(Win32Methods.SM_CXSIZEFRAME, dpi) +
+                     Win32Methods.GetSystemMetricsForDpi(Win32Methods.SM_CXPADDEDBORDER, dpi);
+        var frameY = Win32Methods.GetSystemMetricsForDpi(Win32Methods.SM_CYSIZEFRAME, dpi) +
+                     Win32Methods.GetSystemMetricsForDpi(Win32Methods.SM_CXPADDEDBORDER, dpi);
+
+        Win32Methods.GetWindowPlacement(hwnd, out var placement);
+        placement.rcNormalPosition = new Win32Methods.RECT
+        {
+            Left = clientRect.X - frameX,
+            Top = clientRect.Y - frameY,
+            Right = clientRect.X + clientRect.Width + frameX,
+            Bottom = clientRect.Y + clientRect.Height + frameY
+        };
+        placement.showCmd = Win32Methods.SW_SHOWNORMAL;
+
+        var wasFullScreen = AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen;
+
+        // While full-screen, update the hidden normal placement first. Switching presenters then
+        // reveals the window directly at its destination instead of briefly showing the old bounds.
+        Win32Methods.SetWindowPlacement(hwnd, in placement);
+
+        if (wasFullScreen)
+        {
+            exitFullScreenButton?.Visibility = Visibility.Collapsed;
+            AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
+            _wasMaximizedBeforeFullScreen = false;
+            FullScreenToggled?.Invoke(false);
         }
     }
 
