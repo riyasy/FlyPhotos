@@ -38,6 +38,46 @@ internal class ContextMenuHelper
     /// </summary>
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    // uxtheme.dll exports these by ordinal only - undocumented, but stable since Win10 1903.
+    private const int OrdSetPreferredAppMode = 135;
+    private const int OrdFlushMenuThemes = 136;
+
+    // PreferredAppMode::AllowDark - "this app supports dark mode, follow the system setting".
+    // ForceDark (2) would ignore the Windows theme, which is not what we want here.
+    private const int AllowDark = 1;
+
+    /// <summary>
+    /// Cached uxtheme.dll module handle. Resolved once and never freed - uxtheme is a system DLL
+    /// that stays loaded for the lifetime of the process anyway.
+    /// </summary>
+    private static IntPtr _uxTheme;
+
+    /// <summary>
+    /// Opts this process into dark menus so that <c>TrackPopupMenuEx</c> follows the Windows
+    /// light/dark setting. Only affects the in-process menu (<see cref="NativeWrapper.ShowContextMenu"/>),
+    /// since the preferred app mode is per-process.
+    /// </summary>
+    /// <remarks>
+    /// Called before every menu display: <c>FlushMenuThemes</c> drops uxtheme's cached menu theme,
+    /// so a Windows theme switch made while FlyPhotos is running is picked up on the next right-click.
+    /// On Win10 1809 ordinal 135 is the older <c>AllowDarkModeForApp(BOOL)</c>; passing 1 means TRUE
+    /// there too, so no version guard is needed.
+    /// </remarks>
+    private static unsafe void SyncMenuThemeToWindows()
+    {
+        // Full System32 path, not a bare name: a bare name would probe the app directory first,
+        // and matches what the external helper does (LOAD_LIBRARY_SEARCH_SYSTEM32).
+        if (_uxTheme == IntPtr.Zero &&
+            !NativeLibrary.TryLoad(Path.Combine(Environment.SystemDirectory, "uxtheme.dll"), out _uxTheme)) return;
+
+        var pSetPreferredAppMode = Win32Methods.GetProcAddress(_uxTheme, OrdSetPreferredAppMode);
+        var pFlushMenuThemes = Win32Methods.GetProcAddress(_uxTheme, OrdFlushMenuThemes);
+        if (pSetPreferredAppMode == IntPtr.Zero || pFlushMenuThemes == IntPtr.Zero) return;
+
+        ((delegate* unmanaged[Stdcall]<int, int>)pSetPreferredAppMode)(AllowDark);
+        ((delegate* unmanaged[Stdcall]<void>)pFlushMenuThemes)();
+    }
+
     /// <summary>
     /// Displays the Windows Explorer context menu for a specified file at the current cursor position.
     /// </summary>
@@ -64,6 +104,7 @@ internal class ContextMenuHelper
             }
             else
             {
+                SyncMenuThemeToWindows();
                 NativeWrapper.ShowContextMenu(hWnd, filePath, mousePosScreen.X, mousePosScreen.Y);
             }
         }
