@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using Windows.Graphics;
 using Windows.System;
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
@@ -28,9 +29,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using NLog;
-using Windows.Graphics;
 using WinUIEx;
-using WinRT.Interop;
 
 namespace FlyPhotos.UI.Views;
 
@@ -355,6 +354,48 @@ public sealed partial class PhotoDisplayWindow
             _windFullScreenManager.Maximize();
     }
 
+    /// <summary>
+    /// Restores the window with its client area sized around the currently displayed image.
+    /// </summary>
+    private void RestoreWindowToImage()
+    {
+        if (!_canvasController.TryGetDisplayedImageBounds(out var imageBounds))
+        {
+            _windFullScreenManager.Restore(ButtonFullScreenClose);
+            return;
+        }
+
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        var clientOrigin = new Win32Methods.POINT();
+        if (!Win32Methods.ClientToScreen(hwnd, ref clientOrigin) ||
+            !Win32Methods.GetClientRect(hwnd, out var clientRect))
+        {
+            _windFullScreenManager.Restore(ButtonFullScreenClose);
+            return;
+        }
+
+        var dpiScale = D2dCanvas.Dpi / 96.0;
+        var canvasOffset = D2dCanvas.TransformToVisual(MainLayout).TransformPoint(default);
+        var canvasOffsetX = (int)Math.Round(canvasOffset.X * dpiScale);
+        var canvasOffsetY = (int)Math.Round(canvasOffset.Y * dpiScale);
+        var nonCanvasWidth = clientRect.Right - clientRect.Left - (int)Math.Round(D2dCanvas.ActualWidth * dpiScale);
+        var nonCanvasHeight = clientRect.Bottom - clientRect.Top - (int)Math.Round(D2dCanvas.ActualHeight * dpiScale);
+
+        var imageLeft = clientOrigin.X + canvasOffsetX + (int)Math.Floor(imageBounds.Left);
+        var imageTop = clientOrigin.Y + canvasOffsetY + (int)Math.Floor(imageBounds.Top);
+        var imageWidth = (int)Math.Ceiling(imageBounds.Right) - (int)Math.Floor(imageBounds.Left);
+        var imageHeight = (int)Math.Ceiling(imageBounds.Bottom) - (int)Math.Floor(imageBounds.Top);
+
+        _canvasController.PrepareForImageSizedWindow(imageBounds);
+        _windFullScreenManager.RestoreToClientRect(
+            new RectInt32(
+                imageLeft - canvasOffsetX,
+                imageTop - canvasOffsetY,
+                Math.Max(1, imageWidth + nonCanvasWidth),
+                Math.Max(1, imageHeight + nonCanvasHeight)),
+            ButtonFullScreenClose);
+    }
+
     private async Task AnimatePhotoDisplayWindowClose()
     {
         _settingWindow?.Close();
@@ -612,12 +653,7 @@ public sealed partial class PhotoDisplayWindow
                     !(currentPoint.Position.Y < AppTitlebar.ActualHeight) &&
                     !_canvasController.IsPressedOnImage(dpiAdjustedPosition) &&
                     _windFullScreenManager.IsMaximizedOrFullScreen)
-                {
-                    if (AppConfig.Settings.SizeWindowToImageOnRestore)
-                        RestoreWindowToImage();
-                    else
-                        _windFullScreenManager.Restore(ButtonFullScreenClose);
-                }
+                    _windFullScreenManager.Restore(ButtonFullScreenClose);
                 break;
 
             case PointerUpdateKind.MiddleButtonReleased:
@@ -1121,332 +1157,10 @@ public sealed partial class PhotoDisplayWindow
         {
             if (_isRunning) return;
             _isRunning = true;
-            try
-            { await action(); }
-            finally
-            { _isRunning = false; }
+            try { await action(); }
+            finally { _isRunning = false; }
         }
     }
-
-    private const string DefaultAppIconGlyph = "\uED35";
-
-    private static IconElement BuildAppIcon(InstalledApp app, double? size = null)
-    {
-        if (app.Icon != null)
-        {
-            var icon = new ImageIcon { Source = app.Icon };
-            if (size.HasValue) { icon.Width = size.Value; icon.Height = size.Value; }
-            return icon;
-        }
-
-        var fallback = new FontIcon { Glyph = DefaultAppIconGlyph, FontFamily = App.FluentIconFont };
-        if (size.HasValue) fallback.FontSize = size.Value;
-        return fallback;
-    }
-
-    private void LaunchExternalAppFromSender(object sender)
-    {
-        var filePathArgument = _photoController.GetFullPathCurrentFile();
-        if (sender is FrameworkElement { Tag: InstalledApp app })
-            _ = app.LaunchAsync(filePathArgument); // Fire and forget the launch, we don't need to await it here
-    }
-
-    /// <summary>
-    /// Shows a Flyout of configured external-app shortcuts, anchored to the bottom toolbar
-    /// panel (always visible/laid-out, unlike the zoom-percentage OSD). A plain Flyout gives
-    /// light-dismiss (click-outside/Escape) and keyboard navigation for free, unlike a
-    /// hand-rolled overlay.
-    /// </summary>
-    private Task ShowShortcutsPanelAsync() => _shortcutsGate.RunAsync(async () =>
-    {
-        if (!File.Exists(_photoController.GetFullPathCurrentFile())) return;
-
-        var stackPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4 };
-        foreach (var app in await GetConfiguredExternalAppsAsync())
-        {
-            if (app == null) continue;
-
-            var flyoutButton = new Button { Width = 60, Height = 50, Tag = app, Content = BuildAppIcon(app, 32) };
-            ToolTipService.SetToolTip(flyoutButton, app.DisplayName);
-            flyoutButton.Click += ShortcutsFlyoutButton_OnClick;
-            stackPanel.Children.Add(flyoutButton);
-        }
-
-        UIElement content = stackPanel.Children.Count != 0
-            ? stackPanel
-            : new TextBlock { Text = L.Get("NoShortcutsCreated/Message") };
-
-        _shortcutsFlyout = new Flyout { Content = content, Placement = FlyoutPlacementMode.Top };
-        _shortcutsFlyout.ShowAt(BorderButtonPanel);
-    });
-
-    private Task ShowMoreMenuAsync() => _moreMenuGate.RunAsync(async () =>
-    {
-        if (!File.Exists(_photoController.GetFullPathCurrentFile())) return;
-        await PopulateOpenWithSectionAsync();
-        FlyoutBase.ShowAttachedFlyout(ButtonMore);
-    });
-
-    /// <summary>
-    /// Resolves the 4 configured external-app shortcut slots (Settings &gt; External apps) in
-    /// parallel and caches the result by position (an empty/unresolved slot is null at that
-    /// index), since resolving an app involves off-UI-thread work (icon extraction for Win32
-    /// apps, native lookups for Store apps) and callers like Ctrl+1..4 depend on slot identity.
-    /// </summary>
-    private async Task<InstalledApp?[]> GetConfiguredExternalAppsAsync()
-    {
-        var shortCuts = new[]
-        {
-            AppConfig.Settings.ExternalApp1, AppConfig.Settings.ExternalApp2,
-            AppConfig.Settings.ExternalApp3, AppConfig.Settings.ExternalApp4
-        };
-        var key = (shortCuts[0], shortCuts[1], shortCuts[2], shortCuts[3]);
-        if (_cachedExternalApps != null && _cachedExternalAppKey.Equals(key))
-            return _cachedExternalApps;
-
-        var resolveTasks = new Task<InstalledApp?>[shortCuts.Length];
-        for (var i = 0; i < shortCuts.Length; i++)
-            resolveTasks[i] = string.IsNullOrEmpty(shortCuts[i])
-                ? Task.FromResult<InstalledApp?>(null)
-                : ShellAppProvider.GetAppAsync(shortCuts[i]);
-
-        var apps = await Task.WhenAll(resolveTasks);
-
-        _cachedExternalAppKey = key;
-        _cachedExternalApps = apps;
-        return apps;
-    }
-
-    private async Task PopulateOpenWithSectionAsync()
-    {
-        while (ButtonMoreMenuFlyout.Items[0] != SeparatorAfterOpenWith)
-            ButtonMoreMenuFlyout.Items.RemoveAt(0);
-
-        if (!AppConfig.Settings.ShowExternalAppShortcuts)
-        {
-            SeparatorAfterOpenWith.Visibility = Visibility.Collapsed;
-            return;
-        }
-        SeparatorAfterOpenWith.Visibility = Visibility.Visible;
-
-        var insertAt = 0;
-        ButtonMoreMenuFlyout.Items.Insert(insertAt++,
-            new MenuFlyoutItem { Text = L.Get("MenuItemOpenWithHeader/Text"), IsEnabled = false });
-
-        var apps = await GetConfiguredExternalAppsAsync();
-        var anyAdded = false;
-        foreach (var app in apps)
-        {
-            if (app == null) continue;
-
-            var item = new MenuFlyoutItem
-            {
-                Text = TruncateAppName(app.DisplayName),
-                Tag = app,
-                Icon = BuildAppIcon(app)
-            };
-            ToolTipService.SetToolTip(item, app.DisplayName);
-            item.Click += MenuItemOpenWithApp_OnClick;
-            ButtonMoreMenuFlyout.Items.Insert(insertAt++, item);
-            anyAdded = true;
-        }
-
-        if (!anyAdded)
-            ButtonMoreMenuFlyout.Items.Insert(insertAt,
-                new MenuFlyoutItem { Text = L.Get("NoShortcutsCreated/Message"), IsEnabled = false });
-    }
-
-    private static string TruncateAppName(string name, int maxLength = 24) =>
-        name.Length > maxLength ? name[..maxLength] + "…" : name;
-
-    /// <summary>
-    ///     Activates the window and applies the configured launch mode (maximized, full-screen,
-    ///     or last window state). <c>Activate()</c> is always called first so that
-    ///     <c>ExtendsContentIntoTitleBar</c> is stable before any maximize, avoiding the
-    ///     top-edge position jag that occurs when <c>SW_SHOWMAXIMIZED</c> is applied inside
-    ///     <c>WM_SHOWWINDOW</c> before the title-bar geometry has settled.
-    /// </summary>
-    internal void ActivateForStartup()
-    {
-        Activate();
-        switch (AppConfig.Settings.WindowLaunchMode)
-        {
-            case WindowLaunchMode.Maximized:
-                this.Maximize();
-                break;
-            case WindowLaunchMode.FullScreen:
-                _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
-                break;
-            case WindowLaunchMode.LastWindowState:
-                if (_windPlacementManager.WasMaximized)
-                    this.Maximize();
-                break;
-        }
-    }
-
-    private async Task HandleMouseWheelNavigation(int delta, bool isHorizontalScroll)
-    {
-        if (_photoController.IsSinglePhoto()) return;
-
-        ref int accumulator = ref (isHorizontalScroll ? ref _horizontalDeltaAccumulator : ref _verticalDeltaAccumulator);
-        accumulator += delta;
-
-        if (Math.Abs(accumulator) < AppConfig.Settings.ScrollThreshold) return;
-
-        var direction = isHorizontalScroll ?
-            (accumulator > 0 ? NavDirection.Next : NavDirection.Prev) :
-            (accumulator > 0 ? NavDirection.Prev : NavDirection.Next);
-
-        accumulator = 0;
-        await _photoController.Fly(direction);
-        RestartBrakeTimer();
-    }
-
-    private void HandleMouseWheelZoom(int delta, Point point)
-    {
-        var adjustedPoint = point.AdjustForDpi(D2dCanvas);
-
-        if (IsPrecisionTouchpad(delta))
-            _canvasController.ZoomAtPointPrecision(delta, adjustedPoint);
-        else
-            _canvasController.ZoomAtPoint(delta > 0 ? ZoomDirection.In : ZoomDirection.Out, adjustedPoint);
-    }
-
-    /// <summary>
-    /// Heuristic to detect precision touchpad / smooth pinch scroll.
-    /// Returns true if delta is not a multiple of standard WHEEL_DELTA (120),
-    /// which usually indicates a touchpad gesture.
-    /// </summary>
-    private static bool IsPrecisionTouchpad(int delta) => Math.Abs(delta) % 120 != 0;
-
-    private void RestartBrakeTimer()
-    {
-        _wheelScrollBrakeTimer.Stop();
-        _wheelScrollBrakeTimer.Start();
-    }
-
-    private void ToggleMaximizeRestore()
-    {
-        if (_windFullScreenManager.IsMaximizedOrFullScreen)
-            _windFullScreenManager.Restore(ButtonFullScreenClose);
-        else
-            _windFullScreenManager.Maximize();
-    }
-
-    /// <summary>
-    /// Restores the window with its client area sized around the currently displayed image.
-    /// </summary>
-    private void RestoreWindowToImage()
-    {
-        if (!_canvasController.TryGetDisplayedImageBounds(out var imageBounds))
-        {
-            _windFullScreenManager.Restore(ButtonFullScreenClose);
-            return;
-        }
-
-        var hwnd = WindowNative.GetWindowHandle(this);
-        var clientOrigin = new Win32Methods.POINT();
-        if (!Win32Methods.ClientToScreen(hwnd, ref clientOrigin) ||
-            !Win32Methods.GetClientRect(hwnd, out var clientRect))
-        {
-            _windFullScreenManager.Restore(ButtonFullScreenClose);
-            return;
-        }
-
-        var dpiScale = D2dCanvas.Dpi / 96.0;
-        var canvasOffset = D2dCanvas.TransformToVisual(MainLayout).TransformPoint(default);
-        var canvasOffsetX = (int)Math.Round(canvasOffset.X * dpiScale);
-        var canvasOffsetY = (int)Math.Round(canvasOffset.Y * dpiScale);
-        var nonCanvasWidth = clientRect.Right - clientRect.Left - (int)Math.Round(D2dCanvas.ActualWidth * dpiScale);
-        var nonCanvasHeight = clientRect.Bottom - clientRect.Top - (int)Math.Round(D2dCanvas.ActualHeight * dpiScale);
-
-        var imageLeft = clientOrigin.X + canvasOffsetX + (int)Math.Floor(imageBounds.Left);
-        var imageTop = clientOrigin.Y + canvasOffsetY + (int)Math.Floor(imageBounds.Top);
-        var imageWidth = (int)Math.Ceiling(imageBounds.Right) - (int)Math.Floor(imageBounds.Left);
-        var imageHeight = (int)Math.Ceiling(imageBounds.Bottom) - (int)Math.Floor(imageBounds.Top);
-
-        _canvasController.PrepareForImageSizedWindow(imageBounds);
-        _windFullScreenManager.RestoreToClientRect(
-            new RectInt32(
-                imageLeft - canvasOffsetX,
-                imageTop - canvasOffsetY,
-                Math.Max(1, imageWidth + nonCanvasWidth),
-                Math.Max(1, imageHeight + nonCanvasHeight)),
-            ButtonFullScreenClose);
-    }
-
-    private async Task AnimatePhotoDisplayWindowClose()
-    {
-        _settingWindow?.Close();
-
-        if (AppConfig.Settings.OpenExitZoom)
-        {
-            // Arm before starting so the W2D subscribe is enqueued (FIFO) ahead of ZoomOutOnExit's
-            // start action, then wait for the actual animation to finish instead of a fixed delay.
-            var exitAnimation = _canvasController.WaitForPanZoomAnimationAsync(
-                Constants.PanZoomAnimationDurationForExit * 2);
-            _canvasController.ZoomOutOnExit(Constants.PanZoomAnimationDurationForExit);
-            await exitAnimation;
-        }
-        SaveLastWindowState();
-        this.Hide();
-        Close();
-    }
-
-    private void SaveLastWindowState()
-    {
-        if (AppConfig.Settings.WindowLaunchMode == WindowLaunchMode.LastWindowState)
-        {
-            AppConfig.Settings.WindowState = _windPlacementManager.Data;
-            AppConfig.Save();
-        }
-    }
-
-    private void OnFirstPhotoLoaded() => DispatcherQueue.TryEnqueue(() =>
-    {
-        _firstPhotoLoaded = true;
-        if (_licenseCheckDone) CheckLicense();
-    });
-
-    private async void MainLayout_Loaded(object sender, RoutedEventArgs e)
-    {
-        await LicenseService.Instance.RefreshLicenseStateAsync();
-        _licenseCheckDone = true;
-        if (_firstPhotoLoaded) CheckLicense();
-    }
-
-    private async void CheckLicense()
-    {
-        if (LicenseService.Instance.State != LicenseState.TrialExpired) return;
-        if (Content?.XamlRoot == null) return; // window may be closing
-        var dialog = new ContentDialog
-        {
-            Title = L.Get("TrialExpiredMessage/Title"),
-            Content = L.Get("TrialExpiredMessage/Content"),
-            CloseButtonText = L.Get("TrialExpiredMessage/CloseButton"),
-            XamlRoot = Content.XamlRoot
-        };
-        await dialog.ShowAsync();
-        await AnimatePhotoDisplayWindowClose();
-    }
-
-    private void OpenFileInExplorer()
-    {
-        var filePath = _photoController.GetFullPathCurrentFile();
-        if (File.Exists(filePath))
-            Process.Start("explorer.exe", $"/select,\"{filePath}\"");
-    }
-
-    private async Task DeleteCurrentlyDisplayedPhoto()
-    {
-        if (AppConfig.Volatile.IsSecondaryInstance) return;
-        if (!_photoController.CanDeleteCurrentPhoto())
-        {
-            TxtZoom.Text = L.Get("LoadingHighQuality/Message");
-            _inactivityFader.ReportActivity();
-            _canvasController.Shrug();
-            return;
-        }
 
     #endregion
 }
