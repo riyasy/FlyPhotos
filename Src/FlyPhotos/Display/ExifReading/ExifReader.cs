@@ -24,6 +24,10 @@ public static class ExifReader
 
     private static ExifData Read(string filePath)
     {
+        // MetadataExtractor cannot parse DDS, so it would throw here and leave the panel empty.
+        if (string.Equals(Path.GetExtension(filePath), ".dds", StringComparison.OrdinalIgnoreCase))
+            return DdsReader.Read(filePath);
+
         try
         {
             var directories = ImageMetadataReader.ReadMetadata(filePath);
@@ -86,7 +90,7 @@ public static class ExifReader
         return fields;
     }
 
-    private static string FormatFileSize(long bytes)
+    internal static string FormatFileSize(long bytes)
     {
         const double kb = 1024;
         const double mb = kb * 1024;

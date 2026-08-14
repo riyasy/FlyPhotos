@@ -324,10 +324,7 @@ internal static class ImageReader
     }
 
     /// <summary>Returns a loading indicator display item to show while an image is being asynchronously decoded.</summary>
-    public static DisplayItem GetLoadingIndicator()
-    {
-        return new PreviewDisplayItem(_indicators.Loading, Origin.ErrorScreen);
-    }
+    public static DisplayItem GetLoadingIndicator() => new PreviewDisplayItem(_indicators.Loading, Origin.ErrorScreen);
 
     /// <summary>
     /// Tries each RAW decoder in the configured priority order (Rawler → WIC → Magick).

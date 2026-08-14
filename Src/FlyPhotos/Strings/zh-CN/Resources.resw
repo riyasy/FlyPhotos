@@ -486,7 +486,7 @@ Ctrl + 方向键：平移照片
 Ctrl + +：放大
 Ctrl + -：缩小
 
-Alt + 左右方向键：切换多页 TIFF 的页面
+Alt + 左右方向键：切换多页 TIFF/ICO 的页面
 
 Page Up/Page Down：切换到下一个预设缩放级别（100%、400%、适应窗口）
 Home：跳转到第一张照片
@@ -818,5 +818,26 @@ High Quality Cubic – 适合照片的最高质量缩放。</value>
   </data>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>共享</value>
+  </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>重命名</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>确定</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>无法重命名该文件。</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>重命名失败</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>文件名包含无效字符。</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>已存在同名的文件。</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>确定</value>
   </data>
 </root>

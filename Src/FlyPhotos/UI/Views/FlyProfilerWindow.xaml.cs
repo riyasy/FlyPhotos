@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage.Pickers;
 using FlyPhotos.Display.ImageReading;
+using FlyPhotos.Services;
 using Microsoft.UI.Xaml;
 using WinRT.Interop;
 
@@ -13,10 +14,132 @@ namespace FlyPhotos.UI.Views;
 
 public sealed partial class FlyProfilerWindow : Window
 {
+    private string _selectedFolder;
+
     public FlyProfilerWindow()
     {
         InitializeComponent();
+        AppWindow.Resize(new Windows.Graphics.SizeInt32(640, 760));
     }
+
+    private async void BrowseFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        var picker = new FolderPicker { SuggestedStartLocation = PickerLocationId.Desktop };
+        picker.FileTypeFilter.Add("*"); // FolderPicker requires at least one filter entry
+
+        var hwnd = WindowNative.GetWindowHandle(this);
+        InitializeWithWindow.Initialize(picker, hwnd);
+
+        var folder = await picker.PickSingleFolderAsync();
+        if (folder == null) return;
+
+        _selectedFolder = folder.Path;
+        ProfileAllButton.IsEnabled = true;
+        FolderPathText.Text = _selectedFolder;
+        StatusText.Text = "Ready to profile.";
+    }
+
+    private async void ProfileAllButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            BrowseFolderButton.IsEnabled = false;
+            ProfileAllButton.IsEnabled = false;
+            TestButton.IsEnabled = false;
+
+            var files = Directory
+                .GetFiles(_selectedFolder, "*", new EnumerationOptions { IgnoreInaccessible = true })
+                .Where(f => CodecDiscovery.SupportedExtensions.Contains(Path.GetExtension(f)))
+                .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            if (files.Length == 0)
+            {
+                StatusText.Text = "No supported image files in folder.";
+                return;
+            }
+
+            ProfileProgress.Maximum = files.Length;
+            ProfileProgress.Value = 0;
+            ProfileProgress.Visibility = Visibility.Visible;
+
+            // Read UI options on the UI thread before entering the background task.
+            var mode = ModeSelector.SelectedIndex; // 0 = HQ, 1 = Preview, 2 = Both
+            var runHq = mode == 0 || mode == 2;
+            var runPreview = mode == 1 || mode == 2;
+            var checkLock = CheckLockBox.IsChecked == true;
+
+            var outLines = new List<string>
+            {
+                "fileName,gethq status,time taken gethq (ms),gethq function used,gethq fallback,FileLocked," +
+                "getpreview status,getpreview (ms),getpreview function used,getpreview fallback"
+            };
+
+            await Task.Run(async () =>
+            {
+                for (int i = 0; i < files.Length; i++)
+                {
+                    var file = files[i];
+
+                    string hqStatus = "", hqMs = "", hqFunc = "", hqFallback = "", fileLocked = "";
+                    if (runHq)
+                    {
+                        var hq = await ProfilingImageReader.ProbeHq(TestCanvas, file, checkLock);
+                        hqStatus = hq.Success.ToString();
+                        hqMs = hq.ElapsedMs.ToString();
+                        hqFunc = hq.FunctionUsed;
+                        hqFallback = hq.Fallback.ToString();
+                        fileLocked = hq.Locked?.ToString() ?? "";
+                    }
+
+                    string pvStatus = "", pvMs = "", pvFunc = "", pvFallback = "";
+                    if (runPreview)
+                    {
+                        var pv = await ProfilingImageReader.ProbePreview(TestCanvas, file);
+                        pvStatus = pv.Success.ToString();
+                        pvMs = pv.ElapsedMs.ToString();
+                        pvFunc = pv.FunctionUsed;
+                        pvFallback = pv.Fallback.ToString();
+                    }
+
+                    outLines.Add(string.Join(",",
+                        CsvEscape(file),
+                        hqStatus, hqMs, hqFunc, hqFallback, fileLocked,
+                        pvStatus, pvMs, pvFunc, pvFallback));
+
+                    var done = i + 1;
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        StatusText.Text = $"Processing {done} / {files.Length}…";
+                        ProfileProgress.Value = done;
+                    });
+                }
+            });
+
+            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            var iso = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss"); // ':' is illegal in Windows filenames
+            var outPath = Path.Combine(desktop, iso + "_ProfileResult.csv");
+            await File.WriteAllLinesAsync(outPath, outLines);
+
+            StatusText.Text = $"Done! Output: {outPath}";
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            ProfileProgress.Visibility = Visibility.Collapsed;
+            BrowseFolderButton.IsEnabled = true;
+            ProfileAllButton.IsEnabled = _selectedFolder != null;
+            TestButton.IsEnabled = true;
+        }
+    }
+
+    private static string CsvEscape(string value) =>
+        value.Contains(',') || value.Contains('"')
+            ? "\"" + value.Replace("\"", "\"\"") + "\""
+            : value;
 
     private async void TestButton_Click(object sender, RoutedEventArgs e)
     {

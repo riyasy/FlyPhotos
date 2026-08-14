@@ -377,6 +377,14 @@ internal static partial class Win32Methods
     [LibraryImport("kernel32.dll")]
     internal static partial int GetCurrentPackageFullName(ref uint packageFullNameLength, IntPtr packageFullName);
 
+    /// <summary>
+    /// Ordinal-lookup form of <c>GetProcAddress</c>: <paramref name="lpProcName"/> carries an
+    /// ordinal value rather than a string pointer. Needed for exports that have no name, such as
+    /// the undocumented dark-mode functions in <c>uxtheme.dll</c>.
+    /// </summary>
+    [LibraryImport("kernel32.dll", SetLastError = true)]
+    internal static partial IntPtr GetProcAddress(IntPtr hModule, IntPtr lpProcName);
+
     #endregion
 
     #region Shell file operations — copy / move / delete to Recycle Bin (shell32.dll)

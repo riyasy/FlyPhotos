@@ -485,7 +485,7 @@ Ctrl + 화살표 키 : 사진 이동 (Pan)
 Ctrl + + : 확대
 Ctrl + - : 축소
 
-Alt + 왼쪽/오른쪽 화살표 : 멀티 페이지 TIFF 페이지 넘기기
+Alt + 왼쪽/오른쪽 화살표 : 멀티 페이지 TIFF/ICO 페이지 넘기기
 
 Page Up / Page Down : 다음 프리셋으로 줌 (100%, 400%, 맞춤)
 Home : 첫 번째 사진으로 이동
@@ -817,5 +817,26 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
   </data>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>공유</value>
+  </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>이름 바꾸기</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>확인</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>파일 이름을 바꿀 수 없습니다.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>이름 바꾸기 실패</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>파일 이름에 유효하지 않은 문자가 포함되어 있습니다.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>같은 이름의 파일이 이미 있습니다.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>확인</value>
   </data>
 </root>

@@ -159,7 +159,7 @@ internal partial class PhotoDisplayController
     {
         if (_photoList.GetPhoto(key) is not { } photo) return;
 
-        if (!IsContinuousKeyPress() && _cache.IsHqLoaded(key))
+        if (_cache.IsHqLoaded(key))
             await SetSourceAsync(photo, DisplayLevel.Hq);
         else if (_cache.IsPreviewLoaded(key))
             await SetSourceAsync(photo, DisplayLevel.Preview);
@@ -189,9 +189,11 @@ internal partial class PhotoDisplayController
 
     public async Task Fly(NavDirection direction)
     {
-        Interlocked.Increment(ref _keyPressCounter);
         var keys = _photoList.Keys;
         if (keys.Count <= 1) return;
+        // A list that can't be navigated must never open a burst: the HQ worker parks on
+        // IsContinuousKeyPress, and only a Brake() would unwind it.
+        Interlocked.Increment(ref _keyPressCounter);
         int currentPosition = _photoSessionState.CurrentPhotoListPosition;
         if (currentPosition < 0) return; // TODO Should not happen if state is consistent
         int newPosition = currentPosition + (direction == NavDirection.Next ? 1 : -1);
@@ -244,7 +246,7 @@ internal partial class PhotoDisplayController
 
     // --- File info ---
 
-    private void UpdateFileNameAndDetails()
+    public void UpdateFileNameAndDetails()
     {
         try
         {
@@ -273,8 +275,17 @@ internal partial class PhotoDisplayController
 
             if (showDimension)
             {
-                var (w, h) = photo.GetActualSize();
-                dimensionText = $"({w} x {h})";
+                // A multi-page photo reports the page on screen, not the whole file - ICO frames each
+                // have their own size, so the file's "actual size" would be wrong on every page but the first.
+                if (_photoSessionState.CurrentPage is { } page && page.Path == photo.FilePath)
+                {
+                    dimensionText = $"({page.Width} x {page.Height} - {page.Index + 1}/{page.Count})";
+                }
+                else
+                {
+                    var (w, h) = photo.GetActualSize();
+                    dimensionText = $"({w} x {h})";
+                }
             }
 
             FileNameOrDetailsChanged?.Invoke(new FileDisplayDetails(positionText, fileName, dimensionText));
@@ -283,11 +294,6 @@ internal partial class PhotoDisplayController
         {
             Logger.Error(ex);
         }
-    }
-
-    public void RefreshFileNameAndDetails()
-    {
-        UpdateFileNameAndDetails();
     }
 
     // --- RAW decode settings changed ---
@@ -365,6 +371,35 @@ internal partial class PhotoDisplayController
             // app close will crash as the draw call will try to display disposed canvas bitmaps.
             return new DeleteResult(true, true);
         }
+    }
+
+    // --- Rename ---
+
+    public bool CanRenameCurrentPhoto()
+    {
+        if (_photoList.Keys.Count == 0) return false;
+        if (IsContinuousKeyPress()) return false;
+        if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq) return false;
+        return true;
+    }
+
+    public async Task<RenameResult> RenameCurrentPhoto(string newFileName)
+    {
+        var currentKey = _photoSessionState.CurrentPhotoKey;
+        if (_photoList.GetPhoto(currentKey) is not { } photo)
+        {
+            Logger.Error($"RenameCurrentPhoto failed: Key {currentKey} not found in the collection.");
+            return new RenameResult(false, "App - Inconsistent State");
+        }
+
+        var newPath = Path.Combine(Path.GetDirectoryName(photo.FilePath) ?? "", newFileName);
+        var result = await StorageOps.RenameFileOnDisk(photo.FilePath, newPath);
+        if (result.Success)
+        {
+            photo.Rename(newPath);
+            UpdateFileNameAndDetails();
+        }
+        return result;
     }
 
     // --- Clipboard ---

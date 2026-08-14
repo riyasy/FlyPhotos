@@ -486,7 +486,7 @@ Ctrl + Piltangenter : Panorera bild
 Ctrl + + : Zooma in
 Ctrl + - : Zooma ut
 
-Alt + Vänster/Höger Pil : Bläddra sidor i flersidig TIFF
+Alt + Vänster/Höger Pil : Bläddra sidor i flersidig TIFF/ICO
 
 Page Up / Page Down : Zooma till nästa förinställning (100%, 400%, Anpassa)
 Home : Gå till första bilden
@@ -818,5 +818,26 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
   </data>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>Dela</value>
+  </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>Byt namn</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>Det gick inte att byta namn på filen.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>Det gick inte att byta namn</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>Filnamnet innehåller ogiltiga tecken.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>Det finns redan en fil med det namnet.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>OK</value>
   </data>
 </root>

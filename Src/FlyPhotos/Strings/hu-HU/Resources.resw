@@ -485,7 +485,7 @@ Ctrl + Nyilak : Kép pásztázása
 Ctrl + + : Nagyítás
 Ctrl + - : Kicsinyítés
 
-Alt + Balra/Jobbra nyilak : Lapozás több oldalas TIFF fájlban
+Alt + Balra/Jobbra nyilak : Lapozás több oldalas TIFF/ICO fájlban
 
 Page Up/Page Down : Nagyítás/kicsinyítés a következő előre beállított értékre (100%, 400%, Illesztés)
 Home : Ugrás az első képre
@@ -817,5 +817,26 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
   </data>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>Megosztás</value>
+  </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>Átnevezés</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>A fájlt nem sikerült átnevezni.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>Az átnevezés nem sikerült</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>A fájlnév érvénytelen karaktereket tartalmaz.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>Már létezik ilyen nevű fájl.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>OK</value>
   </data>
 </root>

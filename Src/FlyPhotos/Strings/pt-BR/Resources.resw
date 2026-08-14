@@ -486,7 +486,7 @@ Ctrl + Setas direcionais : Deslocar foto
 Ctrl + + : Ampliar
 Ctrl + - : Reduzir
 
-Alt + Setas para a esquerda/direita : Navegar pelas páginas em um TIFF de várias páginas
+Alt + Setas para a esquerda/direita : Navegar pelas páginas em um TIFF/ICO de várias páginas
 
 Page Up/Page Down : Ampliar/reduzir para a próxima predefinição (100%, 400%, Ajustar)
 Home : Ir para a primeira foto
@@ -818,5 +818,26 @@ High Quality Cubic – Dimensionamento de alta qualidade para fotos.</value>
   </data>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>Compartilhar</value>
+  </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>Renomear</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>Não foi possível renomear o arquivo.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>Falha ao renomear</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>O nome do arquivo contém caracteres inválidos.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>Já existe um arquivo com esse nome.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>OK</value>
   </data>
 </root>

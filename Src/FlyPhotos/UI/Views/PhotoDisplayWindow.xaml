@@ -67,6 +67,7 @@
                 Typography.NumeralAlignment="Tabular" />
         </Border>
         <StackPanel
+            x:Name="BottomPanel"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Bottom"
             Orientation="Vertical"
@@ -146,6 +147,14 @@
                             </MenuFlyoutItem>
                             <MenuFlyoutSeparator Padding="12,8,12,8" />
                             <MenuFlyoutItem
+                                x:Uid="MenuItemRename"
+                                Click="MenuItemRename_OnClick"
+                                Text="Rename">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="&#xE8AC;" />
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem
                                 x:Uid="MenuItemDelete"
                                 Click="MenuItemDelete_OnClick"
                                 Text="Delete">
@@ -158,7 +167,7 @@
                     <RepeatButton
                         x:Name="ButtonBack"
                         Width="Auto"
-                        Click="ButtonBack_OnClick"
+                        Click="ButtonBackNext_OnClick"
                         Content="&#xE96f;"
                         FontFamily="{StaticResource FluentIcons}"
                         FontSize="16"
@@ -191,7 +200,7 @@
                         x:Name="ButtonNext"
                         Width="Auto"
                         Margin="0,0,10,0"
-                        Click="ButtonNext_OnClick"
+                        Click="ButtonBackNext_OnClick"
                         Content="&#xE970;"
                         FontFamily="{StaticResource FluentIcons}"
                         FontSize="16"
@@ -207,7 +216,7 @@
                     <RepeatButton
                         x:Name="ButtonPrevPage"
                         Width="Auto"
-                        Click="ButtonPrevPage_OnClick"
+                        Click="ButtonPrevNextPage_OnClick"
                         Content="&#xF587;"
                         FontFamily="{StaticResource FluentIcons}"
                         FontSize="16"
@@ -225,7 +234,7 @@
                         x:Name="ButtonNextPage"
                         Width="Auto"
                         Margin="0,0,10,0"
-                        Click="ButtonNextPage_OnClick"
+                        Click="ButtonPrevNextPage_OnClick"
                         Content="&#xF586;"
                         FontFamily="{StaticResource FluentIcons}"
                         FontSize="16"

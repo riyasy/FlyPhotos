@@ -12,7 +12,7 @@ namespace FlyPhotos.Core.Model;
 
 internal partial class Photo : IDisposable
 {
-    public readonly string FilePath;
+    public string FilePath { get; private set; }
     public HqDisplayItem? Hq { get; private set; }
     public PreviewDisplayItem? Preview { get; private set; }
     public Thumbnail? Thumbnail { get; private set; }
@@ -31,6 +31,10 @@ internal partial class Photo : IDisposable
         IsVector = extension.Contains(".svg", StringComparison.OrdinalIgnoreCase);
         IsRaw = !string.IsNullOrEmpty(extension) && CodecDiscovery.IsRawFile(extension);
     }
+
+    // Extension is never changed by a rename (UI keeps it fixed), so the format-derived
+    // flags above stay valid — only the path itself needs updating.
+    public void Rename(string newFilePath) => FilePath = newFilePath;
 
     private static readonly Photo _empty = new(string.Empty);
     public static Photo Empty() => _empty;
@@ -115,10 +119,7 @@ internal partial class Photo : IDisposable
         return (100, 100);
     }
 
-    public static DisplayItem GetLoadingIndicator()
-    {
-        return ImageReader.GetLoadingIndicator();
-    }
+    public static DisplayItem GetLoadingIndicator() => ImageReader.GetLoadingIndicator();
 
     private static readonly HashSet<string> FormatsSupportingTransparency =
         new(StringComparer.OrdinalIgnoreCase)

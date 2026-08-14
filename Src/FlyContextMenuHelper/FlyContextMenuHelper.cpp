@@ -61,6 +61,46 @@ struct ContextMenuParams {
 };
 
 /**
+ * @brief Opts this process into dark menus so TrackPopupMenuEx follows the Windows theme.
+ *
+ * @details
+ * uxtheme.dll exports these two functions by ordinal only - undocumented, but stable since
+ * Win10 1903. PreferredAppMode::AllowDark (1) means "this app supports dark mode, follow the
+ * system setting"; ForceDark (2) would ignore the Windows theme, which is not what we want.
+ *
+ * Called before every menu display rather than once at startup: this helper outlives many
+ * right-clicks, and FlushMenuThemes drops uxtheme's cached menu theme so a Windows light/dark
+ * switch made in the meantime is picked up on the next menu.
+ *
+ * @note On Win10 1809 ordinal 135 is the older AllowDarkModeForApp(BOOL); passing 1 means TRUE
+ *       there too, so no OS version guard is needed.
+ * @note The C# side does the same thing for the in-process menu (ContextMenuHelper.cs) - the
+ *       preferred app mode is per-process, so each process must opt in for itself.
+ */
+static void SyncMenuThemeToWindows()
+{
+    using SetPreferredAppModeFn = int (WINAPI*)(int);
+    using FlushMenuThemesFn = void (WINAPI*)();
+
+    constexpr int ORD_SET_PREFERRED_APP_MODE = 135;
+    constexpr int ORD_FLUSH_MENU_THEMES = 136;
+    constexpr int ALLOW_DARK = 1;
+
+    // Resolved once; uxtheme stays loaded for the lifetime of the process anyway.
+    static HMODULE hUxTheme = LoadLibraryExW(L"uxtheme.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+    if (!hUxTheme) return;
+
+    static auto pSetPreferredAppMode = reinterpret_cast<SetPreferredAppModeFn>(
+        GetProcAddress(hUxTheme, MAKEINTRESOURCEA(ORD_SET_PREFERRED_APP_MODE)));
+    static auto pFlushMenuThemes = reinterpret_cast<FlushMenuThemesFn>(
+        GetProcAddress(hUxTheme, MAKEINTRESOURCEA(ORD_FLUSH_MENU_THEMES)));
+    if (!pSetPreferredAppMode || !pFlushMenuThemes) return;
+
+    pSetPreferredAppMode(ALLOW_DARK);
+    pFlushMenuThemes();
+}
+
+/**
  * @brief Application entry point.
  *
  * Creates a hidden helper window and a monitor thread, then enters the message loop.
@@ -297,6 +337,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             std::vector<std::wstring> fileList = { params->filePath };
             POINT pt = { params->x, params->y };
             HWND hRequesterWnd = params->hRequesterWnd;
+
+            // Match the Windows light/dark setting before the menu is created
+            SyncMenuThemeToWindows();
 
             // Show Menu (Blocks here until menu closed)
             g_shellContextMenu.ShowContextMenu(hWnd, fileList, pt);

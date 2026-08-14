@@ -483,7 +483,7 @@ Ctrl + ആരോ കീകൾ : ഫോട്ടോ നീക്കാൻ (Pan)
 Ctrl + + : സൂം ഇൻ
 Ctrl + - : സൂം ഔട്ട്
 
-Alt + Left/Right ആരോ കീകൾ : മൾട്ടി-പേജ് TIFF-ൽ പേജുകൾ മാറ്റാൻ
+Alt + Left/Right ആരോ കീകൾ : മൾട്ടി-പേജ് TIFF/ICO-ൽ പേജുകൾ മാറ്റാൻ
 
 Page Up / Page Down : അടുത്ത പ്രീസെറ്റിലേക്ക് സൂം ചെയ്യാൻ (100%, 400%, സ്‌ക്രീനിൽ നിറക്കുക)
 Home : ആദ്യത്തെ ഫോട്ടോയിലേക്ക് പോകാൻ
@@ -815,5 +815,26 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
   </data>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>പങ്കിടുക</value>
+  </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>പേരുമാറ്റുക</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>ശരി</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>ഫയലിന്റെ പേര് മാറ്റാൻ കഴിഞ്ഞില്ല.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>പേര് മാറ്റൽ പരാജയപ്പെട്ടു</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>ഫയലിന്റെ പേരിൽ അസാധുവായ പ്രതീകങ്ങൾ അടങ്ങിയിരിക്കുന്നു.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>ആ പേരിലുള്ള ഒരു ഫയൽ ഇതിനകം നിലവിലുണ്ട്.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>ശരി</value>
   </data>
 </root>

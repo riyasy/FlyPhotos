@@ -100,6 +100,13 @@ internal class CanvasViewManager : IAnimationHost
     /// </summary>
     private bool _isStateModifiedByUser;
 
+    /// <summary>
+    /// True while a multi-page image shows a page whose pixel size differs from page 1's. A revisit always
+    /// reopens at page 1, and the remembered scale is absolute, so a view made here must not be cached —
+    /// a 10x zoom on an ICO's 16x16 frame would come back as a 10x zoom on its 256x256 frame.
+    /// </summary>
+    private bool _isOnResizedPage;
+
     // Animation substrate. At most one animation is active (null at rest); its concrete type encodes "which
     // kind", replacing the old AnimationType enum + switch. The animation owns its type-specific geometry; the
     // shared spring bank / clock / target scale below stay here so velocity and clock carry continuously across
@@ -208,6 +215,7 @@ internal class CanvasViewManager : IAnimationHost
         bool isFirstPhotoEver, bool isNewPhoto, bool isUpgradeFromPlaceholder)
     {
         _photoPath = photoPath;
+        _isOnResizedPage = false; // new content always installs at page 1
 
         if (isFirstPhotoEver)
             ApplyFirstPhotoView(imageSize, imageRotation, canvasSize);
@@ -217,6 +225,22 @@ internal class CanvasViewManager : IAnimationHost
             ApplyNavigationView(photoPath, imageSize, imageRotation, canvasSize, isNewPhoto);
 
         ViewChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// Re-fits the view for a new page of the current multi-page image. Only called when the page
+    /// actually changed size (ICO frames run 256 px down to 16 px; TIFF pages are normally uniform and
+    /// keep the user's zoom/pan instead). Rotation is carried over from the live view rather than the
+    /// EXIF baseline, so a manual rotation survives the page change.
+    /// </summary>
+    public void SetPageSize(Size imageSize, Size canvasSize, bool isFirstPage)
+    {
+        _isOnResizedPage = !isFirstPage;
+        StopAnimationSnappingToTarget();
+        _canvasViewState.ImageRect = new Rect(0, 0, imageSize.Width, imageSize.Height);
+        SetDefaultView(imageSize, _canvasViewState.Rotation, canvasSize, isFirstPhotoEver: false);
+        ViewChanged?.Invoke();
+        ZoomChanged?.Invoke(); // 256 px -> 16 px moves the scale by up to 16x; the readout must follow
     }
 
     /// <summary>The very first photo on launch always opens from a clean, fitted view.</summary>
@@ -456,7 +480,7 @@ internal class CanvasViewManager : IAnimationHost
     public void CacheCurrentViewState(string photoPath, Size canvasSize)
     {
         if (AppConfig.Settings.PanZoomBehaviourOnNavigation != PanZoomBehaviourOnNavigation.RememberPerPhoto
-            || !_isStateModifiedByUser)
+            || !_isStateModifiedByUser || _isOnResizedPage)
             return;
 
         _viewStore.Save(photoPath, _canvasViewState.Scale, _canvasViewState.LastScaleTo,

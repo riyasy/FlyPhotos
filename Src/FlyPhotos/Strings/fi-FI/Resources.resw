@@ -486,7 +486,7 @@ Ctrl + Nuolinäppäimet : Panoroi kuvaa
 Ctrl + + : Zoomaa sisään
 Ctrl + - : Zoomaa ulos
 
-Alt + Vasen/Oikea Nuolinäppäin : Vaihda sivua monisivuisessa TIFF:ssä
+Alt + Vasen/Oikea Nuolinäppäin : Vaihda sivua monisivuisessa TIFF/ICO:ssä
 
 Page Up / Page Down : Zoomaa seuraavaan esiasetukseen (100%, 400%, Sovita)
 Home : Siirry ensimmäiseen kuvaan
@@ -818,5 +818,26 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
   </data>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>Jaa</value>
+  </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>Nimeä uudelleen</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>Tiedoston uudelleennimeäminen epäonnistui.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>Uudelleennimeäminen epäonnistui</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>Tiedostonimi sisältää virheellisiä merkkejä.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>Samanniminen tiedosto on jo olemassa.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>OK</value>
   </data>
 </root>

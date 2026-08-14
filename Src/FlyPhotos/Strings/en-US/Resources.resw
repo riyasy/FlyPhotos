@@ -357,6 +357,18 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>GPS location</value>
   </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Texture type</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Mipmaps</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Alpha</value>
+  </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Loading high resolution version. Please wait…</value>
   </data>
@@ -486,7 +498,7 @@ Ctrl + Arrow Keys : Pan Photo
 Ctrl + + : Zoom In
 Ctrl + - : Zoom Out
 
-Alt + Left/Right Arrow Keys : Navigate pages in multi-page TIFF
+Alt + Left/Right Arrow Keys : Navigate pages in multi-page TIFF/ICO
 
 Page Up/Page Down : Zoom In/Out to next Preset (100%, 400%, Fit)
 Home : Navigate to first photo
@@ -824,5 +836,26 @@ High Quality Cubic – Highest-quality scaling for photos.</value>
   </data>
   <data name="MenuItemDelete.Text" xml:space="preserve">
     <value>Delete</value>
+  </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>The file could not be renamed.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>Rename Failed</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>The file name contains invalid characters.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>A file with that name already exists.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>OK</value>
   </data>
 </root>

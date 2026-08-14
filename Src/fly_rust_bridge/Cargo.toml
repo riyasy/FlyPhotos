@@ -11,8 +11,10 @@ crate-type = ["cdylib"]
 rawler = "0.7" 
 libc = "0.2"
 rayon = "1"
-resvg = "0.47.0"
-fontdb = "0.23.0"
+# fontdb is not a direct dependency: lib.rs uses the `usvg::fontdb` re-export,
+# so it always tracks whatever version usvg pins. Listing it here separately
+# risks two copies of fontdb in the DLL when resvg bumps it.
+resvg = "0.48.1"
 
 [profile.release]
 opt-level = 3

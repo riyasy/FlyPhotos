@@ -486,7 +486,7 @@ Ctrl + Flèches : Déplacer la photo
 Ctrl + + : Zoom avant
 Ctrl + - : Zoom arrière
 
-Alt + Flèches Gauche/Droite : Naviguer dans les TIFF multipages
+Alt + Flèches Gauche/Droite : Naviguer dans les TIFF/ICO multipages
 
 Page Préc. / Page Suiv. : Zoomer au prochain préréglage (100%, 400%, Ajuster)
 Origine (Home) : Aller à la première photo
@@ -818,5 +818,26 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
   </data>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>Partager</value>
+  </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>Renommer</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>Impossible de renommer le fichier.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>Échec du changement de nom</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>Le nom du fichier contient des caractères non valides.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>Un fichier portant ce nom existe déjà.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>OK</value>
   </data>
 </root>

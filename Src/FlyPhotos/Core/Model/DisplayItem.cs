@@ -11,10 +11,8 @@ internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, 
     public Origin Origin { get; } = origin;
     public int Rotation { get; } = rotation;
 
-    public bool IsErrorOrUndefined()
-    {
-        return Origin == Origin.ErrorScreen || Origin == Origin.Undefined;
-    }
+    public bool IsErrorOrUndefined() => 
+        Origin == Origin.ErrorScreen || Origin == Origin.Undefined;
 
     public void Dispose()
     {
@@ -44,9 +42,18 @@ internal sealed partial class AnimatedHqDisplayItem(CanvasBitmap firstFrame, Ori
     public byte[] FileAsByteArray { get; } = fileAsByteArray;
 }
 
-internal sealed partial class MultiPageHqDisplayItem(CanvasBitmap firstFrame, Origin origin, byte[] fileAsByteArray) : HqDisplayItem(firstFrame, origin, 0)
+internal sealed partial class MultiPageHqDisplayItem(CanvasBitmap firstFrame, Origin origin, byte[] fileAsByteArray,
+    int[] pageOrder) : HqDisplayItem(firstFrame, origin, 0)
 {
     public byte[] FileAsByteArray { get; } = fileAsByteArray;
+
+    /// <summary>
+    /// Display page -> decoder frame index. TIFF passes identity, ICO passes largest-frame-first. It is
+    /// also the page count, so a count and a map can never disagree.
+    /// </summary>
+    public int[] PageOrder { get; } = pageOrder;
+
+    public int PageCount => PageOrder.Length;
 }
 
 internal sealed partial class Thumbnail(byte[] pixels) : IDisposable

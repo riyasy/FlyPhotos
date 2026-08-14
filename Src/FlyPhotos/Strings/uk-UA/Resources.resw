@@ -486,7 +486,7 @@ Ctrl + стрілки : Переміщення фото
 Ctrl + + : Збільшити
 Ctrl + - : Зменшити
 
-Alt + стрілки ліво/право : Навігація між сторінками багатосторінкового TIFF
+Alt + стрілки ліво/право : Навігація між сторінками багатосторінкового TIFF/ICO
 
 Page Up/Page Down : Збільшити/зменшити до наступного пресету (100%, 400%, вписати)
 Home : Перейти до першого фото
@@ -818,5 +818,26 @@ High Quality Cubic – Масштабування найвищої якості 
   </data>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>Поділитися</value>
+  </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>Перейменувати</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>ОК</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>Не вдалося перейменувати файл.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>Помилка перейменування</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>Ім'я файлу містить неприпустимі символи.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>Файл із таким ім'ям уже існує.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>ОК</value>
   </data>
 </root>

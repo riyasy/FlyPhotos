@@ -486,7 +486,7 @@ Strg + Pfeiltasten : Ausschnitt verschieben
 Strg + + : Vergrößern
 Strg + - : Verkleinern
 
-Alt + Pfeiltasten Links/Rechts : Seiten in mehrseitigen TIFFs wechseln
+Alt + Pfeiltasten Links/Rechts : Seiten in mehrseitigen TIFF/ICOs wechseln
 
 Bild Auf / Bild Ab : Zur nächsten Zoomstufe (100%, 400%, Einpassen)
 Pos1 : Zum ersten Foto
@@ -818,5 +818,26 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
   </data>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>Teilen</value>
+  </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>Umbenennen</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>Die Datei konnte nicht umbenannt werden.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>Umbenennen fehlgeschlagen</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>Der Dateiname enthält ungültige Zeichen.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>Eine Datei mit diesem Namen ist bereits vorhanden.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>OK</value>
   </data>
 </root>

@@ -19,6 +19,12 @@ namespace FlyPhotos.UI.Behaviors;
 public partial class OpacityFader : IDisposable
 {
     /// <summary>
+    /// Extra height (in DIPs) added above the hot zone element, so the controls fade in
+    /// slightly before the pointer reaches them.
+    /// </summary>
+    private const double HotZoneBuffer = 20;
+
+    /// <summary>
     /// A list of Composition Visuals corresponding to the UI elements whose opacity will be animated.
     /// </summary>
     private readonly List<Visual> _visuals;
@@ -38,6 +44,11 @@ public partial class OpacityFader : IDisposable
     /// to determine whether to fade elements.
     /// </summary>
     private readonly FrameworkElement _trackingElement;
+
+    /// <summary>
+    /// The element whose height defines the "hot zone" at the bottom of the tracking element.
+    /// </summary>
+    private readonly FrameworkElement _hotZoneElement;
 
     /// <summary>
     /// A flag indicating whether the managed UI elements are currently in a faded (lower opacity) state.
@@ -64,15 +75,19 @@ public partial class OpacityFader : IDisposable
     /// The <see cref="FrameworkElement"/> to monitor for pointer movements. This element defines
     /// the coordinate space and boundaries for the "hot zone" that triggers fading.
     /// </param>
+    /// <param name="hotZoneElement">
+    /// The bottom-aligned <see cref="FrameworkElement"/> whose height defines how tall the hot zone is.
+    /// </param>
     /// <param name="enabled">Whether pointer tracking and fading are active immediately on construction.</param>
     /// <param name="fadeDuration">
     /// An optional <see cref="TimeSpan"/> specifying the duration of the opacity fade animation.
     /// If null, a default duration of 500 milliseconds is used.
     /// </param>
-    public OpacityFader(IEnumerable<FrameworkElement> elementsToFade, FrameworkElement trackingElement, bool enabled, TimeSpan? fadeDuration = null)
+    public OpacityFader(IEnumerable<FrameworkElement> elementsToFade, FrameworkElement trackingElement, FrameworkElement hotZoneElement, bool enabled, TimeSpan? fadeDuration = null)
     {
         ArgumentNullException.ThrowIfNull(elementsToFade);
         ArgumentNullException.ThrowIfNull(trackingElement);
+        ArgumentNullException.ThrowIfNull(hotZoneElement);
 
         _visuals = [];
         foreach (var element in elementsToFade)
@@ -86,6 +101,7 @@ public partial class OpacityFader : IDisposable
 
         _compositor = _visuals[0].Compositor;
         _trackingElement = trackingElement;
+        _hotZoneElement = hotZoneElement;
         _defaultDuration = fadeDuration ?? TimeSpan.FromMilliseconds(500);
         _isFaded = false;
 
@@ -239,11 +255,13 @@ public partial class OpacityFader : IDisposable
 
         var windowHeight = _trackingElement.ActualHeight;
 
-        // If the tracking element has no height, cannot determine hot zone, so exit.
-        if (windowHeight <= 0) return;
+        // The hot zone is the strip occupied by the bottom panel plus a small approach buffer,
+        // so the controls light up just before the pointer reaches them (Ref #216).
+        var bottomThreshold = _hotZoneElement.ActualHeight + HotZoneBuffer;
 
-        // Defines the "hot zone" at the bottom of the window (30% or minimum 100px).
-        var bottomThreshold = Math.Max(100, windowHeight * 0.30);
+        // Before the first layout pass either height can be 0 — leave the current state alone.
+        if (windowHeight <= 0 || bottomThreshold <= 0) return;
+
         var isPointerInHotZone = pos.Y >= windowHeight - bottomThreshold;
 
 

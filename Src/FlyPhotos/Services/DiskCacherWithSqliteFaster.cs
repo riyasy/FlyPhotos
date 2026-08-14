@@ -553,10 +553,7 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     /// Returns the current UTC time as a Unix epoch timestamp (seconds).
     /// Used to record <c>lastAccessed</c> values in the database.
     /// </summary>
-    private static long NowUnix()
-    {
-        return DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-    }
+    private static long NowUnix() => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
     /// <summary>
     /// Returns the last-write time of <paramref name="path" /> as a compact
@@ -568,10 +565,8 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     /// </para>
     /// </summary>
     /// <param name="path">Absolute path of the file to inspect.</param>
-    private static string FileMtimeString(string path)
-    {
-        return File.GetLastWriteTimeUtc(path).ToString("yyyyMMddHHmmss");
-    }
+    private static string FileMtimeString(string path) => 
+        File.GetLastWriteTimeUtc(path).ToString("yyyyMMddHHmmss");
 
     /// <summary>
     /// Encodes a <see cref="CanvasBitmap"/> as a JPEG, applying resizing and rotation via 

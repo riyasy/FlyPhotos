@@ -486,7 +486,7 @@ Ctrl + Frecce : Sposta foto
 Ctrl + + : Zoom avanti
 Ctrl + - : Zoom indietro
 
-Alt + Frecce Sinistra/Destra : Cambia pagina in TIFF multipagina
+Alt + Frecce Sinistra/Destra : Cambia pagina in TIFF/ICO multipagina
 
 Pag Su / Pag Giù : Zoom al prossimo preset (100%, 400%, Adatta)
 Inizio (Home) : Vai alla prima foto
@@ -818,5 +818,26 @@ High Quality Cubic – Ridimensionamento della massima qualità per le foto.</va
   </data>
   <data name="MenuItemShare.Text" xml:space="preserve">
     <value>Condividi</value>
+  </data>
+  <data name="MenuItemRename.Text" xml:space="preserve">
+    <value>Rinomina</value>
+  </data>
+  <data name="RenameFailed.CloseButton" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="RenameFailed.Message" xml:space="preserve">
+    <value>Impossibile rinominare il file.</value>
+  </data>
+  <data name="RenameFailed.Title" xml:space="preserve">
+    <value>Ridenominazione non riuscita</value>
+  </data>
+  <data name="RenameFailed.InvalidCharacters" xml:space="preserve">
+    <value>Il nome del file contiene caratteri non validi.</value>
+  </data>
+  <data name="RenameFailed.FileAlreadyExists" xml:space="preserve">
+    <value>Esiste già un file con questo nome.</value>
+  </data>
+  <data name="RenameFlyout.OkButton" xml:space="preserve">
+    <value>OK</value>
   </data>
 </root>

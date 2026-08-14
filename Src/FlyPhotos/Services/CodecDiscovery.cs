@@ -138,10 +138,10 @@ internal static class CodecDiscovery
     public static bool IsRawFile(string extension) =>
         IsRawlerRaw(extension) || IsWicRaw(extension) || IsMagickRaw(extension);
 
-    public static IReadOnlyList<CodecInfo> GetAllCodecs()
-    {
-        return _codecInfoList;
-    }
+    // Return type MUST stay concrete List (not IReadOnlyList). Under Native AOT the CsWinRT
+    // optimizer pre-bakes the CCW vtable from this declared type when the result flows into
+    // ItemsSource; an interface type yields no vtable -> E_INVALIDARG at runtime.
+    public static List<CodecInfo> GetAllCodecs() => _codecInfoList;
 
     private static List<CodecInfo> GetWicCodecs() => NativeWrapper.GetWicDecoders();
 
