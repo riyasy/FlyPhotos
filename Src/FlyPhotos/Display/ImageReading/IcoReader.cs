@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 using FlyPhotos.Core.Model;
@@ -12,7 +13,8 @@ namespace FlyPhotos.Display.ImageReading;
 
 /// <summary>
 /// A reader specifically for .ICO files to correctly handle their multi-frame nature.
-/// This reader finds and loads the frame with the highest resolution.
+/// A multi-frame icon is presented like a multi-page TIFF, with the frames ordered by decreasing
+/// resolution, so the highest-resolution frame is what shows first. Previews stay single-frame.
 /// </summary>
 internal static class IcoReader
 {
@@ -23,96 +25,90 @@ internal static class IcoReader
     /// </summary>
     public static async Task<(bool, PreviewDisplayItem)> GetPreview(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
-        var (bitmap, width, height) = await LoadLargestFrameAsync(ctrl, inputPath);
-
-        if (bitmap != null)
-        {
-            var metadata = new ImageMetadata(width, height);
-            var previewItem = new PreviewDisplayItem(bitmap, Origin.Disk, metadata);
-            return (true, previewItem);
-        }
-        return (false, PreviewDisplayItem.Empty());
-    }
-
-    /// <summary>
-    /// Gets the highest-resolution image from an ICO file for high-quality display.
-    /// </summary>
-    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
-    {
-        var (bitmap, _, _) = await LoadLargestFrameAsync(ctrl, inputPath);
-
-        if (bitmap != null)
-        {
-            var hqItem = new StaticHqDisplayItem(bitmap, Origin.Disk);
-            return (true, hqItem);
-        }
-        return (false, HqDisplayItem.Empty());
-    }
-
-    /// <summary>
-    /// Core logic to open an ICO file, find the frame with the largest dimensions, and load it into a CanvasBitmap.
-    /// </summary>
-    /// <returns>A tuple containing the loaded bitmap, its width, and its height. Returns null on failure.</returns>
-    private static async Task<(CanvasBitmap? bitmap, int width, int height)> LoadLargestFrameAsync(ICanvasResourceCreatorWithDpi ctrl, string filePath)
-    {
         try
         {
-            using var stream = await StorageOps.GetWin2DPerformantStream(filePath);
-
-            // The BitmapDecoder is essential for inspecting multi-frame images.
+            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
             var decoder = await BitmapDecoder.CreateAsync(stream);
-            // Find the index of the frame with the most pixels.
-            var bestFrame = await FindLargestFrameAsync(decoder);
+            var order = await GetFramesLargestFirstAsync(decoder);
 
-            // Get the raw pixel data from that frame.
-            var pixelProvider = await bestFrame.GetPixelDataAsync(
-                BitmapPixelFormat.Bgra8,
-                BitmapAlphaMode.Premultiplied,
-                new BitmapTransform(),
-                ExifOrientationMode.IgnoreExifOrientation,
-                ColorManagementMode.DoNotColorManage);
-
-            var pixelData = pixelProvider.DetachPixelData();
-
-            // Create the final CanvasBitmap directly from the pixel data of the chosen frame.
-            var canvasBitmap = CanvasBitmap.CreateFromBytes(
-                ctrl,
-                pixelData,
-                (int)bestFrame.PixelWidth,
-                (int)bestFrame.PixelHeight,
-                Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized);
-
-            return (canvasBitmap, (int)bestFrame.PixelWidth, (int)bestFrame.PixelHeight);
+            var (bitmap, width, height) = await DecodeFrameAsync(ctrl, decoder, order[0]);
+            var metadata = new ImageMetadata(width, height);
+            return (true, new PreviewDisplayItem(bitmap, Origin.Disk, metadata));
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Failed to load ICO file {path}", filePath);
-            return (null, 0, 0);
+            Logger.Error(ex, "IcoReader - GetPreview failed for {0}", inputPath);
+            return (false, PreviewDisplayItem.Empty());
         }
     }
 
     /// <summary>
-    /// Iterates through all frames in a BitmapDecoder to find the one with the largest area.
-    /// Returns the frame itself to avoid a redundant GetFrameAsync call by the caller.
+    /// Opens an ICO file for high-quality display. A single-frame icon becomes a plain static item;
+    /// a multi-frame one becomes a multi-page item whose pages run from the largest frame downwards.
     /// </summary>
-    private static async Task<BitmapFrame> FindLargestFrameAsync(BitmapDecoder decoder)
+    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
-        var bestFrame = await decoder.GetFrameAsync(0);
-        if (decoder.FrameCount <= 1) return bestFrame;
+        try
+        {
+            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
+            var decoder = await BitmapDecoder.CreateAsync(stream);
+            var order = await GetFramesLargestFirstAsync(decoder);
 
-        uint maxPixelCount = bestFrame.PixelWidth * bestFrame.PixelHeight;
+            // Page 1 is the largest frame; it also sizes the initial view via Photo.GetActualSize().
+            var (bitmap, _, _) = await DecodeFrameAsync(ctrl, decoder, order[0]);
 
-        for (uint i = 1; i < decoder.FrameCount; i++)
+            if (order.Length <= 1) return (true, new StaticHqDisplayItem(bitmap, Origin.Disk));
+
+            // Seeking back to read the raw bytes is a simple memcpy - the renderer decodes the
+            // remaining frames on demand from them.
+            stream.Seek(0);
+            var bytes = await StorageOps.GetInMemByteArray(stream);
+            return (true, new MultiPageHqDisplayItem(bitmap, Origin.Disk, bytes, order));
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "IcoReader - GetHq failed for {0}", inputPath);
+            return (false, HqDisplayItem.Empty());
+        }
+    }
+
+    /// <summary>
+    /// Frame indices sorted by decreasing pixel area. Well-formed icons are already stored largest-first,
+    /// so this is usually a no-op; it earns its place on icons built by merging two icon groups, whose
+    /// directory runs e.g. 48, 32, 16, 256, 48, 32, 16. OrderByDescending is stable, so equal-area
+    /// frames (e.g. the same size at different bit depths) keep their file order.
+    /// </summary>
+    private static async Task<int[]> GetFramesLargestFirstAsync(BitmapDecoder decoder)
+    {
+        var areas = new uint[decoder.FrameCount];
+        for (uint i = 0; i < decoder.FrameCount; i++)
         {
             var frame = await decoder.GetFrameAsync(i);
-            var pixelCount = frame.PixelWidth * frame.PixelHeight;
-
-            if (pixelCount > maxPixelCount)
-            {
-                maxPixelCount = pixelCount;
-                bestFrame = frame;
-            }
+            areas[i] = frame.PixelWidth * frame.PixelHeight;
         }
-        return bestFrame;
+        return Enumerable.Range(0, areas.Length).OrderByDescending(i => areas[i]).ToArray();
+    }
+
+    /// <summary>Decodes one frame into a CanvasBitmap, returning it with its pixel dimensions.</summary>
+    private static async Task<(CanvasBitmap bitmap, int width, int height)> DecodeFrameAsync(
+        ICanvasResourceCreatorWithDpi ctrl, BitmapDecoder decoder, int frameIndex)
+    {
+        var frame = await decoder.GetFrameAsync((uint)frameIndex);
+
+        var pixelProvider = await frame.GetPixelDataAsync(
+            BitmapPixelFormat.Bgra8,
+            BitmapAlphaMode.Premultiplied,
+            new BitmapTransform(),
+            ExifOrientationMode.IgnoreExifOrientation,
+            ColorManagementMode.DoNotColorManage);
+
+        var canvasBitmap = CanvasBitmap.CreateFromBytes(
+            ctrl,
+            pixelProvider.DetachPixelData(),
+            (int)frame.PixelWidth,
+            (int)frame.PixelHeight,
+            Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized);
+
+        return (canvasBitmap, (int)frame.PixelWidth, (int)frame.PixelHeight);
     }
 }

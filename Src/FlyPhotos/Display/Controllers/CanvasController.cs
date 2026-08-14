@@ -40,6 +40,9 @@ internal partial class CanvasController : ICanvasController
     public event Action<bool> OnOneToOneStateChanged;
     public event Action<bool> OnMutliPagePhotoLoaded;
 
+    /// <summary>Raised on the UI thread after a multi-page navigation settled on a new page.</summary>
+    public event Action OnPageChanged;
+
     private readonly IThumbnailController _thumbNailController;
     private readonly PhotoSessionState _photoSessionState;
     private readonly CanvasAnimatedControl _d2dCanvas;
@@ -66,7 +69,8 @@ internal partial class CanvasController : ICanvasController
 
     private int _latestSetSourceOperationId;
 
-    // UI-owned orchestration fields — touched only inside SetSource / InstallRenderer on the UI thread.
+    // UI-owned orchestration fields — touched inside SetSource / InstallRenderer, and _imageSize also in
+    // the closing UI hop of LoadAndFitPageAsync (a page can resize the image). All on the UI thread.
     private Size _imageSize;
     private string _currentPhotoPath = string.Empty;
     private bool _realImageDisplayedForCurrentPhoto;
@@ -230,7 +234,7 @@ internal partial class CanvasController : ICanvasController
     {
         InstallRenderer(
             new MultiPageRenderer(_d2dCanvas, multiDispItem.FileAsByteArray, 0,
-                photo.SupportsTransparency, RequestInvalidate),
+                photo.SupportsTransparency, RequestInvalidate, multiDispItem.PageOrder),
             _imageSize, multiDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
@@ -278,6 +282,13 @@ internal partial class CanvasController : ICanvasController
             _isMultiPageActive = isMultiPage;
             OnMutliPagePhotoLoaded?.Invoke(isMultiPage);
         }
+
+        // Publish (or clear) the page label for the filename bar. Unlike the event above this must be
+        // written on every install, since the path and page count change from photo to photo.
+        _photoSessionState.CurrentPage = newRenderer is MultiPageRenderer multiPage
+            ? new MultiPagePosition(ctx.PhotoPath, 0, multiPage.PageCount,
+                (int)imageSize.Width, (int)imageSize.Height)
+            : null;
 
         _pump.Enqueue(() =>
         {
@@ -387,13 +398,53 @@ internal partial class CanvasController : ICanvasController
 
     public void ChangePage(NavDirection navDirection)
     {
+        // Canvas size and photo path must be read on the calling (UI) thread; the load runs off the pump.
+        var canvasSize = _d2dCanvas.GetSize();
+        var photoPath = _currentPhotoPath;
         _pump.Enqueue(() =>
         {
             if (_currentRenderer is not MultiPageRenderer multiPageRenderer) return;
             var targetIndex = navDirection == NavDirection.Next
                 ? multiPageRenderer.CurrentPageIndex + 1
                 : multiPageRenderer.CurrentPageIndex - 1;
-            _ = multiPageRenderer.LoadPageAsync(targetIndex);
+            // No wraparound: pressing Next on the last page does nothing.
+            if (targetIndex < 0 || targetIndex >= multiPageRenderer.PageCount) return;
+            _ = LoadAndFitPageAsync(multiPageRenderer, targetIndex, canvasSize, photoPath);
+        });
+    }
+
+    /// <summary>
+    /// Loads a page and, when it differs in size from the one on screen, re-fits the view to it.
+    /// Pages of equal size (the normal multi-page TIFF case) leave the user's zoom/pan untouched;
+    /// ICO frames, which shrink from 256 px to 16 px, get a fresh fit each time.
+    /// </summary>
+    private async Task LoadAndFitPageAsync(MultiPageRenderer renderer, int targetIndex, Size canvasSize, string photoPath)
+    {
+        if (await renderer.LoadPageAsync(targetIndex) is not { } pageSize) return;
+
+        _pump.Enqueue(() =>
+        {
+            // A photo navigation may have swapped (and disposed) the renderer while we were decoding.
+            if (!ReferenceEquals(_currentRenderer, renderer)) return;
+
+            var pageIndex = renderer.CurrentPageIndex;
+            var pageCount = renderer.PageCount;
+
+            var shownSize = _canvasViewState.ImageRect;
+            if (pageSize.Width != shownSize.Width || pageSize.Height != shownSize.Height)
+                _canvasViewManager.SetPageSize(pageSize, canvasSize, pageIndex == 0);
+
+            // _imageSize and CurrentPage are UI-owned; hand them over on the UI thread. The photo may
+            // have been navigated away from in the meantime, in which case this result is stale.
+            _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
+            {
+                if (_currentPhotoPath != photoPath) return;
+
+                _imageSize = pageSize;
+                _photoSessionState.CurrentPage = new MultiPagePosition(photoPath, pageIndex, pageCount,
+                    (int)pageSize.Width, (int)pageSize.Height);
+                OnPageChanged?.Invoke();
+            });
         });
     }
 

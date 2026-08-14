@@ -123,6 +123,7 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.OnFitToScreenStateChanged += CanvasController_OnFitToScreenStateChanged;
         _canvasController.OnOneToOneStateChanged += CanvasController_OnOneToOneStateChanged;
         _canvasController.OnMutliPagePhotoLoaded += CanvasController_OnMultiPagePhotoLoaded;
+        _canvasController.OnPageChanged += CanvasController_OnPageChanged;
         _thumbNailController.ThumbnailClicked += Thumbnail_Clicked;
 
         TxtFileName.Text = Path.GetFileName(firstPhotoPath);
@@ -306,6 +307,7 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.OnFitToScreenStateChanged -= CanvasController_OnFitToScreenStateChanged;
         _canvasController.OnOneToOneStateChanged -= CanvasController_OnOneToOneStateChanged;
         _canvasController.OnMutliPagePhotoLoaded -= CanvasController_OnMultiPagePhotoLoaded;
+        _canvasController.OnPageChanged -= CanvasController_OnPageChanged;
 
         _thumbNailController.ThumbnailClicked -= Thumbnail_Clicked;
 
@@ -1001,7 +1003,7 @@ public sealed partial class PhotoDisplayWindow
                 BorderTxtFileName.Visibility = AppConfig.Settings.ShowFileName ? Visibility.Visible : Visibility.Collapsed;
                 break;
             case Setting.ImageDimensionsShowHide:
-                _photoController.RefreshFileNameAndDetails();
+                _photoController.UpdateFileNameAndDetails();
                 break;
             case Setting.CacheStatusShowHide:
                 ButtonExpander.Visibility = AppConfig.Settings.ShowCacheStatus ? Visibility.Visible : Visibility.Collapsed;
@@ -1072,6 +1074,10 @@ public sealed partial class PhotoDisplayWindow
         ButtonNextPage.Visibility = visibilityState;
         ButtonPrevPage.Visibility = visibilityState;
     }
+
+    // CanvasController raises this on the UI thread once a page navigation settled, so the filename
+    // bar can pick up the new page's size and index.
+    private void CanvasController_OnPageChanged() => _photoController.UpdateFileNameAndDetails();
 
     #endregion
 

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 using FlyPhotos.Core.Model;
@@ -66,7 +67,9 @@ internal static class TiffReader
                 // than a second pixel decode pass.
                 stream.Seek(0);
                 var bytes = await StorageOps.GetInMemByteArray(stream);
-                return (true, new MultiPageHqDisplayItem(firstFrame, Origin.Disk, bytes));
+                // Pages are the frames, in file order.
+                var pageOrder = Enumerable.Range(0, (int)decoder.FrameCount).ToArray();
+                return (true, new MultiPageHqDisplayItem(firstFrame, Origin.Disk, bytes, pageOrder));
             }
 
             return (true, new StaticHqDisplayItem(firstFrame, Origin.Disk));

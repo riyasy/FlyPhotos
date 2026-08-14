@@ -246,7 +246,7 @@ internal partial class PhotoDisplayController
 
     // --- File info ---
 
-    private void UpdateFileNameAndDetails()
+    public void UpdateFileNameAndDetails()
     {
         try
         {
@@ -275,8 +275,17 @@ internal partial class PhotoDisplayController
 
             if (showDimension)
             {
-                var (w, h) = photo.GetActualSize();
-                dimensionText = $"({w} x {h})";
+                // A multi-page photo reports the page on screen, not the whole file - ICO frames each
+                // have their own size, so the file's "actual size" would be wrong on every page but the first.
+                if (_photoSessionState.CurrentPage is { } page && page.Path == photo.FilePath)
+                {
+                    dimensionText = $"({page.Width} x {page.Height} - {page.Index + 1}/{page.Count})";
+                }
+                else
+                {
+                    var (w, h) = photo.GetActualSize();
+                    dimensionText = $"({w} x {h})";
+                }
             }
 
             FileNameOrDetailsChanged?.Invoke(new FileDisplayDetails(positionText, fileName, dimensionText));
@@ -285,11 +294,6 @@ internal partial class PhotoDisplayController
         {
             Logger.Error(ex);
         }
-    }
-
-    public void RefreshFileNameAndDetails()
-    {
-        UpdateFileNameAndDetails();
     }
 
     // --- RAW decode settings changed ---

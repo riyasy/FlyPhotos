@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Windows.Graphics.DirectX;
 using Windows.Graphics.Imaging;
 using Windows.Storage.Streams;
+using FlyPhotos.Core.Model;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
 using Microsoft.Graphics.Canvas;
@@ -14,9 +15,10 @@ using NLog;
 namespace FlyPhotos.Display.ImageRendering;
 
 /// <summary>
-/// Renderer for multi-page images (e.g., multipage TIFF). It decodes pages on demand from the
-/// provided byte array and renders the currently selected page. Page index can be changed to
-/// navigate through pages.
+/// Renderer for multi-page images (e.g., multipage TIFF, multi-frame ICO). It decodes pages on demand
+/// from the provided byte array and renders the currently selected page. Page index can be changed to
+/// navigate through pages. A <c>pageOrder</c> map lets a caller present the frames in an order other
+/// than the file's own (ICO shows them largest first).
 /// </summary>
 internal partial class MultiPageRenderer : IRenderer
 {
@@ -39,16 +41,19 @@ internal partial class MultiPageRenderer : IRenderer
     // The stream and decoder are created once and reused for all page loads.
     private readonly InMemoryRandomAccessStream _fileStream = new();
     private readonly Task<BitmapDecoder> _decoderTask;
-    private uint _frameCount;
+
+    // Display page -> decoder frame index. Identity for TIFF, largest-frame-first for ICO.
+    private readonly int[] _pageOrder;
 
     public MultiPageRenderer(CanvasAnimatedControl canvas, byte[] fileBytes, int initialPageIndex,
-        bool supportsTransparency, Action invalidate)
+        bool supportsTransparency, Action invalidate, int[] pageOrder)
     {
         _canvas = canvas;
         _supportsTransparency = supportsTransparency;
         _fileBytes = fileBytes;
         _currentPageIndex = initialPageIndex;
         _invalidate = invalidate;
+        _pageOrder = pageOrder;
 
         _decoderTask = InitDecoderAsync();
         _ = LoadPageAsync(_currentPageIndex);
@@ -65,9 +70,7 @@ internal partial class MultiPageRenderer : IRenderer
         }
         _fileBytes = null; // bytes are now in _fileStream; release the array
         _fileStream.Seek(0);
-        var decoder = await BitmapDecoder.CreateAsync(_fileStream);
-        _frameCount = decoder.FrameCount;
-        return decoder;
+        return await BitmapDecoder.CreateAsync(_fileStream);
     }
 
     public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating)
@@ -106,16 +109,19 @@ internal partial class MultiPageRenderer : IRenderer
         _fileStream.Dispose();
     }
 
-    public async Task<bool> LoadPageAsync(int pageIndex)
+    /// <summary>
+    /// Loads a page, returning its pixel size so the caller can re-fit the view when pages differ in
+    /// size (ICO frames do). Returns null when there is nothing to fit — the load failed, or a newer
+    /// load superseded it. The caller is responsible for passing an in-range page.
+    /// </summary>
+    public async Task<Size> LoadPageAsync(int pageIndex)
     {
         var operationId = Interlocked.Increment(ref _latestPageLoadId);
         try
         {
             var decoder = await _decoderTask;
 
-            if (pageIndex < 0 || pageIndex >= (int)_frameCount) return false;
-
-            var frame = await decoder.GetFrameAsync((uint)pageIndex);
+            var frame = await decoder.GetFrameAsync((uint)_pageOrder[pageIndex]);
             var pixelData = await frame.GetPixelDataAsync(
                 BitmapPixelFormat.Bgra8,
                 BitmapAlphaMode.Premultiplied,
@@ -126,7 +132,7 @@ internal partial class MultiPageRenderer : IRenderer
 
             // All the heavy decoding is done. Before touching shared state, check if this
             // operation is still the latest, and that the renderer hasn't been disposed.
-            if (_isDisposed || operationId != _latestPageLoadId) return false;
+            if (_isDisposed || operationId != _latestPageLoadId) return null;
 
             // CreateFromBytes is synchronous and uploads directly to the GPU — no PNG round-trip.
             // 96f DPI matches the original LoadAsync-from-PNG behaviour (PNG default DPI = 96).
@@ -141,7 +147,7 @@ internal partial class MultiPageRenderer : IRenderer
                 if (_isDisposed || operationId != _latestPageLoadId)
                 {
                     newBitmap.Dispose();
-                    return false;
+                    return null;
                 }
 
                 _currentBitmap?.Dispose();
@@ -149,14 +155,16 @@ internal partial class MultiPageRenderer : IRenderer
                 _currentPageIndex = pageIndex;
             }
             _invalidate();
-            return true;
+            return new Size(frame.PixelWidth, frame.PixelHeight);
         }
         catch (Exception ex)
         {
             Logger.Error(ex, "MultiPageRenderer - LoadPageAsync failed");
-            return false;
+            return null;
         }
     }
 
     public int CurrentPageIndex => _currentPageIndex;
+
+    public int PageCount => _pageOrder.Length;
 }
