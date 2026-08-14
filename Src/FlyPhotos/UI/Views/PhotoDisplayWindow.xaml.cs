@@ -172,7 +172,7 @@ public sealed partial class PhotoDisplayWindow
             dir => _photoController.Fly(dir),
             () => _photoController.Brake(),
             () => AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom);
-        _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout, AppConfig.Settings.AutoFade);
+        _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout, BottomPanel, AppConfig.Settings.AutoFade);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
         _mouseAutoHider = new MouseAutoHider(MainLayout, AppConfig.Settings.AutoHideMouse, TimeSpan.FromSeconds(1));
         _windPlacementManager = new WindowPlacementManager(this, AppConfig.Settings.WindowState);

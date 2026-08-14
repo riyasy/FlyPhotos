@@ -67,6 +67,7 @@
                 Typography.NumeralAlignment="Tabular" />
         </Border>
         <StackPanel
+            x:Name="BottomPanel"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Bottom"
             Orientation="Vertical"
