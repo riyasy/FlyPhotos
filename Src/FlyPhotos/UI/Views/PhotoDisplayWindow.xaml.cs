@@ -653,7 +653,12 @@ public sealed partial class PhotoDisplayWindow
                     !(currentPoint.Position.Y < AppTitlebar.ActualHeight) &&
                     !_canvasController.IsPressedOnImage(dpiAdjustedPosition) &&
                     _windFullScreenManager.IsMaximizedOrFullScreen)
-                    _windFullScreenManager.Restore(ButtonFullScreenClose);
+                {
+                    if (AppConfig.Settings.SizeWindowToImageOnRestore)
+                        RestoreWindowToImage();
+                    else
+                        _windFullScreenManager.Restore(ButtonFullScreenClose);
+                }
                 break;
 
             case PointerUpdateKind.MiddleButtonReleased:
