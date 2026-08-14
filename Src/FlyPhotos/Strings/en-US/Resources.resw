@@ -357,6 +357,18 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>GPS location</value>
   </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Texture type</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Mipmaps</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Alpha</value>
+  </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Loading high resolution version. Please wait…</value>
   </data>
