@@ -91,35 +91,56 @@ internal sealed class WindowFullScreenManager
     {
         var hwnd = WindowNative.GetWindowHandle(_window);
 
-        // Seed the hidden normal placement with the requested rectangle so the presenter switch
-        // reveals the window near its destination instead of at the old bounds. This is only a
-        // flicker hint — the exact geometry is applied by AlignClientRect below, because the real
-        // non-client offsets cannot be derived from system metrics on a window that extends its
-        // content into the title bar (they are asymmetric: ~0 at the top, a resize border
-        // elsewhere) and cannot be measured at all while the full-screen presenter is live.
-        Win32Methods.GetWindowPlacement(hwnd, out var placement);
-        placement.rcNormalPosition = new Win32Methods.RECT
+        // The image has already been prepared for the destination client rect. Suppress the
+        // DWM resize transition so Windows does not move the photo during this transition.
+        int transitionsDisabled = 1;
+        Win32Methods.DwmSetWindowAttribute(
+            hwnd,
+            Win32Methods.DWMWA_TRANSITIONS_FORCEDISABLED,
+            ref transitionsDisabled,
+            sizeof(int));
+
+        try
         {
-            Left = clientRect.X,
-            Top = clientRect.Y,
-            Right = clientRect.X + clientRect.Width,
-            Bottom = clientRect.Y + clientRect.Height
-        };
-        placement.showCmd = Win32Methods.SW_SHOWNORMAL;
+            // Seed the hidden normal placement with the requested rectangle so the presenter switch
+            // reveals the window near its destination instead of at the old bounds. This is only a
+            // flicker hint — the exact geometry is applied by AlignClientRect below, because the real
+            // non-client offsets cannot be derived from system metrics on a window that extends its
+            // content into the title bar (they are asymmetric: ~0 at the top, a resize border
+            // elsewhere) and cannot be measured at all while the full-screen presenter is live.
+            Win32Methods.GetWindowPlacement(hwnd, out var placement);
+            placement.rcNormalPosition = new Win32Methods.RECT
+            {
+                Left = clientRect.X,
+                Top = clientRect.Y,
+                Right = clientRect.X + clientRect.Width,
+                Bottom = clientRect.Y + clientRect.Height
+            };
+            placement.showCmd = Win32Methods.SW_SHOWNORMAL;
 
-        var wasFullScreen = AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen;
+            var wasFullScreen = AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen;
 
-        Win32Methods.SetWindowPlacement(hwnd, in placement);
+            Win32Methods.SetWindowPlacement(hwnd, in placement);
 
-        if (wasFullScreen)
-        {
-            exitFullScreenButton?.Visibility = Visibility.Collapsed;
-            AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
-            _wasMaximizedBeforeFullScreen = false;
-            FullScreenToggled?.Invoke(false);
+            if (wasFullScreen)
+            {
+                exitFullScreenButton?.Visibility = Visibility.Collapsed;
+                AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
+                _wasMaximizedBeforeFullScreen = false;
+                FullScreenToggled?.Invoke(false);
+            }
+
+            AlignClientRect(hwnd, clientRect);
         }
-
-        AlignClientRect(hwnd, clientRect);
+        finally
+        {
+            transitionsDisabled = 0;
+            Win32Methods.DwmSetWindowAttribute(
+                hwnd,
+                Win32Methods.DWMWA_TRANSITIONS_FORCEDISABLED,
+                ref transitionsDisabled,
+                sizeof(int));
+        }
     }
 
     /// <summary>

@@ -204,6 +204,14 @@ internal static partial class Win32Methods
 
     #region Window placement (user32.dll)
 
+    /// <summary>Disables DWM transitions for the specified window while the value is true.</summary>
+    internal const uint DWMWA_TRANSITIONS_FORCEDISABLED = 3;
+
+    /// <summary>Sets a Desktop Window Manager attribute for a window.</summary>
+    [LibraryImport("dwmapi.dll")]
+    internal static partial int DwmSetWindowAttribute(
+        nint hwnd, uint dwAttribute, ref int pvAttribute, uint cbAttribute);
+
     /// <summary>Retrieves the dimensions of a window's client area.</summary>
     [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
