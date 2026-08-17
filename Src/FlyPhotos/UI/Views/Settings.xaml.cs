@@ -46,6 +46,9 @@ internal sealed partial class Settings
 
     private readonly WindowAppearanceManager _windAppearanceManager;
 
+    /// <summary>Which swatch opened the shared <c>ColorPickerFlyout</c>.</summary>
+    private bool _pickingWindowBackgroundColor;
+
     private bool _heartBeatStarted;
     private Visual? _heartVisual;
     private SizeChangedEventHandler? _heartSizeChangedHandler;
@@ -96,6 +99,7 @@ internal sealed partial class Settings
         ButtonStretchSmallImages.IsOn = AppConfig.Settings.StretchSmallImages;
         SliderTransparentBackgroundIntensity.Value = AppConfig.Settings.TransparentBackgroundIntensity;
         RectThumbnailSelection.Stroke = new SolidColorBrush(ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor));
+        RectWindowBackground.Fill = new SolidColorBrush(WindowAppearanceManager.CustomColor());
         SliderThumbnailSize.Value = AppConfig.Settings.ThumbnailSize;
         ComboWindowLaunchMode.SelectedIndex = GetIndexForWindowLaunchMode(AppConfig.Settings.WindowLaunchMode);
         ButtonAllowMultiInstance.IsOn = AppConfig.Settings.AllowMultiInstance;
@@ -468,6 +472,8 @@ internal sealed partial class Settings
 
     private bool ShouldEnableTransparencySlider(int index) => index == 0;
 
+    private bool ShouldEnableBackgroundColor(int index) => GetBackdropForIndex(index) == WindowBackdropType.Custom;
+
     // Show the "Previous state" explanation only for the LastWindowState option (index 2).
     private string LaunchModeDescription(int index) => index == 2 ? L.Get("SettingsCardWindowLaunchMode/Description") : string.Empty;
 
@@ -504,6 +510,7 @@ internal sealed partial class Settings
             WindowBackdropType.Mica => 4,
             WindowBackdropType.MicaAlt => 5,
             WindowBackdropType.None => 6,
+            WindowBackdropType.Custom => 7,
             _ => 0
         };
     }
@@ -518,6 +525,7 @@ internal sealed partial class Settings
             4 => WindowBackdropType.Mica,
             5 => WindowBackdropType.MicaAlt,
             6 => WindowBackdropType.None,
+            7 => WindowBackdropType.Custom,
             _ => WindowBackdropType.Transparent,
         };
     }
@@ -592,11 +600,24 @@ internal sealed partial class Settings
 
     private async void ColorFlyOutOkButton_Click(object sender, RoutedEventArgs e)
     {
-        Windows.UI.Color newColor = FlyoutColorPicker.Color;
-        RectThumbnailSelection.Stroke = new SolidColorBrush(Windows.UI.Color.FromArgb(255, newColor.R, newColor.G, newColor.B));
+        Windows.UI.Color picked = FlyoutColorPicker.Color;
+        var newColor = Windows.UI.Color.FromArgb(255, picked.R, picked.G, picked.B);
+        var hex = $"#{picked.R:X2}{picked.G:X2}{picked.B:X2}";
         ColorPickerFlyout.Hide();
-        AppConfig.Settings.ThumbnailSelectionColor = $"#{newColor.R:X2}{newColor.G:X2}{newColor.B:X2}";
-        SettingChanged?.Invoke(Setting.ThumbnailSelectionColor);
+
+        if (_pickingWindowBackgroundColor)
+        {
+            RectWindowBackground.Fill = new SolidColorBrush(newColor);
+            AppConfig.Settings.WindowBackgroundColor = hex;
+            // The Custom backdrop reads WindowBackgroundColor on apply, so re-applying it picks up the colour.
+            SettingChanged?.Invoke(Setting.BackDrop);
+        }
+        else
+        {
+            RectThumbnailSelection.Stroke = new SolidColorBrush(newColor);
+            AppConfig.Settings.ThumbnailSelectionColor = hex;
+            SettingChanged?.Invoke(Setting.ThumbnailSelectionColor);
+        }
         await AppConfig.SaveAsync();
     }
 
@@ -607,9 +628,16 @@ internal sealed partial class Settings
 
     private void RectThumbnailSelection_Tapped(object sender, TappedRoutedEventArgs e)
     {
-        var currentColor = ((SolidColorBrush)RectThumbnailSelection.Stroke).Color;
-        FlyoutColorPicker.Color = currentColor;
+        _pickingWindowBackgroundColor = false;
+        FlyoutColorPicker.Color = ((SolidColorBrush)RectThumbnailSelection.Stroke).Color;
         FlyoutBase.ShowAttachedFlyout(ButtonSetThumbnailSelColor);
+    }
+
+    private void RectWindowBackground_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        _pickingWindowBackgroundColor = true;
+        FlyoutColorPicker.Color = ((SolidColorBrush)RectWindowBackground.Fill).Color;
+        FlyoutBase.ShowAttachedFlyout(ButtonSetWindowBackgroundColor);
     }
 
     private async void OnShortcutButtonClick(object sender, RoutedEventArgs e)

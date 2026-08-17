@@ -192,6 +192,9 @@
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Acrylic Thin</value>
   </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>Custom</value>
+  </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>Frozen</value>
   </data>
@@ -665,6 +668,12 @@ Esc : Close Settings or Exit App</value>
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Window Background</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>Applicable only for Custom Window Background.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>Background color</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>'Previous state' restores the last windowed or maximized size, position, and monitor.</value>

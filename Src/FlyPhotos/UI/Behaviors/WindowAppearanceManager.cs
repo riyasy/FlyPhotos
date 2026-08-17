@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Globalization;
 using Windows.UI;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
@@ -48,12 +49,13 @@ namespace FlyPhotos.UI.Behaviors
 
         /// <summary>
         /// The solid-colour backdrop currently assigned for the <see cref="WindowBackdropType.None"/>
-        /// mode, if any. The CanvasAnimatedControl swapchain composites over (and so occludes) the
-        /// root Grid background, so a plain Grid colour no longer paints the window — the opaque
-        /// theme colour must be supplied as a system backdrop instead. Its colour is updated
-        /// <em>in place</em> on theme change (never reassigned, which would crash).
+        /// and <see cref="WindowBackdropType.Custom"/> modes, if any. The CanvasAnimatedControl
+        /// swapchain composites over (and so occludes) the root Grid background, so a plain Grid
+        /// colour no longer paints the window — the opaque colour must be supplied as a system
+        /// backdrop instead. Its colour is updated <em>in place</em> on theme change (never
+        /// reassigned, which would crash).
         /// </summary>
-        private SolidColorBackdrop? _noneBackdrop;
+        private SolidColorBackdrop? _solidBackdrop;
 
         /// <summary>
         /// The currently applied window backdrop type.
@@ -136,7 +138,7 @@ namespace FlyPhotos.UI.Behaviors
             // brushes; only the Mica/Acrylic controllers are torn down above.
             _window.SystemBackdrop = null;
             _frozenBackdrop = null;
-            _noneBackdrop = null;
+            _solidBackdrop = null;
         }
 
         /// <summary>
@@ -171,7 +173,7 @@ namespace FlyPhotos.UI.Behaviors
             // The previous brush-based backdrops (if any) are now detached; drop them so theme
             // changes can't touch a dead brush. Fresh ones are created if (re)applied below.
             _frozenBackdrop = null;
-            _noneBackdrop = null;
+            _solidBackdrop = null;
 
             switch (backdropType)
             {
@@ -200,7 +202,8 @@ namespace FlyPhotos.UI.Behaviors
                     break;
 
                 case WindowBackdropType.None:
-                    ApplyNoneBackdrop();
+                case WindowBackdropType.Custom:
+                    ApplySolidBackdrop();
                     break;
 
                 default:
@@ -229,23 +232,37 @@ namespace FlyPhotos.UI.Behaviors
             theme == ElementTheme.Light ? Colors.Transparent : Color.FromArgb(0x60, 0x00, 0x00, 0x00);
 
         /// <summary>
-        /// Creates a fresh opaque solid-colour backdrop for the current theme and assigns it for the
-        /// <see cref="WindowBackdropType.None"/> mode. A system backdrop is used (rather than the
-        /// root Grid background) because the CanvasAnimatedControl swapchain occludes the Grid;
-        /// theme changes thereafter update the colour in place (see <see cref="Window_ActualThemeChanged"/>).
+        /// Creates a fresh opaque solid-colour backdrop and assigns it for the
+        /// <see cref="WindowBackdropType.None"/> / <see cref="WindowBackdropType.Custom"/> modes.
+        /// A system backdrop is used (rather than the root Grid background) because the
+        /// CanvasAnimatedControl swapchain occludes the Grid; theme changes thereafter update the
+        /// colour in place (see <see cref="Window_ActualThemeChanged"/>).
         /// </summary>
-        private void ApplyNoneBackdrop()
+        private void ApplySolidBackdrop()
         {
-            _noneBackdrop = new SolidColorBackdrop(NoneColor(_root.ActualTheme));
-            _window.SystemBackdrop = _noneBackdrop;
+            _solidBackdrop = new SolidColorBackdrop(SolidBackdropColor());
+            _window.SystemBackdrop = _solidBackdrop;
         }
 
         /// <summary>
-        /// The opaque background colour for the <see cref="WindowBackdropType.None"/> mode:
-        /// white in light, black in dark.
+        /// The opaque background colour for the solid backdrop modes: the user-picked
+        /// <see cref="AppSettings.WindowBackgroundColor"/> for <see cref="WindowBackdropType.Custom"/>,
+        /// otherwise the theme default (white in light, black in dark).
         /// </summary>
-        private static Color NoneColor(ElementTheme theme) =>
-            theme == ElementTheme.Light ? Colors.White : Colors.Black;
+        private Color SolidBackdropColor() =>
+            _currentBackdropType == WindowBackdropType.Custom
+                ? CustomColor()
+                : _root.ActualTheme == ElementTheme.Light ? Colors.White : Colors.Black;
+
+        /// <summary>
+        /// The user-picked window colour, parsed leniently from "#RRGGBB" so a hand-edited settings
+        /// file falls back to black instead of throwing on the window-creation path.
+        /// </summary>
+        internal static Color CustomColor() =>
+            uint.TryParse(AppConfig.Settings.WindowBackgroundColor?.TrimStart('#'),
+                NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var rgb)
+                ? Color.FromArgb(255, (byte)(rgb >> 16), (byte)(rgb >> 8), (byte)rgb)
+                : Colors.Black;
 
         /// <summary>
         /// The semi-transparent black tint for a given transparency intensity (0-100): higher
@@ -287,19 +304,24 @@ namespace FlyPhotos.UI.Behaviors
         /// <summary>
         /// Updates the caption button glyph color to stay legible against the current backdrop and theme.
         /// The transparent backdrop shows arbitrary content underneath, so the glyphs are always white;
-        /// for every other backdrop they follow the theme (white in dark, black in light).
+        /// the custom backdrop follows its own colour (the user can pick a dark colour in the light
+        /// theme, which would otherwise leave black glyphs on a black window); every other backdrop
+        /// follows the theme (white in dark, black in light).
         /// </summary>
         private void UpdateCaptionButtonForeground()
         {
-            var isLight = _root.ActualTheme == ElementTheme.Light;
             var titleBar = _window.AppWindow.TitleBar;
 
-            // Transparent shows arbitrary content underneath, so glyphs are always white; every other
-            // backdrop follows the theme.
-            titleBar.ButtonForegroundColor = _currentBackdropType == WindowBackdropType.Transparent
-                ? Colors.White
-                : isLight ? Colors.Black : Colors.White;
+            titleBar.ButtonForegroundColor = _currentBackdropType switch
+            {
+                WindowBackdropType.Transparent => Colors.White,
+                WindowBackdropType.Custom => IsLight(CustomColor()) ? Colors.Black : Colors.White,
+                _ => _root.ActualTheme == ElementTheme.Light ? Colors.Black : Colors.White
+            };
         }
+
+        /// <summary>Perceived-brightness test (ITU-R BT.601 luma) used to pick a legible glyph colour.</summary>
+        private static bool IsLight(Color c) => (0.299 * c.R) + (0.587 * c.G) + (0.114 * c.B) > 140;
 
         /// <summary>
         /// Attempts to apply the Mica backdrop effect to the window.
@@ -347,8 +369,8 @@ namespace FlyPhotos.UI.Behaviors
             var actualTheme = _root.ActualTheme;
             if (_currentBackdropType == WindowBackdropType.Frozen)
                 _frozenBackdrop?.UpdateTint(FrozenTint(actualTheme));
-            else if (_currentBackdropType == WindowBackdropType.None)
-                _noneBackdrop?.UpdateColor(NoneColor(actualTheme));
+            else if (_currentBackdropType is WindowBackdropType.None or WindowBackdropType.Custom)
+                _solidBackdrop?.UpdateColor(SolidBackdropColor());
             UpdateCaptionButtonForeground();
         }
 
@@ -456,7 +478,8 @@ namespace FlyPhotos.UI.Behaviors
     }
 
     /// <summary>
-    /// A brush backdrop that paints a plain opaque colour. Used for <see cref="WindowBackdropType.None"/>:
+    /// A brush backdrop that paints a plain opaque colour. Used for <see cref="WindowBackdropType.None"/>
+    /// and <see cref="WindowBackdropType.Custom"/>:
     /// the CanvasAnimatedControl swapchain occludes the root Grid background, so the window's solid
     /// colour is supplied as a system backdrop instead. The colour can be updated <em>in place</em>
     /// via <see cref="UpdateColor"/> (a <see cref="Windows.UI.Composition.CompositionColorBrush"/>

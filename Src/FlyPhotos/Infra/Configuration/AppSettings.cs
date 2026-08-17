@@ -15,6 +15,9 @@ public class AppSettings
     [JsonConverter(typeof(JsonStringEnumConverter<WindowBackdropType>))]
     public WindowBackdropType WindowBackdrop { get; set; } = WindowBackdropType.Transparent;
 
+    /// <summary>Opaque window colour for <see cref="WindowBackdropType.Custom"/>, as "#RRGGBB".</summary>
+    public string WindowBackgroundColor { get; set; } = "#000000";
+
     [JsonConverter(typeof(JsonStringEnumConverter<DefaultMouseWheelBehavior>))]
     public DefaultMouseWheelBehavior DefaultMouseWheelBehavior { get; set; } = DefaultMouseWheelBehavior.Zoom;
 

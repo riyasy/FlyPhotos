@@ -31,7 +31,8 @@ public enum WindowBackdropType
     Acrylic,
     AcrylicThin,
     Transparent,
-    Frozen
+    Frozen,
+    Custom
 }
 
 public enum ZoomDirection

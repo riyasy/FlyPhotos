@@ -107,6 +107,7 @@
                                 <ComboBoxItem x:Uid="ComboBackgroundItemMica" />
                                 <ComboBoxItem x:Uid="ComboBackgroundItemMicaAlt" />
                                 <ComboBoxItem x:Uid="ComboBackgroundItemNone" />
+                                <ComboBoxItem x:Uid="ComboBackgroundItemCustom" />
                             </ComboBox>
                             <controls:SettingsExpander.Items>
                                 <controls:SettingsCard
@@ -121,6 +122,26 @@
                                         SmallChange="10"
                                         StepFrequency="10"
                                         Value="60" />
+                                </controls:SettingsCard>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardWindowBackgroundColor"
+                                    x:Uid="SettingsCardWindowBackgroundColor"
+                                    IsEnabled="{x:Bind ShouldEnableBackgroundColor(ComboBackGround.SelectedIndex), Mode=OneWay}">
+                                    <Button
+                                        x:Name="ButtonSetWindowBackgroundColor"
+                                        HorizontalAlignment="Right"
+                                        FlyoutBase.AttachedFlyout="{StaticResource ColorPickerFlyout}"
+                                        Tapped="RectWindowBackground_Tapped"
+                                        ToolTipService.ToolTip="Click to change the window background color.">
+                                        <Button.Content>
+                                            <Rectangle
+                                                x:Name="RectWindowBackground"
+                                                Width="20"
+                                                Height="20"
+                                                Stroke="{ThemeResource ControlStrongStrokeColorDefaultBrush}"
+                                                StrokeThickness="1" />
+                                        </Button.Content>
+                                    </Button>
                                 </controls:SettingsCard>
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
