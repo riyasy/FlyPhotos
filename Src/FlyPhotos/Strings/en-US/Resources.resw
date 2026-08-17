@@ -783,6 +783,12 @@ Esc : Close Settings or Exit App</value>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>Click outside image to restore window</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>When restoring the window by clicking outside the image, resize it to match the displayed image.</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>Size restored window to image</value>
+  </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>The minimize, maximize, and close buttons are shown only when the mouse is near the top of the window.</value>
   </data>

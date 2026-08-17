@@ -461,6 +461,18 @@ internal class CanvasViewManager : IAnimationHost
     }
 
     /// <summary>
+    /// Keeps the current scale and moves the displayed image bounds to the new canvas origin.
+    /// </summary>
+    public void HandleImageSizedWindowResize(Point previousImageOrigin)
+    {
+        ClearActiveAnimation();
+        _canvasViewState.ImagePos.X -= previousImageOrigin.X;
+        _canvasViewState.ImagePos.Y -= previousImageOrigin.Y;
+        _canvasViewState.UpdateTransform();
+        ViewChanged?.Invoke();
+    }
+
+    /// <summary>
     /// Saves the current view for <paramref name="photoPath"/> if "RememberPerPhoto" is enabled and the
     /// user has actually modified the view (panned, zoomed, or rotated). Pan is stored normalized to the
     /// canvas size and rotation relative to the EXIF baseline — see <see cref="PerPhotoViewStore"/>.

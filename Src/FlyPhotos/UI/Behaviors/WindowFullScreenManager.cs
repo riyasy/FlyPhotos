@@ -3,6 +3,7 @@ using System;
 using FlyPhotos.Infra.Interop;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Windows.Graphics;
 using WinRT.Interop;
 
 namespace FlyPhotos.UI.Behaviors;
@@ -79,6 +80,100 @@ internal sealed class WindowFullScreenManager
             AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
             (AppWindow.Presenter as OverlappedPresenter)?.Restore();
         }
+    }
+
+    /// <summary>
+    /// Restores the window and makes its client area match the requested screen-space rectangle.
+    /// </summary>
+    /// <param name="clientRect">The desired client-area rectangle in physical screen pixels.</param>
+    /// <param name="exitFullScreenButton">The optional button to hide when leaving full-screen mode.</param>
+    internal void RestoreToClientRect(RectInt32 clientRect, UIElement? exitFullScreenButton = null)
+    {
+        var hwnd = WindowNative.GetWindowHandle(_window);
+
+        // The image has already been prepared for the destination client rect. Suppress the
+        // DWM resize transition so Windows does not move the photo during this transition.
+        int transitionsDisabled = 1;
+        Win32Methods.DwmSetWindowAttribute(
+            hwnd,
+            Win32Methods.DWMWA_TRANSITIONS_FORCEDISABLED,
+            ref transitionsDisabled,
+            sizeof(int));
+
+        try
+        {
+            // Seed the hidden normal placement with the requested rectangle so the presenter switch
+            // reveals the window near its destination instead of at the old bounds. This is only a
+            // flicker hint — the exact geometry is applied by AlignClientRect below, because the real
+            // non-client offsets cannot be derived from system metrics on a window that extends its
+            // content into the title bar (they are asymmetric: ~0 at the top, a resize border
+            // elsewhere) and cannot be measured at all while the full-screen presenter is live.
+            Win32Methods.GetWindowPlacement(hwnd, out var placement);
+            placement.rcNormalPosition = new Win32Methods.RECT
+            {
+                Left = clientRect.X,
+                Top = clientRect.Y,
+                Right = clientRect.X + clientRect.Width,
+                Bottom = clientRect.Y + clientRect.Height
+            };
+            placement.showCmd = Win32Methods.SW_SHOWNORMAL;
+
+            var wasFullScreen = AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen;
+
+            Win32Methods.SetWindowPlacement(hwnd, in placement);
+
+            if (wasFullScreen)
+            {
+                exitFullScreenButton?.Visibility = Visibility.Collapsed;
+                AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
+                _wasMaximizedBeforeFullScreen = false;
+                FullScreenToggled?.Invoke(false);
+            }
+
+            AlignClientRect(hwnd, clientRect);
+        }
+        finally
+        {
+            transitionsDisabled = 0;
+            Win32Methods.DwmSetWindowAttribute(
+                hwnd,
+                Win32Methods.DWMWA_TRANSITIONS_FORCEDISABLED,
+                ref transitionsDisabled,
+                sizeof(int));
+        }
+    }
+
+    /// <summary>
+    /// Positions the window so its client area matches <paramref name="targetClientRect"/> exactly,
+    /// using measured (not estimated) non-client offsets.
+    /// </summary>
+    private static void AlignClientRect(nint hwnd, RectInt32 targetClientRect)
+    {
+        if (!Win32Methods.GetWindowRect(hwnd, out var windowRect) ||
+            !Win32Methods.GetClientRect(hwnd, out var clientRect))
+            return;
+
+        var clientOrigin = new Win32Methods.POINT();
+        if (!Win32Methods.ClientToScreen(hwnd, ref clientOrigin))
+            return;
+
+        var extraLeft = clientOrigin.X - windowRect.Left;
+        var extraTop = clientOrigin.Y - windowRect.Top;
+        var extraWidth = windowRect.Right - windowRect.Left - clientRect.Right;
+        var extraHeight = windowRect.Bottom - windowRect.Top - clientRect.Bottom;
+
+        var desiredLeft = targetClientRect.X - extraLeft;
+        var desiredTop = targetClientRect.Y - extraTop;
+        var desiredWidth = targetClientRect.Width + extraWidth;
+        var desiredHeight = targetClientRect.Height + extraHeight;
+
+        if (desiredLeft == windowRect.Left && desiredTop == windowRect.Top &&
+            desiredWidth == windowRect.Right - windowRect.Left &&
+            desiredHeight == windowRect.Bottom - windowRect.Top)
+            return;
+
+        Win32Methods.SetWindowPos(hwnd, 0, desiredLeft, desiredTop, desiredWidth, desiredHeight,
+            Win32Methods.SWP_NOACTIVATE | Win32Methods.SWP_NOZORDER);
     }
 
     /// <summary>
