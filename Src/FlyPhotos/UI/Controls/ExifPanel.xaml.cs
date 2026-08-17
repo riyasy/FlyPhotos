@@ -19,9 +19,15 @@ public sealed partial class ExifPanel : UserControl
     private const double FieldFontSize = 12;
 
     private ExifData _data = ExifData.Empty;
-    private bool _showAll;
     private int _loadToken;
     private string? _loadedFilePath;
+
+    // Kept in volatile app state so the chosen view survives closing/reopening the panel.
+    private static bool ShowAll
+    {
+        get => AppConfig.Volatile.ExifShowAll;
+        set => AppConfig.Volatile.ExifShowAll = value;
+    }
 
     public ExifPanel()
     {
@@ -64,8 +70,7 @@ public sealed partial class ExifPanel : UserControl
     {
         var token = ++_loadToken;
         _loadedFilePath = filePath;
-        _showAll = false;
-        ButtonToggleMode.Content = L.Get("Exif_ShowAll");
+        ButtonToggleMode.Content = L.Get(ShowAll ? "Exif_ShowSummary" : "Exif_ShowAll");
 
         // Clear the previous photo's rows synchronously (before the await) so they don't
         // linger in the visible panel while the new file's metadata is read in the background.
@@ -91,7 +96,7 @@ public sealed partial class ExifPanel : UserControl
     {
         var sb = new StringBuilder();
 
-        if (_showAll)
+        if (ShowAll)
         {
             foreach (var group in _data.All.Value)
             {
@@ -110,8 +115,8 @@ public sealed partial class ExifPanel : UserControl
 
     private void ButtonToggleMode_Click(object _, RoutedEventArgs _1)
     {
-        _showAll = !_showAll;
-        ButtonToggleMode.Content = L.Get(_showAll ? "Exif_ShowSummary" : "Exif_ShowAll");
+        ShowAll = !ShowAll;
+        ButtonToggleMode.Content = L.Get(ShowAll ? "Exif_ShowSummary" : "Exif_ShowAll");
         Render();
     }
 
@@ -120,7 +125,7 @@ public sealed partial class ExifPanel : UserControl
         FieldsPanel.Children.Clear();
         FieldsPanel.RowDefinitions.Clear();
 
-        if (_showAll)
+        if (ShowAll)
         {
             foreach (var group in _data.All.Value)
             {

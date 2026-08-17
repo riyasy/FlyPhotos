@@ -2,7 +2,6 @@ namespace FlyPhotos.Infra.Configuration;
 
 /// <summary>
 /// Holds volatile (non-persisted) runtime state for the current process.
-/// Populated once at startup and read-only thereafter.
 /// </summary>
 public class AppVolatileState
 {
@@ -12,4 +11,10 @@ public class AppVolatileState
     /// selected image — no folder scan, no Settings button, no Delete, no cache status.
     /// </summary>
     public bool IsSecondaryInstance { get; set; } = false;
+
+    /// <summary>
+    /// True when the EXIF panel was last left in "show all" mode. Remembered for the
+    /// lifetime of the process so reopening the panel keeps the chosen view.
+    /// </summary>
+    public bool ExifShowAll { get; set; } = false;
 }
