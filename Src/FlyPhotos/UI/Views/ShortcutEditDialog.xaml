@@ -6,7 +6,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="using:FlyPhotos.UI.Views"
-    CloseButtonText="Done"
     DefaultButton="Close"
     mc:Ignorable="d">
 
@@ -27,7 +26,7 @@
 
     <StackPanel MinWidth="400" Spacing="10">
 
-        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Current shortcuts" />
+        <TextBlock x:Uid="TextShortcutCurrent" Style="{StaticResource BodyStrongTextBlockStyle}" />
 
         <ItemsControl ItemsSource="{x:Bind Row.Keys}">
             <ItemsControl.ItemsPanel>
@@ -51,12 +50,15 @@
                                 FontSize="13"
                                 Text="{x:Bind Text}" />
                             <Button
-                                AutomationProperties.Name="Remove this shortcut"
+                                x:Uid="ButtonShortcutRemove"
                                 Click="ChipRemove_OnClick"
                                 Content="&#xE711;"
                                 Style="{StaticResource DialogChipButtonStyle}"
-                                Tag="{x:Bind}"
-                                ToolTipService.ToolTip="Remove" />
+                                Tag="{x:Bind}">
+                                <ToolTipService.ToolTip>
+                                    <ToolTip x:Uid="ShortcutRemoveToolTip" />
+                                </ToolTipService.ToolTip>
+                            </Button>
                         </StackPanel>
                     </Border>
                 </DataTemplate>
@@ -64,8 +66,8 @@
         </ItemsControl>
 
         <TextBlock
+            x:Uid="TextShortcutNoneAssigned"
             Opacity="0.6"
-            Text="No shortcut assigned."
             Visibility="{x:Bind Row.NoKeysVisibility, Mode=OneWay}" />
 
         <Border
@@ -73,7 +75,7 @@
             Margin="0,4,0,4"
             Background="{ThemeResource CardStrokeColorDefaultBrush}" />
 
-        <TextBlock x:Name="TxtPrompt" Text="Click the box below, then press the keys you want to add." TextWrapping="Wrap" />
+        <TextBlock x:Uid="TextShortcutCapturePrompt" TextWrapping="Wrap" />
 
         <!--
             A focusable ContentControl rather than a Button: while capturing we must see every key,
@@ -94,13 +96,13 @@
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="2"
                 CornerRadius="8">
+                <!--  Text is set from code: it changes as capture starts, stops and rejects.  -->
                 <TextBlock
                     x:Name="TxtCapture"
                     Margin="12"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     FontSize="18"
-                    Text="Click here to add a shortcut"
                     TextAlignment="Center"
                     TextWrapping="Wrap" />
             </Border>
@@ -116,16 +118,15 @@
             <InfoBar.ActionButton>
                 <Button
                     x:Name="ButtonReassign"
-                    Click="ButtonReassign_OnClick"
-                    Content="Reassign" />
+                    x:Uid="ButtonShortcutReassign"
+                    Click="ButtonReassign_OnClick" />
             </InfoBar.ActionButton>
         </InfoBar>
 
         <Button
-            x:Name="ButtonResetDefault"
+            x:Uid="ButtonShortcutResetDefault"
             HorizontalAlignment="Left"
-            Click="ButtonResetDefault_OnClick"
-            Content="Reset to default" />
+            Click="ButtonResetDefault_OnClick" />
 
     </StackPanel>
 </ContentDialog>

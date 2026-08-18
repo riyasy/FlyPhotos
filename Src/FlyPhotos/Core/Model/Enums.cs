@@ -83,7 +83,8 @@ public enum Setting
     AutoFadeToggle,
     AutoHideMouseToggle,
     ImageScalingQualityChange,
-    RawDecodingChange
+    RawDecodingChange,
+    KeyBindingsChanged
 }
 
 public enum ScrollDirection

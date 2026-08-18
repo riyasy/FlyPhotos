@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
 using FlyPhotos.Core.Model;
@@ -80,4 +81,12 @@ public class AppSettings
     // since property-level JsonStringEnumConverter<T> does not apply to collection elements.
     public ObservableCollection<RawDecoder> RawDecoderPriority { get; set; } =
         [RawDecoder.WIC, RawDecoder.Rawler, RawDecoder.ImageMagick];
+
+    /// <summary>
+    /// Only the commands whose keys the user changed, keyed by CommandId member name (never its
+    /// numeric value, so reordering the enum cannot remap anybody's bindings). A command that is
+    /// absent uses its code defaults, which is what lets a later release add commands with working
+    /// keys and no migration; an empty list means the user deliberately unbound it.
+    /// </summary>
+    public Dictionary<string, List<string>> KeyBindings { get; set; } = [];
 }

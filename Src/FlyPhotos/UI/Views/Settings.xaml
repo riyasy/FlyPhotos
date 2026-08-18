@@ -627,12 +627,11 @@
             </PivotItem>
 
             <!--
-                PROTOTYPE TAB - English strings are hard-coded (no x:Uid) on purpose so this can be
-                evaluated without a .resw sweep across 20 locales, and nothing here is wired to the
-                real key handling in PhotoDisplayWindow. Edits live in memory and are lost when the
-                Settings window closes. See docs/03_think_later/20260818_shortcut_customization_design.md.
+                Command names, hints and key names come from the catalog in code, which resolves them
+                through L.Get; everything static on the page uses x:Uid as usual. Only en-US is filled
+                in for now. See docs/03_think_later/20260818_shortcut_customization_design.md.
             -->
-            <PivotItem Header="Shortcuts">
+            <PivotItem x:Uid="SettingsPivotItemShortcuts">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -649,14 +648,14 @@
                         </Grid.ColumnDefinitions>
                         <AutoSuggestBox
                             x:Name="ShortcutSearchBox"
-                            PlaceholderText="Search commands and keys"
+                            x:Uid="ShortcutSearchBox"
                             QueryIcon="Find"
                             TextChanged="ShortcutSearchBox_OnTextChanged" />
                         <Button
                             x:Name="ButtonResetAllShortcuts"
+                            x:Uid="ButtonResetAllShortcuts"
                             Grid.Column="1"
-                            Click="ButtonResetAllShortcuts_OnClick"
-                            Content="Reset all..." />
+                            Click="ButtonResetAllShortcuts_OnClick" />
                     </Grid>
 
                     <ScrollViewer Grid.Row="1">
@@ -664,9 +663,9 @@
 
                             <TextBlock
                                 x:Name="TxtNoShortcutResults"
+                                x:Uid="TxtNoShortcutResults"
                                 Margin="0,24,0,0"
                                 Opacity="0.7"
-                                Text="No commands match your search."
                                 Visibility="Collapsed" />
 
                             <ItemsControl x:Name="ShortcutGroupsList">
@@ -698,9 +697,9 @@
                                                                 Orientation="Horizontal"
                                                                 Spacing="4">
                                                                 <TextBlock
+                                                                    x:Uid="TextShortcutNoKeys"
                                                                     VerticalAlignment="Center"
                                                                     Opacity="0.6"
-                                                                    Text="None"
                                                                     Visibility="{x:Bind NoKeysVisibility, Mode=OneWay}" />
 
                                                                 <ItemsControl ItemsSource="{x:Bind Keys}">
@@ -730,13 +729,16 @@
 
                                                                 <!--  Add, remove and reset all live inside the edit dialog.  -->
                                                                 <Button
-                                                                    AutomationProperties.Name="Change shortcuts"
+                                                                    x:Uid="ButtonShortcutEdit"
                                                                     Click="ShortcutEdit_OnClick"
                                                                     Content="&#xE70F;"
                                                                     Style="{StaticResource ShortcutIconButtonStyle}"
                                                                     Tag="{x:Bind}"
-                                                                    ToolTipService.ToolTip="Change shortcuts"
-                                                                    Visibility="{x:Bind EditableVisibility}" />
+                                                                    Visibility="{x:Bind EditableVisibility}">
+                                                                    <ToolTipService.ToolTip>
+                                                                        <ToolTip x:Uid="ShortcutEditToolTip" />
+                                                                    </ToolTipService.ToolTip>
+                                                                </Button>
                                                             </StackPanel>
                                                         </controls:SettingsCard>
                                                     </DataTemplate>
@@ -747,8 +749,16 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
 
-                            <!--  Mouse: pickers, not capture. See design doc section 5.  -->
+                            <!--
+                                Mouse: pickers, not capture. See design doc section 5.
+                                Hand-written cards rather than catalog rows, so the search box filters
+                                them separately - see FilterMouseSection. Keep every card a direct
+                                child of this panel or it drops out of the search.
+                            -->
+                            <StackPanel x:Name="MouseSectionPanel" Orientation="Vertical">
+
                             <TextBlock
+                                x:Name="TextMouseSectionHeader"
                                 x:Uid="TextBlockMouseSection"
                                 Margin="0,28,0,0"
                                 Style="{StaticResource BodyStrongTextBlockStyle}" />
@@ -868,6 +878,8 @@
                                     <ComboBoxItem x:Uid="ComboMouseFwdBackItemStepZoom" />
                                 </ComboBox>
                             </controls:SettingsCard>
+
+                            </StackPanel>
 
                         </StackPanel>
                     </ScrollViewer>

@@ -4,12 +4,13 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Windows.System;
+using FlyPhotos.Infra.Localization;
 
 namespace FlyPhotos.UI.Views;
 
-// Prototype editor. It really captures keys and really reports conflicts, but every
-// change lands on the in-memory ShortcutRow only - nothing is persisted and no real binding
-// changes. See docs/03_think_later/20260818_shortcut_customization_design.md.
+// Mutates the ShortcutRow in place; the caller persists once the dialog closes, because a Reassign
+// can strip a chord off a second command. Its own strings are still English - see the note on the
+// Shortcuts PivotItem in Settings.xaml.
 
 /// <summary>
 /// Edits one command's shortcuts: lists what it has, removes any of them, captures a new one, and
@@ -36,6 +37,8 @@ public sealed partial class ShortcutEditDialog : ContentDialog
         InitializeComponent();
 
         Title = row.Name;
+        CloseButtonText = L.Get("ShortcutCapture_DoneButton");
+        TxtCapture.Text = L.Get("ShortcutCapture_Idle");
         ButtonReassign.Visibility = Visibility.Collapsed;
 
         Opened += (_, _) => CaptureBox.Focus(FocusState.Programmatic);
@@ -52,14 +55,14 @@ public sealed partial class ShortcutEditDialog : ContentDialog
     {
         _capturing = true;
         _pendingKey = VirtualKey.None;
-        TxtCapture.Text = "Waiting for keys...";
+        TxtCapture.Text = L.Get("ShortcutCapture_Waiting");
     }
 
     private void EndCapture()
     {
         _capturing = false;
         _pendingKey = VirtualKey.None;
-        TxtCapture.Text = "Click here to add a shortcut";
+        TxtCapture.Text = L.Get("ShortcutCapture_Idle");
     }
 
     private void OnKeyDown(object sender, KeyRoutedEventArgs e)
@@ -87,14 +90,14 @@ public sealed partial class ShortcutEditDialog : ContentDialog
 
         if (e.Key is VirtualKey.LeftWindows or VirtualKey.RightWindows)
         {
-            Reject("Windows reserves shortcuts that use the Windows key.");
+            Reject(L.Get("ShortcutCapture_WinKeyRejected"));
             return;
         }
 
         // 229 = VK_PROCESSKEY, raised while an IME is composing.
         if ((int)e.Key == 229)
         {
-            Reject("Switch to a Latin input method to set a shortcut.");
+            Reject(L.Get("ShortcutCapture_ImeRejected"));
             return;
         }
 
@@ -116,16 +119,23 @@ public sealed partial class ShortcutEditDialog : ContentDialog
 
         if (Row.HasToken(token))
         {
-            Info($"{display} is already assigned to this command.");
+            Info(string.Format(L.Get("ShortcutCapture_AlreadyOnThisCommand"), display));
             return;
         }
 
         var owner = _findOwner(token);
         if (owner != null && owner != Row)
         {
+            // A reserved command's chord can be found but never taken from it.
+            if (owner.IsReserved)
+            {
+                Info(string.Format(L.Get("ShortcutCapture_ReservedByOther"), display, owner.Name));
+                return;
+            }
+
             _conflictToken = token;
             StatusBar.Severity = InfoBarSeverity.Warning;
-            StatusBar.Message = $"{display} is already used by \"{owner.Name}\". Reassigning it will leave that command without this shortcut.";
+            StatusBar.Message = string.Format(L.Get("ShortcutCapture_Conflict"), display, owner.Name);
             ButtonReassign.Visibility = Visibility.Visible;
             StatusBar.IsOpen = true;
             return;
@@ -148,7 +158,7 @@ public sealed partial class ShortcutEditDialog : ContentDialog
         _conflictToken = null;
         StatusBar.IsOpen = false;
         ButtonReassign.Visibility = Visibility.Collapsed;
-        TxtCapture.Text = "Waiting for keys...";
+        TxtCapture.Text = L.Get("ShortcutCapture_Waiting");
     }
 
     private void ChipRemove_OnClick(object sender, RoutedEventArgs e)
@@ -169,7 +179,7 @@ public sealed partial class ShortcutEditDialog : ContentDialog
         _pendingKey = VirtualKey.None;
         _conflictToken = null;
         ButtonReassign.Visibility = Visibility.Collapsed;
-        TxtCapture.Text = "Waiting for keys...";
+        TxtCapture.Text = L.Get("ShortcutCapture_Waiting");
         StatusBar.Severity = InfoBarSeverity.Error;
         StatusBar.Message = reason;
         StatusBar.IsOpen = true;

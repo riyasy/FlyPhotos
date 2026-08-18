@@ -1,4 +1,5 @@
 #nullable enable
+using CommunityToolkit.WinUI.Controls;
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
@@ -695,13 +696,12 @@ internal sealed partial class Settings
         }
     }
 
-    // ───────────────────────── Shortcuts tab (prototype) ─────────────────────────
-    // In-memory only. Nothing below touches AppConfig or PhotoDisplayWindow's real key
-    // table; closing the Settings window discards every edit. Exists so the layout and the capture
-    // interaction can be judged before any of the routing work in
-    // docs/03_think_later/20260818_shortcut_customization_design.md is committed to.
+    // ───────────────────────── Shortcuts tab ─────────────────────────
+    // Edits are live: each one is persisted to usersettings.json and pushed to the photo window,
+    // which rebuilds its routing table. Command names are still hard-coded English - the .resw
+    // sweep across 20 locales is deliberately the last step.
 
-    private readonly List<ShortcutGroup> _allShortcutGroups = ShortcutsPrototypeCatalog.BuildAll();
+    private readonly List<ShortcutGroup> _allShortcutGroups = ShortcutCatalog.BuildAll();
 
     /// <summary>Filtered view bound to the page. Holds the same row instances as
     /// <see cref="_allShortcutGroups"/>, so edits survive a search.</summary>
@@ -709,8 +709,17 @@ internal sealed partial class Settings
 
     private void InitializeShortcutsTab()
     {
+        ShortcutCatalog.ApplySavedBindings(_allShortcutGroups);
         ShortcutGroupsList.ItemsSource = _visibleShortcutGroups;
         ApplyShortcutFilter(string.Empty);
+    }
+
+    /// <summary>Persists whatever the rows now hold and tells the photo window to re-resolve.
+    /// Called at the two points a change is complete: the editor closing, and Reset all.</summary>
+    private async Task SaveShortcutsAsync()
+    {
+        await ShortcutCatalog.SaveBindingsAsync(_allShortcutGroups);
+        SettingChanged?.Invoke(Setting.KeyBindingsChanged);
     }
 
     private void ShortcutSearchBox_OnTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args) =>
@@ -724,7 +733,7 @@ internal sealed partial class Settings
         foreach (var group in _allShortcutGroups)
         {
             // A category name match keeps the whole group, so "zoom" shows the section intact.
-            var groupMatches = group.Name.Contains(query, StringComparison.OrdinalIgnoreCase);
+            var groupMatches = group.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase);
             var rows = query.Length == 0 || groupMatches
                 ? group.Rows
                 : new ObservableCollection<ShortcutRow>(group.Rows.Where(r => r.Matches(query)));
@@ -732,8 +741,51 @@ internal sealed partial class Settings
             if (rows.Count > 0) _visibleShortcutGroups.Add(new ShortcutGroup(group.Name, rows));
         }
 
-        TxtNoShortcutResults.Visibility = _visibleShortcutGroups.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        var mouseShowing = FilterMouseSection(query);
+
+        TxtNoShortcutResults.Visibility = _visibleShortcutGroups.Count == 0 && !mouseShowing
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
+
+    /// <summary>
+    /// Filters the Mouse cards, which are hand-written XAML rather than catalog rows. They match on
+    /// the text MRT already resolved into them — header, description, and either the fixed-action
+    /// label or every option in the picker — so no card needs its resource keys named here.
+    /// Returns whether any card survived, so the caller knows if the page is truly empty.
+    /// </summary>
+    private bool FilterMouseSection(string query)
+    {
+        var anyVisible = false;
+
+        foreach (var card in MouseSectionPanel.Children.OfType<SettingsCard>())
+        {
+            var visible = query.Length == 0 || MouseCardMatches(card, query);
+            card.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+            anyVisible |= visible;
+        }
+
+        // The heading would otherwise sit alone above nothing.
+        TextMouseSectionHeader.Visibility = anyVisible ? Visibility.Visible : Visibility.Collapsed;
+        return anyVisible;
+    }
+
+    private static bool MouseCardMatches(SettingsCard card, string query) =>
+        HasText(card.Header as string, query) ||
+        HasText(card.Description as string, query) ||
+        MouseCardValues(card).Any(v => HasText(v, query));
+
+    /// <summary>A fixed-action card shows one label; a picker matches on any option it offers, so
+    /// searching "zoom" finds the wheel setting even while it is set to Navigate.</summary>
+    private static IEnumerable<string> MouseCardValues(SettingsCard card) => card.Content switch
+    {
+        TextBlock text => new[] { text.Text },
+        ComboBox combo => combo.Items.OfType<ComboBoxItem>().Select(i => i.Content as string ?? string.Empty),
+        _ => Array.Empty<string>()
+    };
+
+    private static bool HasText(string? haystack, string query) =>
+        haystack != null && haystack.Contains(query, StringComparison.CurrentCultureIgnoreCase);
 
     /// <summary>Opens the editor for one command. It mutates the row directly, so there is nothing
     /// to apply here - conflict lookup is by invariant token, never by display text.</summary>
@@ -742,7 +794,7 @@ internal sealed partial class Settings
         if ((sender as FrameworkElement)?.Tag is not ShortcutRow row) return;
 
         var dialog = new ShortcutEditDialog(row,
-            token => ShortcutsPrototypeCatalog.FindOwner(_allShortcutGroups, token))
+            token => ShortcutCatalog.FindOwner(_allShortcutGroups, token))
         {
             XamlRoot = Content.XamlRoot,
             Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
@@ -750,16 +802,18 @@ internal sealed partial class Settings
         };
 
         await dialog.ShowAsync();
+        // A Reassign can strip a chord off a second command, so the whole set is saved, not this row.
+        await SaveShortcutsAsync();
     }
 
     private async void ButtonResetAllShortcuts_OnClick(object sender, RoutedEventArgs e)
     {
         var dialog = new ContentDialog
         {
-            Title = "Reset all shortcuts?",
-            Content = "Every command goes back to its default keys. Your mouse settings will not change.",
-            PrimaryButtonText = "Reset all",
-            CloseButtonText = "Cancel",
+            Title = L.Get("ShortcutResetAll_Title"),
+            Content = L.Get("ShortcutResetAll_Message"),
+            PrimaryButtonText = L.Get("ShortcutResetAll_ResetButton"),
+            CloseButtonText = L.Get("ShortcutResetAll_CancelButton"),
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = Content.XamlRoot,
             Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
@@ -771,6 +825,8 @@ internal sealed partial class Settings
         foreach (var group in _allShortcutGroups)
             foreach (var row in group.Rows)
                 row.ResetToDefault();
+
+        await SaveShortcutsAsync();
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
