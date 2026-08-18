@@ -8,8 +8,46 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:model="using:FlyPhotos.Core.Model"
     xmlns:ui="using:CommunityToolkit.WinUI"
+    xmlns:views="using:FlyPhotos.UI.Views"
     mc:Ignorable="d">
     <Grid x:Name="MainLayout" Background="Transparent">
+        <Grid.Resources>
+            <!--
+                Glyph-only buttons. WinUI's default Button padding (11,5,11,6) and MinWidth/MinHeight
+                of 32 leave a fixed-size icon button no room for its glyph, so all three are zeroed
+                and the size is set explicitly.
+            -->
+            <Style x:Key="ShortcutIconButtonStyle" TargetType="Button">
+                <Setter Property="Width" Value="32" />
+                <Setter Property="Height" Value="32" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="FontFamily" Value="{StaticResource FluentIcons}" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+            </Style>
+            <Style x:Key="ShortcutChipButtonStyle" TargetType="Button">
+                <Setter Property="Width" Value="20" />
+                <Setter Property="Height" Value="20" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="2,0,0,0" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="FontFamily" Value="{StaticResource FluentIcons}" />
+                <Setter Property="FontSize" Value="10" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+            </Style>
+            <Style x:Key="FixedMouseActionTextStyle" TargetType="TextBlock">
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Opacity" Value="0.6" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+        </Grid.Resources>
         <Pivot x:Uid="SettingsPage">
             <PivotItem x:Uid="SettingsPivotItemGeneral">
                 <ScrollViewer>
@@ -625,6 +663,259 @@
                         </controls:SettingsCard>
                     </StackPanel>
                 </ScrollViewer>
+            </PivotItem>
+
+            <!--
+                PROTOTYPE TAB - English strings are hard-coded (no x:Uid) on purpose so this can be
+                evaluated without a .resw sweep across 20 locales, and nothing here is wired to the
+                real key handling in PhotoDisplayWindow. Edits live in memory and are lost when the
+                Settings window closes. See docs/03_think_later/20260818_shortcut_customization_design.md.
+            -->
+            <PivotItem Header="Shortcuts">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid
+                        Grid.Row="0"
+                        Margin="0,8,15,4"
+                        ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <AutoSuggestBox
+                            x:Name="ShortcutSearchBox"
+                            PlaceholderText="Search commands and keys"
+                            QueryIcon="Find"
+                            TextChanged="ShortcutSearchBox_OnTextChanged" />
+                        <Button
+                            x:Name="ButtonResetAllShortcuts"
+                            Grid.Column="1"
+                            Click="ButtonResetAllShortcuts_OnClick"
+                            Content="Reset all..." />
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="1">
+                        <StackPanel Margin="0,0,15,30" Orientation="Vertical">
+
+                            <TextBlock
+                                x:Name="TxtNoShortcutResults"
+                                Margin="0,24,0,0"
+                                Opacity="0.7"
+                                Text="No commands match your search."
+                                Visibility="Collapsed" />
+
+                            <ItemsControl x:Name="ShortcutGroupsList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="views:ShortcutGroup">
+                                        <StackPanel Orientation="Vertical">
+                                            <TextBlock
+                                                Margin="0,20,0,0"
+                                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                                Text="{x:Bind Name}" />
+                                            <ItemsControl Margin="0,5,0,0" ItemsSource="{x:Bind Rows}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="views:ShortcutRow">
+                                                        <controls:SettingsCard
+                                                            Margin="0,0,0,2"
+                                                            Description="{x:Bind Description}"
+                                                            Header="{x:Bind Name}">
+                                                            <controls:SettingsCard.HeaderIcon>
+                                                                <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="{x:Bind Glyph}" />
+                                                            </controls:SettingsCard.HeaderIcon>
+
+                                                            <!--
+                                                                ponytail: horizontal StackPanel, not a wrap panel. No command has
+                                                                more than 3 chords today and SettingsCard drops this block below
+                                                                the header at narrow widths. Swap for a WrapPanel if a 4th lands.
+                                                            -->
+                                                            <StackPanel
+                                                                VerticalAlignment="Center"
+                                                                Orientation="Horizontal"
+                                                                Spacing="4">
+                                                                <TextBlock
+                                                                    VerticalAlignment="Center"
+                                                                    Opacity="0.6"
+                                                                    Text="None"
+                                                                    Visibility="{x:Bind NoKeysVisibility, Mode=OneWay}" />
+
+                                                                <ItemsControl ItemsSource="{x:Bind Keys}">
+                                                                    <ItemsControl.ItemsPanel>
+                                                                        <ItemsPanelTemplate>
+                                                                            <StackPanel Orientation="Horizontal" Spacing="4" />
+                                                                        </ItemsPanelTemplate>
+                                                                    </ItemsControl.ItemsPanel>
+                                                                    <ItemsControl.ItemTemplate>
+                                                                        <DataTemplate x:DataType="views:ShortcutKey">
+                                                                            <Border
+                                                                                Padding="8,3,8,3"
+                                                                                VerticalAlignment="Center"
+                                                                                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                                                BorderThickness="1"
+                                                                                CornerRadius="4">
+                                                                                <TextBlock
+                                                                                    VerticalAlignment="Center"
+                                                                                    FontFamily="Consolas"
+                                                                                    FontSize="13"
+                                                                                    Text="{x:Bind Text}" />
+                                                                            </Border>
+                                                                        </DataTemplate>
+                                                                    </ItemsControl.ItemTemplate>
+                                                                </ItemsControl>
+
+                                                                <!--  Add, remove and reset all live inside the edit dialog.  -->
+                                                                <Button
+                                                                    AutomationProperties.Name="Change shortcuts"
+                                                                    Click="ShortcutEdit_OnClick"
+                                                                    Content="&#xE70F;"
+                                                                    Style="{StaticResource ShortcutIconButtonStyle}"
+                                                                    Tag="{x:Bind}"
+                                                                    ToolTipService.ToolTip="Change shortcuts"
+                                                                    Visibility="{x:Bind EditableVisibility}" />
+                                                            </StackPanel>
+                                                        </controls:SettingsCard>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!--  Mouse: pickers, not capture. See design doc section 5.  -->
+                            <TextBlock
+                                Margin="0,28,0,0"
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Mouse" />
+
+                            <controls:SettingsCard
+                                Margin="0,5,0,2"
+                                Description="What the wheel does when no modifier is held"
+                                Header="Mouse wheel"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <ComboBox MinWidth="170" SelectedIndex="0">
+                                    <ComboBoxItem Content="Zoom" />
+                                    <ComboBoxItem Content="Navigate photos" />
+                                </ComboBox>
+                            </controls:SettingsCard>
+
+                            <!--  Fixed wheel behaviours sit next to the wheel setting they qualify.  -->
+                            <controls:SettingsCard
+                                Margin="0,0,0,2"
+                                Header="Ctrl + mouse wheel"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <TextBlock Style="{StaticResource FixedMouseActionTextStyle}" Text="Always zooms" />
+                            </controls:SettingsCard>
+
+                            <controls:SettingsCard
+                                Margin="0,0,0,2"
+                                Header="Alt + mouse wheel"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <TextBlock Style="{StaticResource FixedMouseActionTextStyle}" Text="Always navigates photos" />
+                            </controls:SettingsCard>
+
+                            <controls:SettingsCard
+                                Margin="0,0,0,2"
+                                Header="Wheel over the thumbnail strip"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <TextBlock Style="{StaticResource FixedMouseActionTextStyle}" Text="Navigate photos" />
+                            </controls:SettingsCard>
+
+                            <controls:SettingsCard
+                                Margin="0,0,0,2"
+                                Description="How far the wheel must travel before the photo changes"
+                                Header="Wheel steps per photo"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <Slider
+                                    MinWidth="170"
+                                    Maximum="200"
+                                    Minimum="20"
+                                    StepFrequency="10"
+                                    Value="60" />
+                            </controls:SettingsCard>
+
+                            <controls:SettingsCard
+                                Margin="0,0,0,2"
+                                Header="Tilt wheel left or right"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <TextBlock Style="{StaticResource FixedMouseActionTextStyle}" Text="Navigate photos" />
+                            </controls:SettingsCard>
+
+                            <controls:SettingsCard
+                                Margin="0,0,0,2"
+                                Header="Left click and drag"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <TextBlock Style="{StaticResource FixedMouseActionTextStyle}" Text="Pan the photo" />
+                            </controls:SettingsCard>
+
+                            <controls:SettingsCard
+                                Margin="0,0,0,2"
+                                Header="Back / Forward buttons"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <ComboBox MinWidth="170" SelectedIndex="0">
+                                    <ComboBoxItem Content="Navigate photos" />
+                                    <ComboBoxItem Content="Step zoom" />
+                                </ComboBox>
+                            </controls:SettingsCard>
+
+                            <controls:SettingsCard
+                                Margin="0,0,0,2"
+                                Header="Middle click"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <ComboBox MinWidth="170" SelectedIndex="0">
+                                    <ComboBoxItem Content="Full screen" />
+                                    <ComboBoxItem Content="Maximize or restore" />
+                                    <ComboBoxItem Content="Nothing" />
+                                </ComboBox>
+                            </controls:SettingsCard>
+
+                            <controls:SettingsCard
+                                Margin="0,0,0,2"
+                                Header="Right click"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <TextBlock Style="{StaticResource FixedMouseActionTextStyle}" Text="Windows Explorer context menu" />
+                            </controls:SettingsCard>
+
+                            <controls:SettingsCard
+                                Margin="0,0,0,2"
+                                Header="Right click and hold"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <ComboBox MinWidth="170" SelectedIndex="0">
+                                    <ComboBoxItem Content="Zoom in" />
+                                    <ComboBoxItem Content="Nothing" />
+                                </ComboBox>
+                            </controls:SettingsCard>
+
+                            <controls:SettingsCard
+                                Margin="0,0,0,2"
+                                Header="Double-click on photo"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <ComboBox MinWidth="170" SelectedIndex="0">
+                                    <ComboBoxItem Content="Toggle 1:1 and Fit" />
+                                    <ComboBoxItem Content="Full screen" />
+                                    <ComboBoxItem Content="Nothing" />
+                                </ComboBox>
+                            </controls:SettingsCard>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
             </PivotItem>
 
             <PivotItem x:Uid="SettingsPivotItemCodecs">

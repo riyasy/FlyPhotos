@@ -7,6 +7,7 @@ using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
 using FlyPhotos.Services.ExternalAppListing;
 using FlyPhotos.UI.Behaviors;
+using FlyPhotos.UI.Controls;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -16,6 +17,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -151,6 +153,8 @@ internal sealed partial class Settings
 
         // Initialize codec list view
         ListViewCodecs.ItemsSource = CodecDiscovery.GetAllCodecs();
+
+        InitializeShortcutsTab();
 
         PopulateSupportedLanguages();
         ComboLanguage.ItemsSource = _supportedLanguages;
@@ -681,6 +685,86 @@ internal sealed partial class Settings
                 break;
         }
     }
+
+    // ───────────────────────── Shortcuts tab (prototype) ─────────────────────────
+    // ponytail: in-memory only. Nothing below touches AppConfig or PhotoDisplayWindow's real key
+    // table; closing the Settings window discards every edit. Exists so the layout and the capture
+    // interaction can be judged before any of the routing work in
+    // docs/03_think_later/20260818_shortcut_customization_design.md is committed to.
+
+    private readonly List<ShortcutGroup> _allShortcutGroups = ShortcutsPrototypeCatalog.BuildAll();
+
+    /// <summary>Filtered view bound to the page. Holds the same row instances as
+    /// <see cref="_allShortcutGroups"/>, so edits survive a search.</summary>
+    private readonly ObservableCollection<ShortcutGroup> _visibleShortcutGroups = [];
+
+    private void InitializeShortcutsTab()
+    {
+        ShortcutGroupsList.ItemsSource = _visibleShortcutGroups;
+        ApplyShortcutFilter(string.Empty);
+    }
+
+    private void ShortcutSearchBox_OnTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args) =>
+        ApplyShortcutFilter(sender.Text);
+
+    private void ApplyShortcutFilter(string query)
+    {
+        _visibleShortcutGroups.Clear();
+        query = query.Trim();
+
+        foreach (var group in _allShortcutGroups)
+        {
+            // A category name match keeps the whole group, so "zoom" shows the section intact.
+            var groupMatches = group.Name.Contains(query, StringComparison.OrdinalIgnoreCase);
+            var rows = query.Length == 0 || groupMatches
+                ? group.Rows
+                : new ObservableCollection<ShortcutRow>(group.Rows.Where(r => r.Matches(query)));
+
+            if (rows.Count > 0) _visibleShortcutGroups.Add(new ShortcutGroup(group.Name, rows));
+        }
+
+        TxtNoShortcutResults.Visibility = _visibleShortcutGroups.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <summary>Opens the editor for one command. It mutates the row directly, so there is nothing
+    /// to apply here - conflict lookup is by invariant token, never by display text.</summary>
+    private async void ShortcutEdit_OnClick(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is not ShortcutRow row) return;
+
+        var dialog = new ShortcutEditDialog(row,
+            token => ShortcutsPrototypeCatalog.FindOwner(_allShortcutGroups, token))
+        {
+            XamlRoot = Content.XamlRoot,
+            Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
+            RequestedTheme = ((FrameworkElement)Content).ActualTheme
+        };
+
+        await dialog.ShowAsync();
+    }
+
+    private async void ButtonResetAllShortcuts_OnClick(object sender, RoutedEventArgs e)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = "Reset all shortcuts?",
+            Content = "Every command goes back to its default keys. Your mouse settings will not change.",
+            PrimaryButtonText = "Reset all",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = Content.XamlRoot,
+            Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
+            RequestedTheme = ((FrameworkElement)Content).ActualTheme
+        };
+
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+
+        foreach (var group in _allShortcutGroups)
+            foreach (var row in group.Rows)
+                row.ResetToDefault();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
 
     private async void ButtonThirdPartyLicenses_Click(object sender, RoutedEventArgs e)
     {

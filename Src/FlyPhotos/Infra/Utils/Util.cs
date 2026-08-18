@@ -43,6 +43,12 @@ internal static class Util
         return coreWindow.HasFlag(CoreVirtualKeyStates.Down);
     }
 
+    public static bool IsShiftPressed()
+    {
+        var coreWindow = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift);
+        return coreWindow.HasFlag(CoreVirtualKeyStates.Down);
+    }
+
     public static CanvasImageBrush CreateCheckeredBrush(ICanvasResourceCreatorWithDpi canvas, int checkerSize)
     {
         // Create a render target for the small 2x2 checker pattern
