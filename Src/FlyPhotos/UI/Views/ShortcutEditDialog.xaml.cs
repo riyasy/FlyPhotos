@@ -7,7 +7,7 @@ using Windows.System;
 
 namespace FlyPhotos.UI.Views;
 
-// ponytail: prototype editor. It really captures keys and really reports conflicts, but every
+// Prototype editor. It really captures keys and really reports conflicts, but every
 // change lands on the in-memory ShortcutRow only - nothing is persisted and no real binding
 // changes. See docs/03_think_later/20260818_shortcut_customization_design.md.
 

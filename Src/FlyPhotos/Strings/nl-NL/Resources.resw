@@ -479,7 +479,7 @@ Muiswiel : Zoomen / Bladeren (afhankelijk van instelling)
 Ctrl + Muiswiel : In- of uitzoomen
 Alt + Muiswiel : Door foto's bladeren
 Linker muisknop + Muiswiel : Door foto's bladeren
-Muiswiel kantelen Links/Rechts : Door foto's bladeren
+Muiswiel kantelen links/rechts : Door foto's bladeren
 Klik op muiswiel : Volledig scherm
 
 Ctrl + Pijltoetsen : Foto verschuiven
@@ -768,11 +768,8 @@ Esc : Instellingen sluiten of App verlaten</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Vensterknoppen automatisch verbergen</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Sleep de achtergrond of houd Ctrl ingedrukt en sleep de afbeelding om het venster te verplaatsen.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Slepen om venster te verplaatsen</value>
+    <value>Linker muisknop en slepen buiten de foto</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Schaalmethode voor afbeeldingen</value>
@@ -839,5 +836,71 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
+  </data>
+  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+    <value>Muis</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Ctrl + Muiswiel</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>Altijd in- of uitzoomen</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + Muiswiel</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>Altijd volgende of vorige weergeven</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>Muiswiel kantelen links/rechts</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>Volgende of vorige weergeven</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>Linker muisknop en slepen op de foto</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>Foto verschuiven</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>Klik op muiswiel</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>Volledig scherm</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>Maximaliseren of herstellen</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>Niets</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>Rechtermuisknop</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>Windows Verkenner contextmenu</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>Rechtermuisknop ingedrukt houden</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>Inzoomen</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>Niets</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>Dubbelklik op de foto</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>Werkelijke grootte of passend maken aan venster</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Ctrl + slepen verplaatst altijd het venster</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>Venster verplaatsen</value>
   </data>
 </root>

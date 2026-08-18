@@ -472,7 +472,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Pfeiltasten Links/Rechts : Durch Fotos blättern
 Pfeiltasten Oben/Unten : Vergrößern oder Verkleinern (Zoom)
 Linke Maustaste + Ziehen : Ausschnitt verschieben
-Rechte Maustaste halten : Vergrößern
+Rechte Maustaste gedrückt halten : Vergrößern
 Rechte Maustaste : Windows-Explorer-Kontextmenü
 
 Mausrad : Zoomen / Blättern (je nach Einstellung)
@@ -768,11 +768,8 @@ Esc : Einstellungen schließen oder App beenden</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Fensterschaltflächen automatisch ausblenden</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Ziehen Sie den Hintergrund, oder halten Sie die Strg-Taste gedrückt und ziehen Sie das Bild, um das Fenster zu verschieben.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Fenster verschieben durch Ziehen</value>
+    <value>Linke Maustaste + Ziehen außerhalb des Fotos</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Skalierungsmethode</value>
@@ -839,5 +836,71 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
+  </data>
+  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+    <value>Maus</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Strg + Mausrad</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>Immer vergrößern oder verkleinern</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + Mausrad</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>Immer nächstes oder vorheriges ansehen</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>Mausrad nach links/rechts neigen</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>Nächstes oder Vorheriges ansehen</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>Linke Maustaste + Ziehen auf dem Foto</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>Ausschnitt verschieben</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>Mausrad-Klick</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>Vollbild</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>Maximieren oder wiederherstellen</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>Nichts</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>Rechte Maustaste</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>Windows-Explorer-Kontextmenü</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>Rechte Maustaste gedrückt halten</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>Vergrößern</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>Nichts</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>Doppelklick auf das Foto</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>Originalgröße oder an Fenster anpassen</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Strg + Ziehen verschiebt immer das Fenster</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>Fenster verschieben</value>
   </data>
 </root>

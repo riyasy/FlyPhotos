@@ -479,7 +479,7 @@ Rueda del ratón : Zoom / Navegar (según configuración)
 Ctrl + Rueda : Zoom dentro o fuera
 Alt + Rueda : Navegar por las fotos
 Clic izquierdo + Rueda : Navegar por las fotos
-Inclinar rueda Izquierda/Derecha : Navegar por las fotos
+Inclinar rueda izquierda/derecha : Navegar por las fotos
 Clic en la rueda del ratón : Pantalla completa
 
 Ctrl + Flechas : Desplazar foto
@@ -768,11 +768,8 @@ Esc : Cerrar ajustes o Salir</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Ocultar automáticamente los botones de la ventana</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Arrastre el fondo o mantenga Ctrl y arrastre la imagen para mover la ventana.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Arrastrar para mover la ventana</value>
+    <value>Clic izquierdo y arrastrar fuera de la foto</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Método de escala de imagen</value>
@@ -839,5 +836,71 @@ High Quality Cubic – Escalado de la más alta calidad para fotos.</value>
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>Aceptar</value>
+  </data>
+  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+    <value>Ratón</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Ctrl + Rueda del ratón</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>Siempre acercar o alejar</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + Rueda del ratón</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>Siempre ver siguiente o anterior</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>Inclinar rueda izquierda/derecha</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>Ver Siguiente o Anterior</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>Clic izquierdo y arrastrar sobre la foto</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>Desplazar imagen</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>Clic en la rueda del ratón</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>Pantalla completa</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>Maximizar o restaurar</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>Nada</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>Clic derecho</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>Menú contextual del Explorador de Windows</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>Clic derecho y mantener</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>Acercar</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>Nada</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>Doble clic sobre la foto</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>Zoom a tamaño real o ajustar a la ventana</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Ctrl + Arrastrar siempre mueve la ventana</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>Mover la ventana</value>
   </data>
 </root>

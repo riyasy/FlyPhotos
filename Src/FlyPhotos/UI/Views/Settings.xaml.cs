@@ -89,6 +89,8 @@ internal sealed partial class Settings
         ComboBackGround.SelectedIndex = GetIndexForBackdrop(AppConfig.Settings.WindowBackdrop);
         ComboMouseWheelBehaviour.SelectedIndex = GetIndexForMouseWheelBehaviour(AppConfig.Settings.DefaultMouseWheelBehavior);
         ComboMouseFwdBackBehaviour.SelectedIndex = GetIndexForMouseFwdBackBehavior(AppConfig.Settings.MouseFwdBackBehavior);
+        ComboMiddleClickBehaviour.SelectedIndex = (int)AppConfig.Settings.MiddleClickBehavior;
+        ComboRightClickHoldBehaviour.SelectedIndex = (int)AppConfig.Settings.RightClickHoldBehavior;
         ButtonShowThumbnail.IsOn = AppConfig.Settings.ShowThumbnails;
         ButtonThumbnailAnimation.IsOn = AppConfig.Settings.EnableThumbnailAnimation;
         ButtonEnableAutoFade.IsOn = AppConfig.Settings.AutoFade;
@@ -112,7 +114,6 @@ internal sealed partial class Settings
         ComboPanZoomNavBehaviour.SelectedIndex = GetIndexForPanZoomBehaviour(AppConfig.Settings.PanZoomBehaviourOnNavigation);
         ButtonEnableAutoHideMouse.IsOn = AppConfig.Settings.AutoHideMouse;
         ButtonEnableAutoHideCaptionButtons.IsOn = AppConfig.Settings.AutoHideCaptionButtons;
-        ButtonCtrlDragToMoveWindow.IsOn = AppConfig.Settings.CtrlDragToMoveWindow;
         ButtonClickOutsideImageToRestoreWindow.IsOn = AppConfig.Settings.ClickOutsideImageToRestoreWindow;
         ButtonEnableExternalShortcut.IsOn = AppConfig.Settings.ShowExternalAppShortcuts;
         ButtonDecodeRawData.IsOn = AppConfig.Settings.DecodeRawData;
@@ -124,6 +125,8 @@ internal sealed partial class Settings
         ComboBackGround.SelectionChanged += ComboBackGround_OnSelectionChanged;
         ComboMouseWheelBehaviour.SelectionChanged += ComboMouseWheel_OnSelectionChanged;
         ComboMouseFwdBackBehaviour.SelectionChanged += ComboMouseFwdBackBehaviour_OnSelectionChanged;
+        ComboMiddleClickBehaviour.SelectionChanged += ComboMiddleClickBehaviour_OnSelectionChanged;
+        ComboRightClickHoldBehaviour.SelectionChanged += ComboRightClickHoldBehaviour_OnSelectionChanged;
         ButtonShowThumbnail.Toggled += ButtonShowThumbnail_OnToggled;
         ButtonThumbnailAnimation.Toggled += ButtonThumbnailAnimation_OnToggled;
         ButtonOpenExitZoom.Toggled += ButtonOpenExitZoom_OnToggled;
@@ -145,7 +148,6 @@ internal sealed partial class Settings
         ComboPanZoomNavBehaviour.SelectionChanged += ComboPanZoomNavBehaviour_OnSelectionChanged;
         ButtonEnableAutoHideMouse.Toggled += ButtonEnableAutoHideMouse_OnToggled;
         ButtonEnableAutoHideCaptionButtons.Toggled += ButtonEnableAutoHideCaptionButtons_OnToggled;
-        ButtonCtrlDragToMoveWindow.Toggled += ButtonCtrlDragToMoveWindow_OnToggled;
         ButtonClickOutsideImageToRestoreWindow.Toggled += ButtonClickOutsideImageToRestoreWindow_OnToggled;
         ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
         ButtonDecodeRawData.Toggled += ButtonDecodeRawData_OnToggled;
@@ -252,13 +254,6 @@ internal sealed partial class Settings
     {
         AppConfig.Settings.AutoHideCaptionButtons = ButtonEnableAutoHideCaptionButtons.IsOn;
         SettingChanged?.Invoke(Setting.CaptionButtonsAutoHideToggle);
-        await AppConfig.SaveAsync();
-    }
-
-    private async void ButtonCtrlDragToMoveWindow_OnToggled(object sender, RoutedEventArgs e)
-    {
-        AppConfig.Settings.CtrlDragToMoveWindow = ButtonCtrlDragToMoveWindow.IsOn;
-        SettingChanged?.Invoke(Setting.CtrlDragToMoveWindowToggle);
         await AppConfig.SaveAsync();
     }
 
@@ -426,6 +421,20 @@ internal sealed partial class Settings
     {
         var behavior = GetMouseFwdBackBehaviorForIndex(ComboMouseFwdBackBehaviour.SelectedIndex);
         AppConfig.Settings.MouseFwdBackBehavior = behavior;
+        await AppConfig.SaveAsync();
+    }
+
+    // These two combos list their items in enum order, so the index is the enum value.
+    // Add an index<->enum map like the ones above if the items ever get reordered.
+    private async void ComboMiddleClickBehaviour_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        AppConfig.Settings.MiddleClickBehavior = (MiddleClickBehavior)ComboMiddleClickBehaviour.SelectedIndex;
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ComboRightClickHoldBehaviour_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        AppConfig.Settings.RightClickHoldBehavior = (RightClickHoldBehavior)ComboRightClickHoldBehaviour.SelectedIndex;
         await AppConfig.SaveAsync();
     }
 
@@ -687,7 +696,7 @@ internal sealed partial class Settings
     }
 
     // ───────────────────────── Shortcuts tab (prototype) ─────────────────────────
-    // ponytail: in-memory only. Nothing below touches AppConfig or PhotoDisplayWindow's real key
+    // In-memory only. Nothing below touches AppConfig or PhotoDisplayWindow's real key
     // table; closing the Settings window discards every edit. Exists so the layout and the capture
     // interaction can be judged before any of the routing work in
     // docs/03_think_later/20260818_shortcut_customization_design.md is committed to.

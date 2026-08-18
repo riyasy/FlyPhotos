@@ -97,7 +97,7 @@ public static class KeyChordText
     };
 }
 
-// ponytail: throw-away prototype for the Shortcuts tab. Mock data only - nothing here reads or
+// Throw-away prototype for the Shortcuts tab. Mock data only - nothing here reads or
 // writes AppConfig, and nothing is wired to PhotoDisplayWindow's real _keyActions table. Display
 // names are hard-coded English on purpose so no .resw sweep across 20 locales is needed yet.
 // Replace wholesale with Infra/Input/CommandCatalog when the real feature lands

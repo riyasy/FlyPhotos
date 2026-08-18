@@ -768,11 +768,8 @@ Esc : إغلاق الإعدادات أو الخروج من التطبيق</value
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>إخفاء أزرار التحكم في النافذة تلقائيًا</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>اسحب الخلفية أو Ctrl + اسحب الصورة لتحريك النافذة.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>السحب لتحريك النافذة</value>
+    <value>النقر بزر الماوس الأيسر والسحب خارج الصورة</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>طريقة تحجيم الصورة</value>
@@ -839,5 +836,71 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>موافق</value>
+  </data>
+  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+    <value>الماوس</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Ctrl + عجلة الماوس</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>التكبير أو التصغير دائمًا</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + عجلة الماوس</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>عرض التالي أو السابق دائمًا</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>إمالة عجلة الماوس لليسار أو لليمين</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>عرض التالي أو السابق</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>النقر بزر الماوس الأيسر والسحب على الصورة</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>تحريك الصورة</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>النقر بعجلة الماوس</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>ملء الشاشة</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>تكبير أو استعادة</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>لا شيء</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>النقر بزر الماوس الأيمن</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>قائمة السياق لمستكشف Windows</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>النقر بزر الماوس الأيمن مع الاستمرار</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>تكبير</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>لا شيء</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>النقر المزدوج على الصورة</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>تكبير إلى الحجم الفعلي أو ملاءمة للنافذة</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Ctrl + السحب يحرك النافذة دائمًا</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>تحريك النافذة</value>
   </data>
 </root>

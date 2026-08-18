@@ -473,13 +473,13 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
 Upp/Ner Pil : Zooma in eller ut
 Vänsterklick och dra : Panorera bild
 Håll ned höger musknapp : Zooma in
-Högerklicka : Windows Explorer snabbmeny
+Högerklicka : Utforskarens snabbmeny
 
 Mushjul : Zooma / Bläddra (beroende på inställning)
 Ctrl + Mushjul : Zooma in eller ut
 Alt + Mushjul : Bläddra bland bilder
 Vänsterklick + Mushjul : Bläddra bland bilder
-Luta mushjul Vänster/Höger : Bläddra bland bilder
+Luta mushjul vänster/höger : Bläddra bland bilder
 Klick på mushjulet : Helskärm
 
 Ctrl + Piltangenter : Panorera bild
@@ -768,11 +768,8 @@ Esc : Stäng inställningar eller Avsluta</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Dölj fönsterknappar automatiskt</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Dra bakgrunden eller håll ned Ctrl och dra bilden för att flytta fönstret.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Dra för att flytta fönstret</value>
+    <value>Vänsterklick och dra utanför bilden</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Skalningsmetod för bilder</value>
@@ -839,5 +836,71 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
+  </data>
+  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+    <value>Mus</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Ctrl + Mushjul</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>Zoomar alltid in eller ut</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + Mushjul</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>Visar alltid nästa eller föregående</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>Luta mushjul vänster/höger</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>Visa nästa eller föregående</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>Vänsterklick och dra på bilden</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>Panorera bild</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>Klick på mushjulet</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>Helskärm</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>Maximera eller återställ</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>Ingenting</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>Högerklicka</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>Utforskarens snabbmeny</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>Håll ned höger musknapp</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>Zooma in</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>Ingenting</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>Dubbelklick på bilden</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>Faktisk storlek eller anpassa till fönster</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Ctrl + dra flyttar alltid fönstret</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>Flytta fönstret</value>
   </data>
 </root>

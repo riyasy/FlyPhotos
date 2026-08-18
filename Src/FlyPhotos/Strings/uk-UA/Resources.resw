@@ -768,11 +768,8 @@ Esc : Закрити налаштування або вийти з програ�
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Автоматично ховати кнопки вікна</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Перетягніть фон або утримуйте Ctrl і перетягуйте зображення, щоб перемістити вікно.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Перетягування для переміщення вікна</value>
+    <value>Лівий клік миші та перетягування поза фото</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Метод масштабування зображення</value>
@@ -839,5 +836,71 @@ High Quality Cubic – Масштабування найвищої якості 
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>ОК</value>
+  </data>
+  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+    <value>Миша</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Ctrl + коліщатко миші</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>Завжди збільшує або зменшує</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + коліщатко миші</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>Завжди наступне або попереднє</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>Нахил коліщатка миші ліворуч або праворуч</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>Наступне або попереднє</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>Лівий клік миші та перетягування по фото</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>Переміщення фото</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>Натискання коліщатка миші</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>На весь екран</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>Розгорнути або відновити</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>Нічого</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>Правий клік миші</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>Контекстне меню Провідника Windows</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>Утримання правої кнопки миші</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>Збільшити</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>Нічого</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>Подвійний клік по фото</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>Масштаб 1:1 або вписати у вікно</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Ctrl + перетягування завжди переміщує вікно</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>Перемістити вікно</value>
   </data>
 </root>

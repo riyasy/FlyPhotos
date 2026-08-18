@@ -473,7 +473,7 @@
 Стрелка вверх/вниз : Увеличение или уменьшение
 
 Удержание правой кнопки мыши : Увеличить
-Правый клик мыши : Контекстное меню проводника Windows
+Правый клик мыши : Контекстное меню Проводника Windows
 Левая кнопка мыши + перетаскивание : Панорамирование фото
 
 Колесо мыши : Увеличение/уменьшение или Просмотр фото (в зависимости от настройки)
@@ -769,11 +769,8 @@ Esc : Закрыть параметры или выйти из приложен�
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Автоматически скрывать кнопки окна</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Перетащите фон или удерживайте Ctrl и перетаскивайте изображение, чтобы переместить окно.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Перетаскивание для перемещения окна</value>
+    <value>Левая кнопка мыши + перетаскивание вне фото</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Метод масштабирования изображения</value>
@@ -840,5 +837,71 @@ High Quality Cubic – Масштабирование наивысшего ка�
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>ОК</value>
+  </data>
+  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+    <value>Мышь</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Ctrl + колесо мыши</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>Всегда увеличение или уменьшение</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + колесо мыши</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>Всегда просмотр фото вперёд или назад</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>Наклон колеса мыши влево/вправо</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>Просмотр фото вперёд или назад</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>Левая кнопка мыши + перетаскивание по фото</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>Панорамирование фото</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>Нажатие колеса мыши</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>Во весь экран</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>Развернуть или восстановить</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>Ничего</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>Правый клик мыши</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>Контекстное меню Проводника Windows</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>Удержание правой кнопки мыши</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>Увеличить</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>Ничего</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>Двойной клик по фото</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>Фактический размер или по размеру окна</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Ctrl + перетаскивание всегда перемещает окно</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>Переместить окно</value>
   </data>
 </root>

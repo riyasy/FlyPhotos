@@ -178,7 +178,9 @@ public sealed partial class PhotoDisplayWindow
         _windPlacementManager = new WindowPlacementManager(this, AppConfig.Settings.WindowState);
         _windFullScreenManager = new WindowFullScreenManager(this);
         _captionButtonFader = new WindowCaptionButtonFader(AppWindow.TitleBar, MainLayout, AppConfig.Settings.AutoHideCaptionButtons, ButtonFullScreenClose);
-        _ctrlDragWindowMover = new CtrlDragWindowMover(D2dCanvas, AppWindow, AppConfig.Settings.CtrlDragToMoveWindow);
+        // Drag-to-move-window is no longer a setting. Enabled stays on the mover so the
+        // toggle can come back without touching this class.
+        _ctrlDragWindowMover = new CtrlDragWindowMover(D2dCanvas, AppWindow, enabled: true);
         _ctrlDragWindowMover.IsOnBackground = pos => !_canvasController.IsPressedOnImage(pos.AdjustForDpi(D2dCanvas));
         _windFullScreenManager.FullScreenToggled += WindFullScreenManager_FullScreenToggled;
         InitKeyActions();
@@ -541,7 +543,9 @@ public sealed partial class PhotoDisplayWindow
                 _rightClickZoomRepeatTimer.Stop();
                 _rightClickPosition = dpiAdjustedPos;
                 _isRightClickHeld = true;
-                _rightClickZoomHoldTimer.Start();
+                // Not starting the timer leaves the release path to open the context menu as usual.
+                if (AppConfig.Settings.RightClickHoldBehavior == RightClickHoldBehavior.ZoomIn)
+                    _rightClickZoomHoldTimer.Start();
                 break;
 
             case PointerUpdateKind.LeftButtonPressed when pointerOverImage:
@@ -614,7 +618,18 @@ public sealed partial class PhotoDisplayWindow
                 break;
 
             case PointerUpdateKind.MiddleButtonReleased:
-                _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
+                switch (AppConfig.Settings.MiddleClickBehavior)
+                {
+                    case MiddleClickBehavior.FullScreen:
+                        _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
+                        break;
+                    case MiddleClickBehavior.MaximizeRestore:
+                        if (_windFullScreenManager.IsMaximizedOrFullScreen)
+                            _windFullScreenManager.Restore(ButtonFullScreenClose);
+                        else
+                            _windFullScreenManager.Maximize();
+                        break;
+                }
                 break;
 
             case PointerUpdateKind.XButton1Released:
@@ -1010,9 +1025,6 @@ public sealed partial class PhotoDisplayWindow
                 break;
             case Setting.CaptionButtonsAutoHideToggle:
                 _captionButtonFader.Enabled = AppConfig.Settings.AutoHideCaptionButtons;
-                break;
-            case Setting.CtrlDragToMoveWindowToggle:
-                _ctrlDragWindowMover.Enabled = AppConfig.Settings.CtrlDragToMoveWindow;
                 break;
             case Setting.AutoFadeToggle:
                 _opacityFader.Enabled = AppConfig.Settings.AutoFade;

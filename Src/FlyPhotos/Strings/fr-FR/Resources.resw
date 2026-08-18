@@ -473,13 +473,13 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
 Flèches Haut/Bas : Zoom avant ou arrière
 Clic gauche + Glisser : Déplacer la photo (Pan)
 Clic droit de la souris et maintenir : Zoom avant
-Clic droit de la souris : Menu contextuel de l'explorateur Windows
+Clic droit de la souris : Menu contextuel de l'Explorateur Windows
 
 Molette de la souris : Zoomer / Naviguer (selon paramètres)
 Ctrl + Molette : Zoom avant ou arrière
 Alt + Molette : Naviguer entre les photos
 Clic gauche + Molette : Naviguer entre les photos
-Incliner la molette (Gauche/Droite) : Naviguer entre les photos
+Incliner la molette (gauche/droite) : Naviguer entre les photos
 Clic sur la molette : Plein écran
 
 Ctrl + Flèches : Déplacer la photo
@@ -768,11 +768,8 @@ Esc : Fermer les paramètres ou Quitter</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Masquer automatiquement les boutons de la fenêtre</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Faites glisser l'arrière-plan ou maintenez la touche Ctrl enfoncée et faites glisser l'image pour déplacer la fenêtre.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Faire glisser pour déplacer la fenêtre</value>
+    <value>Clic gauche + Glisser en dehors de la photo</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Méthode de mise à l'échelle de l'image</value>
@@ -839,5 +836,71 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
+  </data>
+  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+    <value>Souris</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Ctrl + Molette de la souris</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>Toujours zoomer avant ou arrière</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + Molette de la souris</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>Toujours afficher suivant ou précédent</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>Incliner la molette (gauche/droite)</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>Afficher Suivant ou Précédent</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>Clic gauche + Glisser sur la photo</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>Déplacer la photo</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>Clic sur la molette</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>Plein écran</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>Agrandir ou restaurer</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>Aucune action</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>Clic droit de la souris</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>Menu contextuel de l'Explorateur Windows</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>Clic droit de la souris et maintenir</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>Zoom avant</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>Aucune action</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>Double-clic sur la photo</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>Taille réelle ou ajuster à la fenêtre</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Ctrl + Glisser déplace toujours la fenêtre</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>Déplacer la fenêtre</value>
   </data>
 </root>

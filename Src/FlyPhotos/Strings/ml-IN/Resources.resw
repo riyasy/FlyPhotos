@@ -468,7 +468,7 @@
   <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
     <value>Left/Right ആരോ കീകൾ : ഫോട്ടോകൾ മാറ്റാൻ (Navigate)
 Up/Down ആരോ കീകൾ : സൂം ഇൻ / ഔട്ട് ചെയ്യാൻ
-മൗസ് ലെഫ്റ്റ് ക്ലിക്ക് ചെയ്ത് നീക്കുക : ഫോട്ടോ നീക്കാൻ (Pan)
+മൗസ് ലെഫ്റ്റ് ക്ലിക്ക് ചെയ്ത് നീക്കുക : ഫോട്ടോ നീക്കുക (Pan)
 മൗസ് റൈറ്റ് ക്ലിക്ക് ചെയ്ത് പിടിക്കുക : സൂം ഇൻ ചെയ്യുക
 മൗസ് റൈറ്റ് ക്ലിക്ക് : വിൻഡോസ് എക്സ്പ്ലോറർ കോൺടെക്സ്റ്റ് മെനു
 
@@ -479,7 +479,7 @@ Alt + മൗസ് വീൽ : ഫോട്ടോകൾ മാറ്റാൻ
 മൗസ് വീൽ ഇടത്തോട്ട് / വലത്തോട്ട് ചരിക്കുക : ഫോട്ടോകൾ മാറ്റാൻ
 മൗസ് വീൽ ക്ലിക്ക് : മുഴുസ്ക്രീൻ
 
-Ctrl + ആരോ കീകൾ : ഫോട്ടോ നീക്കാൻ (Pan)
+Ctrl + ആരോ കീകൾ : ഫോട്ടോ നീക്കുക (Pan)
 Ctrl + + : സൂം ഇൻ
 Ctrl + - : സൂം ഔട്ട്
 
@@ -765,11 +765,8 @@ Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാ
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>വിൻഡോ ബട്ടണുകൾ സ്വയമേവ മറയ്ക്കുക</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>പശ്ചാത്തലം ഡ്രാഗ് ചെയ്യുക, അല്ലെങ്കിൽ Ctrl കീ അമർത്തിപ്പിടിച്ച് ചിത്രം ഡ്രാഗ് ചെയ്ത് വിൻഡോ നീക്കുക.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>വിൻഡോ നീക്കാൻ ഡ്രാഗ് ചെയ്യുക</value>
+    <value>ഫോട്ടോയ്ക്ക് പുറത്ത് മൗസ് ലെഫ്റ്റ് ക്ലിക്ക് ചെയ്ത് നീക്കുക</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>ഇമേജ് സ്കെയിലിംഗ് രീതി</value>
@@ -836,5 +833,71 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>ശരി</value>
+  </data>
+  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+    <value>മൗസ്</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Ctrl + മൗസ് വീൽ</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>എപ്പോഴും സൂം ഇൻ / ഔട്ട്</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + മൗസ് വീൽ</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>എപ്പോഴും അടുത്തത് അല്ലെങ്കിൽ മുൻപത്തേത് കാണുക</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>മൗസ് വീൽ ഇടത്തോട്ട് / വലത്തോട്ട് ചരിക്കുക</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>അടുത്തത് അല്ലെങ്കിൽ മുൻപത്തേത് കാണുക</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>ഫോട്ടോയിൽ മൗസ് ലെഫ്റ്റ് ക്ലിക്ക് ചെയ്ത് നീക്കുക</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>ഫോട്ടോ നീക്കുക</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>മൗസ് വീൽ ക്ലിക്ക്</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>ഫുൾ സ്ക്രീൻ</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>മാക്സിമൈസ് അല്ലെങ്കിൽ പുനഃസ്ഥാപിക്കുക</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>ഒന്നുമില്ല</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>മൗസ് റൈറ്റ് ക്ലിക്ക്</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>വിൻഡോസ് എക്സ്പ്ലോറർ കോൺടെക്സ്റ്റ് മെനു</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>മൗസ് റൈറ്റ് ക്ലിക്ക് ചെയ്ത് പിടിക്കുക</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>സൂം ഇൻ ചെയ്യുക</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>ഒന്നുമില്ല</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>ഫോട്ടോയിൽ ഡബിൾ ക്ലിക്ക്</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>യഥാർത്ഥ വലിപ്പം അല്ലെങ്കിൽ സ്‌ക്രീനിൽ നിറക്കുക</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Ctrl + ഡ്രാഗ് എപ്പോഴും വിൻഡോ നീക്കുന്നു</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>വിൻഡോ നീക്കുക</value>
   </data>
 </root>

@@ -291,37 +291,6 @@
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
 
-                        <controls:SettingsExpander
-                            x:Name="SettingsCardMouseWheelBehaviour"
-                            x:Uid="SettingsCardMouseWheelBehaviour"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;, FontFamily={StaticResource FluentIcons}}">
-                            <ComboBox
-                                x:Name="ComboMouseWheelBehaviour"
-                                MinWidth="150"
-                                SelectedIndex="0">
-                                <ComboBoxItem x:Uid="ComboMouseWheelItemZoom" />
-                                <ComboBoxItem x:Uid="ComboMouseWheelItemNav" />
-                            </ComboBox>
-                            <controls:SettingsExpander.Items>
-                                <controls:SettingsCard x:Name="SettingsCardMouseWheelBehaviourInfo" x:Uid="SettingsCardMouseWheelBehaviourInfo" />
-                            </controls:SettingsExpander.Items>
-                        </controls:SettingsExpander>
-
-                        <controls:SettingsCard
-                            x:Name="SettingsCardMouseFwdBackBehaviour"
-                            x:Uid="SettingsCardMouseFwdBackBehaviour"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;, FontFamily={StaticResource FluentIcons}}">
-                            <ComboBox
-                                x:Name="ComboMouseFwdBackBehaviour"
-                                MinWidth="150"
-                                SelectedIndex="0">
-                                <ComboBoxItem x:Uid="ComboMouseFwdBackItemNav" />
-                                <ComboBoxItem x:Uid="ComboMouseFwdBackItemStepZoom" />
-                            </ComboBox>
-                        </controls:SettingsCard>
-
                         <controls:SettingsCard
                             x:Name="SettingsCardConfirmBeforeDelete"
                             x:Uid="SettingsCardConfirmBeforeDelete"
@@ -336,14 +305,6 @@
                             Margin="0,5,0,0"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE944;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonClickOutsideImageToRestoreWindow" />
-                        </controls:SettingsCard>
-
-                        <controls:SettingsCard
-                            x:Name="SettingsCardCtrlDragToMoveWindow"
-                            x:Uid="SettingsCardCtrlDragToMoveWindow"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE7C2;, FontFamily={StaticResource FluentIcons}}">
-                            <ToggleSwitch x:Name="ButtonCtrlDragToMoveWindow" HorizontalAlignment="Right" />
                         </controls:SettingsCard>
 
                         <!--  *****************  -->
@@ -728,7 +689,7 @@
                                                             </controls:SettingsCard.HeaderIcon>
 
                                                             <!--
-                                                                ponytail: horizontal StackPanel, not a wrap panel. No command has
+                                                                Horizontal StackPanel, not a wrap panel. No command has
                                                                 more than 3 chords today and SettingsCard drops this block below
                                                                 the header at narrow widths. Swap for a WrapPanel if a 4th lands.
                                                             -->
@@ -788,128 +749,123 @@
 
                             <!--  Mouse: pickers, not capture. See design doc section 5.  -->
                             <TextBlock
+                                x:Uid="TextBlockMouseSection"
                                 Margin="0,28,0,0"
-                                Style="{StaticResource BodyStrongTextBlockStyle}"
-                                Text="Mouse" />
+                                Style="{StaticResource BodyStrongTextBlockStyle}" />
 
                             <controls:SettingsCard
+                                x:Name="SettingsCardMouseWheelBehaviour"
+                                x:Uid="SettingsCardMouseWheelBehaviour"
                                 Margin="0,5,0,2"
-                                Description="What the wheel does when no modifier is held"
-                                Header="Mouse wheel"
                                 HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
                                                          FontFamily={StaticResource FluentIcons}}">
-                                <ComboBox MinWidth="170" SelectedIndex="0">
-                                    <ComboBoxItem Content="Zoom" />
-                                    <ComboBoxItem Content="Navigate photos" />
+                                <ComboBox
+                                    x:Name="ComboMouseWheelBehaviour"
+                                    MinWidth="170"
+                                    SelectedIndex="0">
+                                    <ComboBoxItem x:Uid="ComboMouseWheelItemZoom" />
+                                    <ComboBoxItem x:Uid="ComboMouseWheelItemNav" />
                                 </ComboBox>
                             </controls:SettingsCard>
 
                             <!--  Fixed wheel behaviours sit next to the wheel setting they qualify.  -->
                             <controls:SettingsCard
+                                x:Uid="SettingsCardCtrlMouseWheel"
                                 Margin="0,0,0,2"
-                                Header="Ctrl + mouse wheel"
                                 HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
                                                          FontFamily={StaticResource FluentIcons}}">
-                                <TextBlock Style="{StaticResource FixedMouseActionTextStyle}" Text="Always zooms" />
+                                <TextBlock x:Uid="TextCtrlMouseWheelAction" Style="{StaticResource FixedMouseActionTextStyle}" />
                             </controls:SettingsCard>
 
                             <controls:SettingsCard
+                                x:Uid="SettingsCardAltMouseWheel"
                                 Margin="0,0,0,2"
-                                Header="Alt + mouse wheel"
                                 HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
                                                          FontFamily={StaticResource FluentIcons}}">
-                                <TextBlock Style="{StaticResource FixedMouseActionTextStyle}" Text="Always navigates photos" />
+                                <TextBlock x:Uid="TextAltMouseWheelAction" Style="{StaticResource FixedMouseActionTextStyle}" />
                             </controls:SettingsCard>
 
                             <controls:SettingsCard
+                                x:Uid="SettingsCardTiltWheel"
                                 Margin="0,0,0,2"
-                                Header="Wheel over the thumbnail strip"
                                 HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
                                                          FontFamily={StaticResource FluentIcons}}">
-                                <TextBlock Style="{StaticResource FixedMouseActionTextStyle}" Text="Navigate photos" />
+                                <TextBlock x:Uid="TextTiltWheelAction" Style="{StaticResource FixedMouseActionTextStyle}" />
                             </controls:SettingsCard>
 
                             <controls:SettingsCard
+                                x:Uid="SettingsCardMiddleClick"
                                 Margin="0,0,0,2"
-                                Description="How far the wheel must travel before the photo changes"
-                                Header="Wheel steps per photo"
                                 HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
                                                          FontFamily={StaticResource FluentIcons}}">
-                                <Slider
+                                <ComboBox
+                                    x:Name="ComboMiddleClickBehaviour"
                                     MinWidth="170"
-                                    Maximum="200"
-                                    Minimum="20"
-                                    StepFrequency="10"
-                                    Value="60" />
-                            </controls:SettingsCard>
-
-                            <controls:SettingsCard
-                                Margin="0,0,0,2"
-                                Header="Tilt wheel left or right"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <TextBlock Style="{StaticResource FixedMouseActionTextStyle}" Text="Navigate photos" />
-                            </controls:SettingsCard>
-
-                            <controls:SettingsCard
-                                Margin="0,0,0,2"
-                                Header="Left click and drag"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <TextBlock Style="{StaticResource FixedMouseActionTextStyle}" Text="Pan the photo" />
-                            </controls:SettingsCard>
-
-                            <controls:SettingsCard
-                                Margin="0,0,0,2"
-                                Header="Back / Forward buttons"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <ComboBox MinWidth="170" SelectedIndex="0">
-                                    <ComboBoxItem Content="Navigate photos" />
-                                    <ComboBoxItem Content="Step zoom" />
+                                    SelectedIndex="0">
+                                    <ComboBoxItem x:Uid="ComboMiddleClickItemFullScreen" />
+                                    <ComboBoxItem x:Uid="ComboMiddleClickItemMaximize" />
+                                    <ComboBoxItem x:Uid="ComboMiddleClickItemNothing" />
                                 </ComboBox>
                             </controls:SettingsCard>
 
                             <controls:SettingsCard
+                                x:Uid="SettingsCardLeftClickDrag"
                                 Margin="0,0,0,2"
-                                Header="Middle click"
                                 HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
                                                          FontFamily={StaticResource FluentIcons}}">
-                                <ComboBox MinWidth="170" SelectedIndex="0">
-                                    <ComboBoxItem Content="Full screen" />
-                                    <ComboBoxItem Content="Maximize or restore" />
-                                    <ComboBoxItem Content="Nothing" />
+                                <TextBlock x:Uid="TextLeftClickDragAction" Style="{StaticResource FixedMouseActionTextStyle}" />
+                            </controls:SettingsCard>
+
+                            <controls:SettingsCard
+                                x:Uid="SettingsCardCtrlDragToMoveWindow"
+                                Margin="0,0,0,2"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <TextBlock x:Uid="TextCtrlDragAction" Style="{StaticResource FixedMouseActionTextStyle}" />
+                            </controls:SettingsCard>
+
+                            <controls:SettingsCard
+                                x:Uid="SettingsCardDoubleClick"
+                                Margin="0,0,0,2"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <TextBlock x:Uid="TextDoubleClickAction" Style="{StaticResource FixedMouseActionTextStyle}" />
+                            </controls:SettingsCard>
+
+                            <controls:SettingsCard
+                                x:Uid="SettingsCardRightClick"
+                                Margin="0,0,0,2"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <TextBlock x:Uid="TextRightClickAction" Style="{StaticResource FixedMouseActionTextStyle}" />
+                            </controls:SettingsCard>
+
+                            <controls:SettingsCard
+                                x:Uid="SettingsCardRightClickHold"
+                                Margin="0,0,0,2"
+                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
+                                                         FontFamily={StaticResource FluentIcons}}">
+                                <ComboBox
+                                    x:Name="ComboRightClickHoldBehaviour"
+                                    MinWidth="170"
+                                    SelectedIndex="0">
+                                    <ComboBoxItem x:Uid="ComboRightClickHoldItemZoomIn" />
+                                    <ComboBoxItem x:Uid="ComboRightClickHoldItemNothing" />
                                 </ComboBox>
                             </controls:SettingsCard>
 
                             <controls:SettingsCard
+                                x:Name="SettingsCardMouseFwdBackBehaviour"
+                                x:Uid="SettingsCardMouseFwdBackBehaviour"
                                 Margin="0,0,0,2"
-                                Header="Right click"
                                 HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
                                                          FontFamily={StaticResource FluentIcons}}">
-                                <TextBlock Style="{StaticResource FixedMouseActionTextStyle}" Text="Windows Explorer context menu" />
-                            </controls:SettingsCard>
-
-                            <controls:SettingsCard
-                                Margin="0,0,0,2"
-                                Header="Right click and hold"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <ComboBox MinWidth="170" SelectedIndex="0">
-                                    <ComboBoxItem Content="Zoom in" />
-                                    <ComboBoxItem Content="Nothing" />
-                                </ComboBox>
-                            </controls:SettingsCard>
-
-                            <controls:SettingsCard
-                                Margin="0,0,0,2"
-                                Header="Double-click on photo"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <ComboBox MinWidth="170" SelectedIndex="0">
-                                    <ComboBoxItem Content="Toggle 1:1 and Fit" />
-                                    <ComboBoxItem Content="Full screen" />
-                                    <ComboBoxItem Content="Nothing" />
+                                <ComboBox
+                                    x:Name="ComboMouseFwdBackBehaviour"
+                                    MinWidth="170"
+                                    SelectedIndex="0">
+                                    <ComboBoxItem x:Uid="ComboMouseFwdBackItemNav" />
+                                    <ComboBoxItem x:Uid="ComboMouseFwdBackItemStepZoom" />
                                 </ComboBox>
                             </controls:SettingsCard>
 

@@ -46,6 +46,12 @@ public class AppSettings
     [JsonConverter(typeof(JsonStringEnumConverter<MouseFwdBackBehavior>))]
     public MouseFwdBackBehavior MouseFwdBackBehavior { get; set; } = MouseFwdBackBehavior.Navigate;
 
+    [JsonConverter(typeof(JsonStringEnumConverter<MiddleClickBehavior>))]
+    public MiddleClickBehavior MiddleClickBehavior { get; set; } = MiddleClickBehavior.FullScreen;
+
+    [JsonConverter(typeof(JsonStringEnumConverter<RightClickHoldBehavior>))]
+    public RightClickHoldBehavior RightClickHoldBehavior { get; set; } = RightClickHoldBehavior.ZoomIn;
+
     public bool ConfirmForDelete { get; set; } = true;
     public bool ShowFileName { get; set; } = true;
     public bool ShowCacheStatus { get; set; } = true;
@@ -53,7 +59,6 @@ public class AppSettings
     public bool AutoHideMouse { get; set; } = false;
     public bool AutoHideCaptionButtons { get; set; } = false;
     public bool ClickOutsideImageToRestoreWindow { get; set; } = true;
-    public bool CtrlDragToMoveWindow { get; set; } = true;
     public bool UseExternalExeForContextMenu { get; set; } = false;
     public bool ShowExternalAppShortcuts { get; set; } = false;
     public string ExternalApp1 { get; set; } = string.Empty;
