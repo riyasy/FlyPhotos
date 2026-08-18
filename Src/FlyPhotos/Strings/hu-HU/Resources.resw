@@ -467,58 +467,6 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Kép illesztése a képernyőhöz</value>
   </data>
-  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
-    <value>Balra/Jobbra nyilak : Képek közötti navigálás
-Fel/Le nyilak : Nagyítás vagy kicsinyítés
-Bal gomb + húzás : Kép pásztázása
-Jobb gomb nyomva tartás : Nagyítás
-Jobb gomb : Windows Intéző helyi menü
-
-Egérgörgő : Nagyítás/kicsinyítés / Képek közötti navigálás (beállítástól függően)
-Ctrl + Egérgörgő : Nagyítás/kicsinyítés
-Alt + Egérgörgő : Képek közötti navigálás
-Bal gomb + Egérgörgő : Képek közötti navigálás
-Egérgörgő döntése balra/jobbra : Képek közötti navigálás
-Egérgörgő gomb : Teljes képernyő
-
-Ctrl + Nyilak : Kép pásztázása
-Ctrl + + : Nagyítás
-Ctrl + - : Kicsinyítés
-
-Alt + Balra/Jobbra nyilak : Lapozás több oldalas TIFF/ICO fájlban
-
-Page Up/Page Down : Nagyítás/kicsinyítés a következő előre beállított értékre (100%, 400%, Illesztés)
-Home : Ugrás az első képre
-End : Ugrás az utolsó képre
-
-Egérgörgő a bélyegkép csíkon : Képek közötti navigálás
-Egérgörgő a képernyőn lévő bal/jobb gombon : Képek közötti navigálás
-Egérgörgő a képernyőn lévő forgatás gombon : Kép forgatása
-
-TouchPad kétujjas balra vagy jobbra húzás : Képek közötti navigálás
-TouchPad kétujjas fel vagy le húzás : Nagyítás/kicsinyítés / Képek közötti navigálás (az egérgörgő beállítástól függően)
-TouchPad csípés szét vagy összezárása : Nagyítás vagy kicsinyítés
-
-F11 : Teljes képernyő
-Enter : Maximalizál
-
-Alt + Enter : Fájltulajdonságok megjelenítése (Általános lap)
-D : Fájltulajdonságok megjelenítése (Részletek lap)
-I : Fénykép adatai (metaadatok) panel megjelenítése
-
-W : Fájl megjelenítése a Windows Intézőben
-S : Windows Megosztás párbeszédablak megjelenítése a fájlhoz
-P : Fénykép nyomtatása
-A : Kép nagyítása tényleges méretre
-F : Illesztés az ablakhoz
-E : Külső alkalmazások panel megjelenítése
-Ctrl + 1–4 : Megnyitás a(z) 1–4. külső alkalmazásban
-M : További műveletek menü megjelenítése
-
-Del : Kép törlése
-
-Esc : Beállítások bezárása vagy alkalmazás kilépése</value>
-  </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>Nyelv kiválasztása</value>
   </data>
@@ -539,10 +487,6 @@ Esc : Beállítások bezárása vagy alkalmazás kilépése</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>Egérgörgő</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + egérgörgő mindig nagyít.
-👉 Alt + egérgörgő mindig navigál.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
     <value>⚠ Lassíthatja az indulást. A Fly a teljes felbontású kép betöltésére vár indításkor.</value>
@@ -661,21 +605,6 @@ Esc : Beállítások bezárása vagy alkalmazás kilépése</value>
   </data>
   <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
     <value>Automatikus elhalványítás és elrejtés</value>
-  </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>Konfigurálja, hogy a Fly hogyan kezelje a képgyorsítótárazást.</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>Gyorsítótárazás</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>Billentyűparancsok</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>Pásztázás és nagyítás viselkedésének testreszabása.</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>Pásztázás és nagyítás</value>
   </data>
   <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - Beállítások</value>
@@ -901,5 +830,314 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
   </data>
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>Ablak mozgatása</value>
+  </data>
+  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+    <value>Parancsok</value>
+  </data>
+  <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
+    <value>Parancsok és billentyűk keresése…</value>
+  </data>
+  <data name="ButtonResetAllShortcuts.Content" xml:space="preserve">
+    <value>Összes visszaállítása…</value>
+  </data>
+  <data name="TxtNoShortcutResults.Text" xml:space="preserve">
+    <value>Egyetlen parancs sem felel meg a keresésnek.</value>
+  </data>
+  <data name="TextShortcutNoKeys.Text" xml:space="preserve">
+    <value>Nincs</value>
+  </data>
+  <data name="ButtonShortcutEdit.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Billentyűparancsok módosítása</value>
+  </data>
+  <data name="ShortcutEditToolTip.Content" xml:space="preserve">
+    <value>Billentyűparancsok módosítása</value>
+  </data>
+  <data name="ShortcutResetAll_Title" xml:space="preserve">
+    <value>Visszaállítja az összes billentyűparancsot?</value>
+  </data>
+  <data name="ShortcutResetAll_Message" xml:space="preserve">
+    <value>Minden parancs visszakapja az alapértelmezett billentyűit. Az egérbeállítások nem változnak.</value>
+  </data>
+  <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
+    <value>Összes visszaállítása</value>
+  </data>
+  <data name="ShortcutResetAll_CancelButton" xml:space="preserve">
+    <value>Mégse</value>
+  </data>
+  <data name="TextShortcutCurrent.Text" xml:space="preserve">
+    <value>Jelenlegi billentyűparancsok</value>
+  </data>
+  <data name="TextShortcutNoneAssigned.Text" xml:space="preserve">
+    <value>Nincs hozzárendelt billentyűparancs.</value>
+  </data>
+  <data name="TextShortcutCapturePrompt.Text" xml:space="preserve">
+    <value>Kattintson az alábbi mezőbe, majd nyomja le a hozzáadni kívánt billentyűket.</value>
+  </data>
+  <data name="ButtonShortcutRemove.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Billentyűparancs eltávolítása</value>
+  </data>
+  <data name="ShortcutRemoveToolTip.Content" xml:space="preserve">
+    <value>Eltávolítás</value>
+  </data>
+  <data name="ButtonShortcutReassign.Content" xml:space="preserve">
+    <value>Újrarendelés</value>
+  </data>
+  <data name="ButtonShortcutResetDefault.Content" xml:space="preserve">
+    <value>Alapértelmezés visszaállítása</value>
+  </data>
+  <data name="ShortcutCapture_DoneButton" xml:space="preserve">
+    <value>Kész</value>
+  </data>
+  <data name="ShortcutCapture_Idle" xml:space="preserve">
+    <value>Kattintson ide billentyűparancs hozzáadásához</value>
+  </data>
+  <data name="ShortcutCapture_Waiting" xml:space="preserve">
+    <value>Várakozás a billentyűkre…</value>
+  </data>
+  <data name="ShortcutCapture_WinKeyRejected" xml:space="preserve">
+    <value>A Windows fenntartja a Windows billentyűt használó billentyűparancsokat.</value>
+  </data>
+  <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
+    <value>Váltson latin betűs beviteli módra a billentyűparancs beállításához.</value>
+  </data>
+  <data name="ShortcutCapture_AlreadyOnThisCommand" xml:space="preserve">
+    <value>A(z) {0} már hozzá van rendelve ehhez a parancshoz.</value>
+  </data>
+  <data name="ShortcutCapture_ReservedByOther" xml:space="preserve">
+    <value>A(z) {0} rögzítve van a(z) „{1}” parancshoz, és nem módosítható.</value>
+  </data>
+  <data name="ShortcutCapture_Conflict" xml:space="preserve">
+    <value>A(z) {0} már a(z) „{1}” parancshoz tartozik. Újrarendeléskor az a parancs elveszíti ezt a billentyűparancsot.</value>
+  </data>
+  <data name="ShortcutGroup_Navigation" xml:space="preserve">
+    <value>Navigálás</value>
+  </data>
+  <data name="ShortcutGroup_ZoomPan" xml:space="preserve">
+    <value>Nagyítás és pásztázás</value>
+  </data>
+  <data name="ShortcutGroup_Rotate" xml:space="preserve">
+    <value>Forgatás</value>
+  </data>
+  <data name="ShortcutGroup_View" xml:space="preserve">
+    <value>Nézet</value>
+  </data>
+  <data name="ShortcutGroup_File" xml:space="preserve">
+    <value>Fájl</value>
+  </data>
+  <data name="ShortcutGroup_OpenWith" xml:space="preserve">
+    <value>Megnyitás ezzel</value>
+  </data>
+  <data name="ShortcutName_NextPhoto" xml:space="preserve">
+    <value>Következő kép</value>
+  </data>
+  <data name="ShortcutName_PrevPhoto" xml:space="preserve">
+    <value>Előző kép</value>
+  </data>
+  <data name="ShortcutName_FirstPhoto" xml:space="preserve">
+    <value>Első kép</value>
+  </data>
+  <data name="ShortcutName_LastPhoto" xml:space="preserve">
+    <value>Utolsó kép</value>
+  </data>
+  <data name="ShortcutName_NextPage" xml:space="preserve">
+    <value>Következő oldal</value>
+  </data>
+  <data name="ShortcutName_PrevPage" xml:space="preserve">
+    <value>Előző oldal</value>
+  </data>
+  <data name="ShortcutName_ZoomIn" xml:space="preserve">
+    <value>Nagyítás</value>
+  </data>
+  <data name="ShortcutName_ZoomOut" xml:space="preserve">
+    <value>Kicsinyítés</value>
+  </data>
+  <data name="ShortcutName_StepZoomIn" xml:space="preserve">
+    <value>Lépcsős nagyítás</value>
+  </data>
+  <data name="ShortcutName_StepZoomOut" xml:space="preserve">
+    <value>Lépcsős kicsinyítés</value>
+  </data>
+  <data name="ShortcutName_ActualSize" xml:space="preserve">
+    <value>Tényleges méret (1:1)</value>
+  </data>
+  <data name="ShortcutName_FitToWindow" xml:space="preserve">
+    <value>Igazítás az ablakhoz</value>
+  </data>
+  <data name="ShortcutName_PanUp" xml:space="preserve">
+    <value>Pásztázás felfelé</value>
+  </data>
+  <data name="ShortcutName_PanDown" xml:space="preserve">
+    <value>Pásztázás lefelé</value>
+  </data>
+  <data name="ShortcutName_PanLeft" xml:space="preserve">
+    <value>Pásztázás balra</value>
+  </data>
+  <data name="ShortcutName_PanRight" xml:space="preserve">
+    <value>Pásztázás jobbra</value>
+  </data>
+  <data name="ShortcutName_RotateLeft" xml:space="preserve">
+    <value>Forgatás balra</value>
+  </data>
+  <data name="ShortcutName_RotateRight" xml:space="preserve">
+    <value>Forgatás jobbra</value>
+  </data>
+  <data name="ShortcutName_FullScreen" xml:space="preserve">
+    <value>Teljes képernyő</value>
+  </data>
+  <data name="ShortcutName_MaximizeRestore" xml:space="preserve">
+    <value>Maximalizálás vagy visszaállítás</value>
+  </data>
+  <data name="ShortcutName_PhotoInfoPanel" xml:space="preserve">
+    <value>Fénykép adatai panel</value>
+  </data>
+  <data name="ShortcutName_CloseApp" xml:space="preserve">
+    <value>FlyPhotos bezárása</value>
+  </data>
+  <data name="ShortcutName_CopyPhoto" xml:space="preserve">
+    <value>Kép másolása</value>
+  </data>
+  <data name="ShortcutName_DeletePhoto" xml:space="preserve">
+    <value>Kép törlése</value>
+  </data>
+  <data name="ShortcutName_RenamePhoto" xml:space="preserve">
+    <value>Kép átnevezése</value>
+  </data>
+  <data name="ShortcutName_PrintPhoto" xml:space="preserve">
+    <value>Kép nyomtatása</value>
+  </data>
+  <data name="ShortcutName_SharePhoto" xml:space="preserve">
+    <value>Kép megosztása</value>
+  </data>
+  <data name="ShortcutName_ShowInExplorer" xml:space="preserve">
+    <value>Fájl helyének megnyitása</value>
+  </data>
+  <data name="ShortcutName_FileProperties" xml:space="preserve">
+    <value>Fájltulajdonságok</value>
+  </data>
+  <data name="ShortcutName_FileDetails" xml:space="preserve">
+    <value>Fájl részletei</value>
+  </data>
+  <data name="ShortcutName_MoreActionsMenu" xml:space="preserve">
+    <value>További műveletek menü</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp1" xml:space="preserve">
+    <value>Megnyitás az 1. alkalmazással</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp2" xml:space="preserve">
+    <value>Megnyitás a 2. alkalmazással</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp3" xml:space="preserve">
+    <value>Megnyitás a 3. alkalmazással</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp4" xml:space="preserve">
+    <value>Megnyitás a 4. alkalmazással</value>
+  </data>
+  <data name="ShortcutName_OpenWithPanel" xml:space="preserve">
+    <value>Megnyitás ezzel panel</value>
+  </data>
+  <data name="ShortcutDesc_NextPage" xml:space="preserve">
+    <value>Több oldalas TIFF- és ICO-fájlok</value>
+  </data>
+  <data name="ShortcutDesc_PrevPage" xml:space="preserve">
+    <value>Több oldalas TIFF- és ICO-fájlok</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
+    <value>A következő előre beállított értékre ugrik: 100%, 400%, Illesztés</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
+    <value>Az előző előre beállított értékre lép vissza</value>
+  </data>
+  <data name="ShortcutDesc_PhotoInfoPanel" xml:space="preserve">
+    <value>Fényképezőgép- és EXIF-metaadatok</value>
+  </data>
+  <data name="ShortcutDesc_CloseApp" xml:space="preserve">
+    <value>Mindig elérhető – nem rendelhető át</value>
+  </data>
+  <data name="ShortcutDesc_CopyPhoto" xml:space="preserve">
+    <value>A fájlt a vágólapra másolja</value>
+  </data>
+  <data name="ShortcutDesc_DeletePhoto" xml:space="preserve">
+    <value>Nem rendelhető át</value>
+  </data>
+  <data name="ShortcutDesc_SharePhoto" xml:space="preserve">
+    <value>Megnyitja a Windows Megosztás párbeszédablakot</value>
+  </data>
+  <data name="ShortcutDesc_FileProperties" xml:space="preserve">
+    <value>Általános lap</value>
+  </data>
+  <data name="ShortcutDesc_FileDetails" xml:space="preserve">
+    <value>Részletek lap</value>
+  </data>
+  <data name="ShortcutDesc_OpenWithPanel" xml:space="preserve">
+    <value>Megjeleníti az összes beállított alkalmazást</value>
+  </data>
+  <data name="ShortcutMod_Ctrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="ShortcutMod_Alt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="ShortcutMod_Shift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="ShortcutKey_LeftArrow" xml:space="preserve">
+    <value>Balra nyíl</value>
+  </data>
+  <data name="ShortcutKey_RightArrow" xml:space="preserve">
+    <value>Jobbra nyíl</value>
+  </data>
+  <data name="ShortcutKey_UpArrow" xml:space="preserve">
+    <value>Fel nyíl</value>
+  </data>
+  <data name="ShortcutKey_DownArrow" xml:space="preserve">
+    <value>Le nyíl</value>
+  </data>
+  <data name="ShortcutKey_Esc" xml:space="preserve">
+    <value>Esc</value>
+  </data>
+  <data name="ShortcutKey_Backspace" xml:space="preserve">
+    <value>Backspace</value>
+  </data>
+  <data name="ShortcutKey_PageUp" xml:space="preserve">
+    <value>Page Up</value>
+  </data>
+  <data name="ShortcutKey_PageDown" xml:space="preserve">
+    <value>Page Down</value>
+  </data>
+  <data name="ShortcutKey_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="ShortcutKey_End" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="ShortcutKey_Enter" xml:space="preserve">
+    <value>Enter</value>
+  </data>
+  <data name="ShortcutKey_Delete" xml:space="preserve">
+    <value>Del</value>
+  </data>
+  <data name="ShortcutKey_Space" xml:space="preserve">
+    <value>Szóköz</value>
+  </data>
+  <data name="ShortcutKey_Tab" xml:space="preserve">
+    <value>Tab</value>
+  </data>
+  <data name="ShortcutKey_NumAdd" xml:space="preserve">
+    <value>Num +</value>
+  </data>
+  <data name="ShortcutKey_NumSubtract" xml:space="preserve">
+    <value>Num -</value>
+  </data>
+  <data name="ShortcutKey_NumMultiply" xml:space="preserve">
+    <value>Num *</value>
+  </data>
+  <data name="ShortcutKey_NumDivide" xml:space="preserve">
+    <value>Num /</value>
+  </data>
+  <data name="ShortcutKey_NumDecimal" xml:space="preserve">
+    <value>Num ,</value>
+  </data>
+  <data name="ShortcutKey_NumPad" xml:space="preserve">
+    <value>Num {0}</value>
   </data>
 </root>

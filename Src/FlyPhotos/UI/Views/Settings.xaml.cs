@@ -636,8 +636,7 @@ internal sealed partial class Settings
 
     // ───────────────────────── Shortcuts tab ─────────────────────────
     // Edits are live: each one is persisted to usersettings.json and pushed to the photo window,
-    // which rebuilds its routing table. Every string resolves through MRT, but only en-US is filled
-    // in - the other 19 locales fall back to English until the translation pass.
+    // which rebuilds its routing table. Every string resolves through MRT, in all 20 locales.
 
     /// <summary>Built once, already carrying whatever the user saved.</summary>
     private readonly List<ShortcutGroup> _allShortcutGroups = ShortcutCatalog.BuildAll();
@@ -646,17 +645,13 @@ internal sealed partial class Settings
     /// persistence only care about the rows. Never bound to XAML, so the interface type is safe.</summary>
     private IEnumerable<ShortcutRow> AllShortcutRows => _allShortcutGroups.SelectMany(g => g.Rows);
 
-    /// <summary>Filtered view bound to the page. Holds the same row instances as
-    /// <see cref="_allShortcutGroups"/>, so edits survive a search.</summary>
-    private readonly ObservableCollection<ShortcutGroup> _visibleShortcutGroups = [];
-
     /// <summary>The Mouse section, as data. Built once so the rows keep their selection and their
     /// visibility across a search, exactly like the command rows.</summary>
     private readonly List<MouseRow> _mouseRows = MouseCatalog.BuildAll();
 
     private void InitializeShortcutsTab()
     {
-        ShortcutGroupsList.ItemsSource = _visibleShortcutGroups;
+        ShortcutGroupsList.ItemsSource = _allShortcutGroups;
         MouseRowsList.ItemsSource = _mouseRows;
         ApplyShortcutFilter(string.Empty);
     }
@@ -677,27 +672,22 @@ internal sealed partial class Settings
     private void ShortcutSearchBox_OnTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args) =>
         ApplyShortcutFilter(sender.Text);
 
+    /// <summary>
+    /// Hides what does not match rather than rebuilding the bound collection. The cards are a
+    /// non-virtualized tree, so refilling it meant WinUI tearing down and re-creating every visible
+    /// SettingsCard on each keystroke; toggling a bound Visibility touches only what changed. Each
+    /// group decides for itself, exactly like the Mouse rows.
+    /// </summary>
     private void ApplyShortcutFilter(string query)
     {
-        _visibleShortcutGroups.Clear();
         query = query.Trim();
 
-        foreach (var group in _allShortcutGroups)
-        {
-            // A category name match keeps the whole group, so "zoom" shows the section intact.
-            var groupMatches = Util.ContainsIgnoreCase(group.Name, query);
-            var rows = query.Length == 0 || groupMatches
-                ? group.Rows
-                : new ObservableCollection<ShortcutRow>(group.Rows.Where(r => r.Matches(query)));
+        var anyShowing = false;
+        foreach (var group in _allShortcutGroups) anyShowing |= group.ApplyFilter(query);
 
-            if (rows.Count > 0) _visibleShortcutGroups.Add(new ShortcutGroup(group.Name, rows));
-        }
+        anyShowing |= FilterMouseSection(query);
 
-        var mouseShowing = FilterMouseSection(query);
-
-        TxtNoShortcutResults.Visibility = _visibleShortcutGroups.Count == 0 && !mouseShowing
-            ? Visibility.Visible
-            : Visibility.Collapsed;
+        TxtNoShortcutResults.Visibility = anyShowing ? Visibility.Collapsed : Visibility.Visible;
     }
 
     /// <summary>Filters the Mouse rows and reports whether any survived, so the caller knows if the

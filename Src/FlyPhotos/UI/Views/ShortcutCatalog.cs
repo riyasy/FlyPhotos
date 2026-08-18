@@ -248,7 +248,12 @@ public sealed class ShortcutRow : INotifyPropertyChanged
         IsReserved = flags.HasFlag(CommandFlags.Reserved);
         DefaultChords = defaultChords;
         Name = L.Get($"ShortcutName_{id}");
-        Description = flags.HasFlag(CommandFlags.Hinted) ? L.Get($"ShortcutDesc_{id}") : string.Empty;
+
+        // Whether a command has a hint is a fact about the resource file, so ask the resource file.
+        // This used to be a Hinted flag on the row, which meant adding a description was a two-place
+        // edit and forgetting the flag left a written string that nothing ever displayed.
+        Description = L.GetOptional($"ShortcutDesc_{id}");
+
         SetChords(chords);
         Keys.CollectionChanged += (_, _) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NoKeysVisibility)));
@@ -263,6 +268,19 @@ public sealed class ShortcutRow : INotifyPropertyChanged
     // Visibility rather than bool so the DataTemplate needs no converter.
     public Visibility EditableVisibility => IsReserved ? Visibility.Collapsed : Visibility.Visible;
     public Visibility NoKeysVisibility => Keys.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    /// <summary>Set by the search. The row stays in the tree and hides, rather than being filtered
+    /// out of the bound collection — see <see cref="ApplyFilter"/>.</summary>
+    public Visibility RowVisibility
+    {
+        get;
+        private set
+        {
+            if (field == value) return;
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RowVisibility)));
+        }
+    } = Visibility.Visible;
 
     public void Add(KeyChord chord)
     {
@@ -282,52 +300,89 @@ public sealed class ShortcutRow : INotifyPropertyChanged
         foreach (var c in chords) Keys.Add(new ShortcutKey(c));
     }
 
-    /// <summary>Matches the search box against what the user can actually see - the display name,
-    /// the hint, and the rendered chord text. Never the persisted form.</summary>
-    public bool Matches(string query) =>
-        Util.ContainsIgnoreCase(Name, query) ||
-        Util.ContainsIgnoreCase(Description, query) ||
-        Keys.Any(k => Util.ContainsIgnoreCase(k.Text, query));
+    /// <summary>Shows or hides the row for a search, and reports whether it survived. Matches on
+    /// what the user can actually see - the display name, the hint, and the rendered chord text.
+    /// Never the persisted form. Mirrors MouseRow.ApplyFilter.</summary>
+    public bool ApplyFilter(string query)
+    {
+        var match = query.Length == 0
+                    || Util.ContainsIgnoreCase(Name, query)
+                    || Util.ContainsIgnoreCase(Description, query)
+                    || Keys.Any(k => Util.ContainsIgnoreCase(k.Text, query));
+
+        RowVisibility = match ? Visibility.Visible : Visibility.Collapsed;
+        return match;
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 }
 
 /// <summary>A category heading plus the rows under it.</summary>
 public sealed class ShortcutGroup(string name, ObservableCollection<ShortcutRow> rows)
+    : INotifyPropertyChanged
 {
     public string Name { get; } = name;
     public ObservableCollection<ShortcutRow> Rows { get; } = rows;
+
+    /// <summary>Hidden when nothing under it survived the search, so the heading never sits alone
+    /// above nothing.</summary>
+    public Visibility GroupVisibility
+    {
+        get;
+        private set
+        {
+            if (field == value) return;
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GroupVisibility)));
+        }
+    } = Visibility.Visible;
+
+    /// <summary>Filters the rows and reports whether any survived. A match on the category name
+    /// keeps the whole group, so "zoom" shows that section intact rather than shredding it.</summary>
+    public bool ApplyFilter(string query)
+    {
+        var keepAll = query.Length == 0 || Util.ContainsIgnoreCase(Name, query);
+
+        var anyVisible = false;
+        foreach (var row in Rows) anyVisible |= row.ApplyFilter(keepAll ? string.Empty : query);
+
+        GroupVisibility = anyVisible ? Visibility.Visible : Visibility.Collapsed;
+        return anyVisible;
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 }
 
 /// <summary>
 /// Everything the catalog needs to say about a command beyond its keys and its icon. One flags enum
-/// rather than a bool per trait: the traits compose (Copy photo is both Hinted and Suppress) and a
-/// new one costs an enum member instead of a fourth mechanism.
+/// rather than a bool per trait: the traits compose (Next photo is both Burst and Repeat) and a new
+/// one costs an enum member instead of a fourth mechanism.
+///
+/// Every member here is a behaviour. A trait that is really a fact about another file — "has a
+/// description" was one, and lived here as Hinted — belongs to that file, not to this table.
+/// Never persisted, so the bit values are free to move.
 /// </summary>
 [Flags]
 internal enum CommandFlags
 {
     None = 0,
 
-    /// <summary>Has a <c>ShortcutDesc_</c> resource, because the name alone does not explain it.</summary>
-    Hinted = 1 << 0,
-
     /// <summary>Keys are fixed: no edit button, and anything saved against it is ignored. Escape is
     /// the universal way out of the app and of the capture dialog; Delete keeps the key every file
     /// manager uses.</summary>
-    Reserved = 1 << 1,
+    Reserved = 1 << 0,
 
     /// <summary>Mark the key event handled so WinUI's own handling does not also run — Ctrl+C would
     /// trigger a browser-style copy, Enter would activate the focused button, Delete moves focus.</summary>
-    Suppress = 1 << 2,
+    Suppress = 1 << 1,
 
     /// <summary>Opens a navigation burst, which parks the HQ cache tier until a <c>Brake()</c>
     /// unwinds it, so key-up on whatever chord is bound to this has to brake.</summary>
-    Burst = 1 << 3,
+    Burst = 1 << 2,
 
     /// <summary>Safe to fire again while the key is held. Windows repeats KeyDown for a held key,
     /// which is the point for navigation, zoom and pan, and wrong for anything that toggles.</summary>
-    Repeat = 1 << 4
+    Repeat = 1 << 3
 }
 
 /// <summary>
@@ -354,8 +409,8 @@ internal static class ShortcutCatalog
             Row(CommandId.PrevPhoto, "\uE96F", Burst | Repeat, K(VirtualKey.Left)),
             Row(CommandId.FirstPhoto, "\uE892", Repeat, K(VirtualKey.Home)),
             Row(CommandId.LastPhoto, "\uE893", Repeat, K(VirtualKey.End)),
-            Row(CommandId.NextPage, "\uF586", Hinted | Repeat, K(VirtualKey.Right, alt: true)),
-            Row(CommandId.PrevPage, "\uF587", Hinted | Repeat, K(VirtualKey.Left, alt: true))
+            Row(CommandId.NextPage, "\uF586", Repeat, K(VirtualKey.Right, alt: true)),
+            Row(CommandId.PrevPage, "\uF587", Repeat, K(VirtualKey.Left, alt: true))
         ]),
 
         ("ZoomPan",
@@ -364,8 +419,8 @@ internal static class ShortcutCatalog
                 [K(VirtualKey.Up), .. KeyChord.CtrlChordsFor('+'), K(VirtualKey.Add, ctrl: true)]),
             Row(CommandId.ZoomOut, "\uE71F", Repeat,
                 [K(VirtualKey.Down), .. KeyChord.CtrlChordsFor('-'), K(VirtualKey.Subtract, ctrl: true)]),
-            Row(CommandId.StepZoomIn, "\uE8A3", Hinted | Repeat, K(VirtualKey.PageUp)),
-            Row(CommandId.StepZoomOut, "\uE71F", Hinted | Repeat, K(VirtualKey.PageDown)),
+            Row(CommandId.StepZoomIn, "\uE8A3", Repeat, K(VirtualKey.PageUp)),
+            Row(CommandId.StepZoomOut, "\uE71F", Repeat, K(VirtualKey.PageDown)),
             Row(CommandId.ActualSize, "\uE799", None, K(VirtualKey.A)),
             Row(CommandId.FitToWindow, "\uE9A6", None, K(VirtualKey.F)),
             Row(CommandId.PanUp, "\uE7C2", Repeat, K(VirtualKey.Up, ctrl: true)),
@@ -384,20 +439,20 @@ internal static class ShortcutCatalog
         [
             Row(CommandId.FullScreen, "\uE740", None, K(VirtualKey.F11)),
             Row(CommandId.MaximizeRestore, "\uE922", Suppress, K(VirtualKey.Enter)),
-            Row(CommandId.PhotoInfoPanel, "\uE946", Hinted, K(VirtualKey.I)),
-            Row(CommandId.CloseApp, "\uE8BB", Reserved | Hinted, K(VirtualKey.Escape))
+            Row(CommandId.PhotoInfoPanel, "\uE946", None, K(VirtualKey.I)),
+            Row(CommandId.CloseApp, "\uE8BB", Reserved, K(VirtualKey.Escape))
         ]),
 
         ("File",
         [
-            Row(CommandId.CopyPhoto, "\uE8C8", Hinted | Suppress, K(VirtualKey.C, ctrl: true)),
-            Row(CommandId.DeletePhoto, "\uE74D", Reserved | Hinted | Suppress, K(VirtualKey.Delete)),
+            Row(CommandId.CopyPhoto, "\uE8C8", Suppress, K(VirtualKey.C, ctrl: true)),
+            Row(CommandId.DeletePhoto, "\uE74D", Reserved | Suppress, K(VirtualKey.Delete)),
             Row(CommandId.RenamePhoto, "\uE8AC", None, K(VirtualKey.F2)),
             Row(CommandId.PrintPhoto, "\uE749", None, K(VirtualKey.P)),
-            Row(CommandId.SharePhoto, "\uE72D", Hinted, K(VirtualKey.S)),
+            Row(CommandId.SharePhoto, "\uE72D", None, K(VirtualKey.S)),
             Row(CommandId.ShowInExplorer, "\uE8DA", None, K(VirtualKey.W)),
-            Row(CommandId.FileProperties, "\uF167", Hinted | Suppress, K(VirtualKey.Enter, alt: true)),
-            Row(CommandId.FileDetails, "\uF167", Hinted, K(VirtualKey.D)),
+            Row(CommandId.FileProperties, "\uF167", Suppress, K(VirtualKey.Enter, alt: true)),
+            Row(CommandId.FileDetails, "\uF167", None, K(VirtualKey.D)),
             Row(CommandId.MoreActionsMenu, "\uE712", None, K(VirtualKey.M))
         ]),
 
@@ -411,7 +466,7 @@ internal static class ShortcutCatalog
                 [K(VirtualKey.Number3, ctrl: true), K(VirtualKey.NumberPad3, ctrl: true)]),
             Row(CommandId.OpenWithApp4, "\uE8A7", None,
                 [K(VirtualKey.Number4, ctrl: true), K(VirtualKey.NumberPad4, ctrl: true)]),
-            Row(CommandId.OpenWithPanel, "\uE71D", Hinted, K(VirtualKey.E))
+            Row(CommandId.OpenWithPanel, "\uE71D", None, K(VirtualKey.E))
         ])
     ];
 
@@ -485,8 +540,10 @@ internal static class ShortcutCatalog
 
         foreach (var (id, def) in ById)
         {
-            Debug.Assert(!def.Flags.HasFlag(Reserved) || def.Flags.HasFlag(Hinted),
-                $"{id} is reserved but has no description explaining the missing edit button.");
+            // Checks the resource itself, not a flag standing in for it. The flag could be set on a
+            // command whose description was never written, which is the case this exists to catch.
+            Debug.Assert(!def.Flags.HasFlag(Reserved) || L.GetOptional($"ShortcutDesc_{id}").Length > 0,
+                $"{id} is reserved but has no ShortcutDesc_ resource explaining the missing edit button.");
 
             foreach (var chord in def.Chords)
             {

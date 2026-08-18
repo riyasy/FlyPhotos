@@ -467,58 +467,6 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>画面への画像フィット</value>
   </data>
-  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
-    <value>左右の矢印キー : 写真を切り替え
-上下の矢印キー : ズームイン / アウト
-マウスの左クリック + ドラッグ : 写真を移動 (Pan)
-マウスを右クリックして長押し : ズームイン
-マウスの右クリック : Windowsエクスプローラーのコンテキストメニュー
-
-マウスホイール : ズーム / 切り替え (設定による)
-Ctrl + マウスホイール : ズームイン / アウト
-Alt + マウスホイール : 写真を切り替え
-左クリック + マウスホイール : 写真を切り替え
-マウスホイールを左右に倒す : 写真を切り替え
-マウスホイールクリック : 全画面表示
-
-Ctrl + 矢印キー : 写真を移動 (Pan)
-Ctrl + + : ズームイン
-Ctrl + - : ズームアウト
-
-Alt + 左右の矢印キー : マルチページTIFF/ICOのページ切り替え
-
-Page Up / Page Down : 次のプリセットにズーム (100%, 400%, 画面に合わせる)
-Home : 最初の写真へ移動
-End : 最後の写真へ移動
-
-サムネイル帯でホイール操作 : 写真を切り替え
-画面上の左右ボタンでホイール操作 : 写真を切り替え
-画面上の回転ボタンでホイール操作 : 写真を回転
-
-タッチパッド 2本指で左右にスワイプ : 写真を切り替え
-タッチパッド 2本指で上下にスワイプ : ズーム / 切り替え (設定による)
-タッチパッド ピンチ操作 (開く/閉じる) : ズームイン / アウト
-
-F11 : 全画面表示
-Enter : 最大化
-
-Alt + Enter : ファイルのプロパティを表示 (全般)
-D : ファイルのプロパティを表示 (詳細)
-I : 写真情報 (メタデータ) パネルを表示
-
-W : Windowsエクスプローラーでファイルを表示
-S : Windowsの共有ダイアログを開く
-P : 写真を印刷
-A : 実際のサイズにズーム
-F : ウィンドウに合わせる
-E : 外部アプリパネルを表示
-Ctrl + 1–4: 外部アプリ1～4で開く
-M : 「その他の操作」メニューを表示
-
-Del : 写真を削除
-
-Esc : 設定を閉じる / アプリを終了</value>
-  </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>言語を選択</value>
   </data>
@@ -539,10 +487,6 @@ Esc : 設定を閉じる / アプリを終了</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>マウスホイール</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + マウスホイールは常にズームします。 
-👉 Alt + マウスホイールは常にナビゲートします。</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
     <value>⚠ 起動が遅くなる可能性があります。Flyは起動時にフル解像度の写真のロードを待ちます。</value>
@@ -661,21 +605,6 @@ Esc : 設定を閉じる / アプリを終了</value>
   </data>
   <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
     <value>自動フェードと非表示</value>
-  </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>Flyが写真のキャッシュをどのように処理するかを設定します。</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>キャッシュ</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>キーボードショートカット</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>パンとズームの動作をカスタマイズします。</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>パンとズーム</value>
   </data>
   <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - 設定</value>
@@ -901,5 +830,314 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
   </data>
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>ウィンドウを移動</value>
+  </data>
+  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+    <value>ショートカット</value>
+  </data>
+  <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
+    <value>コマンドとキーを検索…</value>
+  </data>
+  <data name="ButtonResetAllShortcuts.Content" xml:space="preserve">
+    <value>すべてリセット…</value>
+  </data>
+  <data name="TxtNoShortcutResults.Text" xml:space="preserve">
+    <value>検索に一致するコマンドはありません。</value>
+  </data>
+  <data name="TextShortcutNoKeys.Text" xml:space="preserve">
+    <value>なし</value>
+  </data>
+  <data name="ButtonShortcutEdit.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>ショートカットを変更</value>
+  </data>
+  <data name="ShortcutEditToolTip.Content" xml:space="preserve">
+    <value>ショートカットを変更</value>
+  </data>
+  <data name="ShortcutResetAll_Title" xml:space="preserve">
+    <value>すべてのショートカットをリセットしますか?</value>
+  </data>
+  <data name="ShortcutResetAll_Message" xml:space="preserve">
+    <value>すべてのコマンドが既定のキーに戻ります。マウスの設定は変更されません。</value>
+  </data>
+  <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
+    <value>すべてリセット</value>
+  </data>
+  <data name="ShortcutResetAll_CancelButton" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="TextShortcutCurrent.Text" xml:space="preserve">
+    <value>現在のショートカット</value>
+  </data>
+  <data name="TextShortcutNoneAssigned.Text" xml:space="preserve">
+    <value>ショートカットが割り当てられていません。</value>
+  </data>
+  <data name="TextShortcutCapturePrompt.Text" xml:space="preserve">
+    <value>下のボックスをクリックしてから、追加したいキーを押してください。</value>
+  </data>
+  <data name="ButtonShortcutRemove.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>このショートカットを削除</value>
+  </data>
+  <data name="ShortcutRemoveToolTip.Content" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="ButtonShortcutReassign.Content" xml:space="preserve">
+    <value>再割り当て</value>
+  </data>
+  <data name="ButtonShortcutResetDefault.Content" xml:space="preserve">
+    <value>既定値に戻す</value>
+  </data>
+  <data name="ShortcutCapture_DoneButton" xml:space="preserve">
+    <value>完了</value>
+  </data>
+  <data name="ShortcutCapture_Idle" xml:space="preserve">
+    <value>ここをクリックしてショートカットを追加</value>
+  </data>
+  <data name="ShortcutCapture_Waiting" xml:space="preserve">
+    <value>キー入力を待機中…</value>
+  </data>
+  <data name="ShortcutCapture_WinKeyRejected" xml:space="preserve">
+    <value>Windows キーを使うショートカットは Windows が予約しています。</value>
+  </data>
+  <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
+    <value>ショートカットを設定するには、半角英数の入力方式に切り替えてください。</value>
+  </data>
+  <data name="ShortcutCapture_AlreadyOnThisCommand" xml:space="preserve">
+    <value>{0} はこのコマンドにすでに割り当てられています。</value>
+  </data>
+  <data name="ShortcutCapture_ReservedByOther" xml:space="preserve">
+    <value>{0} は「{1}」に固定されているため、変更できません。</value>
+  </data>
+  <data name="ShortcutCapture_Conflict" xml:space="preserve">
+    <value>{0} は「{1}」ですでに使われています。再割り当てすると、そのコマンドからこのショートカットがなくなります。</value>
+  </data>
+  <data name="ShortcutGroup_Navigation" xml:space="preserve">
+    <value>移動</value>
+  </data>
+  <data name="ShortcutGroup_ZoomPan" xml:space="preserve">
+    <value>ズームと移動</value>
+  </data>
+  <data name="ShortcutGroup_Rotate" xml:space="preserve">
+    <value>回転</value>
+  </data>
+  <data name="ShortcutGroup_View" xml:space="preserve">
+    <value>表示</value>
+  </data>
+  <data name="ShortcutGroup_File" xml:space="preserve">
+    <value>ファイル</value>
+  </data>
+  <data name="ShortcutGroup_OpenWith" xml:space="preserve">
+    <value>プログラムから開く</value>
+  </data>
+  <data name="ShortcutName_NextPhoto" xml:space="preserve">
+    <value>次の写真</value>
+  </data>
+  <data name="ShortcutName_PrevPhoto" xml:space="preserve">
+    <value>前の写真</value>
+  </data>
+  <data name="ShortcutName_FirstPhoto" xml:space="preserve">
+    <value>最初の写真</value>
+  </data>
+  <data name="ShortcutName_LastPhoto" xml:space="preserve">
+    <value>最後の写真</value>
+  </data>
+  <data name="ShortcutName_NextPage" xml:space="preserve">
+    <value>次のページ</value>
+  </data>
+  <data name="ShortcutName_PrevPage" xml:space="preserve">
+    <value>前のページ</value>
+  </data>
+  <data name="ShortcutName_ZoomIn" xml:space="preserve">
+    <value>ズームイン</value>
+  </data>
+  <data name="ShortcutName_ZoomOut" xml:space="preserve">
+    <value>ズームアウト</value>
+  </data>
+  <data name="ShortcutName_StepZoomIn" xml:space="preserve">
+    <value>段階的にズームイン</value>
+  </data>
+  <data name="ShortcutName_StepZoomOut" xml:space="preserve">
+    <value>段階的にズームアウト</value>
+  </data>
+  <data name="ShortcutName_ActualSize" xml:space="preserve">
+    <value>実際のサイズ (1:1)</value>
+  </data>
+  <data name="ShortcutName_FitToWindow" xml:space="preserve">
+    <value>ウィンドウに合わせる</value>
+  </data>
+  <data name="ShortcutName_PanUp" xml:space="preserve">
+    <value>上へ移動</value>
+  </data>
+  <data name="ShortcutName_PanDown" xml:space="preserve">
+    <value>下へ移動</value>
+  </data>
+  <data name="ShortcutName_PanLeft" xml:space="preserve">
+    <value>左へ移動</value>
+  </data>
+  <data name="ShortcutName_PanRight" xml:space="preserve">
+    <value>右へ移動</value>
+  </data>
+  <data name="ShortcutName_RotateLeft" xml:space="preserve">
+    <value>左に回転</value>
+  </data>
+  <data name="ShortcutName_RotateRight" xml:space="preserve">
+    <value>右に回転</value>
+  </data>
+  <data name="ShortcutName_FullScreen" xml:space="preserve">
+    <value>全画面表示</value>
+  </data>
+  <data name="ShortcutName_MaximizeRestore" xml:space="preserve">
+    <value>最大化 / 元のサイズに戻す</value>
+  </data>
+  <data name="ShortcutName_PhotoInfoPanel" xml:space="preserve">
+    <value>写真情報パネル</value>
+  </data>
+  <data name="ShortcutName_CloseApp" xml:space="preserve">
+    <value>FlyPhotos を閉じる</value>
+  </data>
+  <data name="ShortcutName_CopyPhoto" xml:space="preserve">
+    <value>写真をコピー</value>
+  </data>
+  <data name="ShortcutName_DeletePhoto" xml:space="preserve">
+    <value>写真を削除</value>
+  </data>
+  <data name="ShortcutName_RenamePhoto" xml:space="preserve">
+    <value>写真の名前を変更</value>
+  </data>
+  <data name="ShortcutName_PrintPhoto" xml:space="preserve">
+    <value>写真を印刷</value>
+  </data>
+  <data name="ShortcutName_SharePhoto" xml:space="preserve">
+    <value>写真を共有</value>
+  </data>
+  <data name="ShortcutName_ShowInExplorer" xml:space="preserve">
+    <value>ファイルの場所を開く</value>
+  </data>
+  <data name="ShortcutName_FileProperties" xml:space="preserve">
+    <value>ファイルのプロパティ</value>
+  </data>
+  <data name="ShortcutName_FileDetails" xml:space="preserve">
+    <value>ファイルの詳細</value>
+  </data>
+  <data name="ShortcutName_MoreActionsMenu" xml:space="preserve">
+    <value>「その他の操作」メニュー</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp1" xml:space="preserve">
+    <value>外部アプリ 1 で開く</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp2" xml:space="preserve">
+    <value>外部アプリ 2 で開く</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp3" xml:space="preserve">
+    <value>外部アプリ 3 で開く</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp4" xml:space="preserve">
+    <value>外部アプリ 4 で開く</value>
+  </data>
+  <data name="ShortcutName_OpenWithPanel" xml:space="preserve">
+    <value>「プログラムから開く」パネル</value>
+  </data>
+  <data name="ShortcutDesc_NextPage" xml:space="preserve">
+    <value>マルチページの TIFF / ICO ファイル</value>
+  </data>
+  <data name="ShortcutDesc_PrevPage" xml:space="preserve">
+    <value>マルチページの TIFF / ICO ファイル</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
+    <value>次のプリセットに移動: 100%、400%、画面に合わせる</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
+    <value>前のプリセットに戻る</value>
+  </data>
+  <data name="ShortcutDesc_PhotoInfoPanel" xml:space="preserve">
+    <value>カメラおよび EXIF メタデータ</value>
+  </data>
+  <data name="ShortcutDesc_CloseApp" xml:space="preserve">
+    <value>常に利用可能 — 再割り当てできません</value>
+  </data>
+  <data name="ShortcutDesc_CopyPhoto" xml:space="preserve">
+    <value>ファイルをクリップボードにコピーします</value>
+  </data>
+  <data name="ShortcutDesc_DeletePhoto" xml:space="preserve">
+    <value>再割り当てできません</value>
+  </data>
+  <data name="ShortcutDesc_SharePhoto" xml:space="preserve">
+    <value>Windows の共有ダイアログを開きます</value>
+  </data>
+  <data name="ShortcutDesc_FileProperties" xml:space="preserve">
+    <value>「全般」タブ</value>
+  </data>
+  <data name="ShortcutDesc_FileDetails" xml:space="preserve">
+    <value>「詳細」タブ</value>
+  </data>
+  <data name="ShortcutDesc_OpenWithPanel" xml:space="preserve">
+    <value>設定済みのアプリをすべて表示します</value>
+  </data>
+  <data name="ShortcutMod_Ctrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="ShortcutMod_Alt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="ShortcutMod_Shift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="ShortcutKey_LeftArrow" xml:space="preserve">
+    <value>左矢印キー</value>
+  </data>
+  <data name="ShortcutKey_RightArrow" xml:space="preserve">
+    <value>右矢印キー</value>
+  </data>
+  <data name="ShortcutKey_UpArrow" xml:space="preserve">
+    <value>上矢印キー</value>
+  </data>
+  <data name="ShortcutKey_DownArrow" xml:space="preserve">
+    <value>下矢印キー</value>
+  </data>
+  <data name="ShortcutKey_Esc" xml:space="preserve">
+    <value>Esc</value>
+  </data>
+  <data name="ShortcutKey_Backspace" xml:space="preserve">
+    <value>Backspace</value>
+  </data>
+  <data name="ShortcutKey_PageUp" xml:space="preserve">
+    <value>Page Up</value>
+  </data>
+  <data name="ShortcutKey_PageDown" xml:space="preserve">
+    <value>Page Down</value>
+  </data>
+  <data name="ShortcutKey_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="ShortcutKey_End" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="ShortcutKey_Enter" xml:space="preserve">
+    <value>Enter</value>
+  </data>
+  <data name="ShortcutKey_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="ShortcutKey_Space" xml:space="preserve">
+    <value>Space</value>
+  </data>
+  <data name="ShortcutKey_Tab" xml:space="preserve">
+    <value>Tab</value>
+  </data>
+  <data name="ShortcutKey_NumAdd" xml:space="preserve">
+    <value>テンキー +</value>
+  </data>
+  <data name="ShortcutKey_NumSubtract" xml:space="preserve">
+    <value>テンキー -</value>
+  </data>
+  <data name="ShortcutKey_NumMultiply" xml:space="preserve">
+    <value>テンキー *</value>
+  </data>
+  <data name="ShortcutKey_NumDivide" xml:space="preserve">
+    <value>テンキー /</value>
+  </data>
+  <data name="ShortcutKey_NumDecimal" xml:space="preserve">
+    <value>テンキー .</value>
+  </data>
+  <data name="ShortcutKey_NumPad" xml:space="preserve">
+    <value>テンキー {0}</value>
   </data>
 </root>

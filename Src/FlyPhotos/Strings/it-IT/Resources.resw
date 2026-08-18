@@ -468,58 +468,6 @@ Impostazioni &gt; App &gt; App predefinite.</value>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Adattamento immagine a schermo</value>
   </data>
-  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
-    <value>Frecce Sinistra/Destra : Scorri foto
-Frecce Su/Giù : Zoom avanti o indietro
-Clic sinistro e trascina : Sposta foto (Pan)
-Clic destro del mouse tenuto premuto : Ingrandisci
-Clic destro del mouse : Menu contestuale di Esplora file di Windows
-
-Rotellina del mouse : Zoom / Scorri (secondo impostazioni)
-Ctrl + Rotellina : Zoom avanti o indietro
-Alt + Rotellina : Scorri foto
-Clic sinistro + Rotellina : Scorri foto
-Inclinare rotellina Sinistra/Destra : Scorri foto
-Clic sulla rotellina : Schermo intero
-
-Ctrl + Frecce : Sposta foto
-Ctrl + + : Zoom avanti
-Ctrl + - : Zoom indietro
-
-Alt + Frecce Sinistra/Destra : Cambia pagina in TIFF/ICO multipagina
-
-Pag Su / Pag Giù : Zoom al prossimo preset (100%, 400%, Adatta)
-Inizio (Home) : Vai alla prima foto
-Fine (End) : Vai all'ultima foto
-
-Rotellina su striscia miniature : Scorri foto
-Rotellina su pulsanti schermo Sx/Dx : Scorri foto
-Rotellina su pulsante rotazione : Ruota foto
-
-TouchPad scorri 2 dita Sx/Dx : Scorri foto
-TouchPad scorri 2 dita Su/Giù : Zoom / Scorri (secondo imp. rotellina)
-TouchPad pizzica (Pinch) : Zoom avanti o indietro
-
-F11 : Schermo intero
-Invio : Ingrandisci
-
-Alt + Invio : Proprietà del file (Generale)
-D : Proprietà del file (Dettagli)
-I : Mostra riquadro Info foto (metadati)
-
-W : Mostra file in Esplora file di Windows
-S : Apri la finestra di condivisione di Windows per il file
-P : Stampa foto
-A : Zoom a dimensione effettiva
-F : Adatta alla finestra
-E : Mostra il pannello delle app esterne
-Ctrl + 1–4: Apri nell’app esterna 1–4
-M : Mostra menu Altre azioni
-
-Canc (Del) : Elimina foto
-
-Esc : Chiudi impostazioni o Esci</value>
-  </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>Scegli lingua</value>
   </data>
@@ -540,10 +488,6 @@ Esc : Chiudi impostazioni o Esci</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>Rotellina del mouse</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + rotellina del mouse ingrandisce sempre. 
-👉 Alt + rotellina del mouse naviga sempre.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
     <value>⚠ Potrebbe rallentare l'avvio. Fly attende il caricamento della foto a piena risoluzione all'avvio.</value>
@@ -662,21 +606,6 @@ Esc : Chiudi impostazioni o Esci</value>
   </data>
   <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
     <value>Dissolvenza e nascondi automatici</value>
-  </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>Configura come Fly gestisce la cache delle foto.</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>Caching</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>Collegamenti da tastiera</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>Personalizza il comportamento di Pan e Zoom.</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>Pan e Zoom</value>
   </data>
   <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - Impostazioni</value>
@@ -902,5 +831,314 @@ High Quality Cubic – Ridimensionamento della massima qualità per le foto.</va
   </data>
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>Sposta la finestra</value>
+  </data>
+  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+    <value>Collegamenti</value>
+  </data>
+  <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
+    <value>Cerca comandi e tasti…</value>
+  </data>
+  <data name="ButtonResetAllShortcuts.Content" xml:space="preserve">
+    <value>Reimposta tutto…</value>
+  </data>
+  <data name="TxtNoShortcutResults.Text" xml:space="preserve">
+    <value>Nessun comando corrisponde alla ricerca.</value>
+  </data>
+  <data name="TextShortcutNoKeys.Text" xml:space="preserve">
+    <value>Nessuno</value>
+  </data>
+  <data name="ButtonShortcutEdit.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Modifica collegamenti</value>
+  </data>
+  <data name="ShortcutEditToolTip.Content" xml:space="preserve">
+    <value>Modifica collegamenti</value>
+  </data>
+  <data name="ShortcutResetAll_Title" xml:space="preserve">
+    <value>Reimpostare tutti i collegamenti?</value>
+  </data>
+  <data name="ShortcutResetAll_Message" xml:space="preserve">
+    <value>Tutti i comandi tornano ai tasti predefiniti. Le impostazioni del mouse non cambiano.</value>
+  </data>
+  <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
+    <value>Reimposta tutto</value>
+  </data>
+  <data name="ShortcutResetAll_CancelButton" xml:space="preserve">
+    <value>Annulla</value>
+  </data>
+  <data name="TextShortcutCurrent.Text" xml:space="preserve">
+    <value>Collegamenti attuali</value>
+  </data>
+  <data name="TextShortcutNoneAssigned.Text" xml:space="preserve">
+    <value>Nessun collegamento assegnato.</value>
+  </data>
+  <data name="TextShortcutCapturePrompt.Text" xml:space="preserve">
+    <value>Fai clic nel riquadro sotto, quindi premi i tasti da aggiungere.</value>
+  </data>
+  <data name="ButtonShortcutRemove.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Rimuovi questo collegamento</value>
+  </data>
+  <data name="ShortcutRemoveToolTip.Content" xml:space="preserve">
+    <value>Rimuovi</value>
+  </data>
+  <data name="ButtonShortcutReassign.Content" xml:space="preserve">
+    <value>Riassegna</value>
+  </data>
+  <data name="ButtonShortcutResetDefault.Content" xml:space="preserve">
+    <value>Ripristina i valori predefiniti</value>
+  </data>
+  <data name="ShortcutCapture_DoneButton" xml:space="preserve">
+    <value>Fine</value>
+  </data>
+  <data name="ShortcutCapture_Idle" xml:space="preserve">
+    <value>Fai clic qui per aggiungere un collegamento</value>
+  </data>
+  <data name="ShortcutCapture_Waiting" xml:space="preserve">
+    <value>In attesa dei tasti…</value>
+  </data>
+  <data name="ShortcutCapture_WinKeyRejected" xml:space="preserve">
+    <value>Windows riserva i collegamenti che usano il tasto Windows.</value>
+  </data>
+  <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
+    <value>Passa a un metodo di input latino per impostare un collegamento.</value>
+  </data>
+  <data name="ShortcutCapture_AlreadyOnThisCommand" xml:space="preserve">
+    <value>{0} è già assegnato a questo comando.</value>
+  </data>
+  <data name="ShortcutCapture_ReservedByOther" xml:space="preserve">
+    <value>{0} è fisso per «{1}» e non può essere modificato.</value>
+  </data>
+  <data name="ShortcutCapture_Conflict" xml:space="preserve">
+    <value>{0} è già usato da «{1}». Riassegnandolo, quel comando resterà senza questo collegamento.</value>
+  </data>
+  <data name="ShortcutGroup_Navigation" xml:space="preserve">
+    <value>Navigazione</value>
+  </data>
+  <data name="ShortcutGroup_ZoomPan" xml:space="preserve">
+    <value>Zoom e spostamento</value>
+  </data>
+  <data name="ShortcutGroup_Rotate" xml:space="preserve">
+    <value>Rotazione</value>
+  </data>
+  <data name="ShortcutGroup_View" xml:space="preserve">
+    <value>Visualizza</value>
+  </data>
+  <data name="ShortcutGroup_File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="ShortcutGroup_OpenWith" xml:space="preserve">
+    <value>Apri con</value>
+  </data>
+  <data name="ShortcutName_NextPhoto" xml:space="preserve">
+    <value>Foto successiva</value>
+  </data>
+  <data name="ShortcutName_PrevPhoto" xml:space="preserve">
+    <value>Foto precedente</value>
+  </data>
+  <data name="ShortcutName_FirstPhoto" xml:space="preserve">
+    <value>Prima foto</value>
+  </data>
+  <data name="ShortcutName_LastPhoto" xml:space="preserve">
+    <value>Ultima foto</value>
+  </data>
+  <data name="ShortcutName_NextPage" xml:space="preserve">
+    <value>Pagina successiva</value>
+  </data>
+  <data name="ShortcutName_PrevPage" xml:space="preserve">
+    <value>Pagina precedente</value>
+  </data>
+  <data name="ShortcutName_ZoomIn" xml:space="preserve">
+    <value>Ingrandisci</value>
+  </data>
+  <data name="ShortcutName_ZoomOut" xml:space="preserve">
+    <value>Riduci</value>
+  </data>
+  <data name="ShortcutName_StepZoomIn" xml:space="preserve">
+    <value>Ingrandisci a livelli</value>
+  </data>
+  <data name="ShortcutName_StepZoomOut" xml:space="preserve">
+    <value>Riduci a livelli</value>
+  </data>
+  <data name="ShortcutName_ActualSize" xml:space="preserve">
+    <value>Dimensione effettiva (1:1)</value>
+  </data>
+  <data name="ShortcutName_FitToWindow" xml:space="preserve">
+    <value>Adatta alla finestra</value>
+  </data>
+  <data name="ShortcutName_PanUp" xml:space="preserve">
+    <value>Sposta in alto</value>
+  </data>
+  <data name="ShortcutName_PanDown" xml:space="preserve">
+    <value>Sposta in basso</value>
+  </data>
+  <data name="ShortcutName_PanLeft" xml:space="preserve">
+    <value>Sposta a sinistra</value>
+  </data>
+  <data name="ShortcutName_PanRight" xml:space="preserve">
+    <value>Sposta a destra</value>
+  </data>
+  <data name="ShortcutName_RotateLeft" xml:space="preserve">
+    <value>Ruota a sinistra</value>
+  </data>
+  <data name="ShortcutName_RotateRight" xml:space="preserve">
+    <value>Ruota a destra</value>
+  </data>
+  <data name="ShortcutName_FullScreen" xml:space="preserve">
+    <value>Schermo intero</value>
+  </data>
+  <data name="ShortcutName_MaximizeRestore" xml:space="preserve">
+    <value>Massimizza o ripristina</value>
+  </data>
+  <data name="ShortcutName_PhotoInfoPanel" xml:space="preserve">
+    <value>Riquadro Info foto</value>
+  </data>
+  <data name="ShortcutName_CloseApp" xml:space="preserve">
+    <value>Chiudi FlyPhotos</value>
+  </data>
+  <data name="ShortcutName_CopyPhoto" xml:space="preserve">
+    <value>Copia foto</value>
+  </data>
+  <data name="ShortcutName_DeletePhoto" xml:space="preserve">
+    <value>Elimina foto</value>
+  </data>
+  <data name="ShortcutName_RenamePhoto" xml:space="preserve">
+    <value>Rinomina foto</value>
+  </data>
+  <data name="ShortcutName_PrintPhoto" xml:space="preserve">
+    <value>Stampa foto</value>
+  </data>
+  <data name="ShortcutName_SharePhoto" xml:space="preserve">
+    <value>Condividi foto</value>
+  </data>
+  <data name="ShortcutName_ShowInExplorer" xml:space="preserve">
+    <value>Apri percorso file</value>
+  </data>
+  <data name="ShortcutName_FileProperties" xml:space="preserve">
+    <value>Proprietà del file</value>
+  </data>
+  <data name="ShortcutName_FileDetails" xml:space="preserve">
+    <value>Dettagli del file</value>
+  </data>
+  <data name="ShortcutName_MoreActionsMenu" xml:space="preserve">
+    <value>Menu Altre azioni</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp1" xml:space="preserve">
+    <value>Apri con l'app 1</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp2" xml:space="preserve">
+    <value>Apri con l'app 2</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp3" xml:space="preserve">
+    <value>Apri con l'app 3</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp4" xml:space="preserve">
+    <value>Apri con l'app 4</value>
+  </data>
+  <data name="ShortcutName_OpenWithPanel" xml:space="preserve">
+    <value>Pannello Apri con</value>
+  </data>
+  <data name="ShortcutDesc_NextPage" xml:space="preserve">
+    <value>File TIFF e ICO multipagina</value>
+  </data>
+  <data name="ShortcutDesc_PrevPage" xml:space="preserve">
+    <value>File TIFF e ICO multipagina</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
+    <value>Passa al preset successivo: 100%, 400%, Adatta</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
+    <value>Torna al preset precedente</value>
+  </data>
+  <data name="ShortcutDesc_PhotoInfoPanel" xml:space="preserve">
+    <value>Metadati della fotocamera ed EXIF</value>
+  </data>
+  <data name="ShortcutDesc_CloseApp" xml:space="preserve">
+    <value>Sempre disponibile: non riassegnabile</value>
+  </data>
+  <data name="ShortcutDesc_CopyPhoto" xml:space="preserve">
+    <value>Copia il file negli appunti</value>
+  </data>
+  <data name="ShortcutDesc_DeletePhoto" xml:space="preserve">
+    <value>Non riassegnabile</value>
+  </data>
+  <data name="ShortcutDesc_SharePhoto" xml:space="preserve">
+    <value>Apre la finestra di condivisione di Windows</value>
+  </data>
+  <data name="ShortcutDesc_FileProperties" xml:space="preserve">
+    <value>Scheda Generale</value>
+  </data>
+  <data name="ShortcutDesc_FileDetails" xml:space="preserve">
+    <value>Scheda Dettagli</value>
+  </data>
+  <data name="ShortcutDesc_OpenWithPanel" xml:space="preserve">
+    <value>Mostra tutte le app configurate</value>
+  </data>
+  <data name="ShortcutMod_Ctrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="ShortcutMod_Alt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="ShortcutMod_Shift" xml:space="preserve">
+    <value>Maiusc</value>
+  </data>
+  <data name="ShortcutKey_LeftArrow" xml:space="preserve">
+    <value>Freccia sinistra</value>
+  </data>
+  <data name="ShortcutKey_RightArrow" xml:space="preserve">
+    <value>Freccia destra</value>
+  </data>
+  <data name="ShortcutKey_UpArrow" xml:space="preserve">
+    <value>Freccia su</value>
+  </data>
+  <data name="ShortcutKey_DownArrow" xml:space="preserve">
+    <value>Freccia giù</value>
+  </data>
+  <data name="ShortcutKey_Esc" xml:space="preserve">
+    <value>Esc</value>
+  </data>
+  <data name="ShortcutKey_Backspace" xml:space="preserve">
+    <value>Backspace</value>
+  </data>
+  <data name="ShortcutKey_PageUp" xml:space="preserve">
+    <value>Pag Su</value>
+  </data>
+  <data name="ShortcutKey_PageDown" xml:space="preserve">
+    <value>Pag Giù</value>
+  </data>
+  <data name="ShortcutKey_Home" xml:space="preserve">
+    <value>Inizio</value>
+  </data>
+  <data name="ShortcutKey_End" xml:space="preserve">
+    <value>Fine</value>
+  </data>
+  <data name="ShortcutKey_Enter" xml:space="preserve">
+    <value>Invio</value>
+  </data>
+  <data name="ShortcutKey_Delete" xml:space="preserve">
+    <value>Canc</value>
+  </data>
+  <data name="ShortcutKey_Space" xml:space="preserve">
+    <value>Spazio</value>
+  </data>
+  <data name="ShortcutKey_Tab" xml:space="preserve">
+    <value>Tab</value>
+  </data>
+  <data name="ShortcutKey_NumAdd" xml:space="preserve">
+    <value>Num +</value>
+  </data>
+  <data name="ShortcutKey_NumSubtract" xml:space="preserve">
+    <value>Num -</value>
+  </data>
+  <data name="ShortcutKey_NumMultiply" xml:space="preserve">
+    <value>Num *</value>
+  </data>
+  <data name="ShortcutKey_NumDivide" xml:space="preserve">
+    <value>Num /</value>
+  </data>
+  <data name="ShortcutKey_NumDecimal" xml:space="preserve">
+    <value>Num ,</value>
+  </data>
+  <data name="ShortcutKey_NumPad" xml:space="preserve">
+    <value>Num {0}</value>
   </data>
 </root>

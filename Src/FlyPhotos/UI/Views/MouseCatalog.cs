@@ -57,11 +57,11 @@ public sealed class MouseRow : INotifyPropertyChanged
         }
     }
 
-    private MouseRow(string headerKey, bool hasDescription, string? fixedActionKey,
+    private MouseRow(string headerKey, string? fixedActionKey,
                      List<string> options, int selectedIndex, Action<int>? apply)
     {
         Header = L.Get($"{headerKey}/Header");
-        Description = hasDescription ? L.Get($"{headerKey}/Description") : string.Empty;
+        Description = L.GetOptional($"{headerKey}/Description");
         FixedAction = fixedActionKey is null ? string.Empty : L.Get($"{fixedActionKey}/Text");
         Options = options;
         SelectedIndex = selectedIndex;
@@ -100,15 +100,15 @@ public sealed class MouseRow : INotifyPropertyChanged
 
     /// <summary>A gesture the user chooses the behaviour of. Every picker here lists its options in
     /// enum order, so the selected index is the enum value.</summary>
-    internal static MouseRow Picker(string headerKey, bool hasDescription, string[] optionKeys,
+    internal static MouseRow Picker(string headerKey, string[] optionKeys,
                                     int selected, Action<int> apply) =>
-        new(headerKey, hasDescription, null,
+        new(headerKey, null,
             optionKeys.Select(k => L.Get($"{k}/Content")).ToList(), selected, apply);
 
     /// <summary>A gesture that is hardcoded, listed so the user can see what the mouse does without
     /// being able to break it.</summary>
-    internal static MouseRow Fixed(string headerKey, string actionKey, bool hasDescription = false) =>
-        new(headerKey, hasDescription, actionKey, [], -1, null);
+    internal static MouseRow Fixed(string headerKey, string actionKey) =>
+        new(headerKey, actionKey, [], -1, null);
 }
 
 /// <summary>
@@ -119,7 +119,7 @@ internal static class MouseCatalog
 {
     public static List<MouseRow> BuildAll() =>
     [
-        MouseRow.Picker("SettingsCardMouseWheelBehaviour", true,
+        MouseRow.Picker("SettingsCardMouseWheelBehaviour",
             ["ComboMouseWheelItemZoom", "ComboMouseWheelItemNav"],
             (int)AppConfig.Settings.DefaultMouseWheelBehavior,
             i => AppConfig.Settings.DefaultMouseWheelBehavior = (DefaultMouseWheelBehavior)i),
@@ -129,22 +129,22 @@ internal static class MouseCatalog
         MouseRow.Fixed("SettingsCardAltMouseWheel", "TextAltMouseWheelAction"),
         MouseRow.Fixed("SettingsCardTiltWheel", "TextTiltWheelAction"),
 
-        MouseRow.Picker("SettingsCardMiddleClick", false,
+        MouseRow.Picker("SettingsCardMiddleClick",
             ["ComboMiddleClickItemFullScreen", "ComboMiddleClickItemMaximize", "ComboMiddleClickItemNothing"],
             (int)AppConfig.Settings.MiddleClickBehavior,
             i => AppConfig.Settings.MiddleClickBehavior = (MiddleClickBehavior)i),
 
-        MouseRow.Fixed("SettingsCardLeftClickDrag", "TextLeftClickDragAction", hasDescription: true),
+        MouseRow.Fixed("SettingsCardLeftClickDrag", "TextLeftClickDragAction"),
         MouseRow.Fixed("SettingsCardCtrlDragToMoveWindow", "TextCtrlDragAction"),
         MouseRow.Fixed("SettingsCardDoubleClick", "TextDoubleClickAction"),
         MouseRow.Fixed("SettingsCardRightClick", "TextRightClickAction"),
 
-        MouseRow.Picker("SettingsCardRightClickHold", false,
+        MouseRow.Picker("SettingsCardRightClickHold",
             ["ComboRightClickHoldItemZoomIn", "ComboRightClickHoldItemNothing"],
             (int)AppConfig.Settings.RightClickHoldBehavior,
             i => AppConfig.Settings.RightClickHoldBehavior = (RightClickHoldBehavior)i),
 
-        MouseRow.Picker("SettingsCardMouseFwdBackBehaviour", true,
+        MouseRow.Picker("SettingsCardMouseFwdBackBehaviour",
             ["ComboMouseFwdBackItemNav", "ComboMouseFwdBackItemStepZoom"],
             (int)AppConfig.Settings.MouseFwdBackBehavior,
             i => AppConfig.Settings.MouseFwdBackBehavior = (MouseFwdBackBehavior)i)

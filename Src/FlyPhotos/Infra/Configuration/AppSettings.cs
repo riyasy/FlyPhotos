@@ -87,6 +87,10 @@ public class AppSettings
     /// numeric value, so reordering the enum cannot remap anybody's bindings). A command that is
     /// absent uses its code defaults, which is what lets a later release add commands with working
     /// keys and no migration; an empty list means the user deliberately unbound it.
+    ///
+    /// The setter substitutes an empty map for null: the property initializer covers a key that is
+    /// absent from usersettings.json, but a hand-written <c>"KeyBindings": null</c> deserializes as
+    /// null and would take the app down on the first lookup.
     /// </summary>
-    public Dictionary<string, List<string>> KeyBindings { get; set; } = [];
+    public Dictionary<string, List<string>> KeyBindings { get; set => field = value ?? []; } = [];
 }
