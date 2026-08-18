@@ -1102,7 +1102,7 @@ High Quality Cubic – Highest-quality scaling for photos.</value>
     <value>Share photo</value>
   </data>
   <data name="ShortcutName_ShowInExplorer" xml:space="preserve">
-    <value>Show in Explorer</value>
+    <value>Open File Location</value>
   </data>
   <data name="ShortcutName_FileProperties" xml:space="preserve">
     <value>File properties</value>

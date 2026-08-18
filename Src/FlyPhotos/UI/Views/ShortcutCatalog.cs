@@ -12,94 +12,132 @@ using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Localization;
 using FlyPhotos.Infra.Utils;
 
+// The command table reads as a table only if the flags stay short. CommandFlags is declared in this
+// same file, so the unqualified names below are never ambiguous.
+using static FlyPhotos.UI.Views.CommandFlags;
+
 namespace FlyPhotos.UI.Views;
 
 /// <summary>
-/// Converts between a chord's two representations, which must never be confused:
-/// a <b>token</b> ("Ctrl+Add") is culture-invariant, is what identity and persistence use, and
-/// never changes; the <b>display</b> form ("Ctrl + Num +") is localized and is never compared.
-/// Comparing display strings would silently orphan every binding when the UI language changes.
+/// A key plus the modifiers held with it - the unit of identity for a shortcut.
+///
+/// This is a value type on purpose. Equality and hashing come free, so it drops into a dictionary
+/// key with no allocation on the keypress path, and a chord no keyboard could ever send is simply
+/// not expressible. Its two string forms are strictly boundaries and must never be confused:
+/// <see cref="Format"/> is culture-invariant and is what usersettings.json stores;
+/// <see cref="Display"/> is localized, is for humans, and is never compared. Comparing display text
+/// would silently orphan every binding the moment the UI language changed.
 /// </summary>
-public static class KeyChordText
+public readonly record struct KeyChord(VirtualKey Key, bool Ctrl, bool Alt, bool Shift)
 {
-    // The keys that type + and - are layout-dependent and Windows.System.VirtualKey does not name
-    // the OEM range, so (VirtualKey)187 would stringify as "187". Naming them keeps tokens readable
-    // and keeps a binding attached to the + key rather than to one layout's scan code.
-    private const string TokenPlus = "OemPlus";
-    private const string TokenMinus = "OemMinus";
-
+    // Segment names for Format/TryParse. Invariant: these are identity, not UI text.
     private const string TokenCtrl = "Ctrl";
     private const string TokenAlt = "Alt";
     private const string TokenShift = "Shift";
 
-    private static readonly VirtualKey PlusKey = Util.GetKeyThatProduces('+');
-    private static readonly VirtualKey MinusKey = Util.GetKeyThatProduces('-');
+    // The keys that type + and - are layout-dependent and Windows.System.VirtualKey does not name
+    // the OEM range, so (VirtualKey)187 would format as "187". Naming them keeps the persisted file
+    // readable and keeps a binding attached to the + key rather than to one layout's scan code.
+    private const string TokenPlus = "OemPlus";
+    private const string TokenMinus = "OemMinus";
 
-    /// <summary>Builds the invariant token for a key plus the modifiers currently held.
-    /// Modifier order is fixed so two presses of the same chord always produce the same token.</summary>
-    public static string Token(VirtualKey key)
-    {
-        var parts = Modifiers();
-        parts.Add(KeyToken(key));
-        return string.Join("+", parts);
-    }
+    private static readonly (VirtualKey Key, bool NeedsShift) PlusKey = Util.GetKeyThatProduces('+');
+    private static readonly (VirtualKey Key, bool NeedsShift) MinusKey = Util.GetKeyThatProduces('-');
 
-    /// <summary>Renders a token for display, in the user's language.</summary>
-    public static string Display(string? token)
+    /// <summary>The chord for a key plus whatever modifiers are held at this instant. Correct at
+    /// key-down; a caller committing on key-up must latch the chord rather than rebuild it, or a
+    /// modifier released a moment early is lost.</summary>
+    public static KeyChord FromCurrentModifiers(VirtualKey key) =>
+        new(key, Util.IsControlPressed(), Util.IsAltPressed(), Util.IsShiftPressed());
+
+    /// <summary>Culture-invariant identity, as persisted. Modifier order is fixed so the same chord
+    /// always produces the same text.</summary>
+    public string Format() => string.Join("+", Segments().Append(KeyToken(Key)));
+
+    /// <summary>
+    /// Reads a persisted chord. False for anything malformed, so a hand-edited usersettings.json
+    /// costs the user that one binding instead of throwing at startup.
+    /// </summary>
+    public static bool TryParse(string? token, out KeyChord chord)
     {
-        // No enum name contains '+', so splitting on it is safe.
-        if (string.IsNullOrEmpty(token)) return "...";
+        chord = default;
+        if (string.IsNullOrWhiteSpace(token)) return false;
+
         var parts = token.Split('+');
-        var shown = new List<string>(parts.Length);
-        for (var i = 0; i < parts.Length - 1; i++) shown.Add(ModifierDisplay(parts[i]));
-        shown.Add(KeyDisplay(parts[^1]));
-        return string.Join(" + ", shown);
+        bool ctrl = false, alt = false, shift = false;
+
+        for (var i = 0; i < parts.Length - 1; i++)
+            switch (parts[i])
+            {
+                case TokenCtrl: ctrl = true; break;
+                case TokenAlt: alt = true; break;
+                case TokenShift: shift = true; break;
+                default: return false;
+            }
+
+        var key = parts[^1] switch
+        {
+            TokenPlus => PlusKey.Key,
+            TokenMinus => MinusKey.Key,
+            _ => Enum.TryParse<VirtualKey>(parts[^1], out var vk) ? vk : VirtualKey.None
+        };
+
+        if (key == VirtualKey.None) return false;
+        chord = new KeyChord(key, ctrl, alt, shift);
+        return true;
     }
 
-    /// <summary>The live modifier-only preview shown before a key lands.</summary>
+    /// <summary>Localized display form. Never compared, never persisted.</summary>
+    public string Display() => Render(Segments(), KeyDisplay(Key));
+
+    /// <summary>The modifier-only preview shown while the user is still holding modifiers and no
+    /// key has landed yet.</summary>
     public static string ModifierPreview()
     {
-        var parts = Modifiers().Select(ModifierDisplay).ToList();
-        parts.Add("...");
-        return string.Join(" + ", parts);
+        var held = new List<string>(3);
+        if (Util.IsControlPressed()) held.Add(TokenCtrl);
+        if (Util.IsAltPressed()) held.Add(TokenAlt);
+        if (Util.IsShiftPressed()) held.Add(TokenShift);
+        return Render(held, Pending);
     }
 
     /// <summary>
-    /// The same token with Shift added. Modifier order puts Shift immediately before the key, so
-    /// inserting it there is all that is needed.
+    /// Ctrl plus the key that types <paramref name="c"/>. Which key that is, and whether Shift is
+    /// needed to reach it, are both layout-dependent, so a hand-written "Ctrl+OemPlus" is wrong on
+    /// any layout where '+' is shifted.
+    ///
+    /// Where Shift is needed, both chords come back: Ctrl+Shift+= is what "Ctrl and +" actually
+    /// sends, and plain Ctrl+= is what users press just as often. Both worked before Shift joined
+    /// the chord and both still must. They are returned as real bindings rather than aliased in
+    /// later, so the settings page can see them - an alias applied after resolution is invisible to
+    /// conflict detection, which would let a user take Ctrl+Shift+= for another command and be told
+    /// nothing.
     /// </summary>
-    public static string WithShift(string token)
+    public static KeyChord[] CtrlChordsFor(char c)
     {
-        var i = token.LastIndexOf('+');
-        return i < 0 ? TokenShift + "+" + token : string.Concat(token.AsSpan(0, i), "+Shift+", token.AsSpan(i + 1));
+        var (key, needsShift) = c == '+' ? PlusKey : MinusKey;
+        var plain = new KeyChord(key, Ctrl: true, Alt: false, Shift: false);
+        return needsShift ? [plain with { Shift = true }, plain] : [plain];
     }
 
-    /// <summary>
-    /// True when every segment of a token is something <see cref="Token"/> could itself have
-    /// produced. A hand-written default that fails this never fires and reports nothing, so the
-    /// catalog's startup self-check leans on it.
-    /// </summary>
-    public static bool IsWellFormed(string token)
-    {
-        var parts = token.Split('+');
-        for (var i = 0; i < parts.Length - 1; i++)
-            if (parts[i] is not (TokenCtrl or TokenAlt or TokenShift)) return false;
+    /// <summary>Stands in for the key that has not been pressed yet.</summary>
+    private const string Pending = "...";
 
-        return parts[^1] is TokenPlus or TokenMinus || Enum.TryParse<VirtualKey>(parts[^1], out _);
-    }
-
-    private static List<string> Modifiers()
+    private List<string> Segments()
     {
-        var parts = new List<string>(4);
-        if (Util.IsControlPressed()) parts.Add(TokenCtrl);
-        if (Util.IsAltPressed()) parts.Add(TokenAlt);
-        if (Util.IsShiftPressed()) parts.Add(TokenShift);
+        var parts = new List<string>(3);
+        if (Ctrl) parts.Add(TokenCtrl);
+        if (Alt) parts.Add(TokenAlt);
+        if (Shift) parts.Add(TokenShift);
         return parts;
     }
 
+    private static string Render(IEnumerable<string> modifierTokens, string keyText) =>
+        string.Join(" + ", modifierTokens.Select(ModifierDisplay).Append(keyText));
+
     private static string KeyToken(VirtualKey k) =>
-        k == PlusKey ? TokenPlus :
-        k == MinusKey ? TokenMinus :
+        k == PlusKey.Key ? TokenPlus :
+        k == MinusKey.Key ? TokenMinus :
         k.ToString();
 
     // Windows names the modifier keys differently per language (Strg, Maj, ...), so these are
@@ -112,18 +150,13 @@ public static class KeyChordText
         _ => modifierToken
     };
 
-    private static string KeyDisplay(string keyToken) => keyToken switch
-    {
-        // + and - are the same glyph in every language.
-        TokenPlus => "+",
-        TokenMinus => "-",
-        _ => Enum.TryParse<VirtualKey>(keyToken, out var vk) ? KeyName(vk) : keyToken
-    };
-
     /// <summary>Only the keys whose printed name is a word. Letters, digits and the function keys
     /// are the same everywhere and fall through to the enum name.</summary>
-    private static string KeyName(VirtualKey k) => k switch
+    private static string KeyDisplay(VirtualKey k) => k switch
     {
+        // + and - are the same glyph in every language.
+        _ when k == PlusKey.Key => "+",
+        _ when k == MinusKey.Key => "-",
         VirtualKey.Left => L.Get("ShortcutKey_LeftArrow"),
         VirtualKey.Right => L.Get("ShortcutKey_RightArrow"),
         VirtualKey.Up => L.Get("ShortcutKey_UpArrow"),
@@ -172,16 +205,14 @@ public enum CommandId
 }
 
 /// <summary>
-/// One assigned chord. <see cref="Token"/> is the invariant identity ("Ctrl+Add");
-/// <see cref="Text"/> is the localized display form ("Ctrl + Num +") and is never compared.
-/// The back-reference lets a chip's remove button find its command without the template
-/// having to pass two values.
+/// One assigned chord, as the settings page shows it. <see cref="Text"/> is fixed at construction
+/// because rendering costs a resource lookup per segment and the search box re-reads every chip on
+/// every keystroke.
 /// </summary>
-public sealed class ShortcutKey(string token, ShortcutRow owner)
+public sealed class ShortcutKey(KeyChord chord)
 {
-    public string Token { get; } = token;
-    public ShortcutRow Owner { get; } = owner;
-    public string Text => KeyChordText.Display(Token);
+    public KeyChord Chord { get; } = chord;
+    public string Text { get; } = chord.Display();
 }
 
 /// <summary>One command row: identity, display name, icon, and its current chords.</summary>
@@ -195,72 +226,70 @@ public sealed class ShortcutRow : INotifyPropertyChanged
 
     public string Description { get; }
 
-    /// <summary>Segoe Fluent glyph for the row icon, built from a code point so the source file
-    /// stays ASCII - a literal private-use character does not survive every editor round-trip.</summary>
+    /// <summary>Segoe Fluent glyph for the row icon, written as an escape so the source file stays
+    /// ASCII - a literal private-use character does not survive every editor round-trip.</summary>
     public string Glyph { get; }
 
     /// <summary>Reserved commands cannot be rebound at all, so they have no edit button and ignore
     /// anything saved against them.</summary>
     public bool IsReserved { get; }
 
-    public string[] DefaultTokens { get; }
+    public KeyChord[] DefaultChords { get; }
 
     public ObservableCollection<ShortcutKey> Keys { get; } = [];
 
-    public ShortcutRow(CommandId id, int glyphCode, bool isReserved, bool hasDescription,
-                       string[] defaultTokens)
+    /// <summary>Takes the catalog's flags rather than bools unpacked from them, so the traits have
+    /// one spelling. Internal because only the catalog builds rows.</summary>
+    internal ShortcutRow(CommandId id, string glyph, CommandFlags flags, IEnumerable<KeyChord> chords,
+                         KeyChord[] defaultChords)
     {
         Id = id;
-        Glyph = char.ConvertFromUtf32(glyphCode);
-        IsReserved = isReserved;
-        DefaultTokens = defaultTokens;
+        Glyph = glyph;
+        IsReserved = flags.HasFlag(CommandFlags.Reserved);
+        DefaultChords = defaultChords;
         Name = L.Get($"ShortcutName_{id}");
-        Description = hasDescription ? L.Get($"ShortcutDesc_{id}") : string.Empty;
-        ResetToDefault();
-        Keys.CollectionChanged += (_, _) => RaiseDerived();
+        Description = flags.HasFlag(CommandFlags.Hinted) ? L.Get($"ShortcutDesc_{id}") : string.Empty;
+        SetChords(chords);
+        Keys.CollectionChanged += (_, _) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NoKeysVisibility)));
     }
 
-    public bool HasToken(string token) => Keys.Any(k => k.Token == token);
+    public bool HasChord(KeyChord chord) => Keys.Any(k => k.Chord == chord);
 
     /// <summary>True once the user's chords differ from the shipped ones, which is the only case
     /// worth writing to usersettings.json.</summary>
-    public bool IsModified => !Keys.Select(k => k.Token).SequenceEqual(DefaultTokens);
+    public bool IsModified => !Keys.Select(k => k.Chord).SequenceEqual(DefaultChords);
 
     // Visibility rather than bool so the DataTemplate needs no converter.
     public Visibility EditableVisibility => IsReserved ? Visibility.Collapsed : Visibility.Visible;
     public Visibility NoKeysVisibility => Keys.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
-    public void Add(string token)
+    public void Add(KeyChord chord)
     {
-        if (!HasToken(token)) Keys.Add(new ShortcutKey(token, this));
+        if (!HasChord(chord)) Keys.Add(new ShortcutKey(chord));
     }
 
-    public void Remove(ShortcutKey key) => Keys.Remove(key);
-
-    public void RemoveToken(string token)
+    public void RemoveChord(KeyChord chord)
     {
-        if (Keys.FirstOrDefault(k => k.Token == token) is { } stale) Keys.Remove(stale);
+        if (Keys.FirstOrDefault(k => k.Chord == chord) is { } stale) Keys.Remove(stale);
     }
 
-    public void ResetToDefault() => SetTokens(DefaultTokens);
+    public void ResetToDefault() => SetChords(DefaultChords);
 
-    public void SetTokens(IEnumerable<string> tokens)
+    public void SetChords(IEnumerable<KeyChord> chords)
     {
         Keys.Clear();
-        foreach (var t in tokens) Keys.Add(new ShortcutKey(t, this));
+        foreach (var c in chords) Keys.Add(new ShortcutKey(c));
     }
 
     /// <summary>Matches the search box against what the user can actually see - the display name,
-    /// the hint, and the rendered chord text. Never the token.</summary>
+    /// the hint, and the rendered chord text. Never the persisted form.</summary>
     public bool Matches(string query) =>
-        Name.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
-        Description.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
-        Keys.Any(k => k.Text.Contains(query, StringComparison.CurrentCultureIgnoreCase));
+        Util.ContainsIgnoreCase(Name, query) ||
+        Util.ContainsIgnoreCase(Description, query) ||
+        Keys.Any(k => Util.ContainsIgnoreCase(k.Text, query));
 
     public event PropertyChangedEventHandler? PropertyChanged;
-
-    private void RaiseDerived() =>
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NoKeysVisibility)));
 }
 
 /// <summary>A category heading plus the rows under it.</summary>
@@ -271,156 +300,168 @@ public sealed class ShortcutGroup(string name, ObservableCollection<ShortcutRow>
 }
 
 /// <summary>
-/// The single source of truth for keyboard commands: which keys they ship with, which of them can
-/// be rebound, and the defaults-plus-overrides resolution that <see cref="PhotoDisplayWindow"/>
-/// routes on. Defaults live here in code and only the user's changes reach usersettings.json, so a
-/// command added in a later release ships working keys to every existing user with no migration.
+/// Everything the catalog needs to say about a command beyond its keys and its icon. One flags enum
+/// rather than a bool per trait: the traits compose (Copy photo is both Hinted and Suppress) and a
+/// new one costs an enum member instead of a fourth mechanism.
+/// </summary>
+[Flags]
+internal enum CommandFlags
+{
+    None = 0,
+
+    /// <summary>Has a <c>ShortcutDesc_</c> resource, because the name alone does not explain it.</summary>
+    Hinted = 1 << 0,
+
+    /// <summary>Keys are fixed: no edit button, and anything saved against it is ignored. Escape is
+    /// the universal way out of the app and of the capture dialog; Delete keeps the key every file
+    /// manager uses.</summary>
+    Reserved = 1 << 1,
+
+    /// <summary>Mark the key event handled so WinUI's own handling does not also run — Ctrl+C would
+    /// trigger a browser-style copy, Enter would activate the focused button, Delete moves focus.</summary>
+    Suppress = 1 << 2,
+
+    /// <summary>Opens a navigation burst, which parks the HQ cache tier until a <c>Brake()</c>
+    /// unwinds it, so key-up on whatever chord is bound to this has to brake.</summary>
+    Burst = 1 << 3,
+
+    /// <summary>Safe to fire again while the key is held. Windows repeats KeyDown for a held key,
+    /// which is the point for navigation, zoom and pan, and wrong for anything that toggles.</summary>
+    Repeat = 1 << 4
+}
+
+/// <summary>
+/// The single source of truth for keyboard commands: which keys they ship with, how each one
+/// behaves, and the defaults-plus-overrides resolution that <see cref="PhotoDisplayWindow"/> routes
+/// on. Defaults live here in code and only the user's changes reach usersettings.json, so a command
+/// added in a later release ships working keys to every existing user with no migration.
 /// </summary>
 internal static class ShortcutCatalog
 {
     /// <summary>Pure data: no display strings and no UI objects, so the photo window can resolve
     /// its routing table at construction without touching the resource loader.</summary>
-    private sealed record Def(CommandId Id, int Glyph, bool Reserved, bool HasDescription, string[] Tokens);
+    private sealed record Def(CommandId Id, string Glyph, CommandFlags Flags, KeyChord[] Chords);
 
+    // Defaults are typed rather than parsed from string literals, so a mistyped key name is a
+    // compile error instead of a binding that silently never fires.
+    // Repeat marks what is safe to fire again while the key is held: navigation, zoom and pan.
+    // Everything else toggles or opens something, where a held key used to flicker it.
     private static readonly (string GroupKey, Def[] Rows)[] Table =
     [
         ("Navigation",
         [
-            Row(CommandId.NextPhoto, 0xE970, "Right"),
-            Row(CommandId.PrevPhoto, 0xE96F, "Left"),
-            Row(CommandId.FirstPhoto, 0xE892, "Home"),
-            Row(CommandId.LastPhoto, 0xE893, "End"),
-            Hinted(CommandId.NextPage, 0xF586, "Alt+Right"),
-            Hinted(CommandId.PrevPage, 0xF587, "Alt+Left")
+            Row(CommandId.NextPhoto, "\uE970", Burst | Repeat, K(VirtualKey.Right)),
+            Row(CommandId.PrevPhoto, "\uE96F", Burst | Repeat, K(VirtualKey.Left)),
+            Row(CommandId.FirstPhoto, "\uE892", Repeat, K(VirtualKey.Home)),
+            Row(CommandId.LastPhoto, "\uE893", Repeat, K(VirtualKey.End)),
+            Row(CommandId.NextPage, "\uF586", Hinted | Repeat, K(VirtualKey.Right, alt: true)),
+            Row(CommandId.PrevPage, "\uF587", Hinted | Repeat, K(VirtualKey.Left, alt: true))
         ]),
 
         ("ZoomPan",
         [
-            Row(CommandId.ZoomIn, 0xE8A3, "Up", "Ctrl+OemPlus", "Ctrl+Add"),
-            Row(CommandId.ZoomOut, 0xE71F, "Down", "Ctrl+OemMinus", "Ctrl+Subtract"),
-            Hinted(CommandId.StepZoomIn, 0xE8A3, "PageUp"),
-            Hinted(CommandId.StepZoomOut, 0xE71F, "PageDown"),
-            Row(CommandId.ActualSize, 0xE799, "A"),
-            Row(CommandId.FitToWindow, 0xE9A6, "F"),
-            Row(CommandId.PanUp, 0xE7C2, "Ctrl+Up"),
-            Row(CommandId.PanDown, 0xE7C2, "Ctrl+Down"),
-            Row(CommandId.PanLeft, 0xE7C2, "Ctrl+Left"),
-            Row(CommandId.PanRight, 0xE7C2, "Ctrl+Right")
+            Row(CommandId.ZoomIn, "\uE8A3", Repeat,
+                [K(VirtualKey.Up), .. KeyChord.CtrlChordsFor('+'), K(VirtualKey.Add, ctrl: true)]),
+            Row(CommandId.ZoomOut, "\uE71F", Repeat,
+                [K(VirtualKey.Down), .. KeyChord.CtrlChordsFor('-'), K(VirtualKey.Subtract, ctrl: true)]),
+            Row(CommandId.StepZoomIn, "\uE8A3", Hinted | Repeat, K(VirtualKey.PageUp)),
+            Row(CommandId.StepZoomOut, "\uE71F", Hinted | Repeat, K(VirtualKey.PageDown)),
+            Row(CommandId.ActualSize, "\uE799", None, K(VirtualKey.A)),
+            Row(CommandId.FitToWindow, "\uE9A6", None, K(VirtualKey.F)),
+            Row(CommandId.PanUp, "\uE7C2", Repeat, K(VirtualKey.Up, ctrl: true)),
+            Row(CommandId.PanDown, "\uE7C2", Repeat, K(VirtualKey.Down, ctrl: true)),
+            Row(CommandId.PanLeft, "\uE7C2", Repeat, K(VirtualKey.Left, ctrl: true)),
+            Row(CommandId.PanRight, "\uE7C2", Repeat, K(VirtualKey.Right, ctrl: true))
         ]),
 
         ("Rotate",
         [
-            Row(CommandId.RotateLeft, 0xE89E, "L"),
-            Row(CommandId.RotateRight, 0xE89E, "R")
+            Row(CommandId.RotateLeft, "\uE89E", None, K(VirtualKey.L)),
+            Row(CommandId.RotateRight, "\uE89E", None, K(VirtualKey.R))
         ]),
 
         ("View",
         [
-            Row(CommandId.FullScreen, 0xE740, "F11"),
-            Row(CommandId.MaximizeRestore, 0xE922, "Enter"),
-            Hinted(CommandId.PhotoInfoPanel, 0xE946, "I"),
-            Reserved(CommandId.CloseApp, 0xE8BB, "Escape")
+            Row(CommandId.FullScreen, "\uE740", None, K(VirtualKey.F11)),
+            Row(CommandId.MaximizeRestore, "\uE922", Suppress, K(VirtualKey.Enter)),
+            Row(CommandId.PhotoInfoPanel, "\uE946", Hinted, K(VirtualKey.I)),
+            Row(CommandId.CloseApp, "\uE8BB", Reserved | Hinted, K(VirtualKey.Escape))
         ]),
 
         ("File",
         [
-            Hinted(CommandId.CopyPhoto, 0xE8C8, "Ctrl+C"),
-            Reserved(CommandId.DeletePhoto, 0xE74D, "Delete"),
-            Row(CommandId.RenamePhoto, 0xE8AC, "F2"),
-            Row(CommandId.PrintPhoto, 0xE749, "P"),
-            Hinted(CommandId.SharePhoto, 0xE72D, "S"),
-            Row(CommandId.ShowInExplorer, 0xE8DA, "W"),
-            Hinted(CommandId.FileProperties, 0xF167, "Alt+Enter"),
-            Hinted(CommandId.FileDetails, 0xF167, "D"),
-            Row(CommandId.MoreActionsMenu, 0xE712, "M")
+            Row(CommandId.CopyPhoto, "\uE8C8", Hinted | Suppress, K(VirtualKey.C, ctrl: true)),
+            Row(CommandId.DeletePhoto, "\uE74D", Reserved | Hinted | Suppress, K(VirtualKey.Delete)),
+            Row(CommandId.RenamePhoto, "\uE8AC", None, K(VirtualKey.F2)),
+            Row(CommandId.PrintPhoto, "\uE749", None, K(VirtualKey.P)),
+            Row(CommandId.SharePhoto, "\uE72D", Hinted, K(VirtualKey.S)),
+            Row(CommandId.ShowInExplorer, "\uE8DA", None, K(VirtualKey.W)),
+            Row(CommandId.FileProperties, "\uF167", Hinted | Suppress, K(VirtualKey.Enter, alt: true)),
+            Row(CommandId.FileDetails, "\uF167", Hinted, K(VirtualKey.D)),
+            Row(CommandId.MoreActionsMenu, "\uE712", None, K(VirtualKey.M))
         ]),
 
         ("OpenWith",
         [
-            Row(CommandId.OpenWithApp1, 0xE8A7, "Ctrl+Number1", "Ctrl+NumberPad1"),
-            Row(CommandId.OpenWithApp2, 0xE8A7, "Ctrl+Number2", "Ctrl+NumberPad2"),
-            Row(CommandId.OpenWithApp3, 0xE8A7, "Ctrl+Number3", "Ctrl+NumberPad3"),
-            Row(CommandId.OpenWithApp4, 0xE8A7, "Ctrl+Number4", "Ctrl+NumberPad4"),
-            Hinted(CommandId.OpenWithPanel, 0xE71D, "E")
+            Row(CommandId.OpenWithApp1, "\uE8A7", None,
+                [K(VirtualKey.Number1, ctrl: true), K(VirtualKey.NumberPad1, ctrl: true)]),
+            Row(CommandId.OpenWithApp2, "\uE8A7", None,
+                [K(VirtualKey.Number2, ctrl: true), K(VirtualKey.NumberPad2, ctrl: true)]),
+            Row(CommandId.OpenWithApp3, "\uE8A7", None,
+                [K(VirtualKey.Number3, ctrl: true), K(VirtualKey.NumberPad3, ctrl: true)]),
+            Row(CommandId.OpenWithApp4, "\uE8A7", None,
+                [K(VirtualKey.Number4, ctrl: true), K(VirtualKey.NumberPad4, ctrl: true)]),
+            Row(CommandId.OpenWithPanel, "\uE71D", Hinted, K(VirtualKey.E))
         ])
     ];
 
-    /// <summary>Chords whose key must not also reach WinUI's own handling: Ctrl+C would trigger a
-    /// browser-style copy, Enter would activate the focused button, and Delete moves focus.</summary>
-    private static readonly HashSet<CommandId> SuppressDefault =
-        [CommandId.CopyPhoto, CommandId.DeletePhoto, CommandId.MaximizeRestore, CommandId.FileProperties];
+    private static readonly Dictionary<CommandId, Def> ById =
+        Table.SelectMany(g => g.Rows).ToDictionary(r => r.Id);
 
-    /// <summary>Commands that open a navigation burst, which parks the HQ cache tier until a
-    /// <c>Brake()</c> unwinds it. Key-up on whatever chord is bound to one has to brake, or every
-    /// photo stays at preview quality for the rest of the session.</summary>
-    private static readonly HashSet<CommandId> Burst = [CommandId.NextPhoto, CommandId.PrevPhoto];
+    public static bool Has(CommandId id, CommandFlags flag) => (ById[id].Flags & flag) != 0;
 
-    private static readonly Dictionary<CommandId, string[]> DefaultsById =
-        Table.SelectMany(g => g.Rows).ToDictionary(r => r.Id, r => r.Tokens);
-
-    private static readonly HashSet<CommandId> ReservedIds =
-        Table.SelectMany(g => g.Rows).Where(r => r.Reserved).Select(r => r.Id).ToHashSet();
-
-    public static bool Suppresses(CommandId id) => SuppressDefault.Contains(id);
-
-    public static bool IsBurst(CommandId id) => Burst.Contains(id);
-
-    /// <summary>Every command, in display order, at its default chords. Builds the display strings,
-    /// so call it only from the settings window - never on the photo window's startup path.</summary>
+    /// <summary>Every command, in display order, already carrying whatever the user saved. Builds
+    /// the display strings, so call it only from the settings window - never on the photo window's
+    /// startup path.</summary>
     public static List<ShortcutGroup> BuildAll() =>
     [
         .. Table.Select(g => new ShortcutGroup(
             L.Get($"ShortcutGroup_{g.GroupKey}"),
             new ObservableCollection<ShortcutRow>(
-                g.Rows.Select(r => new ShortcutRow(r.Id, r.Glyph, r.Reserved, r.HasDescription, r.Tokens)))))
+                g.Rows.Select(r => new ShortcutRow(
+                    r.Id, r.Glyph, r.Flags,
+                    TryGetSaved(r.Id, out var saved) ? saved : r.Chords,
+                    r.Chords)))))
     ];
 
-    /// <summary>The command that already owns <paramref name="token"/>, or null if it is free.</summary>
-    public static ShortcutRow? FindOwner(List<ShortcutGroup> groups, string token) =>
-        groups.SelectMany(g => g.Rows).FirstOrDefault(r => r.HasToken(token));
+    /// <summary>The command that already owns <paramref name="chord"/>, or null if it is free.</summary>
+    public static ShortcutRow? FindOwner(IEnumerable<ShortcutRow> rows, KeyChord chord) =>
+        rows.FirstOrDefault(r => r.HasChord(chord));
 
-    /// <summary>Overlays what the user saved onto freshly built default rows.</summary>
-    public static void ApplySavedBindings(List<ShortcutGroup> groups)
-    {
-        foreach (var row in groups.SelectMany(g => g.Rows))
-            if (TryGetSaved(row.Id, out var tokens))
-                row.SetTokens(tokens);
-    }
-
-    /// <summary>Writes only what differs from the defaults, then persists.</summary>
-    public static async Task SaveBindingsAsync(List<ShortcutGroup> groups)
+    /// <summary>Writes only what differs from the defaults, then persists. Chords are stored in
+    /// their invariant text form: human-readable, hand-editable, and stable if VirtualKey names
+    /// ever shift.</summary>
+    public static async Task SaveBindingsAsync(IEnumerable<ShortcutRow> rows)
     {
         var overrides = new Dictionary<string, List<string>>(StringComparer.Ordinal);
-        foreach (var row in groups.SelectMany(g => g.Rows).Where(r => r.IsModified))
-            overrides[row.Id.ToString()] = row.Keys.Select(k => k.Token).ToList();
+        foreach (var row in rows.Where(r => r.IsModified))
+            overrides[row.Id.ToString()] = row.Keys.Select(k => k.Chord.Format()).ToList();
 
         AppConfig.Settings.KeyBindings = overrides;
         await AppConfig.SaveAsync();
     }
 
-    /// <summary>
-    /// Defaults overlaid with the user's overrides, inverted into the lookup the key handler needs.
-    /// A token that no longer parses to anything simply never matches, so a hand-mangled
-    /// usersettings.json costs the user that one binding rather than throwing at startup.
-    /// </summary>
-    public static Dictionary<string, CommandId> Resolve()
+    /// <summary>Defaults overlaid with the user's overrides, inverted into the lookup the key
+    /// handler needs.</summary>
+    public static Dictionary<KeyChord, CommandId> Resolve()
     {
-        var routes = new Dictionary<string, CommandId>(StringComparer.Ordinal);
+        var routes = new Dictionary<KeyChord, CommandId>();
 
-        foreach (var (id, defaults) in DefaultsById)
+        foreach (var (id, def) in ById)
         {
-            var tokens = TryGetSaved(id, out var saved) ? saved : (IReadOnlyList<string>)defaults;
-            foreach (var token in tokens)
-                if (!string.IsNullOrWhiteSpace(token)) routes[token] = id;
+            var chords = TryGetSaved(id, out var saved) ? saved : (IReadOnlyList<KeyChord>)def.Chords;
+            foreach (var chord in chords) routes[chord] = id;
         }
-
-        // The keys that type + and - need Shift on US and most EU layouts, and the layout lookup
-        // discards that bit. Registering the Shift variant keeps Ctrl++ zooming exactly as it did
-        // before Shift became part of the chord.
-        // ponytail: only these two keys need it - no other default involves a shifted character.
-        foreach (var (token, id) in routes.ToArray())
-            if (token.Contains("Oem", StringComparison.Ordinal) && !token.Contains("Shift", StringComparison.Ordinal))
-                routes.TryAdd(KeyChordText.WithShift(token), id);
 
         return routes;
     }
@@ -428,49 +469,60 @@ internal static class ShortcutCatalog
 #if DEBUG
     /// <summary>
     /// Catches the table mistakes that have no other symptom until a user hits them: a command with
-    /// no defaults, a chord claimed by two commands, or an id nobody wrote a handler for. Runs once
-    /// at startup, costs nothing in release, and needs no test framework.
+    /// no defaults, a chord claimed by two commands, an id nobody wrote a handler for, or a chord
+    /// that does not survive the round trip through the persisted file. Runs once at startup, costs
+    /// nothing in release, and needs no test framework.
     /// </summary>
     public static void AssertConsistent(ICollection<CommandId> handled)
     {
-        var owner = new Dictionary<string, CommandId>(StringComparer.Ordinal);
+        var owner = new Dictionary<KeyChord, CommandId>();
 
         foreach (var id in Enum.GetValues<CommandId>())
         {
-            Debug.Assert(DefaultsById.ContainsKey(id), $"{id} is missing from the catalog.");
+            Debug.Assert(ById.ContainsKey(id), $"{id} is missing from the catalog.");
             Debug.Assert(handled.Contains(id), $"{id} has no handler in PhotoDisplayWindow.");
         }
 
-        foreach (var (id, tokens) in DefaultsById)
-            foreach (var token in tokens)
+        foreach (var (id, def) in ById)
+        {
+            Debug.Assert(!def.Flags.HasFlag(Reserved) || def.Flags.HasFlag(Hinted),
+                $"{id} is reserved but has no description explaining the missing edit button.");
+
+            foreach (var chord in def.Chords)
             {
-                Debug.Assert(KeyChordText.IsWellFormed(token),
-                    $"{id}'s default \"{token}\" is not a chord this app can ever receive.");
-                Debug.Assert(owner.TryAdd(token, id),
-                    $"{token} is a default for both {id} and {owner.GetValueOrDefault(token)}.");
+                Debug.Assert(KeyChord.TryParse(chord.Format(), out var back) && back == chord,
+                    $"{id}'s chord \"{chord.Format()}\" does not survive a save and reload.");
+                Debug.Assert(owner.TryAdd(chord, id),
+                    $"{chord.Format()} is a default for both {id} and {owner.GetValueOrDefault(chord)}.");
             }
+        }
     }
 #endif
 
-    /// <summary>Reserved commands ignore saved bindings outright - Escape must always close the app,
-    /// including when it is the only way out of a capture dialog, and Delete keeps the key every
-    /// file manager uses.</summary>
-    private static bool TryGetSaved(CommandId id, out List<string> tokens)
+    /// <summary>
+    /// The saved chords for a command, or false to use its defaults. This is the one place both
+    /// readers funnel through, so <see cref="CommandFlags.Reserved"/> is enforced here rather than
+    /// on each path — it only ever has to defend against a hand-edited file, since a reserved row
+    /// has no edit button to write one in the first place. An entry that no longer parses is
+    /// dropped rather than throwing.
+    /// </summary>
+    private static bool TryGetSaved(CommandId id, out List<KeyChord> chords)
     {
-        tokens = [];
-        if (ReservedIds.Contains(id)) return false;
-        return AppConfig.Settings.KeyBindings.TryGetValue(id.ToString(), out tokens!);
+        chords = [];
+        if (Has(id, Reserved)) return false;
+        if (!AppConfig.Settings.KeyBindings.TryGetValue(id.ToString(), out var tokens) || tokens is null)
+            return false;
+
+        foreach (var token in tokens)
+            if (KeyChord.TryParse(token, out var chord)) chords.Add(chord);
+
+        return true;
     }
 
-    private static Def Row(CommandId id, int glyph, params string[] tokens) =>
-        new(id, glyph, false, false, tokens);
+    /// <summary>Shorthand so the table above stays a table.</summary>
+    private static KeyChord K(VirtualKey key, bool ctrl = false, bool alt = false, bool shift = false) =>
+        new(key, ctrl, alt, shift);
 
-    /// <summary>A command whose name alone does not explain it, so it also has a description.</summary>
-    private static Def Hinted(CommandId id, int glyph, params string[] tokens) =>
-        new(id, glyph, false, true, tokens);
-
-    /// <summary>A command whose keys are fixed and cannot be edited. Always described, since the
-    /// missing edit button needs explaining.</summary>
-    private static Def Reserved(CommandId id, int glyph, params string[] tokens) =>
-        new(id, glyph, true, true, tokens);
+    private static Def Row(CommandId id, string glyph, CommandFlags flags, params KeyChord[] chords) =>
+        new(id, glyph, flags, chords);
 }

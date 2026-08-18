@@ -9,8 +9,7 @@ using FlyPhotos.Infra.Localization;
 namespace FlyPhotos.UI.Views;
 
 // Mutates the ShortcutRow in place; the caller persists once the dialog closes, because a Reassign
-// can strip a chord off a second command. Its own strings are still English - see the note on the
-// Shortcuts PivotItem in Settings.xaml.
+// can strip a chord off a second command.
 
 /// <summary>
 /// Edits one command's shortcuts: lists what it has, removes any of them, captures a new one, and
@@ -19,18 +18,23 @@ namespace FlyPhotos.UI.Views;
 /// </summary>
 public sealed partial class ShortcutEditDialog : ContentDialog
 {
-    /// <summary>Finds the command that currently owns a chord token, or null when free.</summary>
-    private readonly Func<string, ShortcutRow?> _findOwner;
+    /// <summary>Finds the command that currently owns a chord, or null when free.</summary>
+    private readonly Func<KeyChord, ShortcutRow?> _findOwner;
 
     private bool _capturing;
     private VirtualKey _pendingKey = VirtualKey.None;
 
+    /// <summary>The chord as it stood when the key went down. Commit happens on key-up, by which
+    /// point the user may already have let go of Ctrl — reading modifiers then would silently
+    /// capture a bare letter.</summary>
+    private KeyChord? _pendingChord;
+
     /// <summary>Chord captured but not yet applied because it clashed and is awaiting Reassign.</summary>
-    private string? _conflictToken;
+    private KeyChord? _conflictChord;
 
     public ShortcutRow Row { get; }
 
-    public ShortcutEditDialog(ShortcutRow row, Func<string, ShortcutRow?> findOwner)
+    public ShortcutEditDialog(ShortcutRow row, Func<KeyChord, ShortcutRow?> findOwner)
     {
         Row = row;
         _findOwner = findOwner;
@@ -84,7 +88,7 @@ public sealed partial class ShortcutEditDialog : ContentDialog
 
         if (IsModifier(e.Key))
         {
-            TxtCapture.Text = KeyChordText.ModifierPreview();
+            TxtCapture.Text = KeyChord.ModifierPreview();
             return;
         }
 
@@ -102,29 +106,33 @@ public sealed partial class ShortcutEditDialog : ContentDialog
         }
 
         _pendingKey = e.Key;
-        TxtCapture.Text = KeyChordText.Display(KeyChordText.Token(e.Key));
+        var chord = KeyChord.FromCurrentModifiers(e.Key);
+        _pendingChord = chord;
+        TxtCapture.Text = chord.Display();
     }
 
     private void OnKeyUp(object sender, KeyRoutedEventArgs e)
     {
-        if (!_capturing || _pendingKey == VirtualKey.None || e.Key != _pendingKey) return;
+        if (!_capturing || e.Key != _pendingKey || _pendingChord is not { } chord) return;
         e.Handled = true;
-        Commit(KeyChordText.Token(_pendingKey));
         _pendingKey = VirtualKey.None;
+        _pendingChord = null;
+        Commit(chord);
     }
 
-    private void Commit(string token)
+    private void Commit(KeyChord chord)
     {
-        var display = KeyChordText.Display(token);
+        var display = chord.Display();
 
-        if (Row.HasToken(token))
+        if (Row.HasChord(chord))
         {
             Info(string.Format(L.Get("ShortcutCapture_AlreadyOnThisCommand"), display));
             return;
         }
 
-        var owner = _findOwner(token);
-        if (owner != null && owner != Row)
+        // Not "owner != Row": the HasChord check above already returned for chords this row owns.
+        var owner = _findOwner(chord);
+        if (owner is not null)
         {
             // A reserved command's chord can be found but never taken from it.
             if (owner.IsReserved)
@@ -133,7 +141,7 @@ public sealed partial class ShortcutEditDialog : ContentDialog
                 return;
             }
 
-            _conflictToken = token;
+            _conflictChord = chord;
             StatusBar.Severity = InfoBarSeverity.Warning;
             StatusBar.Message = string.Format(L.Get("ShortcutCapture_Conflict"), display, owner.Name);
             ButtonReassign.Visibility = Visibility.Visible;
@@ -141,21 +149,21 @@ public sealed partial class ShortcutEditDialog : ContentDialog
             return;
         }
 
-        Apply(token);
+        Apply(chord);
     }
 
     private void ButtonReassign_OnClick(object sender, RoutedEventArgs e)
     {
-        if (_conflictToken is not { } token) return;
-        _findOwner(token)?.RemoveToken(token);
-        Apply(token);
+        if (_conflictChord is not { } chord) return;
+        _findOwner(chord)?.RemoveChord(chord);
+        Apply(chord);
         CaptureBox.Focus(FocusState.Programmatic);
     }
 
-    private void Apply(string token)
+    private void Apply(KeyChord chord)
     {
-        Row.Add(token);
-        _conflictToken = null;
+        Row.Add(chord);
+        _conflictChord = null;
         StatusBar.IsOpen = false;
         ButtonReassign.Visibility = Visibility.Collapsed;
         TxtCapture.Text = L.Get("ShortcutCapture_Waiting");
@@ -163,13 +171,13 @@ public sealed partial class ShortcutEditDialog : ContentDialog
 
     private void ChipRemove_OnClick(object sender, RoutedEventArgs e)
     {
-        if ((sender as FrameworkElement)?.Tag is ShortcutKey key) Row.Remove(key);
+        if ((sender as FrameworkElement)?.Tag is ShortcutKey key) Row.Keys.Remove(key);
     }
 
     private void ButtonResetDefault_OnClick(object sender, RoutedEventArgs e)
     {
         Row.ResetToDefault();
-        _conflictToken = null;
+        _conflictChord = null;
         StatusBar.IsOpen = false;
         ButtonReassign.Visibility = Visibility.Collapsed;
     }
@@ -177,7 +185,7 @@ public sealed partial class ShortcutEditDialog : ContentDialog
     private void Reject(string reason)
     {
         _pendingKey = VirtualKey.None;
-        _conflictToken = null;
+        _conflictChord = null;
         ButtonReassign.Visibility = Visibility.Collapsed;
         TxtCapture.Text = L.Get("ShortcutCapture_Waiting");
         StatusBar.Severity = InfoBarSeverity.Error;
@@ -187,7 +195,7 @@ public sealed partial class ShortcutEditDialog : ContentDialog
 
     private void Info(string message)
     {
-        _conflictToken = null;
+        _conflictChord = null;
         ButtonReassign.Visibility = Visibility.Collapsed;
         StatusBar.Severity = InfoBarSeverity.Informational;
         StatusBar.Message = message;

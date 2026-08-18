@@ -23,13 +23,26 @@ internal static class Util
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public static VirtualKey GetKeyThatProduces(char character)
+    /// <summary>
+    /// The key that types <paramref name="character"/> on the active layout, and whether Shift is
+    /// needed to reach it. VkKeyScanEx packs the shift state into the high byte; discarding it means
+    /// a chord built from the result never matches what the user actually presses, because on US and
+    /// most EU layouts '+' is Shift and the OEM_PLUS key rather than a key of its own.
+    /// </summary>
+    public static (VirtualKey Key, bool NeedsShift) GetKeyThatProduces(char character)
     {
         IntPtr layout = Win32Methods.GetKeyboardLayout(0);
         short vkScanResult = Win32Methods.VkKeyScanEx((byte)character, layout);
-        int virtualKeyCode = vkScanResult & 0xff;
-        return (VirtualKey)virtualKeyCode;
+        return ((VirtualKey)(vkScanResult & 0xff), (vkScanResult & 0x100) != 0);
     }
+
+    /// <summary>
+    /// Null-tolerant, case-insensitive substring test for search boxes. Culture-aware rather than
+    /// ordinal because what is being matched is localized text the user can see, and ordinal gets
+    /// the Turkish dotted I and the German sharp S wrong.
+    /// </summary>
+    public static bool ContainsIgnoreCase(string? haystack, string needle) =>
+        haystack != null && haystack.Contains(needle, StringComparison.CurrentCultureIgnoreCase);
 
     public static bool IsControlPressed()
     {

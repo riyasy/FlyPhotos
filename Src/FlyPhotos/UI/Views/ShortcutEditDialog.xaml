@@ -90,7 +90,6 @@
             IsTabStop="True"
             UseSystemFocusVisuals="True">
             <Border
-                x:Name="CaptureBorder"
                 MinHeight="60"
                 Background="{ThemeResource LayerFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"

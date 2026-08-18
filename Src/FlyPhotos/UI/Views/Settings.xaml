@@ -647,12 +647,10 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <AutoSuggestBox
-                            x:Name="ShortcutSearchBox"
                             x:Uid="ShortcutSearchBox"
                             QueryIcon="Find"
                             TextChanged="ShortcutSearchBox_OnTextChanged" />
                         <Button
-                            x:Name="ButtonResetAllShortcuts"
                             x:Uid="ButtonResetAllShortcuts"
                             Grid.Column="1"
                             Click="ButtonResetAllShortcuts_OnClick" />
@@ -688,9 +686,11 @@
                                                             </controls:SettingsCard.HeaderIcon>
 
                                                             <!--
-                                                                Horizontal StackPanel, not a wrap panel. No command has
-                                                                more than 3 chords today and SettingsCard drops this block below
-                                                                the header at narrow widths. Swap for a WrapPanel if a 4th lands.
+                                                                Horizontal StackPanel, not a wrap panel: WinUI has no built-in
+                                                                WrapPanel and the toolkit's lives in a package this project does
+                                                                not reference. Zoom is the widest row at 4 chords, and SettingsCard
+                                                                drops this block below the header at narrow widths, which is what
+                                                                keeps it usable at high scaling. Revisit if a 5th ever lands.
                                                             -->
                                                             <StackPanel
                                                                 VerticalAlignment="Center"
@@ -750,137 +750,47 @@
                             </ItemsControl>
 
                             <!--
-                                Mouse: pickers, not capture. See design doc section 5.
-                                Hand-written cards rather than catalog rows, so the search box filters
-                                them separately - see FilterMouseSection. Keep every card a direct
-                                child of this panel or it drops out of the search.
+                                Mouse: pickers, not capture. See design doc section 5. Rendered from
+                                MouseCatalog rather than hand-written, so these rows filter through the
+                                same data path as the command rows above and a new row needs no change
+                                to the search. Resource keys are unchanged from when they were x:Uid.
                             -->
-                            <StackPanel x:Name="MouseSectionPanel" Orientation="Vertical">
-
                             <TextBlock
                                 x:Name="TextMouseSectionHeader"
                                 x:Uid="TextBlockMouseSection"
-                                Margin="0,28,0,0"
+                                Margin="0,28,0,5"
                                 Style="{StaticResource BodyStrongTextBlockStyle}" />
 
-                            <controls:SettingsCard
-                                x:Name="SettingsCardMouseWheelBehaviour"
-                                x:Uid="SettingsCardMouseWheelBehaviour"
-                                Margin="0,5,0,2"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <ComboBox
-                                    x:Name="ComboMouseWheelBehaviour"
-                                    MinWidth="170"
-                                    SelectedIndex="0">
-                                    <ComboBoxItem x:Uid="ComboMouseWheelItemZoom" />
-                                    <ComboBoxItem x:Uid="ComboMouseWheelItemNav" />
-                                </ComboBox>
-                            </controls:SettingsCard>
+                            <ItemsControl x:Name="MouseRowsList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="views:MouseRow">
+                                        <controls:SettingsCard
+                                            Margin="0,0,0,2"
+                                            Description="{x:Bind Description}"
+                                            Header="{x:Bind Header}"
+                                            Visibility="{x:Bind RowVisibility, Mode=OneWay}">
+                                            <controls:SettingsCard.HeaderIcon>
+                                                <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="&#xE962;" />
+                                            </controls:SettingsCard.HeaderIcon>
 
-                            <!--  Fixed wheel behaviours sit next to the wheel setting they qualify.  -->
-                            <controls:SettingsCard
-                                x:Uid="SettingsCardCtrlMouseWheel"
-                                Margin="0,0,0,2"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <TextBlock x:Uid="TextCtrlMouseWheelAction" Style="{StaticResource FixedMouseActionTextStyle}" />
-                            </controls:SettingsCard>
-
-                            <controls:SettingsCard
-                                x:Uid="SettingsCardAltMouseWheel"
-                                Margin="0,0,0,2"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <TextBlock x:Uid="TextAltMouseWheelAction" Style="{StaticResource FixedMouseActionTextStyle}" />
-                            </controls:SettingsCard>
-
-                            <controls:SettingsCard
-                                x:Uid="SettingsCardTiltWheel"
-                                Margin="0,0,0,2"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <TextBlock x:Uid="TextTiltWheelAction" Style="{StaticResource FixedMouseActionTextStyle}" />
-                            </controls:SettingsCard>
-
-                            <controls:SettingsCard
-                                x:Uid="SettingsCardMiddleClick"
-                                Margin="0,0,0,2"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <ComboBox
-                                    x:Name="ComboMiddleClickBehaviour"
-                                    MinWidth="170"
-                                    SelectedIndex="0">
-                                    <ComboBoxItem x:Uid="ComboMiddleClickItemFullScreen" />
-                                    <ComboBoxItem x:Uid="ComboMiddleClickItemMaximize" />
-                                    <ComboBoxItem x:Uid="ComboMiddleClickItemNothing" />
-                                </ComboBox>
-                            </controls:SettingsCard>
-
-                            <controls:SettingsCard
-                                x:Uid="SettingsCardLeftClickDrag"
-                                Margin="0,0,0,2"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <TextBlock x:Uid="TextLeftClickDragAction" Style="{StaticResource FixedMouseActionTextStyle}" />
-                            </controls:SettingsCard>
-
-                            <controls:SettingsCard
-                                x:Uid="SettingsCardCtrlDragToMoveWindow"
-                                Margin="0,0,0,2"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <TextBlock x:Uid="TextCtrlDragAction" Style="{StaticResource FixedMouseActionTextStyle}" />
-                            </controls:SettingsCard>
-
-                            <controls:SettingsCard
-                                x:Uid="SettingsCardDoubleClick"
-                                Margin="0,0,0,2"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <TextBlock x:Uid="TextDoubleClickAction" Style="{StaticResource FixedMouseActionTextStyle}" />
-                            </controls:SettingsCard>
-
-                            <controls:SettingsCard
-                                x:Uid="SettingsCardRightClick"
-                                Margin="0,0,0,2"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <TextBlock x:Uid="TextRightClickAction" Style="{StaticResource FixedMouseActionTextStyle}" />
-                            </controls:SettingsCard>
-
-                            <controls:SettingsCard
-                                x:Uid="SettingsCardRightClickHold"
-                                Margin="0,0,0,2"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <ComboBox
-                                    x:Name="ComboRightClickHoldBehaviour"
-                                    MinWidth="170"
-                                    SelectedIndex="0">
-                                    <ComboBoxItem x:Uid="ComboRightClickHoldItemZoomIn" />
-                                    <ComboBoxItem x:Uid="ComboRightClickHoldItemNothing" />
-                                </ComboBox>
-                            </controls:SettingsCard>
-
-                            <controls:SettingsCard
-                                x:Name="SettingsCardMouseFwdBackBehaviour"
-                                x:Uid="SettingsCardMouseFwdBackBehaviour"
-                                Margin="0,0,0,2"
-                                HeaderIcon="{ui:FontIcon Glyph=&#xE962;,
-                                                         FontFamily={StaticResource FluentIcons}}">
-                                <ComboBox
-                                    x:Name="ComboMouseFwdBackBehaviour"
-                                    MinWidth="170"
-                                    SelectedIndex="0">
-                                    <ComboBoxItem x:Uid="ComboMouseFwdBackItemNav" />
-                                    <ComboBoxItem x:Uid="ComboMouseFwdBackItemStepZoom" />
-                                </ComboBox>
-                            </controls:SettingsCard>
-
-                            </StackPanel>
-
+                                            <!--  A row is one or the other; the unused half stays collapsed.  -->
+                                            <Grid>
+                                                <TextBlock
+                                                    Style="{StaticResource FixedMouseActionTextStyle}"
+                                                    Text="{x:Bind FixedAction}"
+                                                    Visibility="{x:Bind FixedVisibility}" />
+                                                <ComboBox
+                                                    MinWidth="170"
+                                                    ItemsSource="{x:Bind Options}"
+                                                    SelectedIndex="{x:Bind SelectedIndex}"
+                                                    SelectionChanged="MouseOption_OnSelectionChanged"
+                                                    Tag="{x:Bind}"
+                                                    Visibility="{x:Bind PickerVisibility}" />
+                                            </Grid>
+                                        </controls:SettingsCard>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>

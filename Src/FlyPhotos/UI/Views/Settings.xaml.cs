@@ -1,5 +1,4 @@
 #nullable enable
-using CommunityToolkit.WinUI.Controls;
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
@@ -88,10 +87,6 @@ internal sealed partial class Settings
         // Use index-based mapping for localized combo box items. Settings are still saved as enum names in AppSettings.
         ComboTheme.SelectedIndex = GetIndexForTheme(AppConfig.Settings.Theme);
         ComboBackGround.SelectedIndex = GetIndexForBackdrop(AppConfig.Settings.WindowBackdrop);
-        ComboMouseWheelBehaviour.SelectedIndex = GetIndexForMouseWheelBehaviour(AppConfig.Settings.DefaultMouseWheelBehavior);
-        ComboMouseFwdBackBehaviour.SelectedIndex = GetIndexForMouseFwdBackBehavior(AppConfig.Settings.MouseFwdBackBehavior);
-        ComboMiddleClickBehaviour.SelectedIndex = (int)AppConfig.Settings.MiddleClickBehavior;
-        ComboRightClickHoldBehaviour.SelectedIndex = (int)AppConfig.Settings.RightClickHoldBehavior;
         ButtonShowThumbnail.IsOn = AppConfig.Settings.ShowThumbnails;
         ButtonThumbnailAnimation.IsOn = AppConfig.Settings.EnableThumbnailAnimation;
         ButtonEnableAutoFade.IsOn = AppConfig.Settings.AutoFade;
@@ -124,10 +119,6 @@ internal sealed partial class Settings
         SliderLowResCacheSize.ValueChanged += SliderLowResCacheSize_OnValueChanged;
         ComboTheme.SelectionChanged += ComboTheme_OnSelectionChanged;
         ComboBackGround.SelectionChanged += ComboBackGround_OnSelectionChanged;
-        ComboMouseWheelBehaviour.SelectionChanged += ComboMouseWheel_OnSelectionChanged;
-        ComboMouseFwdBackBehaviour.SelectionChanged += ComboMouseFwdBackBehaviour_OnSelectionChanged;
-        ComboMiddleClickBehaviour.SelectionChanged += ComboMiddleClickBehaviour_OnSelectionChanged;
-        ComboRightClickHoldBehaviour.SelectionChanged += ComboRightClickHoldBehaviour_OnSelectionChanged;
         ButtonShowThumbnail.Toggled += ButtonShowThumbnail_OnToggled;
         ButtonThumbnailAnimation.Toggled += ButtonThumbnailAnimation_OnToggled;
         ButtonOpenExitZoom.Toggled += ButtonOpenExitZoom_OnToggled;
@@ -411,33 +402,6 @@ internal sealed partial class Settings
         SettingChanged?.Invoke(Setting.BackDrop);
         await AppConfig.SaveAsync();
     }
-    private async void ComboMouseWheel_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        var mouseWheelEnum = GetMouseWheelForIndex(ComboMouseWheelBehaviour.SelectedIndex);
-        AppConfig.Settings.DefaultMouseWheelBehavior = mouseWheelEnum;
-        await AppConfig.SaveAsync();
-    }
-
-    private async void ComboMouseFwdBackBehaviour_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        var behavior = GetMouseFwdBackBehaviorForIndex(ComboMouseFwdBackBehaviour.SelectedIndex);
-        AppConfig.Settings.MouseFwdBackBehavior = behavior;
-        await AppConfig.SaveAsync();
-    }
-
-    // These two combos list their items in enum order, so the index is the enum value.
-    // Add an index<->enum map like the ones above if the items ever get reordered.
-    private async void ComboMiddleClickBehaviour_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        AppConfig.Settings.MiddleClickBehavior = (MiddleClickBehavior)ComboMiddleClickBehaviour.SelectedIndex;
-        await AppConfig.SaveAsync();
-    }
-
-    private async void ComboRightClickHoldBehaviour_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        AppConfig.Settings.RightClickHoldBehavior = (RightClickHoldBehavior)ComboRightClickHoldBehaviour.SelectedIndex;
-        await AppConfig.SaveAsync();
-    }
 
     private async void ButtonShowThumbnail_OnToggled(object sender, RoutedEventArgs e)
     {
@@ -543,32 +507,6 @@ internal sealed partial class Settings
             _ => WindowBackdropType.Transparent,
         };
     }
-
-    private static int GetIndexForMouseWheelBehaviour(DefaultMouseWheelBehavior behaviour)
-    {
-        return behaviour switch
-        {
-            DefaultMouseWheelBehavior.Zoom => 0,
-            DefaultMouseWheelBehavior.Navigate => 1,
-            _ => 0
-        };
-    }
-
-    private static DefaultMouseWheelBehavior GetMouseWheelForIndex(int index) => 
-        index == 1 ? DefaultMouseWheelBehavior.Navigate : DefaultMouseWheelBehavior.Zoom;
-
-    private static int GetIndexForMouseFwdBackBehavior(MouseFwdBackBehavior behaviour)
-    {
-        return behaviour switch
-        {
-            MouseFwdBackBehavior.Navigate => 0,
-            MouseFwdBackBehavior.StepZoom => 1,
-            _ => 0
-        };
-    }
-
-    private static MouseFwdBackBehavior GetMouseFwdBackBehaviorForIndex(int index) => 
-        index == 1 ? MouseFwdBackBehavior.StepZoom : MouseFwdBackBehavior.Navigate;
 
     private static int GetIndexForPanZoomBehaviour(PanZoomBehaviourOnNavigation behaviour)
     {
@@ -698,27 +636,41 @@ internal sealed partial class Settings
 
     // ───────────────────────── Shortcuts tab ─────────────────────────
     // Edits are live: each one is persisted to usersettings.json and pushed to the photo window,
-    // which rebuilds its routing table. Command names are still hard-coded English - the .resw
-    // sweep across 20 locales is deliberately the last step.
+    // which rebuilds its routing table. Every string resolves through MRT, but only en-US is filled
+    // in - the other 19 locales fall back to English until the translation pass.
 
+    /// <summary>Built once, already carrying whatever the user saved.</summary>
     private readonly List<ShortcutGroup> _allShortcutGroups = ShortcutCatalog.BuildAll();
+
+    /// <summary>The same row instances, flat. Grouping is a layout concern; conflict lookup and
+    /// persistence only care about the rows. Never bound to XAML, so the interface type is safe.</summary>
+    private IEnumerable<ShortcutRow> AllShortcutRows => _allShortcutGroups.SelectMany(g => g.Rows);
 
     /// <summary>Filtered view bound to the page. Holds the same row instances as
     /// <see cref="_allShortcutGroups"/>, so edits survive a search.</summary>
     private readonly ObservableCollection<ShortcutGroup> _visibleShortcutGroups = [];
 
+    /// <summary>The Mouse section, as data. Built once so the rows keep their selection and their
+    /// visibility across a search, exactly like the command rows.</summary>
+    private readonly List<MouseRow> _mouseRows = MouseCatalog.BuildAll();
+
     private void InitializeShortcutsTab()
     {
-        ShortcutCatalog.ApplySavedBindings(_allShortcutGroups);
         ShortcutGroupsList.ItemsSource = _visibleShortcutGroups;
+        MouseRowsList.ItemsSource = _mouseRows;
         ApplyShortcutFilter(string.Empty);
+    }
+
+    private async void MouseOption_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is ComboBox { Tag: MouseRow row } combo) await row.SelectAsync(combo.SelectedIndex);
     }
 
     /// <summary>Persists whatever the rows now hold and tells the photo window to re-resolve.
     /// Called at the two points a change is complete: the editor closing, and Reset all.</summary>
     private async Task SaveShortcutsAsync()
     {
-        await ShortcutCatalog.SaveBindingsAsync(_allShortcutGroups);
+        await ShortcutCatalog.SaveBindingsAsync(AllShortcutRows);
         SettingChanged?.Invoke(Setting.KeyBindingsChanged);
     }
 
@@ -733,7 +685,7 @@ internal sealed partial class Settings
         foreach (var group in _allShortcutGroups)
         {
             // A category name match keeps the whole group, so "zoom" shows the section intact.
-            var groupMatches = group.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase);
+            var groupMatches = Util.ContainsIgnoreCase(group.Name, query);
             var rows = query.Length == 0 || groupMatches
                 ? group.Rows
                 : new ObservableCollection<ShortcutRow>(group.Rows.Where(r => r.Matches(query)));
@@ -748,44 +700,17 @@ internal sealed partial class Settings
             : Visibility.Collapsed;
     }
 
-    /// <summary>
-    /// Filters the Mouse cards, which are hand-written XAML rather than catalog rows. They match on
-    /// the text MRT already resolved into them — header, description, and either the fixed-action
-    /// label or every option in the picker — so no card needs its resource keys named here.
-    /// Returns whether any card survived, so the caller knows if the page is truly empty.
-    /// </summary>
+    /// <summary>Filters the Mouse rows and reports whether any survived, so the caller knows if the
+    /// page is truly empty. Each row decides for itself what it matches on.</summary>
     private bool FilterMouseSection(string query)
     {
         var anyVisible = false;
-
-        foreach (var card in MouseSectionPanel.Children.OfType<SettingsCard>())
-        {
-            var visible = query.Length == 0 || MouseCardMatches(card, query);
-            card.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
-            anyVisible |= visible;
-        }
+        foreach (var row in _mouseRows) anyVisible |= row.ApplyFilter(query);
 
         // The heading would otherwise sit alone above nothing.
         TextMouseSectionHeader.Visibility = anyVisible ? Visibility.Visible : Visibility.Collapsed;
         return anyVisible;
     }
-
-    private static bool MouseCardMatches(SettingsCard card, string query) =>
-        HasText(card.Header as string, query) ||
-        HasText(card.Description as string, query) ||
-        MouseCardValues(card).Any(v => HasText(v, query));
-
-    /// <summary>A fixed-action card shows one label; a picker matches on any option it offers, so
-    /// searching "zoom" finds the wheel setting even while it is set to Navigate.</summary>
-    private static IEnumerable<string> MouseCardValues(SettingsCard card) => card.Content switch
-    {
-        TextBlock text => new[] { text.Text },
-        ComboBox combo => combo.Items.OfType<ComboBoxItem>().Select(i => i.Content as string ?? string.Empty),
-        _ => Array.Empty<string>()
-    };
-
-    private static bool HasText(string? haystack, string query) =>
-        haystack != null && haystack.Contains(query, StringComparison.CurrentCultureIgnoreCase);
 
     /// <summary>Opens the editor for one command. It mutates the row directly, so there is nothing
     /// to apply here - conflict lookup is by invariant token, never by display text.</summary>
@@ -793,8 +718,10 @@ internal sealed partial class Settings
     {
         if ((sender as FrameworkElement)?.Tag is not ShortcutRow row) return;
 
+        var before = row.Keys.Select(k => k.Chord).ToList();
+
         var dialog = new ShortcutEditDialog(row,
-            token => ShortcutCatalog.FindOwner(_allShortcutGroups, token))
+            chord => ShortcutCatalog.FindOwner(AllShortcutRows, chord))
         {
             XamlRoot = Content.XamlRoot,
             Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
@@ -802,6 +729,13 @@ internal sealed partial class Settings
         };
 
         await dialog.ShowAsync();
+
+        // Opening the editor and pressing Done should not rewrite usersettings.json or make the
+        // photo window re-resolve. Watching this row alone is enough: every edit the dialog can
+        // make - add, remove, reset, and the Reassign that also strips a chord off another
+        // command - changes this one too.
+        if (row.Keys.Select(k => k.Chord).SequenceEqual(before)) return;
+
         // A Reassign can strip a chord off a second command, so the whole set is saved, not this row.
         await SaveShortcutsAsync();
     }
@@ -822,9 +756,7 @@ internal sealed partial class Settings
 
         if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
 
-        foreach (var group in _allShortcutGroups)
-            foreach (var row in group.Rows)
-                row.ResetToDefault();
+        foreach (var row in AllShortcutRows) row.ResetToDefault();
 
         await SaveShortcutsAsync();
     }

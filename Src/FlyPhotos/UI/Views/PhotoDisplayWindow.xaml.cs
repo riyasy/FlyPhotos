@@ -56,7 +56,7 @@ public sealed partial class PhotoDisplayWindow
     private readonly SideButtonNavBehavior _sideButtonNav = null!;
 
     private Dictionary<CommandId, Func<Task>> _commands = null!;
-    private Dictionary<string, CommandId> _routes = ShortcutCatalog.Resolve();
+    private Dictionary<KeyChord, CommandId> _routes = ShortcutCatalog.Resolve();
 
     /// <summary>The key currently held down on a navigation burst, so key-up brakes on whatever
     /// chord is bound to Next/Prev rather than on a hard-coded Left/Right.</summary>
@@ -407,12 +407,20 @@ public sealed partial class PhotoDisplayWindow
     {
         try
         {
-            if (!_routes.TryGetValue(KeyChordText.Token(e.Key), out var id)) return;
+            if (!_routes.TryGetValue(KeyChord.FromCurrentModifiers(e.Key), out var id)) return;
             if (!_commands.TryGetValue(id, out var action)) return;
 
-            if (ShortcutCatalog.IsBurst(id)) _burstKey = e.Key;
+            // Set before awaiting: an async handler suspends here and the routed event finishes
+            // bubbling while it runs, so an e.Handled set afterwards is ignored. Suppression also
+            // has to survive the repeat guard below, or a held Enter reaches the focused button.
+            if (ShortcutCatalog.Has(id, CommandFlags.Suppress)) e.Handled = true;
+
+            // Windows repeats KeyDown while a key is held. That is the point for navigation, zoom
+            // and pan; for anything that toggles it flickers, which is what holding I used to do.
+            if (e.KeyStatus.WasKeyDown && !ShortcutCatalog.Has(id, CommandFlags.Repeat)) return;
+
+            if (ShortcutCatalog.Has(id, CommandFlags.Burst)) _burstKey = e.Key;
             await action();
-            if (ShortcutCatalog.Suppresses(id)) e.Handled = true;
         }
         catch (Exception ex)
         {
