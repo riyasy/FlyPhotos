@@ -26,7 +26,7 @@
  * @details This function retrieves the list of files by calling the ShellUtility class
  * and then invokes the provided callback for each file found.
  */
-HRESULT GetFileListFromExplorer(FileListCallback callback)
+HRESULT GetFileListFromExplorer(FileListCallback callback, HWND hwndExplorer)
 {
     // Validate the callback pointer to prevent crashes.
     if (!callback) return E_POINTER;
@@ -35,7 +35,7 @@ HRESULT GetFileListFromExplorer(FileListCallback callback)
     ShellUtility shellUtil; // Create an instance of the utility class.
 
     // Call the underlying implementation to get the file list.
-    const HRESULT hr = shellUtil.GetFileListFromExplorerWindow(fileListNative);
+    const HRESULT hr = shellUtil.GetFileListFromExplorerWindow(fileListNative, hwndExplorer);
 
     if (SUCCEEDED(hr))
     {

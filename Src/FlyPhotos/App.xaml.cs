@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
 using FlyPhotos.Infra.Configuration;
+using FlyPhotos.Infra.Interop;
 using FlyPhotos.Infra.Localization;
 using FlyPhotos.Services;
 using FlyPhotos.UI.Views;
@@ -44,6 +45,10 @@ public partial class App
 
         // Must call Initialize before reading AllowMultiInstance setting.
         AppConfig.Initialize();
+
+        // Sample the launching Explorer window before we create any window of our own. File discovery
+        // needs it on a background thread later, by which point our own window may be foreground.
+        AppConfig.Volatile.LaunchForegroundWindow = Win32Methods.GetForegroundWindow();
 
         HandleInstanceManagement();
 

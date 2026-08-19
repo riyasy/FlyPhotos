@@ -141,6 +141,13 @@ internal static partial class Win32Methods
     internal static partial IntPtr FindWindow(string lpClassName, string lpWindowName);
 
     /// <summary>
+    /// Retrieves a handle to the window the user is currently working with.
+    /// </summary>
+    /// <returns>A handle to the foreground window, or <see cref="IntPtr.Zero"/> if there is none.</returns>
+    [LibraryImport("user32.dll")]
+    internal static partial IntPtr GetForegroundWindow();
+
+    /// <summary>
     /// Sends the specified message to a window or windows. This overload is used to send a <see cref="COPYDATASTRUCT"/> with the <c>WM_COPYDATA</c> message.
     /// This is a managed declaration of the Win32 <c>SendMessage</c> function from <c>user32.dll</c>.
     /// </summary>

@@ -35,10 +35,14 @@ internal static partial class NativeBridge
     /// This function typically interacts with the Windows Explorer shell to retrieve list of files in the open File Explorer window.
     /// </summary>
     /// <param name="callback">A delegate that the native function will call for each file path it finds.</param>
+    /// <param name="hwndExplorer">
+    /// The Explorer window to enumerate, captured at process start. Pass <see cref="IntPtr.Zero"/> to let
+    /// the native side fall back to GetForegroundWindow() — which races our own window activation.
+    /// </param>
     /// <returns>An HRESULT indicating the success or failure of the native operation.</returns>
     [LibraryImport(DllName)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvStdcall)])]
-    internal static partial int GetFileListFromExplorer(FileListCallback callback);
+    internal static partial int GetFileListFromExplorer(FileListCallback callback, IntPtr hwndExplorer);
 
     /// <summary>
     /// Represents the signature of a callback function used by <see cref="GetWicDecoders"/>.
@@ -138,15 +142,23 @@ public static class NativeWrapper
     /// Retrieves a list of file paths from the Windows Explorer shell.
     /// This typically corresponds to files in the currently open and active Explorer window.
     /// </summary>
+    /// <param name="hwndExplorer">
+    /// The Explorer window captured at process start, before this app had a window of its own.
+    /// </param>
     /// <returns>A <see cref="List{T}"/> of strings, where each string is a full file path.</returns>
-    public static List<string> GetFileListFromExplorerWindow()
+    public static List<string> GetFileListFromExplorerWindow(IntPtr hwndExplorer)
     {
         var files = new List<string>();
-        var hresult = NativeBridge.GetFileListFromExplorer(FileListCallback);
+        var hresult = NativeBridge.GetFileListFromExplorer(FileListCallback, hwndExplorer);
         if (hresult >= 0) // SUCCEEDED
             return files;
 
-        Logger.Error($"GetFileListFromExplorer failed with HRESULT: {hresult}");
+        // 0x8004020n is our own per-stage diagnostic code (FLY_E_ENUM_STAGE in ShellUtility.cpp);
+        // anything else is a genuine COM error from the shell.
+        var stage = (hresult & unchecked((int)0xFFFFFFF0)) == unchecked((int)0x80040200)
+            ? $" (enumeration stage {hresult & 0xF})"
+            : string.Empty;
+        Logger.Error($"GetFileListFromExplorer failed with HRESULT 0x{hresult:X8}{stage}");
         return [];
 
         void FileListCallback(string filePath)

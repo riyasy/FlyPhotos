@@ -2,14 +2,29 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
+using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Interop;
 using NLog;
 
 namespace FlyPhotos.Services;
 
-internal static class FileDiscovery
+internal static partial class FileDiscovery
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+    /// <summary>
+    /// The comparison Explorer itself sorts filenames with: digit runs compare as numbers, so
+    /// "(3)" sorts before "(12)". Ordinal comparison puts '1' before '3' and gives 1, 12, 3.
+    /// </summary>
+    [LibraryImport("shlwapi.dll", StringMarshalling = StringMarshalling.Utf16)]
+    private static partial int StrCmpLogicalW(string psz1, string psz2);
+
+    private sealed class NaturalComparer : IComparer<string>
+    {
+        public static readonly NaturalComparer Instance = new();
+        public int Compare(string? x, string? y) => StrCmpLogicalW(x ?? string.Empty, y ?? string.Empty);
+    }
 
     public static IReadOnlyList<string> DiscoverFiles(string selectedFilePath, bool flyLaunchedExternally)
     {
@@ -79,7 +94,7 @@ internal static class FileDiscovery
 
     private static List<string> FindAllFilesFromExplorerWindowNative()
     {
-        var fileList = NativeWrapper.GetFileListFromExplorerWindow();        
+        var fileList = NativeWrapper.GetFileListFromExplorerWindow(AppConfig.Volatile.LaunchForegroundWindow);
         return fileList;
     }
 
@@ -99,9 +114,10 @@ internal static class FileDiscovery
         // Directory.GetFiles is highly optimized in .NET 6+ to work with these options
         string[] files = Directory.GetFiles(dirPath, "*", options);
 
-        // OrdinalIgnoreCase is the fastest way to sort strings in .NET
-        // as it uses a simple bitwise comparison after case-folding.
-        Array.Sort(files, StringComparer.OrdinalIgnoreCase);
+        // Must match the order Explorer shows, because the other discovery path (SVGIO_FLAG_VIEWORDER)
+        // returns Explorer's own view order. Sorting ordinally here made the two paths disagree
+        // whenever filenames contained numbers — see issue #228.
+        Array.Sort(files, NaturalComparer.Instance);
 
         return files;
     }
