@@ -484,7 +484,7 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Préchargement basse résolution (En mémoire)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
-    <value>Choisir le comportement par défaut de la molette de la souris.</value>
+    <value>Choisissez le comportement par défaut de la molette de la souris.</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>Molette de la souris</value>

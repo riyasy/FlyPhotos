@@ -773,7 +773,7 @@ High Quality Cubic – Redimensionamento de alta qualidade para fotos.</value>
     <value>Ctrl + Roda do rato</value>
   </data>
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
-    <value>Aumentar ou diminuir zoom sempre</value>
+    <value>Aumentar ou diminuir sempre o zoom</value>
   </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Roda do rato</value>

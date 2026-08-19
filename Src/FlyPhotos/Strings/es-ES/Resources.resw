@@ -680,7 +680,7 @@ Configuración &gt; Aplicaciones &gt; Aplicaciones predeterminadas.</value>
     <value>Botones de avance/retroceso del ratón</value>
   </data>
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
-    <value>Elige qué hacen los botones de avance y retroceso del ratón (disponible en algunos ratones).</value>
+    <value>Elija qué hacen los botones de avance y retroceso del ratón (disponible en algunos ratones).</value>
   </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Zoom por pasos</value>

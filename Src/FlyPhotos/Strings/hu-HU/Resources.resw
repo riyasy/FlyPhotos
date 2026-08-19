@@ -483,7 +483,7 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Alacsony felbontású előtöltés (Memóriában)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
-    <value>Válassza ki az alapértelmezett egérgörgő viselkedést.</value>
+    <value>Válassza ki az egérgörgő alapértelmezett működését.</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>Egérgörgő</value>
@@ -880,7 +880,7 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
     <value>Eltávolítás</value>
   </data>
   <data name="ButtonShortcutReassign.Content" xml:space="preserve">
-    <value>Újrarendelés</value>
+    <value>Újra hozzárendelés</value>
   </data>
   <data name="ButtonShortcutResetDefault.Content" xml:space="preserve">
     <value>Alapértelmezés visszaállítása</value>
@@ -904,7 +904,7 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
     <value>A(z) {0} már hozzá van rendelve ehhez a parancshoz.</value>
   </data>
   <data name="ShortcutCapture_ReservedByOther" xml:space="preserve">
-    <value>A(z) {0} rögzítve van a(z) „{1}” parancshoz, és nem módosítható.</value>
+    <value>A(z) {0} véglegesen hozzá van rendelve a(z) „{1}” parancshoz, és nem módosítható.</value>
   </data>
   <data name="ShortcutCapture_Conflict" xml:space="preserve">
     <value>A(z) {0} már a(z) „{1}” parancshoz tartozik. Újrarendeléskor az a parancs elveszíti ezt a billentyűparancsot.</value>

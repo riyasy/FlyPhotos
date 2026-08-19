@@ -1061,7 +1061,7 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
     <value>Kann nicht neu zugewiesen werden</value>
   </data>
   <data name="ShortcutDesc_SharePhoto" xml:space="preserve">
-    <value>Öffnet den Windows-Freigabedialog</value>
+    <value>Öffnet den „Teilen“-Dialog von Windows</value>
   </data>
   <data name="ShortcutDesc_FileProperties" xml:space="preserve">
     <value>Registerkarte „Allgemein“</value>

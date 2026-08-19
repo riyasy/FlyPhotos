@@ -833,13 +833,13 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
     <value>Venster verplaatsen</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>Snelkoppelingen</value>
+    <value>Sneltoetsen</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>Opdrachten en toetsen zoeken…</value>
   </data>
   <data name="ButtonResetAllShortcuts.Content" xml:space="preserve">
-    <value>Alles herstellen…</value>
+    <value>Alles opnieuw instellen…</value>
   </data>
   <data name="TxtNoShortcutResults.Text" xml:space="preserve">
     <value>Geen opdrachten komen overeen met uw zoekopdracht.</value>
@@ -848,34 +848,34 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
     <value>Geen</value>
   </data>
   <data name="ButtonShortcutEdit.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>Snelkoppelingen wijzigen</value>
+    <value>Sneltoetsen wijzigen</value>
   </data>
   <data name="ShortcutEditToolTip.Content" xml:space="preserve">
-    <value>Snelkoppelingen wijzigen</value>
+    <value>Sneltoetsen wijzigen</value>
   </data>
   <data name="ShortcutResetAll_Title" xml:space="preserve">
-    <value>Alle snelkoppelingen herstellen?</value>
+    <value>Alle sneltoetsen opnieuw instellen?</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
     <value>Alle opdrachten krijgen hun standaardtoetsen terug. Uw muisinstellingen veranderen niet.</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
-    <value>Alles herstellen</value>
+    <value>Alles opnieuw instellen</value>
   </data>
   <data name="ShortcutResetAll_CancelButton" xml:space="preserve">
     <value>Annuleren</value>
   </data>
   <data name="TextShortcutCurrent.Text" xml:space="preserve">
-    <value>Huidige snelkoppelingen</value>
+    <value>Huidige sneltoetsen</value>
   </data>
   <data name="TextShortcutNoneAssigned.Text" xml:space="preserve">
-    <value>Geen snelkoppeling toegewezen.</value>
+    <value>Geen sneltoets toegewezen.</value>
   </data>
   <data name="TextShortcutCapturePrompt.Text" xml:space="preserve">
     <value>Klik in het vak hieronder en druk vervolgens op de toetsen die u wilt toevoegen.</value>
   </data>
   <data name="ButtonShortcutRemove.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>Deze snelkoppeling verwijderen</value>
+    <value>Deze sneltoets verwijderen</value>
   </data>
   <data name="ShortcutRemoveToolTip.Content" xml:space="preserve">
     <value>Verwijderen</value>
@@ -890,16 +890,16 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
     <value>Gereed</value>
   </data>
   <data name="ShortcutCapture_Idle" xml:space="preserve">
-    <value>Klik hier om een snelkoppeling toe te voegen</value>
+    <value>Klik hier om een sneltoets toe te voegen</value>
   </data>
   <data name="ShortcutCapture_Waiting" xml:space="preserve">
     <value>Wachten op toetsen…</value>
   </data>
   <data name="ShortcutCapture_WinKeyRejected" xml:space="preserve">
-    <value>Windows reserveert snelkoppelingen met de Windows-toets.</value>
+    <value>Windows reserveert sneltoetsen met de Windows-toets.</value>
   </data>
   <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
-    <value>Schakel over naar een Latijnse invoermethode om een snelkoppeling in te stellen.</value>
+    <value>Schakel over naar een Latijnse invoermethode om een sneltoets in te stellen.</value>
   </data>
   <data name="ShortcutCapture_AlreadyOnThisCommand" xml:space="preserve">
     <value>{0} is al aan deze opdracht toegewezen.</value>
@@ -908,7 +908,7 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
     <value>{0} ligt vast voor '{1}' en kan niet worden gewijzigd.</value>
   </data>
   <data name="ShortcutCapture_Conflict" xml:space="preserve">
-    <value>{0} wordt al gebruikt door '{1}'. Bij opnieuw toewijzen verliest die opdracht deze snelkoppeling.</value>
+    <value>{0} wordt al gebruikt door '{1}'. Bij opnieuw toewijzen verliest die opdracht deze sneltoets.</value>
   </data>
   <data name="ShortcutGroup_Navigation" xml:space="preserve">
     <value>Navigatie</value>

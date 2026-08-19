@@ -208,10 +208,10 @@
     <value>Прозрачный</value>
   </data>
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
-    <value>Просмотр фото вперёд или назад</value>
+    <value>Просмотр следующего или предыдущего фото</value>
   </data>
   <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
-    <value>Просмотр фото вперёд или назад</value>
+    <value>Просмотр следующего или предыдущего фото</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Увеличение или уменьшение</value>
@@ -773,19 +773,19 @@ High Quality Cubic – Масштабирование наивысшего ка�
     <value>Ctrl + колесо мыши</value>
   </data>
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
-    <value>Всегда увеличение или уменьшение</value>
+    <value>Всегда увеличивать или уменьшать масштаб</value>
   </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + колесо мыши</value>
   </data>
   <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
-    <value>Всегда просмотр фото вперёд или назад</value>
+    <value>Всегда показывать следующее или предыдущее фото</value>
   </data>
   <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
     <value>Наклон колеса мыши влево/вправо</value>
   </data>
   <data name="TextTiltWheelAction.Text" xml:space="preserve">
-    <value>Просмотр фото вперёд или назад</value>
+    <value>Просмотр следующего или предыдущего фото</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
     <value>Левая кнопка мыши + перетаскивание по фото</value>
@@ -1061,7 +1061,7 @@ High Quality Cubic – Масштабирование наивысшего ка�
     <value>Переназначить нельзя</value>
   </data>
   <data name="ShortcutDesc_SharePhoto" xml:space="preserve">
-    <value>Открывает окно общего доступа Windows</value>
+    <value>Открывает окно «Поделиться» Windows</value>
   </data>
   <data name="ShortcutDesc_FileProperties" xml:space="preserve">
     <value>Вкладка «Общие»</value>

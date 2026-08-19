@@ -809,7 +809,7 @@ High Quality Cubic – 适合照片的最高质量缩放。</value>
     <value>鼠标右键单击</value>
   </data>
   <data name="TextRightClickAction.Text" xml:space="preserve">
-    <value>Windows 资源管理器上下文菜单</value>
+    <value>Windows 文件资源管理器上下文菜单</value>
   </data>
   <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
     <value>鼠标右键单击并按住</value>
@@ -899,7 +899,7 @@ High Quality Cubic – 适合照片的最高质量缩放。</value>
     <value>使用 Windows 键的快捷键由 Windows 保留。</value>
   </data>
   <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
-    <value>请切换到拉丁字母输入法以设置快捷键。</value>
+    <value>请切换到英文输入法以设置快捷键。</value>
   </data>
   <data name="ShortcutCapture_AlreadyOnThisCommand" xml:space="preserve">
     <value>{0} 已分配给此命令。</value>

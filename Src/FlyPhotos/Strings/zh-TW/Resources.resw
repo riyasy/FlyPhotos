@@ -809,7 +809,7 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
     <value>滑鼠右鍵單擊</value>
   </data>
   <data name="TextRightClickAction.Text" xml:space="preserve">
-    <value>Windows 檔案總管右鍵選單</value>
+    <value>Windows 檔案總管的內容功能表</value>
   </data>
   <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
     <value>滑鼠右鍵按住不放</value>
@@ -899,7 +899,7 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
     <value>使用 Windows 鍵的快速鍵由 Windows 保留。</value>
   </data>
   <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
-    <value>請切換到拉丁字母輸入法以設定快速鍵。</value>
+    <value>請切換到英文輸入法以設定快速鍵。</value>
   </data>
   <data name="ShortcutCapture_AlreadyOnThisCommand" xml:space="preserve">
     <value>{0} 已指派給此命令。</value>

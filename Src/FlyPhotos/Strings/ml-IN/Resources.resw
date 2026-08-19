@@ -169,7 +169,7 @@
     <value>ഫോട്ടോ കറക്കുക</value>
   </data>
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
-    <value>സ്‌ക്രീനിൽ നിറക്കുക</value>
+    <value>വിൻഡോയിൽ ഒതുക്കുക</value>
   </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>ക്രമീകരണങ്ങൾ</value>
@@ -235,7 +235,7 @@
     <value>ലൈറ്റ്</value>
   </data>
   <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
-    <value>ഫുൾ സ്ക്രീൻ</value>
+    <value>പൂർണ്ണ സ്‌ക്രീൻ</value>
   </data>
   <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
     <value>പഴയ അവസ്ഥ</value>
@@ -794,7 +794,7 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
     <value>മൗസ് വീൽ ക്ലിക്ക്</value>
   </data>
   <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
-    <value>ഫുൾ സ്ക്രീൻ</value>
+    <value>പൂർണ്ണ സ്‌ക്രീൻ</value>
   </data>
   <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
     <value>മാക്സിമൈസ് അല്ലെങ്കിൽ പുനഃസ്ഥാപിക്കുക</value>
@@ -803,13 +803,13 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
     <value>ഒന്നുമില്ല</value>
   </data>
   <data name="SettingsCardRightClick.Header" xml:space="preserve">
-    <value>മൗസ് റൈറ്റ് ക്ലിക്ക്</value>
+    <value>മൗസിന്റെ വലത് ക്ലിക്ക്</value>
   </data>
   <data name="TextRightClickAction.Text" xml:space="preserve">
-    <value>വിൻഡോസ് എക്സ്പ്ലോറർ കോൺടെക്സ്റ്റ് മെനു</value>
+    <value>വിൻഡോസ് ഫയൽ എക്സ്പ്ലോററിന്റെ കോൺടെക്സ്റ്റ് മെനു</value>
   </data>
   <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
-    <value>മൗസ് റൈറ്റ് ക്ലിക്ക് ചെയ്ത് പിടിക്കുക</value>
+    <value>മൗസിന്റെ വലത് ബട്ടൺ അമർത്തിപ്പിടിക്കുക</value>
   </data>
   <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
     <value>സൂം ഇൻ ചെയ്യുക</value>
@@ -821,7 +821,7 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
     <value>ഫോട്ടോയിൽ ഡബിൾ ക്ലിക്ക്</value>
   </data>
   <data name="TextDoubleClickAction.Text" xml:space="preserve">
-    <value>യഥാർത്ഥ വലിപ്പം അല്ലെങ്കിൽ സ്‌ക്രീനിൽ നിറക്കുക</value>
+    <value>യഥാർത്ഥ വലിപ്പം അല്ലെങ്കിൽ വിൻഡോയിൽ ഒതുക്കുക</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
     <value>Ctrl + ഡ്രാഗ് എപ്പോഴും വിൻഡോ നീക്കുന്നു</value>
@@ -959,7 +959,7 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
     <value>യഥാർത്ഥ വലിപ്പം (1:1)</value>
   </data>
   <data name="ShortcutName_FitToWindow" xml:space="preserve">
-    <value>സ്‌ക്രീനിൽ നിറക്കുക</value>
+    <value>വിൻഡോയിൽ ഒതുക്കുക</value>
   </data>
   <data name="ShortcutName_PanUp" xml:space="preserve">
     <value>മുകളിലേക്ക് നീക്കുക</value>
@@ -980,7 +980,7 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
     <value>വലത്തോട്ട് തിരിക്കുക</value>
   </data>
   <data name="ShortcutName_FullScreen" xml:space="preserve">
-    <value>ഫുൾ സ്ക്രീൻ</value>
+    <value>പൂർണ്ണ സ്‌ക്രീൻ</value>
   </data>
   <data name="ShortcutName_MaximizeRestore" xml:space="preserve">
     <value>മാക്സിമൈസ് അല്ലെങ്കിൽ പുനഃസ്ഥാപിക്കുക</value>
@@ -1040,7 +1040,7 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
     <value>മൾട്ടി-പേജ് TIFF, ICO ഫയലുകൾ</value>
   </data>
   <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
-    <value>അടുത്ത പ്രീസെറ്റിലേക്ക്: 100%, 400%, സ്‌ക്രീനിൽ നിറക്കുക</value>
+    <value>അടുത്ത പ്രീസെറ്റിലേക്ക്: 100%, 400%, വിൻഡോയിൽ ഒതുക്കുക</value>
   </data>
   <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
     <value>മുൻപത്തെ പ്രീസെറ്റിലേക്ക് മടങ്ങുന്നു</value>
@@ -1061,10 +1061,10 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
     <value>Windows Share ഡയലോഗ് തുറക്കുന്നു</value>
   </data>
   <data name="ShortcutDesc_FileProperties" xml:space="preserve">
-    <value>General ടാബ്</value>
+    <value>പൊതുവായ ടാബ്</value>
   </data>
   <data name="ShortcutDesc_FileDetails" xml:space="preserve">
-    <value>Details ടാബ്</value>
+    <value>വിശദാംശങ്ങൾ ടാബ്</value>
   </data>
   <data name="ShortcutDesc_OpenWithPanel" xml:space="preserve">
     <value>ക്രമീകരിച്ച എല്ലാ ആപ്പുകളും കാണിക്കുന്നു</value>
@@ -1079,16 +1079,16 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
     <value>Shift</value>
   </data>
   <data name="ShortcutKey_LeftArrow" xml:space="preserve">
-    <value>ഇടത് ആരോ</value>
+    <value>ഇടത്തേക്കുള്ള അമ്പടയാളം</value>
   </data>
   <data name="ShortcutKey_RightArrow" xml:space="preserve">
-    <value>വലത് ആരോ</value>
+    <value>വലത്തേക്കുള്ള അമ്പടയാളം</value>
   </data>
   <data name="ShortcutKey_UpArrow" xml:space="preserve">
-    <value>മുകളിലോട്ട് ആരോ</value>
+    <value>മുകളിലേക്കുള്ള അമ്പടയാളം</value>
   </data>
   <data name="ShortcutKey_DownArrow" xml:space="preserve">
-    <value>താഴോട്ട് ആരോ</value>
+    <value>താഴേക്കുള്ള അമ്പടയാളം</value>
   </data>
   <data name="ShortcutKey_Esc" xml:space="preserve">
     <value>Esc</value>

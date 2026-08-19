@@ -208,10 +208,10 @@
     <value>Transparent</value>
   </data>
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
-    <value>Visa nästa eller föregående</value>
+    <value>Visa nästa eller föregående bild</value>
   </data>
   <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
-    <value>Visa nästa eller föregående</value>
+    <value>Visa nästa eller föregående bild</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Zooma in eller ut</value>
@@ -779,13 +779,13 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
     <value>Alt + Mushjul</value>
   </data>
   <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
-    <value>Visar alltid nästa eller föregående</value>
+    <value>Visar alltid nästa eller föregående bild</value>
   </data>
   <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
     <value>Luta mushjul vänster/höger</value>
   </data>
   <data name="TextTiltWheelAction.Text" xml:space="preserve">
-    <value>Visa nästa eller föregående</value>
+    <value>Visa nästa eller föregående bild</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
     <value>Vänsterklick och dra på bilden</value>
@@ -806,7 +806,7 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
     <value>Ingenting</value>
   </data>
   <data name="SettingsCardRightClick.Header" xml:space="preserve">
-    <value>Högerklicka</value>
+    <value>Högerklick</value>
   </data>
   <data name="TextRightClickAction.Text" xml:space="preserve">
     <value>Utforskarens snabbmeny</value>

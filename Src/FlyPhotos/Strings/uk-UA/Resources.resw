@@ -208,10 +208,10 @@
     <value>Прозорий</value>
   </data>
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
-    <value>Наступне або попереднє</value>
+    <value>Перегляд наступного або попереднього фото</value>
   </data>
   <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
-    <value>Наступне або попереднє</value>
+    <value>Перегляд наступного або попереднього фото</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Збільшити або зменшити</value>
@@ -773,19 +773,19 @@ High Quality Cubic – Масштабування найвищої якості 
     <value>Ctrl + коліщатко миші</value>
   </data>
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
-    <value>Завжди збільшує або зменшує</value>
+    <value>Завжди збільшує або зменшує масштаб</value>
   </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + коліщатко миші</value>
   </data>
   <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
-    <value>Завжди наступне або попереднє</value>
+    <value>Завжди показує наступне або попереднє фото</value>
   </data>
   <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
     <value>Нахил коліщатка миші ліворуч або праворуч</value>
   </data>
   <data name="TextTiltWheelAction.Text" xml:space="preserve">
-    <value>Наступне або попереднє</value>
+    <value>Перегляд наступного або попереднього фото</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
     <value>Лівий клік миші та перетягування по фото</value>
