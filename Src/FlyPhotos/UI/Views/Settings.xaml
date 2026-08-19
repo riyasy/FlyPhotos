@@ -8,8 +8,46 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:model="using:FlyPhotos.Core.Model"
     xmlns:ui="using:CommunityToolkit.WinUI"
+    xmlns:views="using:FlyPhotos.UI.Views"
     mc:Ignorable="d">
     <Grid x:Name="MainLayout" Background="Transparent">
+        <Grid.Resources>
+            <!--
+                Glyph-only buttons. WinUI's default Button padding (11,5,11,6) and MinWidth/MinHeight
+                of 32 leave a fixed-size icon button no room for its glyph, so all three are zeroed
+                and the size is set explicitly.
+            -->
+            <Style x:Key="ShortcutIconButtonStyle" TargetType="Button">
+                <Setter Property="Width" Value="32" />
+                <Setter Property="Height" Value="32" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="FontFamily" Value="{StaticResource FluentIcons}" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+            </Style>
+            <Style x:Key="ShortcutChipButtonStyle" TargetType="Button">
+                <Setter Property="Width" Value="20" />
+                <Setter Property="Height" Value="20" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="2,0,0,0" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="FontFamily" Value="{StaticResource FluentIcons}" />
+                <Setter Property="FontSize" Value="10" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+            </Style>
+            <Style x:Key="FixedMouseActionTextStyle" TargetType="TextBlock">
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Opacity" Value="0.6" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+        </Grid.Resources>
         <Pivot x:Uid="SettingsPage">
             <PivotItem x:Uid="SettingsPivotItemGeneral">
                 <ScrollViewer>
@@ -241,49 +279,6 @@
                             Margin="0,20,0,0"
                             Style="{StaticResource BodyStrongTextBlockStyle}" />
 
-                        <controls:SettingsExpander
-                            x:Uid="SettingsExpanderKeyboardShortcuts"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE765;, FontFamily={StaticResource FluentIcons}}">
-                            <controls:SettingsExpander.Items>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardKeyboardShortCuts"
-                                    x:Uid="SettingsCardKeyboardShortCuts"
-                                    Description="" />
-                            </controls:SettingsExpander.Items>
-                        </controls:SettingsExpander>
-
-                        <controls:SettingsExpander
-                            x:Name="SettingsCardMouseWheelBehaviour"
-                            x:Uid="SettingsCardMouseWheelBehaviour"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;, FontFamily={StaticResource FluentIcons}}">
-                            <ComboBox
-                                x:Name="ComboMouseWheelBehaviour"
-                                MinWidth="150"
-                                SelectedIndex="0">
-                                <ComboBoxItem x:Uid="ComboMouseWheelItemZoom" />
-                                <ComboBoxItem x:Uid="ComboMouseWheelItemNav" />
-                            </ComboBox>
-                            <controls:SettingsExpander.Items>
-                                <controls:SettingsCard x:Name="SettingsCardMouseWheelBehaviourInfo" x:Uid="SettingsCardMouseWheelBehaviourInfo" />
-                            </controls:SettingsExpander.Items>
-                        </controls:SettingsExpander>
-
-                        <controls:SettingsCard
-                            x:Name="SettingsCardMouseFwdBackBehaviour"
-                            x:Uid="SettingsCardMouseFwdBackBehaviour"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;, FontFamily={StaticResource FluentIcons}}">
-                            <ComboBox
-                                x:Name="ComboMouseFwdBackBehaviour"
-                                MinWidth="150"
-                                SelectedIndex="0">
-                                <ComboBoxItem x:Uid="ComboMouseFwdBackItemNav" />
-                                <ComboBoxItem x:Uid="ComboMouseFwdBackItemStepZoom" />
-                            </ComboBox>
-                        </controls:SettingsCard>
-
                         <controls:SettingsCard
                             x:Name="SettingsCardConfirmBeforeDelete"
                             x:Uid="SettingsCardConfirmBeforeDelete"
@@ -298,14 +293,6 @@
                             Margin="0,5,0,0"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE944;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonClickOutsideImageToRestoreWindow" />
-                        </controls:SettingsCard>
-
-                        <controls:SettingsCard
-                            x:Name="SettingsCardCtrlDragToMoveWindow"
-                            x:Uid="SettingsCardCtrlDragToMoveWindow"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE7C2;, FontFamily={StaticResource FluentIcons}}">
-                            <ToggleSwitch x:Name="ButtonCtrlDragToMoveWindow" HorizontalAlignment="Right" />
                         </controls:SettingsCard>
 
                         <!--  *****************  -->
@@ -625,6 +612,176 @@
                         </controls:SettingsCard>
                     </StackPanel>
                 </ScrollViewer>
+            </PivotItem>
+
+            <!--
+                Command names, hints and key names come from the catalog in code, which resolves them
+                through L.Get; everything static on the page uses x:Uid as usual.
+            -->
+            <PivotItem x:Uid="SettingsPivotItemShortcuts">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid
+                        Grid.Row="0"
+                        Margin="0,8,15,4"
+                        ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <AutoSuggestBox
+                            x:Uid="ShortcutSearchBox"
+                            QueryIcon="Find"
+                            TextChanged="ShortcutSearchBox_OnTextChanged" />
+                        <Button
+                            x:Uid="ButtonResetAllShortcuts"
+                            Grid.Column="1"
+                            Click="ButtonResetAllShortcuts_OnClick" />
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="1">
+                        <StackPanel Margin="0,0,15,30" Orientation="Vertical">
+
+                            <TextBlock
+                                x:Name="TxtNoShortcutResults"
+                                x:Uid="TxtNoShortcutResults"
+                                Margin="0,24,0,0"
+                                Opacity="0.7"
+                                Visibility="Collapsed" />
+
+                            <ItemsControl x:Name="ShortcutGroupsList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="views:ShortcutGroup">
+                                        <StackPanel Orientation="Vertical" Visibility="{x:Bind GroupVisibility, Mode=OneWay}">
+                                            <TextBlock
+                                                Margin="0,20,0,0"
+                                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                                Text="{x:Bind Name}" />
+                                            <ItemsControl Margin="0,5,0,0" ItemsSource="{x:Bind Rows}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="views:ShortcutRow">
+                                                        <controls:SettingsCard
+                                                            Margin="0,0,0,2"
+                                                            Description="{x:Bind Description}"
+                                                            Header="{x:Bind Name}"
+                                                            Visibility="{x:Bind RowVisibility, Mode=OneWay}">
+                                                            <controls:SettingsCard.HeaderIcon>
+                                                                <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="{x:Bind Glyph}" />
+                                                            </controls:SettingsCard.HeaderIcon>
+
+                                                            <!--
+                                                                Horizontal StackPanel, not a wrap panel: WinUI has no built-in
+                                                                WrapPanel and the toolkit's lives in a package this project does
+                                                                not reference. Zoom is the widest row at 4 chords, and SettingsCard
+                                                                drops this block below the header at narrow widths, which is what
+                                                                keeps it usable at high scaling. Revisit if a 5th ever lands.
+                                                            -->
+                                                            <StackPanel
+                                                                VerticalAlignment="Center"
+                                                                Orientation="Horizontal"
+                                                                Spacing="4">
+                                                                <TextBlock
+                                                                    x:Uid="TextShortcutNoKeys"
+                                                                    VerticalAlignment="Center"
+                                                                    Opacity="0.6"
+                                                                    Visibility="{x:Bind NoKeysVisibility, Mode=OneWay}" />
+
+                                                                <ItemsControl ItemsSource="{x:Bind Keys}">
+                                                                    <ItemsControl.ItemsPanel>
+                                                                        <ItemsPanelTemplate>
+                                                                            <StackPanel Orientation="Horizontal" Spacing="4" />
+                                                                        </ItemsPanelTemplate>
+                                                                    </ItemsControl.ItemsPanel>
+                                                                    <ItemsControl.ItemTemplate>
+                                                                        <DataTemplate x:DataType="views:ShortcutKey">
+                                                                            <Border
+                                                                                Padding="8,3,8,3"
+                                                                                VerticalAlignment="Center"
+                                                                                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                                                BorderThickness="1"
+                                                                                CornerRadius="4">
+                                                                                <TextBlock
+                                                                                    VerticalAlignment="Center"
+                                                                                    FontFamily="Consolas"
+                                                                                    FontSize="13"
+                                                                                    Text="{x:Bind Text}" />
+                                                                            </Border>
+                                                                        </DataTemplate>
+                                                                    </ItemsControl.ItemTemplate>
+                                                                </ItemsControl>
+
+                                                                <!--  Add, remove and reset all live inside the edit dialog.  -->
+                                                                <Button
+                                                                    x:Uid="ButtonShortcutEdit"
+                                                                    Click="ShortcutEdit_OnClick"
+                                                                    Content="&#xE70F;"
+                                                                    Style="{StaticResource ShortcutIconButtonStyle}"
+                                                                    Tag="{x:Bind}"
+                                                                    Visibility="{x:Bind EditableVisibility}">
+                                                                    <ToolTipService.ToolTip>
+                                                                        <ToolTip x:Uid="ShortcutEditToolTip" />
+                                                                    </ToolTipService.ToolTip>
+                                                                </Button>
+                                                            </StackPanel>
+                                                        </controls:SettingsCard>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!--
+                                Mouse: pickers, not capture. See design doc section 5. Rendered from
+                                MouseCatalog rather than hand-written, so these rows filter through the
+                                same data path as the command rows above and a new row needs no change
+                                to the search. Resource keys are unchanged from when they were x:Uid.
+                            -->
+                            <TextBlock
+                                x:Name="TextMouseSectionHeader"
+                                x:Uid="TextBlockMouseSection"
+                                Margin="0,28,0,5"
+                                Style="{StaticResource BodyStrongTextBlockStyle}" />
+
+                            <ItemsControl x:Name="MouseRowsList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="views:MouseRow">
+                                        <controls:SettingsCard
+                                            Margin="0,0,0,2"
+                                            Description="{x:Bind Description}"
+                                            Header="{x:Bind Header}"
+                                            Visibility="{x:Bind RowVisibility, Mode=OneWay}">
+                                            <controls:SettingsCard.HeaderIcon>
+                                                <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="&#xE962;" />
+                                            </controls:SettingsCard.HeaderIcon>
+
+                                            <!--  A row is one or the other; the unused half stays collapsed.  -->
+                                            <Grid>
+                                                <TextBlock
+                                                    Style="{StaticResource FixedMouseActionTextStyle}"
+                                                    Text="{x:Bind FixedAction}"
+                                                    Visibility="{x:Bind FixedVisibility}" />
+                                                <ComboBox
+                                                    MinWidth="170"
+                                                    ItemsSource="{x:Bind Options}"
+                                                    SelectedIndex="{x:Bind SelectedIndex}"
+                                                    SelectionChanged="MouseOption_OnSelectionChanged"
+                                                    Tag="{x:Bind}"
+                                                    Visibility="{x:Bind PickerVisibility}" />
+                                            </Grid>
+                                        </controls:SettingsCard>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
             </PivotItem>
 
             <PivotItem x:Uid="SettingsPivotItemCodecs">

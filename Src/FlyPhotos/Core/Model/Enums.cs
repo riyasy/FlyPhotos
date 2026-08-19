@@ -53,6 +53,19 @@ public enum MouseFwdBackBehavior
     StepZoom
 }
 
+public enum MiddleClickBehavior
+{
+    FullScreen,
+    MaximizeRestore,
+    Nothing
+}
+
+public enum RightClickHoldBehavior
+{
+    ZoomIn,
+    Nothing
+}
+
 public enum Setting
 {
     ThumbnailShowHide,
@@ -67,11 +80,11 @@ public enum Setting
     ExtShortcutsShowHide,
     ImageDimensionsShowHide,
     CaptionButtonsAutoHideToggle,
-    CtrlDragToMoveWindowToggle,
     AutoFadeToggle,
     AutoHideMouseToggle,
     ImageScalingQualityChange,
-    RawDecodingChange
+    RawDecodingChange,
+    KeyBindingsChanged
 }
 
 public enum ScrollDirection

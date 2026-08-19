@@ -7,6 +7,7 @@ using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services;
 using FlyPhotos.Services.ExternalAppListing;
 using FlyPhotos.UI.Behaviors;
+using FlyPhotos.UI.Controls;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -16,6 +17,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -85,8 +87,6 @@ internal sealed partial class Settings
         // Use index-based mapping for localized combo box items. Settings are still saved as enum names in AppSettings.
         ComboTheme.SelectedIndex = GetIndexForTheme(AppConfig.Settings.Theme);
         ComboBackGround.SelectedIndex = GetIndexForBackdrop(AppConfig.Settings.WindowBackdrop);
-        ComboMouseWheelBehaviour.SelectedIndex = GetIndexForMouseWheelBehaviour(AppConfig.Settings.DefaultMouseWheelBehavior);
-        ComboMouseFwdBackBehaviour.SelectedIndex = GetIndexForMouseFwdBackBehavior(AppConfig.Settings.MouseFwdBackBehavior);
         ButtonShowThumbnail.IsOn = AppConfig.Settings.ShowThumbnails;
         ButtonThumbnailAnimation.IsOn = AppConfig.Settings.EnableThumbnailAnimation;
         ButtonEnableAutoFade.IsOn = AppConfig.Settings.AutoFade;
@@ -110,7 +110,6 @@ internal sealed partial class Settings
         ComboPanZoomNavBehaviour.SelectedIndex = GetIndexForPanZoomBehaviour(AppConfig.Settings.PanZoomBehaviourOnNavigation);
         ButtonEnableAutoHideMouse.IsOn = AppConfig.Settings.AutoHideMouse;
         ButtonEnableAutoHideCaptionButtons.IsOn = AppConfig.Settings.AutoHideCaptionButtons;
-        ButtonCtrlDragToMoveWindow.IsOn = AppConfig.Settings.CtrlDragToMoveWindow;
         ButtonClickOutsideImageToRestoreWindow.IsOn = AppConfig.Settings.ClickOutsideImageToRestoreWindow;
         ButtonEnableExternalShortcut.IsOn = AppConfig.Settings.ShowExternalAppShortcuts;
         ButtonDecodeRawData.IsOn = AppConfig.Settings.DecodeRawData;
@@ -120,8 +119,6 @@ internal sealed partial class Settings
         SliderLowResCacheSize.ValueChanged += SliderLowResCacheSize_OnValueChanged;
         ComboTheme.SelectionChanged += ComboTheme_OnSelectionChanged;
         ComboBackGround.SelectionChanged += ComboBackGround_OnSelectionChanged;
-        ComboMouseWheelBehaviour.SelectionChanged += ComboMouseWheel_OnSelectionChanged;
-        ComboMouseFwdBackBehaviour.SelectionChanged += ComboMouseFwdBackBehaviour_OnSelectionChanged;
         ButtonShowThumbnail.Toggled += ButtonShowThumbnail_OnToggled;
         ButtonThumbnailAnimation.Toggled += ButtonThumbnailAnimation_OnToggled;
         ButtonOpenExitZoom.Toggled += ButtonOpenExitZoom_OnToggled;
@@ -143,7 +140,6 @@ internal sealed partial class Settings
         ComboPanZoomNavBehaviour.SelectionChanged += ComboPanZoomNavBehaviour_OnSelectionChanged;
         ButtonEnableAutoHideMouse.Toggled += ButtonEnableAutoHideMouse_OnToggled;
         ButtonEnableAutoHideCaptionButtons.Toggled += ButtonEnableAutoHideCaptionButtons_OnToggled;
-        ButtonCtrlDragToMoveWindow.Toggled += ButtonCtrlDragToMoveWindow_OnToggled;
         ButtonClickOutsideImageToRestoreWindow.Toggled += ButtonClickOutsideImageToRestoreWindow_OnToggled;
         ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
         ButtonDecodeRawData.Toggled += ButtonDecodeRawData_OnToggled;
@@ -151,6 +147,8 @@ internal sealed partial class Settings
 
         // Initialize codec list view
         ListViewCodecs.ItemsSource = CodecDiscovery.GetAllCodecs();
+
+        InitializeShortcutsTab();
 
         PopulateSupportedLanguages();
         ComboLanguage.ItemsSource = _supportedLanguages;
@@ -248,13 +246,6 @@ internal sealed partial class Settings
     {
         AppConfig.Settings.AutoHideCaptionButtons = ButtonEnableAutoHideCaptionButtons.IsOn;
         SettingChanged?.Invoke(Setting.CaptionButtonsAutoHideToggle);
-        await AppConfig.SaveAsync();
-    }
-
-    private async void ButtonCtrlDragToMoveWindow_OnToggled(object sender, RoutedEventArgs e)
-    {
-        AppConfig.Settings.CtrlDragToMoveWindow = ButtonCtrlDragToMoveWindow.IsOn;
-        SettingChanged?.Invoke(Setting.CtrlDragToMoveWindowToggle);
         await AppConfig.SaveAsync();
     }
 
@@ -411,19 +402,6 @@ internal sealed partial class Settings
         SettingChanged?.Invoke(Setting.BackDrop);
         await AppConfig.SaveAsync();
     }
-    private async void ComboMouseWheel_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        var mouseWheelEnum = GetMouseWheelForIndex(ComboMouseWheelBehaviour.SelectedIndex);
-        AppConfig.Settings.DefaultMouseWheelBehavior = mouseWheelEnum;
-        await AppConfig.SaveAsync();
-    }
-
-    private async void ComboMouseFwdBackBehaviour_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        var behavior = GetMouseFwdBackBehaviorForIndex(ComboMouseFwdBackBehaviour.SelectedIndex);
-        AppConfig.Settings.MouseFwdBackBehavior = behavior;
-        await AppConfig.SaveAsync();
-    }
 
     private async void ButtonShowThumbnail_OnToggled(object sender, RoutedEventArgs e)
     {
@@ -529,32 +507,6 @@ internal sealed partial class Settings
             _ => WindowBackdropType.Transparent,
         };
     }
-
-    private static int GetIndexForMouseWheelBehaviour(DefaultMouseWheelBehavior behaviour)
-    {
-        return behaviour switch
-        {
-            DefaultMouseWheelBehavior.Zoom => 0,
-            DefaultMouseWheelBehavior.Navigate => 1,
-            _ => 0
-        };
-    }
-
-    private static DefaultMouseWheelBehavior GetMouseWheelForIndex(int index) => 
-        index == 1 ? DefaultMouseWheelBehavior.Navigate : DefaultMouseWheelBehavior.Zoom;
-
-    private static int GetIndexForMouseFwdBackBehavior(MouseFwdBackBehavior behaviour)
-    {
-        return behaviour switch
-        {
-            MouseFwdBackBehavior.Navigate => 0,
-            MouseFwdBackBehavior.StepZoom => 1,
-            _ => 0
-        };
-    }
-
-    private static MouseFwdBackBehavior GetMouseFwdBackBehaviorForIndex(int index) => 
-        index == 1 ? MouseFwdBackBehavior.StepZoom : MouseFwdBackBehavior.Navigate;
 
     private static int GetIndexForPanZoomBehaviour(PanZoomBehaviourOnNavigation behaviour)
     {
@@ -681,6 +633,125 @@ internal sealed partial class Settings
                 break;
         }
     }
+
+    // ───────────────────────── Shortcuts tab ─────────────────────────
+    // Edits are live: each one is persisted to usersettings.json and pushed to the photo window,
+    // which rebuilds its routing table. Every string resolves through MRT, in all 20 locales.
+
+    /// <summary>Built once, already carrying whatever the user saved.</summary>
+    private readonly List<ShortcutGroup> _allShortcutGroups = ShortcutCatalog.BuildAll();
+
+    /// <summary>The same row instances, flat. Grouping is a layout concern; conflict lookup and
+    /// persistence only care about the rows. Never bound to XAML, so the interface type is safe.</summary>
+    private IEnumerable<ShortcutRow> AllShortcutRows => _allShortcutGroups.SelectMany(g => g.Rows);
+
+    /// <summary>The Mouse section, as data. Built once so the rows keep their selection and their
+    /// visibility across a search, exactly like the command rows.</summary>
+    private readonly List<MouseRow> _mouseRows = MouseCatalog.BuildAll();
+
+    private void InitializeShortcutsTab()
+    {
+        ShortcutGroupsList.ItemsSource = _allShortcutGroups;
+        MouseRowsList.ItemsSource = _mouseRows;
+        ApplyShortcutFilter(string.Empty);
+    }
+
+    private async void MouseOption_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is ComboBox { Tag: MouseRow row } combo) await row.SelectAsync(combo.SelectedIndex);
+    }
+
+    /// <summary>Persists whatever the rows now hold and tells the photo window to re-resolve.
+    /// Called at the two points a change is complete: the editor closing, and Reset all.</summary>
+    private async Task SaveShortcutsAsync()
+    {
+        await ShortcutCatalog.SaveBindingsAsync(AllShortcutRows);
+        SettingChanged?.Invoke(Setting.KeyBindingsChanged);
+    }
+
+    private void ShortcutSearchBox_OnTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args) =>
+        ApplyShortcutFilter(sender.Text);
+
+    /// <summary>
+    /// Hides what does not match rather than rebuilding the bound collection. The cards are a
+    /// non-virtualized tree, so refilling it meant WinUI tearing down and re-creating every visible
+    /// SettingsCard on each keystroke; toggling a bound Visibility touches only what changed. Each
+    /// group decides for itself, exactly like the Mouse rows.
+    /// </summary>
+    private void ApplyShortcutFilter(string query)
+    {
+        query = query.Trim();
+
+        var anyShowing = false;
+        foreach (var group in _allShortcutGroups) anyShowing |= group.ApplyFilter(query);
+
+        anyShowing |= FilterMouseSection(query);
+
+        TxtNoShortcutResults.Visibility = anyShowing ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    /// <summary>Filters the Mouse rows and reports whether any survived, so the caller knows if the
+    /// page is truly empty. Each row decides for itself what it matches on.</summary>
+    private bool FilterMouseSection(string query)
+    {
+        var anyVisible = false;
+        foreach (var row in _mouseRows) anyVisible |= row.ApplyFilter(query);
+
+        // The heading would otherwise sit alone above nothing.
+        TextMouseSectionHeader.Visibility = anyVisible ? Visibility.Visible : Visibility.Collapsed;
+        return anyVisible;
+    }
+
+    /// <summary>Opens the editor for one command. It mutates the row directly, so there is nothing
+    /// to apply here - conflict lookup is by invariant token, never by display text.</summary>
+    private async void ShortcutEdit_OnClick(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is not ShortcutRow row) return;
+
+        var before = row.Keys.Select(k => k.Chord).ToList();
+
+        var dialog = new ShortcutEditDialog(row,
+            chord => ShortcutCatalog.FindOwner(AllShortcutRows, chord))
+        {
+            XamlRoot = Content.XamlRoot,
+            Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
+            RequestedTheme = ((FrameworkElement)Content).ActualTheme
+        };
+
+        await dialog.ShowAsync();
+
+        // Opening the editor and pressing Done should not rewrite usersettings.json or make the
+        // photo window re-resolve. Watching this row alone is enough: every edit the dialog can
+        // make - add, remove, reset, and the Reassign that also strips a chord off another
+        // command - changes this one too.
+        if (row.Keys.Select(k => k.Chord).SequenceEqual(before)) return;
+
+        // A Reassign can strip a chord off a second command, so the whole set is saved, not this row.
+        await SaveShortcutsAsync();
+    }
+
+    private async void ButtonResetAllShortcuts_OnClick(object sender, RoutedEventArgs e)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = L.Get("ShortcutResetAll_Title"),
+            Content = L.Get("ShortcutResetAll_Message"),
+            PrimaryButtonText = L.Get("ShortcutResetAll_ResetButton"),
+            CloseButtonText = L.Get("ShortcutResetAll_CancelButton"),
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = Content.XamlRoot,
+            Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
+            RequestedTheme = ((FrameworkElement)Content).ActualTheme
+        };
+
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+
+        foreach (var row in AllShortcutRows) row.ResetToDefault();
+
+        await SaveShortcutsAsync();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
 
     private async void ButtonThirdPartyLicenses_Click(object sender, RoutedEventArgs e)
     {

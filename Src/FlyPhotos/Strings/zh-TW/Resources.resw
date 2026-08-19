@@ -468,58 +468,6 @@
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>圖片適應螢幕</value>
   </data>
-  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
-    <value>左／右方向鍵：切換照片
-上／下方向鍵：放大或縮小
-滑鼠左鍵拖曳：平移照片
-滑鼠右鍵按住不放：放大
-滑鼠右鍵單擊：Windows 檔案總管右鍵選單
-
-滑鼠滾輪：放大或縮小／切換照片（依設定）
-Ctrl + 滑鼠滾輪：放大或縮小
-Alt + 滑鼠滾輪：切換照片
-左鍵 + 滑鼠滾輪：切換照片
-滑鼠滾輪左右傾斜：切換照片
-點擊滑鼠滾輪：全螢幕
-
-Ctrl + 方向鍵：平移照片
-Ctrl + +：放大
-Ctrl + -：縮小
-
-Alt + 左／右方向鍵：切換多頁 TIFF/ICO 的頁面
-
-Page Up/Page Down：切換至下一個縮放預設（100%、400%、符合視窗）
-Home：前往第一張照片
-End：前往最後一張照片
-
-縮圖列上滾輪：切換照片
-螢幕左右按鈕上滾輪：切換照片
-螢幕旋轉按鈕上滾輪：旋轉照片
-
-觸控板雙指左右滑動：切換照片
-觸控板雙指上下滑動：放大或縮小／切換照片（依設定）
-觸控板雙指開合：放大或縮小
-
-F11：全螢幕
-Enter：最大化
-
-Alt + Enter：顯示檔案內容（一般）
-D：顯示檔案內容（詳細資料）
-I：顯示相片資訊 (中繼資料) 面板
-
-W：在 Windows 檔案總管中顯示檔案
-S：開啟 Windows 分享對話方塊
-P：列印相片
-A：以實際大小縮放
-F：使照片符合視窗大小
-E：顯示外部應用面板
-Ctrl + 1–4：在外部應用程式 1–4 中開啟
-M：顯示「其他動作」功能表
-
-Del：刪除照片
-
-Esc：關閉設定或離開應用程式</value>
-  </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>選擇語言</value>
   </data>
@@ -540,10 +488,6 @@ Esc：關閉設定或離開應用程式</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>滑鼠滾輪</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + 滑鼠滾輪：永遠縮放。
-👉 Alt + 滑鼠滾輪：永遠切換照片。</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
     <value>⚠ 可能會使啟動變慢。Fly 會在啟動時等待完整解析度的照片載入。</value>
@@ -663,21 +607,6 @@ Esc：關閉設定或離開應用程式</value>
   <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
     <value>自動淡出與隱藏</value>
   </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>設定 Fly 如何處理照片快取。</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>快取</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>鍵盤快速鍵</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>自訂平移與縮放行為。</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>平移與縮放</value>
-  </data>
   <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - 設定</value>
   </data>
@@ -768,11 +697,8 @@ Esc：關閉設定或離開應用程式</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>自動隱藏視窗按鈕</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>拖曳背景或按住 Ctrl 鍵拖曳圖片即可移動視窗。</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>拖曳以移動視窗</value>
+    <value>在照片外滑鼠左鍵拖曳</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>圖片縮放方法</value>
@@ -839,5 +765,380 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>確定</value>
+  </data>
+  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+    <value>滑鼠</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Ctrl + 滑鼠滾輪</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>永遠放大或縮小</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + 滑鼠滾輪</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>永遠查看上一張或下一張</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>滑鼠滾輪左右傾斜</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>查看上一張或下一張</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>在照片上滑鼠左鍵拖曳</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>平移照片</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>點擊滑鼠滾輪</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>全螢幕</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>最大化或還原</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>無</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>滑鼠右鍵單擊</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>Windows 檔案總管的內容功能表</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>滑鼠右鍵按住不放</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>放大</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>無</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>在照片上連按兩下</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>實際大小或符合視窗</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Ctrl + 拖曳永遠移動視窗</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>移動視窗</value>
+  </data>
+  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+    <value>快速鍵</value>
+  </data>
+  <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
+    <value>搜尋命令與按鍵…</value>
+  </data>
+  <data name="ButtonResetAllShortcuts.Content" xml:space="preserve">
+    <value>全部重設…</value>
+  </data>
+  <data name="TxtNoShortcutResults.Text" xml:space="preserve">
+    <value>沒有符合搜尋的命令。</value>
+  </data>
+  <data name="TextShortcutNoKeys.Text" xml:space="preserve">
+    <value>無</value>
+  </data>
+  <data name="ButtonShortcutEdit.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>變更快速鍵</value>
+  </data>
+  <data name="ShortcutEditToolTip.Content" xml:space="preserve">
+    <value>變更快速鍵</value>
+  </data>
+  <data name="ShortcutResetAll_Title" xml:space="preserve">
+    <value>要重設所有快速鍵嗎？</value>
+  </data>
+  <data name="ShortcutResetAll_Message" xml:space="preserve">
+    <value>所有命令都會恢復為預設按鍵。滑鼠設定不會變更。</value>
+  </data>
+  <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
+    <value>全部重設</value>
+  </data>
+  <data name="ShortcutResetAll_CancelButton" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="TextShortcutCurrent.Text" xml:space="preserve">
+    <value>目前的快速鍵</value>
+  </data>
+  <data name="TextShortcutNoneAssigned.Text" xml:space="preserve">
+    <value>未指派快速鍵。</value>
+  </data>
+  <data name="TextShortcutCapturePrompt.Text" xml:space="preserve">
+    <value>按一下下方的方塊，然後按下要新增的按鍵。</value>
+  </data>
+  <data name="ButtonShortcutRemove.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>移除此快速鍵</value>
+  </data>
+  <data name="ShortcutRemoveToolTip.Content" xml:space="preserve">
+    <value>移除</value>
+  </data>
+  <data name="ButtonShortcutReassign.Content" xml:space="preserve">
+    <value>重新指派</value>
+  </data>
+  <data name="ButtonShortcutResetDefault.Content" xml:space="preserve">
+    <value>重設為預設值</value>
+  </data>
+  <data name="ShortcutCapture_DoneButton" xml:space="preserve">
+    <value>完成</value>
+  </data>
+  <data name="ShortcutCapture_Idle" xml:space="preserve">
+    <value>按一下這裡以新增快速鍵</value>
+  </data>
+  <data name="ShortcutCapture_Waiting" xml:space="preserve">
+    <value>正在等待按鍵…</value>
+  </data>
+  <data name="ShortcutCapture_WinKeyRejected" xml:space="preserve">
+    <value>使用 Windows 鍵的快速鍵由 Windows 保留。</value>
+  </data>
+  <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
+    <value>請切換到英文輸入法以設定快速鍵。</value>
+  </data>
+  <data name="ShortcutCapture_AlreadyOnThisCommand" xml:space="preserve">
+    <value>{0} 已指派給此命令。</value>
+  </data>
+  <data name="ShortcutCapture_ReservedByOther" xml:space="preserve">
+    <value>{0} 已固定用於「{1}」，無法變更。</value>
+  </data>
+  <data name="ShortcutCapture_Conflict" xml:space="preserve">
+    <value>{0} 已由「{1}」使用。重新指派後，該命令將失去此快速鍵。</value>
+  </data>
+  <data name="ShortcutGroup_Navigation" xml:space="preserve">
+    <value>瀏覽</value>
+  </data>
+  <data name="ShortcutGroup_ZoomPan" xml:space="preserve">
+    <value>縮放與平移</value>
+  </data>
+  <data name="ShortcutGroup_Rotate" xml:space="preserve">
+    <value>旋轉</value>
+  </data>
+  <data name="ShortcutGroup_View" xml:space="preserve">
+    <value>檢視</value>
+  </data>
+  <data name="ShortcutGroup_File" xml:space="preserve">
+    <value>檔案</value>
+  </data>
+  <data name="ShortcutGroup_OpenWith" xml:space="preserve">
+    <value>開啟方式</value>
+  </data>
+  <data name="ShortcutName_NextPhoto" xml:space="preserve">
+    <value>下一張照片</value>
+  </data>
+  <data name="ShortcutName_PrevPhoto" xml:space="preserve">
+    <value>上一張照片</value>
+  </data>
+  <data name="ShortcutName_FirstPhoto" xml:space="preserve">
+    <value>第一張照片</value>
+  </data>
+  <data name="ShortcutName_LastPhoto" xml:space="preserve">
+    <value>最後一張照片</value>
+  </data>
+  <data name="ShortcutName_NextPage" xml:space="preserve">
+    <value>下一頁</value>
+  </data>
+  <data name="ShortcutName_PrevPage" xml:space="preserve">
+    <value>上一頁</value>
+  </data>
+  <data name="ShortcutName_ZoomIn" xml:space="preserve">
+    <value>放大</value>
+  </data>
+  <data name="ShortcutName_ZoomOut" xml:space="preserve">
+    <value>縮小</value>
+  </data>
+  <data name="ShortcutName_StepZoomIn" xml:space="preserve">
+    <value>分段放大</value>
+  </data>
+  <data name="ShortcutName_StepZoomOut" xml:space="preserve">
+    <value>分段縮小</value>
+  </data>
+  <data name="ShortcutName_ActualSize" xml:space="preserve">
+    <value>實際大小 (1:1)</value>
+  </data>
+  <data name="ShortcutName_FitToWindow" xml:space="preserve">
+    <value>符合視窗大小</value>
+  </data>
+  <data name="ShortcutName_PanUp" xml:space="preserve">
+    <value>向上平移</value>
+  </data>
+  <data name="ShortcutName_PanDown" xml:space="preserve">
+    <value>向下平移</value>
+  </data>
+  <data name="ShortcutName_PanLeft" xml:space="preserve">
+    <value>向左平移</value>
+  </data>
+  <data name="ShortcutName_PanRight" xml:space="preserve">
+    <value>向右平移</value>
+  </data>
+  <data name="ShortcutName_RotateLeft" xml:space="preserve">
+    <value>向左旋轉</value>
+  </data>
+  <data name="ShortcutName_RotateRight" xml:space="preserve">
+    <value>向右旋轉</value>
+  </data>
+  <data name="ShortcutName_FullScreen" xml:space="preserve">
+    <value>全螢幕</value>
+  </data>
+  <data name="ShortcutName_MaximizeRestore" xml:space="preserve">
+    <value>最大化或還原</value>
+  </data>
+  <data name="ShortcutName_PhotoInfoPanel" xml:space="preserve">
+    <value>相片資訊面板</value>
+  </data>
+  <data name="ShortcutName_CloseApp" xml:space="preserve">
+    <value>關閉 FlyPhotos</value>
+  </data>
+  <data name="ShortcutName_CopyPhoto" xml:space="preserve">
+    <value>複製照片</value>
+  </data>
+  <data name="ShortcutName_DeletePhoto" xml:space="preserve">
+    <value>刪除照片</value>
+  </data>
+  <data name="ShortcutName_RenamePhoto" xml:space="preserve">
+    <value>重新命名照片</value>
+  </data>
+  <data name="ShortcutName_PrintPhoto" xml:space="preserve">
+    <value>列印照片</value>
+  </data>
+  <data name="ShortcutName_SharePhoto" xml:space="preserve">
+    <value>共用照片</value>
+  </data>
+  <data name="ShortcutName_ShowInExplorer" xml:space="preserve">
+    <value>開啟檔案位置</value>
+  </data>
+  <data name="ShortcutName_FileProperties" xml:space="preserve">
+    <value>檔案內容</value>
+  </data>
+  <data name="ShortcutName_FileDetails" xml:space="preserve">
+    <value>檔案詳細資料</value>
+  </data>
+  <data name="ShortcutName_MoreActionsMenu" xml:space="preserve">
+    <value>「其他動作」功能表</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp1" xml:space="preserve">
+    <value>在外部應用程式 1 中開啟</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp2" xml:space="preserve">
+    <value>在外部應用程式 2 中開啟</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp3" xml:space="preserve">
+    <value>在外部應用程式 3 中開啟</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp4" xml:space="preserve">
+    <value>在外部應用程式 4 中開啟</value>
+  </data>
+  <data name="ShortcutName_OpenWithPanel" xml:space="preserve">
+    <value>「開啟方式」面板</value>
+  </data>
+  <data name="ShortcutDesc_NextPage" xml:space="preserve">
+    <value>多頁 TIFF 與 ICO 檔案</value>
+  </data>
+  <data name="ShortcutDesc_PrevPage" xml:space="preserve">
+    <value>多頁 TIFF 與 ICO 檔案</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
+    <value>跳至下一個預設值：100%、400%、符合視窗</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
+    <value>回到上一個預設值</value>
+  </data>
+  <data name="ShortcutDesc_PhotoInfoPanel" xml:space="preserve">
+    <value>相機與 EXIF 中繼資料</value>
+  </data>
+  <data name="ShortcutDesc_CloseApp" xml:space="preserve">
+    <value>一律可用 — 無法重新指派</value>
+  </data>
+  <data name="ShortcutDesc_CopyPhoto" xml:space="preserve">
+    <value>將檔案複製到剪貼簿</value>
+  </data>
+  <data name="ShortcutDesc_DeletePhoto" xml:space="preserve">
+    <value>無法重新指派</value>
+  </data>
+  <data name="ShortcutDesc_SharePhoto" xml:space="preserve">
+    <value>開啟 Windows 分享對話方塊</value>
+  </data>
+  <data name="ShortcutDesc_FileProperties" xml:space="preserve">
+    <value>「一般」索引標籤</value>
+  </data>
+  <data name="ShortcutDesc_FileDetails" xml:space="preserve">
+    <value>「詳細資料」索引標籤</value>
+  </data>
+  <data name="ShortcutDesc_OpenWithPanel" xml:space="preserve">
+    <value>顯示所有已設定的應用程式</value>
+  </data>
+  <data name="ShortcutMod_Ctrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="ShortcutMod_Alt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="ShortcutMod_Shift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="ShortcutKey_LeftArrow" xml:space="preserve">
+    <value>左方向鍵</value>
+  </data>
+  <data name="ShortcutKey_RightArrow" xml:space="preserve">
+    <value>右方向鍵</value>
+  </data>
+  <data name="ShortcutKey_UpArrow" xml:space="preserve">
+    <value>上方向鍵</value>
+  </data>
+  <data name="ShortcutKey_DownArrow" xml:space="preserve">
+    <value>下方向鍵</value>
+  </data>
+  <data name="ShortcutKey_Esc" xml:space="preserve">
+    <value>Esc</value>
+  </data>
+  <data name="ShortcutKey_Backspace" xml:space="preserve">
+    <value>Backspace</value>
+  </data>
+  <data name="ShortcutKey_PageUp" xml:space="preserve">
+    <value>Page Up</value>
+  </data>
+  <data name="ShortcutKey_PageDown" xml:space="preserve">
+    <value>Page Down</value>
+  </data>
+  <data name="ShortcutKey_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="ShortcutKey_End" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="ShortcutKey_Enter" xml:space="preserve">
+    <value>Enter</value>
+  </data>
+  <data name="ShortcutKey_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="ShortcutKey_Space" xml:space="preserve">
+    <value>空白鍵</value>
+  </data>
+  <data name="ShortcutKey_Tab" xml:space="preserve">
+    <value>Tab</value>
+  </data>
+  <data name="ShortcutKey_NumAdd" xml:space="preserve">
+    <value>數字鍵台 +</value>
+  </data>
+  <data name="ShortcutKey_NumSubtract" xml:space="preserve">
+    <value>數字鍵台 -</value>
+  </data>
+  <data name="ShortcutKey_NumMultiply" xml:space="preserve">
+    <value>數字鍵台 *</value>
+  </data>
+  <data name="ShortcutKey_NumDivide" xml:space="preserve">
+    <value>數字鍵台 /</value>
+  </data>
+  <data name="ShortcutKey_NumDecimal" xml:space="preserve">
+    <value>數字鍵台 .</value>
+  </data>
+  <data name="ShortcutKey_NumPad" xml:space="preserve">
+    <value>數字鍵台 {0}</value>
   </data>
 </root>

@@ -23,13 +23,47 @@ internal static class Util
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public static VirtualKey GetKeyThatProduces(char character)
+    /// <summary>
+    /// The key that types <paramref name="character"/> on the active layout, and whether Shift is
+    /// needed to reach it. VkKeyScanEx packs the shift state into the high byte; discarding it means
+    /// a chord built from the result never matches what the user actually presses, because on US and
+    /// most EU layouts '+' is Shift and the OEM_PLUS key rather than a key of its own.
+    /// </summary>
+    public static (VirtualKey Key, bool NeedsShift) GetKeyThatProduces(char character)
     {
         IntPtr layout = Win32Methods.GetKeyboardLayout(0);
         short vkScanResult = Win32Methods.VkKeyScanEx((byte)character, layout);
-        int virtualKeyCode = vkScanResult & 0xff;
-        return (VirtualKey)virtualKeyCode;
+        return ((VirtualKey)(vkScanResult & 0xff), (vkScanResult & 0x100) != 0);
     }
+
+    /// <summary>
+    /// The character printed on <paramref name="key"/>'s keycap on the active layout, or an empty
+    /// string when the key types none. The inverse of <see cref="GetKeyThatProduces"/>.
+    ///
+    /// VirtualKey names no key in the OEM range, so ToString on a punctuation key yields its raw
+    /// number - a shortcut shown as "Ctrl + 186" rather than "Ctrl + ;". Asking the layout is also
+    /// the only correct answer, because which character key 186 types differs per layout.
+    /// </summary>
+    public static string GetKeyCapText(VirtualKey key)
+    {
+        // Asks the OS per call and the rows are built once, so switching layouts with the Settings
+        // window open leaves stale keycaps until it is reopened.
+        IntPtr layout = Win32Methods.GetKeyboardLayout(0);
+        uint mapped = Win32Methods.MapVirtualKeyEx((uint)key, Win32Methods.MAPVK_VK_TO_CHAR, layout);
+
+        // The top bit only flags a dead key; the character itself is still in the low word, and a
+        // dead key has a keycap like any other. 0 means the key types nothing - a function key.
+        var c = (char)(mapped & 0xffff);
+        return char.IsControl(c) || c == '\0' ? string.Empty : c.ToString();
+    }
+
+    /// <summary>
+    /// Null-tolerant, case-insensitive substring test for search boxes. Culture-aware rather than
+    /// ordinal because what is being matched is localized text the user can see, and ordinal gets
+    /// the Turkish dotted I and the German sharp S wrong.
+    /// </summary>
+    public static bool ContainsIgnoreCase(string? haystack, string needle) =>
+        haystack != null && haystack.Contains(needle, StringComparison.CurrentCultureIgnoreCase);
 
     public static bool IsControlPressed()
     {
@@ -40,6 +74,12 @@ internal static class Util
     public static bool IsAltPressed()
     {
         var coreWindow = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Menu);
+        return coreWindow.HasFlag(CoreVirtualKeyStates.Down);
+    }
+
+    public static bool IsShiftPressed()
+    {
+        var coreWindow = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift);
         return coreWindow.HasFlag(CoreVirtualKeyStates.Down);
     }
 

@@ -468,58 +468,6 @@
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>ملاءمة الصورة للشاشة</value>
   </data>
-  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
-    <value>مفاتيح الأسهم لليسار/لليمين : التنقل بين الصور
-مفاتيح الأسهم للأعلى/للأسفل : التكبير أو التصغير
-النقر بزر الماوس الأيسر والسحب : تحريك الصورة
-النقر بزر الماوس الأيمن مع الاستمرار : تكبير
-النقر بزر الماوس الأيمن : قائمة السياق لمستكشف Windows
-
-عجلة الماوس : التكبير أو التصغير / التنقل بين الصور (حسب الإعداد)
-Ctrl + عجلة الماوس : التكبير أو التصغير
-Alt + عجلة الماوس : التنقل بين الصور
-النقر بالزر الأيسر + عجلة الماوس : التنقل بين الصور
-إمالة عجلة الماوس لليسار أو لليمين : التنقل بين الصور
-النقر بعجلة الماوس : ملء الشاشة
-
-Ctrl + مفاتيح الأسهم : تحريك الصورة
-Ctrl + + : تكبير
-Ctrl + - : تصغير
-
-Alt + مفاتيح الأسهم لليسار/لليمين : التنقل بين الصفحات في ملفات TIFF/ICO متعددة الصفحات
-
-Page Up/Page Down : التكبير/التصغير إلى الإعداد المسبق التالي (100%، 400%، ملاءمة)
-Home : الانتقال إلى الصورة الأولى
-End : الانتقال إلى الصورة الأخيرة
-
-عجلة الماوس على شريط الصور المصغرة : التنقل بين الصور
-عجلة الماوس على الزر الأيسر/الأيمن على الشاشة : التنقل بين الصور
-عجلة الماوس على زر التدوير على الشاشة : تدوير الصورة
-
-التمرير بإصبعين على لوحة اللمس لليسار أو لليمين : التنقل بين الصور
-التمرير بإصبعين على لوحة اللمس للأعلى أو للأسفل : التكبير أو التصغير / التنقل بين الصور (حسب إعداد عجلة الماوس)
-ضم أو مباعدة الإصبعين على لوحة اللمس : التكبير أو التصغير
-
-F11 : ملء الشاشة
-Enter : تكبير
-
-Alt + Enter : عرض خصائص الملف (علامة التبويب "عام")
-D : عرض خصائص الملف (علامة التبويب "التفاصيل")
-I : إظهار لوحة معلومات الصورة (البيانات الوصفية)
-
-W : عرض الملف في مستكشف ملفات Windows
-S : عرض مربع حوار مشاركة Windows للملف
-P : طباعة الصورة
-A : تكبير/تصغير الصورة إلى الحجم الفعلي
-F : ملاءمة للنافذة
-E : عرض لوحة التطبيقات الخارجية
-Ctrl + 1–4: الفتح في التطبيق الخارجي 1–4
-M : إظهار قائمة مزيد من الإجراءات
-
-Del : حذف الصورة
-
-Esc : إغلاق الإعدادات أو الخروج من التطبيق</value>
-  </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>اللغة</value>
   </data>
@@ -540,10 +488,6 @@ Esc : إغلاق الإعدادات أو الخروج من التطبيق</value
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>عجلة الماوس</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + عجلة الماوس للتكبير أو التصغير دائمًا.
-👉 Alt + عجلة الماوس للتنقل دائمًا.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
     <value>⚠ قد يؤدي ذلك إلى إبطاء بدء التشغيل. ينتظر التطبيق تحميل الصورة بالدقة الكاملة عند تشغيله.</value>
@@ -663,21 +607,6 @@ Esc : إغلاق الإعدادات أو الخروج من التطبيق</value
   <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
     <value>التلاشي والإخفاء التلقائي</value>
   </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>تكوين كيفية معالجة التطبيق للتخزين المؤقت للصور.</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>التخزين المؤقت</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>اختصارات لوحة المفاتيح</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>تخصيص سلوك التحريك والتكبير/التصغير.</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>التحريك والتكبير/التصغير</value>
-  </data>
   <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - الإعدادات</value>
   </data>
@@ -768,11 +697,8 @@ Esc : إغلاق الإعدادات أو الخروج من التطبيق</value
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>إخفاء أزرار التحكم في النافذة تلقائيًا</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>اسحب الخلفية أو Ctrl + اسحب الصورة لتحريك النافذة.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>السحب لتحريك النافذة</value>
+    <value>النقر بزر الماوس الأيسر والسحب خارج الصورة</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>طريقة تحجيم الصورة</value>
@@ -839,5 +765,380 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>موافق</value>
+  </data>
+  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+    <value>الماوس</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Ctrl + عجلة الماوس</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>التكبير أو التصغير دائمًا</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + عجلة الماوس</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>عرض التالي أو السابق دائمًا</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>إمالة عجلة الماوس لليسار أو لليمين</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>عرض التالي أو السابق</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>النقر بزر الماوس الأيسر والسحب على الصورة</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>تحريك الصورة</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>النقر بعجلة الماوس</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>ملء الشاشة</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>تكبير أو استعادة</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>لا شيء</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>النقر بزر الماوس الأيمن</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>قائمة السياق لمستكشف Windows</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>النقر بزر الماوس الأيمن مع الاستمرار</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>تكبير</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>لا شيء</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>النقر المزدوج على الصورة</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>تكبير إلى الحجم الفعلي أو ملاءمة للنافذة</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Ctrl + السحب يحرك النافذة دائمًا</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>تحريك النافذة</value>
+  </data>
+  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+    <value>الاختصارات</value>
+  </data>
+  <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
+    <value>البحث عن الأوامر والمفاتيح…</value>
+  </data>
+  <data name="ButtonResetAllShortcuts.Content" xml:space="preserve">
+    <value>إعادة تعيين الكل…</value>
+  </data>
+  <data name="TxtNoShortcutResults.Text" xml:space="preserve">
+    <value>لا توجد أوامر مطابقة لبحثك.</value>
+  </data>
+  <data name="TextShortcutNoKeys.Text" xml:space="preserve">
+    <value>بلا</value>
+  </data>
+  <data name="ButtonShortcutEdit.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>تغيير الاختصارات</value>
+  </data>
+  <data name="ShortcutEditToolTip.Content" xml:space="preserve">
+    <value>تغيير الاختصارات</value>
+  </data>
+  <data name="ShortcutResetAll_Title" xml:space="preserve">
+    <value>إعادة تعيين جميع الاختصارات؟</value>
+  </data>
+  <data name="ShortcutResetAll_Message" xml:space="preserve">
+    <value>ستعود جميع الأوامر إلى مفاتيحها الافتراضية. لن تتغير إعدادات الماوس.</value>
+  </data>
+  <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
+    <value>إعادة تعيين الكل</value>
+  </data>
+  <data name="ShortcutResetAll_CancelButton" xml:space="preserve">
+    <value>إلغاء</value>
+  </data>
+  <data name="TextShortcutCurrent.Text" xml:space="preserve">
+    <value>الاختصارات الحالية</value>
+  </data>
+  <data name="TextShortcutNoneAssigned.Text" xml:space="preserve">
+    <value>لم يتم تعيين أي اختصار.</value>
+  </data>
+  <data name="TextShortcutCapturePrompt.Text" xml:space="preserve">
+    <value>انقر على المربع أدناه، ثم اضغط على المفاتيح التي تريد إضافتها.</value>
+  </data>
+  <data name="ButtonShortcutRemove.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>إزالة هذا الاختصار</value>
+  </data>
+  <data name="ShortcutRemoveToolTip.Content" xml:space="preserve">
+    <value>إزالة</value>
+  </data>
+  <data name="ButtonShortcutReassign.Content" xml:space="preserve">
+    <value>إعادة التعيين</value>
+  </data>
+  <data name="ButtonShortcutResetDefault.Content" xml:space="preserve">
+    <value>إعادة التعيين إلى الافتراضي</value>
+  </data>
+  <data name="ShortcutCapture_DoneButton" xml:space="preserve">
+    <value>تم</value>
+  </data>
+  <data name="ShortcutCapture_Idle" xml:space="preserve">
+    <value>انقر هنا لإضافة اختصار</value>
+  </data>
+  <data name="ShortcutCapture_Waiting" xml:space="preserve">
+    <value>في انتظار المفاتيح…</value>
+  </data>
+  <data name="ShortcutCapture_WinKeyRejected" xml:space="preserve">
+    <value>يحتفظ Windows بالاختصارات التي تستخدم مفتاح Windows.</value>
+  </data>
+  <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
+    <value>بدّل إلى أسلوب إدخال لاتيني لتعيين اختصار.</value>
+  </data>
+  <data name="ShortcutCapture_AlreadyOnThisCommand" xml:space="preserve">
+    <value>{0} معيّن بالفعل لهذا الأمر.</value>
+  </data>
+  <data name="ShortcutCapture_ReservedByOther" xml:space="preserve">
+    <value>{0} ثابت للأمر "{1}" ولا يمكن تغييره.</value>
+  </data>
+  <data name="ShortcutCapture_Conflict" xml:space="preserve">
+    <value>{0} مستخدم بالفعل بواسطة "{1}". إعادة تعيينه ستترك ذلك الأمر بلا هذا الاختصار.</value>
+  </data>
+  <data name="ShortcutGroup_Navigation" xml:space="preserve">
+    <value>التنقل</value>
+  </data>
+  <data name="ShortcutGroup_ZoomPan" xml:space="preserve">
+    <value>التكبير/التصغير والتحريك</value>
+  </data>
+  <data name="ShortcutGroup_Rotate" xml:space="preserve">
+    <value>التدوير</value>
+  </data>
+  <data name="ShortcutGroup_View" xml:space="preserve">
+    <value>العرض</value>
+  </data>
+  <data name="ShortcutGroup_File" xml:space="preserve">
+    <value>الملف</value>
+  </data>
+  <data name="ShortcutGroup_OpenWith" xml:space="preserve">
+    <value>فتح باستخدام</value>
+  </data>
+  <data name="ShortcutName_NextPhoto" xml:space="preserve">
+    <value>الصورة التالية</value>
+  </data>
+  <data name="ShortcutName_PrevPhoto" xml:space="preserve">
+    <value>الصورة السابقة</value>
+  </data>
+  <data name="ShortcutName_FirstPhoto" xml:space="preserve">
+    <value>الصورة الأولى</value>
+  </data>
+  <data name="ShortcutName_LastPhoto" xml:space="preserve">
+    <value>الصورة الأخيرة</value>
+  </data>
+  <data name="ShortcutName_NextPage" xml:space="preserve">
+    <value>الصفحة التالية</value>
+  </data>
+  <data name="ShortcutName_PrevPage" xml:space="preserve">
+    <value>الصفحة السابقة</value>
+  </data>
+  <data name="ShortcutName_ZoomIn" xml:space="preserve">
+    <value>تكبير</value>
+  </data>
+  <data name="ShortcutName_ZoomOut" xml:space="preserve">
+    <value>تصغير</value>
+  </data>
+  <data name="ShortcutName_StepZoomIn" xml:space="preserve">
+    <value>تكبير تدريجي</value>
+  </data>
+  <data name="ShortcutName_StepZoomOut" xml:space="preserve">
+    <value>تصغير تدريجي</value>
+  </data>
+  <data name="ShortcutName_ActualSize" xml:space="preserve">
+    <value>الحجم الفعلي (1:1)</value>
+  </data>
+  <data name="ShortcutName_FitToWindow" xml:space="preserve">
+    <value>ملاءمة للنافذة</value>
+  </data>
+  <data name="ShortcutName_PanUp" xml:space="preserve">
+    <value>التحريك لأعلى</value>
+  </data>
+  <data name="ShortcutName_PanDown" xml:space="preserve">
+    <value>التحريك لأسفل</value>
+  </data>
+  <data name="ShortcutName_PanLeft" xml:space="preserve">
+    <value>التحريك لليسار</value>
+  </data>
+  <data name="ShortcutName_PanRight" xml:space="preserve">
+    <value>التحريك لليمين</value>
+  </data>
+  <data name="ShortcutName_RotateLeft" xml:space="preserve">
+    <value>التدوير لليسار</value>
+  </data>
+  <data name="ShortcutName_RotateRight" xml:space="preserve">
+    <value>التدوير لليمين</value>
+  </data>
+  <data name="ShortcutName_FullScreen" xml:space="preserve">
+    <value>ملء الشاشة</value>
+  </data>
+  <data name="ShortcutName_MaximizeRestore" xml:space="preserve">
+    <value>تكبير أو استعادة</value>
+  </data>
+  <data name="ShortcutName_PhotoInfoPanel" xml:space="preserve">
+    <value>لوحة معلومات الصورة</value>
+  </data>
+  <data name="ShortcutName_CloseApp" xml:space="preserve">
+    <value>إغلاق FlyPhotos</value>
+  </data>
+  <data name="ShortcutName_CopyPhoto" xml:space="preserve">
+    <value>نسخ الصورة</value>
+  </data>
+  <data name="ShortcutName_DeletePhoto" xml:space="preserve">
+    <value>حذف الصورة</value>
+  </data>
+  <data name="ShortcutName_RenamePhoto" xml:space="preserve">
+    <value>إعادة تسمية الصورة</value>
+  </data>
+  <data name="ShortcutName_PrintPhoto" xml:space="preserve">
+    <value>طباعة الصورة</value>
+  </data>
+  <data name="ShortcutName_SharePhoto" xml:space="preserve">
+    <value>مشاركة الصورة</value>
+  </data>
+  <data name="ShortcutName_ShowInExplorer" xml:space="preserve">
+    <value>فتح موقع الملف</value>
+  </data>
+  <data name="ShortcutName_FileProperties" xml:space="preserve">
+    <value>خصائص الملف</value>
+  </data>
+  <data name="ShortcutName_FileDetails" xml:space="preserve">
+    <value>تفاصيل الملف</value>
+  </data>
+  <data name="ShortcutName_MoreActionsMenu" xml:space="preserve">
+    <value>قائمة مزيد من الإجراءات</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp1" xml:space="preserve">
+    <value>الفتح في التطبيق 1</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp2" xml:space="preserve">
+    <value>الفتح في التطبيق 2</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp3" xml:space="preserve">
+    <value>الفتح في التطبيق 3</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp4" xml:space="preserve">
+    <value>الفتح في التطبيق 4</value>
+  </data>
+  <data name="ShortcutName_OpenWithPanel" xml:space="preserve">
+    <value>لوحة "فتح باستخدام"</value>
+  </data>
+  <data name="ShortcutDesc_NextPage" xml:space="preserve">
+    <value>ملفات TIFF وICO متعددة الصفحات</value>
+  </data>
+  <data name="ShortcutDesc_PrevPage" xml:space="preserve">
+    <value>ملفات TIFF وICO متعددة الصفحات</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
+    <value>الانتقال إلى الإعداد المسبق التالي: 100%، 400%، ملاءمة</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
+    <value>العودة إلى الإعداد المسبق السابق</value>
+  </data>
+  <data name="ShortcutDesc_PhotoInfoPanel" xml:space="preserve">
+    <value>بيانات الكاميرا وEXIF الوصفية</value>
+  </data>
+  <data name="ShortcutDesc_CloseApp" xml:space="preserve">
+    <value>متاح دائمًا — لا يمكن إعادة تعيينه</value>
+  </data>
+  <data name="ShortcutDesc_CopyPhoto" xml:space="preserve">
+    <value>نسخ الملف إلى الحافظة</value>
+  </data>
+  <data name="ShortcutDesc_DeletePhoto" xml:space="preserve">
+    <value>لا يمكن إعادة تعيينه</value>
+  </data>
+  <data name="ShortcutDesc_SharePhoto" xml:space="preserve">
+    <value>فتح مربع حوار مشاركة Windows</value>
+  </data>
+  <data name="ShortcutDesc_FileProperties" xml:space="preserve">
+    <value>علامة التبويب "عام"</value>
+  </data>
+  <data name="ShortcutDesc_FileDetails" xml:space="preserve">
+    <value>علامة التبويب "التفاصيل"</value>
+  </data>
+  <data name="ShortcutDesc_OpenWithPanel" xml:space="preserve">
+    <value>عرض جميع التطبيقات المكوّنة</value>
+  </data>
+  <data name="ShortcutMod_Ctrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="ShortcutMod_Alt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="ShortcutMod_Shift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="ShortcutKey_LeftArrow" xml:space="preserve">
+    <value>السهم الأيسر</value>
+  </data>
+  <data name="ShortcutKey_RightArrow" xml:space="preserve">
+    <value>السهم الأيمن</value>
+  </data>
+  <data name="ShortcutKey_UpArrow" xml:space="preserve">
+    <value>السهم لأعلى</value>
+  </data>
+  <data name="ShortcutKey_DownArrow" xml:space="preserve">
+    <value>السهم لأسفل</value>
+  </data>
+  <data name="ShortcutKey_Esc" xml:space="preserve">
+    <value>Esc</value>
+  </data>
+  <data name="ShortcutKey_Backspace" xml:space="preserve">
+    <value>Backspace</value>
+  </data>
+  <data name="ShortcutKey_PageUp" xml:space="preserve">
+    <value>Page Up</value>
+  </data>
+  <data name="ShortcutKey_PageDown" xml:space="preserve">
+    <value>Page Down</value>
+  </data>
+  <data name="ShortcutKey_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="ShortcutKey_End" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="ShortcutKey_Enter" xml:space="preserve">
+    <value>Enter</value>
+  </data>
+  <data name="ShortcutKey_Delete" xml:space="preserve">
+    <value>Del</value>
+  </data>
+  <data name="ShortcutKey_Space" xml:space="preserve">
+    <value>مسافة</value>
+  </data>
+  <data name="ShortcutKey_Tab" xml:space="preserve">
+    <value>Tab</value>
+  </data>
+  <data name="ShortcutKey_NumAdd" xml:space="preserve">
+    <value>Num +</value>
+  </data>
+  <data name="ShortcutKey_NumSubtract" xml:space="preserve">
+    <value>Num -</value>
+  </data>
+  <data name="ShortcutKey_NumMultiply" xml:space="preserve">
+    <value>Num *</value>
+  </data>
+  <data name="ShortcutKey_NumDivide" xml:space="preserve">
+    <value>Num /</value>
+  </data>
+  <data name="ShortcutKey_NumDecimal" xml:space="preserve">
+    <value>Num .</value>
+  </data>
+  <data name="ShortcutKey_NumPad" xml:space="preserve">
+    <value>Num {0}</value>
   </data>
 </root>

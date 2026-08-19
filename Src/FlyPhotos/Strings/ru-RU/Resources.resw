@@ -208,10 +208,10 @@
     <value>Прозрачный</value>
   </data>
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
-    <value>Просмотр фото вперёд или назад</value>
+    <value>Просмотр следующего или предыдущего фото</value>
   </data>
   <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
-    <value>Просмотр фото вперёд или назад</value>
+    <value>Просмотр следующего или предыдущего фото</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Увеличение или уменьшение</value>
@@ -468,59 +468,6 @@
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Подогнать под размер экрана</value>
   </data>
-  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
-    <value>Стрелка влево/вправо : Просмотр фотографий
-Стрелка вверх/вниз : Увеличение или уменьшение
-
-Удержание правой кнопки мыши : Увеличить
-Правый клик мыши : Контекстное меню проводника Windows
-Левая кнопка мыши + перетаскивание : Панорамирование фото
-
-Колесо мыши : Увеличение/уменьшение или Просмотр фото (в зависимости от настройки)
-Ctrl + колесо мыши : Увеличение или уменьшение
-Alt + колесо мыши : Просмотр фотографий
-Левая кнопка мыши + колесо мыши : Просмотр фотографий
-Наклон колеса мыши влево/вправо : Просмотр фотографий
-Нажатие на колесо мыши : Полноэкранный режим
-
-Ctrl + стрелки : Панорамирование фото
-Ctrl + + : Увеличить
-Ctrl + - : Уменьшить
-
-Alt + стрелка влево/вправо : Просмотр страниц в многостраничном TIFF/ICO
-
-Page Up/Page Down : Увеличение/уменьшение до следующего предустановленного масштаба (100%, 400%, по размеру экрана)
-Home : Перейти к первому фото
-End : Перейти к последнему фото
-
-Колесо мыши на панели миниатюр : Просмотр фотографий
-Колесо мыши на экранной кнопке влево/вправо : Просмотр фотографий
-Колесо мыши на экранной кнопке поворота : Повернуть фото
-
-Свайп двумя пальцами влево/вправо на тачпаде : Просмотр фотографий
-Свайп двумя пальцами вверх/вниз на тачпаде : Увеличение/уменьшение или просмотр фото (в зависимости от настройки колеса мыши)
-Жест «щипок» на тачпаде : Увеличение или уменьшение
-
-F11 : Полноэкранный режим
-Enter : Развернуть
-
-Alt + Enter : Свойства файла (Общие)
-D : Свойства файла (Подробно)
-I : Показать панель сведений о фото (метаданных)
-
-W : Показать файл в проводнике Windows
-S : Открыть окно общего доступа Windows для файла
-P : Печать фото
-A : Масштаб 100% (фактический размер)
-F : По размеру окна
-E : Показать панель внешних приложений
-Ctrl + 1–4: Открыть во внешнем приложении 1–4
-M : Показать меню дополнительных действий
-
-Del : Удалить фото
-
-Esc : Закрыть параметры или выйти из приложения</value>
-  </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>Выбор языка</value>
   </data>
@@ -541,10 +488,6 @@ Esc : Закрыть параметры или выйти из приложен�
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>Колесо мыши</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + колесо мыши всегда масштабирует
-👉 Alt + колесо мыши всегда переключает фото</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
     <value>⚠ Может замедлить запуск. FlyPhotos загружает фото в полном разрешении при открытии</value>
@@ -664,21 +607,6 @@ Esc : Закрыть параметры или выйти из приложен�
   <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
     <value>Настройки автоскрытия</value>
   </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>Настройте способ обработки кэша фотографий в FlyPhotos</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>Кэширование</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>Горячие клавиши</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>Настроить панорамирование и масштабирование</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>Панорамирование и масштабирование</value>
-  </data>
   <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - Параметры</value>
   </data>
@@ -769,11 +697,8 @@ Esc : Закрыть параметры или выйти из приложен�
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Автоматически скрывать кнопки окна</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Перетащите фон или удерживайте Ctrl и перетаскивайте изображение, чтобы переместить окно.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Перетаскивание для перемещения окна</value>
+    <value>Левая кнопка мыши + перетаскивание вне фото</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Метод масштабирования изображения</value>
@@ -840,5 +765,380 @@ High Quality Cubic – Масштабирование наивысшего ка�
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>ОК</value>
+  </data>
+  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+    <value>Мышь</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Ctrl + колесо мыши</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>Всегда увеличивать или уменьшать масштаб</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + колесо мыши</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>Всегда показывать следующее или предыдущее фото</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>Наклон колеса мыши влево/вправо</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>Просмотр следующего или предыдущего фото</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>Левая кнопка мыши + перетаскивание по фото</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>Панорамирование фото</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>Нажатие колеса мыши</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>Во весь экран</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>Развернуть или восстановить</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>Ничего</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>Правый клик мыши</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>Контекстное меню Проводника Windows</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>Удержание правой кнопки мыши</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>Увеличить</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>Ничего</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>Двойной клик по фото</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>Фактический размер или по размеру окна</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Ctrl + перетаскивание всегда перемещает окно</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>Переместить окно</value>
+  </data>
+  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+    <value>Сочетания клавиш</value>
+  </data>
+  <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
+    <value>Поиск команд и клавиш…</value>
+  </data>
+  <data name="ButtonResetAllShortcuts.Content" xml:space="preserve">
+    <value>Сбросить все…</value>
+  </data>
+  <data name="TxtNoShortcutResults.Text" xml:space="preserve">
+    <value>Нет команд, соответствующих запросу.</value>
+  </data>
+  <data name="TextShortcutNoKeys.Text" xml:space="preserve">
+    <value>Нет</value>
+  </data>
+  <data name="ButtonShortcutEdit.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Изменить сочетания клавиш</value>
+  </data>
+  <data name="ShortcutEditToolTip.Content" xml:space="preserve">
+    <value>Изменить сочетания клавиш</value>
+  </data>
+  <data name="ShortcutResetAll_Title" xml:space="preserve">
+    <value>Сбросить все сочетания клавиш?</value>
+  </data>
+  <data name="ShortcutResetAll_Message" xml:space="preserve">
+    <value>Все команды вернутся к клавишам по умолчанию. Настройки мыши не изменятся.</value>
+  </data>
+  <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
+    <value>Сбросить все</value>
+  </data>
+  <data name="ShortcutResetAll_CancelButton" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
+  <data name="TextShortcutCurrent.Text" xml:space="preserve">
+    <value>Текущие сочетания клавиш</value>
+  </data>
+  <data name="TextShortcutNoneAssigned.Text" xml:space="preserve">
+    <value>Сочетание клавиш не назначено.</value>
+  </data>
+  <data name="TextShortcutCapturePrompt.Text" xml:space="preserve">
+    <value>Щёлкните поле ниже, затем нажмите клавиши, которые хотите добавить.</value>
+  </data>
+  <data name="ButtonShortcutRemove.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Удалить это сочетание клавиш</value>
+  </data>
+  <data name="ShortcutRemoveToolTip.Content" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
+  <data name="ButtonShortcutReassign.Content" xml:space="preserve">
+    <value>Переназначить</value>
+  </data>
+  <data name="ButtonShortcutResetDefault.Content" xml:space="preserve">
+    <value>Сбросить до значений по умолчанию</value>
+  </data>
+  <data name="ShortcutCapture_DoneButton" xml:space="preserve">
+    <value>Готово</value>
+  </data>
+  <data name="ShortcutCapture_Idle" xml:space="preserve">
+    <value>Щёлкните здесь, чтобы добавить сочетание клавиш</value>
+  </data>
+  <data name="ShortcutCapture_Waiting" xml:space="preserve">
+    <value>Ожидание нажатия клавиш…</value>
+  </data>
+  <data name="ShortcutCapture_WinKeyRejected" xml:space="preserve">
+    <value>Windows резервирует сочетания клавиш с клавишей Windows.</value>
+  </data>
+  <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
+    <value>Переключитесь на латинскую раскладку, чтобы задать сочетание клавиш.</value>
+  </data>
+  <data name="ShortcutCapture_AlreadyOnThisCommand" xml:space="preserve">
+    <value>{0} уже назначено этой команде.</value>
+  </data>
+  <data name="ShortcutCapture_ReservedByOther" xml:space="preserve">
+    <value>{0} закреплено за командой «{1}» и не может быть изменено.</value>
+  </data>
+  <data name="ShortcutCapture_Conflict" xml:space="preserve">
+    <value>{0} уже используется командой «{1}». После переназначения та команда останется без этого сочетания клавиш.</value>
+  </data>
+  <data name="ShortcutGroup_Navigation" xml:space="preserve">
+    <value>Навигация</value>
+  </data>
+  <data name="ShortcutGroup_ZoomPan" xml:space="preserve">
+    <value>Масштаб и панорамирование</value>
+  </data>
+  <data name="ShortcutGroup_Rotate" xml:space="preserve">
+    <value>Поворот</value>
+  </data>
+  <data name="ShortcutGroup_View" xml:space="preserve">
+    <value>Вид</value>
+  </data>
+  <data name="ShortcutGroup_File" xml:space="preserve">
+    <value>Файл</value>
+  </data>
+  <data name="ShortcutGroup_OpenWith" xml:space="preserve">
+    <value>Открыть с помощью</value>
+  </data>
+  <data name="ShortcutName_NextPhoto" xml:space="preserve">
+    <value>Следующее фото</value>
+  </data>
+  <data name="ShortcutName_PrevPhoto" xml:space="preserve">
+    <value>Предыдущее фото</value>
+  </data>
+  <data name="ShortcutName_FirstPhoto" xml:space="preserve">
+    <value>Первое фото</value>
+  </data>
+  <data name="ShortcutName_LastPhoto" xml:space="preserve">
+    <value>Последнее фото</value>
+  </data>
+  <data name="ShortcutName_NextPage" xml:space="preserve">
+    <value>Следующая страница</value>
+  </data>
+  <data name="ShortcutName_PrevPage" xml:space="preserve">
+    <value>Предыдущая страница</value>
+  </data>
+  <data name="ShortcutName_ZoomIn" xml:space="preserve">
+    <value>Увеличить</value>
+  </data>
+  <data name="ShortcutName_ZoomOut" xml:space="preserve">
+    <value>Уменьшить</value>
+  </data>
+  <data name="ShortcutName_StepZoomIn" xml:space="preserve">
+    <value>Пошагово увеличить</value>
+  </data>
+  <data name="ShortcutName_StepZoomOut" xml:space="preserve">
+    <value>Пошагово уменьшить</value>
+  </data>
+  <data name="ShortcutName_ActualSize" xml:space="preserve">
+    <value>Фактический размер (1:1)</value>
+  </data>
+  <data name="ShortcutName_FitToWindow" xml:space="preserve">
+    <value>По размеру окна</value>
+  </data>
+  <data name="ShortcutName_PanUp" xml:space="preserve">
+    <value>Панорамировать вверх</value>
+  </data>
+  <data name="ShortcutName_PanDown" xml:space="preserve">
+    <value>Панорамировать вниз</value>
+  </data>
+  <data name="ShortcutName_PanLeft" xml:space="preserve">
+    <value>Панорамировать влево</value>
+  </data>
+  <data name="ShortcutName_PanRight" xml:space="preserve">
+    <value>Панорамировать вправо</value>
+  </data>
+  <data name="ShortcutName_RotateLeft" xml:space="preserve">
+    <value>Повернуть влево</value>
+  </data>
+  <data name="ShortcutName_RotateRight" xml:space="preserve">
+    <value>Повернуть вправо</value>
+  </data>
+  <data name="ShortcutName_FullScreen" xml:space="preserve">
+    <value>Во весь экран</value>
+  </data>
+  <data name="ShortcutName_MaximizeRestore" xml:space="preserve">
+    <value>Развернуть или восстановить</value>
+  </data>
+  <data name="ShortcutName_PhotoInfoPanel" xml:space="preserve">
+    <value>Панель сведений о фото</value>
+  </data>
+  <data name="ShortcutName_CloseApp" xml:space="preserve">
+    <value>Закрыть FlyPhotos</value>
+  </data>
+  <data name="ShortcutName_CopyPhoto" xml:space="preserve">
+    <value>Копировать фото</value>
+  </data>
+  <data name="ShortcutName_DeletePhoto" xml:space="preserve">
+    <value>Удалить фото</value>
+  </data>
+  <data name="ShortcutName_RenamePhoto" xml:space="preserve">
+    <value>Переименовать фото</value>
+  </data>
+  <data name="ShortcutName_PrintPhoto" xml:space="preserve">
+    <value>Печать фото</value>
+  </data>
+  <data name="ShortcutName_SharePhoto" xml:space="preserve">
+    <value>Поделиться фото</value>
+  </data>
+  <data name="ShortcutName_ShowInExplorer" xml:space="preserve">
+    <value>Открыть расположение файла</value>
+  </data>
+  <data name="ShortcutName_FileProperties" xml:space="preserve">
+    <value>Свойства файла</value>
+  </data>
+  <data name="ShortcutName_FileDetails" xml:space="preserve">
+    <value>Подробные сведения о файле</value>
+  </data>
+  <data name="ShortcutName_MoreActionsMenu" xml:space="preserve">
+    <value>Меню дополнительных действий</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp1" xml:space="preserve">
+    <value>Открыть в приложении 1</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp2" xml:space="preserve">
+    <value>Открыть в приложении 2</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp3" xml:space="preserve">
+    <value>Открыть в приложении 3</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp4" xml:space="preserve">
+    <value>Открыть в приложении 4</value>
+  </data>
+  <data name="ShortcutName_OpenWithPanel" xml:space="preserve">
+    <value>Панель «Открыть с помощью»</value>
+  </data>
+  <data name="ShortcutDesc_NextPage" xml:space="preserve">
+    <value>Многостраничные файлы TIFF и ICO</value>
+  </data>
+  <data name="ShortcutDesc_PrevPage" xml:space="preserve">
+    <value>Многостраничные файлы TIFF и ICO</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
+    <value>Переход к следующему масштабу: 100 %, 400 %, по размеру окна</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
+    <value>Возврат к предыдущему масштабу</value>
+  </data>
+  <data name="ShortcutDesc_PhotoInfoPanel" xml:space="preserve">
+    <value>Метаданные камеры и EXIF</value>
+  </data>
+  <data name="ShortcutDesc_CloseApp" xml:space="preserve">
+    <value>Всегда доступно — переназначить нельзя</value>
+  </data>
+  <data name="ShortcutDesc_CopyPhoto" xml:space="preserve">
+    <value>Копирует файл в буфер обмена</value>
+  </data>
+  <data name="ShortcutDesc_DeletePhoto" xml:space="preserve">
+    <value>Переназначить нельзя</value>
+  </data>
+  <data name="ShortcutDesc_SharePhoto" xml:space="preserve">
+    <value>Открывает окно «Поделиться» Windows</value>
+  </data>
+  <data name="ShortcutDesc_FileProperties" xml:space="preserve">
+    <value>Вкладка «Общие»</value>
+  </data>
+  <data name="ShortcutDesc_FileDetails" xml:space="preserve">
+    <value>Вкладка «Подробно»</value>
+  </data>
+  <data name="ShortcutDesc_OpenWithPanel" xml:space="preserve">
+    <value>Показывает все настроенные приложения</value>
+  </data>
+  <data name="ShortcutMod_Ctrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="ShortcutMod_Alt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="ShortcutMod_Shift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="ShortcutKey_LeftArrow" xml:space="preserve">
+    <value>Стрелка влево</value>
+  </data>
+  <data name="ShortcutKey_RightArrow" xml:space="preserve">
+    <value>Стрелка вправо</value>
+  </data>
+  <data name="ShortcutKey_UpArrow" xml:space="preserve">
+    <value>Стрелка вверх</value>
+  </data>
+  <data name="ShortcutKey_DownArrow" xml:space="preserve">
+    <value>Стрелка вниз</value>
+  </data>
+  <data name="ShortcutKey_Esc" xml:space="preserve">
+    <value>Esc</value>
+  </data>
+  <data name="ShortcutKey_Backspace" xml:space="preserve">
+    <value>Backspace</value>
+  </data>
+  <data name="ShortcutKey_PageUp" xml:space="preserve">
+    <value>Page Up</value>
+  </data>
+  <data name="ShortcutKey_PageDown" xml:space="preserve">
+    <value>Page Down</value>
+  </data>
+  <data name="ShortcutKey_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="ShortcutKey_End" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="ShortcutKey_Enter" xml:space="preserve">
+    <value>Enter</value>
+  </data>
+  <data name="ShortcutKey_Delete" xml:space="preserve">
+    <value>Del</value>
+  </data>
+  <data name="ShortcutKey_Space" xml:space="preserve">
+    <value>Пробел</value>
+  </data>
+  <data name="ShortcutKey_Tab" xml:space="preserve">
+    <value>Tab</value>
+  </data>
+  <data name="ShortcutKey_NumAdd" xml:space="preserve">
+    <value>Num +</value>
+  </data>
+  <data name="ShortcutKey_NumSubtract" xml:space="preserve">
+    <value>Num -</value>
+  </data>
+  <data name="ShortcutKey_NumMultiply" xml:space="preserve">
+    <value>Num *</value>
+  </data>
+  <data name="ShortcutKey_NumDivide" xml:space="preserve">
+    <value>Num /</value>
+  </data>
+  <data name="ShortcutKey_NumDecimal" xml:space="preserve">
+    <value>Num ,</value>
+  </data>
+  <data name="ShortcutKey_NumPad" xml:space="preserve">
+    <value>Num {0}</value>
   </data>
 </root>

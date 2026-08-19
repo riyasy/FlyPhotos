@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
 using FlyPhotos.Core.Model;
@@ -46,6 +47,12 @@ public class AppSettings
     [JsonConverter(typeof(JsonStringEnumConverter<MouseFwdBackBehavior>))]
     public MouseFwdBackBehavior MouseFwdBackBehavior { get; set; } = MouseFwdBackBehavior.Navigate;
 
+    [JsonConverter(typeof(JsonStringEnumConverter<MiddleClickBehavior>))]
+    public MiddleClickBehavior MiddleClickBehavior { get; set; } = MiddleClickBehavior.FullScreen;
+
+    [JsonConverter(typeof(JsonStringEnumConverter<RightClickHoldBehavior>))]
+    public RightClickHoldBehavior RightClickHoldBehavior { get; set; } = RightClickHoldBehavior.ZoomIn;
+
     public bool ConfirmForDelete { get; set; } = true;
     public bool ShowFileName { get; set; } = true;
     public bool ShowCacheStatus { get; set; } = true;
@@ -53,7 +60,6 @@ public class AppSettings
     public bool AutoHideMouse { get; set; } = false;
     public bool AutoHideCaptionButtons { get; set; } = false;
     public bool ClickOutsideImageToRestoreWindow { get; set; } = true;
-    public bool CtrlDragToMoveWindow { get; set; } = true;
     public bool UseExternalExeForContextMenu { get; set; } = false;
     public bool ShowExternalAppShortcuts { get; set; } = false;
     public string ExternalApp1 { get; set; } = string.Empty;
@@ -75,4 +81,16 @@ public class AppSettings
     // since property-level JsonStringEnumConverter<T> does not apply to collection elements.
     public ObservableCollection<RawDecoder> RawDecoderPriority { get; set; } =
         [RawDecoder.WIC, RawDecoder.Rawler, RawDecoder.ImageMagick];
+
+    /// <summary>
+    /// Only the commands whose keys the user changed, keyed by CommandId member name (never its
+    /// numeric value, so reordering the enum cannot remap anybody's bindings). A command that is
+    /// absent uses its code defaults, which is what lets a later release add commands with working
+    /// keys and no migration; an empty list means the user deliberately unbound it.
+    ///
+    /// The setter substitutes an empty map for null: the property initializer covers a key that is
+    /// absent from usersettings.json, but a hand-written <c>"KeyBindings": null</c> deserializes as
+    /// null and would take the app down on the first lookup.
+    /// </summary>
+    public Dictionary<string, List<string>> KeyBindings { get; set => field = value ?? []; } = [];
 }

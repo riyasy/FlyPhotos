@@ -169,7 +169,7 @@
     <value>ഫോട്ടോ കറക്കുക</value>
   </data>
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
-    <value>സ്‌ക്രീനിൽ നിറക്കുക</value>
+    <value>വിൻഡോയിൽ ഒതുക്കുക</value>
   </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>ക്രമീകരണങ്ങൾ</value>
@@ -235,7 +235,7 @@
     <value>ലൈറ്റ്</value>
   </data>
   <data name="ComboWindowLaunchModeItemFullScreen.Content" xml:space="preserve">
-    <value>ഫുൾ സ്ക്രീൻ</value>
+    <value>പൂർണ്ണ സ്‌ക്രീൻ</value>
   </data>
   <data name="ComboWindowLaunchModeItemLastWindowState.Content" xml:space="preserve">
     <value>പഴയ അവസ്ഥ</value>
@@ -465,58 +465,6 @@
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>സ്ക്രീനിലേക്കുള്ള ഇമേജ് ഫിറ്റ്</value>
   </data>
-  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
-    <value>Left/Right ആരോ കീകൾ : ഫോട്ടോകൾ മാറ്റാൻ (Navigate)
-Up/Down ആരോ കീകൾ : സൂം ഇൻ / ഔട്ട് ചെയ്യാൻ
-മൗസ് ലെഫ്റ്റ് ക്ലിക്ക് ചെയ്ത് നീക്കുക : ഫോട്ടോ നീക്കാൻ (Pan)
-മൗസ് റൈറ്റ് ക്ലിക്ക് ചെയ്ത് പിടിക്കുക : സൂം ഇൻ ചെയ്യുക
-മൗസ് റൈറ്റ് ക്ലിക്ക് : വിൻഡോസ് എക്സ്പ്ലോറർ കോൺടെക്സ്റ്റ് മെനു
-
-മൗസ് വീൽ : സൂം ചെയ്യാൻ / ഫോട്ടോകൾ മാറ്റാൻ (ക്രമീകരണം അനുസരിച്ച്)
-Ctrl + മൗസ് വീൽ : സൂം ഇൻ / ഔട്ട് ചെയ്യാൻ
-Alt + മൗസ് വീൽ : ഫോട്ടോകൾ മാറ്റാൻ
-മൗസ് ലെഫ്റ്റ് ക്ലിക്ക് + മൗസ് വീൽ : ഫോട്ടോകൾ മാറ്റാൻ
-മൗസ് വീൽ ഇടത്തോട്ട് / വലത്തോട്ട് ചരിക്കുക : ഫോട്ടോകൾ മാറ്റാൻ
-മൗസ് വീൽ ക്ലിക്ക് : മുഴുസ്ക്രീൻ
-
-Ctrl + ആരോ കീകൾ : ഫോട്ടോ നീക്കാൻ (Pan)
-Ctrl + + : സൂം ഇൻ
-Ctrl + - : സൂം ഔട്ട്
-
-Alt + Left/Right ആരോ കീകൾ : മൾട്ടി-പേജ് TIFF/ICO-ൽ പേജുകൾ മാറ്റാൻ
-
-Page Up / Page Down : അടുത്ത പ്രീസെറ്റിലേക്ക് സൂം ചെയ്യാൻ (100%, 400%, സ്‌ക്രീനിൽ നിറക്കുക)
-Home : ആദ്യത്തെ ഫോട്ടോയിലേക്ക് പോകാൻ
-End : അവസാനത്തെ ഫോട്ടോയിലേക്ക് പോകാൻ
-
-തമ്പ്‌നെയിൽ സ്ട്രിപ്പിൽ മൗസ് വീൽ : ഫോട്ടോകൾ മാറ്റാൻ
-സ്‌ക്രീനിലെ Left/Right ബട്ടണിൽ മൗസ് വീൽ : ഫോട്ടോകൾ മാറ്റാൻ
-സ്‌ക്രീനിലെ റൊട്ടേറ്റ് ബട്ടണിൽ മൗസ് വീൽ : ഫോട്ടോ തിരിക്കാൻ (Rotate)
-
-ടച്ച്‌പാഡിൽ രണ്ട് വിരൽ കൊണ്ട് ഇടത്തോട്ട് / വലത്തോട്ട് സ്വൈപ്പ് : ഫോട്ടോകൾ മാറ്റാൻ
-ടച്ച്‌പാഡിൽ രണ്ട് വിരൽ കൊണ്ട് മുകളിലോട്ട് / താഴോട്ട് സ്വൈപ്പ് : സൂം ചെയ്യാൻ / ഫോട്ടോകൾ മാറ്റാൻ
-ടച്ച്‌പാഡിൽ പിഞ്ച് (Pinch) ചെയ്യുക : സൂം ഇൻ / ഔട്ട് ചെയ്യാൻ
-
-F11 : മുഴുസ്ക്രീൻ
-Enter : വലുതാക്കുക
-
-Alt + Enter : ഫയൽ Properties കാണിക്കുക (General)
-D : ഫയൽ Properties കാണിക്കുക (Details)
-I : ഫോട്ടോ വിവര (മെറ്റാഡാറ്റ) പാനൽ കാണിക്കുക
-
-W : Windows Explorer-ൽ ഫയൽ കാണിക്കുക
-S : ഫയലിനായി Windows Share ഡയലോഗ് തുറക്കുക
-P : ഫോട്ടോ പ്രിന്റ് ചെയ്യുക
-A : യഥാർത്ഥ വലിപ്പത്തിലേക്ക് സൂം ചെയ്യുക
-F : സ്‌ക്രീനിൽ നിറക്കുക
-E : പുറം ആപ്പുകളുടെ പാനൽ കാണിക്കുക
-Ctrl + 1–4: പുറം ആപ്പ് 1–4ൽ തുറക്കുക
-M : ‘കൂടുതൽ പ്രവർത്തനങ്ങൾ’ മെനു കാണിക്കുക
-
-Del : ഫോട്ടോ ഡിലീറ്റ് ചെയ്യാൻ
-
-Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാൻ / ആപ്പിൽ നിന്ന് പുറത്തുകടക്കാൻ</value>
-  </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>ഭാഷ തിരഞ്ഞെടുക്കുക</value>
   </data>
@@ -537,10 +485,6 @@ Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാ
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>മൗസ് വീൽ</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + മൗസ് വീൽ എപ്പോഴും സൂം ഇൻ/ഔട്ട് ചെയ്യുന്നു.
-👉 Alt + മൗസ് വീൽ ഫോട്ടോകൾ അടുത്തതിലേക്കോ മുൻപത്തേതിലേക്കോ മാറ്റുന്നു.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
     <value>⚠ സ്റ്റാർട്ടപ്പ് വൈകിയേക്കാം: പൂർണ വ്യക്തതയുള്ള ഇമേജ് ലോഡ് ചെയ്യാൻ Fly കാത്തിരിക്കും.</value>
@@ -660,21 +604,6 @@ Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാ
   <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
     <value>ഓട്ടോ ഫേഡ് / ഹൈഡ്</value>
   </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>Fly ഫോട്ടോ കാഷിംഗ് കൈകാര്യം ചെയ്യുന്ന രീതി ക്രമീകരിക്കുക.</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>കാഷിംഗ്</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>കീബോർഡ് കുറുക്കുവഴികൾ</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>പാൻ, സൂം പ്രവർത്തി രീതികൾ ക്രമീകരിക്കുക.</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>പാൻ, സൂം ക്രമീകരണങ്ങൾ</value>
-  </data>
   <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - ക്രമീകരണങ്ങൾ</value>
   </data>
@@ -765,11 +694,8 @@ Esc : ക്രമീകരണങ്ങൾ ക്ലോസ് ചെയ്യാ
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>വിൻഡോ ബട്ടണുകൾ സ്വയമേവ മറയ്ക്കുക</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>പശ്ചാത്തലം ഡ്രാഗ് ചെയ്യുക, അല്ലെങ്കിൽ Ctrl കീ അമർത്തിപ്പിടിച്ച് ചിത്രം ഡ്രാഗ് ചെയ്ത് വിൻഡോ നീക്കുക.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>വിൻഡോ നീക്കാൻ ഡ്രാഗ് ചെയ്യുക</value>
+    <value>ഫോട്ടോയ്ക്ക് പുറത്ത് മൗസ് ലെഫ്റ്റ് ക്ലിക്ക് ചെയ്ത് നീക്കുക</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>ഇമേജ് സ്കെയിലിംഗ് രീതി</value>
@@ -836,5 +762,380 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>ശരി</value>
+  </data>
+  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+    <value>മൗസ്</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Ctrl + മൗസ് വീൽ</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>എപ്പോഴും സൂം ഇൻ / ഔട്ട്</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + മൗസ് വീൽ</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>എപ്പോഴും അടുത്തത് അല്ലെങ്കിൽ മുൻപത്തേത് കാണുക</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>മൗസ് വീൽ ഇടത്തോട്ട് / വലത്തോട്ട് ചരിക്കുക</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>അടുത്തത് അല്ലെങ്കിൽ മുൻപത്തേത് കാണുക</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>ഫോട്ടോയിൽ മൗസ് ലെഫ്റ്റ് ക്ലിക്ക് ചെയ്ത് നീക്കുക</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>ഫോട്ടോ നീക്കുക</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>മൗസ് വീൽ ക്ലിക്ക്</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>പൂർണ്ണ സ്‌ക്രീൻ</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>മാക്സിമൈസ് അല്ലെങ്കിൽ പുനഃസ്ഥാപിക്കുക</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>ഒന്നുമില്ല</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>മൗസിന്റെ വലത് ക്ലിക്ക്</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>വിൻഡോസ് ഫയൽ എക്സ്പ്ലോററിന്റെ കോൺടെക്സ്റ്റ് മെനു</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>മൗസിന്റെ വലത് ബട്ടൺ അമർത്തിപ്പിടിക്കുക</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>സൂം ഇൻ ചെയ്യുക</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>ഒന്നുമില്ല</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>ഫോട്ടോയിൽ ഡബിൾ ക്ലിക്ക്</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>യഥാർത്ഥ വലിപ്പം അല്ലെങ്കിൽ വിൻഡോയിൽ ഒതുക്കുക</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Ctrl + ഡ്രാഗ് എപ്പോഴും വിൻഡോ നീക്കുന്നു</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>വിൻഡോ നീക്കുക</value>
+  </data>
+  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+    <value>കുറുക്കുവഴികൾ</value>
+  </data>
+  <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
+    <value>കമാൻഡുകളും കീകളും തിരയുക…</value>
+  </data>
+  <data name="ButtonResetAllShortcuts.Content" xml:space="preserve">
+    <value>എല്ലാം പുനഃസജ്ജമാക്കുക…</value>
+  </data>
+  <data name="TxtNoShortcutResults.Text" xml:space="preserve">
+    <value>തിരയലുമായി പൊരുത്തപ്പെടുന്ന കമാൻഡുകളൊന്നുമില്ല.</value>
+  </data>
+  <data name="TextShortcutNoKeys.Text" xml:space="preserve">
+    <value>ഒന്നുമില്ല</value>
+  </data>
+  <data name="ButtonShortcutEdit.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>കുറുക്കുവഴികൾ മാറ്റുക</value>
+  </data>
+  <data name="ShortcutEditToolTip.Content" xml:space="preserve">
+    <value>കുറുക്കുവഴികൾ മാറ്റുക</value>
+  </data>
+  <data name="ShortcutResetAll_Title" xml:space="preserve">
+    <value>എല്ലാ കുറുക്കുവഴികളും പുനഃസജ്ജമാക്കണോ?</value>
+  </data>
+  <data name="ShortcutResetAll_Message" xml:space="preserve">
+    <value>എല്ലാ കമാൻഡുകളും അവയുടെ സ്ഥിരസ്ഥിതി കീകളിലേക്ക് മടങ്ങും. മൗസ് ക്രമീകരണങ്ങൾ മാറില്ല.</value>
+  </data>
+  <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
+    <value>എല്ലാം പുനഃസജ്ജമാക്കുക</value>
+  </data>
+  <data name="ShortcutResetAll_CancelButton" xml:space="preserve">
+    <value>റദ്ദാക്കുക</value>
+  </data>
+  <data name="TextShortcutCurrent.Text" xml:space="preserve">
+    <value>നിലവിലെ കുറുക്കുവഴികൾ</value>
+  </data>
+  <data name="TextShortcutNoneAssigned.Text" xml:space="preserve">
+    <value>കുറുക്കുവഴിയൊന്നും നൽകിയിട്ടില്ല.</value>
+  </data>
+  <data name="TextShortcutCapturePrompt.Text" xml:space="preserve">
+    <value>താഴെയുള്ള ബോക്സിൽ ക്ലിക്ക് ചെയ്ത ശേഷം ചേർക്കേണ്ട കീകൾ അമർത്തുക.</value>
+  </data>
+  <data name="ButtonShortcutRemove.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>ഈ കുറുക്കുവഴി നീക്കം ചെയ്യുക</value>
+  </data>
+  <data name="ShortcutRemoveToolTip.Content" xml:space="preserve">
+    <value>നീക്കം ചെയ്യുക</value>
+  </data>
+  <data name="ButtonShortcutReassign.Content" xml:space="preserve">
+    <value>വീണ്ടും നൽകുക</value>
+  </data>
+  <data name="ButtonShortcutResetDefault.Content" xml:space="preserve">
+    <value>സ്ഥിരസ്ഥിതിയിലേക്ക് പുനഃസജ്ജമാക്കുക</value>
+  </data>
+  <data name="ShortcutCapture_DoneButton" xml:space="preserve">
+    <value>പൂർത്തിയായി</value>
+  </data>
+  <data name="ShortcutCapture_Idle" xml:space="preserve">
+    <value>കുറുക്കുവഴി ചേർക്കാൻ ഇവിടെ ക്ലിക്ക് ചെയ്യുക</value>
+  </data>
+  <data name="ShortcutCapture_Waiting" xml:space="preserve">
+    <value>കീകൾക്കായി കാത്തിരിക്കുന്നു…</value>
+  </data>
+  <data name="ShortcutCapture_WinKeyRejected" xml:space="preserve">
+    <value>Windows കീ ഉപയോഗിക്കുന്ന കുറുക്കുവഴികൾ Windows-നായി നീക്കിവച്ചിരിക്കുന്നു.</value>
+  </data>
+  <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
+    <value>കുറുക്കുവഴി സജ്ജമാക്കാൻ ലാറ്റിൻ ഇൻപുട്ട് രീതിയിലേക്ക് മാറുക.</value>
+  </data>
+  <data name="ShortcutCapture_AlreadyOnThisCommand" xml:space="preserve">
+    <value>{0} ഇതിനകം ഈ കമാൻഡിന് നൽകിയിട്ടുണ്ട്.</value>
+  </data>
+  <data name="ShortcutCapture_ReservedByOther" xml:space="preserve">
+    <value>{0} എന്നത് ‘{1}’ എന്നതിനായി നിശ്ചയിച്ചിരിക്കുന്നു; മാറ്റാൻ കഴിയില്ല.</value>
+  </data>
+  <data name="ShortcutCapture_Conflict" xml:space="preserve">
+    <value>{0} ഇതിനകം ‘{1}’ ഉപയോഗിക്കുന്നു. വീണ്ടും നൽകിയാൽ ആ കമാൻഡിന് ഈ കുറുക്കുവഴി ഇല്ലാതാകും.</value>
+  </data>
+  <data name="ShortcutGroup_Navigation" xml:space="preserve">
+    <value>നാവിഗേഷൻ</value>
+  </data>
+  <data name="ShortcutGroup_ZoomPan" xml:space="preserve">
+    <value>സൂമും നീക്കവും</value>
+  </data>
+  <data name="ShortcutGroup_Rotate" xml:space="preserve">
+    <value>തിരിക്കൽ</value>
+  </data>
+  <data name="ShortcutGroup_View" xml:space="preserve">
+    <value>കാഴ്ച</value>
+  </data>
+  <data name="ShortcutGroup_File" xml:space="preserve">
+    <value>ഫയൽ</value>
+  </data>
+  <data name="ShortcutGroup_OpenWith" xml:space="preserve">
+    <value>ഇതുപയോഗിച്ച് തുറക്കുക</value>
+  </data>
+  <data name="ShortcutName_NextPhoto" xml:space="preserve">
+    <value>അടുത്ത ഫോട്ടോ</value>
+  </data>
+  <data name="ShortcutName_PrevPhoto" xml:space="preserve">
+    <value>മുൻപത്തെ ഫോട്ടോ</value>
+  </data>
+  <data name="ShortcutName_FirstPhoto" xml:space="preserve">
+    <value>ആദ്യത്തെ ഫോട്ടോ</value>
+  </data>
+  <data name="ShortcutName_LastPhoto" xml:space="preserve">
+    <value>അവസാനത്തെ ഫോട്ടോ</value>
+  </data>
+  <data name="ShortcutName_NextPage" xml:space="preserve">
+    <value>അടുത്ത പേജ്</value>
+  </data>
+  <data name="ShortcutName_PrevPage" xml:space="preserve">
+    <value>മുൻപത്തെ പേജ്</value>
+  </data>
+  <data name="ShortcutName_ZoomIn" xml:space="preserve">
+    <value>സൂം ഇൻ</value>
+  </data>
+  <data name="ShortcutName_ZoomOut" xml:space="preserve">
+    <value>സൂം ഔട്ട്</value>
+  </data>
+  <data name="ShortcutName_StepZoomIn" xml:space="preserve">
+    <value>ഘട്ടംഘട്ടമായി സൂം ഇൻ</value>
+  </data>
+  <data name="ShortcutName_StepZoomOut" xml:space="preserve">
+    <value>ഘട്ടംഘട്ടമായി സൂം ഔട്ട്</value>
+  </data>
+  <data name="ShortcutName_ActualSize" xml:space="preserve">
+    <value>യഥാർത്ഥ വലിപ്പം (1:1)</value>
+  </data>
+  <data name="ShortcutName_FitToWindow" xml:space="preserve">
+    <value>വിൻഡോയിൽ ഒതുക്കുക</value>
+  </data>
+  <data name="ShortcutName_PanUp" xml:space="preserve">
+    <value>മുകളിലേക്ക് നീക്കുക</value>
+  </data>
+  <data name="ShortcutName_PanDown" xml:space="preserve">
+    <value>താഴോട്ട് നീക്കുക</value>
+  </data>
+  <data name="ShortcutName_PanLeft" xml:space="preserve">
+    <value>ഇടത്തോട്ട് നീക്കുക</value>
+  </data>
+  <data name="ShortcutName_PanRight" xml:space="preserve">
+    <value>വലത്തോട്ട് നീക്കുക</value>
+  </data>
+  <data name="ShortcutName_RotateLeft" xml:space="preserve">
+    <value>ഇടത്തോട്ട് തിരിക്കുക</value>
+  </data>
+  <data name="ShortcutName_RotateRight" xml:space="preserve">
+    <value>വലത്തോട്ട് തിരിക്കുക</value>
+  </data>
+  <data name="ShortcutName_FullScreen" xml:space="preserve">
+    <value>പൂർണ്ണ സ്‌ക്രീൻ</value>
+  </data>
+  <data name="ShortcutName_MaximizeRestore" xml:space="preserve">
+    <value>മാക്സിമൈസ് അല്ലെങ്കിൽ പുനഃസ്ഥാപിക്കുക</value>
+  </data>
+  <data name="ShortcutName_PhotoInfoPanel" xml:space="preserve">
+    <value>ഫോട്ടോ വിവര പാനൽ</value>
+  </data>
+  <data name="ShortcutName_CloseApp" xml:space="preserve">
+    <value>FlyPhotos അടയ്ക്കുക</value>
+  </data>
+  <data name="ShortcutName_CopyPhoto" xml:space="preserve">
+    <value>ഫോട്ടോ പകർത്തുക</value>
+  </data>
+  <data name="ShortcutName_DeletePhoto" xml:space="preserve">
+    <value>ഫോട്ടോ ഇല്ലാതാക്കുക</value>
+  </data>
+  <data name="ShortcutName_RenamePhoto" xml:space="preserve">
+    <value>ഫോട്ടോയുടെ പേരുമാറ്റുക</value>
+  </data>
+  <data name="ShortcutName_PrintPhoto" xml:space="preserve">
+    <value>ഫോട്ടോ പ്രിന്റ് ചെയ്യുക</value>
+  </data>
+  <data name="ShortcutName_SharePhoto" xml:space="preserve">
+    <value>ഫോട്ടോ പങ്കിടുക</value>
+  </data>
+  <data name="ShortcutName_ShowInExplorer" xml:space="preserve">
+    <value>ഫയലിന്റെ സ്ഥാനം തുറക്കുക</value>
+  </data>
+  <data name="ShortcutName_FileProperties" xml:space="preserve">
+    <value>ഫയൽ പ്രോപ്പർട്ടികൾ</value>
+  </data>
+  <data name="ShortcutName_FileDetails" xml:space="preserve">
+    <value>ഫയൽ വിശദാംശങ്ങൾ</value>
+  </data>
+  <data name="ShortcutName_MoreActionsMenu" xml:space="preserve">
+    <value>‘കൂടുതൽ പ്രവർത്തനങ്ങൾ’ മെനു</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp1" xml:space="preserve">
+    <value>ആപ്പ് 1-ൽ തുറക്കുക</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp2" xml:space="preserve">
+    <value>ആപ്പ് 2-ൽ തുറക്കുക</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp3" xml:space="preserve">
+    <value>ആപ്പ് 3-ൽ തുറക്കുക</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp4" xml:space="preserve">
+    <value>ആപ്പ് 4-ൽ തുറക്കുക</value>
+  </data>
+  <data name="ShortcutName_OpenWithPanel" xml:space="preserve">
+    <value>‘ഇതുപയോഗിച്ച് തുറക്കുക’ പാനൽ</value>
+  </data>
+  <data name="ShortcutDesc_NextPage" xml:space="preserve">
+    <value>മൾട്ടി-പേജ് TIFF, ICO ഫയലുകൾ</value>
+  </data>
+  <data name="ShortcutDesc_PrevPage" xml:space="preserve">
+    <value>മൾട്ടി-പേജ് TIFF, ICO ഫയലുകൾ</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
+    <value>അടുത്ത പ്രീസെറ്റിലേക്ക്: 100%, 400%, വിൻഡോയിൽ ഒതുക്കുക</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
+    <value>മുൻപത്തെ പ്രീസെറ്റിലേക്ക് മടങ്ങുന്നു</value>
+  </data>
+  <data name="ShortcutDesc_PhotoInfoPanel" xml:space="preserve">
+    <value>ക്യാമറ, EXIF മെറ്റാഡാറ്റ</value>
+  </data>
+  <data name="ShortcutDesc_CloseApp" xml:space="preserve">
+    <value>എപ്പോഴും ലഭ്യം — വീണ്ടും നൽകാനാവില്ല</value>
+  </data>
+  <data name="ShortcutDesc_CopyPhoto" xml:space="preserve">
+    <value>ഫയൽ ക്ലിപ്പ്ബോർഡിലേക്ക് പകർത്തുന്നു</value>
+  </data>
+  <data name="ShortcutDesc_DeletePhoto" xml:space="preserve">
+    <value>വീണ്ടും നൽകാനാവില്ല</value>
+  </data>
+  <data name="ShortcutDesc_SharePhoto" xml:space="preserve">
+    <value>Windows Share ഡയലോഗ് തുറക്കുന്നു</value>
+  </data>
+  <data name="ShortcutDesc_FileProperties" xml:space="preserve">
+    <value>പൊതുവായ ടാബ്</value>
+  </data>
+  <data name="ShortcutDesc_FileDetails" xml:space="preserve">
+    <value>വിശദാംശങ്ങൾ ടാബ്</value>
+  </data>
+  <data name="ShortcutDesc_OpenWithPanel" xml:space="preserve">
+    <value>ക്രമീകരിച്ച എല്ലാ ആപ്പുകളും കാണിക്കുന്നു</value>
+  </data>
+  <data name="ShortcutMod_Ctrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="ShortcutMod_Alt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="ShortcutMod_Shift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="ShortcutKey_LeftArrow" xml:space="preserve">
+    <value>ഇടത്തേക്കുള്ള അമ്പടയാളം</value>
+  </data>
+  <data name="ShortcutKey_RightArrow" xml:space="preserve">
+    <value>വലത്തേക്കുള്ള അമ്പടയാളം</value>
+  </data>
+  <data name="ShortcutKey_UpArrow" xml:space="preserve">
+    <value>മുകളിലേക്കുള്ള അമ്പടയാളം</value>
+  </data>
+  <data name="ShortcutKey_DownArrow" xml:space="preserve">
+    <value>താഴേക്കുള്ള അമ്പടയാളം</value>
+  </data>
+  <data name="ShortcutKey_Esc" xml:space="preserve">
+    <value>Esc</value>
+  </data>
+  <data name="ShortcutKey_Backspace" xml:space="preserve">
+    <value>Backspace</value>
+  </data>
+  <data name="ShortcutKey_PageUp" xml:space="preserve">
+    <value>Page Up</value>
+  </data>
+  <data name="ShortcutKey_PageDown" xml:space="preserve">
+    <value>Page Down</value>
+  </data>
+  <data name="ShortcutKey_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="ShortcutKey_End" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="ShortcutKey_Enter" xml:space="preserve">
+    <value>Enter</value>
+  </data>
+  <data name="ShortcutKey_Delete" xml:space="preserve">
+    <value>Del</value>
+  </data>
+  <data name="ShortcutKey_Space" xml:space="preserve">
+    <value>സ്പേസ്</value>
+  </data>
+  <data name="ShortcutKey_Tab" xml:space="preserve">
+    <value>Tab</value>
+  </data>
+  <data name="ShortcutKey_NumAdd" xml:space="preserve">
+    <value>Num +</value>
+  </data>
+  <data name="ShortcutKey_NumSubtract" xml:space="preserve">
+    <value>Num -</value>
+  </data>
+  <data name="ShortcutKey_NumMultiply" xml:space="preserve">
+    <value>Num *</value>
+  </data>
+  <data name="ShortcutKey_NumDivide" xml:space="preserve">
+    <value>Num /</value>
+  </data>
+  <data name="ShortcutKey_NumDecimal" xml:space="preserve">
+    <value>Num .</value>
+  </data>
+  <data name="ShortcutKey_NumPad" xml:space="preserve">
+    <value>Num {0}</value>
   </data>
 </root>
