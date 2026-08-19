@@ -298,7 +298,7 @@
     <value>類型</value>
   </data>
   <data name="ExifPanelTitle.Text" xml:space="preserve">
-    <value>相片資訊</value>
+    <value>照片資訊</value>
   </data>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>關閉</value>
@@ -758,7 +758,7 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
     <value>其他動作</value>
   </data>
   <data name="MenuItemPhotoInfo.Text" xml:space="preserve">
-    <value>相片資訊</value>
+    <value>照片資訊</value>
   </data>
   <data name="MenuItemOpenFileLocation.Text" xml:space="preserve">
     <value>開啟檔案位置</value>
@@ -800,13 +800,13 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
     <value>Ctrl + 滑鼠滾輪</value>
   </data>
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
-    <value>永遠放大或縮小</value>
+    <value>一律放大或縮小</value>
   </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + 滑鼠滾輪</value>
   </data>
   <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
-    <value>永遠查看上一張或下一張</value>
+    <value>一律檢視上一張或下一張</value>
   </data>
   <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
     <value>滑鼠滾輪左右傾斜</value>
@@ -851,10 +851,10 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
     <value>在照片上連按兩下</value>
   </data>
   <data name="TextDoubleClickAction.Text" xml:space="preserve">
-    <value>實際大小或符合視窗</value>
+    <value>縮放到實際大小或符合視窗大小</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
-    <value>Ctrl + 拖曳永遠移動視窗</value>
+    <value>Ctrl + 拖曳：一律移動視窗</value>
   </data>
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>移動視窗</value>
@@ -863,7 +863,7 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
     <value>快速鍵</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
-    <value>搜尋命令與按鍵…</value>
+    <value>搜尋命令與按鍵</value>
   </data>
   <data name="ButtonResetAllShortcuts.Content" xml:space="preserve">
     <value>全部重設…</value>
@@ -926,7 +926,7 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
     <value>使用 Windows 鍵的快速鍵由 Windows 保留。</value>
   </data>
   <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
-    <value>請切換到英文輸入法以設定快速鍵。</value>
+    <value>請切換到拉丁文（如英文）輸入法以設定快速鍵。</value>
   </data>
   <data name="ShortcutCapture_AlreadyOnThisCommand" xml:space="preserve">
     <value>{0} 已指派給此命令。</value>
@@ -986,7 +986,7 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
     <value>分段縮小</value>
   </data>
   <data name="ShortcutName_ActualSize" xml:space="preserve">
-    <value>實際大小 (1:1)</value>
+    <value>實際大小（1:1）</value>
   </data>
   <data name="ShortcutName_FitToWindow" xml:space="preserve">
     <value>符合視窗大小</value>
@@ -1016,7 +1016,7 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
     <value>最大化或還原</value>
   </data>
   <data name="ShortcutName_PhotoInfoPanel" xml:space="preserve">
-    <value>相片資訊面板</value>
+    <value>照片資訊面板</value>
   </data>
   <data name="ShortcutName_CloseApp" xml:space="preserve">
     <value>關閉 FlyPhotos</value>
@@ -1046,7 +1046,7 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
     <value>檔案詳細資料</value>
   </data>
   <data name="ShortcutName_MoreActionsMenu" xml:space="preserve">
-    <value>「其他動作」功能表</value>
+    <value>「更多動作」功能表</value>
   </data>
   <data name="ShortcutName_OpenWithApp1" xml:space="preserve">
     <value>在外部應用程式 1 中開啟</value>
@@ -1073,13 +1073,13 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
     <value>跳至下一個預設值：100%、400%、符合視窗</value>
   </data>
   <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
-    <value>回到上一個預設值</value>
+    <value>跳至上一個預設值</value>
   </data>
   <data name="ShortcutDesc_PhotoInfoPanel" xml:space="preserve">
     <value>相機與 EXIF 中繼資料</value>
   </data>
   <data name="ShortcutDesc_CloseApp" xml:space="preserve">
-    <value>一律可用 — 無法重新指派</value>
+    <value>一律可用，無法重新指派</value>
   </data>
   <data name="ShortcutDesc_CopyPhoto" xml:space="preserve">
     <value>將檔案複製到剪貼簿</value>

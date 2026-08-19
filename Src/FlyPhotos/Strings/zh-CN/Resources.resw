@@ -854,7 +854,7 @@ High Quality Cubic – 适合照片的最高质量缩放。</value>
     <value>实际大小或适应窗口</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
-    <value>Ctrl + 拖动始终移动窗口</value>
+    <value>Ctrl + 拖动：始终移动窗口</value>
   </data>
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>移动窗口</value>
