@@ -150,8 +150,8 @@ public readonly record struct KeyChord(VirtualKey Key, bool Ctrl, bool Alt, bool
         _ => modifierToken
     };
 
-    /// <summary>Only the keys whose printed name is a word. Letters, digits and the function keys
-    /// are the same everywhere and fall through to the enum name.</summary>
+    /// <summary>Only the keys whose printed name is a word. Everything else falls through to the
+    /// keycap, then to the enum name for the keys that have no keycap at all.</summary>
     private static string KeyDisplay(VirtualKey k) => k switch
     {
         // + and - are the same glyph in every language.
@@ -179,7 +179,12 @@ public readonly record struct KeyChord(VirtualKey Key, bool Ctrl, bool Alt, bool
         >= VirtualKey.NumberPad0 and <= VirtualKey.NumberPad9 =>
             string.Format(L.Get("ShortcutKey_NumPad"), k - VirtualKey.NumberPad0),
         >= VirtualKey.Number0 and <= VirtualKey.Number9 => ((int)(k - VirtualKey.Number0)).ToString(),
-        _ => k.ToString()
+
+        // The keycap first, because VirtualKey names no OEM key: bind ; or [ and the enum name is
+        // the bare number. Letters give back the same letter, and the keys that type nothing - F5,
+        // Insert, Pause - give back nothing, so they still print their enum name, which is already
+        // what every keyboard has on them.
+        _ => Util.GetKeyCapText(k) is { Length: > 0 } cap ? cap : k.ToString()
     };
 }
 
@@ -498,6 +503,17 @@ internal static class ShortcutCatalog
     /// ever shift.</summary>
     public static async Task SaveBindingsAsync(IEnumerable<ShortcutRow> rows)
     {
+#if DEBUG
+        // Every path that hands out a chord must leave it with exactly one owner. Checked here
+        // because this is where they all end up: Resolve keeps only the last command it sees, so a
+        // duplicate never throws - it just makes a command quietly stop responding.
+        var seen = new Dictionary<KeyChord, CommandId>();
+        foreach (var row in rows)
+        foreach (var key in row.Keys)
+            Debug.Assert(seen.TryAdd(key.Chord, row.Id),
+                $"{key.Chord.Format()} is on both {row.Id} and {seen.GetValueOrDefault(key.Chord)}.");
+#endif
+
         var overrides = new Dictionary<string, List<string>>(StringComparer.Ordinal);
         foreach (var row in rows.Where(r => r.IsModified))
             overrides[row.Id.ToString()] = row.Keys.Select(k => k.Chord.Format()).ToList();

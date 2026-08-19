@@ -3,6 +3,7 @@
     x:Class="FlyPhotos.UI.Views.ShortcutEditDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:FlyPhotos.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="using:FlyPhotos.UI.Views"
@@ -24,14 +25,19 @@
         </Style>
     </ContentDialog.Resources>
 
-    <StackPanel MinWidth="400" Spacing="10">
+    <!--
+        Fixed width, not MinWidth: the capture text, the conflict message and the chip list all
+        change as the user works, and each one reports the width it wants unwrapped, so the dialog
+        used to resize on every keystroke and every chip removed. Pinned, they wrap instead.
+    -->
+    <StackPanel Width="400" Spacing="10">
 
         <TextBlock x:Uid="TextShortcutCurrent" Style="{StaticResource BodyStrongTextBlockStyle}" />
 
         <ItemsControl ItemsSource="{x:Bind Row.Keys}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <StackPanel Orientation="Vertical" Spacing="4" />
+                    <controls:WrapPanel HorizontalSpacing="6" VerticalSpacing="6" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>

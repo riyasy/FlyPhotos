@@ -176,6 +176,14 @@ public sealed partial class ShortcutEditDialog : ContentDialog
 
     private void ButtonResetDefault_OnClick(object sender, RoutedEventArgs e)
     {
+        // Reset is an assignment like every other, so it has to clear the way first. Swap two
+        // commands' keys, reset one of them, and without this both rows show the same chord - and
+        // the routing table has already silently given it to whichever command it built last.
+        // No Reassign prompt here: the user asked for the defaults back, and the defaults are what
+        // the other command was holding on borrowed time.
+        foreach (var chord in Row.DefaultChords)
+            _findOwner(chord)?.RemoveChord(chord);
+
         Row.ResetToDefault();
         _conflictChord = null;
         StatusBar.IsOpen = false;

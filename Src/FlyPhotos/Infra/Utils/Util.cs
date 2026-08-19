@@ -37,6 +37,27 @@ internal static class Util
     }
 
     /// <summary>
+    /// The character printed on <paramref name="key"/>'s keycap on the active layout, or an empty
+    /// string when the key types none. The inverse of <see cref="GetKeyThatProduces"/>.
+    ///
+    /// VirtualKey names no key in the OEM range, so ToString on a punctuation key yields its raw
+    /// number - a shortcut shown as "Ctrl + 186" rather than "Ctrl + ;". Asking the layout is also
+    /// the only correct answer, because which character key 186 types differs per layout.
+    /// </summary>
+    public static string GetKeyCapText(VirtualKey key)
+    {
+        // Asks the OS per call and the rows are built once, so switching layouts with the Settings
+        // window open leaves stale keycaps until it is reopened.
+        IntPtr layout = Win32Methods.GetKeyboardLayout(0);
+        uint mapped = Win32Methods.MapVirtualKeyEx((uint)key, Win32Methods.MAPVK_VK_TO_CHAR, layout);
+
+        // The top bit only flags a dead key; the character itself is still in the low word, and a
+        // dead key has a keycap like any other. 0 means the key types nothing - a function key.
+        var c = (char)(mapped & 0xffff);
+        return char.IsControl(c) || c == '\0' ? string.Empty : c.ToString();
+    }
+
+    /// <summary>
     /// Null-tolerant, case-insensitive substring test for search boxes. Culture-aware rather than
     /// ordinal because what is being matched is localized text the user can see, and ordinal gets
     /// the Turkish dotted I and the German sharp S wrong.
