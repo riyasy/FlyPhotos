@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>Dopasuj do okna</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>Kliknij, aby zmienić kolor wyboru.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Ustawienia</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>Kliknij, aby zmienić kolor tła okna.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>Aplikacja musi zostać uruchomiona ponownie, aby zmienić język wyświetlania.</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Cienki akryl</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>Niestandardowe</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>Zamarznięty</value>
@@ -356,6 +365,18 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>Lokalizacja GPS</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Typ tekstury</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Mipmapy</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Alfa</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Ładowanie wersji w wysokiej rozdzielczości. Proszę czekać…</value>
@@ -597,6 +618,12 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Tło okna</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>Dotyczy tylko niestandardowego tła okna.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>Kolor tła</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>„Poprzedni stan” przywraca ostatni rozmiar (w oknie lub zmaksymalizowany), położenie i monitor.</value>

@@ -169,8 +169,10 @@
                                         x:Name="ButtonSetWindowBackgroundColor"
                                         HorizontalAlignment="Right"
                                         FlyoutBase.AttachedFlyout="{StaticResource ColorPickerFlyout}"
-                                        Tapped="RectWindowBackground_Tapped"
-                                        ToolTipService.ToolTip="Click to change the window background color.">
+                                        Tapped="RectWindowBackground_Tapped">
+                                        <ToolTipService.ToolTip>
+                                            <ToolTip x:Uid="ButtonSetWindowBackgroundColorToolTip" />
+                                        </ToolTipService.ToolTip>
                                         <Button.Content>
                                             <Rectangle
                                                 x:Name="RectWindowBackground"
@@ -416,8 +418,10 @@
                                         x:Name="ButtonSetThumbnailSelColor"
                                         HorizontalAlignment="Right"
                                         FlyoutBase.AttachedFlyout="{StaticResource ColorPickerFlyout}"
-                                        Tapped="RectThumbnailSelection_Tapped"
-                                        ToolTipService.ToolTip="Click to change selection color.">
+                                        Tapped="RectThumbnailSelection_Tapped">
+                                        <ToolTipService.ToolTip>
+                                            <ToolTip x:Uid="ButtonSetThumbnailSelColorToolTip" />
+                                        </ToolTipService.ToolTip>
                                         <Button.Content>
                                             <Rectangle
                                                 x:Name="RectThumbnailSelection"

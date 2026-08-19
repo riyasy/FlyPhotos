@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>Ajustar à janela</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>Clique para alterar a cor de seleção.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Definições</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>Clique para alterar a cor de fundo da janela.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>A aplicação tem de ser reiniciada para alterar o idioma.</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Acrílico fino</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>Personalizado</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>Congelado</value>
@@ -356,6 +365,18 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>Localização GPS</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Formato</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Tipo de textura</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Mipmaps</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Alfa</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>A carregar versão de alta resolução. Aguarde…</value>
@@ -597,6 +618,12 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Fundo da janela</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>Aplicável apenas ao fundo de janela personalizado.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>Cor de fundo</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>'Estado anterior' restaura o último tamanho (janela ou maximizado), posição e monitor.</value>

@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>ملاءمة للنافذة</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>انقر لتغيير لون التحديد.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>الإعدادات</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>انقر لتغيير لون خلفية النافذة.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>يجب إعادة تشغيل التطبيق لتغيير لغة العرض.</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Acrylic Thin</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>مخصص</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>متجمد</value>
@@ -356,6 +365,18 @@
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>موقع GPS</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>التنسيق</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>نوع النسيج</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>خرائط MIP</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>ألفا</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>جارٍ تحميل إصدار عالي الدقة. يرجى الانتظار…</value>
@@ -597,6 +618,12 @@
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>خلفية النافذة</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>ينطبق فقط على خلفية النافذة المخصصة.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>لون الخلفية</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>يستعيد خيار "الحالة الأخيرة" الحجم الأخير للنافذة (عادية أو مكبرة) وموقعها والشاشة المستخدمة.</value>

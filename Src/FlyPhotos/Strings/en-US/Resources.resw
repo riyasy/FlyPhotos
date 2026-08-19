@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>Fit to window</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>Click to change selection color.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Settings</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>Click to change the window background color.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>App needs to be restarted to change display language.</value>

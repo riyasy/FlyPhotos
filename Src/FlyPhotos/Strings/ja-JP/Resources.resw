@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>ウィンドウに合わせる</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>クリックして選択色を変更します。</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>設定</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>クリックしてウィンドウの背景色を変更します。</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>表示言語を変更するには、アプリを再起動する必要があります。</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>アクリル 薄型</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>カスタム</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>フローズン</value>
@@ -355,6 +364,18 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>GPS位置情報</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>形式</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>テクスチャの種類</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>ミップマップ</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>アルファ</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>高解像度バージョンを読み込み中。お待ちください…</value>
@@ -596,6 +617,12 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>ウィンドウの背景</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>カスタムのウィンドウ背景にのみ適用されます。</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>背景色</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>「前回の状態」では、最後にウインドウ表示または最大化されたときのサイズ、位置、表示モニターを復元します。</value>

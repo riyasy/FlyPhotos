@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>Вписати у вікно</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>Натисніть, щоб змінити колір виділення.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Налаштування</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>Натисніть, щоб змінити колір фону вікна.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>Для зміни мови інтерфейсу необхідно перезапустити програму.</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Тонкий акрил</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>Власний</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>Заморожений</value>
@@ -356,6 +365,18 @@
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>Розташування GPS</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Формат</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Тип текстури</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Міп-карти</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Альфа</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Завантаження версії у високій роздільній здатності. Будь ласка, зачекайте…</value>
@@ -597,6 +618,12 @@
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Фон вікна</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>Застосовується лише до власного фону вікна.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>Колір фону</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>«Попередній стан» відновлює останній розмір (у віконному режимі або розгорнутий), положення та монітор.</value>

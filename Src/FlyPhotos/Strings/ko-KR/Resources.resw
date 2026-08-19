@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>창에 맞춤</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>클릭하여 선택 색상을 변경합니다.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>설정</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>클릭하여 창 배경색을 변경합니다.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>앱을 다시 시작해야 표시 언어가 변경됩니다.</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>얇은 아크릴</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>사용자 지정</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>고정</value>
@@ -355,6 +364,18 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>GPS 위치</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>형식</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>텍스처 유형</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>밉맵</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>알파</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>고해상도 버전을 로드 중입니다. 잠시 기다려 주세요…</value>
@@ -596,6 +617,12 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>창 배경</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>사용자 지정 창 배경에만 적용됩니다.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>배경색</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>‘이전 상태’는 마지막 창 모드 또는 최대화 상태의 크기, 위치 및 모니터를 복원합니다.</value>

@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>Ajuster à la fenêtre</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>Cliquez pour modifier la couleur de sélection.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Paramètres</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>Cliquez pour modifier la couleur d'arrière-plan de la fenêtre.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>L'application doit être redémarrée pour changer la langue d'affichage.</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Acrylique Fin</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>Personnalisé</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>Gelé</value>
@@ -356,6 +365,18 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>Position GPS</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Type de texture</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Mipmaps</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Alpha</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Chargement de la version haute résolution. Veuillez patienter…</value>
@@ -597,6 +618,12 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Arrière-plan de la fenêtre</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>Applicable uniquement à l'arrière-plan de fenêtre personnalisé.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>Couleur d'arrière-plan</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>« État précédent » restaure la dernière taille (fenêtrée ou maximisée), la position et l'écran.</value>

@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>适应窗口</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>单击以更改选中颜色。</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>设置</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>单击以更改窗口背景颜色。</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>更改显示语言后需要重新启动应用。</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>亚克力（薄）</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>自定义</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>磨砂玻璃</value>
@@ -356,6 +365,18 @@
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>GPS位置</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>格式</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>纹理类型</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Mipmap</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Alpha</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>正在加载高分辨率版本，请稍候…</value>
@@ -597,6 +618,12 @@
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>窗口背景</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>仅适用于自定义窗口背景。</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>背景色</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>“上次状态”会恢复上次窗口化或最大化时的大小、位置和所在显示器。</value>

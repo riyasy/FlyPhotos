@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>വിൻഡോയിൽ ഒതുക്കുക</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>സെലക്ഷൻ നിറം മാറ്റാൻ ക്ലിക്ക് ചെയ്യുക.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>ക്രമീകരണങ്ങൾ</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>വിൻഡോ പശ്ചാത്തല നിറം മാറ്റാൻ ക്ലിക്ക് ചെയ്യുക.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>ഭാഷ മാറ്റാൻ ആപ്പ് റീസ്റ്റാർട് ചെയ്യുക</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>അക്രിലിക് തിൻ</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>ഇഷ്ടാനുസൃതം</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>ഫ്രോസൺ</value>
@@ -353,6 +362,18 @@
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>GPS ലൊക്കേഷൻ</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>ഫോർമാറ്റ്</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>ടെക്സ്ചർ തരം</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>മിപ്മാപ്പുകൾ</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>ആൽഫ</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>കൂടുതൽ വ്യക്തതയുള്ള ചിത്രം ലോഡ് ചെയ്യുന്നു. കുറച്ചു കഴിഞ്ഞ് ശ്രമിക്കുക</value>
@@ -594,6 +615,12 @@
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>വിൻഡോ പശ്ചാത്തലം</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>ഇഷ്ടാനുസൃത വിൻഡോ പശ്ചാത്തലത്തിന് മാത്രം ബാധകം.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>പശ്ചാത്തല നിറം</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>'പഴയ അവസ്ഥ' വിൻഡോ അവസാനമായി വിൻഡോ രൂപത്തിലോ മാക്സിമൈസ് ചെയ്ത രൂപത്തിലോ ഉണ്ടായിരുന്ന വലുപ്പവും സ്ഥാനവും മോണിറ്ററും പുനഃസ്ഥാപിക്കുന്നു.</value>

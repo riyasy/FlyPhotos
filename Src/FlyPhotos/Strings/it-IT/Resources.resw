@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>Adatta alla finestra</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>Fare clic per cambiare il colore di selezione.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Impostazioni</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>Fare clic per cambiare il colore di sfondo della finestra.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>L'app deve essere riavviata per cambiare la lingua di visualizzazione.</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Acrilico Sottile</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>Personalizzato</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>Congelato</value>
@@ -356,6 +365,18 @@ Impostazioni &gt; App &gt; App predefinite.</value>
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>Posizione GPS</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Formato</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Tipo di texture</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Mipmap</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Alfa</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Caricamento della versione ad alta risoluzione. Attendere prego…</value>
@@ -597,6 +618,12 @@ Impostazioni &gt; App &gt; App predefinite.</value>
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Sfondo finestra</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>Applicabile solo allo sfondo finestra personalizzato.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>Colore di sfondo</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>«Stato precedente» ripristina l'ultima dimensione (in finestra o massimizzata), posizione e monitor.</value>

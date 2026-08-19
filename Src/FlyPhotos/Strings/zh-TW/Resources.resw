@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>使照片符合視窗大小</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>按一下以變更選取顏色。</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>設定</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>按一下以變更視窗背景顏色。</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>變更顯示語言需要重新啟動應用程式。</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>薄壓克力（Acrylic Thin）</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>自訂</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>霧面</value>
@@ -356,6 +365,18 @@
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>GPS位置</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>格式</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>紋理類型</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Mipmap</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Alpha</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>正在載入高解析度版本，請稍候…</value>
@@ -597,6 +618,12 @@
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>視窗背景</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>僅適用於自訂視窗背景。</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>背景色</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>「上次狀態」會還原上次視窗化或最大化時的大小、位置與所在螢幕。</value>

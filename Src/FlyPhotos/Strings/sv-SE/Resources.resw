@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>Anpassa till fönster</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>Klicka för att ändra markeringsfärgen.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Inställningar</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>Klicka för att ändra fönstrets bakgrundsfärg.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>Appen måste startas om för att ändra visningsspråk.</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Tunn akryl</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>Anpassad</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>Frusen</value>
@@ -356,6 +365,18 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>GPS-plats</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Texturtyp</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Mipmaps</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Alfa</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Laddar högupplöst version. Vänta…</value>
@@ -597,6 +618,12 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Fönsterbakgrund</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>Gäller endast anpassad fönsterbakgrund.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>Bakgrundsfärg</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>”Föregående tillstånd” återställer fönstrets senaste storlek (fönsterläge eller maximerat), position och skärm.</value>

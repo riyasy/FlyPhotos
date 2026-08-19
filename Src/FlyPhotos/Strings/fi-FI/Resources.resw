@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>Sovita ikkunaan</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>Napsauta muuttaaksesi valintaväriä.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Asetukset</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>Napsauta muuttaaksesi ikkunan taustaväriä.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>Sovellus on käynnistettävä uudelleen näytön kielen vaihtamiseksi.</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Ohut akryyli</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>Mukautettu</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>Jäätynyt</value>
@@ -356,6 +365,18 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>GPS-sijainti</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Muoto</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Tekstuurin tyyppi</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Mipmapit</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Alfa</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Ladataan korkearesoluutioista versiota. Odota hetki…</value>
@@ -597,6 +618,12 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Ikkunan tausta</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>Koskee vain mukautettua ikkunan taustaa.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>Taustaväri</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>’Edellinen tila’ palauttaa ikkunan viimeisimmän koon (ikkunoitu tai maksimoitu), sijainnin ja näytön.</value>

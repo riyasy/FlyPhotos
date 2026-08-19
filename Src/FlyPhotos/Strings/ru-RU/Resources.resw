@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>По размеру окна</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>Нажмите, чтобы изменить цвет выделения.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Параметры</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>Нажмите, чтобы изменить цвет фона окна.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>Для изменения языка интерфейса, необходимо перезапустить приложение.</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Acrylic Thin</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>Пользовательский</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>Frozen</value>
@@ -356,6 +365,18 @@
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>Местоположение GPS</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Формат</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Тип текстуры</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Мип-карты</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Альфа</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Загрузка версии в высоком разрешении. Пожалуйста, подождите…</value>
@@ -597,6 +618,12 @@
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Фон окна</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>Применимо только к пользовательскому фону окна.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>Цвет фона</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>«Предыдущее состояние» восстанавливает последний размер (в оконном режиме или развернутый), положение и монитор.</value>

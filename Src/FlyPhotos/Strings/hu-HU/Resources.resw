@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>Igazítás az ablakhoz</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>Kattintson a kijelölési szín módosításához.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Beállítások</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>Kattintson az ablak háttérszínének módosításához.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>A megjelenítési nyelv váltásához újra kell indítani az alkalmazást.</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Vékony akril</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>Egyéni</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>Fagyott</value>
@@ -355,6 +364,18 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>GPS-hely</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Formátum</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Textúra típusa</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Mipmapek</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Alfa</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Nagy felbontású verzió betöltése. Kérem, várjon…</value>
@@ -596,6 +617,12 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Ablak háttér</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>Csak az egyéni ablakháttérre vonatkozik.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>Háttérszín</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>Az 'Előző állapot' visszaállítja az utolsó ablakos vagy maximalizált méretet, pozíciót és monitort.</value>

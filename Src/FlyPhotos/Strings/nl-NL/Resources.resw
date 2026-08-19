@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>Passend maken aan venster</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>Klik om de selectiekleur te wijzigen.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Instellingen</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>Klik om de achtergrondkleur van het venster te wijzigen.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>App moet opnieuw worden opgestart om de weergavetaal te wijzigen.</value>
@@ -191,6 +197,9 @@
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Dunne acryl</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>Aangepast</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
     <value>Bevroren</value>
@@ -356,6 +365,18 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
   </data>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>GPS-locatie</value>
+  </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Formaat</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Textuurtype</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Mipmaps</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Alfa</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Hoogwaardige versie laden. Even geduld…</value>
@@ -597,6 +618,12 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Vensterachtergrond</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>Alleen van toepassing op een aangepaste vensterachtergrond.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>Achtergrondkleur</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>‘Vorige staat’ herstelt de laatste venstergrootte (venster of gemaximaliseerd), positie en monitor.</value>
