@@ -169,7 +169,7 @@
     <value>Foto drehen</value>
   </data>
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
-    <value>An Anzeigebereich anpassen</value>
+    <value>An Fenster anpassen</value>
   </data>
   <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
     <value>Klicken Sie, um die Auswahlfarbe zu ändern.</value>
@@ -196,13 +196,13 @@
     <value>Acryl</value>
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
-    <value>Acryl dünn</value>
+    <value>Acryl (dünn)</value>
   </data>
   <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
     <value>Benutzerdefiniert</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>Gefroren</value>
+    <value>Milchglas</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Mica</value>
@@ -211,7 +211,7 @@
     <value>Mica Alt</value>
   </data>
   <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
-    <value>Kein</value>
+    <value>Ohne</value>
   </data>
   <data name="ComboBackgroundItemTransparent.Content" xml:space="preserve">
     <value>Transparent</value>
@@ -286,7 +286,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Spenden</value>
   </data>
   <data name="DropAreaRun.Text" xml:space="preserve">
-    <value>Bild hierher ziehen oder</value>
+    <value>Foto hierher ziehen oder</value>
   </data>
   <data name="HeaderCodec.Text" xml:space="preserve">
     <value>Codec</value>
@@ -298,7 +298,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Typ</value>
   </data>
   <data name="ExifPanelTitle.Text" xml:space="preserve">
-    <value>Foto-Info</value>
+    <value>Fotoinfo</value>
   </data>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Schließen</value>
@@ -385,7 +385,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>OK</value>
   </data>
   <data name="NoShortcutsCreated.Message" xml:space="preserve">
-    <value>Keine Verknüpfungen gefunden. Konfigurieren Sie diese in den Einstellungen.</value>
+    <value>Es wurden keine Verknüpfungen erstellt. Konfigurieren Sie sie in den Einstellungen.</value>
   </data>
   <data name="OpenFileHyperlink.Text" xml:space="preserve">
     <value>Datei öffnen</value>
@@ -412,7 +412,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Mauszeiger automatisch ausblenden</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Fly speichert aktuelle schnelle Vorschauen auf dem Datenträger für ein schnelleres Laden beim nächsten Mal. „Löschen" entfernt alle zwischengespeicherten Vorschauen aus dem Festplatten-Cache.</value>
+    <value>Fly speichert aktuelle schnelle Vorschauen auf dem Datenträger für ein schnelleres Laden beim nächsten Mal. „Leeren“ entfernt alle zwischengespeicherten Vorschauen aus dem Festplatten-Cache.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Festplatten-Cache leeren</value>
@@ -421,7 +421,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Vor dem Löschen einer Datei um Bestätigung bitten.</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Header" xml:space="preserve">
-    <value>Bestätigungsdialog zum Löschen von Dateien anzeigen</value>
+    <value>Vor dem Löschen von Dateien bestätigen</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
     <value>FlyPhotos dankt Resvg, Magick.NET, MagicScaler, Rawler, NLog und WinUIEx.</value>
@@ -436,7 +436,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Decoder geändert</value>
   </data>
   <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
-    <value>Verwenden Sie echte RAW-Daten anstelle des eingebetteten JPEGs in der RAW-Datei</value>
+    <value>Echte RAW-Daten anstelle des eingebetteten JPEGs in der RAW-Datei verwenden.</value>
   </data>
   <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
     <value>Kamera-RAW decodieren</value>
@@ -448,13 +448,13 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>RAW-Decoder-Priorität anpassen (Ziehen zum Neuanordnen)</value>
   </data>
   <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
-    <value>Helfen Sie, Fly noch besser zu machen.</value>
+    <value>Fly noch besser machen.</value>
   </data>
   <data name="SettingsCardDeveloperSupport.Header" xml:space="preserve">
     <value>FlyPhotos unterstützen</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Wählen Sie externe Programme aus, um sie als Verknüpfungen hinzuzufügen.</value>
+    <value>Externe Apps auswählen, um sie als Verknüpfungen hinzuzufügen.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Externe Apps auswählen</value>
@@ -475,13 +475,13 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Stärke des automatischen Ausblendeffekts anpassen.</value>
   </data>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
-    <value>Intensität des automatischen Ausblendens %</value>
+    <value>Intensität des automatischen Ausblendens (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Anzahl der vollauflösenden Bilder, die auf jeder Seite vorgeladen werden.</value>
+    <value>Anzahl der Bilder in voller Auflösung, die auf jeder Seite vorgeladen werden.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Hochauflösungs-Vorabladen (Im Arbeitsspeicher)</value>
+    <value>Vorladen in hoher Auflösung (im Arbeitsspeicher)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Legt fest, wie viel % des Bildschirms das Foto ausfüllt.</value>
@@ -502,28 +502,28 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Anzahl der schnellen Vorschauen, die auf jeder Seite vorgeladen werden.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Niedrigauflösungs-Vorabladen (Im Arbeitsspeicher)</value>
+    <value>Vorladen in niedriger Auflösung (im Arbeitsspeicher)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
-    <value>Wählen Sie das Standardverhalten des Mausrads.</value>
+    <value>Standardverhalten des Mausrads auswählen.</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>Mausrad</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
-    <value>⚠ Kann den Start verlangsamen: Fly wartet beim Start auf das Laden des vollständigen Bildes statt die Vorschau zu verwenden.</value>
+    <value>⚠ Kann den Start verlangsamen. Fly wartet beim Start auf das Laden des Fotos in voller Auflösung.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
     <value>Zoom-Animation beim Start und Auszoomen beim Beenden</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ Verwenden Sie die Option „Beibehalten“ nur in Ordnern mit gleich großen Fotos.</value>
+    <value>⚠ Option „Beibehalten“ nur in Ordnern mit ähnlich großen Fotos verwenden.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Schwenk-, Zoom- und Drehverhalten bei der Navigation</value>
   </data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
-    <value>Melden Sie Probleme auf GitHub oder per E-Mail an ryftools@outlook.com</value>
+    <value>Probleme auf GitHub melden oder per E-Mail an ryftools@outlook.com</value>
   </data>
   <data name="SettingsCardReportBugs.Header" xml:space="preserve">
     <value>Fehler und Probleme</value>
@@ -535,11 +535,11 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Cache-Status anzeigen</value>
   </data>
   <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
-    <value>Karierten Hintergrund für transparente Bilder anzeigen. 
+    <value>Schachbrettmuster für transparente Bilder anzeigen. 
 ⚠ Kann die Leistung beeinträchtigen.</value>
   </data>
   <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
-    <value>Karierten Hintergrund anzeigen</value>
+    <value>Schachbretthintergrund anzeigen</value>
   </data>
   <data name="SettingsCardShowFileName.Description" xml:space="preserve">
     <value>Dateinamen der aktuell geöffneten Datei anzeigen</value>
@@ -554,10 +554,10 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Fotoabmessungen anzeigen</value>
   </data>
   <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
-    <value>Miniaturansichtleiste am unteren Fensterrand anzeigen</value>
+    <value>Miniaturansichtsleiste am unteren Fensterrand anzeigen</value>
   </data>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
-    <value>Miniaturansichtleiste anzeigen</value>
+    <value>Miniaturansichtsleiste anzeigen</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Zoomprozentsatz beim Zoomen in der Bildschirmmitte anzeigen.</value>
@@ -572,13 +572,13 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>GitHub-Repository</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
-    <value>Große Fotos passen immer in den Anzeigebereich. Kleine Fotos werden standardmäßig in Originalgröße (1:1) angezeigt; aktivieren Sie dies, um sie zu vergrößern und anzupassen.</value>
+    <value>Große Fotos passen immer in den Anzeigebereich. Kleine Fotos werden standardmäßig in Originalgröße (1:1) angezeigt; diese Option aktivieren, um sie zu vergrößern und anzupassen.</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
     <value>Kleine Fotos an Anzeigebereich anpassen</value>
   </data>
   <data name="SettingsCardTheme.Description" xml:space="preserve">
-    <value>Wählen Sie das App-Design.</value>
+    <value>App-Design auswählen.</value>
   </data>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>Fensterdesign</value>
@@ -590,16 +590,16 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Miniaturansichtsleiste animieren</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
-    <value>Legen Sie die Hervorhebungsfarbe für ausgewählte Miniaturansichten fest.</value>
+    <value>Hervorhebungsfarbe für ausgewählte Miniaturansichten festlegen.</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
     <value>Auswahlfarbe für Miniaturansichten</value>
   </data>
   <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
-    <value>Passen Sie die Größe der Miniaturansichten im Viewer an.</value>
+    <value>Größe der Miniaturansichten im Viewer anpassen.</value>
   </data>
   <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
-    <value>Größe der Miniaturansicht</value>
+    <value>Größe der Miniaturansichten</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
     <value>Nur für transparenten Fensterhintergrund anwendbar.</value>
@@ -614,7 +614,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Aktuelle Version</value>
   </data>
   <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
-    <value>Legen Sie den Fensterhintergrund fest.</value>
+    <value>Fensterhintergrund auswählen.</value>
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Fensterhintergrund</value>
@@ -632,7 +632,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Fensterzustand beim Start</value>
   </data>
   <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
-    <value>Automatisches Ein- und Ausblenden</value>
+    <value>Automatisches Ausblenden</value>
   </data>
   <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - Einstellungen</value>
@@ -662,10 +662,10 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Diagnose</value>
   </data>
   <data name="TextBlockCaching.Text" xml:space="preserve">
-    <value>Caching</value>
+    <value>Zwischenspeicherung</value>
   </data>
   <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
-    <value>FlyPhotos verwendet hauptsächlich integrierte Windows Imaging Component (WIC) Codecs.</value>
+    <value>FlyPhotos verwendet hauptsächlich die integrierten Windows Imaging Component (WIC)-Codecs.</value>
   </data>
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Erweitert</value>
@@ -695,7 +695,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Testversion abgelaufen</value>
   </data>
   <data name="UnsupportedFileAlert.Description" xml:space="preserve">
-    <value>Die abgelegte Datei wird nicht als unterstütztes Bildformat erkannt.</value>
+    <value>Die abgelegte Datei ist kein unterstütztes Bildformat.</value>
   </data>
   <data name="UnsupportedFileAlert.Title" xml:space="preserve">
     <value>Nicht unterstützte Datei</value>
@@ -707,7 +707,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Vorwärts-/Zurück-Tasten der Maus</value>
   </data>
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
-    <value>Wählen Sie aus, was die Vorwärts- und Zurück-Tasten der Maus tun (nur bei einigen Mäusen verfügbar).</value>
+    <value>Auswählen, was die Vorwärts- und Zurück-Tasten der Maus tun (nur bei einigen Mäusen verfügbar).</value>
   </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Stufenweises Zoomen</value>
@@ -728,7 +728,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Linke Maustaste + Ziehen außerhalb des Fotos</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
-    <value>Skalierungsmethode</value>
+    <value>Bildskalierungsmethode</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
     <value>Nearest Neighbor – Nur für Pixel-Art verwenden. Bewahrt scharfe Pixelkanten.
@@ -818,7 +818,7 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
     <value>Linke Maustaste + Ziehen auf dem Foto</value>
   </data>
   <data name="TextLeftClickDragAction.Text" xml:space="preserve">
-    <value>Ausschnitt verschieben</value>
+    <value>Foto schwenken</value>
   </data>
   <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
     <value>Mausrad-Klick</value>
@@ -863,7 +863,7 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
     <value>Tastenkürzel</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
-    <value>Befehle und Tasten suchen…</value>
+    <value>Befehle und Tasten suchen</value>
   </data>
   <data name="ButtonResetAllShortcuts.Content" xml:space="preserve">
     <value>Alle zurücksetzen…</value>
@@ -941,7 +941,7 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
     <value>Navigation</value>
   </data>
   <data name="ShortcutGroup_ZoomPan" xml:space="preserve">
-    <value>Zoom und Verschieben</value>
+    <value>Zoomen und Schwenken</value>
   </data>
   <data name="ShortcutGroup_Rotate" xml:space="preserve">
     <value>Drehen</value>
@@ -992,16 +992,16 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
     <value>An Fenster anpassen</value>
   </data>
   <data name="ShortcutName_PanUp" xml:space="preserve">
-    <value>Nach oben verschieben</value>
+    <value>Nach oben schwenken</value>
   </data>
   <data name="ShortcutName_PanDown" xml:space="preserve">
-    <value>Nach unten verschieben</value>
+    <value>Nach unten schwenken</value>
   </data>
   <data name="ShortcutName_PanLeft" xml:space="preserve">
-    <value>Nach links verschieben</value>
+    <value>Nach links schwenken</value>
   </data>
   <data name="ShortcutName_PanRight" xml:space="preserve">
-    <value>Nach rechts verschieben</value>
+    <value>Nach rechts schwenken</value>
   </data>
   <data name="ShortcutName_RotateLeft" xml:space="preserve">
     <value>Nach links drehen</value>
@@ -1070,7 +1070,7 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
     <value>Mehrseitige TIFF- und ICO-Dateien</value>
   </data>
   <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
-    <value>Springt zur nächsten Stufe: 100 %, 400 %, Einpassen</value>
+    <value>Springt zur nächsten Stufe: 100 %, 400 %, Anpassen</value>
   </data>
   <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
     <value>Springt zur vorherigen Stufe</value>
