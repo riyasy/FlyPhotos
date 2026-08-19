@@ -643,8 +643,8 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Avançado</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>Teclado e mouse</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>Comportamento</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Exibição de fotos</value>

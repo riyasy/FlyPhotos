@@ -643,8 +643,8 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Avançadas</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>Teclado e rato</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>Comportamento</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Apresentação de fotografias</value>

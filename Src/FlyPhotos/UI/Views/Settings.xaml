@@ -275,7 +275,7 @@
                         <!--  *****************  -->
 
                         <TextBlock
-                            x:Uid="TextBlockKeyboardAndMouse"
+                            x:Uid="TextBlockBehaviour"
                             Margin="0,20,0,0"
                             Style="{StaticResource BodyStrongTextBlockStyle}" />
 

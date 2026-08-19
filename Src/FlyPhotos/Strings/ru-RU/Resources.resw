@@ -643,8 +643,8 @@
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Расширенные</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>Клавиатура и мышь</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>Поведение</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Отображение фото</value>

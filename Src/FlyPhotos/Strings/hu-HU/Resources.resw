@@ -642,8 +642,8 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Speciális</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>Billentyűzet és egér</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>Viselkedés</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Kép megjelenítése</value>

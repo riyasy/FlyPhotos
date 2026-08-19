@@ -643,8 +643,8 @@
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Додатково</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>Клавіатура та миша</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>Поведінка</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Відображення фото</value>

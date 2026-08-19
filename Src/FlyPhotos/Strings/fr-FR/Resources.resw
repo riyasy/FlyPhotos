@@ -643,8 +643,8 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Avancé</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>Clavier et souris</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>Comportement</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Affichage des photos</value>

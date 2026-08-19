@@ -643,8 +643,8 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Geavanceerd</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>Toetsenbord en muis</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>Gedrag</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Fotoweergave</value>

@@ -664,8 +664,8 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Advanced</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>Keyboard and Mouse</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>Behaviour</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Photo Display</value>

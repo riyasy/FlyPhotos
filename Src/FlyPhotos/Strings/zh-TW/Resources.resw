@@ -643,8 +643,8 @@
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>進階</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>鍵盤和滑鼠</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>行為</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>照片顯示</value>

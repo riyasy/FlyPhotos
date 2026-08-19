@@ -640,8 +640,8 @@
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>അഡ്വാൻസ്ഡ്</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>കീബോർഡും മൗസും</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>പ്രവർത്തനരീതി</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>ഫോട്ടോ പ്രദർശനം</value>

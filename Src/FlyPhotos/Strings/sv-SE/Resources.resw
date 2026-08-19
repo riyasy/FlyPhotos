@@ -643,8 +643,8 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Avancerat</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>Tangentbord och mus</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>Beteende</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Fotovisning</value>

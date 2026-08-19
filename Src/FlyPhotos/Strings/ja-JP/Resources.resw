@@ -642,8 +642,8 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>詳細</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>キーボードとマウス</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>動作</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>写真の表示</value>

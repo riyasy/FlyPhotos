@@ -643,8 +643,8 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Erweitert</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>Tastatur und Maus</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>Verhalten</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Fotoanzeige</value>

@@ -643,8 +643,8 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Zaawansowane</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>Klawiatura i mysz</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>Zachowanie</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Wyświetlanie zdjęć</value>
