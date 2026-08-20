@@ -172,7 +172,7 @@
     <value>Dopasuj do okna</value>
   </data>
   <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
-    <value>Kliknij, aby zmienić kolor wyboru.</value>
+    <value>Kliknij, aby zmienić kolor zaznaczenia.</value>
   </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Ustawienia</value>
@@ -202,7 +202,7 @@
     <value>Niestandardowe</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>Zamarznięty</value>
+    <value>Matowy</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Mika</value>
@@ -217,10 +217,10 @@
     <value>Przezroczysty</value>
   </data>
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
-    <value>Wyświetl następny lub poprzedni</value>
+    <value>Wyświetl następne lub poprzednie</value>
   </data>
   <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
-    <value>Wyświetl następny lub poprzedni</value>
+    <value>Wyświetl następne lub poprzednie</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Powiększ lub pomniejsz</value>
@@ -265,12 +265,12 @@
     <value>Potwierdź usunięcie</value>
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
-    <value>Aby ustawić FlyPhotos jako domyślną aplikację: 
-kliknij prawym przyciskiem myszy zdjęcie &gt; Otwórz za pomocą &gt; Wybierz inną aplikację. 
+    <value>Aby ustawić FlyPhotos jako domyślną aplikację:
+Kliknij prawym przyciskiem myszy zdjęcie &gt; Otwórz za pomocą &gt; Wybierz inną aplikację.
 Wybierz FlyPhotos i zaznacz Zawsze.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
-    <value>W systemie Windows 11 możesz także ustawić FlyPhotos jako domyślną aplikację 
+    <value>W systemie Windows 11 możesz także ustawić FlyPhotos jako domyślną aplikację
 w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   </data>
   <data name="DeletionFailed.CloseButton" xml:space="preserve">
@@ -319,7 +319,7 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Rozmiar pliku</value>
   </data>
   <data name="Exif_DateTaken" xml:space="preserve">
-    <value>Data zrobienia</value>
+    <value>Data wykonania</value>
   </data>
   <data name="Exif_CameraMake" xml:space="preserve">
     <value>Producent aparatu</value>
@@ -409,16 +409,16 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Ukryj wskaźnik myszy, jeśli mysz jest nieaktywna.</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
-    <value>Automatycznie ukryj wskaźnik myszy</value>
+    <value>Automatycznie ukrywaj wskaźnik myszy</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Fly zapisuje ostatnie szybkie podglądy na dysku, aby przyspieszyć ładowanie przy następnym otwarciu. Wyczyść usuwa wszystkie zbuforowane podglądy z pamięci podręcznej dysku.</value>
+    <value>Fly zapisuje ostatnie szybkie podglądy na dysku, aby przyspieszyć ładowanie przy następnym otwarciu. „Wyczyść” usuwa wszystkie zapisane podglądy z pamięci podręcznej dysku.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Wyczyść pamięć podręczną dysku</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
-    <value>Poproś o potwierdzenie przed usunięciem jakiegokolwiek pliku.</value>
+    <value>Pytaj o potwierdzenie przed usunięciem każdego pliku.</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Header" xml:space="preserve">
     <value>Potwierdź przed usunięciem plików</value>
@@ -427,7 +427,7 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>FlyPhotos dziękuje Resvg, Magick.NET, MagicScaler, Rawler, NLog i WinUIEx.</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
-    <value>Kredyty</value>
+    <value>Podziękowania</value>
   </data>
   <data name="RawDecodeTeachingTip.Subtitle" xml:space="preserve">
     <value>Bieżące zdjęcie zostanie za chwilę załadowane ponownie.</value>
@@ -478,10 +478,10 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Intensywność automatycznego wygaszania (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Liczba obrazów w pełnej rozdzielczości wstępnie załadowanych po każdej stronie.</value>
+    <value>Liczba obrazów w pełnej rozdzielczości wstępnie załadowanych po każdej stronie bieżącego zdjęcia.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Wstępne ładowanie w wysokiej rozdzielczości (W pamięci)</value>
+    <value>Wstępne ładowanie w wysokiej rozdzielczości (w pamięci)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Wybierz, jaką część ekranu wypełnia zdjęcie. (%)</value>
@@ -499,10 +499,10 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Plik dziennika</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Liczba szybkich podglądów wstępnie załadowanych po każdej stronie.</value>
+    <value>Liczba szybkich podglądów wstępnie załadowanych po każdej stronie bieżącego zdjęcia.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Wstępne ładowanie w niskiej rozdzielczości (W pamięci)</value>
+    <value>Wstępne ładowanie w niskiej rozdzielczości (w pamięci)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Wybierz domyślne zachowanie kółka myszy.</value>
@@ -517,7 +517,7 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Animuj powiększenie przy uruchomieniu i pomniejsz przy zamykaniu</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ Użyj opcji Zachowaj tylko dla folderów z podobnymi rozmiarami zdjęć.</value>
+    <value>⚠ Użyj opcji „Zachowaj” tylko dla folderów ze zdjęciami o podobnych rozmiarach.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Zachowanie przesuwania, powiększania i obracania podczas nawigacji</value>
@@ -560,7 +560,7 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Pokaż pasek miniatur</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
-    <value>Wyświetl procent powiększenia na środku ekranu podczas powiększania.</value>
+    <value>Pokaż procent powiększenia na środku ekranu podczas powiększania.</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>Pokaż procent powiększenia</value>
@@ -593,13 +593,13 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Ustaw kolor wyróżnienia używany dla wybranych miniatur.</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
-    <value>Kolor wyboru miniatury</value>
+    <value>Kolor zaznaczenia miniatur</value>
   </data>
   <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
     <value>Dostosuj rozmiar miniatur w przeglądarce.</value>
   </data>
   <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
-    <value>Rozmiar miniatury</value>
+    <value>Rozmiar miniatur</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
     <value>Ma zastosowanie tylko do przezroczystego tła okna.</value>
@@ -662,7 +662,7 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Diagnostyka</value>
   </data>
   <data name="TextBlockCaching.Text" xml:space="preserve">
-    <value>Buforowanie</value>
+    <value>Pamięć podręczna</value>
   </data>
   <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
     <value>FlyPhotos używa głównie wbudowanych kodeków Windows Imaging Component (WIC).</value>
@@ -725,7 +725,7 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Automatycznie ukrywaj przyciski okna</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Lewy przycisk myszy i przeciągnij poza zdjęciem</value>
+    <value>Lewy przycisk myszy i przeciąganie poza zdjęciem</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Metoda skalowania obrazu</value>
@@ -806,16 +806,16 @@ High Quality Cubic – Najwyższej jakości skalowanie dla zdjęć.</value>
     <value>Alt + Kółko myszy</value>
   </data>
   <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
-    <value>Zawsze wyświetla następny lub poprzedni</value>
+    <value>Zawsze wyświetla następne lub poprzednie</value>
   </data>
   <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
-    <value>Przechyl kółko w lewo/prawo</value>
+    <value>Przechylenie kółka myszy w lewo lub w prawo</value>
   </data>
   <data name="TextTiltWheelAction.Text" xml:space="preserve">
-    <value>Wyświetl następny lub poprzedni</value>
+    <value>Wyświetl następne lub poprzednie</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
-    <value>Lewy przycisk myszy i przeciągnij na zdjęciu</value>
+    <value>Lewy przycisk myszy i przeciąganie na zdjęciu</value>
   </data>
   <data name="TextLeftClickDragAction.Text" xml:space="preserve">
     <value>Przesuń zdjęcie</value>
@@ -851,7 +851,7 @@ High Quality Cubic – Najwyższej jakości skalowanie dla zdjęć.</value>
     <value>Dwukrotne kliknięcie zdjęcia</value>
   </data>
   <data name="TextDoubleClickAction.Text" xml:space="preserve">
-    <value>Rzeczywisty rozmiar lub dopasuj do okna</value>
+    <value>Powiększ do rzeczywistego rozmiaru lub dopasuj do okna</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
     <value>Ctrl + przeciąganie zawsze przenosi okno</value>
@@ -1070,7 +1070,7 @@ High Quality Cubic – Najwyższej jakości skalowanie dla zdjęć.</value>
     <value>Wielostronicowe pliki TIFF i ICO</value>
   </data>
   <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
-    <value>Przechodzi do następnego ustawienia: 100%, 400%, Dopasuj</value>
+    <value>Przechodzi do następnego ustawienia: 100%, 400%, Dopasuj do okna</value>
   </data>
   <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
     <value>Wraca do poprzedniego ustawienia</value>

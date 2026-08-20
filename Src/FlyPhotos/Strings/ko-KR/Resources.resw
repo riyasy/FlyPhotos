@@ -202,13 +202,13 @@
     <value>사용자 지정</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>고정</value>
+    <value>간유리</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Mica</value>
   </data>
   <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
-    <value>Mica 대체</value>
+    <value>Mica Alt</value>
   </data>
   <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
     <value>없음</value>
@@ -226,13 +226,13 @@
     <value>확대 또는 축소</value>
   </data>
   <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
-    <value>사진별 이동/확대/축소/회전 기억</value>
+    <value>사진별 이동, 확대/축소, 회전 기억</value>
   </data>
   <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
-    <value>이동/확대/축소/회전 재설정</value>
+    <value>이동, 확대/축소, 회전 재설정</value>
   </data>
   <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
-    <value>이전 사진에서 이동/확대/축소 유지</value>
+    <value>이전 사진의 이동, 확대/축소 유지</value>
   </data>
   <data name="ComboThemeItemDark.Content" xml:space="preserve">
     <value>어둡게</value>
@@ -265,9 +265,9 @@
     <value>삭제 확인</value>
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
-    <value>FlyPhotos를 기본 앱으로 설정하려면: 
-사진을 마우스 오른쪽 버튼으로 클릭 &gt; 연결 프로그램 &gt; 다른 앱 선택을 선택합니다. 
-FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
+    <value>FlyPhotos를 기본 앱으로 설정하려면:
+사진을 마우스 오른쪽 버튼으로 클릭 &gt; 연결 프로그램 &gt; 다른 앱 선택을 클릭합니다.
+FlyPhotos를 선택한 다음 항상을 선택합니다.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
     <value>Windows 11에서는 설정 &gt; 앱 &gt; 기본 앱에서도 FlyPhotos를 기본 앱으로 설정할 수 있습니다.</value>
@@ -291,7 +291,7 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
     <value>코덱</value>
   </data>
   <data name="HeaderExtensions.Text" xml:space="preserve">
-    <value>확장</value>
+    <value>확장자</value>
   </data>
   <data name="HeaderType.Text" xml:space="preserve">
     <value>유형</value>
@@ -354,7 +354,7 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
     <value>플래시</value>
   </data>
   <data name="Exif_Dimensions" xml:space="preserve">
-    <value>크기</value>
+    <value>이미지 크기</value>
   </data>
   <data name="Exif_Orientation" xml:space="preserve">
     <value>방향</value>
@@ -435,7 +435,7 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
     <value>디코더 변경됨</value>
   </data>
   <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
-    <value>RAW 파일 내에 포함된 JPEG 대신 실제 RAW 데이터를 사용합니다</value>
+    <value>RAW 파일 내에 포함된 JPEG 대신 실제 RAW 데이터를 사용합니다.</value>
   </data>
   <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
     <value>카메라 RAW 디코딩</value>
@@ -477,13 +477,13 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
     <value>자동 페이드 강도(%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>각 측면에 미리 로드되는 전체 해상도 이미지 수.</value>
+    <value>현재 사진의 양쪽에 미리 로드되는 전체 해상도 이미지 수.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
     <value>고해상도 미리 로드 (메모리)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
-    <value>사진이 화면을 채우는 정도를 선택합니다.(%)</value>
+    <value>사진이 화면을 채우는 정도를 선택합니다. (%)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>이미지 화면 맞춤</value>
@@ -492,13 +492,13 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
     <value>언어 선택</value>
   </data>
   <data name="SettingsCardLog.Description" xml:space="preserve">
-    <value>로그 파일 보기를 위해 열기</value>
+    <value>로그 파일을 보려면 열기</value>
   </data>
   <data name="SettingsCardLog.Header" xml:space="preserve">
     <value>로그 파일</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>각 측면에 미리 로드되는 빠른 미리보기 수.</value>
+    <value>현재 사진의 양쪽에 미리 로드되는 빠른 미리보기 수.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
     <value>저해상도 미리 로드 (메모리)</value>
@@ -510,10 +510,10 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
     <value>마우스 휠</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
-    <value>⚠ 시작이 느려질 수 있습니다. Fly가 실행 시 고해상도 사진을 로드할 때까지 기다립니다.</value>
+    <value>⚠ 시작이 느려질 수 있습니다. 실행 시 Fly가 전체 해상도 사진을 로드할 때까지 기다립니다.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
-    <value>시작 시 줌 애니메이션 및 종료 시 축소</value>
+    <value>시작 시 확대 애니메이션 및 종료 시 축소</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
     <value>⚠ 비슷한 크기의 사진이 있는 폴더에만 '유지' 옵션을 사용하세요.</value>
@@ -559,7 +559,7 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
     <value>축소판 그림 표시줄 표시</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
-    <value>확대/축소 시 화면 중앙에 줌 비율 표시.</value>
+    <value>확대/축소 시 화면 중앙에 확대/축소 비율 표시</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>확대/축소 비율 표시</value>
@@ -601,7 +601,7 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
     <value>축소판 그림 크기</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
-    <value>투명 창 배경에만 적용 가능</value>
+    <value>투명 창 배경에만 적용됩니다.</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
     <value>투명도(%)</value>
@@ -625,7 +625,7 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
     <value>배경색</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>‘이전 상태’는 마지막 창 모드 또는 최대화 상태의 크기, 위치 및 모니터를 복원합니다.</value>
+    <value>'이전 상태'는 마지막 창 모드 또는 최대화 상태의 크기, 위치 및 모니터를 복원합니다.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>시작 시 창 상태</value>
@@ -709,7 +709,7 @@ FlyPhotos를 선택하고 항상 선택을 선택합니다.</value>
     <value>마우스 앞으로/뒤로 버튼의 동작을 선택합니다(일부 마우스에서만 지원).</value>
   </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
-    <value>단계별 줌</value>
+    <value>단계별 확대/축소</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
     <value>사진 바깥쪽을 클릭하면 전체 화면 또는 최대화 상태에서 창이 복원됩니다. 두 번 클릭하면 다시 최대화됩니다.</value>
@@ -853,7 +853,7 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
     <value>실제 크기 또는 창에 맞춤</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
-    <value>Ctrl + 드래그는 항상 창을 이동합니다</value>
+    <value>Ctrl + 드래그는 항상 창을 이동합니다.</value>
   </data>
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>창 이동</value>
@@ -1069,7 +1069,7 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
     <value>멀티 페이지 TIFF 및 ICO 파일</value>
   </data>
   <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
-    <value>다음 프리셋으로 이동: 100%, 400%, 맞춤</value>
+    <value>다음 프리셋으로 이동: 100%, 400%, 창에 맞춤</value>
   </data>
   <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
     <value>이전 프리셋으로 이동</value>

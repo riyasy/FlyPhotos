@@ -145,7 +145,7 @@
     <value>Előző kép</value>
   </data>
   <data name="ButtonClearDiskCache.Content" xml:space="preserve">
-    <value>Törlés</value>
+    <value>Ürítés</value>
   </data>
   <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
     <value>Gyorsítótár állapotának megtekintése</value>
@@ -202,7 +202,7 @@
     <value>Egyéni</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>Fagyott</value>
+    <value>Matt üveg</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Csillám</value>
@@ -384,7 +384,7 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>OK</value>
   </data>
   <data name="NoShortcutsCreated.Message" xml:space="preserve">
-    <value>Nem lettek parancsikonok létrehozva. Állítsa be őket a Beállításokban.</value>
+    <value>Nem jöttek létre parancsikonok. Állítsa be őket a Beállításokban.</value>
   </data>
   <data name="OpenFileHyperlink.Text" xml:space="preserve">
     <value>Fájl megnyitása</value>
@@ -393,7 +393,7 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>A FlyPhotos használatához kattintson jobb gombbal egy képre, és válassza a Megnyitás ezzel &gt; FlyPhotos lehetőséget.</value>
   </data>
   <data name="ScanningTextBlock.Text" xml:space="preserve">
-    <value>Alkalmazások keresése…</value>
+    <value>Telepített alkalmazások keresése…</value>
   </data>
   <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>Alkalmazások keresése…</value>
@@ -411,10 +411,10 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Egérmutató automatikus elrejtése</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>A Fly a legutóbbi gyors előnézeteket lemezre menti a következő alkalommal gyorsabb betöltés érdekében. A törlés eltávolítja az összes gyorsítótárazott előnézetet a lemezes gyorsítótárból.</value>
+    <value>A Fly a legutóbbi gyors előnézeteket lemezre menti a következő alkalommal gyorsabb betöltés érdekében. Az „Ürítés” eltávolítja az összes gyorsítótárazott előnézetet a lemezes gyorsítótárból.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
-    <value>Lemezgyorsítótár törlése</value>
+    <value>Lemezgyorsítótár ürítése</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
     <value>Megerősítés kérése fájl törlése előtt.</value>
@@ -438,7 +438,7 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Tényleges RAW adatok használata a RAW fájlba ágyazott JPEG helyett.</value>
   </data>
   <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
-    <value>Camera RAW dekódolása</value>
+    <value>Fényképezőgép RAW dekódolása</value>
   </data>
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
     <value>WIC (Windows Imaging Component) : Rendszerkodekek • Rawler : leggyorsabb • ImageMagick : legjobb kompatibilitás</value>
@@ -447,7 +447,7 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>RAW dekódoló prioritásának beállítása (Rendezés húzással)</value>
   </data>
   <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
-    <value>Tedd a Fly-t még fantasztikusabbá.</value>
+    <value>Tegye a Fly-t még fantasztikusabbá.</value>
   </data>
   <data name="SettingsCardDeveloperSupport.Header" xml:space="preserve">
     <value>FlyPhotos támogatása</value>
@@ -468,7 +468,7 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Vezérlők elhalványítása, amikor az egér elmozdul.</value>
   </data>
   <data name="SettingsCardFadeControls.Header" xml:space="preserve">
-    <value>UI vezérlők automatikus elhalványítása</value>
+    <value>UI-vezérlők automatikus elhalványítása</value>
   </data>
   <data name="SettingsCardFadeIntensity.Description" xml:space="preserve">
     <value>Az automatikus elhalványítás erősségének beállítása.</value>
@@ -477,10 +477,10 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Automatikus elhalványítás intenzitása (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Oldalanként előtöltött teljes felbontású képek száma.</value>
+    <value>A jelenlegi kép mindkét oldalán előtöltött teljes felbontású képek száma.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Nagy felbontású előtöltés (Memóriában)</value>
+    <value>Nagy felbontású előtöltés (memóriában)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Válassza ki, hogy a kép mennyire töltse ki a képernyőt. (%)</value>
@@ -498,10 +498,10 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Naplófájl</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Oldalanként előtöltött gyors előnézetek száma.</value>
+    <value>A jelenlegi kép mindkét oldalán előtöltött gyors előnézetek száma.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Alacsony felbontású előtöltés (Memóriában)</value>
+    <value>Alacsony felbontású előtöltés (memóriában)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Válassza ki az egérgörgő alapértelmezett működését.</value>
@@ -516,7 +516,7 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Animált nagyítás indításkor és kicsinyítés kilépéskor</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ A Megtartás opciót csak hasonló méretű képeket tartalmazó mappákhoz használja.</value>
+    <value>⚠ A „Pásztázás/nagyítás megtartása az előző képről” lehetőséget csak hasonló méretű képeket tartalmazó mappákhoz használja.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Pásztázás, nagyítás és forgatás viselkedése navigáláskor</value>
@@ -553,10 +553,10 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Kép méreteinek megjelenítése</value>
   </data>
   <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
-    <value>A bélyegkép csík megjelenítése az ablak alján</value>
+    <value>A bélyegképsáv megjelenítése az ablak alján</value>
   </data>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
-    <value>Bélyegkép csík megjelenítése</value>
+    <value>Bélyegképsáv megjelenítése</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Nagyítási százalék megjelenítése a képernyő közepén nagyításkor.</value>
@@ -565,7 +565,7 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Nagyítási százalék megjelenítése</value>
   </data>
   <data name="SettingsCardSourceCode.Description" xml:space="preserve">
-    <value>A FlyPhotos nyílt forráskódú, a GitHubon tároljuk</value>
+    <value>A FlyPhotos nyílt forráskódú, és a GitHubon található</value>
   </data>
   <data name="SettingsCardSourceCode.Header" xml:space="preserve">
     <value>GitHub tárhely</value>
@@ -592,16 +592,16 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Állítsa be a kiválasztott bélyegképek kiemelő színét.</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
-    <value>Bélyegkép kijelölési szín</value>
+    <value>Bélyegképek kijelölési színe</value>
   </data>
   <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
     <value>Állítsa be a bélyegképek méretét a nézőben.</value>
   </data>
   <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
-    <value>Bélyegkép méret</value>
+    <value>Bélyegképek mérete</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
-    <value>Csak az Átlátszó ablak háttér esetén alkalmazható.</value>
+    <value>Csak az átlátszó ablakháttérre vonatkozik.</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
     <value>Átlátszóság (%)</value>
@@ -616,7 +616,7 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Válassza ki az ablak hátterét.</value>
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
-    <value>Ablak háttér</value>
+    <value>Ablakháttér</value>
   </data>
   <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
     <value>Csak az egyéni ablakháttérre vonatkozik.</value>
@@ -625,7 +625,7 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Háttérszín</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>Az 'Előző állapot' visszaállítja az utolsó ablakos vagy maximalizált méretet, pozíciót és monitort.</value>
+    <value>Az „Előző állapot” visszaállítja az utolsó ablakos vagy maximalizált méretet, pozíciót és monitort.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>Indulási ablakállapot</value>
@@ -679,7 +679,7 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Indítás és megjelenés</value>
   </data>
   <data name="TextBlockUIControls.Text" xml:space="preserve">
-    <value>UI vezérlők</value>
+    <value>UI-vezérlők</value>
   </data>
   <data name="TitleTextBlock.Text" xml:space="preserve">
     <value>FlyPhotos - Kép megnyitása</value>
@@ -688,13 +688,13 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>OK</value>
   </data>
   <data name="TrialExpiredMessage.Content" xml:space="preserve">
-    <value>Ingyenes próbaverziója lejárt. Kérjük, vásárolja meg a teljes verziót a Microsoft Store-ból.</value>
+    <value>Az ingyenes próbaverziója lejárt. Kérjük, vásárolja meg a teljes verziót a Microsoft Store-ból.</value>
   </data>
   <data name="TrialExpiredMessage.Title" xml:space="preserve">
     <value>A próbaverzió lejárt</value>
   </data>
   <data name="UnsupportedFileAlert.Description" xml:space="preserve">
-    <value>A behúzott fájl nem támogatott képformátum.</value>
+    <value>Az ide húzott fájl nem támogatott képformátum.</value>
   </data>
   <data name="UnsupportedFileAlert.Title" xml:space="preserve">
     <value>Nem támogatott fájl</value>
@@ -709,7 +709,7 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Válassza ki, mit csináljon az egér előre és vissza gombja (néhány egéren elérhető).</value>
   </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
-    <value>Lépcsős nagyítás</value>
+    <value>Lépcsős nagyítás/kicsinyítés</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
     <value>A képen kívülre kattintva visszaállítja az ablakot a teljes képernyős vagy maximalizált állapotból. Duplán kattintva ismét maximalizálja.</value>
@@ -721,7 +721,7 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>A minimalizálás, maximalizálás és bezárás gombok csak akkor jelennek meg, ha az egér az ablak tetejéhez közel van.</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
-    <value>Címsor gombok automatikus elrejtése</value>
+    <value>Címsorgombok automatikus elrejtése</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Bal gomb + húzás a képen kívül</value>
@@ -739,7 +739,7 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
     <value>Nearest Neighbor</value>
   </data>
   <data name="ComboImageScalingQualityItemBilinear.Content" xml:space="preserve">
-    <value>High Quality Cubic</value>
+    <value>Bilinear</value>
   </data>
   <data name="ComboImageScalingQualityItemHighQualityCubic.Content" xml:space="preserve">
     <value>High Quality Cubic</value>
@@ -835,7 +835,7 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
     <value>Jobb gomb</value>
   </data>
   <data name="TextRightClickAction.Text" xml:space="preserve">
-    <value>Windows Intéző helyi menü</value>
+    <value>A Windows Intéző helyi menüje</value>
   </data>
   <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
     <value>Jobb gomb nyomva tartás</value>
@@ -850,7 +850,7 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
     <value>Dupla kattintás a képen</value>
   </data>
   <data name="TextDoubleClickAction.Text" xml:space="preserve">
-    <value>Tényleges méret vagy illesztés az ablakhoz</value>
+    <value>Nagyítás tényleges méretre vagy igazítás az ablakhoz</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
     <value>A Ctrl + húzás mindig az ablakot mozgatja</value>
@@ -859,7 +859,7 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
     <value>Ablak mozgatása</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>Parancsok</value>
+    <value>Billentyűparancsok</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>Parancsok és billentyűk keresése…</value>
@@ -1069,7 +1069,7 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
     <value>Több oldalas TIFF- és ICO-fájlok</value>
   </data>
   <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
-    <value>A következő előre beállított értékre ugrik: 100%, 400%, Illesztés</value>
+    <value>A következő előre beállított értékre ugrik: 100%, 400%, Igazítás az ablakhoz</value>
   </data>
   <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
     <value>Az előző előre beállított értékre lép vissza</value>

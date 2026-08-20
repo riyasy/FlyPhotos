@@ -124,7 +124,7 @@
     <value>Annuleren</value>
   </data>
   <data name="AppSelectionDialog.Title" xml:space="preserve">
-    <value>Een toepassing selecteren</value>
+    <value>Een app selecteren</value>
   </data>
   <data name="BrowseBtn.Content" xml:space="preserve">
     <value>Bladeren naar app…</value>
@@ -148,7 +148,7 @@
     <value>Wissen</value>
   </data>
   <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
-    <value>Cachedetails bekijken</value>
+    <value>Cachestatus bekijken</value>
   </data>
   <data name="ButtonNextPageToolTip.Content" xml:space="preserve">
     <value>Volgende pagina</value>
@@ -202,7 +202,7 @@
     <value>Aangepast</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>Bevroren</value>
+    <value>Matglas</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Mica</value>
@@ -226,13 +226,13 @@
     <value>Inzoomen of uitzoomen</value>
   </data>
   <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
-    <value>Pan/Zoom/Rotatie per foto onthouden</value>
+    <value>Verschuiving/zoom/rotatie per foto onthouden</value>
   </data>
   <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
-    <value>Pan/Zoom/Rotatie resetten</value>
+    <value>Verschuiving/zoom/rotatie resetten</value>
   </data>
   <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
-    <value>Pan/Zoom van vorige foto behouden</value>
+    <value>Verschuiving en zoom van vorige foto behouden</value>
   </data>
   <data name="ComboThemeItemDark.Content" xml:space="preserve">
     <value>Donker</value>
@@ -265,12 +265,12 @@
     <value>Verwijdering bevestigen</value>
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
-    <value>FlyPhotos instellen als standaard-app: 
-klik met de rechtermuisknop op een foto &gt; Openen met &gt; Een andere app kiezen. 
+    <value>FlyPhotos instellen als standaard-app:
+Klik met de rechtermuisknop op een foto &gt; Openen met &gt; Een andere app kiezen.
 Selecteer FlyPhotos en kies Altijd.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
-    <value>In Windows 11 kunt u FlyPhotos ook instellen als de standaard-app in 
+    <value>In Windows 11 kunt u FlyPhotos ook instellen als de standaard-app in
 Instellingen &gt; Apps &gt; Standaard-apps.</value>
   </data>
   <data name="DeletionFailed.CloseButton" xml:space="preserve">
@@ -298,13 +298,13 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Type</value>
   </data>
   <data name="ExifPanelTitle.Text" xml:space="preserve">
-    <value>Foto-informatie</value>
+    <value>Foto-info</value>
   </data>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Sluiten</value>
   </data>
   <data name="Exif_CopyTooltip" xml:space="preserve">
-    <value>Kopiëren naar het Klembord</value>
+    <value>Kopiëren naar het klembord</value>
   </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Alles tonen</value>
@@ -379,7 +379,7 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Alfa</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
-    <value>Hoogwaardige versie laden. Even geduld…</value>
+    <value>Versie met hoge resolutie laden. Even geduld…</value>
   </data>
   <data name="MessageClose_Ok" xml:space="preserve">
     <value>OK</value>
@@ -391,7 +391,7 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Bestand openen</value>
   </data>
   <data name="RightClickInstruction.Text" xml:space="preserve">
-    <value>Om FlyPhotos te gebruiken, klik met de rechtermuisknop op een foto en selecteer Openen met &gt; FlyPhotos.</value>
+    <value>Om FlyPhotos te gebruiken, klikt u met de rechtermuisknop op een foto en selecteert u Openen met &gt; FlyPhotos.</value>
   </data>
   <data name="ScanningTextBlock.Text" xml:space="preserve">
     <value>Apps scannen…</value>
@@ -412,7 +412,7 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Muisaanwijzer automatisch verbergen</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Fly slaat recente snelle voorvertoningen op schijf op voor sneller laden de volgende keer. Wissen verwijdert alle gecachte voorvertoningen uit de schijfcache.</value>
+    <value>Fly slaat recente snelle voorvertoningen op schijf op voor sneller laden de volgende keer. 'Wissen' verwijdert alle opgeslagen voorvertoningen uit de schijfcache.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Schijfcache wissen</value>
@@ -421,13 +421,13 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Vraag om bevestiging voordat een bestand wordt verwijderd.</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Header" xml:space="preserve">
-    <value>Bevestig alvorens bestanden te verwijderen</value>
+    <value>Bevestigen voordat bestanden worden verwijderd</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
     <value>FlyPhotos dankt Resvg, Magick.NET, MagicScaler, Rawler, NLog en WinUIEx.</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
-    <value>Erkenningen</value>
+    <value>Met dank aan</value>
   </data>
   <data name="RawDecodeTeachingTip.Subtitle" xml:space="preserve">
     <value>De huidige foto wordt zo opnieuw geladen.</value>
@@ -436,7 +436,7 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Decoder gewijzigd</value>
   </data>
   <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
-    <value>Gebruik echte RAW-gegevens in plaats van de ingesloten JPEG in het RAW-bestand</value>
+    <value>Gebruik echte RAW-gegevens in plaats van de ingesloten JPEG in het RAW-bestand.</value>
   </data>
   <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
     <value>Camera RAW decoderen</value>
@@ -457,7 +457,7 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Selecteer externe apps om als snelkoppelingen toe te voegen.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
-    <value>Selecteer externe apps</value>
+    <value>Externe apps selecteren</value>
   </data>
   <data name="SettingsCardExternalShortcuts.Description" xml:space="preserve">
     <value>Open de huidige foto in andere apps</value>
@@ -472,19 +472,19 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>UI-besturingselementen automatisch vervagen</value>
   </data>
   <data name="SettingsCardFadeIntensity.Description" xml:space="preserve">
-    <value>Pas de sterkte van het automatisch vervagingseffect aan.</value>
+    <value>Pas de sterkte van het automatische vervagingseffect aan.</value>
   </data>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
     <value>Intensiteit automatisch vervagen (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Aantal afbeeldingen in volledige resolutie dat aan elke kant wordt voorgeladen.</value>
+    <value>Aantal afbeeldingen in volledige resolutie dat aan elke kant van de huidige foto wordt voorgeladen.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Voorladen in hoge resolutie (In geheugen)</value>
+    <value>Voorladen in hoge resolutie (in geheugen)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
-    <value>Kies hoeveel van het scherm de foto vult. (%)</value>
+    <value>Kies welk deel van het scherm de foto vult. (%)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Afbeelding op scherm aanpassen</value>
@@ -499,10 +499,10 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Logboekbestand</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Aantal snelle voorvertoningen dat aan elke kant wordt voorgeladen.</value>
+    <value>Aantal snelle voorvertoningen dat aan elke kant van de huidige foto wordt voorgeladen.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Voorladen in lage resolutie (In geheugen)</value>
+    <value>Voorladen in lage resolutie (in geheugen)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Kies het standaardgedrag van het muiswiel.</value>
@@ -511,16 +511,16 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Muiswiel</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
-    <value>⚠ Kan de opstart vertragen. Fly wacht met het laden van de foto met volledige resolutie bij het opstarten.</value>
+    <value>⚠ Kan de opstart vertragen. Fly wacht bij het opstarten tot de foto met volledige resolutie is geladen.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
     <value>Zoomanimatie bij opstarten en uitzoomen bij afsluiten</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ Gebruik de optie Behouden alleen voor mappen met foto's van vergelijkbare grootte.</value>
+    <value>⚠ Gebruik de optie 'Verschuiving en zoom van vorige foto behouden' alleen voor mappen met foto's van vergelijkbare grootte.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
-    <value>Pan-, Zoom- en Rotatiegedrag tijdens navigeren</value>
+    <value>Gedrag van verschuiven, zoomen en roteren tijdens navigeren</value>
   </data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Problemen melden op GitHub of e-mailen naar ryftools@outlook.com</value>
@@ -551,13 +551,13 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Breedte en hoogte van de foto naast de bestandsnaam weergeven.</value>
   </data>
   <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
-    <value>Fotodimensies weergeven</value>
+    <value>Afmetingen van foto weergeven</value>
   </data>
   <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
-    <value>Miniatuurstrip onderaan het venster weergeven.</value>
+    <value>Miniatuurbalk onderaan het venster weergeven.</value>
   </data>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
-    <value>Miniatuurstrip weergeven</value>
+    <value>Miniatuurbalk weergeven</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Zoompercentage tijdens zoomen in het midden van het scherm weergeven.</value>
@@ -572,10 +572,10 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>GitHub-opslagplaats</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
-    <value>Grote foto’s passen altijd in beeld. Kleine foto’s worden standaard op ware grootte (1:1) weergegeven; schakel dit in om ze te vergroten en passend te maken.</value>
+    <value>Grote foto's passen altijd in beeld. Kleine foto's worden standaard op ware grootte (1:1) weergegeven; schakel dit in om ze te vergroten en passend te maken.</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
-    <value>Kleine foto’s vergroten om in beeld te passen</value>
+    <value>Kleine foto's vergroten om in beeld te passen</value>
   </data>
   <data name="SettingsCardTheme.Description" xml:space="preserve">
     <value>Selecteer het app-thema.</value>
@@ -599,10 +599,10 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Pas de grootte van de miniaturen in de viewer aan.</value>
   </data>
   <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
-    <value>Grootte van miniatuur</value>
+    <value>Grootte van miniaturen</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
-    <value>Alleen van toepassing op transparante vensterachtergrond.</value>
+    <value>Alleen van toepassing op een transparante vensterachtergrond.</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
     <value>Transparantie (%)</value>
@@ -626,7 +626,7 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Achtergrondkleur</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>‘Vorige staat’ herstelt de laatste venstergrootte (venster of gemaximaliseerd), positie en monitor.</value>
+    <value>'Vorige staat' herstelt de laatste venstergrootte (venster of gemaximaliseerd), positie en monitor.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>Vensterstatus bij opstarten</value>
@@ -656,13 +656,13 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Laden…</value>
   </data>
   <data name="Status_PreviewFailed" xml:space="preserve">
-    <value>Voorbeeld laden mislukt</value>
+    <value>Voorvertoning laden mislukt</value>
   </data>
   <data name="TextBlockLog.Text" xml:space="preserve">
     <value>Diagnostiek</value>
   </data>
   <data name="TextBlockCaching.Text" xml:space="preserve">
-    <value>Caching</value>
+    <value>Cache</value>
   </data>
   <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
     <value>FlyPhotos gebruikt voornamelijk Windows Imaging Component (WIC) codecs.</value>
@@ -836,7 +836,7 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
     <value>Rechtermuisknop</value>
   </data>
   <data name="TextRightClickAction.Text" xml:space="preserve">
-    <value>Windows Verkenner contextmenu</value>
+    <value>Contextmenu van Windows Verkenner</value>
   </data>
   <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
     <value>Rechtermuisknop ingedrukt houden</value>
@@ -851,7 +851,7 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
     <value>Dubbelklik op de foto</value>
   </data>
   <data name="TextDoubleClickAction.Text" xml:space="preserve">
-    <value>Werkelijke grootte of passend maken aan venster</value>
+    <value>Zoomen naar werkelijke grootte of passend maken aan venster</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
     <value>Ctrl + slepen verplaatst altijd het venster</value>
@@ -869,7 +869,7 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
     <value>Alles opnieuw instellen…</value>
   </data>
   <data name="TxtNoShortcutResults.Text" xml:space="preserve">
-    <value>Geen opdrachten komen overeen met uw zoekopdracht.</value>
+    <value>Er komen geen opdrachten overeen met uw zoekopdracht.</value>
   </data>
   <data name="TextShortcutNoKeys.Text" xml:space="preserve">
     <value>Geen</value>
@@ -1061,7 +1061,7 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
     <value>Openen met app 4</value>
   </data>
   <data name="ShortcutName_OpenWithPanel" xml:space="preserve">
-    <value>Paneel Openen met</value>
+    <value>Deelvenster Openen met</value>
   </data>
   <data name="ShortcutDesc_NextPage" xml:space="preserve">
     <value>TIFF- en ICO-bestanden met meerdere pagina's</value>
@@ -1070,7 +1070,7 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
     <value>TIFF- en ICO-bestanden met meerdere pagina's</value>
   </data>
   <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
-    <value>Springt naar de volgende preset: 100%, 400%, Passend</value>
+    <value>Springt naar de volgende preset: 100%, 400%, Passend maken aan venster</value>
   </data>
   <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
     <value>Gaat terug naar de vorige preset</value>
@@ -1082,13 +1082,13 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
     <value>Altijd beschikbaar – kan niet opnieuw worden toegewezen</value>
   </data>
   <data name="ShortcutDesc_CopyPhoto" xml:space="preserve">
-    <value>Kopieert het bestand naar het Klembord</value>
+    <value>Kopieert het bestand naar het klembord</value>
   </data>
   <data name="ShortcutDesc_DeletePhoto" xml:space="preserve">
     <value>Kan niet opnieuw worden toegewezen</value>
   </data>
   <data name="ShortcutDesc_SharePhoto" xml:space="preserve">
-    <value>Opent het Windows-deelvenster</value>
+    <value>Opent het Windows-dialoogvenster voor delen</value>
   </data>
   <data name="ShortcutDesc_FileProperties" xml:space="preserve">
     <value>Tabblad Algemeen</value>

@@ -202,13 +202,13 @@
     <value>Mukautettu</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>Jäätynyt</value>
+    <value>Huurrelasi</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Kiille</value>
   </data>
   <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
-    <value>Kiille Alt</value>
+    <value>Vaihtoehtoinen kiille</value>
   </data>
   <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
     <value>Ei mitään</value>
@@ -226,13 +226,13 @@
     <value>Lähennä tai loitonna</value>
   </data>
   <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
-    <value>Muista panorointi/zoomi/kierto kuvaa kohti</value>
+    <value>Muista panorointi/zoomaus/kierto kuvaa kohti</value>
   </data>
   <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
-    <value>Palauta panorointi/zoomi/kierto</value>
+    <value>Palauta panorointi/zoomaus/kierto</value>
   </data>
   <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
-    <value>Säilytä näkymä ja zoomaus edellisestä kuvasta</value>
+    <value>Säilytä panorointi ja zoomaus edellisestä kuvasta</value>
   </data>
   <data name="ComboThemeItemDark.Content" xml:space="preserve">
     <value>Tumma</value>
@@ -265,12 +265,12 @@
     <value>Vahvista poisto</value>
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
-    <value>Voit asettaa FlyPhotosin oletussovellukseksi: 
-Napsauta kuvaa hiiren kakkospainikkeella &gt; Avaa sovelluksessa &gt; Valitse muu sovellus. 
+    <value>Voit asettaa FlyPhotosin oletussovellukseksi:
+Napsauta kuvaa hiiren kakkospainikkeella &gt; Avaa sovelluksessa &gt; Valitse muu sovellus.
 Valitse FlyPhotos ja napsauta Aina.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
-    <value>Windows 11:ssä voit myös asettaa FlyPhotosin oletussovellukseksi kohdassa 
+    <value>Windows 11:ssä voit myös asettaa FlyPhotosin oletussovellukseksi kohdassa
 Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   </data>
   <data name="DeletionFailed.CloseButton" xml:space="preserve">
@@ -412,7 +412,7 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Piilota hiiren osoitin automaattisesti</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Fly tallentaa viimeisimmät pikakatsaukset levylle nopeampaa latausta varten seuraavalla kerralla. Tyhjennä poistaa kaikki tallennetut esikatselut levyn välimuistista.</value>
+    <value>Fly tallentaa viimeisimmät pikaesikatselut levylle nopeampaa latausta varten seuraavalla kerralla. ”Tyhjennä” poistaa kaikki tallennetut pikaesikatselut levyn välimuistista.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Tyhjennä levyn välimuisti</value>
@@ -454,7 +454,7 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Tue FlyPhotosia</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Valitse ulkoisia sovelluksia lisättäväksi pikanäppäimiksi.</value>
+    <value>Valitse ulkoisia sovelluksia lisättäväksi pikakuvakkeiksi.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Valitse ulkoiset sovellukset</value>
@@ -478,13 +478,13 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Automaattisen häivytyksen voimakkuus (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Kummallekin puolelle esiladattujen täysresoluutioisten kuvien määrä.</value>
+    <value>Nykyisen kuvan kummallekin puolelle esiladattujen täysresoluutioisten kuvien määrä.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Korkearesoluutioinen esilataus (Muistissa)</value>
+    <value>Korkearesoluutioinen esilataus (muistissa)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
-    <value>Valitse kuinka paljon näytöstä kuva täyttää. (%)</value>
+    <value>Valitse, kuinka suuren osan näytöstä kuva täyttää. (%)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Kuvan sovittaminen näyttöön</value>
@@ -499,16 +499,16 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Lokitiedosto</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Kummallekin puolelle esikatseltavaksi esiladattujen pikkukuvien määrä.</value>
+    <value>Nykyisen kuvan kummallekin puolelle esiladattujen pikaesikatselujen määrä.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Matalaresoluutioinen esilataus (Muistissa)</value>
+    <value>Matalaresoluutioinen esilataus (muistissa)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
-    <value>Valitse hiiren vierityspyörän oletustoiminto.</value>
+    <value>Valitse hiiren rullan oletustoiminto.</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
-    <value>Hiiren vierityspyörä</value>
+    <value>Hiiren rulla</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
     <value>⚠ Voi hidastaa käynnistystä. Fly odottaa täyden resoluution kuvan latautumista käynnistyksessä.</value>
@@ -520,7 +520,7 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>⚠ Käytä Säilytä-vaihtoehtoa vain kansioissa, joissa on samankokoisia kuvia.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
-    <value>Panoroinnin, zoomin ja kierron käyttäytyminen navigoinnin aikana</value>
+    <value>Panoroinnin, zoomauksen ja kierron käyttäytyminen navigoinnin aikana</value>
   </data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Ilmoita ongelmista GitHubissa tai lähetä sähköpostia osoitteeseen ryftools@outlook.com</value>
@@ -584,22 +584,22 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Ikkunan teema</value>
   </data>
   <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
-    <value>Liu'uta pienoiskuvariviä pehmeästi kuvien välillä siirryttäessä.</value>
+    <value>Liu'uta pikkukuvapalkkia pehmeästi kuvien välillä siirryttäessä.</value>
   </data>
   <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
-    <value>Animoi pienoiskuvarivi</value>
+    <value>Animoi pikkukuvapalkki</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>Aseta valittuihin pikkukuviin käytettävä korostusväri.</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
-    <value>Pikkukuvan valintaväri</value>
+    <value>Pikkukuvien valintaväri</value>
   </data>
   <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
     <value>Säädä pikkukuvien kokoa katseluohjelmassa.</value>
   </data>
   <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
-    <value>Pikkukuvan koko</value>
+    <value>Pikkukuvien koko</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
     <value>Soveltuu vain läpinäkyvälle ikkunan taustalle.</value>
@@ -626,7 +626,7 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Taustaväri</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>’Edellinen tila’ palauttaa ikkunan viimeisimmän koon (ikkunoitu tai maksimoitu), sijainnin ja näytön.</value>
+    <value>”Edellinen tila” palauttaa ikkunan viimeisimmän koon (ikkunoitu tai maksimoitu), sijainnin ja näytön.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>Ikkunan tila käynnistyksessä</value>
@@ -644,7 +644,7 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Koodekit</value>
   </data>
   <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
-    <value>Yleinen</value>
+    <value>Yleiset</value>
   </data>
   <data name="Status_FileNotFound" xml:space="preserve">
     <value>Tiedostoa ei löydy</value>
@@ -698,7 +698,7 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Pudotettu tiedosto ei ole tuettu kuvatyyppi.</value>
   </data>
   <data name="UnsupportedFileAlert.Title" xml:space="preserve">
-    <value>Ei tuettu tiedosto</value>
+    <value>Tiedostoa ei tueta</value>
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
@@ -758,7 +758,7 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
     <value>Lisää toimintoja</value>
   </data>
   <data name="MenuItemPhotoInfo.Text" xml:space="preserve">
-    <value>Valokuvan tiedot</value>
+    <value>Kuvan tiedot</value>
   </data>
   <data name="MenuItemOpenFileLocation.Text" xml:space="preserve">
     <value>Avaa tiedoston sijainti</value>
@@ -797,19 +797,19 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
     <value>Hiiri</value>
   </data>
   <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
-    <value>Ctrl + Hiiren rulla</value>
+    <value>Ctrl + hiiren rulla</value>
   </data>
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
     <value>Aina lähennä tai loitonna</value>
   </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
-    <value>Alt + Hiiren rulla</value>
+    <value>Alt + hiiren rulla</value>
   </data>
   <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
     <value>Näytä aina seuraava tai edellinen</value>
   </data>
   <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
-    <value>Hiiren rullan kallistus Vasen/Oikea</value>
+    <value>Hiiren rullan kallistus vasemmalle tai oikealle</value>
   </data>
   <data name="TextTiltWheelAction.Text" xml:space="preserve">
     <value>Näytä seuraava tai edellinen</value>
@@ -851,7 +851,7 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
     <value>Kaksoisnapsautus kuvan päällä</value>
   </data>
   <data name="TextDoubleClickAction.Text" xml:space="preserve">
-    <value>Todellinen koko tai sovita ikkunaan</value>
+    <value>Zoomaa todelliseen kokoon tai sovita ikkunaan</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
     <value>Ctrl + veto siirtää aina ikkunaa</value>
@@ -1016,7 +1016,7 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
     <value>Suurenna tai palauta</value>
   </data>
   <data name="ShortcutName_PhotoInfoPanel" xml:space="preserve">
-    <value>Valokuvan tiedot -paneeli</value>
+    <value>Kuvan tiedot -paneeli</value>
   </data>
   <data name="ShortcutName_CloseApp" xml:space="preserve">
     <value>Sulje FlyPhotos</value>
@@ -1070,7 +1070,7 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
     <value>Monisivuiset TIFF- ja ICO-tiedostot</value>
   </data>
   <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
-    <value>Siirtyy seuraavaan esiasetukseen: 100 %, 400 %, Sovita</value>
+    <value>Siirtyy seuraavaan esiasetukseen: 100 %, 400 %, Sovita ikkunaan</value>
   </data>
   <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
     <value>Palaa edelliseen esiasetukseen</value>
@@ -1088,7 +1088,7 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
     <value>Ei voi määrittää uudelleen</value>
   </data>
   <data name="ShortcutDesc_SharePhoto" xml:space="preserve">
-    <value>Avaa Windowsin jakovalinnan</value>
+    <value>Avaa Windowsin jakoikkunan</value>
   </data>
   <data name="ShortcutDesc_FileProperties" xml:space="preserve">
     <value>Yleiset-välilehti</value>

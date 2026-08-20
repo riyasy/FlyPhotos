@@ -202,7 +202,7 @@
     <value>Personalizado</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>Congelado</value>
+    <value>Fosco</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Mica</value>
@@ -226,13 +226,13 @@
     <value>Ampliar ou reduzir</value>
   </data>
   <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
-    <value>Lembrar posição/zoom/rotação por foto</value>
+    <value>Lembrar deslocamento/zoom/rotação por foto</value>
   </data>
   <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
-    <value>Redefinir posição/zoom/rotação</value>
+    <value>Redefinir deslocamento/zoom/rotação</value>
   </data>
   <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
-    <value>Manter posição/zoom da foto anterior</value>
+    <value>Manter deslocamento e zoom da foto anterior</value>
   </data>
   <data name="ComboThemeItemDark.Content" xml:space="preserve">
     <value>Escuro</value>
@@ -385,13 +385,13 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
     <value>OK</value>
   </data>
   <data name="NoShortcutsCreated.Message" xml:space="preserve">
-    <value>Nenhum atalho foi criado. Configure-os em Configurações.</value>
+    <value>Nenhum atalho foi criado. Adicione-os em Configurações.</value>
   </data>
   <data name="OpenFileHyperlink.Text" xml:space="preserve">
     <value>Abrir arquivo</value>
   </data>
   <data name="RightClickInstruction.Text" xml:space="preserve">
-    <value>Para usar o FlyPhotos, Clique com o botão direito do mouse em uma foto e selecione Abrir com &gt; FlyPhotos.</value>
+    <value>Para usar o FlyPhotos, clique com o botão direito do mouse em uma foto e selecione Abrir com &gt; FlyPhotos.</value>
   </data>
   <data name="ScanningTextBlock.Text" xml:space="preserve">
     <value>Procurando aplicativos…</value>
@@ -412,7 +412,7 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
     <value>Ocultar automaticamente o ponteiro do mouse</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>O Fly armazena em cache as visualizações rápidas recentes no disco para um carregamento mais rápido na próxima vez. Limpar remove todas as visualizações em cache do cache do disco.</value>
+    <value>O Fly armazena em cache as visualizações rápidas recentes no disco para um carregamento mais rápido na próxima vez. 'Limpar' remove todas as visualizações armazenadas no cache do disco.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Limpar cache do disco</value>
@@ -424,7 +424,7 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
     <value>Confirmar antes de excluir arquivos</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
-    <value>O FlyPhotos agradece ao Resvg, Magick.NET, MagicScaler, Rawler, NLog e WinUIEx.</value>
+    <value>O FlyPhotos agradece a Resvg, Magick.NET, MagicScaler, Rawler, NLog e WinUIEx.</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
     <value>Créditos</value>
@@ -439,7 +439,7 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
     <value>Usar os dados RAW reais em vez do JPEG incorporado no arquivo RAW.</value>
   </data>
   <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
-    <value>Decodificar Camera RAW</value>
+    <value>Decodificar RAW da câmera</value>
   </data>
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
     <value>WIC (Windows Imaging Component) : Codecs do sistema • Rawler : Mais rápido • ImageMagick : Melhor compatibilidade</value>
@@ -478,13 +478,13 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
     <value>Intensidade da ocultação gradual (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Número de imagens em resolução completa pré-carregadas em cada lado.</value>
+    <value>Número de imagens em resolução completa pré-carregadas de cada lado da foto atual.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Pré-carregamento em alta resolução (Na memória)</value>
+    <value>Pré-carregamento em alta resolução (na memória)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
-    <value>Escolha quanto da tela a foto preenche. (%)</value>
+    <value>Escolha que parte da tela a foto ocupa. (%)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Ajuste da imagem na tela</value>
@@ -499,10 +499,10 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
     <value>Arquivo de log</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Número de visualizações rápidas pré-carregadas em cada lado.</value>
+    <value>Número de visualizações rápidas pré-carregadas de cada lado da foto atual.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Pré-carregamento em baixa resolução (Na memória)</value>
+    <value>Pré-carregamento em baixa resolução (na memória)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Escolher o comportamento padrão da roda do mouse.</value>
@@ -511,16 +511,16 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
     <value>Roda do mouse</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
-    <value>⚠ Pode deixar a inicialização lenta. O Fly aguarda o carregamento da foto em resolução máxima ao iniciar.</value>
+    <value>⚠ Pode deixar a inicialização lenta. O Fly aguarda o carregamento da foto em resolução completa ao iniciar.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
     <value>Animar o zoom na inicialização e reduzir ao sair</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ Use a opção Manter apenas para pastas com fotos de tamanho semelhante.</value>
+    <value>⚠ Use a opção 'Manter' apenas para pastas com fotos de tamanho semelhante.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
-    <value>Comportamento de posição, zoom e rotação durante a navegação</value>
+    <value>Comportamento de deslocamento, zoom e rotação durante a navegação</value>
   </data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Relatar problemas no GitHub ou enviar um e-mail para ryftools@outlook.com</value>
@@ -599,10 +599,10 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
     <value>Ajustar o tamanho das miniaturas no visualizador.</value>
   </data>
   <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
-    <value>Tamanho da miniatura</value>
+    <value>Tamanho das miniaturas</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
-    <value>Aplicável apenas ao fundo da janela transparente.</value>
+    <value>Aplicável apenas ao fundo de janela transparente.</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
     <value>Transparência (%)</value>
@@ -632,7 +632,7 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
     <value>Estado da janela na inicialização</value>
   </data>
   <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
-    <value>Ocultar automaticamente (or: Ocultar e esmaecer automaticamente)</value>
+    <value>Esmaecer e ocultar automaticamente</value>
   </data>
   <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - Configurações</value>
@@ -695,10 +695,10 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
     <value>Avaliação expirada</value>
   </data>
   <data name="UnsupportedFileAlert.Description" xml:space="preserve">
-    <value>O arquivo não é um tipo de imagem suportado.</value>
+    <value>O arquivo que você soltou não é um tipo de imagem compatível.</value>
   </data>
   <data name="UnsupportedFileAlert.Title" xml:space="preserve">
-    <value>Arquivo não suportado</value>
+    <value>Arquivo não compatível</value>
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
@@ -722,7 +722,7 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
     <value>Os botões de minimizar, maximizar e fechar são exibidos apenas quando o mouse está próximo ao topo da janela.</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
-    <value>Ocultar automaticamente os botões da janela</value>
+    <value>Ocultar automaticamente os botões da barra de título</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Clique esquerdo e arraste fora da foto</value>
@@ -851,7 +851,7 @@ High Quality Cubic – Dimensionamento de alta qualidade para fotos.</value>
     <value>Clique duplo na foto</value>
   </data>
   <data name="TextDoubleClickAction.Text" xml:space="preserve">
-    <value>Tamanho real ou ajustar à janela</value>
+    <value>Zoom em tamanho real ou ajustar à janela</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
     <value>Ctrl + arrastar sempre move a janela</value>
@@ -1070,7 +1070,7 @@ High Quality Cubic – Dimensionamento de alta qualidade para fotos.</value>
     <value>Arquivos TIFF e ICO de várias páginas</value>
   </data>
   <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
-    <value>Vai para a próxima predefinição: 100%, 400%, Ajustar</value>
+    <value>Vai para a próxima predefinição: 100%, 400%, Ajustar à janela</value>
   </data>
   <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
     <value>Volta à predefinição anterior</value>

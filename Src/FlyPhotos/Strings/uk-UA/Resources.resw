@@ -202,13 +202,13 @@
     <value>Власний</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>Заморожений</value>
+    <value>Матове скло</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Міка</value>
   </data>
   <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
-    <value>Міка Alt</value>
+    <value>Альтернативна Міка</value>
   </data>
   <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
     <value>Немає</value>
@@ -298,7 +298,7 @@
     <value>Тип</value>
   </data>
   <data name="ExifPanelTitle.Text" xml:space="preserve">
-    <value>Інформація про фото</value>
+    <value>Відомості про фото</value>
   </data>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Закрити</value>
@@ -385,7 +385,7 @@
     <value>OK</value>
   </data>
   <data name="NoShortcutsCreated.Message" xml:space="preserve">
-    <value>Ярлики не створено. Налаштуйте їх у Параметрах.</value>
+    <value>Ярлики не створено. Налаштуйте їх у Налаштуваннях.</value>
   </data>
   <data name="OpenFileHyperlink.Text" xml:space="preserve">
     <value>Відкрити файл</value>
@@ -394,7 +394,7 @@
     <value>Щоб використовувати FlyPhotos, клацніть правою кнопкою миші на фото та виберіть Відкрити за допомогою &gt; FlyPhotos.</value>
   </data>
   <data name="ScanningTextBlock.Text" xml:space="preserve">
-    <value>Пошук програм…</value>
+    <value>Пошук установлених програм…</value>
   </data>
   <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>Пошук програм…</value>
@@ -439,7 +439,7 @@
     <value>Використовувати справжні RAW-дані замість вбудованого JPEG у RAW-файлі.</value>
   </data>
   <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
-    <value>Декодування Camera RAW</value>
+    <value>Декодування RAW камери</value>
   </data>
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
     <value>WIC (Windows Imaging Component) : системні кодеки • Rawler : найшвидший • ImageMagick : найкраща сумісність</value>
@@ -466,10 +466,10 @@
     <value>Показати ярлики зовнішніх програм</value>
   </data>
   <data name="SettingsCardFadeControls.Description" xml:space="preserve">
-    <value>Зникання елементів керування, коли миша відводиться.</value>
+    <value>Приховувати елементи керування, коли миша віддаляється.</value>
   </data>
   <data name="SettingsCardFadeControls.Header" xml:space="preserve">
-    <value>Автоматичне зникання елементів інтерфейсу</value>
+    <value>Автоматичне зникання елементів керування</value>
   </data>
   <data name="SettingsCardFadeIntensity.Description" xml:space="preserve">
     <value>Налаштувати інтенсивність ефекту автозникання.</value>
@@ -478,10 +478,10 @@
     <value>Інтенсивність автозникання (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Кількість зображень у повній роздільній здатності, попередньо завантажених з кожного боку.</value>
+    <value>Кількість зображень у повній роздільній здатності, попередньо завантажених з кожного боку від поточного фото.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Попереднє завантаження високої роздільної здатності (У пам'яті)</value>
+    <value>Попереднє завантаження високої роздільної здатності (у пам'яті)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Вибрати, яку частину екрана займає фото. (%)</value>
@@ -493,16 +493,16 @@
     <value>Вибрати мову</value>
   </data>
   <data name="SettingsCardLog.Description" xml:space="preserve">
-    <value>Відкрити файл журналу</value>
+    <value>Відкрити, щоб переглянути файл журналу</value>
   </data>
   <data name="SettingsCardLog.Header" xml:space="preserve">
     <value>Файл журналу</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Кількість швидких прев'ю, попередньо завантажених з кожного боку.</value>
+    <value>Кількість швидких прев'ю, попередньо завантажених з кожного боку від поточного фото.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Попереднє завантаження низької роздільної здатності (У пам'яті)</value>
+    <value>Попереднє завантаження низької роздільної здатності (у пам'яті)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Вибрати поведінку коліщатка миші за замовчуванням.</value>
@@ -514,10 +514,10 @@
     <value>⚠ Може сповільнити запуск. Fly чекає завантаження фото у повній роздільній здатності при старті.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
-    <value>Анімація масштабування при запуску та зменшенні при виході</value>
+    <value>Анімація масштабування при запуску та зменшення при виході</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ Використовуйте «Зберегти» лише для папок із фото подібного розміру.</value>
+    <value>⚠ Використовуйте варіант «Зберегти» лише для папок із фото подібного розміру.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Поведінка переміщення, масштабу та повороту при навігації</value>
@@ -554,10 +554,10 @@
     <value>Показувати розміри фото</value>
   </data>
   <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
-    <value>Показувати панель мініатюр внизу вікна</value>
+    <value>Показувати стрічку мініатюр внизу вікна</value>
   </data>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
-    <value>Показувати панель мініатюр</value>
+    <value>Показувати стрічку мініатюр</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Показувати відсоток масштабування в центрі екрана під час масштабування.</value>
@@ -566,7 +566,7 @@
     <value>Показувати відсоток масштабування</value>
   </data>
   <data name="SettingsCardSourceCode.Description" xml:space="preserve">
-    <value>FlyPhotos є відкритим вихідним кодом і розміщений на GitHub</value>
+    <value>FlyPhotos має відкритий вихідний код і розміщений на GitHub</value>
   </data>
   <data name="SettingsCardSourceCode.Header" xml:space="preserve">
     <value>Репозиторій GitHub</value>
@@ -593,7 +593,7 @@
     <value>Встановити колір виділення для вибраних мініатюр.</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
-    <value>Колір виділення мініатюри</value>
+    <value>Колір виділення мініатюр</value>
   </data>
   <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
     <value>Налаштувати розмір мініатюр у переглядачі.</value>
@@ -602,7 +602,7 @@
     <value>Розмір мініатюр</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
-    <value>Застосовується лише для прозорого фону вікна.</value>
+    <value>Застосовується лише до прозорого фону вікна.</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
     <value>Прозорість (%)</value>
@@ -680,7 +680,7 @@
     <value>Запуск та зовнішній вигляд</value>
   </data>
   <data name="TextBlockUIControls.Text" xml:space="preserve">
-    <value>Елементи інтерфейсу</value>
+    <value>Елементи керування</value>
   </data>
   <data name="TitleTextBlock.Text" xml:space="preserve">
     <value>FlyPhotos - Відкрити фото</value>
@@ -776,7 +776,7 @@ High Quality Cubic – Масштабування найвищої якості 
     <value>Перейменувати</value>
   </data>
   <data name="RenameFailed.CloseButton" xml:space="preserve">
-    <value>ОК</value>
+    <value>OK</value>
   </data>
   <data name="RenameFailed.Message" xml:space="preserve">
     <value>Не вдалося перейменувати файл.</value>
@@ -791,7 +791,7 @@ High Quality Cubic – Масштабування найвищої якості 
     <value>Файл із таким ім'ям уже існує.</value>
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
-    <value>ОК</value>
+    <value>OK</value>
   </data>
   <data name="TextBlockMouseSection.Text" xml:space="preserve">
     <value>Миша</value>
@@ -923,7 +923,7 @@ High Quality Cubic – Масштабування найвищої якості 
     <value>Очікування натискання клавіш…</value>
   </data>
   <data name="ShortcutCapture_WinKeyRejected" xml:space="preserve">
-    <value>Windows резервує сполучення з клавішею Windows.</value>
+    <value>Windows резервує гарячі клавіші з клавішею Windows.</value>
   </data>
   <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
     <value>Перейдіть на латинську розкладку, щоб задати гарячу клавішу.</value>
@@ -1070,7 +1070,7 @@ High Quality Cubic – Масштабування найвищої якості 
     <value>Багатосторінкові файли TIFF та ICO</value>
   </data>
   <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
-    <value>Перехід до наступного пресету: 100 %, 400 %, вписати</value>
+    <value>Перехід до наступного пресету: 100 %, 400 %, Вписати у вікно</value>
   </data>
   <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
     <value>Повернення до попереднього пресету</value>

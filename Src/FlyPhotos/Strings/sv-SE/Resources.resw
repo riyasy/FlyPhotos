@@ -145,7 +145,7 @@
     <value>Föregående foto</value>
   </data>
   <data name="ButtonClearDiskCache.Content" xml:space="preserve">
-    <value>Töm</value>
+    <value>Rensa</value>
   </data>
   <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
     <value>Visa cachestatus</value>
@@ -202,7 +202,7 @@
     <value>Anpassad</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>Frusen</value>
+    <value>Frostad</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Mica</value>
@@ -217,22 +217,22 @@
     <value>Transparent</value>
   </data>
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
-    <value>Visa nästa eller föregående bild</value>
+    <value>Visa nästa eller föregående foto</value>
   </data>
   <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
-    <value>Visa nästa eller föregående bild</value>
+    <value>Visa nästa eller föregående foto</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Zooma in eller ut</value>
   </data>
   <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
-    <value>Kom ihåg Pan/Zoom/Rotation per foto</value>
+    <value>Kom ihåg panorering/zoom/rotation per foto</value>
   </data>
   <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
-    <value>Återställ Pan/Zoom/Rotation</value>
+    <value>Återställ panorering/zoom/rotation</value>
   </data>
   <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
-    <value>Behåll Pan/Zoom från föregående foto</value>
+    <value>Behåll panorering och zoom från föregående foto</value>
   </data>
   <data name="ComboThemeItemDark.Content" xml:space="preserve">
     <value>Mörk</value>
@@ -265,12 +265,12 @@
     <value>Bekräfta borttagning</value>
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
-    <value>Så här ställer du in FlyPhotos som standardapp: 
-Högerklicka på ett foto &gt; Öppna med &gt; Välj en annan app. 
+    <value>Så här ställer du in FlyPhotos som standardapp:
+Högerklicka på ett foto &gt; Öppna med &gt; Välj en annan app.
 Välj FlyPhotos och välj Alltid.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
-    <value>I Windows 11 kan du också ställa in FlyPhotos som standardapp i 
+    <value>I Windows 11 kan du också ställa in FlyPhotos som standardapp i
 Inställningar &gt; Appar &gt; Standardappar.</value>
   </data>
   <data name="DeletionFailed.CloseButton" xml:space="preserve">
@@ -319,7 +319,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Filstorlek</value>
   </data>
   <data name="Exif_DateTaken" xml:space="preserve">
-    <value>Datum taget</value>
+    <value>Fotograferingsdatum</value>
   </data>
   <data name="Exif_CameraMake" xml:space="preserve">
     <value>Kameratillverkare</value>
@@ -412,7 +412,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Dölj muspekaren automatiskt</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Fly cachar senaste snabbförhandsvisningar till disk för snabbare laddning nästa gång. Rensa tar bort alla cachade förhandsvisningar från diskcachen.</value>
+    <value>Fly cachar de senaste snabbförhandsvisningarna till disk för snabbare laddning nästa gång. ”Rensa” tar bort alla cachade förhandsvisningar från diskcachen.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Rensa diskcache</value>
@@ -427,7 +427,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>FlyPhotos tackar Resvg, Magick.NET, MagicScaler, Rawler, NLog och WinUIEx.</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
-    <value>Bidrag</value>
+    <value>Tack till</value>
   </data>
   <data name="RawDecodeTeachingTip.Subtitle" xml:space="preserve">
     <value>Det aktuella fotot laddas snart om.</value>
@@ -475,19 +475,19 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Justera styrkan på auto-toningseffekten.</value>
   </data>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
-    <value>Automatisk toningintensitet (%)</value>
+    <value>Automatisk toningsintensitet (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Antal bilder i full upplösning som förinläses på varje sida.</value>
+    <value>Antal bilder i full upplösning som förinläses på varje sida om det aktuella fotot.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Högupplöst förinläsning (I minnet)</value>
+    <value>Högupplöst förinläsning (i minnet)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Välj hur stor del av skärmen fotot fyller. (%)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
-    <value>Bild till skärmpassning</value>
+    <value>Bildanpassning till skärm</value>
   </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>Välj språk</value>
@@ -499,10 +499,10 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Loggfil</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Antal snabbförhandsvisningar som förinläses på varje sida.</value>
+    <value>Antal snabbförhandsvisningar som förinläses på varje sida om det aktuella fotot.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Lågupplöst förinläsning (I minnet)</value>
+    <value>Lågupplöst förinläsning (i minnet)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Välj standardbeteende för mushjulet.</value>
@@ -517,10 +517,10 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Animera zoom vid start och zooma ut vid avslut</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ Använd endast alternativet Behåll för mappar med liknande storlek på foton.</value>
+    <value>⚠ Använd endast alternativet ”Behåll” för mappar med foton av liknande storlek.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
-    <value>Pan, Zoom &amp; Rotation-beteende under navigering</value>
+    <value>Beteende för panorering, zoom och rotation under navigering</value>
   </data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Rapportera problem på GitHub eller maila till ryftools@outlook.com</value>
@@ -529,7 +529,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Buggar och problem</value>
   </data>
   <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
-    <value>Visa cachestatus i det nedre panelen.</value>
+    <value>Visa cachestatus i den nedre panelen.</value>
   </data>
   <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
     <value>Visa cachestatus</value>
@@ -542,7 +542,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Visa rutig bakgrund</value>
   </data>
   <data name="SettingsCardShowFileName.Description" xml:space="preserve">
-    <value>Visa filnamnet på det aktuella fotot</value>
+    <value>Visa filnamnet på den fil som är öppen</value>
   </data>
   <data name="SettingsCardShowFileName.Header" xml:space="preserve">
     <value>Visa filnamn</value>
@@ -572,10 +572,10 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>GitHub-lagringsplats</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
-    <value>Stora bilder anpassas alltid till visningsytan. Små bilder visas i 1:1 som standard; aktivera detta för att zooma in och anpassa dem.</value>
+    <value>Stora foton anpassas alltid till visningsytan. Små foton visas i 1:1 som standard; aktivera detta för att zooma in och anpassa dem.</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
-    <value>Zooma små bilder för att passa visningsytan</value>
+    <value>Zooma små foton för att passa visningsytan</value>
   </data>
   <data name="SettingsCardTheme.Description" xml:space="preserve">
     <value>Välj apptemat.</value>
@@ -593,7 +593,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Ställ in markeringsfärgen som används för valda miniatyrer.</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
-    <value>Färg för miniatyrval</value>
+    <value>Markeringsfärg för miniatyrer</value>
   </data>
   <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
     <value>Justera storleken på miniatyrerna i visningsprogrammet.</value>
@@ -632,7 +632,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Fönsterläge vid start</value>
   </data>
   <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
-    <value>Automatisk toning och dölj</value>
+    <value>Automatisk toning och döljning</value>
   </data>
   <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - Inställningar</value>
@@ -641,7 +641,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Om</value>
   </data>
   <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
-    <value>Codec</value>
+    <value>Codecs</value>
   </data>
   <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
     <value>Allmänt</value>
@@ -695,7 +695,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Provperioden har löpt ut</value>
   </data>
   <data name="UnsupportedFileAlert.Description" xml:space="preserve">
-    <value>Den släppta filen är inte en stödd bildtyp.</value>
+    <value>Den släppta filen är inte en bildtyp som stöds.</value>
   </data>
   <data name="UnsupportedFileAlert.Title" xml:space="preserve">
     <value>Filtyp stöds inte</value>
@@ -725,7 +725,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Dölj fönsterknappar automatiskt</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Vänsterklick och dra utanför bilden</value>
+    <value>Vänsterklick och dra utanför fotot</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Skalningsmetod för bilder</value>
@@ -806,19 +806,19 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
     <value>Alt + Mushjul</value>
   </data>
   <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
-    <value>Visar alltid nästa eller föregående bild</value>
+    <value>Visar alltid nästa eller föregående foto</value>
   </data>
   <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
     <value>Luta mushjul vänster/höger</value>
   </data>
   <data name="TextTiltWheelAction.Text" xml:space="preserve">
-    <value>Visa nästa eller föregående bild</value>
+    <value>Visa nästa eller föregående foto</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
-    <value>Vänsterklick och dra på bilden</value>
+    <value>Vänsterklick och dra på fotot</value>
   </data>
   <data name="TextLeftClickDragAction.Text" xml:space="preserve">
-    <value>Panorera bild</value>
+    <value>Panorera foto</value>
   </data>
   <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
     <value>Klick på mushjulet</value>
@@ -848,10 +848,10 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
     <value>Ingenting</value>
   </data>
   <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
-    <value>Dubbelklick på bilden</value>
+    <value>Dubbelklick på fotot</value>
   </data>
   <data name="TextDoubleClickAction.Text" xml:space="preserve">
-    <value>Faktisk storlek eller anpassa till fönster</value>
+    <value>Zooma till faktisk storlek eller anpassa till fönster</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
     <value>Ctrl + dra flyttar alltid fönstret</value>
@@ -1070,7 +1070,7 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
     <value>Flersidiga TIFF- och ICO-filer</value>
   </data>
   <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
-    <value>Hoppar till nästa förinställning: 100 %, 400 %, Anpassa</value>
+    <value>Hoppar till nästa förinställning: 100 %, 400 %, Anpassa till fönster</value>
   </data>
   <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
     <value>Går till föregående förinställning</value>

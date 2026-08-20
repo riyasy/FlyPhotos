@@ -202,7 +202,7 @@
     <value>Personalizado</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>Congelado</value>
+    <value>Fosco</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Mica</value>
@@ -220,7 +220,7 @@
     <value>Ver foto seguinte ou anterior</value>
   </data>
   <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
-    <value>Ver seguinte ou anterior</value>
+    <value>Ver foto seguinte ou anterior</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Ampliar ou reduzir</value>
@@ -265,8 +265,8 @@
     <value>Confirmar eliminação</value>
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
-    <value>Para definir o FlyPhotos como aplicação predefinida: 
-Clique com o botão direito numa fotografia &gt; Abrir com &gt; Escolher outra aplicação.
+    <value>Para definir o FlyPhotos como aplicação predefinida:
+Clique com o botão direito numa foto &gt; Abrir com &gt; Escolher outra aplicação.
 Selecione FlyPhotos e escolha Sempre.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
@@ -298,7 +298,7 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Tipo</value>
   </data>
   <data name="ExifPanelTitle.Text" xml:space="preserve">
-    <value>Informações da fotografia</value>
+    <value>Informações da foto</value>
   </data>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Fechar</value>
@@ -391,7 +391,7 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Abrir ficheiro</value>
   </data>
   <data name="RightClickInstruction.Text" xml:space="preserve">
-    <value>Para utilizar FlyPhotos, clique com o botão direito numa fotografia e selecione Abrir com &gt; FlyPhotos.</value>
+    <value>Para utilizar FlyPhotos, clique com o botão direito numa foto e selecione Abrir com &gt; FlyPhotos.</value>
   </data>
   <data name="ScanningTextBlock.Text" xml:space="preserve">
     <value>A analisar aplicações…</value>
@@ -406,13 +406,13 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Permitir múltiplas instâncias (Beta)</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
-    <value>Ocultar ponteiro do rato se estiver inativo.</value>
+    <value>Ocultar o ponteiro do rato quando este estiver inativo.</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
     <value>Ocultar ponteiro do rato automaticamente</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>O Fly guarda em cache as pré-visualizações rápidas recentes no disco para um carregamento mais rápido da próxima vez. Limpar remove todas as pré-visualizações em cache da cache do disco.</value>
+    <value>O Fly guarda em cache as pré-visualizações rápidas recentes no disco para um carregamento mais rápido da próxima vez. 'Limpar' remove todas as pré-visualizações guardadas na cache do disco.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Limpar cache do disco</value>
@@ -430,7 +430,7 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Créditos</value>
   </data>
   <data name="RawDecodeTeachingTip.Subtitle" xml:space="preserve">
-    <value>A fotografia atual será recarregada dentro de momentos.</value>
+    <value>A foto atual será recarregada dentro de momentos.</value>
   </data>
   <data name="RawDecodeTeachingTip.Title" xml:space="preserve">
     <value>Descodificador alterado</value>
@@ -460,13 +460,13 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Selecionar aplicações externas</value>
   </data>
   <data name="SettingsCardExternalShortcuts.Description" xml:space="preserve">
-    <value>Abrir fotografia atual noutras aplicações</value>
+    <value>Abrir a foto atual noutras aplicações</value>
   </data>
   <data name="SettingsCardExternalShortcuts.Header" xml:space="preserve">
     <value>Mostrar atalhos para aplicações externas</value>
   </data>
   <data name="SettingsCardFadeControls.Description" xml:space="preserve">
-    <value>Ocultar gradualmente controlos quando o rato se afasta.</value>
+    <value>Ocultar gradualmente os controlos quando o rato se afasta.</value>
   </data>
   <data name="SettingsCardFadeControls.Header" xml:space="preserve">
     <value>Ocultar gradualmente os controlos da interface</value>
@@ -478,13 +478,13 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Intensidade de ocultação gradual (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Número de imagens em resolução completa pré-carregadas em cada lado.</value>
+    <value>Número de imagens em resolução completa pré-carregadas de cada lado da foto atual.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Pré-carregamento de alta resolução (Na memória)</value>
+    <value>Pré-carregamento de alta resolução (na memória)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
-    <value>Escolher a percentagem do ecrã preenchida pela fotografia. (%)</value>
+    <value>Escolher a percentagem do ecrã preenchida pela foto. (%)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Ajuste da imagem no ecrã</value>
@@ -499,10 +499,10 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Ficheiro de registo</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Número de pré-visualizações rápidas pré-carregadas em cada lado.</value>
+    <value>Número de pré-visualizações rápidas pré-carregadas de cada lado da foto atual.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Pré-carregamento de baixa resolução (Na memória)</value>
+    <value>Pré-carregamento de baixa resolução (na memória)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Escolher o comportamento predefinido da roda do rato.</value>
@@ -511,13 +511,13 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Roda do rato</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
-    <value>⚠ Pode abrandar o arranque. Fly aguarda pelo carregamento da fotografia de alta resolução ao iniciar.</value>
+    <value>⚠ Pode abrandar o arranque. Fly aguarda o carregamento da foto em resolução completa ao iniciar.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
     <value>Animar zoom ao iniciar e diminuir zoom ao sair</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ Utilize a opção Manter apenas para pastas com fotografias de tamanho semelhante.</value>
+    <value>⚠ Utilize a opção 'Manter' apenas para pastas com fotos de tamanho semelhante.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Comportamento de deslocação, zoom e rotação durante navegação</value>
@@ -548,10 +548,10 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Mostrar nome do ficheiro</value>
   </data>
   <data name="SettingsCardShowImageDimensions.Description" xml:space="preserve">
-    <value>Mostrar largura e altura da fotografia junto ao nome do ficheiro.</value>
+    <value>Mostrar largura e altura da foto junto ao nome do ficheiro.</value>
   </data>
   <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
-    <value>Mostrar dimensões da fotografia</value>
+    <value>Mostrar dimensões da foto</value>
   </data>
   <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
     <value>Mostrar a faixa de miniaturas na parte inferior da janela</value>
@@ -572,10 +572,10 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Repositório GitHub</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
-    <value>Fotografias grandes ajustam-se sempre à área de apresentação. Por predefinição, as pequenas são mostradas a 1:1; ative para fazer zoom e ajustá-las.</value>
+    <value>Fotos grandes ajustam-se sempre à área de apresentação. Por predefinição, as pequenas são mostradas a 1:1; ative para fazer zoom e ajustá-las.</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
-    <value>Fazer zoom de fotografias pequenas para ajustar à área de apresentação</value>
+    <value>Fazer zoom de fotos pequenas para ajustar à área de apresentação</value>
   </data>
   <data name="SettingsCardTheme.Description" xml:space="preserve">
     <value>Selecionar o tema da aplicação.</value>
@@ -584,7 +584,7 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Tema da janela</value>
   </data>
   <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
-    <value>Deslizar suavemente a faixa de miniaturas ao navegar entre as fotografias.</value>
+    <value>Deslizar suavemente a faixa de miniaturas ao navegar entre as fotos.</value>
   </data>
   <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
     <value>Animar a faixa de miniaturas</value>
@@ -602,7 +602,7 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Tamanho das miniaturas</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
-    <value>Aplicável apenas ao Fundo da Janela Transparente.</value>
+    <value>Aplicável apenas ao fundo de janela transparente.</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
     <value>Transparência (%)</value>
@@ -674,16 +674,16 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Comportamento</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
-    <value>Apresentação de fotografias</value>
+    <value>Apresentação de fotos</value>
   </data>
   <data name="TextBlockStartupAndAppearance.Text" xml:space="preserve">
     <value>Arranque e aspeto</value>
   </data>
   <data name="TextBlockUIControls.Text" xml:space="preserve">
-    <value>Controlos da IU</value>
+    <value>Controlos da interface</value>
   </data>
   <data name="TitleTextBlock.Text" xml:space="preserve">
-    <value>FlyPhotos - Abrir fotografia</value>
+    <value>FlyPhotos - Abrir foto</value>
   </data>
   <data name="TrialExpiredMessage.CloseButton" xml:space="preserve">
     <value>OK</value>
@@ -695,7 +695,7 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Avaliação expirada</value>
   </data>
   <data name="UnsupportedFileAlert.Description" xml:space="preserve">
-    <value>O ficheiro largado não é de um tipo de imagem suportado.</value>
+    <value>O ficheiro largado não é um tipo de imagem suportado.</value>
   </data>
   <data name="UnsupportedFileAlert.Title" xml:space="preserve">
     <value>Ficheiro não suportado</value>
@@ -722,10 +722,10 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Os botões de minimizar, maximizar e fechar são apresentados apenas quando o rato está próximo do topo da janela.</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
-    <value>Ocultar automaticamente os botões da janela</value>
+    <value>Ocultar automaticamente os botões da barra de título</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Clique esquerdo do rato e arrastar fora da fotografia</value>
+    <value>Clique esquerdo do rato e arrastar fora da foto</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Método de dimensionamento de imagem</value>
@@ -815,10 +815,10 @@ High Quality Cubic – Redimensionamento de alta qualidade para fotos.</value>
     <value>Ver foto seguinte ou anterior</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
-    <value>Clique esquerdo do rato e arrastar sobre a fotografia</value>
+    <value>Clique esquerdo do rato e arrastar sobre a foto</value>
   </data>
   <data name="TextLeftClickDragAction.Text" xml:space="preserve">
-    <value>Deslocar fotografia</value>
+    <value>Deslocar foto</value>
   </data>
   <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
     <value>Clique na roda do rato</value>
@@ -848,10 +848,10 @@ High Quality Cubic – Redimensionamento de alta qualidade para fotos.</value>
     <value>Nada</value>
   </data>
   <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
-    <value>Duplo clique na fotografia</value>
+    <value>Duplo clique na foto</value>
   </data>
   <data name="TextDoubleClickAction.Text" xml:space="preserve">
-    <value>Tamanho real ou ajustar à janela</value>
+    <value>Zoom para tamanho real ou ajustar à janela</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
     <value>Ctrl + arrastar move sempre a janela</value>
@@ -1070,7 +1070,7 @@ High Quality Cubic – Redimensionamento de alta qualidade para fotos.</value>
     <value>Ficheiros TIFF e ICO multipágina</value>
   </data>
   <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
-    <value>Salta para a predefinição seguinte: 100%, 400%, Ajustar</value>
+    <value>Salta para a predefinição seguinte: 100%, 400%, Ajustar à janela</value>
   </data>
   <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
     <value>Volta à predefinição anterior</value>
