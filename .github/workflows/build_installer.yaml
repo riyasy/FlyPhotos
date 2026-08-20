@@ -249,7 +249,7 @@ jobs:
         run: |
           $externalDir = "Src/FlyPhotos/External/${{ matrix.platform }}"
           $expected = @(
-            "heif.dll", "dav1d.dll", "libde265.dll", "libpng16.dll",
+            "heif.dll", "dav1d.dll", "libde265.dll", "libpng16.dll", "z.dll",
             "FlyNativeLib.dll", "FlyNativeLibHeif.dll", "FlyContextMenuHelper.exe",
             "fly_rust_bridge.dll"
           )

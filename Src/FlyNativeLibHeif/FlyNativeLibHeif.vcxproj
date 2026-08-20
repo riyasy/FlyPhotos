@@ -124,6 +124,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <EnableUAC>false</EnableUAC>
+      <!-- /PDBALTPATH:%_PDB% embeds just the PDB filename instead of the full build-machine
+           path, which would otherwise leak a local directory into every shipped binary.
+           /Brepro drops build timestamps so the output is byte-reproducible.
+           The %25 are MSBuild-escaped percent signs; the linker receives %_PDB%. -->
+      <AdditionalOptions>/PDBALTPATH:%25_PDB%25 /Brepro %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
@@ -160,6 +165,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <EnableUAC>false</EnableUAC>
+      <!-- /PDBALTPATH:%_PDB% embeds just the PDB filename instead of the full build-machine
+           path, which would otherwise leak a local directory into every shipped binary.
+           /Brepro drops build timestamps so the output is byte-reproducible.
+           The %25 are MSBuild-escaped percent signs; the linker receives %_PDB%. -->
+      <AdditionalOptions>/PDBALTPATH:%25_PDB%25 /Brepro %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -183,6 +193,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">Create</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="FlyNativeLibHeif.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

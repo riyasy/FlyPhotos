@@ -111,6 +111,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <!-- /PDBALTPATH:%_PDB% embeds just the PDB filename instead of the full build-machine
+           path, which would otherwise leak a local directory into every shipped binary.
+           /Brepro drops build timestamps so the output is byte-reproducible.
+           The %25 are MSBuild-escaped percent signs; the linker receives %_PDB%. -->
+      <AdditionalOptions>/PDBALTPATH:%25_PDB%25 /Brepro %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
@@ -141,6 +146,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <!-- /PDBALTPATH:%_PDB% embeds just the PDB filename instead of the full build-machine
+           path, which would otherwise leak a local directory into every shipped binary.
+           /Brepro drops build timestamps so the output is byte-reproducible.
+           The %25 are MSBuild-escaped percent signs; the linker receives %_PDB%. -->
+      <AdditionalOptions>/PDBALTPATH:%25_PDB%25 /Brepro %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -149,6 +159,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShellContextMenu.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="FlyContextMenuHelper.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

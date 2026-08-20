@@ -191,10 +191,27 @@ jobs:
       #   opt-level=3, lto=true, codegen-units=1, panic=abort, strip=true.
       # --target must be specified or cargo builds for the host and the DLL
       # lands in target/release/ (no triplet subfolder) -- easy to mis-deploy.
+      #
+      # CARGO_ENCODED_RUSTFLAGS keeps absolute build paths out of the shipped DLL.
+      # Rust bakes the source path of every panic site into the binary, so without
+      # this the cargo registry and rustup std source paths (and on a dev machine,
+      # the developer's home directory) end up as ~100 strings inside the DLL.
+      # Same block as in Src/03_build_only_rust.ps1 -- keep the two in sync.
+      # 0x1F is the separator CARGO_ENCODED_RUSTFLAGS expects; it avoids the
+      # whitespace-splitting problem that plain RUSTFLAGS has with spaced paths.
+      # Changing these flags invalidates the rust-cache entry, so the first run
+      # after this was added recompiles the full dependency graph.
       - name: Build fly_rust_bridge
         if: ${{ inputs.native == 'Build fresh' }}
         working-directory: Src/fly_rust_bridge
         run: |
+          $cargoHome  = if ($env:CARGO_HOME)  { $env:CARGO_HOME }  else { Join-Path $env:USERPROFILE ".cargo"  }
+          $rustupHome = if ($env:RUSTUP_HOME) { $env:RUSTUP_HOME } else { Join-Path $env:USERPROFILE ".rustup" }
+          $env:CARGO_ENCODED_RUSTFLAGS = @(
+            "--remap-path-prefix=$cargoHome=/cargo"
+            "--remap-path-prefix=$rustupHome=/rustup"
+            "--remap-path-prefix=$PWD=/fly_rust_bridge"
+          ) -join ([char]0x1F)
           cargo build --release --target ${{ matrix.rust-target }}
 
       # -----------------------------------------------------------------------
@@ -248,7 +265,7 @@ jobs:
         run: |
           $externalDir = "Src/FlyPhotos/External/${{ matrix.platform }}"
           $expected = @(
-            "heif.dll", "dav1d.dll", "libde265.dll", "libpng16.dll",
+            "heif.dll", "dav1d.dll", "libde265.dll", "libpng16.dll", "z.dll",
             "FlyNativeLib.dll", "FlyNativeLibHeif.dll", "FlyContextMenuHelper.exe",
             "fly_rust_bridge.dll"
           )

@@ -132,6 +132,10 @@ internal class ContextMenuHelper
     {
         try
         {
+            // The helper is a singleton keyed on its window class, but its lifetime is tied to
+            // whichever instance launched it. If that instance exits while a second one is still
+            // running, the helper goes with it and the next right-click here relaunches one.
+            // Costs a one-off ~100ms on that click; not worth a refcount or a shared lifetime owner.
             var target = Win32Methods.FindWindow(ContextMenuHelperWindowClassName, null);
             if (target == IntPtr.Zero)
             {
@@ -149,10 +153,13 @@ internal class ContextMenuHelper
                     {
                         var psi = new ProcessStartInfo(exePath)
                         {
+                            // The helper waits on this PID's process handle and exits when we do,
+                            // so it never outlives us. See MonitorThreadProc in FlyContextMenuHelper.cpp.
+                            Arguments = Environment.ProcessId.ToString(),
                             UseShellExecute = false,
                             CreateNoWindow = false
                         };
-                        var proc = Process.Start(psi);
+                        Process.Start(psi);
                     }
 
                     // Wait briefly for the window to appear
