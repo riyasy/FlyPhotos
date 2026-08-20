@@ -124,7 +124,7 @@
     <value>キャンセル</value>
   </data>
   <data name="AppSelectionDialog.Title" xml:space="preserve">
-    <value>アプリケーションを選択</value>
+    <value>アプリを選択</value>
   </data>
   <data name="BrowseBtn.Content" xml:space="preserve">
     <value>アプリを参照…</value>
@@ -196,13 +196,13 @@
     <value>アクリル</value>
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
-    <value>アクリル 薄型</value>
+    <value>アクリル (薄)</value>
   </data>
   <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
     <value>カスタム</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>フローズン</value>
+    <value>すりガラス</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>マイカ</value>
@@ -217,10 +217,10 @@
     <value>透明</value>
   </data>
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
-    <value>次/前の表示</value>
+    <value>次または前を表示</value>
   </data>
   <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
-    <value>次/前の表示</value>
+    <value>次または前を表示</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>ズームインまたはズームアウト</value>
@@ -265,8 +265,8 @@
     <value>削除の確認</value>
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
-    <value>FlyPhotosを既定のアプリに設定するには: 
-写真を右クリック &gt; プログラムから開く &gt; 別のアプリを選択。 
+    <value>FlyPhotosを既定のアプリに設定するには:
+写真を右クリック &gt; プログラムから開く &gt; 別のアプリを選択。
 FlyPhotosを選択し、「常に」をクリックします。</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
@@ -285,13 +285,13 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>寄付</value>
   </data>
   <data name="DropAreaRun.Text" xml:space="preserve">
-    <value>ここに写真をドラッグアンドドロップまたは</value>
+    <value>ここに写真をドラッグアンドドロップ、または</value>
   </data>
   <data name="HeaderCodec.Text" xml:space="preserve">
     <value>コーデック</value>
   </data>
   <data name="HeaderExtensions.Text" xml:space="preserve">
-    <value>拡張機能</value>
+    <value>拡張子</value>
   </data>
   <data name="HeaderType.Text" xml:space="preserve">
     <value>種類</value>
@@ -315,7 +315,7 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>ファイル名</value>
   </data>
   <data name="Exif_FileSize" xml:space="preserve">
-    <value>ファイル サイズ</value>
+    <value>ファイルサイズ</value>
   </data>
   <data name="Exif_DateTaken" xml:space="preserve">
     <value>撮影日時</value>
@@ -354,7 +354,7 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>フラッシュ</value>
   </data>
   <data name="Exif_Dimensions" xml:space="preserve">
-    <value>寸法</value>
+    <value>大きさ</value>
   </data>
   <data name="Exif_Orientation" xml:space="preserve">
     <value>向き</value>
@@ -378,13 +378,13 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>アルファ</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
-    <value>高解像度バージョンを読み込み中。お待ちください…</value>
+    <value>高解像度版を読み込んでいます。しばらくお待ちください…</value>
   </data>
   <data name="MessageClose_Ok" xml:space="preserve">
     <value>OK</value>
   </data>
   <data name="NoShortcutsCreated.Message" xml:space="preserve">
-    <value>ショートカットが作成されませんでした。設定で構成してください。</value>
+    <value>ショートカットが作成されていません。設定で追加してください。</value>
   </data>
   <data name="OpenFileHyperlink.Text" xml:space="preserve">
     <value>ファイルを開く</value>
@@ -393,10 +393,10 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>FlyPhotosを使用するには、写真を右クリックし、プログラムから開く &gt; FlyPhotosを選択します。</value>
   </data>
   <data name="ScanningTextBlock.Text" xml:space="preserve">
-    <value>アプリケーションをスキャン中…</value>
+    <value>アプリをスキャン中…</value>
   </data>
   <data name="SearchBox.PlaceholderText" xml:space="preserve">
-    <value>アプリケーションを検索…</value>
+    <value>アプリを検索…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
     <value>追加のインスタンスでは選択した画像のみ表示されます（移動・削除・設定は利用できません）。</value>
@@ -411,7 +411,7 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>マウスポインターを自動的に非表示にする</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Flyは最近のクイックプレビューをディスクにキャッシュし、次回の読み込みを高速化します。クリアするとディスクキャッシュからすべてのキャッシュ済みプレビューが削除されます。</value>
+    <value>Flyは最近のクイックプレビューをディスクにキャッシュし、次回の読み込みを高速化します。「クリア」を押すと、ディスクキャッシュ内のプレビューがすべて削除されます。</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>ディスクキャッシュをクリア</value>
@@ -420,13 +420,13 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>ファイルを削除する前に確認を求めます。</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Header" xml:space="preserve">
-    <value>ファイル削除前の確認</value>
+    <value>ファイルを削除する前に確認する</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
     <value>FlyPhotosは、Resvg、Magick.NET、MagicScaler、Rawler、NLog、およびWinUIExに感謝します。</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
-    <value>著作権情報</value>
+    <value>クレジット</value>
   </data>
   <data name="RawDecodeTeachingTip.Subtitle" xml:space="preserve">
     <value>現在の写真はまもなく再読み込みされます。</value>
@@ -435,13 +435,13 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>デコーダーを変更しました</value>
   </data>
   <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
-    <value>RAWファイル内の埋め込みJPEGの代わりに実際のRAWデータを使用します</value>
+    <value>RAWファイル内の埋め込みJPEGの代わりに実際のRAWデータを使用します。</value>
   </data>
   <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
     <value>カメラRAWをデコード</value>
   </data>
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
-    <value>WIC（Windows Imaging Component）：システムコーデック • Rawler：最速 • ImageMagick：最高の互換性</value>
+    <value>WIC (Windows Imaging Component)：システムコーデック • Rawler：最速 • ImageMagick：最高の互換性</value>
   </data>
   <data name="SettingsCardDecoderPriority.Header" xml:space="preserve">
     <value>RAWデコーダーの優先順位を調整（ドラッグして並べ替え）</value>
@@ -477,7 +477,7 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>自動フェードの強度 (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>各側にプリロードされるフル解像度画像の数。</value>
+    <value>現在の写真の前後それぞれにプリロードするフル解像度画像の枚数。</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
     <value>高解像度プリロード (メモリ内)</value>
@@ -486,19 +486,19 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>写真が画面を占める割合を選択します。(%)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
-    <value>画面への画像フィット</value>
+    <value>画面に対する画像の表示サイズ</value>
   </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>言語を選択</value>
   </data>
   <data name="SettingsCardLog.Description" xml:space="preserve">
-    <value>ログファイルを表示するために開きます</value>
+    <value>開いてログファイルを表示します</value>
   </data>
   <data name="SettingsCardLog.Header" xml:space="preserve">
     <value>ログファイル</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>各側にプリロードされるクイックプレビューの数。</value>
+    <value>現在の写真の前後それぞれにプリロードするクイックプレビューの枚数。</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
     <value>低解像度プリロード (メモリ内)</value>
@@ -510,13 +510,13 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>マウスホイール</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
-    <value>⚠ 起動が遅くなる可能性があります。Flyは起動時にフル解像度の写真のロードを待ちます。</value>
+    <value>⚠ 起動が遅くなる可能性があります。Flyは起動時にフル解像度の写真の読み込みを待ちます。</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
     <value>起動時にズームをアニメーションし、終了時にズームアウト</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ サイズが類似した写真を含むフォルダーでのみ「保持」オプションを使用してください。</value>
+    <value>⚠ サイズが類似した写真を含むフォルダーでのみ「維持」オプションを使用してください。</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>ナビゲーション中のパン、ズーム、回転の動作</value>
@@ -550,7 +550,7 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>ファイル名の横に写真の幅と高さを表示します。</value>
   </data>
   <data name="SettingsCardShowImageDimensions.Header" xml:space="preserve">
-    <value>写真の寸法を表示</value>
+    <value>写真の大きさを表示</value>
   </data>
   <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
     <value>ウィンドウの下部にサムネイルストリップを表示</value>
@@ -559,7 +559,7 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>サムネイルストリップを表示</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
-    <value>ズーム時に画面中央にズーム率を表示。</value>
+    <value>ズーム中に画面の中央にズーム率を表示します。</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>ズーム率を表示</value>
@@ -625,7 +625,7 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>背景色</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>「前回の状態」では、最後にウインドウ表示または最大化されたときのサイズ、位置、表示モニターを復元します。</value>
+    <value>「前回の状態」では、最後にウィンドウ表示または最大化されたときのサイズ、位置、表示モニターを復元します。</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>起動時のウィンドウ状態</value>
@@ -664,10 +664,10 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>キャッシュ</value>
   </data>
   <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
-    <value>FlyPhotosは主にWindows Imaging Component (WIC) コーデックを使用します。</value>
+    <value>FlyPhotosは主にWindowsに内蔵されているWindows Imaging Component (WIC) コーデックを使用します。</value>
   </data>
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
-    <value>詳細</value>
+    <value>詳細設定</value>
   </data>
   <data name="TextBlockBehaviour.Text" xml:space="preserve">
     <value>動作</value>
@@ -703,13 +703,13 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>end</value>
   </data>
   <data name="SettingsCardMouseFwdBackBehaviour.Header" xml:space="preserve">
-    <value>マウスの進む／戻るボタン</value>
+    <value>マウスの進む/戻るボタン</value>
   </data>
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
-    <value>マウスの進む／戻るボタンの動作を選択します（一部のマウスで利用可能）。</value>
+    <value>マウスの進む/戻るボタンの動作を選択します（一部のマウスで利用可能）。</value>
   </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
-    <value>段階的ズーム</value>
+    <value>段階的にズーム</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
     <value>写真の枠外をクリックすると、全画面表示または最大化された状態からウィンドウが元のサイズに復元されます。ダブルクリックすると再度最大化されます。</value>
@@ -721,18 +721,18 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>最小化、最大化、閉じるボタンは、マウスがウィンドウの上端近くにあるときにのみ表示されます。</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
-    <value>ウィンドウボタンを自動的に隠す</value>
+    <value>ウィンドウボタンを自動的に非表示にする</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>写真の外でマウスの左クリック + ドラッグ</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
-    <value>画像拡大縮小方法</value>
+    <value>画像の拡大縮小方法</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
     <value>Nearest Neighbor – ピクセルアートのみに使用します。ピクセルのエッジをシャープに保ちます。
 Bilinear – 一般的な表示に適した、高速で滑らかな画像スケーリングです。
-Anisotropic – 優れたパフォーマンスを維持しながら、Bilinearよりもシャープな结果を提供します。
+Anisotropic – 優れたパフォーマンスを維持しながら、Bilinearよりもシャープな結果を提供します。
 High Quality Cubic – 写真に最適な最高品質のスケーリングです。</value>
   </data>
   <data name="ComboImageScalingQualityItemNearestNeighbor.Content" xml:space="preserve">
@@ -799,25 +799,25 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
     <value>Ctrl + マウスホイール</value>
   </data>
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
-    <value>常にズームイン / アウト</value>
+    <value>常にズームインまたはズームアウト</value>
   </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + マウスホイール</value>
   </data>
   <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
-    <value>常に次/前を表示</value>
+    <value>常に次または前を表示</value>
   </data>
   <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
     <value>マウスホイールを左右に倒す</value>
   </data>
   <data name="TextTiltWheelAction.Text" xml:space="preserve">
-    <value>次/前の表示</value>
+    <value>次または前を表示</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
     <value>写真上でマウスの左クリック + ドラッグ</value>
   </data>
   <data name="TextLeftClickDragAction.Text" xml:space="preserve">
-    <value>写真を移動</value>
+    <value>写真をパン</value>
   </data>
   <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
     <value>マウスホイールクリック</value>
@@ -880,7 +880,7 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
     <value>ショートカットを変更</value>
   </data>
   <data name="ShortcutResetAll_Title" xml:space="preserve">
-    <value>すべてのショートカットをリセットしますか?</value>
+    <value>すべてのショートカットをリセットしますか？</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
     <value>すべてのコマンドが既定のキーに戻ります。マウスの設定は変更されません。</value>
@@ -940,7 +940,7 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
     <value>移動</value>
   </data>
   <data name="ShortcutGroup_ZoomPan" xml:space="preserve">
-    <value>ズームと移動</value>
+    <value>ズームとパン</value>
   </data>
   <data name="ShortcutGroup_Rotate" xml:space="preserve">
     <value>回転</value>
@@ -991,16 +991,16 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
     <value>ウィンドウに合わせる</value>
   </data>
   <data name="ShortcutName_PanUp" xml:space="preserve">
-    <value>上へ移動</value>
+    <value>上にパン</value>
   </data>
   <data name="ShortcutName_PanDown" xml:space="preserve">
-    <value>下へ移動</value>
+    <value>下にパン</value>
   </data>
   <data name="ShortcutName_PanLeft" xml:space="preserve">
-    <value>左へ移動</value>
+    <value>左にパン</value>
   </data>
   <data name="ShortcutName_PanRight" xml:space="preserve">
-    <value>右へ移動</value>
+    <value>右にパン</value>
   </data>
   <data name="ShortcutName_RotateLeft" xml:space="preserve">
     <value>左に回転</value>
@@ -1069,7 +1069,7 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
     <value>マルチページの TIFF / ICO ファイル</value>
   </data>
   <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
-    <value>次のプリセットに移動: 100%、400%、画面に合わせる</value>
+    <value>次のプリセットに移動: 100%、400%、ウィンドウに合わせる</value>
   </data>
   <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
     <value>前のプリセットに戻る</value>
@@ -1108,16 +1108,16 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
     <value>Shift</value>
   </data>
   <data name="ShortcutKey_LeftArrow" xml:space="preserve">
-    <value>左矢印キー</value>
+    <value>左方向キー</value>
   </data>
   <data name="ShortcutKey_RightArrow" xml:space="preserve">
-    <value>右矢印キー</value>
+    <value>右方向キー</value>
   </data>
   <data name="ShortcutKey_UpArrow" xml:space="preserve">
-    <value>上矢印キー</value>
+    <value>上方向キー</value>
   </data>
   <data name="ShortcutKey_DownArrow" xml:space="preserve">
-    <value>下矢印キー</value>
+    <value>下方向キー</value>
   </data>
   <data name="ShortcutKey_Esc" xml:space="preserve">
     <value>Esc</value>

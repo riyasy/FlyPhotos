@@ -172,13 +172,13 @@
     <value>Adatta alla finestra</value>
   </data>
   <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
-    <value>Fare clic per cambiare il colore di selezione.</value>
+    <value>Fai clic per cambiare il colore di selezione.</value>
   </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Impostazioni</value>
   </data>
   <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
-    <value>Fare clic per cambiare il colore di sfondo della finestra.</value>
+    <value>Fai clic per cambiare il colore di sfondo della finestra.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>L'app deve essere riavviata per cambiare la lingua di visualizzazione.</value>
@@ -196,13 +196,13 @@
     <value>Acrilico</value>
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
-    <value>Acrilico Sottile</value>
+    <value>Acrilico sottile</value>
   </data>
   <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
     <value>Personalizzato</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>Congelato</value>
+    <value>Smerigliato</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Mica</value>
@@ -217,22 +217,22 @@
     <value>Trasparente</value>
   </data>
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
-    <value>Visualizza Successivo o Precedente</value>
+    <value>Visualizza successivo o precedente</value>
   </data>
   <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
-    <value>Visualizza Successivo o Precedente</value>
+    <value>Visualizza successivo o precedente</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
-    <value>Ingrandisci o Riduci</value>
+    <value>Ingrandisci o riduci</value>
   </data>
   <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
-    <value>Memorizza Pan/Zoom/Rotazione per foto</value>
+    <value>Memorizza spostamento/zoom/rotazione per foto</value>
   </data>
   <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
-    <value>Reimposta Pan/Zoom/Rotazione</value>
+    <value>Reimposta spostamento/zoom/rotazione</value>
   </data>
   <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
-    <value>Mantieni Pan/Zoom dalla foto precedente</value>
+    <value>Mantieni spostamento e zoom dalla foto precedente</value>
   </data>
   <data name="ComboThemeItemDark.Content" xml:space="preserve">
     <value>Scuro</value>
@@ -265,12 +265,12 @@
     <value>Conferma eliminazione</value>
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
-    <value>Per impostare FlyPhotos come app predefinita: 
-Fai clic con il pulsante destro del mouse su una foto &gt; Apri con &gt; Scegli un'altra app. 
+    <value>Per impostare FlyPhotos come app predefinita:
+Fai clic con il pulsante destro del mouse su una foto &gt; Apri con &gt; Scegli un'altra app.
 Seleziona FlyPhotos e seleziona Sempre.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
-    <value>In Windows 11, puoi anche impostare FlyPhotos come app predefinita in 
+    <value>In Windows 11, puoi anche impostare FlyPhotos come app predefinita in
 Impostazioni &gt; App &gt; App predefinite.</value>
   </data>
   <data name="DeletionFailed.CloseButton" xml:space="preserve">
@@ -280,7 +280,7 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Impossibile eliminare il file.</value>
   </data>
   <data name="DeletionFailed.Title" xml:space="preserve">
-    <value>Eliminazione fallita</value>
+    <value>Eliminazione non riuscita</value>
   </data>
   <data name="DonateButton.Content" xml:space="preserve">
     <value>Dona</value>
@@ -346,7 +346,7 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Compensazione esposizione</value>
   </data>
   <data name="Exif_MeteringMode" xml:space="preserve">
-    <value>Metodo di misurazione</value>
+    <value>Modalità di misurazione</value>
   </data>
   <data name="Exif_ExposureProgram" xml:space="preserve">
     <value>Programma di esposizione</value>
@@ -379,7 +379,7 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Alfa</value>
   </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
-    <value>Caricamento della versione ad alta risoluzione. Attendere prego…</value>
+    <value>Caricamento della versione ad alta risoluzione. Attendere…</value>
   </data>
   <data name="MessageClose_Ok" xml:space="preserve">
     <value>OK</value>
@@ -400,7 +400,7 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Cerca app…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Le istanze aggiuntive mostrano solo l’immagine selezionata (senza navigazione, eliminazione o impostazioni).</value>
+    <value>Le istanze aggiuntive mostrano solo l'immagine selezionata (senza navigazione, eliminazione o impostazioni).</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
     <value>Consenti più istanze (Beta)</value>
@@ -412,13 +412,13 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Nascondi automaticamente il puntatore del mouse</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Fly memorizza nella cache le anteprime veloci recenti su disco per un caricamento più rapido la prossima volta. Cancella rimuove tutte le anteprime memorizzate dalla cache del disco.</value>
+    <value>Fly memorizza nella cache le anteprime veloci recenti su disco per un caricamento più rapido la prossima volta. «Svuota» rimuove tutte le anteprime memorizzate dalla cache del disco.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Svuota la cache del disco</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Description" xml:space="preserve">
-    <value>Chiede conferma prima di eliminare qualsiasi file.</value>
+    <value>Chiedi conferma prima di eliminare qualsiasi file.</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Header" xml:space="preserve">
     <value>Conferma prima di eliminare i file</value>
@@ -478,13 +478,13 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Intensità dissolvenza automatica (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Numero di immagini a piena risoluzione precaricate per ogni lato.</value>
+    <value>Numero di immagini a piena risoluzione precaricate su ciascun lato della foto corrente.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Precaricamento ad alta risoluzione (In memoria)</value>
+    <value>Precaricamento ad alta risoluzione (in memoria)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
-    <value>Scegli quanto dello schermo riempie la foto. (%)</value>
+    <value>Scegli quanta parte dello schermo occupa la foto. (%)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Adattamento immagine a schermo</value>
@@ -499,10 +499,10 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>File di registro</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Numero di anteprime veloci precaricate per ogni lato.</value>
+    <value>Numero di anteprime veloci precaricate su ciascun lato della foto corrente.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Precaricamento a bassa risoluzione (In memoria)</value>
+    <value>Precaricamento a bassa risoluzione (in memoria)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Scegli il comportamento predefinito della rotellina del mouse.</value>
@@ -514,13 +514,13 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>⚠ Potrebbe rallentare l'avvio. Fly attende il caricamento della foto a piena risoluzione all'avvio.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
-    <value>Anima lo zoom all’avvio e riduci all’uscita</value>
+    <value>Anima lo zoom all'avvio e riduci all'uscita</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ Usa l'opzione Mantieni solo per le cartelle con foto di dimensioni simili.</value>
+    <value>⚠ Usa l'opzione «Mantieni» solo per le cartelle con foto di dimensioni simili.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
-    <value>Comportamento di Pan, Zoom e Rotazione durante la navigazione</value>
+    <value>Comportamento di spostamento, zoom e rotazione durante la navigazione</value>
   </data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Segnala problemi su GitHub o invia un'email a ryftools@outlook.com</value>
@@ -554,10 +554,10 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Mostra dimensioni foto</value>
   </data>
   <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
-    <value>Mostra la striscia di miniature nella parte inferiore della finestra</value>
+    <value>Mostra la striscia delle miniature nella parte inferiore della finestra</value>
   </data>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
-    <value>Mostra striscia miniature</value>
+    <value>Mostra striscia delle miniature</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Mostra la percentuale di zoom al centro dello schermo durante lo zoom.</value>
@@ -572,10 +572,10 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Repository GitHub</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
-    <value>Le foto grandi si adattano sempre all’area di visualizzazione. Le foto piccole vengono mostrate a dimensione reale (1:1) per impostazione predefinita; abilita questa opzione per ingrandirle e adattarle.</value>
+    <value>Le foto grandi si adattano sempre all'area di visualizzazione. Le foto piccole vengono mostrate a dimensione reale (1:1) per impostazione predefinita; abilita questa opzione per ingrandirle e adattarle.</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
-    <value>Ingrandisci le foto piccole per adattarle all’area di visualizzazione</value>
+    <value>Ingrandisci le foto piccole per adattarle all'area di visualizzazione</value>
   </data>
   <data name="SettingsCardTheme.Description" xml:space="preserve">
     <value>Seleziona il tema dell'app.</value>
@@ -593,13 +593,13 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Imposta il colore di evidenziazione utilizzato per le miniature selezionate.</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
-    <value>Colore di selezione miniatura</value>
+    <value>Colore di selezione delle miniature</value>
   </data>
   <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
     <value>Regola la dimensione delle miniature nel visualizzatore.</value>
   </data>
   <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
-    <value>Dimensione miniatura</value>
+    <value>Dimensione delle miniature</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
     <value>Applicabile solo per sfondo finestra trasparente.</value>
@@ -632,7 +632,7 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Stato finestra all'avvio</value>
   </data>
   <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
-    <value>Dissolvenza e nascondi automatici</value>
+    <value>Dissolvenza e nascondimento automatici</value>
   </data>
   <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - Impostazioni</value>
@@ -662,7 +662,7 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Diagnostica</value>
   </data>
   <data name="TextBlockCaching.Text" xml:space="preserve">
-    <value>Caching</value>
+    <value>Cache</value>
   </data>
   <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
     <value>FlyPhotos utilizza principalmente codec Windows Imaging Component (WIC).</value>
@@ -809,16 +809,16 @@ High Quality Cubic – Ridimensionamento della massima qualità per le foto.</va
     <value>Visualizza sempre successivo o precedente</value>
   </data>
   <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
-    <value>Inclinare rotellina Sinistra/Destra</value>
+    <value>Inclinazione della rotellina a sinistra o a destra</value>
   </data>
   <data name="TextTiltWheelAction.Text" xml:space="preserve">
-    <value>Visualizza Successivo o Precedente</value>
+    <value>Visualizza successivo o precedente</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
     <value>Clic sinistro e trascina sulla foto</value>
   </data>
   <data name="TextLeftClickDragAction.Text" xml:space="preserve">
-    <value>Sposta foto</value>
+    <value>Sposta la foto</value>
   </data>
   <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
     <value>Clic sulla rotellina</value>
@@ -884,7 +884,7 @@ High Quality Cubic – Ridimensionamento della massima qualità per le foto.</va
     <value>Reimpostare tutti i collegamenti?</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
-    <value>Tutti i comandi tornano ai tasti predefiniti. Le impostazioni del mouse non cambiano.</value>
+    <value>Tutti i comandi tornano ai tasti predefiniti. Le impostazioni del mouse non cambieranno.</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
     <value>Reimposta tutto</value>
@@ -1070,10 +1070,10 @@ High Quality Cubic – Ridimensionamento della massima qualità per le foto.</va
     <value>File TIFF e ICO multipagina</value>
   </data>
   <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
-    <value>Passa al preset successivo: 100%, 400%, Adatta</value>
+    <value>Passa alla preimpostazione successiva: 100%, 400%, Adatta alla finestra</value>
   </data>
   <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
-    <value>Torna al preset precedente</value>
+    <value>Torna alla preimpostazione precedente</value>
   </data>
   <data name="ShortcutDesc_PhotoInfoPanel" xml:space="preserve">
     <value>Metadati della fotocamera ed EXIF</value>

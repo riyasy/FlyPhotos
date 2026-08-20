@@ -196,13 +196,13 @@
     <value>Acrylique</value>
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
-    <value>Acrylique Fin</value>
+    <value>Acrylique fin</value>
   </data>
   <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
     <value>Personnalisé</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>Gelé</value>
+    <value>Dépoli</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Mica</value>
@@ -217,22 +217,22 @@
     <value>Transparent</value>
   </data>
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
-    <value>Afficher Suivant ou Précédent</value>
+    <value>Afficher suivant ou précédent</value>
   </data>
   <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
-    <value>Afficher Suivant ou Précédent</value>
+    <value>Afficher suivant ou précédent</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Zoomer avant ou arrière</value>
   </data>
   <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
-    <value>Mémoriser Pan/Zoom/Rotation par photo</value>
+    <value>Mémoriser déplacement/zoom/rotation par photo</value>
   </data>
   <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
-    <value>Réinitialiser Pan/Zoom/Rotation</value>
+    <value>Réinitialiser déplacement/zoom/rotation</value>
   </data>
   <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
-    <value>Conserver Pan/Zoom de la photo précédente</value>
+    <value>Conserver déplacement/zoom de la photo précédente</value>
   </data>
   <data name="ComboThemeItemDark.Content" xml:space="preserve">
     <value>Sombre</value>
@@ -265,12 +265,12 @@
     <value>Confirmer la suppression</value>
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
-    <value>Pour définir FlyPhotos comme application par défaut : 
-Cliquez avec le bouton droit sur une photo &gt; Ouvrir avec &gt; Choisir une autre application. 
+    <value>Pour définir FlyPhotos comme application par défaut :
+Cliquez avec le bouton droit sur une photo &gt; Ouvrir avec &gt; Choisir une autre application.
 Sélectionnez FlyPhotos et cliquez sur Toujours.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
-    <value>Sous Windows 11, vous pouvez également définir FlyPhotos comme application par défaut dans 
+    <value>Sous Windows 11, vous pouvez également définir FlyPhotos comme application par défaut dans
 Paramètres &gt; Applications &gt; Applications par défaut.</value>
   </data>
   <data name="DeletionFailed.CloseButton" xml:space="preserve">
@@ -322,16 +322,16 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Date de prise de vue</value>
   </data>
   <data name="Exif_CameraMake" xml:space="preserve">
-    <value>Marque de l'appareil</value>
+    <value>Marque de l'appareil photo</value>
   </data>
   <data name="Exif_CameraModel" xml:space="preserve">
-    <value>Modèle de l'appareil</value>
+    <value>Modèle de l'appareil photo</value>
   </data>
   <data name="Exif_LensModel" xml:space="preserve">
-    <value>Modèle d'objectif</value>
+    <value>Modèle de l'objectif</value>
   </data>
   <data name="Exif_FocalLength" xml:space="preserve">
-    <value>Longueur focale</value>
+    <value>Distance focale</value>
   </data>
   <data name="Exif_Aperture" xml:space="preserve">
     <value>Ouverture</value>
@@ -385,7 +385,7 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>OK</value>
   </data>
   <data name="NoShortcutsCreated.Message" xml:space="preserve">
-    <value>Aucun raccourci créé. Configurez-les dans les Paramètres.</value>
+    <value>Aucun raccourci créé. Ajoutez-en dans les Paramètres.</value>
   </data>
   <data name="OpenFileHyperlink.Text" xml:space="preserve">
     <value>Ouvrir le fichier</value>
@@ -400,19 +400,19 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Rechercher des applications…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Les instances supplémentaires affichent seulement l’image sélectionnée (pas de navigation, suppression ou paramètres).</value>
+    <value>Les instances supplémentaires affichent seulement l'image sélectionnée (pas de navigation, de suppression ni de paramètres).</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
     <value>Autoriser plusieurs instances (Beta)</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
-    <value>Masquer le pointeur de la souris si la souris est inactive.</value>
+    <value>Masquer le pointeur de la souris lorsque celle-ci est inactive.</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Header" xml:space="preserve">
     <value>Masquer automatiquement le pointeur de la souris</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Fly met en cache les aperçus rapides récents sur le disque pour un chargement plus rapide la prochaine fois. Effacer supprime tous les aperçus mis en cache du cache disque.</value>
+    <value>Fly met en cache les aperçus rapides récents sur le disque pour un chargement plus rapide la prochaine fois. « Vider » supprime tous les aperçus mis en cache du cache disque.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Vider le cache disque</value>
@@ -439,7 +439,7 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Utiliser les données RAW réelles au lieu du JPEG intégré dans le fichier RAW.</value>
   </data>
   <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
-    <value>Décoder les fichiers RAW de l’appareil photo</value>
+    <value>Décoder les fichiers RAW de l'appareil photo</value>
   </data>
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
     <value>WIC (Windows Imaging Component) : codecs système • Rawler : le plus rapide • ImageMagick : meilleure compatibilité</value>
@@ -478,16 +478,16 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Intensité d'estompage automatique (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Nombre d'images en pleine résolution préchargées de chaque côté.</value>
+    <value>Nombre d'images en pleine résolution préchargées de chaque côté de la photo actuelle.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Préchargement haute résolution (En mémoire)</value>
+    <value>Préchargement haute résolution (en mémoire)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
-    <value>Choisir la quantité d'écran que la photo remplit. (%)</value>
+    <value>Choisir la portion de l'écran que la photo remplit. (%)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
-    <value>Ajustement Image à l'écran</value>
+    <value>Ajustement de l'image à l'écran</value>
   </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>Choisir la langue</value>
@@ -499,10 +499,10 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Fichier journal</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Nombre d'aperçus rapides préchargés de chaque côté.</value>
+    <value>Nombre d'aperçus rapides préchargés de chaque côté de la photo actuelle.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Préchargement basse résolution (En mémoire)</value>
+    <value>Préchargement basse résolution (en mémoire)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Choisissez le comportement par défaut de la molette de la souris.</value>
@@ -511,19 +511,19 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Molette de la souris</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
-    <value>⚠ Peut ralentir le démarrage. Fly attend pour charger la photo pleine résolution au lancement.</value>
+    <value>⚠ Peut ralentir le démarrage. Fly attend le chargement de la photo pleine résolution au lancement.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
     <value>Animer le zoom au démarrage et dézoomer à la fermeture</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ N'utilisez l'option Conserver que pour les dossiers contenant des photos de taille similaire.</value>
+    <value>⚠ N'utilisez l'option « Conserver » que pour les dossiers contenant des photos de taille similaire.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
-    <value>Comportement Pan, Zoom et Rotation pendant la navigation</value>
+    <value>Comportement du déplacement, du zoom et de la rotation pendant la navigation</value>
   </data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
-    <value>Signaler des problèmes sur GitHub ou envoyer un mail à ryftools@outlook.com</value>
+    <value>Signaler des problèmes sur GitHub ou envoyer un e-mail à ryftools@outlook.com</value>
   </data>
   <data name="SettingsCardReportBugs.Header" xml:space="preserve">
     <value>Bogues et problèmes</value>
@@ -560,7 +560,7 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Afficher la bande de miniatures</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
-    <value>Afficher le pourcentage de zoom au centre de l’écran pendant le zoom.</value>
+    <value>Afficher le pourcentage de zoom au centre de l'écran pendant le zoom.</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Header" xml:space="preserve">
     <value>Afficher le pourcentage de zoom</value>
@@ -572,10 +572,10 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Dépôt GitHub</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
-    <value>Les grandes photos s’adaptent toujours à la zone d’affichage. Les petites photos sont affichées à taille réelle (1:1) par défaut ; activez ceci pour les agrandir et les ajuster.</value>
+    <value>Les grandes photos s'adaptent toujours à la zone d'affichage. Les petites photos sont affichées à taille réelle (1:1) par défaut ; activez ceci pour les agrandir et les ajuster.</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
-    <value>Agrandir les petites photos pour remplir la zone d’affichage</value>
+    <value>Agrandir les petites photos pour remplir la zone d'affichage</value>
   </data>
   <data name="SettingsCardTheme.Description" xml:space="preserve">
     <value>Sélectionner le thème de l'application.</value>
@@ -626,7 +626,7 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Couleur d'arrière-plan</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>« État précédent » restaure la dernière taille (fenêtrée ou maximisée), la position et l'écran.</value>
+    <value>« État précédent » restaure la dernière taille (fenêtrée ou agrandie), la position et l'écran.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>État de la fenêtre au démarrage</value>
@@ -707,13 +707,13 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Boutons avant/arrière de la souris</value>
   </data>
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
-    <value>Choisissez l’action des boutons avant et arrière de la souris (disponible sur certaines souris).</value>
+    <value>Choisissez l'action des boutons avant et arrière de la souris (disponible sur certaines souris).</value>
   </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Zoom par paliers</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
-    <value>Cliquer en dehors de la photo restaure la fenêtre depuis le mode plein écran ou depuis un état maximisé. Un double-clic la maximise à nouveau.</value>
+    <value>Cliquer en dehors de la photo restaure la fenêtre depuis le mode plein écran ou agrandi. Un double-clic l'agrandit à nouveau.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
     <value>Cliquer en dehors de l'image pour restaurer la fenêtre</value>
@@ -809,10 +809,10 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
     <value>Toujours afficher suivant ou précédent</value>
   </data>
   <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
-    <value>Incliner la molette (gauche/droite)</value>
+    <value>Incliner la molette de la souris (gauche/droite)</value>
   </data>
   <data name="TextTiltWheelAction.Text" xml:space="preserve">
-    <value>Afficher Suivant ou Précédent</value>
+    <value>Afficher suivant ou précédent</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
     <value>Clic gauche + Glisser sur la photo</value>
@@ -839,7 +839,7 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
     <value>Menu contextuel de l'Explorateur Windows</value>
   </data>
   <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
-    <value>Clic droit de la souris et maintenir</value>
+    <value>Clic droit de la souris maintenu</value>
   </data>
   <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
     <value>Zoom avant</value>
@@ -851,7 +851,7 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
     <value>Double-clic sur la photo</value>
   </data>
   <data name="TextDoubleClickAction.Text" xml:space="preserve">
-    <value>Taille réelle ou ajuster à la fenêtre</value>
+    <value>Zoomer à la taille réelle ou ajuster à la fenêtre</value>
   </data>
   <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
     <value>Ctrl + Glisser déplace toujours la fenêtre</value>
@@ -1070,7 +1070,7 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
     <value>Fichiers TIFF et ICO multipages</value>
   </data>
   <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
-    <value>Passe au préréglage suivant : 100 %, 400 %, Ajuster</value>
+    <value>Passe au préréglage suivant : 100 %, 400 %, Ajuster à la fenêtre</value>
   </data>
   <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
     <value>Revient au préréglage précédent</value>
