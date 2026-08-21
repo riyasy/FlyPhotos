@@ -857,7 +857,7 @@ High Quality Cubic – Масштабирование наивысшего ка�
     <value>Ctrl + перетаскивание всегда перемещает окно</value>
   </data>
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
-    <value>Переместить окно</value>
+    <value>Перемещение окна</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
     <value>Сочетания клавиш</value>
@@ -866,7 +866,7 @@ High Quality Cubic – Масштабирование наивысшего ка�
     <value>Поиск команд и клавиш…</value>
   </data>
   <data name="ButtonResetAllShortcuts.Content" xml:space="preserve">
-    <value>Сбросить все…</value>
+    <value>Сбросить всё…</value>
   </data>
   <data name="TxtNoShortcutResults.Text" xml:space="preserve">
     <value>Нет команд, соответствующих запросу.</value>
