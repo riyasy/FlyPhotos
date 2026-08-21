@@ -173,6 +173,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <!-- Included by FlyNativeLibHeif.rc. Listed here so it is reachable from Solution Explorer;
+         the incremental build already picks up changes to it through the RC file tracker. -->
+    <ClInclude Include="..\build\version.h" />
     <ClInclude Include="DllGlobals.h" />
     <ClInclude Include="PixelBufferEncoder.h" />
     <ClInclude Include="HeifReader.h" />

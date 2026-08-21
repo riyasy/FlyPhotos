@@ -158,6 +158,9 @@
     <ClCompile Include="ShellContextMenu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Included by FlyContextMenuHelper.rc. Listed here so it is reachable from Solution
+         Explorer; the incremental build already picks up changes through the RC file tracker. -->
+    <ClInclude Include="..\build\version.h" />
     <ClInclude Include="ShellContextMenu.h" />
   </ItemGroup>
   <ItemGroup>

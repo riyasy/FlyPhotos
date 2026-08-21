@@ -165,6 +165,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <!-- Included by FlyNativeLib.rc. Listed here so it is reachable from Solution Explorer;
+         the incremental build already picks up changes to it through the RC file tracker. -->
+    <ClInclude Include="..\build\version.h" />
     <ClInclude Include="DllGlobals.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="NativeExports.h" />
