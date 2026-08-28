@@ -14,10 +14,10 @@
 
 #define FLY_VER_MAJOR 2
 #define FLY_VER_MINOR 7
-#define FLY_VER_PATCH 1
+#define FLY_VER_PATCH 2
 #define FLY_VER_BUILD 0
 
-#define FLY_VER_STRING "2.7.1.0"
+#define FLY_VER_STRING "2.7.2.0"
 
 #define FLY_COMPANY   "RYFTools"
 #define FLY_PRODUCT   "FlyPhotos"
