@@ -709,10 +709,10 @@
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>ഘട്ടംഘട്ടമായ സൂം</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Description" xml:space="preserve">
     <value>ചിത്രത്തിന് പുറത്തുള്ള ഭാഗത്ത് ക്ലിക്ക് ചെയ്താൽ വിൻഡോ ഫുൾസ്‌ക്രീൻ അല്ലെങ്കിൽ മാക്സിമൈസ് ചെയ്ത നിലയിൽ നിന്ന് പുനഃസ്ഥാപിക്കും. ഡബിൾ-ക്ലിക്ക് ചെയ്താൽ വീണ്ടും മാക്സിമൈസ് ചെയ്യും.</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Header" xml:space="preserve">
     <value>ഫോട്ടോയ്ക്ക് പുറത്ത് മൗസ് ലെഫ്റ്റ് ക്ലിക്ക്</value>
   </data>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
@@ -871,7 +871,7 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>വിൻഡോ നീക്കുക</value>
   </data>
-  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+  <data name="SettingsPivotItemKeyboard.Header" xml:space="preserve">
     <value>കീബോർഡ്</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">

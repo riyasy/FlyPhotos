@@ -712,10 +712,10 @@ Impostazioni &gt; App &gt; App predefinite.</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Zoom a livelli</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Description" xml:space="preserve">
     <value>Facendo clic all'esterno della foto si ripristina la finestra dallo stato a schermo intero o massimizzato. Un doppio clic la massimizza di nuovo.</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Header" xml:space="preserve">
     <value>Clic sinistro fuori dalla foto</value>
   </data>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
@@ -874,7 +874,7 @@ High Quality Cubic – Ridimensionamento della massima qualità per le foto.</va
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>Sposta la finestra</value>
   </data>
-  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+  <data name="SettingsPivotItemKeyboard.Header" xml:space="preserve">
     <value>Tastiera</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">

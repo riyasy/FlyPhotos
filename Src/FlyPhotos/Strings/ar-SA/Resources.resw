@@ -712,10 +712,10 @@
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>تكبير/تصغير تدريجي</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Description" xml:space="preserve">
     <value>يؤدي النقر خارج الصورة إلى استعادة النافذة من حالة ملء الشاشة أو التكبير. النقر المزدوج يُكبّر النافذة مجدداً.</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Header" xml:space="preserve">
     <value>النقر بزر الماوس الأيسر خارج الصورة</value>
   </data>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
@@ -874,7 +874,7 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>تحريك النافذة</value>
   </data>
-  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+  <data name="SettingsPivotItemKeyboard.Header" xml:space="preserve">
     <value>لوحة المفاتيح</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">

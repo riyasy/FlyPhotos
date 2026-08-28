@@ -711,10 +711,10 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>段階的にズーム</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Description" xml:space="preserve">
     <value>写真の枠外をクリックすると、全画面表示または最大化された状態からウィンドウが元のサイズに復元されます。ダブルクリックすると再度最大化されます。</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Header" xml:space="preserve">
     <value>写真の外でマウスの左クリック</value>
   </data>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
@@ -873,7 +873,7 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>ウィンドウを移動</value>
   </data>
-  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+  <data name="SettingsPivotItemKeyboard.Header" xml:space="preserve">
     <value>キーボード</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">

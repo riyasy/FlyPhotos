@@ -712,10 +712,10 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Portaittainen zoomaus</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Description" xml:space="preserve">
     <value>Kuvan ulkopuolelle napsauttaminen palauttaa ikkunan kokonäytön tilasta tai maksimoidusta tilasta. Kaksoisnapsauttaminen maksimoi sen uudelleen.</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Header" xml:space="preserve">
     <value>Hiiren vasen painike kuvan ulkopuolella</value>
   </data>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
@@ -874,7 +874,7 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>Siirrä ikkunaa</value>
   </data>
-  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+  <data name="SettingsPivotItemKeyboard.Header" xml:space="preserve">
     <value>Näppäimistö</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">

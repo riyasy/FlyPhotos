@@ -133,7 +133,7 @@ internal static class MouseCatalog
             MouseRow.Fixed("SettingsCardCtrlDragToMoveWindow", "TextCtrlDragAction"),
 
             // Backed by a bool, so index 0 is "Restore window" and index 1 is "Nothing".
-            MouseRow.Picker("SettingsCardClickOutsideImageToRestoreWindow",
+            MouseRow.Picker("SettingsCardLeftClickOutside",
                 ["ComboClickOutsideItemRestore", "ComboClickOutsideItemNothing"],
                 AppConfig.Settings.ClickOutsideImageToRestoreWindow ? 0 : 1,
                 i =>

@@ -712,10 +712,10 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Stepped Zoom</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Description" xml:space="preserve">
     <value>Clicking outside the photo restores the window from fullscreen or maximized state. Double-clicking maximizes it again.</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Header" xml:space="preserve">
     <value>Mouse Left Click outside Photo</value>
   </data>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
@@ -874,7 +874,7 @@ High Quality Cubic – Highest-quality scaling for photos.</value>
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>Move window</value>
   </data>
-  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+  <data name="SettingsPivotItemKeyboard.Header" xml:space="preserve">
     <value>Keyboard</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">

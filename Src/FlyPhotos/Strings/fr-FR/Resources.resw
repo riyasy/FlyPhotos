@@ -712,10 +712,10 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Zoom par paliers</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Description" xml:space="preserve">
     <value>Cliquer en dehors de la photo restaure la fenêtre depuis le mode plein écran ou agrandi. Un double-clic l'agrandit à nouveau.</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Header" xml:space="preserve">
     <value>Clic gauche en dehors de la photo</value>
   </data>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
@@ -874,7 +874,7 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>Déplacer la fenêtre</value>
   </data>
-  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+  <data name="SettingsPivotItemKeyboard.Header" xml:space="preserve">
     <value>Clavier</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">

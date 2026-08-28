@@ -614,7 +614,7 @@
                 Command names, hints and key names come from the catalog in code, which resolves them
                 through L.Get; everything static on the page uses x:Uid as usual.
             -->
-            <PivotItem x:Uid="SettingsPivotItemShortcuts">
+            <PivotItem x:Uid="SettingsPivotItemKeyboard">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />

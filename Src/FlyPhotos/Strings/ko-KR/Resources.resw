@@ -711,10 +711,10 @@ FlyPhotos를 선택한 다음 항상을 선택합니다.</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>단계별 확대/축소</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Description" xml:space="preserve">
     <value>사진 바깥쪽을 클릭하면 전체 화면 또는 최대화 상태에서 창이 복원됩니다. 두 번 클릭하면 다시 최대화됩니다.</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Header" xml:space="preserve">
     <value>사진 바깥에서 마우스 왼쪽 클릭</value>
   </data>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
@@ -873,7 +873,7 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>창 이동</value>
   </data>
-  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+  <data name="SettingsPivotItemKeyboard.Header" xml:space="preserve">
     <value>키보드</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">

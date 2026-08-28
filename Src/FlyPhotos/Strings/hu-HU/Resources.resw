@@ -711,10 +711,10 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Lépcsős nagyítás/kicsinyítés</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Description" xml:space="preserve">
     <value>A képen kívülre kattintva visszaállítja az ablakot a teljes képernyős vagy maximalizált állapotból. Duplán kattintva ismét maximalizálja.</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Header" xml:space="preserve">
     <value>Bal kattintás a képen kívül</value>
   </data>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
@@ -873,7 +873,7 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>Ablak mozgatása</value>
   </data>
-  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+  <data name="SettingsPivotItemKeyboard.Header" xml:space="preserve">
     <value>Billentyűzet</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">

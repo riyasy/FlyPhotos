@@ -712,10 +712,10 @@
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>分段縮放</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Description" xml:space="preserve">
     <value>按一下相片外部可將視窗從全螢幕或最大化狀態還原。按兩下可再次最大化。</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Header" xml:space="preserve">
     <value>在照片外按一下滑鼠左鍵</value>
   </data>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
@@ -874,7 +874,7 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
   <data name="TextCtrlDragAction.Text" xml:space="preserve">
     <value>移動視窗</value>
   </data>
-  <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
+  <data name="SettingsPivotItemKeyboard.Header" xml:space="preserve">
     <value>鍵盤</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
