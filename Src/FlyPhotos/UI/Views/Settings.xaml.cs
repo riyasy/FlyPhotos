@@ -637,14 +637,14 @@ internal sealed partial class Settings
     /// persistence only care about the rows. Never bound to XAML, so the interface type is safe.</summary>
     private IEnumerable<ShortcutRow> AllShortcutRows => _allShortcutGroups.SelectMany(g => g.Rows);
 
-    /// <summary>The Mouse tab, as data. Built once so a row that another row drives keeps whatever
-    /// it was retargeted to.</summary>
-    private readonly List<MouseRow> _mouseRows = MouseCatalog.BuildAll();
-
     private void InitializeShortcutsTab()
     {
         ShortcutGroupsList.ItemsSource = _allShortcutGroups;
-        MouseRowsList.ItemsSource = _mouseRows;
+
+        // No field for these: nothing outside the binding reads them, and ItemsSource keeps the
+        // rows alive, so a row that another row retargets holds whatever it was set to.
+        MouseRowsList.ItemsSource = MouseCatalog.BuildAll();
+
         ApplyShortcutFilter(string.Empty);
     }
 

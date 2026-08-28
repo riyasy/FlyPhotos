@@ -29,9 +29,11 @@
                         Stroke="{ThemeResource SystemControlForegroundBaseMediumBrush}"
                         StrokeDashArray="4 2"
                         StrokeThickness="3" />
-                    <!--  Content: Text runs are now empty tags, populated by x:Uid  -->
+                    <!--
+                        Content: Text runs are now empty tags, populated by x:Uid. No x:Uid on the
+                        TextBlock itself - a .Text resource on it would overwrite these children.
+                    -->
                     <TextBlock
-                        x:Uid="DropAreaTextBlock"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Foreground="{ThemeResource SystemControlPageTextBaseHighBrush}"
