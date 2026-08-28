@@ -146,9 +146,11 @@ jobs:
             --overlay-triplets=triplets
 
       # -----------------------------------------------------------------------
-      # Step 2 -- Native C++: FlyNativeLib.dll, FlyNativeLibHeif.dll,
-      #                         FlyContextMenuHelper.exe
+      # Step 2 -- Native C++: FlyNativeLib.dll, FlyNativeLibHeif.dll
       # -----------------------------------------------------------------------
+      # FlyContextMenuHelper.exe is deliberately not built or shipped -- an
+      # unsigned helper .exe trips antivirus heuristics. The project is still
+      # in the repo and can be built by hand for users who ask.
       # PlatformToolset is per-runner (matrix.toolset): the windows-latest x64
       # runner is on Visual Studio 2026 (v145), but windows-11-arm is still on
       # Visual Studio 2022 (newest toolset v143) and has no v145. ATL ships with
@@ -171,15 +173,6 @@ jobs:
         working-directory: Src/FlyNativeLibHeif
         run: |
           msbuild FlyNativeLibHeif.vcxproj `
-            /p:Configuration=Release `
-            /p:Platform=${{ matrix.platform }} `
-            /p:PlatformToolset=${{ matrix.toolset }}
-
-      - name: Build FlyContextMenuHelper
-        if: ${{ inputs.native == 'Build fresh' }}
-        working-directory: Src/FlyContextMenuHelper
-        run: |
-          msbuild FlyContextMenuHelper.vcxproj `
             /p:Configuration=Release `
             /p:Platform=${{ matrix.platform }} `
             /p:PlatformToolset=${{ matrix.toolset }}
@@ -248,7 +241,6 @@ jobs:
           # Native C++ DLLs (OutDir = Src\<Platform>\Release\)
           Copy-Item "Src/$platform/Release/FlyNativeLib.dll"          -Destination $externalDir -Force
           Copy-Item "Src/$platform/Release/FlyNativeLibHeif.dll"       -Destination $externalDir -Force
-          Copy-Item "Src/$platform/Release/FlyContextMenuHelper.exe"   -Destination $externalDir -Force
 
           # Rust DLL
           Copy-Item "Src/fly_rust_bridge/target/$rustTarget/release/fly_rust_bridge.dll" `
@@ -266,7 +258,7 @@ jobs:
           $externalDir = "Src/FlyPhotos/External/${{ matrix.platform }}"
           $expected = @(
             "heif.dll", "dav1d.dll", "libde265.dll", "libpng16.dll", "z.dll",
-            "FlyNativeLib.dll", "FlyNativeLibHeif.dll", "FlyContextMenuHelper.exe",
+            "FlyNativeLib.dll", "FlyNativeLibHeif.dll",
             "fly_rust_bridge.dll"
           )
           $failed = $false
