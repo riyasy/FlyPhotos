@@ -168,11 +168,13 @@
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 		<WarningsAsErrors>NU1605</WarningsAsErrors>
+		<MSBuildWarningsAsErrors>$(WarningsAsErrors);MSB3270</MSBuildWarningsAsErrors>
 		<DebugSymbols>False</DebugSymbols>
 		<DebugType>None</DebugType>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
 		<WarningsAsErrors>NU1605</WarningsAsErrors>
+		<MSBuildWarningsAsErrors>$(WarningsAsErrors);MSB3270</MSBuildWarningsAsErrors>
 		<DebugSymbols>False</DebugSymbols>
 		<DebugType>None</DebugType>
 	</PropertyGroup>
