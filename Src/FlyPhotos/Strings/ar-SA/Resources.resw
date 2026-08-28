@@ -716,7 +716,22 @@
     <value>يؤدي النقر خارج الصورة إلى استعادة النافذة من حالة ملء الشاشة أو التكبير. النقر المزدوج يُكبّر النافذة مجدداً.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>النقر خارج الصورة لاستعادة النافذة</value>
+    <value>النقر بزر الماوس الأيسر خارج الصورة</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>استعادة النافذة</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>لا شيء</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>النقر المزدوج خارج الصورة</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>تكبير النافذة</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>لا شيء</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>تظهر أزرار التصغير والتكبير والإغلاق فقط عندما يكون مؤشر الماوس قريبًا من الجزء العلوي للنافذة.</value>

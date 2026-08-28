@@ -289,14 +289,6 @@
                             <ToggleSwitch x:Name="ButtonConfirmBeforeDelete" />
                         </controls:SettingsCard>
 
-                        <controls:SettingsCard
-                            x:Name="SettingsCardClickOutsideImageToRestoreWindow"
-                            x:Uid="SettingsCardClickOutsideImageToRestoreWindow"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE944;, FontFamily={StaticResource FluentIcons}}">
-                            <ToggleSwitch x:Name="ButtonClickOutsideImageToRestoreWindow" />
-                        </controls:SettingsCard>
-
                         <!--  *****************  -->
 
                         <TextBlock
@@ -769,7 +761,7 @@
                                             <Grid>
                                                 <TextBlock
                                                     Style="{StaticResource FixedMouseActionTextStyle}"
-                                                    Text="{x:Bind FixedAction}"
+                                                    Text="{x:Bind FixedAction, Mode=OneWay}"
                                                     Visibility="{x:Bind FixedVisibility}" />
                                                 <ComboBox
                                                     MinWidth="170"

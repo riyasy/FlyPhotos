@@ -716,7 +716,22 @@
     <value>Клік за межами фотографії відновлює вікно з повноекранного або розгорнутого стану. Подвійний клік знову розгортає вікно.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Клік за межами зображення, щоб відновити вікно</value>
+    <value>Лівий клік миші поза фото</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Відновити вікно</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Нічого</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Подвійний клік поза фото</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Розгорнути вікно</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Нічого</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>Кнопки згортання, розгортання та закриття відображаються лише тоді, коли миша знаходиться біля верхнього краю вікна.</value>

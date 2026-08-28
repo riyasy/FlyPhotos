@@ -713,7 +713,22 @@
     <value>ചിത്രത്തിന് പുറത്തുള്ള ഭാഗത്ത് ക്ലിക്ക് ചെയ്താൽ വിൻഡോ ഫുൾസ്‌ക്രീൻ അല്ലെങ്കിൽ മാക്സിമൈസ് ചെയ്ത നിലയിൽ നിന്ന് പുനഃസ്ഥാപിക്കും. ഡബിൾ-ക്ലിക്ക് ചെയ്താൽ വീണ്ടും മാക്സിമൈസ് ചെയ്യും.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>വിൻഡോ പുനഃസ്ഥാപിക്കാൻ ചിത്രത്തിന് പുറത്ത് ക്ലിക്ക് ചെയ്യുക</value>
+    <value>ഫോട്ടോയ്ക്ക് പുറത്ത് മൗസ് ലെഫ്റ്റ് ക്ലിക്ക്</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>വിൻഡോ പുനഃസ്ഥാപിക്കുക</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>ഒന്നുമില്ല</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>ഫോട്ടോയ്ക്ക് പുറത്ത് ഡബിൾ ക്ലിക്ക്</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>വിൻഡോ മാക്സിമൈസ് ചെയ്യുക</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>ഒന്നുമില്ല</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>മൗസ് വിൻഡോയുടെ മുകൾഭാഗത്തിന് സമീപം ആയിരിക്കുമ്പോൾ മാത്രമേ മിനിമൈസ്, മാക്സിമൈസ്, ക്ലോസ് ബട്ടണുകൾ കാണിക്കുകയുള്ളൂ.</value>

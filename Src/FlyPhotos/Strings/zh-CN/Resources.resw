@@ -716,7 +716,22 @@
     <value>点击照片外部可将窗口从全屏或最大化状态恢复。双击可再次最大化。</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>点击图片外部以恢复窗口</value>
+    <value>在照片外点击鼠标左键</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>还原窗口</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>无</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>在照片外双击</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>最大化窗口</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>无</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>仅当鼠标靠近窗口顶部时，才会显示最小化、最大化和关闭按钮。</value>

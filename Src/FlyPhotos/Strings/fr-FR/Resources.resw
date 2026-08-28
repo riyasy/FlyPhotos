@@ -716,7 +716,22 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Cliquer en dehors de la photo restaure la fenêtre depuis le mode plein écran ou agrandi. Un double-clic l'agrandit à nouveau.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Cliquer en dehors de l'image pour restaurer la fenêtre</value>
+    <value>Clic gauche en dehors de la photo</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Restaurer la fenêtre</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Aucune action</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Double-clic en dehors de la photo</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Agrandir la fenêtre</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Aucune action</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>Les boutons réduire, agrandir et fermer s'affichent uniquement lorsque la souris est proche du haut de la fenêtre.</value>

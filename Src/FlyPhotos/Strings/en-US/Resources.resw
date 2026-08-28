@@ -716,7 +716,22 @@ Settings &gt; Apps &gt; Default apps.</value>
     <value>Clicking outside the photo restores the window from fullscreen or maximized state. Double-clicking maximizes it again.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Click outside image to restore window</value>
+    <value>Mouse Left Click outside Photo</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Restore window</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Nothing</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Mouse Double Click outside Photo</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Maximize window</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Nothing</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>The minimize, maximize, and close buttons are shown only when the mouse is near the top of the window.</value>

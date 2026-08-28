@@ -716,7 +716,22 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
     <value>Clicar fora da foto restaura a janela a partir do modo tela cheia ou maximizado. Clicar duas vezes a maximiza novamente.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Clique fora da imagem para restaurar a janela</value>
+    <value>Clique esquerdo fora da foto</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Restaurar a janela</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Nada</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Clique duplo fora da foto</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Maximizar a janela</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Nada</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>Os botões de minimizar, maximizar e fechar são exibidos apenas quando o mouse está próximo ao topo da janela.</value>

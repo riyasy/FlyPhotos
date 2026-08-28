@@ -27,12 +27,23 @@ public sealed class MouseRow : INotifyPropertyChanged
     private readonly Action<int>? _apply;
 
     private Visibility _rowVisibility = Visibility.Visible;
+    private string _fixedAction;
 
     public string Header { get; }
     public string Description { get; }
 
-    /// <summary>What the gesture does, on a row with nothing to choose. Empty on a picker.</summary>
-    public string FixedAction { get; }
+    /// <summary>What the gesture does, on a row with nothing to choose. Empty on a picker. Settable
+    /// because one fixed row only reports what another row's picker decides.</summary>
+    public string FixedAction
+    {
+        get => _fixedAction;
+        private set
+        {
+            if (_fixedAction == value) return;
+            _fixedAction = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FixedAction)));
+        }
+    }
 
     /// <summary>Declared as the concrete type: handing an interface-typed collection to ItemsSource
     /// crashes with E_INVALIDARG under AOT.</summary>
@@ -62,7 +73,7 @@ public sealed class MouseRow : INotifyPropertyChanged
     {
         Header = L.Get($"{headerKey}/Header");
         Description = L.GetOptional($"{headerKey}/Description");
-        FixedAction = fixedActionKey is null ? string.Empty : L.Get($"{fixedActionKey}/Text");
+        _fixedAction = fixedActionKey is null ? string.Empty : L.Get($"{fixedActionKey}/Text");
         Options = options;
         SelectedIndex = selectedIndex;
         _apply = apply;
@@ -109,6 +120,9 @@ public sealed class MouseRow : INotifyPropertyChanged
     /// being able to break it.</summary>
     internal static MouseRow Fixed(string headerKey, string actionKey) =>
         new(headerKey, actionKey, [], -1, null);
+
+    /// <summary>Retargets a fixed row whose behaviour is decided by another row's picker.</summary>
+    internal void SetFixedAction(string actionKey) => FixedAction = L.Get($"{actionKey}/Text");
 }
 
 /// <summary>
@@ -117,36 +131,60 @@ public sealed class MouseRow : INotifyPropertyChanged
 /// </summary>
 internal static class MouseCatalog
 {
-    public static List<MouseRow> BuildAll() =>
-    [
-        MouseRow.Picker("SettingsCardMouseWheelBehaviour",
-            ["ComboMouseWheelItemZoom", "ComboMouseWheelItemNav"],
-            (int)AppConfig.Settings.DefaultMouseWheelBehavior,
-            i => AppConfig.Settings.DefaultMouseWheelBehavior = (DefaultMouseWheelBehavior)i),
+    /// <summary>Double-click outside the photo maximizes only while the single-click-outside
+    /// gesture is enabled - the window code gates both on the same setting - so the row reports
+    /// that setting rather than owning one of its own.</summary>
+    private static string DoubleClickOutsideActionKey(bool clickOutsideEnabled) =>
+        clickOutsideEnabled ? "TextDoubleClickOutsideActionMaximize" : "TextDoubleClickOutsideActionNothing";
 
-        // The fixed wheel behaviours sit next to the wheel setting they qualify.
-        MouseRow.Fixed("SettingsCardCtrlMouseWheel", "TextCtrlMouseWheelAction"),
-        MouseRow.Fixed("SettingsCardAltMouseWheel", "TextAltMouseWheelAction"),
-        MouseRow.Fixed("SettingsCardTiltWheel", "TextTiltWheelAction"),
+    public static List<MouseRow> BuildAll()
+    {
+        var doubleClickOutside = MouseRow.Fixed("SettingsCardDoubleClickOutside",
+            DoubleClickOutsideActionKey(AppConfig.Settings.ClickOutsideImageToRestoreWindow));
 
-        MouseRow.Picker("SettingsCardMiddleClick",
-            ["ComboMiddleClickItemFullScreen", "ComboMiddleClickItemMaximize", "ComboMiddleClickItemNothing"],
-            (int)AppConfig.Settings.MiddleClickBehavior,
-            i => AppConfig.Settings.MiddleClickBehavior = (MiddleClickBehavior)i),
+        return
+        [
+            MouseRow.Picker("SettingsCardMouseWheelBehaviour",
+                ["ComboMouseWheelItemZoom", "ComboMouseWheelItemNav"],
+                (int)AppConfig.Settings.DefaultMouseWheelBehavior,
+                i => AppConfig.Settings.DefaultMouseWheelBehavior = (DefaultMouseWheelBehavior)i),
 
-        MouseRow.Fixed("SettingsCardLeftClickDrag", "TextLeftClickDragAction"),
-        MouseRow.Fixed("SettingsCardCtrlDragToMoveWindow", "TextCtrlDragAction"),
-        MouseRow.Fixed("SettingsCardDoubleClick", "TextDoubleClickAction"),
-        MouseRow.Fixed("SettingsCardRightClick", "TextRightClickAction"),
+            // The fixed wheel behaviours sit next to the wheel setting they qualify.
+            MouseRow.Fixed("SettingsCardCtrlMouseWheel", "TextCtrlMouseWheelAction"),
+            MouseRow.Fixed("SettingsCardAltMouseWheel", "TextAltMouseWheelAction"),
+            MouseRow.Fixed("SettingsCardTiltWheel", "TextTiltWheelAction"),
 
-        MouseRow.Picker("SettingsCardRightClickHold",
-            ["ComboRightClickHoldItemZoomIn", "ComboRightClickHoldItemNothing"],
-            (int)AppConfig.Settings.RightClickHoldBehavior,
-            i => AppConfig.Settings.RightClickHoldBehavior = (RightClickHoldBehavior)i),
+            MouseRow.Picker("SettingsCardMiddleClick",
+                ["ComboMiddleClickItemFullScreen", "ComboMiddleClickItemMaximize", "ComboMiddleClickItemNothing"],
+                (int)AppConfig.Settings.MiddleClickBehavior,
+                i => AppConfig.Settings.MiddleClickBehavior = (MiddleClickBehavior)i),
 
-        MouseRow.Picker("SettingsCardMouseFwdBackBehaviour",
-            ["ComboMouseFwdBackItemNav", "ComboMouseFwdBackItemStepZoom"],
-            (int)AppConfig.Settings.MouseFwdBackBehavior,
-            i => AppConfig.Settings.MouseFwdBackBehavior = (MouseFwdBackBehavior)i)
-    ];
+            MouseRow.Fixed("SettingsCardLeftClickDrag", "TextLeftClickDragAction"),
+            MouseRow.Fixed("SettingsCardCtrlDragToMoveWindow", "TextCtrlDragAction"),
+
+            // Backed by a bool, so index 0 is "Restore window" and index 1 is "Nothing".
+            MouseRow.Picker("SettingsCardClickOutsideImageToRestoreWindow",
+                ["ComboClickOutsideItemRestore", "ComboClickOutsideItemNothing"],
+                AppConfig.Settings.ClickOutsideImageToRestoreWindow ? 0 : 1,
+                i =>
+                {
+                    AppConfig.Settings.ClickOutsideImageToRestoreWindow = i == 0;
+                    doubleClickOutside.SetFixedAction(DoubleClickOutsideActionKey(i == 0));
+                }),
+
+            MouseRow.Fixed("SettingsCardDoubleClick", "TextDoubleClickAction"),
+            doubleClickOutside,
+            MouseRow.Fixed("SettingsCardRightClick", "TextRightClickAction"),
+
+            MouseRow.Picker("SettingsCardRightClickHold",
+                ["ComboRightClickHoldItemZoomIn", "ComboRightClickHoldItemNothing"],
+                (int)AppConfig.Settings.RightClickHoldBehavior,
+                i => AppConfig.Settings.RightClickHoldBehavior = (RightClickHoldBehavior)i),
+
+            MouseRow.Picker("SettingsCardMouseFwdBackBehaviour",
+                ["ComboMouseFwdBackItemNav", "ComboMouseFwdBackItemStepZoom"],
+                (int)AppConfig.Settings.MouseFwdBackBehavior,
+                i => AppConfig.Settings.MouseFwdBackBehavior = (MouseFwdBackBehavior)i)
+        ];
+    }
 }

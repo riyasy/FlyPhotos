@@ -716,7 +716,22 @@
     <value>Клик за пределами фотографии восстанавливает окно из полноэкранного или развёрнутого состояния. Двойной клик снова разворачивает окно.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Клик вне изображения для восстановления окна</value>
+    <value>Левый клик мыши вне фото</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Восстановить окно</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Ничего</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Двойной клик вне фото</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Развёртывание окна</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Ничего</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>Кнопки свертывания, развертывания и закрытия отображаются только тогда, когда мышь находится у верхнего края окна.</value>

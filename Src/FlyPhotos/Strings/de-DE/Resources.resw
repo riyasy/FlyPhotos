@@ -716,7 +716,22 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Ein Klick außerhalb des Fotos stellt das Fenster aus dem Vollbildmodus oder dem maximierten Zustand wieder her. Ein Doppelklick maximiert es erneut.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Außerhalb des Bildes klicken, um das Fenster wiederherzustellen</value>
+    <value>Linke Maustaste außerhalb des Fotos</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Fenster wiederherstellen</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Nichts</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Doppelklick außerhalb des Fotos</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Fenster maximieren</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Nichts</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>Die Schaltflächen zum Minimieren, Maximieren und Schließen werden nur angezeigt, wenn sich die Maus in der Nähe des oberen Fensterrands befindet.</value>

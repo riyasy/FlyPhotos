@@ -716,7 +716,22 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Kliknięcie poza zdjęciem przywraca okno z trybu pełnoekranowego lub zmaksymalizowanego. Dwukrotne kliknięcie ponownie maksymalizuje okno.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Kliknij poza obrazem, aby przywrócić okno</value>
+    <value>Lewy przycisk myszy poza zdjęciem</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Przywróć okno</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Nic</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Dwukrotne kliknięcie poza zdjęciem</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Maksymalizuj okno</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Nic</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>Przyciski minimalizacji, maksymalizacji i zamykania są wyświetlane tylko wtedy, gdy mysz znajduje się w pobliżu górnej krawędzi okna.</value>

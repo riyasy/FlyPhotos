@@ -715,7 +715,22 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>A képen kívülre kattintva visszaállítja az ablakot a teljes képernyős vagy maximalizált állapotból. Duplán kattintva ismét maximalizálja.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Kattintson a képen kívülre az ablak visszaállításához</value>
+    <value>Bal kattintás a képen kívül</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Ablak visszaállítása</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Semmi</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Dupla kattintás a képen kívül</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Ablak maximalizálása</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Semmi</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>A minimalizálás, maximalizálás és bezárás gombok csak akkor jelennek meg, ha az egér az ablak tetejéhez közel van.</value>

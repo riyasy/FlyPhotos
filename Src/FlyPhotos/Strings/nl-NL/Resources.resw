@@ -716,7 +716,22 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Als u buiten de foto klikt, wordt het venster hersteld vanuit de modus Volledig scherm of vanuit een gemaximaliseerd venster. Dubbelklikken maximaliseert het weer.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Klik buiten de afbeelding om het venster te herstellen</value>
+    <value>Linker muisknop buiten de foto</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Venster herstellen</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Niets</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Dubbelklik buiten de foto</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Venster maximaliseren</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Niets</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>De knoppen voor minimaliseren, maximaliseren en sluiten worden alleen weergegeven als de muis zich in de buurt van de bovenkant van het venster bevindt.</value>

@@ -716,7 +716,22 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Genom att klicka utanför fotot återställs fönstret från helskärmsläge eller maximerat läge. Dubbelklick maximerar det igen.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Klicka utanför bilden för att återställa fönstret</value>
+    <value>Vänsterklick utanför fotot</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Återställ fönstret</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Ingenting</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Dubbelklick utanför fotot</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Maximera fönstret</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Ingenting</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>Knapparna för att minimera, maximera och stänga visas endast när musen är nära fönstrets överkant.</value>

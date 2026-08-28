@@ -716,7 +716,22 @@
     <value>按一下相片外部可將視窗從全螢幕或最大化狀態還原。按兩下可再次最大化。</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>按一下圖片外部以還原視窗</value>
+    <value>在照片外按一下滑鼠左鍵</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>還原視窗</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>無</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>在照片外連按兩下</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>最大化視窗</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>無</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>僅當滑鼠靠近視窗頂部時，才會顯示最小化、最大化和關閉按鈕。</value>

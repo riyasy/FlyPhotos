@@ -716,7 +716,22 @@ Configuración &gt; Aplicaciones &gt; Aplicaciones predeterminadas.</value>
     <value>Al hacer clic fuera de la foto, se restaura la ventana desde el estado de pantalla completa o maximizada. Hacer doble clic la vuelve a maximizar.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Hacer clic fuera de la imagen para restaurar la ventana</value>
+    <value>Clic izquierdo fuera de la foto</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Restaurar la ventana</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Nada</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Doble clic fuera de la foto</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Maximizar la ventana</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Nada</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>Los botones de minimizar, maximizar y cerrar solo se muestran cuando el ratón está cerca de la parte superior de la ventana.</value>

@@ -715,7 +715,22 @@ FlyPhotos를 선택한 다음 항상을 선택합니다.</value>
     <value>사진 바깥쪽을 클릭하면 전체 화면 또는 최대화 상태에서 창이 복원됩니다. 두 번 클릭하면 다시 최대화됩니다.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>이미지 바깥쪽을 클릭하여 창 복원</value>
+    <value>사진 바깥에서 마우스 왼쪽 클릭</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>창 복원</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>없음</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>사진 바깥에서 더블 클릭</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>창 최대화</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>없음</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>최소화, 최대화, 닫기 버튼은 마우스가 창의 상단 근처에 있을 때만 표시됩니다.</value>

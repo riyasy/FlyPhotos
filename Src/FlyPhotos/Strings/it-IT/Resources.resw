@@ -716,7 +716,22 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Facendo clic all'esterno della foto si ripristina la finestra dallo stato a schermo intero o massimizzato. Un doppio clic la massimizza di nuovo.</value>
   </data>
   <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Fai clic all'esterno dell'immagine per ripristinare la finestra</value>
+    <value>Clic sinistro fuori dalla foto</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Ripristina la finestra</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Nessuna azione</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Doppio clic fuori dalla foto</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Massimizza la finestra</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Nessuna azione</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>I pulsanti per ridurre a icona, ingrandire e chiudere vengono mostrati solo quando il mouse si trova vicino alla parte superiore della finestra.</value>
