@@ -808,7 +808,7 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
     <value>Mus</value>
   </data>
   <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
@@ -875,7 +875,7 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
     <value>Flytta fönstret</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>Genvägar</value>
+    <value>Tangentbord</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>Sök kommandon och tangenter…</value>
@@ -899,7 +899,7 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
     <value>Återställa alla genvägar?</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
-    <value>Alla kommandon återgår till sina standardtangenter. Dina musinställningar ändras inte.</value>
+    <value>Alla kommandon återgår till sina standardtangenter.</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
     <value>Återställ alla</value>

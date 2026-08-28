@@ -805,7 +805,7 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>ശരി</value>
   </data>
-  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
     <value>മൗസ്</value>
   </data>
   <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
@@ -872,7 +872,7 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
     <value>വിൻഡോ നീക്കുക</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>കുറുക്കുവഴികൾ</value>
+    <value>കീബോർഡ്</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>കമാൻഡുകളും കീകളും തിരയുക…</value>
@@ -896,7 +896,7 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
     <value>എല്ലാ കുറുക്കുവഴികളും പുനഃസജ്ജമാക്കണോ?</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
-    <value>എല്ലാ കമാൻഡുകളും അവയുടെ സ്ഥിരസ്ഥിതി കീകളിലേക്ക് മടങ്ങും. മൗസ് ക്രമീകരണങ്ങൾ മാറില്ല.</value>
+    <value>എല്ലാ കമാൻഡുകളും അവയുടെ സ്ഥിരസ്ഥിതി കീകളിലേക്ക് മടങ്ങും.</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
     <value>എല്ലാം പുനഃസജ്ജമാക്കുക</value>

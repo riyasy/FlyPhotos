@@ -808,7 +808,7 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
     <value>Souris</value>
   </data>
   <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
@@ -875,7 +875,7 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
     <value>Déplacer la fenêtre</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>Raccourcis</value>
+    <value>Clavier</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>Rechercher des commandes et des touches…</value>
@@ -899,7 +899,7 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
     <value>Réinitialiser tous les raccourcis ?</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
-    <value>Toutes les commandes retrouvent leurs touches par défaut. Vos paramètres de souris ne changeront pas.</value>
+    <value>Toutes les commandes retrouvent leurs touches par défaut.</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
     <value>Tout réinitialiser</value>

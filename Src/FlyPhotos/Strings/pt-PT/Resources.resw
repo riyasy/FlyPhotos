@@ -808,7 +808,7 @@ High Quality Cubic – Redimensionamento de alta qualidade para fotos.</value>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
     <value>Rato</value>
   </data>
   <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
@@ -875,7 +875,7 @@ High Quality Cubic – Redimensionamento de alta qualidade para fotos.</value>
     <value>Mover a janela</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>Atalhos</value>
+    <value>Teclado</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>Pesquisar comandos e teclas…</value>
@@ -899,7 +899,7 @@ High Quality Cubic – Redimensionamento de alta qualidade para fotos.</value>
     <value>Repor todos os atalhos?</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
-    <value>Todos os comandos voltam às teclas predefinidas. As definições do rato não são alteradas.</value>
+    <value>Todos os comandos voltam às teclas predefinidas.</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
     <value>Repor tudo</value>

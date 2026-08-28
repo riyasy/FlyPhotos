@@ -808,7 +808,7 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>موافق</value>
   </data>
-  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
     <value>الماوس</value>
   </data>
   <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
@@ -875,7 +875,7 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
     <value>تحريك النافذة</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>الاختصارات</value>
+    <value>لوحة المفاتيح</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>البحث عن الأوامر والمفاتيح…</value>
@@ -899,7 +899,7 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
     <value>إعادة تعيين جميع الاختصارات؟</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
-    <value>ستعود جميع الأوامر إلى مفاتيحها الافتراضية. لن تتغير إعدادات الماوس.</value>
+    <value>ستعود جميع الأوامر إلى مفاتيحها الافتراضية.</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
     <value>إعادة تعيين الكل</value>

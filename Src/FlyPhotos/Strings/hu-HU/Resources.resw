@@ -807,7 +807,7 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
     <value>Egér</value>
   </data>
   <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
@@ -874,7 +874,7 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
     <value>Ablak mozgatása</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>Billentyűparancsok</value>
+    <value>Billentyűzet</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>Parancsok és billentyűk keresése…</value>
@@ -898,7 +898,7 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
     <value>Visszaállítja az összes billentyűparancsot?</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
-    <value>Minden parancs visszakapja az alapértelmezett billentyűit. Az egérbeállítások nem változnak.</value>
+    <value>Minden parancs visszakapja az alapértelmezett billentyűit.</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
     <value>Összes visszaállítása</value>

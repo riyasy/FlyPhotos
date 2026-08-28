@@ -808,7 +808,7 @@ High Quality Cubic – 适合照片的最高质量缩放。</value>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>确定</value>
   </data>
-  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
     <value>鼠标</value>
   </data>
   <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
@@ -875,7 +875,7 @@ High Quality Cubic – 适合照片的最高质量缩放。</value>
     <value>移动窗口</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>快捷键</value>
+    <value>键盘</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>搜索命令和按键…</value>
@@ -899,7 +899,7 @@ High Quality Cubic – 适合照片的最高质量缩放。</value>
     <value>要重置所有快捷键吗？</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
-    <value>所有命令都将恢复为默认按键。鼠标设置不会改变。</value>
+    <value>所有命令都将恢复为默认按键。</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
     <value>全部重置</value>

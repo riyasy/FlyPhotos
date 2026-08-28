@@ -807,7 +807,7 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
     <value>マウス</value>
   </data>
   <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
@@ -874,7 +874,7 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
     <value>ウィンドウを移動</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>ショートカット</value>
+    <value>キーボード</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>コマンドとキーを検索…</value>
@@ -898,7 +898,7 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
     <value>すべてのショートカットをリセットしますか？</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
-    <value>すべてのコマンドが既定のキーに戻ります。マウスの設定は変更されません。</value>
+    <value>すべてのコマンドが既定のキーに戻ります。</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
     <value>すべてリセット</value>

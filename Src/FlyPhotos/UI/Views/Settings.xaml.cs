@@ -637,8 +637,8 @@ internal sealed partial class Settings
     /// persistence only care about the rows. Never bound to XAML, so the interface type is safe.</summary>
     private IEnumerable<ShortcutRow> AllShortcutRows => _allShortcutGroups.SelectMany(g => g.Rows);
 
-    /// <summary>The Mouse section, as data. Built once so the rows keep their selection and their
-    /// visibility across a search, exactly like the command rows.</summary>
+    /// <summary>The Mouse tab, as data. Built once so a row that another row drives keeps whatever
+    /// it was retargeted to.</summary>
     private readonly List<MouseRow> _mouseRows = MouseCatalog.BuildAll();
 
     private void InitializeShortcutsTab()
@@ -668,7 +668,7 @@ internal sealed partial class Settings
     /// Hides what does not match rather than rebuilding the bound collection. The cards are a
     /// non-virtualized tree, so refilling it meant WinUI tearing down and re-creating every visible
     /// SettingsCard on each keystroke; toggling a bound Visibility touches only what changed. Each
-    /// group decides for itself, exactly like the Mouse rows.
+    /// group decides for itself. Mouse rows are a separate tab and are not searched.
     /// </summary>
     private void ApplyShortcutFilter(string query)
     {
@@ -677,21 +677,7 @@ internal sealed partial class Settings
         var anyShowing = false;
         foreach (var group in _allShortcutGroups) anyShowing |= group.ApplyFilter(query);
 
-        anyShowing |= FilterMouseSection(query);
-
         TxtNoShortcutResults.Visibility = anyShowing ? Visibility.Collapsed : Visibility.Visible;
-    }
-
-    /// <summary>Filters the Mouse rows and reports whether any survived, so the caller knows if the
-    /// page is truly empty. Each row decides for itself what it matches on.</summary>
-    private bool FilterMouseSection(string query)
-    {
-        var anyVisible = false;
-        foreach (var row in _mouseRows) anyVisible |= row.ApplyFilter(query);
-
-        // The heading would otherwise sit alone above nothing.
-        TextMouseSectionHeader.Visibility = anyVisible ? Visibility.Visible : Visibility.Collapsed;
-        return anyVisible;
     }
 
     /// <summary>Opens the editor for one command. It mutates the row directly, so there is nothing

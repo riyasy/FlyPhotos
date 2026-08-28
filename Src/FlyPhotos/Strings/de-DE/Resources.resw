@@ -808,7 +808,7 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
     <value>Maus</value>
   </data>
   <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
@@ -875,7 +875,7 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
     <value>Fenster verschieben</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>Tastenkürzel</value>
+    <value>Tastatur</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>Befehle und Tasten suchen</value>
@@ -899,7 +899,7 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
     <value>Alle Tastenkürzel zurücksetzen?</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
-    <value>Alle Befehle erhalten wieder ihre Standardtasten. Ihre Mauseinstellungen bleiben unverändert.</value>
+    <value>Alle Befehle erhalten wieder ihre Standardtasten.</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
     <value>Alle zurücksetzen</value>

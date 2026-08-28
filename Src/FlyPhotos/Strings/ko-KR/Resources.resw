@@ -807,7 +807,7 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>확인</value>
   </data>
-  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
     <value>마우스</value>
   </data>
   <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
@@ -874,7 +874,7 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
     <value>창 이동</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>바로 가기</value>
+    <value>키보드</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>명령 및 키 검색…</value>
@@ -898,7 +898,7 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
     <value>모든 바로 가기 키를 재설정할까요?</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
-    <value>모든 명령이 기본 키로 되돌아갑니다. 마우스 설정은 변경되지 않습니다.</value>
+    <value>모든 명령이 기본 키로 되돌아갑니다.</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
     <value>모두 재설정</value>

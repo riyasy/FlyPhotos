@@ -307,7 +307,7 @@ public sealed class ShortcutRow : INotifyPropertyChanged
 
     /// <summary>Shows or hides the row for a search, and reports whether it survived. Matches on
     /// what the user can actually see - the display name, the hint, and the rendered chord text.
-    /// Never the persisted form. Mirrors MouseRow.ApplyFilter.</summary>
+    /// Never the persisted form.</summary>
     public bool ApplyFilter(string query)
     {
         var match = query.Length == 0

@@ -808,7 +808,7 @@ High Quality Cubic – Масштабирование наивысшего ка�
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>ОК</value>
   </data>
-  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
     <value>Мышь</value>
   </data>
   <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
@@ -875,7 +875,7 @@ High Quality Cubic – Масштабирование наивысшего ка�
     <value>Перемещение окна</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>Сочетания клавиш</value>
+    <value>Клавиатура</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>Поиск команд и клавиш…</value>
@@ -899,7 +899,7 @@ High Quality Cubic – Масштабирование наивысшего ка�
     <value>Сбросить все сочетания клавиш?</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
-    <value>Все команды вернутся к клавишам по умолчанию. Настройки мыши не изменятся.</value>
+    <value>Все команды вернутся к клавишам по умолчанию.</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
     <value>Сбросить все</value>

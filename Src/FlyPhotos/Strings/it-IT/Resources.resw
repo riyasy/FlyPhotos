@@ -808,7 +808,7 @@ High Quality Cubic – Ridimensionamento della massima qualità per le foto.</va
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
     <value>Mouse</value>
   </data>
   <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
@@ -875,7 +875,7 @@ High Quality Cubic – Ridimensionamento della massima qualità per le foto.</va
     <value>Sposta la finestra</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>Collegamenti</value>
+    <value>Tastiera</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>Cerca comandi e tasti…</value>
@@ -899,7 +899,7 @@ High Quality Cubic – Ridimensionamento della massima qualità per le foto.</va
     <value>Reimpostare tutti i collegamenti?</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
-    <value>Tutti i comandi tornano ai tasti predefiniti. Le impostazioni del mouse non cambieranno.</value>
+    <value>Tutti i comandi tornano ai tasti predefiniti.</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
     <value>Reimposta tutto</value>

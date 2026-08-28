@@ -808,7 +808,7 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
     <value>Hiiri</value>
   </data>
   <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
@@ -875,7 +875,7 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
     <value>Siirrä ikkunaa</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>Pikanäppäimet</value>
+    <value>Näppäimistö</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>Etsi komentoja ja näppäimiä…</value>
@@ -899,7 +899,7 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
     <value>Palautetaanko kaikki pikanäppäimet?</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
-    <value>Kaikki komennot palaavat oletusnäppäimiinsä. Hiiriasetukset eivät muutu.</value>
+    <value>Kaikki komennot palaavat oletusnäppäimiinsä.</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
     <value>Palauta kaikki</value>

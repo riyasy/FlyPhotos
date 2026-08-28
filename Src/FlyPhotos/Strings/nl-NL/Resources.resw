@@ -808,7 +808,7 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="TextBlockMouseSection.Text" xml:space="preserve">
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
     <value>Muis</value>
   </data>
   <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
@@ -875,7 +875,7 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
     <value>Venster verplaatsen</value>
   </data>
   <data name="SettingsPivotItemShortcuts.Header" xml:space="preserve">
-    <value>Sneltoetsen</value>
+    <value>Toetsenbord</value>
   </data>
   <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
     <value>Opdrachten en toetsen zoeken…</value>
@@ -899,7 +899,7 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
     <value>Alle sneltoetsen opnieuw instellen?</value>
   </data>
   <data name="ShortcutResetAll_Message" xml:space="preserve">
-    <value>Alle opdrachten krijgen hun standaardtoetsen terug. Uw muisinstellingen veranderen niet.</value>
+    <value>Alle opdrachten krijgen hun standaardtoetsen terug.</value>
   </data>
   <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
     <value>Alles opnieuw instellen</value>

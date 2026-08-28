@@ -8,25 +8,21 @@ using Microsoft.UI.Xaml;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Localization;
-using FlyPhotos.Infra.Utils;
 
 namespace FlyPhotos.UI.Views;
 
 /// <summary>
-/// One row of the Shortcuts tab's Mouse section: either a picker, whose options are backed by a
-/// setting, or a fixed behaviour the user can see but not change.
+/// One row of the Mouse tab: either a picker, whose options are backed by a setting, or a fixed
+/// behaviour the user can see but not change.
 ///
-/// Both shapes are one type so the page renders them from one template and searches them the same
-/// way it searches command rows - by asking the data. The hand-written cards this replaces could
-/// only be searched by walking the control tree, which silently missed any card that was nested,
-/// carried a non-string header, or held a control the matcher had not been taught about.
+/// Both shapes are one type so the page renders them from one template, which is what keeps a new
+/// gesture to a single line in <see cref="MouseCatalog"/> with no XAML at all.
 /// </summary>
 public sealed class MouseRow : INotifyPropertyChanged
 {
     /// <summary>Writes the chosen option to <see cref="AppConfig"/>. Null on a fixed row.</summary>
     private readonly Action<int>? _apply;
 
-    private Visibility _rowVisibility = Visibility.Visible;
     private string _fixedAction;
 
     public string Header { get; }
@@ -57,17 +53,6 @@ public sealed class MouseRow : INotifyPropertyChanged
     public Visibility PickerVisibility => IsPicker ? Visibility.Visible : Visibility.Collapsed;
     public Visibility FixedVisibility => IsPicker ? Visibility.Collapsed : Visibility.Visible;
 
-    public Visibility RowVisibility
-    {
-        get => _rowVisibility;
-        private set
-        {
-            if (_rowVisibility == value) return;
-            _rowVisibility = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RowVisibility)));
-        }
-    }
-
     private MouseRow(string headerKey, string? fixedActionKey,
                      List<string> options, int selectedIndex, Action<int>? apply)
     {
@@ -92,21 +77,6 @@ public sealed class MouseRow : INotifyPropertyChanged
         await AppConfig.SaveAsync();
     }
 
-    /// <summary>Shows or hides the row for a search, and reports whether it survived. A picker
-    /// matches on every option it offers, so "zoom" finds the wheel setting even while it is set
-    /// to Navigate.</summary>
-    public bool ApplyFilter(string query)
-    {
-        var match = query.Length == 0
-                    || Util.ContainsIgnoreCase(Header, query)
-                    || Util.ContainsIgnoreCase(Description, query)
-                    || Util.ContainsIgnoreCase(FixedAction, query)
-                    || Options.Any(o => Util.ContainsIgnoreCase(o, query));
-
-        RowVisibility = match ? Visibility.Visible : Visibility.Collapsed;
-        return match;
-    }
-
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>A gesture the user chooses the behaviour of. Every picker here lists its options in
@@ -126,8 +96,8 @@ public sealed class MouseRow : INotifyPropertyChanged
 }
 
 /// <summary>
-/// The Mouse section of the Shortcuts tab, in display order. Resource keys are the ones the cards
-/// already used as x:Uid, so moving to a template cost no translation work in any locale.
+/// The Mouse tab, in display order. Resource keys are the ones the cards already used as x:Uid, so
+/// moving to a template cost no translation work in any locale.
 /// </summary>
 internal static class MouseCatalog
 {

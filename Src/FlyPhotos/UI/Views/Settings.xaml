@@ -732,52 +732,49 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-
-                            <!--
-                                Mouse: pickers, not capture. See design doc section 5. Rendered from
-                                MouseCatalog rather than hand-written, so these rows filter through the
-                                same data path as the command rows above and a new row needs no change
-                                to the search. Resource keys are unchanged from when they were x:Uid.
-                            -->
-                            <TextBlock
-                                x:Name="TextMouseSectionHeader"
-                                x:Uid="TextBlockMouseSection"
-                                Margin="0,28,0,5"
-                                Style="{StaticResource BodyStrongTextBlockStyle}" />
-
-                            <ItemsControl x:Name="MouseRowsList">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="views:MouseRow">
-                                        <controls:SettingsCard
-                                            Margin="0,0,0,2"
-                                            Description="{x:Bind Description}"
-                                            Header="{x:Bind Header}"
-                                            Visibility="{x:Bind RowVisibility, Mode=OneWay}">
-                                            <controls:SettingsCard.HeaderIcon>
-                                                <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="&#xE962;" />
-                                            </controls:SettingsCard.HeaderIcon>
-
-                                            <!--  A row is one or the other; the unused half stays collapsed.  -->
-                                            <Grid>
-                                                <TextBlock
-                                                    Style="{StaticResource FixedMouseActionTextStyle}"
-                                                    Text="{x:Bind FixedAction, Mode=OneWay}"
-                                                    Visibility="{x:Bind FixedVisibility}" />
-                                                <ComboBox
-                                                    MinWidth="170"
-                                                    ItemsSource="{x:Bind Options}"
-                                                    SelectedIndex="{x:Bind SelectedIndex}"
-                                                    SelectionChanged="MouseOption_OnSelectionChanged"
-                                                    Tag="{x:Bind}"
-                                                    Visibility="{x:Bind PickerVisibility}" />
-                                            </Grid>
-                                        </controls:SettingsCard>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
+            </PivotItem>
+
+            <!--
+                Mouse: pickers, not capture. See design doc section 5. Rendered from MouseCatalog
+                rather than hand-written, so a new row costs no XAML. Its own tab because the
+                Keyboard tab's search box and Reset all apply to key bindings only. Resource keys
+                are unchanged from when these were hand-written cards.
+            -->
+            <PivotItem x:Uid="SettingsPivotItemMouse">
+                <ScrollViewer>
+                    <ItemsControl x:Name="MouseRowsList" Margin="0,5,15,30">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="views:MouseRow">
+                                <controls:SettingsCard
+                                    Margin="0,0,0,2"
+                                    Description="{x:Bind Description}"
+                                    Header="{x:Bind Header}">
+                                    <controls:SettingsCard.HeaderIcon>
+                                        <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="&#xE962;" />
+                                    </controls:SettingsCard.HeaderIcon>
+
+                                    <!--  A row is one or the other; the unused half stays collapsed.  -->
+                                    <Grid>
+                                        <TextBlock
+                                            Style="{StaticResource FixedMouseActionTextStyle}"
+                                            Text="{x:Bind FixedAction, Mode=OneWay}"
+                                            Visibility="{x:Bind FixedVisibility}" />
+                                        <ComboBox
+                                            MinWidth="170"
+                                            ItemsSource="{x:Bind Options}"
+                                            SelectedIndex="{x:Bind SelectedIndex}"
+                                            SelectionChanged="MouseOption_OnSelectionChanged"
+                                            Tag="{x:Bind}"
+                                            Visibility="{x:Bind PickerVisibility}" />
+                                    </Grid>
+                                </controls:SettingsCard>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
             </PivotItem>
 
             <PivotItem x:Uid="SettingsPivotItemCodecs">
