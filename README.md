@@ -30,12 +30,16 @@ Watch Fly Photos in action:
 | **Updates** | ✅ Seamless auto-updates | ❌ User-managed |
 | **Security** | ✅ Signed and certified by Microsoft | ❌ Not signed |
 
+Both builds are the same app, with the same features.
+
 ---
 
 ## 📦 Installation
 
 - Option 1 : [**Install from Microsoft Store**](https://apps.microsoft.com/detail/9pmsk128v1qt?launch=true&cid=GitHubRelease&mode=full)
-- Option 2 : Download and install MSI from Github [**Releases Page**](https://github.com/riyasy/FlyPhotos/releases)
+- Option 2 : Download the MSI for your architecture (x64 or ARM64) from the GitHub [**Releases Page**](https://github.com/riyasy/FlyPhotos/releases)
+
+**Requires** Windows 10 version 1809 (build 17763) or newer, on x64 or ARM64.
 
 
 ## 🚀 Getting Started
@@ -46,87 +50,123 @@ Once installed, you can open photos in three ways:
 Right-click an image, select **"Open with"**, and choose **Fly Photos** from the list.
 
 ### 2. Standalone Mode
-Launch **Fly Photos** directly from the Start menu. You can then use the file picker to browse and select a folder or image to view.
+Launch **Fly Photos** directly from the Start menu, then use the file picker to browse to a folder or image.
 
 ### 3. Set as Default App
 To open images with Fly Photos automatically when you double-click them:
 1. Right-click an image file (e.g., a `.jpg`).
-2. Select **"Open With"** and **"Choose Another App"** and select **FlyPhotos** from the list and click **Always**.
-3. Repeat this for other file types (PNG, WEBP, etc.) as needed.
+2. Select **"Open With"** → **"Choose Another App"**, pick **FlyPhotos**, and click **Always**.
+3. Repeat for other file types (PNG, WEBP, etc.) as needed.
+
+> Tip: to change many types at once, go to **Windows Settings → Apps → Default apps → FlyPhotos** and set the file types there.
 
 ---
 
 ## ✨ Features
+
 - **Fast and lightweight**
-  - Instant startup with Native AOT build.  
-  - In-memory and disk caching for smooth navigation even in folders with thousands of photos.  
-  - Press and hold `←` / `→` after opening a folder with thousands of photos to get a feel of Fly's performance.  
-  - Tight Explorer integration. Follows Explorer sort order and filtering (Recent, Search, etc.).  
+  - Instant startup with a Native AOT build.
+  - In-memory and disk caching for smooth navigation even in folders with thousands of photos.
+  - **Fly-through mode** - press and hold `←` / `→` and glide through a large folder with no loading spinners.
+  - Tight Explorer integration. Follows Explorer's sort order and filtering (Recent, Search, etc.).
 
 - **Image format support**
-  - All formats supported by Windows Imaging Component (JPEG, PNG, TIFF, RAW, etc.).  
-  - Extended support for PSD (with transparency), HEIC/HEIF, SVG, GIF, APNG (Animated PNG), animated WebP, and AVIF.  
+  - Everything the Windows Imaging Component handles (JPEG, PNG, TIFF, BMP, camera RAW, and any format you have a WIC codec installed for).
+  - Extended support for PSD (with transparency), HEIC/HEIF, AVIF, SVG, GIF, APNG, animated WebP, and DDS.
+  - Camera RAW with a configurable decoder order - Rawler (fastest), WIC (system codecs), or ImageMagick (best compatibility) - plus an option to decode the real RAW data instead of the embedded JPEG.
+  - Multi-page TIFF and multi-frame ICO, with page-by-page navigation.
 
 - **Viewing experience**
-  - Transparent background like in Picasa Photo Viewer.  
-  - Modern Windows themes like Mica, Acrylic, and Frozen Glass (a frosted blur variant).  
-  - Smooth pan, zoom, and rotation.  
-  - Thumbnail strip with adjustable size and click-to-jump navigation.  
-  - Multi-monitor support (remembers last used monitor).  
+  - Transparent background like Picasa Photo Viewer, or Mica, Acrylic, Frozen Glass, or a solid colour of your choice.
+  - Light, dark, or system theme.
+  - Smooth pan, zoom, and rotation, with optional sticky zoom stops.
+  - Thumbnail strip with adjustable size, selection colour, and optional animation.
+  - Photo info panel with EXIF and camera metadata.
+  - Choose whether pan/zoom/rotation resets, is remembered per photo, or carries over during navigation.
+  - Multi-monitor support (remembers the last used monitor); starts maximized, full screen, or in its previous window state.
 
 - **Controls**
-  - **Versatile Inputs:** Zoom, pan, and rotate using **Touchpad gestures**, **Mouse**, or **Keyboard**.
-  - **Customizable:** Configurable mouse wheel behavior (Zoom vs. Navigate).
-  - **Touch Friendly:** Native support for pinch-to-zoom and two-finger swipe navigation.
+  - **Fully customizable keyboard shortcuts** - rebind almost any command in **Settings → Keyboard**.
+  - **Configurable mouse** - wheel, wheel click, right-click-and-hold, and the back/forward buttons are all set in **Settings → Mouse**.
+  - **Precision touchpad** - two-finger swipe to navigate and pinch to zoom.
+  - Right-click opens the real Windows Explorer context menu.
+
+- **Localized**
+  - Available in 20 languages, including right-to-left layout for Arabic.
 
 ---
 
 ## 🎮 Usage
 
-| Category | Action | Shortcut |
-|-----------|---------|-----------|
-| **🖐 Touchpad** | Navigate Photos | Two-finger Swipe Left / Right |
-|  | Zoom or Navigate | Two-finger Swipe Up / Down (based on setting) |
-|  | Zoom In / Out | Pinch Open / Close |
-| **🖱 Mouse** | Pan Photo | Left Click + Drag |
-|  | Context Menu | Right Click |
-|  | Zoom In | Right Click + Hold |
-|  | Zoom / Navigate | Wheel Scroll (based on setting) |
-|  | Always Zoom | Ctrl + Wheel |
-|  | Always Navigate | Alt + Wheel |
-|  | Navigate Photos | Tilt Wheel Left / Right |
-|  | Full Screen | Middle Click |
-|  | Navigate Photos | Mouse Back / Forward Buttons |
-|  | Navigate Photos | Wheel on Thumbnail Strip |
-|  | Navigate Photos | Wheel on On-screen Left / Right Button |
-|  | Rotate Photo | Wheel on On-screen Rotate Button |
-| **⌨️ Keyboard** | Next / Previous Photo | ← / → |
-|  | Fly-through Mode | Hold ← / → |
-|  | Zoom In / Out | ↑ / ↓  or  Ctrl + + / − |
-|  | Cycle Zoom Presets (Fit / 100% / 400%) | Page Up / Page Down |
-|  | Zoom to Actual Size | A |
-|  | Fit to Window | F |
-|  | Pan Photo | Ctrl + Arrow Keys |
-|  | Navigate Pages (multi-page TIFF) | Alt + ← / → |
-|  | Jump to First Photo | Home |
-|  | Jump to Last Photo | End |
-|  | Full Screen | F11 |
-|  | Show File Properties (General) | Alt + Enter |
-|  | Show File Properties (Details) | D |
-|  | Show File in Windows Explorer | W |
-|  | Share File | S |
-|  | Show External Apps Panel | E |
-|  | Open in External App 1–4 | Ctrl + 1–4 |
-|  | Copy to Clipboard | Ctrl + C |
-|  | Delete Photo | Del |
-|  | Close Settings / Exit App | Esc |
+### ⌨️ Keyboard
+
+These are the **defaults**. Every command below except `Esc` and `Del` can be rebound in **Settings → Keyboard**, and any shortcut you change is stored per user, so future releases keep your bindings.
+
+| Group | Command | Default |
+|--|--|--|
+| **Navigation** | Next / previous photo | `→` / `←` |
+| | Fly-through mode | Hold `→` / `←` |
+| | First / last photo | `Home` / `End` |
+| | Next / previous page (multi-page TIFF, multi-frame ICO) | `Alt` + `→` / `←` |
+| **Zoom and pan** | Zoom in / out | `↑` / `↓`, or `Ctrl` + `+` / `−` |
+| | Step zoom (fit → 100% → 400%) | `Page Up` / `Page Down` |
+| | Actual size (1:1) | `A` |
+| | Fit to window | `F` |
+| | Pan | `Ctrl` + arrow keys |
+| **Rotate** | Rotate left / right | `L` / `R` |
+| **View** | Full screen | `F11` |
+| | Maximize or restore | `Enter` |
+| | Photo info panel | `I` |
+| | Close FlyPhotos | `Esc` |
+| **File** | Copy photo | `Ctrl` + `C` |
+| | Delete photo | `Del` |
+| | Rename photo | `F2` |
+| | Print photo | `P` |
+| | Share photo | `S` |
+| | Open file location | `W` |
+| | File properties | `Alt` + `Enter` |
+| | File details | `D` |
+| | More actions menu | `M` |
+| **Open with** | Open in external app 1–4 | `Ctrl` + `1`–`4` |
+| | Open-with panel | `E` |
+
+### 🖱 Mouse
+
+Rows marked **configurable** can be changed in **Settings → Mouse**; the values shown are the defaults.
+
+| Action | Default behaviour | |
+|--|--|--|
+| Wheel scroll | Zoom in / out | configurable (zoom or navigate) |
+| `Ctrl` + wheel | Always zooms | fixed |
+| `Alt` + wheel | Always navigates | fixed |
+| Tilt wheel left / right | Navigate photos | fixed |
+| Wheel click | Toggle full screen | configurable |
+| Back / forward buttons | Navigate photos | configurable (navigate or step zoom) |
+| Left click + drag on photo | Pan the photo | fixed |
+| `Ctrl` + drag | Move the window | fixed |
+| Left click outside the photo | Restore the window | configurable |
+| Double click on photo | Actual size ↔ fit to window | fixed |
+| Double click outside the photo | Maximize the window | follows the click-outside setting |
+| Right click | Windows Explorer context menu | fixed |
+| Right click + hold | Zoom in | configurable |
+| Wheel over the thumbnail strip | Navigate photos | fixed |
+| Wheel over the on-screen rotate button | Rotate the photo | fixed |
+
+### 🖐 Precision touchpad
+
+| Action | Gesture |
+|--|--|
+| Navigate photos | Two-finger swipe left / right |
+| Zoom or navigate | Two-finger swipe up / down (follows the wheel setting) |
+| Zoom in / out | Pinch open / close |
 
 ---
 
 ## 🚧 Known Limitations
-- SVG rendering limited to 2000px on the longest side.  
-- HDR support yet to be implemented.  
-- Very large images (e.g. >16384px) may not display on all hardware due to DirectX texture size limits.  
+- SVG rendering is capped at 2000 px on the longest side.
+- HDR photos are displayed tone-mapped to SDR; true HDR output is not implemented yet.
+- Very large images (roughly >16384 px) may not display on all hardware, due to DirectX texture size limits.
+- Multiple instances is still beta: extra instances only show the selected image, with no navigation, delete, or settings.
 
 ---
 
