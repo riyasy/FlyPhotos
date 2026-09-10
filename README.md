@@ -15,7 +15,7 @@ Watch Fly Photos in action:
 
 ## 📥 Download
 
-<a href="https://apps.microsoft.com/detail/9pmsk128v1qt?referrer=appbadge&mode=full" target="_blank"  rel="noopener noreferrer">
+<a href="https://apps.microsoft.com/detail/9pmsk128v1qt?referrer=appbadge&mode=full&cid=from_github" target="_blank"  rel="noopener noreferrer">
 	<img src="https://get.microsoft.com/images/en-us%20light.svg" width="200"/>
 </a>
 
@@ -24,7 +24,7 @@ Watch Fly Photos in action:
 - You can also support via a donation at [![](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/riyasy) . After donating, please email **ryftools@outlook.com**, and I will send you a Store promo code
 
 ### Difference Between GitHub Release and Store Release
-|  | [Microsoft Store](https://apps.microsoft.com/detail/9pmsk128v1qt?launch=true&cid=GitHubRelease&mode=full) | GitHub MSI | 
+|  | [Microsoft Store](https://apps.microsoft.com/detail/9pmsk128v1qt?launch=true&cid=from_github&mode=full) | GitHub MSI | 
 | -- | -- | -- |
 | **Price** | 🪙 Paid | 🆓 Free |
 | **Updates** | ✅ Seamless auto-updates | ❌ User-managed |
@@ -36,7 +36,7 @@ Both builds are the same app, with the same features.
 
 ## 📦 Installation
 
-- Option 1 : [**Install from Microsoft Store**](https://apps.microsoft.com/detail/9pmsk128v1qt?launch=true&cid=GitHubRelease&mode=full)
+- Option 1 : [**Install from Microsoft Store**](https://apps.microsoft.com/detail/9pmsk128v1qt?launch=true&cid=from_github&mode=full)
 - Option 2 : Download the MSI for your architecture (x64 or ARM64) from the GitHub [**Releases Page**](https://github.com/riyasy/FlyPhotos/releases)
 
 **Requires** Windows 10 version 1809 (build 17763) or newer, on x64 or ARM64.
