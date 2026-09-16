@@ -60,7 +60,10 @@ public class AppSettings
     public bool ShowImageDimensions { get; set; } = false;
     public bool AutoHideMouse { get; set; } = false;
     public bool AutoHideCaptionButtons { get; set; } = false;
-    public bool ClickOutsideImageToRestoreWindow { get; set; } = true;
+
+    [JsonConverter(typeof(JsonStringEnumConverter<ClickOutsideBehavior>))]
+    public ClickOutsideBehavior ClickOutsideBehavior { get; set; } = ClickOutsideBehavior.RestoreWindow;
+
     public bool UseExternalExeForContextMenu { get; set; } = false;
     public bool ShowExternalAppShortcuts { get; set; } = false;
     public string ExternalApp1 { get; set; } = string.Empty;

@@ -724,6 +724,9 @@ Impostazioni &gt; App &gt; App predefinite.</value>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
     <value>Ripristina la finestra</value>
   </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>Chiudi FlyPhotos</value>
+  </data>
   <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
     <value>Nessuna azione</value>
   </data>

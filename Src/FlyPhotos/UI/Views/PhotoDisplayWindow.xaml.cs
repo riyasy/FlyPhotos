@@ -348,8 +348,12 @@ public sealed partial class PhotoDisplayWindow
             _windFullScreenManager.Maximize();
     }
 
+    private bool _isClosing;
+
     private async Task AnimatePhotoDisplayWindowClose()
     {
+        if (_isClosing) return; // A second Esc / click-outside during the exit animation.
+        _isClosing = true;
         _settingWindow?.Close();
 
         if (AppConfig.Settings.OpenExitZoom)
@@ -617,11 +621,18 @@ public sealed partial class PhotoDisplayWindow
             case PointerUpdateKind.LeftButtonReleased:
                 if (Environment.TickCount64 - _lastDoubleTappedAt < Win32Methods.GetDoubleClickTime()) break;
 
-                if (AppConfig.Settings.ClickOutsideImageToRestoreWindow &&
-                    !(currentPoint.Position.Y < AppTitlebar.ActualHeight) &&
-                    !_canvasController.IsPressedOnImage(dpiAdjustedPosition) &&
-                    _windFullScreenManager.IsMaximizedOrFullScreen)
-                    _windFullScreenManager.Restore(ButtonFullScreenClose);
+                if (currentPoint.Position.Y < AppTitlebar.ActualHeight ||
+                    _canvasController.IsPressedOnImage(dpiAdjustedPosition)) break;
+
+                switch (AppConfig.Settings.ClickOutsideBehavior)
+                {
+                    case ClickOutsideBehavior.RestoreWindow when _windFullScreenManager.IsMaximizedOrFullScreen:
+                        _windFullScreenManager.Restore(ButtonFullScreenClose);
+                        break;
+                    case ClickOutsideBehavior.CloseApp:
+                        _ = AnimatePhotoDisplayWindowClose();
+                        break;
+                }
                 break;
 
             case PointerUpdateKind.MiddleButtonReleased:
@@ -702,7 +713,7 @@ public sealed partial class PhotoDisplayWindow
         }
         else
         {
-            if (AppConfig.Settings.ClickOutsideImageToRestoreWindow &&
+            if (AppConfig.Settings.ClickOutsideBehavior == ClickOutsideBehavior.RestoreWindow &&
                 !(rawPosition.Y < AppTitlebar.ActualHeight) &&
                 !_windFullScreenManager.IsMaximizedOrFullScreen)
             {

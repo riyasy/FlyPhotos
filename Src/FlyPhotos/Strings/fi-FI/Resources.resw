@@ -724,6 +724,9 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
     <value>Palauta ikkuna</value>
   </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>Sulje FlyPhotos</value>
+  </data>
   <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
     <value>Ei mitään</value>
   </data>

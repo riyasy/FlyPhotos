@@ -723,6 +723,9 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
     <value>Ablak visszaállítása</value>
   </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>FlyPhotos bezárása</value>
+  </data>
   <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
     <value>Semmi</value>
   </data>

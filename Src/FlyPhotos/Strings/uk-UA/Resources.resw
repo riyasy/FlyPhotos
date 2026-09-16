@@ -724,6 +724,9 @@
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
     <value>Відновити вікно</value>
   </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>Закрити FlyPhotos</value>
+  </data>
   <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
     <value>Нічого</value>
   </data>

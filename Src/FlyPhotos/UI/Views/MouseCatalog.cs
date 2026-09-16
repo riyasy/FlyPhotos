@@ -112,7 +112,7 @@ internal static class MouseCatalog
     public static List<MouseRow> BuildAll()
     {
         var doubleClickOutside = MouseRow.Fixed("SettingsCardDoubleClickOutside",
-            DoubleClickOutsideActionKey(AppConfig.Settings.ClickOutsideImageToRestoreWindow));
+            DoubleClickOutsideActionKey(AppConfig.Settings.ClickOutsideBehavior == ClickOutsideBehavior.RestoreWindow));
 
         return
         [
@@ -134,14 +134,14 @@ internal static class MouseCatalog
             MouseRow.Fixed("SettingsCardLeftClickDrag", "TextLeftClickDragAction"),
             MouseRow.Fixed("SettingsCardCtrlDragToMoveWindow", "TextCtrlDragAction"),
 
-            // Backed by a bool, so index 0 is "Restore window" and index 1 is "Nothing".
             MouseRow.Picker("SettingsCardLeftClickOutside",
-                ["ComboClickOutsideItemRestore", "ComboClickOutsideItemNothing"],
-                AppConfig.Settings.ClickOutsideImageToRestoreWindow ? 0 : 1,
+                ["ComboClickOutsideItemRestore", "ComboClickOutsideItemClose", "ComboClickOutsideItemNothing"],
+                (int)AppConfig.Settings.ClickOutsideBehavior,
                 i =>
                 {
-                    AppConfig.Settings.ClickOutsideImageToRestoreWindow = i == 0;
-                    doubleClickOutside.SetFixedAction(DoubleClickOutsideActionKey(i == 0));
+                    AppConfig.Settings.ClickOutsideBehavior = (ClickOutsideBehavior)i;
+                    doubleClickOutside.SetFixedAction(
+                        DoubleClickOutsideActionKey((ClickOutsideBehavior)i == ClickOutsideBehavior.RestoreWindow));
                 }),
 
             MouseRow.Fixed("SettingsCardDoubleClick", "TextDoubleClickAction"),

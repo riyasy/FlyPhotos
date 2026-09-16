@@ -723,6 +723,9 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
     <value>ウィンドウを元に戻す</value>
   </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>FlyPhotos を閉じる</value>
+  </data>
   <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
     <value>何もしない</value>
   </data>

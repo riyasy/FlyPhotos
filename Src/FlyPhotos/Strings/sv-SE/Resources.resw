@@ -724,6 +724,9 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
     <value>Återställ fönstret</value>
   </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>Stäng FlyPhotos</value>
+  </data>
   <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
     <value>Ingenting</value>
   </data>

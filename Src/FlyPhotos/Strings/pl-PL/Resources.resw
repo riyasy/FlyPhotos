@@ -724,6 +724,9 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
     <value>Przywróć okno</value>
   </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>Zamknij FlyPhotos</value>
+  </data>
   <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
     <value>Nic</value>
   </data>

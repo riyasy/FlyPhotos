@@ -724,6 +724,9 @@
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
     <value>Восстановить окно</value>
   </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>Закрыть FlyPhotos</value>
+  </data>
   <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
     <value>Ничего</value>
   </data>

@@ -723,6 +723,9 @@ FlyPhotos를 선택한 다음 항상을 선택합니다.</value>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
     <value>창 복원</value>
   </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>FlyPhotos 닫기</value>
+  </data>
   <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
     <value>없음</value>
   </data>

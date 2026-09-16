@@ -60,6 +60,13 @@ public enum MiddleClickBehavior
     Nothing
 }
 
+public enum ClickOutsideBehavior
+{
+    RestoreWindow,
+    CloseApp,
+    Nothing
+}
+
 public enum RightClickHoldBehavior
 {
     ZoomIn,

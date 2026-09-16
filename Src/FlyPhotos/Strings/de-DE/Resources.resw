@@ -724,6 +724,9 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
     <value>Fenster wiederherstellen</value>
   </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>FlyPhotos schließen</value>
+  </data>
   <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
     <value>Nichts</value>
   </data>

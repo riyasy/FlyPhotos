@@ -724,6 +724,9 @@ Configuración &gt; Aplicaciones &gt; Aplicaciones predeterminadas.</value>
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
     <value>Restaurar la ventana</value>
   </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>Cerrar FlyPhotos</value>
+  </data>
   <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
     <value>Nada</value>
   </data>

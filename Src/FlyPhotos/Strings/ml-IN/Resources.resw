@@ -721,6 +721,9 @@
   <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
     <value>വിൻഡോ പുനഃസ്ഥാപിക്കുക</value>
   </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>FlyPhotos അടയ്ക്കുക</value>
+  </data>
   <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
     <value>ഒന്നുമില്ല</value>
   </data>
