@@ -709,6 +709,9 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
     <value>Valitse, mitä hiiren eteen- ja taaksepäin-painikkeet tekevät (käytettävissä joissakin hiirissä).</value>
   </data>
+  <data name="SettingsCardSwapMouseFwdBack.Header" xml:space="preserve">
+    <value>Vaihda eteen- ja taaksepainikkeet keskenään</value>
+  </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Portaittainen zoomaus</value>
   </data>

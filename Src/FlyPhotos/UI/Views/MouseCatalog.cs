@@ -16,7 +16,8 @@ namespace FlyPhotos.UI.Views;
 /// behaviour the user can see but not change.
 ///
 /// Both shapes are one type so the page renders them from one template, which is what keeps a new
-/// gesture to a single line in <see cref="MouseCatalog"/> with no XAML at all.
+/// gesture to a single line in <see cref="MouseCatalog"/> with no XAML at all. A gesture with child
+/// settings has no shape here and is hand-written in Settings.xaml instead.
 /// </summary>
 public sealed class MouseRow : INotifyPropertyChanged
 {
@@ -96,7 +97,8 @@ public sealed class MouseRow : INotifyPropertyChanged
 }
 
 /// <summary>
-/// The Mouse tab, in display order. Resource keys are the ones the cards already used as x:Uid, so
+/// The Mouse tab's templated rows, in display order; the hand-written Fwd/Back row follows them.
+/// Resource keys are the ones the cards already used as x:Uid, so
 /// moving to a template cost no translation work in any locale.
 /// </summary>
 internal static class MouseCatalog
@@ -149,12 +151,10 @@ internal static class MouseCatalog
             MouseRow.Picker("SettingsCardRightClickHold",
                 ["ComboRightClickHoldItemZoomIn", "ComboRightClickHoldItemNothing"],
                 (int)AppConfig.Settings.RightClickHoldBehavior,
-                i => AppConfig.Settings.RightClickHoldBehavior = (RightClickHoldBehavior)i),
+                i => AppConfig.Settings.RightClickHoldBehavior = (RightClickHoldBehavior)i)
 
-            MouseRow.Picker("SettingsCardMouseFwdBackBehaviour",
-                ["ComboMouseFwdBackItemNav", "ComboMouseFwdBackItemStepZoom"],
-                (int)AppConfig.Settings.MouseFwdBackBehavior,
-                i => AppConfig.Settings.MouseFwdBackBehavior = (MouseFwdBackBehavior)i)
+            // Fwd/Back is hand-written in Settings.xaml below this list: it has a child setting,
+            // which this template has no shape for.
         ];
     }
 }

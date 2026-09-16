@@ -738,42 +738,60 @@
             </PivotItem>
 
             <!--
-                Mouse: pickers, not capture. See design doc section 5. Rendered from MouseCatalog
-                rather than hand-written, so a new row costs no XAML. Its own tab because the
-                Keyboard tab's search box and Reset all apply to key bindings only. Resource keys
-                are unchanged from when these were hand-written cards.
+                Mouse: pickers, not capture. See design doc section 5. Rows are rendered from
+                MouseCatalog, so a new row costs no XAML; only a row with child settings (Fwd/Back,
+                below the list) is hand-written. Its own tab because the Keyboard tab's search box
+                and Reset all apply to key bindings only. Resource keys are unchanged from when
+                these were hand-written cards.
             -->
             <PivotItem x:Uid="SettingsPivotItemMouse">
                 <ScrollViewer>
-                    <ItemsControl x:Name="MouseRowsList" Margin="0,5,15,30">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="views:MouseRow">
-                                <controls:SettingsCard
-                                    Margin="0,0,0,2"
-                                    Description="{x:Bind Description}"
-                                    Header="{x:Bind Header}">
-                                    <controls:SettingsCard.HeaderIcon>
-                                        <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="&#xE962;" />
-                                    </controls:SettingsCard.HeaderIcon>
+                    <StackPanel Margin="0,5,15,30" Orientation="Vertical">
+                        <ItemsControl x:Name="MouseRowsList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="views:MouseRow">
+                                    <controls:SettingsCard
+                                        Margin="0,0,0,2"
+                                        Description="{x:Bind Description}"
+                                        Header="{x:Bind Header}">
+                                        <controls:SettingsCard.HeaderIcon>
+                                            <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="&#xE962;" />
+                                        </controls:SettingsCard.HeaderIcon>
 
-                                    <!--  A row is one or the other; the unused half stays collapsed.  -->
-                                    <Grid>
-                                        <TextBlock
-                                            Style="{StaticResource FixedMouseActionTextStyle}"
-                                            Text="{x:Bind FixedAction, Mode=OneWay}"
-                                            Visibility="{x:Bind FixedVisibility}" />
-                                        <ComboBox
-                                            MinWidth="170"
-                                            ItemsSource="{x:Bind Options}"
-                                            SelectedIndex="{x:Bind SelectedIndex}"
-                                            SelectionChanged="MouseOption_OnSelectionChanged"
-                                            Tag="{x:Bind}"
-                                            Visibility="{x:Bind PickerVisibility}" />
-                                    </Grid>
+                                        <!--  A row is one or the other; the unused half stays collapsed.  -->
+                                        <Grid>
+                                            <TextBlock
+                                                Style="{StaticResource FixedMouseActionTextStyle}"
+                                                Text="{x:Bind FixedAction, Mode=OneWay}"
+                                                Visibility="{x:Bind FixedVisibility}" />
+                                            <ComboBox
+                                                MinWidth="170"
+                                                ItemsSource="{x:Bind Options}"
+                                                SelectedIndex="{x:Bind SelectedIndex}"
+                                                SelectionChanged="MouseOption_OnSelectionChanged"
+                                                Tag="{x:Bind}"
+                                                Visibility="{x:Bind PickerVisibility}" />
+                                        </Grid>
+                                    </controls:SettingsCard>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!--  Hand-written: MouseRow has no shape for a child setting.  -->
+                        <controls:SettingsExpander
+                            x:Uid="SettingsCardMouseFwdBackBehaviour"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;, FontFamily={StaticResource FluentIcons}}">
+                            <ComboBox x:Name="ComboMouseFwdBack" MinWidth="170">
+                                <ComboBoxItem x:Uid="ComboMouseFwdBackItemNav" />
+                                <ComboBoxItem x:Uid="ComboMouseFwdBackItemStepZoom" />
+                            </ComboBox>
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard x:Uid="SettingsCardSwapMouseFwdBack">
+                                    <ToggleSwitch x:Name="ButtonSwapMouseFwdBack" />
                                 </controls:SettingsCard>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
+                    </StackPanel>
                 </ScrollViewer>
             </PivotItem>
 

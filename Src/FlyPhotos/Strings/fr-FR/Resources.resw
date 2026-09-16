@@ -709,6 +709,9 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
     <value>Choisissez l'action des boutons avant et arrière de la souris (disponible sur certaines souris).</value>
   </data>
+  <data name="SettingsCardSwapMouseFwdBack.Header" xml:space="preserve">
+    <value>Inverser les boutons avant et arrière</value>
+  </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Zoom par paliers</value>
   </data>

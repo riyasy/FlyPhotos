@@ -708,6 +708,9 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
     <value>マウスの進む/戻るボタンの動作を選択します（一部のマウスで利用可能）。</value>
   </data>
+  <data name="SettingsCardSwapMouseFwdBack.Header" xml:space="preserve">
+    <value>進む/戻るボタンを入れ替える</value>
+  </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>段階的にズーム</value>
   </data>

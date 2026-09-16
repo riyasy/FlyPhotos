@@ -46,6 +46,7 @@ public class AppSettings
 
     [JsonConverter(typeof(JsonStringEnumConverter<MouseFwdBackBehavior>))]
     public MouseFwdBackBehavior MouseFwdBackBehavior { get; set; } = MouseFwdBackBehavior.Navigate;
+    public bool SwapMouseFwdBack { get; set; } = false;
 
     [JsonConverter(typeof(JsonStringEnumConverter<MiddleClickBehavior>))]
     public MiddleClickBehavior MiddleClickBehavior { get; set; } = MiddleClickBehavior.FullScreen;

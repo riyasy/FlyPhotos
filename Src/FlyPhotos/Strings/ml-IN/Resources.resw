@@ -706,6 +706,9 @@
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
     <value>മൗസിലെ ഫോർവേഡ്/ബാക്ക് ബട്ടണുകൾ എന്ത് ചെയ്യണമെന്ന് തിരഞ്ഞെടുക്കുക (ചില മൗസുകളിൽ മാത്രമേ ലഭ്യമാകൂ).</value>
   </data>
+  <data name="SettingsCardSwapMouseFwdBack.Header" xml:space="preserve">
+    <value>ഫോർവേഡ്/ബാക്ക് ബട്ടണുകൾ പരസ്പരം മാറ്റുക</value>
+  </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>ഘട്ടംഘട്ടമായ സൂം</value>
   </data>

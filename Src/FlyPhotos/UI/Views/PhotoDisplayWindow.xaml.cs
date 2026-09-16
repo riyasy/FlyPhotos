@@ -173,7 +173,8 @@ public sealed partial class PhotoDisplayWindow
             MainLayout,
             dir => _photoController.Fly(dir),
             () => _photoController.Brake(),
-            () => AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom);
+            () => AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom,
+            () => AppConfig.Settings.SwapMouseFwdBack);
         _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout, BottomPanel, AppConfig.Settings.AutoFade);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
         _mouseAutoHider = new MouseAutoHider(MainLayout, AppConfig.Settings.AutoHideMouse, TimeSpan.FromSeconds(1));
@@ -639,13 +640,13 @@ public sealed partial class PhotoDisplayWindow
                 break;
 
             case PointerUpdateKind.XButton1Released:
-                if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom)
-                    _canvasController.StepZoom(ZoomDirection.Out, dpiAdjustedPosition);
-                break;
-
             case PointerUpdateKind.XButton2Released:
                 if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom)
-                    _canvasController.StepZoom(ZoomDirection.In, dpiAdjustedPosition);
+                {
+                    var isBack = (properties.PointerUpdateKind == PointerUpdateKind.XButton1Released)
+                                 != AppConfig.Settings.SwapMouseFwdBack;
+                    _canvasController.StepZoom(isBack ? ZoomDirection.Out : ZoomDirection.In, dpiAdjustedPosition);
+                }
                 break;
         }
     }

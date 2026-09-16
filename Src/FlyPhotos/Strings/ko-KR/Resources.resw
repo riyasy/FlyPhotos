@@ -708,6 +708,9 @@ FlyPhotos를 선택한 다음 항상을 선택합니다.</value>
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
     <value>마우스 앞으로/뒤로 버튼의 동작을 선택합니다(일부 마우스에서만 지원).</value>
   </data>
+  <data name="SettingsCardSwapMouseFwdBack.Header" xml:space="preserve">
+    <value>앞으로/뒤로 버튼 서로 바꾸기</value>
+  </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>단계별 확대/축소</value>
   </data>

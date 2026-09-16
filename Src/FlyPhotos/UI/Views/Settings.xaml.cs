@@ -97,6 +97,9 @@ internal sealed partial class Settings
         ButtonShowCheckeredBackground.IsOn = AppConfig.Settings.CheckeredBackground;
         SliderImageFitPercentage.Value = AppConfig.Settings.ImageFitPercentage;
         ButtonStretchSmallImages.IsOn = AppConfig.Settings.StretchSmallImages;
+        // Items are in enum order.
+        ComboMouseFwdBack.SelectedIndex = (int)AppConfig.Settings.MouseFwdBackBehavior;
+        ButtonSwapMouseFwdBack.IsOn = AppConfig.Settings.SwapMouseFwdBack;
         SliderTransparentBackgroundIntensity.Value = AppConfig.Settings.TransparentBackgroundIntensity;
         RectThumbnailSelection.Stroke = new SolidColorBrush(ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor));
         RectWindowBackground.Fill = new SolidColorBrush(WindowAppearanceManager.CustomColor());
@@ -128,6 +131,8 @@ internal sealed partial class Settings
         ButtonShowCheckeredBackground.Toggled += ButtonShowCheckeredBackground_OnToggled;
         SliderImageFitPercentage.ValueChanged += SliderImageFitPercentage_ValueChanged;
         ButtonStretchSmallImages.Toggled += ButtonStretchSmallImages_OnToggled;
+        ComboMouseFwdBack.SelectionChanged += ComboMouseFwdBack_OnSelectionChanged;
+        ButtonSwapMouseFwdBack.Toggled += ButtonSwapMouseFwdBack_OnToggled;
         SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
         SliderThumbnailSize.ValueChanged += SliderThumbnailSize_ValueChanged;
         ComboWindowLaunchMode.SelectionChanged += ComboWindowLaunchMode_OnSelectionChanged;
@@ -317,6 +322,18 @@ internal sealed partial class Settings
     private async void ButtonStretchSmallImages_OnToggled(object sender, RoutedEventArgs e)
     {
         AppConfig.Settings.StretchSmallImages = ButtonStretchSmallImages.IsOn;
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ComboMouseFwdBack_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        AppConfig.Settings.MouseFwdBackBehavior = (MouseFwdBackBehavior)ComboMouseFwdBack.SelectedIndex;
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ButtonSwapMouseFwdBack_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.SwapMouseFwdBack = ButtonSwapMouseFwdBack.IsOn;
         await AppConfig.SaveAsync();
     }
 

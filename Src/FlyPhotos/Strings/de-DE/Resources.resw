@@ -709,6 +709,9 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
     <value>Auswählen, was die Vorwärts- und Zurück-Tasten der Maus tun (nur bei einigen Mäusen verfügbar).</value>
   </data>
+  <data name="SettingsCardSwapMouseFwdBack.Header" xml:space="preserve">
+    <value>Vorwärts- und Zurück-Tasten vertauschen</value>
+  </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Stufenweises Zoomen</value>
   </data>

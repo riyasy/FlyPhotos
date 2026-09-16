@@ -21,6 +21,7 @@ internal sealed partial class SideButtonNavBehavior
     private readonly Func<NavDirection, Task> _fly;
     private readonly Func<Task> _brake;
     private readonly Func<bool> _isStepZoomMode;
+    private readonly Func<bool> _isSwapped; // true → XButton1 is forward, XButton2 is back
 
     private readonly PointerEventHandler _pressedHandler;
     private readonly PointerEventHandler _releasedHandler;
@@ -31,13 +32,15 @@ internal sealed partial class SideButtonNavBehavior
         UIElement root,
         Func<NavDirection, Task> fly,
         Func<Task> brake,
-        Func<bool> isStepZoomMode)
+        Func<bool> isStepZoomMode,
+        Func<bool> isSwapped)
     {
         _root = root;
         _dispatcherQueue = root.DispatcherQueue; // ctor runs on the UI thread
         _fly = fly;
         _brake = brake;
         _isStepZoomMode = isStepZoomMode;
+        _isSwapped = isSwapped;
 
         _pressedHandler = OnPressed;
         _releasedHandler = OnReleased;
@@ -59,7 +62,8 @@ internal sealed partial class SideButtonNavBehavior
         if (kind is not (PointerUpdateKind.XButton1Pressed or PointerUpdateKind.XButton2Pressed)) return;
         if (_isStepZoomMode()) return;
 
-        var dir = kind == PointerUpdateKind.XButton1Pressed ? NavDirection.Prev : NavDirection.Next;
+        var isBack = (kind == PointerUpdateKind.XButton1Pressed) != _isSwapped();
+        var dir = isBack ? NavDirection.Prev : NavDirection.Next;
 
         FlySafe(dir);
 

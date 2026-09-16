@@ -709,6 +709,9 @@
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
     <value>选择鼠标前进/后退按钮的功能（仅部分鼠标支持）。</value>
   </data>
+  <data name="SettingsCardSwapMouseFwdBack.Header" xml:space="preserve">
+    <value>交换前进/后退按钮</value>
+  </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>分级缩放</value>
   </data>

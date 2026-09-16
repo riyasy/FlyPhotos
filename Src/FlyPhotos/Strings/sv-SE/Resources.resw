@@ -709,6 +709,9 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
     <value>Välj vad musens framåt- och bakåtknappar gör (finns på vissa möss).</value>
   </data>
+  <data name="SettingsCardSwapMouseFwdBack.Header" xml:space="preserve">
+    <value>Byt plats på framåt- och bakåtknapparna</value>
+  </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Stegvis zoom</value>
   </data>

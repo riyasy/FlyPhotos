@@ -709,6 +709,9 @@
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
     <value>اختر ما تفعله أزرار التقدم والرجوع للماوس (متوفر في بعض أنواع الماوس).</value>
   </data>
+  <data name="SettingsCardSwapMouseFwdBack.Header" xml:space="preserve">
+    <value>تبديل زري التقدم والرجوع</value>
+  </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>تكبير/تصغير تدريجي</value>
   </data>
