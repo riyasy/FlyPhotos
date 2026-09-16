@@ -12,9 +12,8 @@ using Microsoft.UI.Xaml.Input;
 namespace FlyPhotos.UI.Behaviors;
 
 // Handles XButton1/XButton2 (mouse back/forward) hold-navigation.
-// Lazy: registers only a lightweight sentinel on construction. The full
-// press/release handlers are allocated on the first XButton event so
-// users without side-button mice pay no ongoing cost.
+// Both handlers are registered up front: swapping handlers from inside a PointerPressed
+// handler makes WinUI deliver that same press to the new handler too (Ref #240).
 internal sealed partial class SideButtonNavBehavior
 {
     private readonly UIElement _root;
@@ -23,9 +22,8 @@ internal sealed partial class SideButtonNavBehavior
     private readonly Func<Task> _brake;
     private readonly Func<bool> _isStepZoomMode;
 
-    private readonly PointerEventHandler _sentinel;
-    private PointerEventHandler? _pressedHandler;
-    private PointerEventHandler? _releasedHandler;
+    private readonly PointerEventHandler _pressedHandler;
+    private readonly PointerEventHandler _releasedHandler;
 
     private CancellationTokenSource? _repeatCts;
 
@@ -41,51 +39,23 @@ internal sealed partial class SideButtonNavBehavior
         _brake = brake;
         _isStepZoomMode = isStepZoomMode;
 
-        _sentinel = OnFirstXButton;
-        root.AddHandler(UIElement.PointerPressedEvent, _sentinel, true);
+        _pressedHandler = OnPressed;
+        _releasedHandler = OnReleased;
+        root.AddHandler(UIElement.PointerPressedEvent, _pressedHandler, true);
+        root.AddHandler(UIElement.PointerReleasedEvent, _releasedHandler, true);
     }
 
     // Called from window Closed handler (UI thread).
     public void Detach()
     {
-        var cts = _repeatCts;
-        _repeatCts = null;
-        cts?.Cancel();
-        cts?.Dispose();
-
-        if (_pressedHandler is not null)
-        {
-            _root.RemoveHandler(UIElement.PointerPressedEvent, _pressedHandler);
-            _root.RemoveHandler(UIElement.PointerReleasedEvent, _releasedHandler);
-        }
-        else
-        {
-            _root.RemoveHandler(UIElement.PointerPressedEvent, _sentinel);
-        }
-    }
-
-    // Sentinel: fires for every PointerPressed on the root until the first XButton
-    // event, then promotes to full press/release handlers.
-    private void OnFirstXButton(object sender, PointerRoutedEventArgs e)
-    {
-        var kind = e.GetCurrentPoint(_root).Properties.PointerUpdateKind;
-        if (kind is not (PointerUpdateKind.XButton1Pressed or PointerUpdateKind.XButton2Pressed)) return;
-
-        _root.RemoveHandler(UIElement.PointerPressedEvent, _sentinel);
-
-        _pressedHandler = OnPressed;
-        _releasedHandler = OnReleased;
-        _root.AddHandler(UIElement.PointerPressedEvent, _pressedHandler, true);
-        _root.AddHandler(UIElement.PointerReleasedEvent, _releasedHandler, true);
-
-        HandlePress(kind);
+        CancelRepeat();
+        _root.RemoveHandler(UIElement.PointerPressedEvent, _pressedHandler);
+        _root.RemoveHandler(UIElement.PointerReleasedEvent, _releasedHandler);
     }
 
     private void OnPressed(object sender, PointerRoutedEventArgs e)
-        => HandlePress(e.GetCurrentPoint(_root).Properties.PointerUpdateKind);
-
-    private void HandlePress(PointerUpdateKind kind)
     {
+        var kind = e.GetCurrentPoint(_root).Properties.PointerUpdateKind;
         if (kind is not (PointerUpdateKind.XButton1Pressed or PointerUpdateKind.XButton2Pressed)) return;
         if (_isStepZoomMode()) return;
 
@@ -93,10 +63,8 @@ internal sealed partial class SideButtonNavBehavior
 
         FlySafe(dir);
 
-        var old = _repeatCts;
+        CancelRepeat();
         _repeatCts = new CancellationTokenSource();
-        old?.Cancel();
-        old?.Dispose();
 
         // Read keyboard timings once per hold; they can't change mid-press,
         // and this keeps the P/Invokes off the repeat loop.
@@ -108,12 +76,18 @@ internal sealed partial class SideButtonNavBehavior
         var kind = e.GetCurrentPoint(_root).Properties.PointerUpdateKind;
         if (kind is not (PointerUpdateKind.XButton1Released or PointerUpdateKind.XButton2Released)) return;
 
+        CancelRepeat();
+
+        try { await _brake(); } catch { /* prevent async void crash */ }
+    }
+
+    // Stops any hold-repeat in progress. UI thread only.
+    private void CancelRepeat()
+    {
         var cts = _repeatCts;
         _repeatCts = null;
         cts?.Cancel();
         cts?.Dispose();
-
-        try { await _brake(); } catch { /* prevent async void crash */ }
     }
 
     // Runs on the ThreadPool so Task.Delay timing is independent of UI thread load.
