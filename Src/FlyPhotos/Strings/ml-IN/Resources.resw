@@ -733,6 +733,9 @@
   <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
     <value>വിൻഡോ മാക്സിമൈസ് ചെയ്യുക</value>
   </data>
+  <data name="TextDoubleClickOutsideActionClose.Text" xml:space="preserve">
+    <value>FlyPhotos അടയ്ക്കുക</value>
+  </data>
   <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
     <value>ഒന്നുമില്ല</value>
   </data>

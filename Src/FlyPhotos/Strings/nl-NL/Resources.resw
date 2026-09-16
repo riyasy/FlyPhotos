@@ -736,6 +736,9 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
   <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
     <value>Venster maximaliseren</value>
   </data>
+  <data name="TextDoubleClickOutsideActionClose.Text" xml:space="preserve">
+    <value>FlyPhotos sluiten</value>
+  </data>
   <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
     <value>Niets</value>
   </data>

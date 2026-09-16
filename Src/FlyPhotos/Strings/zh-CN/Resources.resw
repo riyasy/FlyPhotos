@@ -736,6 +736,9 @@
   <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
     <value>最大化窗口</value>
   </data>
+  <data name="TextDoubleClickOutsideActionClose.Text" xml:space="preserve">
+    <value>关闭 FlyPhotos</value>
+  </data>
   <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
     <value>无</value>
   </data>

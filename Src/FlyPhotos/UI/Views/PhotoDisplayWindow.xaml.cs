@@ -74,6 +74,7 @@ public sealed partial class PhotoDisplayWindow
     private readonly CtrlDragWindowMover _ctrlDragWindowMover;
 
     private bool _loadingStarted;
+    private bool _isClosing;
 
     // Accumulators for smooth scrolling
     private int _verticalDeltaAccumulator;
@@ -347,8 +348,6 @@ public sealed partial class PhotoDisplayWindow
         else
             _windFullScreenManager.Maximize();
     }
-
-    private bool _isClosing;
 
     private async Task AnimatePhotoDisplayWindowClose()
     {

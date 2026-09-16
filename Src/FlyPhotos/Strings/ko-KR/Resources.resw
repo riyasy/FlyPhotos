@@ -735,6 +735,9 @@ FlyPhotos를 선택한 다음 항상을 선택합니다.</value>
   <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
     <value>창 최대화</value>
   </data>
+  <data name="TextDoubleClickOutsideActionClose.Text" xml:space="preserve">
+    <value>FlyPhotos 닫기</value>
+  </data>
   <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
     <value>없음</value>
   </data>

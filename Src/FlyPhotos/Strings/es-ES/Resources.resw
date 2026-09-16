@@ -736,6 +736,9 @@ Configuración &gt; Aplicaciones &gt; Aplicaciones predeterminadas.</value>
   <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
     <value>Maximizar la ventana</value>
   </data>
+  <data name="TextDoubleClickOutsideActionClose.Text" xml:space="preserve">
+    <value>Cerrar FlyPhotos</value>
+  </data>
   <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
     <value>Nada</value>
   </data>

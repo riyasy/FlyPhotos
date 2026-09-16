@@ -103,16 +103,20 @@ public sealed class MouseRow : INotifyPropertyChanged
 /// </summary>
 internal static class MouseCatalog
 {
-    /// <summary>Double-click outside the photo maximizes only while the single-click-outside
-    /// gesture is enabled - the window code gates both on the same setting - so the row reports
-    /// that setting rather than owning one of its own.</summary>
-    private static string DoubleClickOutsideActionKey(bool clickOutsideEnabled) =>
-        clickOutsideEnabled ? "TextDoubleClickOutsideActionMaximize" : "TextDoubleClickOutsideActionNothing";
+    /// <summary>Double-click outside the photo follows the single-click-outside setting: it
+    /// maximizes when that restores, and its first click already closes when that closes. So the
+    /// row reports that setting rather than owning one of its own.</summary>
+    private static string DoubleClickOutsideActionKey(ClickOutsideBehavior clickOutside) => clickOutside switch
+    {
+        ClickOutsideBehavior.RestoreWindow => "TextDoubleClickOutsideActionMaximize",
+        ClickOutsideBehavior.CloseApp => "TextDoubleClickOutsideActionClose",
+        _ => "TextDoubleClickOutsideActionNothing"
+    };
 
     public static List<MouseRow> BuildAll()
     {
         var doubleClickOutside = MouseRow.Fixed("SettingsCardDoubleClickOutside",
-            DoubleClickOutsideActionKey(AppConfig.Settings.ClickOutsideBehavior == ClickOutsideBehavior.RestoreWindow));
+            DoubleClickOutsideActionKey(AppConfig.Settings.ClickOutsideBehavior));
 
         return
         [
@@ -139,9 +143,9 @@ internal static class MouseCatalog
                 (int)AppConfig.Settings.ClickOutsideBehavior,
                 i =>
                 {
-                    AppConfig.Settings.ClickOutsideBehavior = (ClickOutsideBehavior)i;
-                    doubleClickOutside.SetFixedAction(
-                        DoubleClickOutsideActionKey((ClickOutsideBehavior)i == ClickOutsideBehavior.RestoreWindow));
+                    var behavior = (ClickOutsideBehavior)i;
+                    AppConfig.Settings.ClickOutsideBehavior = behavior;
+                    doubleClickOutside.SetFixedAction(DoubleClickOutsideActionKey(behavior));
                 }),
 
             MouseRow.Fixed("SettingsCardDoubleClick", "TextDoubleClickAction"),

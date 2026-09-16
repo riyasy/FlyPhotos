@@ -736,6 +736,9 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
     <value>Suurenna ikkuna</value>
   </data>
+  <data name="TextDoubleClickOutsideActionClose.Text" xml:space="preserve">
+    <value>Sulje FlyPhotos</value>
+  </data>
   <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
     <value>Ei mitään</value>
   </data>

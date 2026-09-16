@@ -735,6 +735,9 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
   <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
     <value>ウィンドウを最大化</value>
   </data>
+  <data name="TextDoubleClickOutsideActionClose.Text" xml:space="preserve">
+    <value>FlyPhotos を閉じる</value>
+  </data>
   <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
     <value>何もしない</value>
   </data>

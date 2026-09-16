@@ -736,6 +736,9 @@
   <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
     <value>Развёртывание окна</value>
   </data>
+  <data name="TextDoubleClickOutsideActionClose.Text" xml:space="preserve">
+    <value>Закрыть FlyPhotos</value>
+  </data>
   <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
     <value>Ничего</value>
   </data>
