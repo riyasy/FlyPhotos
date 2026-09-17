@@ -764,6 +764,15 @@ internal sealed partial class Settings
         await Launcher.LaunchFileAsync(file);
     }
 
+    // The Store scheme isn't registered on every Windows (LTSC, Server), so the web page is the fallback.
+    // cid is the Partner Center campaign id, so installs from this list can be told apart.
+    private async void OtherApp_Click(object sender, RoutedEventArgs e)
+    {
+        var id = (string)((FrameworkElement)sender).Tag;
+        if (!await Launcher.LaunchUriAsync(new Uri($"ms-windows-store://pdp/?productid={id}&cid=FlyPhotosAbout")))
+            await Launcher.LaunchUriAsync(new Uri($"https://apps.microsoft.com/detail/{id.ToLowerInvariant()}?cid=FlyPhotosAbout&mode=full"));
+    }
+
     private async void ComboLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (ComboLanguage.SelectedValue is LanguageInfo info)

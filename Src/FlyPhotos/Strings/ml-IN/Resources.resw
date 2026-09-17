@@ -1195,4 +1195,19 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
   <data name="ShortcutKey_NumPad" xml:space="preserve">
     <value>Num {0}</value>
   </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>മറ്റ് ആപ്പുകൾ</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>Windows ഡെസ്ക്ടോപ്പിനുള്ള മഴയും മഞ്ഞും സിമുലേറ്റർ</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>ലോകമെമ്പാടുമുള്ള നഗരങ്ങളിലെ സമയം, നിങ്ങളുടെ ഡെസ്ക്ടോപ്പിൽ.</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>Windows-നായുള്ള ഇഷ്ടാനുസൃതമാക്കാവുന്ന, ലളിതമായ, സുതാര്യമായ ഡെസ്ക്ടോപ്പ് ക്ലോക്ക് വിജറ്റുകൾ</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>Windows ഡെസ്ക്ടോപ്പിനുള്ള ഫ്ലിപ്പ് ക്ലോക്ക് വിജറ്റ്</value>
+  </data>
 </root>

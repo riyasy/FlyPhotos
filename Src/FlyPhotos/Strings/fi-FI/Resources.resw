@@ -1198,4 +1198,19 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
   <data name="ShortcutKey_NumPad" xml:space="preserve">
     <value>Num {0}</value>
   </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>Muut sovellukset</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>Sade- ja lumisimulaattori Windowsin työpöydälle</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>Kellonaika maailman kaupungeissa, työpöydälläsi.</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>Mukautettavat, pelkistetyt ja läpinäkyvät työpöytäkellot Windowsille</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>Kääntökellowidget Windowsin työpöydälle</value>
+  </data>
 </root>

@@ -1198,4 +1198,19 @@ High Quality Cubic – Ridimensionamento della massima qualità per le foto.</va
   <data name="ShortcutKey_NumPad" xml:space="preserve">
     <value>Num {0}</value>
   </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>Altre app</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>Simulatore di pioggia e neve per il desktop di Windows</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>L&apos;ora nelle città di tutto il mondo, sul tuo desktop.</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>Widget orologio da scrivania personalizzabili, minimalisti e trasparenti per Windows</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>Widget orologio a palette per il desktop di Windows</value>
+  </data>
 </root>

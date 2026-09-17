@@ -1198,4 +1198,19 @@ High Quality Cubic – Escalado de la más alta calidad para fotos.</value>
   <data name="ShortcutKey_NumPad" xml:space="preserve">
     <value>Num {0}</value>
   </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>Otras aplicaciones</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>Simulador de lluvia y nieve para el escritorio de Windows</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>La hora en ciudades de todo el mundo, en tu escritorio.</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>Widgets de reloj de escritorio personalizables, minimalistas y transparentes para Windows</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>Widget de reloj abatible para el escritorio de Windows</value>
+  </data>
 </root>

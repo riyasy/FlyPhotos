@@ -1198,4 +1198,19 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
   <data name="ShortcutKey_NumPad" xml:space="preserve">
     <value>Num {0}</value>
   </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>Andere apps</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>Regen- en sneeuwsimulator voor het Windows-bureaublad</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>De tijd in steden over de hele wereld, op uw bureaublad.</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>Aanpasbare, minimalistische, transparante bureaubladklok-widgets voor Windows</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>Klapklokwidget voor het Windows-bureaublad</value>
+  </data>
 </root>

@@ -1198,4 +1198,19 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
   <data name="ShortcutKey_NumPad" xml:space="preserve">
     <value>Num {0}</value>
   </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>Andra appar</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>Regn- och snösimulator för Windows-skrivbordet</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>Tiden i städer runt om i världen, på ditt skrivbord.</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>Anpassningsbara, minimalistiska, transparenta skrivbordsklockor för Windows</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>Flipklockwidget för Windows-skrivbordet</value>
+  </data>
 </root>

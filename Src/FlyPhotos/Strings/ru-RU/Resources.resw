@@ -1198,4 +1198,19 @@ High Quality Cubic – Масштабирование наивысшего ка�
   <data name="ShortcutKey_NumPad" xml:space="preserve">
     <value>Num {0}</value>
   </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>Другие приложения</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>Симулятор дождя и снега для рабочего стола Windows</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>Время в городах по всему миру, прямо на рабочем столе.</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>Настраиваемые минималистичные прозрачные виджеты часов на рабочем столе для Windows</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>Виджет перекидных часов для рабочего стола Windows</value>
+  </data>
 </root>

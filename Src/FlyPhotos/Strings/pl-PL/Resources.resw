@@ -1198,4 +1198,19 @@ High Quality Cubic – Najwyższej jakości skalowanie dla zdjęć.</value>
   <data name="ShortcutKey_NumPad" xml:space="preserve">
     <value>Num {0}</value>
   </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>Inne aplikacje</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>Symulator deszczu i śniegu na pulpit systemu Windows</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>Czas w miastach na całym świecie, na Twoim pulpicie.</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>Konfigurowalne, minimalistyczne, przezroczyste widżety zegara na pulpit dla systemu Windows</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>Widżet zegara z klapkami na pulpit systemu Windows</value>
+  </data>
 </root>

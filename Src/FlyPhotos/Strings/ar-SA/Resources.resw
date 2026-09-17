@@ -1198,4 +1198,19 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
   <data name="ShortcutKey_NumPad" xml:space="preserve">
     <value>Num {0}</value>
   </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>تطبيقات أخرى</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>محاكي المطر والثلج لسطح مكتب Windows</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>الوقت في مدن حول العالم، على سطح مكتبك.</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>أدوات ساعة سطح مكتب شفافة وبسيطة وقابلة للتخصيص لنظام Windows</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>أداة ساعة قلّابة لسطح مكتب Windows</value>
+  </data>
 </root>

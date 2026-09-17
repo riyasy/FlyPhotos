@@ -1198,4 +1198,19 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
   <data name="ShortcutKey_NumPad" xml:space="preserve">
     <value>數字鍵台 {0}</value>
   </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>其他應用程式</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>Windows 桌面雨雪模擬器</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>在桌面上查看世界各地城市的時間。</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>適用於 Windows 的可自訂極簡透明桌面時鐘小工具</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>適用於 Windows 桌面的翻頁時鐘小工具</value>
+  </data>
 </root>

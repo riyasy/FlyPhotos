@@ -1197,4 +1197,19 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
   <data name="ShortcutKey_NumPad" xml:space="preserve">
     <value>Num {0}</value>
   </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>További alkalmazások</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>Eső- és hószimulátor a Windows asztalára</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>A világ városainak pontos ideje az asztalán.</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>Testreszabható, minimalista, átlátszó asztali óra widgetek Windowshoz</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>Lapozós óra widget a Windows asztalára</value>
+  </data>
 </root>

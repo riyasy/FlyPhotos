@@ -1197,4 +1197,19 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
   <data name="ShortcutKey_NumPad" xml:space="preserve">
     <value>テンキー {0}</value>
   </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>その他のアプリ</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>Windows デスクトップ用の雨と雪のシミュレーター</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>世界各都市の時刻を、デスクトップに。</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>Windows 向けの、カスタマイズ可能でミニマルな透明デスクトップ時計ウィジェット</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>Windows デスクトップ用のフリップ時計ウィジェット</value>
+  </data>
 </root>
