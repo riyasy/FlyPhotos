@@ -1208,7 +1208,7 @@ High Quality Cubic – Масштабирование наивысшего ка�
     <value>Время в городах по всему миру, прямо на рабочем столе.</value>
   </data>
   <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
-    <value>Настраиваемые минималистичные прозрачные виджеты часов на рабочем столе для Windows</value>
+    <value>Виджет часов с разными циферблатами для рабочего стола Windows</value>
   </data>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Виджет перекидных часов для рабочего стола Windows</value>

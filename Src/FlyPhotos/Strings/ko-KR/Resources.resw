@@ -1207,7 +1207,7 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
     <value>전 세계 도시의 시간을 바탕 화면에서 확인하세요.</value>
   </data>
   <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
-    <value>Windows를 위한 사용자 지정 가능하고 미니멀한 투명 데스크톱 시계 위젯</value>
+    <value>Windows 바탕 화면용 다양한 시계판 시계 위젯</value>
   </data>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Windows 바탕 화면용 플립 시계 위젯</value>

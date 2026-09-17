@@ -1208,7 +1208,7 @@ High Quality Cubic – Najwyższej jakości skalowanie dla zdjęć.</value>
     <value>Czas w miastach na całym świecie, na Twoim pulpicie.</value>
   </data>
   <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
-    <value>Konfigurowalne, minimalistyczne, przezroczyste widżety zegara na pulpit dla systemu Windows</value>
+    <value>Widżet zegara z wieloma tarczami na pulpit systemu Windows</value>
   </data>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Widżet zegara z klapkami na pulpit systemu Windows</value>

@@ -1208,7 +1208,7 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
     <value>Kellonaika maailman kaupungeissa, työpöydälläsi.</value>
   </data>
   <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
-    <value>Mukautettavat, pelkistetyt ja läpinäkyvät työpöytäkellot Windowsille</value>
+    <value>Monikellotauluinen kellowidget Windowsin työpöydälle</value>
   </data>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Kääntökellowidget Windowsin työpöydälle</value>

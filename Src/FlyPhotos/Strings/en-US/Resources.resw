@@ -1208,7 +1208,7 @@ High Quality Cubic – Highest-quality scaling for photos.</value>
     <value>The time in cities around the world, on your desktop.</value>
   </data>
   <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
-    <value>Customizable, minimal, transparent desktop clock widgets for Windows</value>
+    <value>Multi-face clock widget for the Windows desktop</value>
   </data>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Flip clock widget for the Windows desktop</value>

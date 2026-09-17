@@ -1207,7 +1207,7 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
     <value>A világ városainak pontos ideje az asztalán.</value>
   </data>
   <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
-    <value>Testreszabható, minimalista, átlátszó asztali óra widgetek Windowshoz</value>
+    <value>Többszámlapos óra widget a Windows asztalára</value>
   </data>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Lapozós óra widget a Windows asztalára</value>

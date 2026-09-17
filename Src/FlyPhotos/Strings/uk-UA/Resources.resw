@@ -1208,7 +1208,7 @@ High Quality Cubic – Масштабування найвищої якості 
     <value>Час у містах по всьому світу, на вашому робочому столі.</value>
   </data>
   <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
-    <value>Настроювані мінімалістичні прозорі віджети годинника на робочому столі для Windows</value>
+    <value>Віджет годинника з різними циферблатами для робочого столу Windows</value>
   </data>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Віджет перекидного годинника для робочого столу Windows</value>
