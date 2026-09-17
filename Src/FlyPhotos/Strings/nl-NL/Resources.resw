@@ -559,6 +559,12 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Miniatuurbalk weergeven</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Pijlen voor vorige/volgende foto weergeven als de muis zich in de buurt van de linker- of rechterrand van het venster bevindt.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Navigatiepijlen aan de vensterranden weergeven</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Zoompercentage tijdens zoomen in het midden van het scherm weergeven.</value>
   </data>

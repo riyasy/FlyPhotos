@@ -94,6 +94,7 @@ internal sealed partial class Settings
         SliderFadeIntensity.Value = AppConfig.Settings.FadeIntensity;
         ComboImageScalingQuality.SelectedIndex = GetIndexForImageScalingQuality(AppConfig.Settings.ImageScalingQuality);
         ButtonShowZoomPercent.IsOn = AppConfig.Settings.ShowZoomPercent;
+        ButtonShowEdgeNavArrows.IsOn = AppConfig.Settings.ShowEdgeNavArrows;
         ButtonShowCheckeredBackground.IsOn = AppConfig.Settings.CheckeredBackground;
         SliderImageFitPercentage.Value = AppConfig.Settings.ImageFitPercentage;
         ButtonStretchSmallImages.IsOn = AppConfig.Settings.StretchSmallImages;
@@ -128,6 +129,7 @@ internal sealed partial class Settings
         SliderFadeIntensity.ValueChanged += SliderFadeIntensity_ValueChanged;
         ComboImageScalingQuality.SelectionChanged += ComboImageScalingQuality_OnSelectionChanged;
         ButtonShowZoomPercent.Toggled += ButtonShowZoomPercent_OnToggled;
+        ButtonShowEdgeNavArrows.Toggled += ButtonShowEdgeNavArrows_OnToggled;
         ButtonShowCheckeredBackground.Toggled += ButtonShowCheckeredBackground_OnToggled;
         SliderImageFitPercentage.ValueChanged += SliderImageFitPercentage_ValueChanged;
         ButtonStretchSmallImages.Toggled += ButtonStretchSmallImages_OnToggled;
@@ -372,6 +374,13 @@ internal sealed partial class Settings
     private async void ButtonShowZoomPercent_OnToggled(object sender, RoutedEventArgs e)
     {
         AppConfig.Settings.ShowZoomPercent = ButtonShowZoomPercent.IsOn;
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ButtonShowEdgeNavArrows_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.ShowEdgeNavArrows = ButtonShowEdgeNavArrows.IsOn;
+        SettingChanged?.Invoke(Setting.EdgeNavArrowsShowHide);
         await AppConfig.SaveAsync();
     }
 

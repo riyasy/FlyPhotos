@@ -559,6 +559,12 @@
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>显示缩略图栏</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>当鼠标靠近窗口左侧或右侧边缘时，显示上一张/下一张照片箭头。</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>在窗口边缘显示导航箭头</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>缩放时在屏幕中央显示缩放百分比。</value>
   </data>

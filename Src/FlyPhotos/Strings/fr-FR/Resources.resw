@@ -559,6 +559,12 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Afficher la bande de miniatures</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Afficher les flèches photo précédente/suivante lorsque la souris est proche du bord gauche ou droit de la fenêtre.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Afficher les flèches de navigation sur les bords de la fenêtre</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Afficher le pourcentage de zoom au centre de l'écran pendant le zoom.</value>
   </data>

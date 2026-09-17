@@ -558,6 +558,12 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Bélyegképsáv megjelenítése</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Előző/következő kép nyilainak megjelenítése, ha az egér az ablak bal vagy jobb széléhez közel van.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Navigációs nyilak megjelenítése az ablak szélein</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Nagyítási százalék megjelenítése a képernyő közepén nagyításkor.</value>
   </data>

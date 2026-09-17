@@ -559,6 +559,12 @@
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>شريط الصور المصغرة</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>عرض أسهم الصورة السابقة/التالية عندما يكون مؤشر الماوس قريبًا من الحافة اليسرى أو اليمنى للنافذة.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>أسهم التنقل على حواف النافذة</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>عرض نسبة التكبير/التصغير في وسط الشاشة أثناء التكبير/التصغير.</value>
   </data>

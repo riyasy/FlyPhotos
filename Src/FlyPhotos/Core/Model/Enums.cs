@@ -91,7 +91,8 @@ public enum Setting
     AutoHideMouseToggle,
     ImageScalingQualityChange,
     RawDecodingChange,
-    KeyBindingsChanged
+    KeyBindingsChanged,
+    EdgeNavArrowsShowHide
 }
 
 public enum ScrollDirection

@@ -556,6 +556,12 @@
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>തമ്പ്‌നെയിൽ സ്ട്രിപ്പ് കാണിക്കുക</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>മൗസ് വിൻഡോയുടെ ഇടത് അല്ലെങ്കിൽ വലത് അരികിന് സമീപം ആയിരിക്കുമ്പോൾ മുൻപത്തെ/അടുത്ത ഫോട്ടോ ആരോകൾ കാണിക്കുക.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>വിൻഡോയുടെ അരികുകളിൽ നാവിഗേഷൻ ആരോകൾ കാണിക്കുക</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>സൂം ചെയ്യുമ്പോൾ സ്ക്രീൻ മദ്ധ്യത്തിൽ സൂം ശതമാനം കാണിക്കുക.</value>
   </data>

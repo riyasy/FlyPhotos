@@ -559,6 +559,12 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Mostrar a faixa de miniaturas</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Mostrar as setas de foto anterior/seguinte quando o rato está próximo da extremidade esquerda ou direita da janela.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Mostrar setas de navegação nas extremidades da janela</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Mostrar percentagem de zoom no centro do ecrã ao utilizar o zoom.</value>
   </data>

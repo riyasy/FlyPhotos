@@ -559,6 +559,12 @@ Impostazioni &gt; App &gt; App predefinite.</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Mostra striscia delle miniature</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Mostra le frecce per la foto precedente/successiva quando il mouse si trova vicino al bordo sinistro o destro della finestra.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Mostra frecce di navigazione sui bordi della finestra</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Mostra la percentuale di zoom al centro dello schermo durante lo zoom.</value>
   </data>

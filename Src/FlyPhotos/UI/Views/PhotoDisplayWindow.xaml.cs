@@ -51,6 +51,8 @@ public sealed partial class PhotoDisplayWindow
     private FileActionRename? _fileActionRename;
     private readonly long _backIsPressedToken;
     private readonly long _nextIsPressedToken;
+    private readonly long _edgePrevIsPressedToken;
+    private readonly long _edgeNextIsPressedToken;
     private readonly DispatcherTimer _wheelScrollBrakeTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
     private PointerUpdateKind _lastPointerDownKind;
     private readonly SideButtonNavBehavior _sideButtonNav = null!;
@@ -68,6 +70,7 @@ public sealed partial class PhotoDisplayWindow
     private readonly InactivityFader _inactivityFader;
     private readonly MouseAutoHider _mouseAutoHider;
     private readonly WindowCaptionButtonFader _captionButtonFader;
+    private readonly EdgeNavArrowFader _edgeNavArrowFader;
     private readonly WindowPlacementManager _windPlacementManager;
     private readonly WindowFullScreenManager _windFullScreenManager;
     private readonly WindowAppearanceManager _windAppearanceManager;
@@ -165,6 +168,8 @@ public sealed partial class PhotoDisplayWindow
 
         _backIsPressedToken = ButtonBack.RegisterPropertyChangedCallback(ButtonBase.IsPressedProperty, ButtonBackNext_IsPressedChanged);
         _nextIsPressedToken = ButtonNext.RegisterPropertyChangedCallback(ButtonBase.IsPressedProperty, ButtonBackNext_IsPressedChanged);
+        _edgePrevIsPressedToken = EdgeButtonPrev.RegisterPropertyChangedCallback(ButtonBase.IsPressedProperty, ButtonBackNext_IsPressedChanged);
+        _edgeNextIsPressedToken = EdgeButtonNext.RegisterPropertyChangedCallback(ButtonBase.IsPressedProperty, ButtonBackNext_IsPressedChanged);
 
         _wheelScrollBrakeTimer.Tick += WheelScrollBrakeTimer_Tick;
         _rightClickZoomHoldTimer.Tick += RightClickZoomHoldTimer_Tick;
@@ -182,6 +187,7 @@ public sealed partial class PhotoDisplayWindow
         _windPlacementManager = new WindowPlacementManager(this, AppConfig.Settings.WindowState);
         _windFullScreenManager = new WindowFullScreenManager(this);
         _captionButtonFader = new WindowCaptionButtonFader(AppWindow.TitleBar, MainLayout, AppConfig.Settings.AutoHideCaptionButtons, ButtonFullScreenClose);
+        _edgeNavArrowFader = new EdgeNavArrowFader(MainLayout, EdgeButtonPrev, EdgeButtonNext, EdgeNavArrowsWanted());
         // Drag-to-move-window is no longer a setting. Enabled stays on the mover so the
         // toggle can come back without touching this class.
         _ctrlDragWindowMover = new CtrlDragWindowMover(D2dCanvas, AppWindow, enabled: true);
@@ -285,6 +291,8 @@ public sealed partial class PhotoDisplayWindow
     {
         ButtonBack.UnregisterPropertyChangedCallback(ButtonBase.IsPressedProperty, _backIsPressedToken);
         ButtonNext.UnregisterPropertyChangedCallback(ButtonBase.IsPressedProperty, _nextIsPressedToken);
+        EdgeButtonPrev.UnregisterPropertyChangedCallback(ButtonBase.IsPressedProperty, _edgePrevIsPressedToken);
+        EdgeButtonNext.UnregisterPropertyChangedCallback(ButtonBase.IsPressedProperty, _edgeNextIsPressedToken);
         _wheelScrollBrakeTimer.Stop();
         _wheelScrollBrakeTimer.Tick -= WheelScrollBrakeTimer_Tick;
         _rightClickZoomHoldTimer.Stop();
@@ -292,6 +300,7 @@ public sealed partial class PhotoDisplayWindow
         _rightClickZoomRepeatTimer.Stop();
         _rightClickZoomRepeatTimer.Tick -= RightClickZoomRepeatTimer_Tick;
         _sideButtonNav.Detach();
+        _edgeNavArrowFader.Enabled = false;
 
         AppWindow.Closing -= PhotoDisplayWindow_Closing;
 
@@ -451,8 +460,13 @@ public sealed partial class PhotoDisplayWindow
     private async void ButtonBackNext_OnClick(object sender, RoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
-        await _photoController.Fly(ReferenceEquals(sender, ButtonBack) ? NavDirection.Prev : NavDirection.Next);
+        var isPrev = ReferenceEquals(sender, ButtonBack) || ReferenceEquals(sender, EdgeButtonPrev);
+        await _photoController.Fly(isPrev ? NavDirection.Prev : NavDirection.Next);
     }
+
+    /// <summary>Secondary instances hide the toolbar nav buttons, so they get no edge arrows either.</summary>
+    private static bool EdgeNavArrowsWanted() =>
+        AppConfig.Settings.ShowEdgeNavArrows && !AppConfig.Volatile.IsSecondaryInstance;
 
     /// <summary>
     /// Brakes once neither nav RepeatButton is held. RepeatButton has no "released" event, but
@@ -463,15 +477,18 @@ public sealed partial class PhotoDisplayWindow
     /// </summary>
     private void ButtonBackNext_IsPressedChanged(DependencyObject sender, DependencyProperty dp)
     {
-        if (ButtonBack.IsPressed || ButtonNext.IsPressed) return;
+        if (AnyNavButtonPressed()) return;
         DispatcherQueue.TryEnqueue(async () =>
         {
-            if (ButtonBack.IsPressed || ButtonNext.IsPressed) return; // re-pressed before this ran
+            if (AnyNavButtonPressed()) return; // re-pressed before this ran
             if (_photoController.IsSinglePhoto()) return;             // no navigation happened, nothing to brake
             try { await _photoController.Brake(); }
             catch (Exception ex) { Logger.Error(ex); }
         });
     }
+
+    private bool AnyNavButtonPressed() =>
+        ButtonBack.IsPressed || ButtonNext.IsPressed || EdgeButtonPrev.IsPressed || EdgeButtonNext.IsPressed;
 
     private async void ButtonBackNext_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
@@ -1051,6 +1068,9 @@ public sealed partial class PhotoDisplayWindow
                 break;
             case Setting.KeyBindingsChanged:
                 _routes = ShortcutCatalog.Resolve();
+                break;
+            case Setting.EdgeNavArrowsShowHide:
+                _edgeNavArrowFader.Enabled = EdgeNavArrowsWanted();
                 break;
         }
     }

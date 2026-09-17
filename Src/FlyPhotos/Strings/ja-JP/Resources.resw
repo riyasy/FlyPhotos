@@ -558,6 +558,12 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>サムネイルストリップを表示</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>マウスがウィンドウの左端または右端の近くにあるときに、前/次の写真への矢印を表示します。</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>ウィンドウの端にナビゲーション矢印を表示</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>ズーム中に画面の中央にズーム率を表示します。</value>
   </data>

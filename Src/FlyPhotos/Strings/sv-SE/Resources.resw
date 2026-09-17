@@ -559,6 +559,12 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Visa miniatyrbildsremsa</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Visa pilar för föregående/nästa foto när musen är nära fönstrets vänstra eller högra kant.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Visa navigeringspilar vid fönsterkanterna</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Visa zoomprocent i mitten av skärmen vid zoomning.</value>
   </data>

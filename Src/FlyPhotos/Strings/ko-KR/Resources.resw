@@ -558,6 +558,12 @@ FlyPhotos를 선택한 다음 항상을 선택합니다.</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>축소판 그림 표시줄 표시</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>마우스가 창의 왼쪽 또는 오른쪽 가장자리 근처에 있을 때 이전/다음 사진 화살표를 표시합니다.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>창 가장자리에 탐색 화살표 표시</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>확대/축소 시 화면 중앙에 확대/축소 비율 표시</value>
   </data>

@@ -426,6 +426,14 @@
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
 
+                        <controls:SettingsCard
+                            x:Name="SettingsCardShowEdgeNavArrows"
+                            x:Uid="SettingsCardShowEdgeNavArrows"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE8AB;, FontFamily={StaticResource FluentIcons}}">
+                            <ToggleSwitch x:Name="ButtonShowEdgeNavArrows" />
+                        </controls:SettingsCard>
+
                         <!--  *****************  -->
 
                         <TextBlock

@@ -71,6 +71,7 @@ public class AppSettings
     public string ExternalApp3 { get; set; } = string.Empty;
     public string ExternalApp4 { get; set; } = string.Empty;
     public bool ShowZoomPercent { get; set; } = true;
+    public bool ShowEdgeNavArrows { get; set; } = false;
     public bool DecodeRawData { get; set; } = false;
     public string Language { get; set; } = "Default";
 

@@ -559,6 +559,12 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Miniaturansichtsleiste anzeigen</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Pfeile für vorheriges/nächstes Foto anzeigen, wenn sich die Maus in der Nähe des linken oder rechten Fensterrands befindet.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Navigationspfeile an den Fensterrändern anzeigen</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Zoomprozentsatz beim Zoomen in der Bildschirmmitte anzeigen.</value>
   </data>

@@ -559,6 +559,12 @@ Configuración &gt; Aplicaciones &gt; Aplicaciones predeterminadas.</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Mostrar tira de miniaturas</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Mostrar las flechas de foto anterior/siguiente cuando el ratón esté cerca del borde izquierdo o derecho de la ventana.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Mostrar flechas de navegación en los bordes de la ventana</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Mostrar el porcentaje de zoom en el centro de la pantalla al hacer zoom.</value>
   </data>

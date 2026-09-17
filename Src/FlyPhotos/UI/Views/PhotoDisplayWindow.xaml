@@ -26,6 +26,14 @@
                         <SolidColorBrush x:Key="FileNameBackgroundBrush" Color="#44000000" />
                     </ResourceDictionary>
                 </ResourceDictionary.ThemeDictionaries>
+                <Style x:Key="EdgeNavButtonStyle" TargetType="RepeatButton">
+                    <Setter Property="Margin" Value="12,0" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="Opacity" Value="0" />
+                </Style>
             </ResourceDictionary>
         </behaviors:CursorHost.Resources>
         <Grid
@@ -66,6 +74,45 @@
                 Text=""
                 Typography.NumeralAlignment="Tabular" />
         </Border>
+        <!--  Edge nav arrows (#243). Only the tile is hit-testable; EdgeNavArrowFader shows them and collapses them when the setting is off.  -->
+        <RepeatButton
+            x:Name="EdgeButtonPrev"
+            HorizontalAlignment="Left"
+            Click="ButtonBackNext_OnClick"
+            PointerWheelChanged="D2dCanvas_PointerWheelChanged"
+            Style="{StaticResource EdgeNavButtonStyle}">
+            <RepeatButton.Resources>
+                <SolidColorBrush x:Key="RepeatButtonBackgroundPointerOver" Color="Transparent" />
+                <SolidColorBrush x:Key="RepeatButtonBackgroundPressed" Color="Transparent" />
+                <SolidColorBrush x:Key="RepeatButtonBorderBrushPointerOver" Color="Transparent" />
+                <SolidColorBrush x:Key="RepeatButtonBorderBrushPressed" Color="Transparent" />
+            </RepeatButton.Resources>
+            <RepeatButton.OpacityTransition>
+                <ScalarTransition />
+            </RepeatButton.OpacityTransition>
+            <Border Padding="8,16" Background="#66000000" CornerRadius="8">
+                <FontIcon FontFamily="{StaticResource FluentIcons}" FontSize="24" Foreground="White" Glyph="&#xE76B;" />
+            </Border>
+        </RepeatButton>
+        <RepeatButton
+            x:Name="EdgeButtonNext"
+            HorizontalAlignment="Right"
+            Click="ButtonBackNext_OnClick"
+            PointerWheelChanged="D2dCanvas_PointerWheelChanged"
+            Style="{StaticResource EdgeNavButtonStyle}">
+            <RepeatButton.Resources>
+                <SolidColorBrush x:Key="RepeatButtonBackgroundPointerOver" Color="Transparent" />
+                <SolidColorBrush x:Key="RepeatButtonBackgroundPressed" Color="Transparent" />
+                <SolidColorBrush x:Key="RepeatButtonBorderBrushPointerOver" Color="Transparent" />
+                <SolidColorBrush x:Key="RepeatButtonBorderBrushPressed" Color="Transparent" />
+            </RepeatButton.Resources>
+            <RepeatButton.OpacityTransition>
+                <ScalarTransition />
+            </RepeatButton.OpacityTransition>
+            <Border Padding="8,16" Background="#66000000" CornerRadius="8">
+                <FontIcon FontFamily="{StaticResource FluentIcons}" FontSize="24" Foreground="White" Glyph="&#xE76C;" />
+            </Border>
+        </RepeatButton>
         <StackPanel
             x:Name="BottomPanel"
             HorizontalAlignment="Stretch"

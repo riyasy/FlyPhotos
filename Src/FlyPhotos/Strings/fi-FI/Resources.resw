@@ -559,6 +559,12 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Näytä pikkukuvapalkki</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Näytä edellisen/seuraavan kuvan nuolet, kun hiiri on lähellä ikkunan vasenta tai oikeaa reunaa.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Näytä siirtymisnuolet ikkunan reunoilla</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Näytä zoomausprosentti näytön keskellä zoomattaessa.</value>
   </data>

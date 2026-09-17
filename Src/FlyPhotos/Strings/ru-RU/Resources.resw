@@ -559,6 +559,12 @@
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Показывать панель миниатюр</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Показывать стрелки перехода к предыдущему/следующему фото, когда мышь находится у левого или правого края окна.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Показывать стрелки навигации по краям окна</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Показывать процент увеличения в центре экрана при масштабировании.</value>
   </data>

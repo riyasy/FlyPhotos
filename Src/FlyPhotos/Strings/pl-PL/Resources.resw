@@ -559,6 +559,12 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Pokaż pasek miniatur</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Pokaż strzałki poprzedniego/następnego zdjęcia, gdy mysz znajduje się w pobliżu lewej lub prawej krawędzi okna.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Pokaż strzałki nawigacji na krawędziach okna</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Pokaż procent powiększenia na środku ekranu podczas powiększania.</value>
   </data>

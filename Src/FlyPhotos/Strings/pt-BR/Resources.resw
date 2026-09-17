@@ -559,6 +559,12 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Mostrar a faixa de miniaturas</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Mostrar as setas de foto anterior/próxima quando o mouse está próximo à borda esquerda ou direita da janela.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Mostrar as setas de navegação nas bordas da janela</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Mostrar a porcentagem de zoom no centro da tela ao usar o zoom.</value>
   </data>
