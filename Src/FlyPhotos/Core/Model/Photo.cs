@@ -175,7 +175,6 @@ internal partial class Photo : IDisposable
     {
         Hq?.Dispose();
         Preview?.Dispose();
-        Thumbnail?.Dispose();
         Thumbnail = null;
     }
 
@@ -189,7 +188,6 @@ internal partial class Photo : IDisposable
     {
         Preview?.Dispose();
         Preview = null;
-        Thumbnail?.Dispose();
-        Thumbnail = null;
+        Thumbnail = null; // its GPU copy is released by ThumbNailController on the W2D thread
     }
 }

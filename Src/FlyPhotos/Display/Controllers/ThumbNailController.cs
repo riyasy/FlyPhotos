@@ -49,6 +49,13 @@ internal partial class ThumbNailController : IThumbnailController
     private CanvasRenderTarget _thumbnailOffscreen;
     private CanvasBitmap _loadingIndicatorBitmap;
 
+    // W2D-owned GPU copies of Photo.Thumbnail pixels, keyed by Thumbnail instance so a regenerated
+    // thumbnail never reuses a stale bitmap. The UI thread only drops Photo.Thumbnail references. Each
+    // ribbon pass moves the bitmaps it draws from _previousPassBitmaps into _currentPassBitmaps; whatever
+    // is left behind wasn't drawn (scrolled off, evicted or deleted) and is disposed.
+    private Dictionary<Thumbnail, CanvasBitmap> _currentPassBitmaps = new();
+    private Dictionary<Thumbnail, CanvasBitmap> _previousPassBitmaps = new();
+
     private static readonly TimeSpan ThrottleInterval = TimeSpan.FromMilliseconds(150);
     private readonly DispatcherTimer _throttledRedrawTimer = new() { Interval = ThrottleInterval };
     private bool _redrawNeeded;
@@ -108,16 +115,12 @@ internal partial class ThumbNailController : IThumbnailController
         RequestRebuild();
     }
 
-    // Device (re)created (first load or device loss). Drop the device-bound surfaces so they rebuild.
-    // Cached photo.Thumbnail.Bitmap objects belong to the old device and are NOT cleared here — the same
-    // accepted device-loss risk the main canvas carries. Runs on the W2D thread.
+    // Device (re)created (first load or device loss). Drop the device-bound surfaces so they rebuild
+    // from the device-independent Photo.Thumbnail pixels. Runs on the W2D thread.
     private void D2dCanvasThumbNail_CreateResources(CanvasAnimatedControl sender,
         Microsoft.Graphics.Canvas.UI.CanvasCreateResourcesEventArgs args)
     {
-        _thumbnailOffscreen?.Dispose();
-        _thumbnailOffscreen = null;
-        _loadingIndicatorBitmap?.Dispose();
-        _loadingIndicatorBitmap = null;
+        ReleaseDeviceResources();
         RequestRebuild();
     }
 
@@ -233,8 +236,7 @@ internal partial class ThumbNailController : IThumbnailController
                 _pump.Enqueue(() =>
                 {
                     ResetSlide();
-                    _thumbnailOffscreen?.Dispose();
-                    _thumbnailOffscreen = null;
+                    ReleaseDeviceResources();
                 });
             }
         });
@@ -355,8 +357,7 @@ internal partial class ThumbNailController : IThumbnailController
         var keys = _provider?.Keys;
         if (keys == null || keys.Count < 1 || !_canDrawThumbnails || !AppConfig.Settings.ShowThumbnails)
         {
-            _thumbnailOffscreen?.Dispose();
-            _thumbnailOffscreen = null;
+            ReleaseDeviceResources();
             return;
         }
 
@@ -392,8 +393,18 @@ internal partial class ThumbNailController : IThumbnailController
             // The selection border is NOT baked here — it is drawn as a fixed frame in D2dCanvasThumbNail_Draw,
             // so it stays put while the strip slides beneath it.
             var renderHalfCount = _numOfThumbNailsInOneDirection + Constants.ThumbnailSlideMarginBoxes;
-            for (var i = -renderHalfCount; i <= renderHalfCount; i++)
-                DrawThumbnailSlot(dsThumbNail, sender, startX, i, keys, currentPosition);
+            (_previousPassBitmaps, _currentPassBitmaps) = (_currentPassBitmaps, _previousPassBitmaps);
+            try
+            {
+                for (var i = -renderHalfCount; i <= renderHalfCount; i++)
+                    DrawThumbnailSlot(dsThumbNail, sender, startX, i, keys, currentPosition);
+            }
+            finally
+            {
+                // Even if a slot throws mid-pass (e.g. device removed), never carry undrawn bitmaps into
+                // the next pass, where a re-created bitmap would overwrite their key without disposing them.
+                DisposeAndClear(_previousPassBitmaps);
+            }
         }
 
         // The strip is now centered on currentPosition. If the position changed since the last render,
@@ -428,18 +439,44 @@ internal partial class ThumbNailController : IThumbnailController
         return _loadingIndicatorBitmap;
     }
 
-    private static CanvasBitmap EnsureThumbnailBitmap(Photo photo, ICanvasResourceCreator creator)
+    /// <summary>
+    /// W2D thread, during a ribbon pass. Carries this thumbnail's bitmap over from the previous pass,
+    /// or creates it, and records it as drawn in this pass.
+    /// </summary>
+    private CanvasBitmap TakeOrCreateThumbnailBitmap(Thumbnail thumbnail, ICanvasResourceCreator creator)
     {
-        if (photo.Thumbnail == null) return null;
-        if (photo.Thumbnail.Bitmap != null) return photo.Thumbnail.Bitmap;
-        try
+        if (!_previousPassBitmaps.Remove(thumbnail, out var bitmap))
         {
-            int s = Constants.ThumbnailPixelBufferSize;
-            photo.Thumbnail.Bitmap = CanvasBitmap.CreateFromBytes(creator,
-                photo.Thumbnail.Pixels, s, s, DirectXPixelFormat.B8G8R8A8UIntNormalized);
+            try
+            {
+                int s = Constants.ThumbnailPixelBufferSize;
+                bitmap = CanvasBitmap.CreateFromBytes(creator,
+                    thumbnail.Pixels, s, s, DirectXPixelFormat.B8G8R8A8UIntNormalized);
+            }
+            catch { return null; }
         }
-        catch { }
-        return photo.Thumbnail.Bitmap;
+        _currentPassBitmaps[thumbnail] = bitmap;
+        return bitmap;
+    }
+
+    /// <summary>
+    /// W2D thread (or after the worker is stopped in Dispose). Frees every device-bound surface; they are
+    /// recreated lazily by the next ribbon pass.
+    /// </summary>
+    private void ReleaseDeviceResources()
+    {
+        _thumbnailOffscreen?.Dispose();
+        _thumbnailOffscreen = null;
+        _loadingIndicatorBitmap?.Dispose();
+        _loadingIndicatorBitmap = null;
+        DisposeAndClear(_currentPassBitmaps);
+    }
+
+    private static void DisposeAndClear(Dictionary<Thumbnail, CanvasBitmap> bitmaps)
+    {
+        foreach (var bitmap in bitmaps.Values)
+            bitmap.Dispose();
+        bitmaps.Clear();
     }
 
     private void DrawThumbnailSlot(CanvasDrawingSession ds, ICanvasResourceCreator creator,
@@ -450,8 +487,10 @@ internal partial class ThumbNailController : IThumbnailController
 
         var key = keys[thumbnailPosition];
         var photo = _isPreviewLoaded?.Invoke(key) == true ? _provider?.GetPhoto(key) : null;
+        // Read once: the UI thread may null Photo.Thumbnail (preview eviction) at any moment.
+        var thumbnail = photo?.Thumbnail;
 
-        var bitmap = (photo != null ? EnsureThumbnailBitmap(photo, creator) : null)
+        var bitmap = (thumbnail != null ? TakeOrCreateThumbnailBitmap(thumbnail, creator) : null)
                      ?? GetOrCreateLoadingIndicatorBitmap(creator);
         if (bitmap == null) return;
 
@@ -508,10 +547,7 @@ internal partial class ThumbNailController : IThumbnailController
             _d2dCanvasThumbNail.PointerPressed -= D2dCanvasThumbNail_PointerPressed;
         }
 
-        _thumbnailOffscreen?.Dispose();
-        _thumbnailOffscreen = null;
-        _loadingIndicatorBitmap?.Dispose();
-        _loadingIndicatorBitmap = null;
+        ReleaseDeviceResources();
         ThumbnailClicked = null;
         _provider = null;
         _isPreviewLoaded = null;

@@ -56,9 +56,11 @@ internal sealed partial class MultiPageHqDisplayItem(CanvasBitmap firstFrame, Or
     public int PageCount => PageOrder.Length;
 }
 
-internal sealed partial class Thumbnail(byte[] pixels) : IDisposable
+/// <summary>
+/// Device-independent thumbnail pixels. The GPU copy is owned by ThumbNailController on its W2D
+/// thread, so dropping a Thumbnail from any thread never races a bitmap that is being drawn.
+/// </summary>
+internal sealed partial class Thumbnail(byte[] pixels)
 {
     public byte[] Pixels { get; } = pixels;
-    public CanvasBitmap Bitmap { get; internal set; }
-    public void Dispose() => Bitmap?.Dispose();
 }
