@@ -160,7 +160,7 @@ internal partial class CanvasController : ICanvasController
         var ctx = new PhotoInstallContext(_currentPhotoPath, previousPhotoPath, canvasSize,
             isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
 
-        // Handle the specific type of display item (Animated, HQ Static, Preview, MultiPage)
+        // Handle the specific type of display item (Animated, HQ Static, Preview, MultiPage, Tiled)
         switch (displayItem)
         {
             case AnimatedHqDisplayItem animDispItem:
@@ -168,6 +168,9 @@ internal partial class CanvasController : ICanvasController
                 break;
             case MultiPageHqDisplayItem multiDispItem:
                 HandleHqMultiPageDisplayItem(photo, multiDispItem, ctx);
+                break;
+            case TiledHqDisplayItem tiledDispItem:
+                HandleHqTiledDisplayItem(photo, tiledDispItem, ctx);
                 break;
             case HqDisplayItem hqDispItem:
                 HandleHqStaticDisplayItem(photo, hqDispItem, ctx);
@@ -236,6 +239,14 @@ internal partial class CanvasController : ICanvasController
             new MultiPageRenderer(_d2dCanvas, multiDispItem.FileAsByteArray, 0,
                 photo.SupportsTransparency, RequestInvalidate, multiDispItem.PageOrder),
             _imageSize, multiDispItem.Rotation, ctx, forceThumbNailRedraw: true);
+    }
+
+    private void HandleHqTiledDisplayItem(Photo photo, TiledHqDisplayItem tiledDispItem, PhotoInstallContext ctx)
+    {
+        InstallRenderer(
+            new TiledImageRenderer(_d2dCanvas, tiledDispItem,
+                photo.SupportsTransparency, RequestInvalidate),
+            _imageSize, tiledDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
     private void HandlePreviewDisplayItem(Photo photo, PreviewDisplayItem previewDispItem, PhotoInstallContext ctx)

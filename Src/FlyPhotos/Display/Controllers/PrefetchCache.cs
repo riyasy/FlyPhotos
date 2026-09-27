@@ -70,6 +70,13 @@ internal sealed class PrefetchCache : IDisposable
     private volatile IReadOnlyList<int> _windowKeys = Array.Empty<int>();
     private volatile int _windowCentre;
 
+    // Cancelled whenever the centre photo changes, so a multi-second large-image decode for a photo the user
+    // has left stops early (only the large-image path observes it). Replaced on the UI/STA thread only.
+    // Replaced sources are cancelled, not disposed — they hold no timer, and an in-flight decode may
+    // still register on its token; the GC reclaims them.
+    private volatile CancellationTokenSource _centreCts = new();
+    private int _centreKey = int.MinValue;
+
     /// <summary>Fired (on a ThreadPool thread) when a preview bitmap has finished loading for a key.</summary>
     public event Action<int>? PreviewReady;
 
@@ -128,6 +135,16 @@ internal sealed class PrefetchCache : IDisposable
         {
             Logger.Warn($"MoveWindow: centre {centrePosition} out of range. Skipping cache update.");
             return;
+        }
+
+        var centreKey = keys[centrePosition];
+        if (centreKey != _centreKey)
+        {
+            _centreKey = centreKey;
+            var left = _centreCts;
+            _centreCts = new CancellationTokenSource();
+            left.Cancel();
+            ReleaseTiledHqExcept(centreKey);
         }
 
         var desiredHqKeys      = FindNeighborKeys(centrePosition, AppConfig.Settings.CacheSizeOneSideHqImages);
@@ -280,7 +297,29 @@ internal sealed class PrefetchCache : IDisposable
             _hqTier.InFlight[key] = 0;
             int gen = _hqGeneration;
             if (_getPhoto(key) is not { } photo) return;
-            await photo.LoadHq(_device);
+            var isCentre = IsWindowCentre(key);
+            var loaded = await photo.LoadHq(_device, allowLarge: isCentre,
+                isCentre ? _centreCts.Token : CancellationToken.None);
+
+            // A large image finished just as the user left it: don't keep gigabytes for a neighbour.
+            if (loaded && photo.Hq is TiledHqDisplayItem && !IsWindowCentre(key))
+            {
+                photo.ReleaseTiledHq();
+                loaded = false;
+            }
+            if (!loaded)
+            {
+                // Oversized neighbour deferred, or its decode cancelled. MoveWindow re-queues it when it becomes
+                // the centre — unless that already happened while this load was in flight (MoveWindow skips
+                // in-flight keys), so check again now.
+                _hqTier.InFlight.Remove(key, out _);
+                if (IsWindowCentre(key))
+                {
+                    _hqTier.Queue.Push(key);
+                    _hqTier.Signal.Set();
+                }
+                return;
+            }
             if (DiscardedStaleRawDecode(key, photo, gen)) return;
             _hqTier.Done[key] = 0;
             _hqTier.InFlight.Remove(key, out _);
@@ -315,7 +354,7 @@ internal sealed class PrefetchCache : IDisposable
             if (_previewTier.Done.ContainsKey(key) &&
                 _getPhoto(key) is { Preview.Origin: Origin.Disk } image)
             {
-                var (actualWidth, actualHeight) = image.GetActualSize();
+                var (actualWidth, actualHeight) = image.GetSourcePixelSize();
                 await DiskCacherWithSqlite.Instance.PutInCache(image.FilePath, image.Preview.Bitmap,
                     (int)Math.Round(actualWidth), (int)Math.Round(actualHeight), image.Preview.Rotation);
             }
@@ -362,6 +401,26 @@ internal sealed class PrefetchCache : IDisposable
         return false;
     }
 
+    // A tiled HQ holds gigabytes of CPU tiles, so only the centre photo keeps one; a neighbour reloads on
+    // return. Runs on the UI/STA thread inside MoveWindow.
+    private void ReleaseTiledHqExcept(int centreKey)
+    {
+        foreach (var key in _hqTier.Done.Keys)
+            if (key != centreKey && _getPhoto(key) is { Hq: TiledHqDisplayItem } photo)
+            {
+                photo.ReleaseTiledHq();
+                _hqTier.Done.TryRemove(key, out _);
+            }
+    }
+
+    // Same snapshot discipline as IsInDesiredHqWindow — called from a ThreadPool thread.
+    private bool IsWindowCentre(int key)
+    {
+        var keys = _windowKeys;
+        int centre = _windowCentre;
+        return centre >= 0 && centre < keys.Count && keys[centre] == key;
+    }
+
     private List<int> FindNeighborKeys(int currentPosition, int cacheSizeOneSide)
     {
         var keys = _windowKeys;
@@ -405,6 +464,7 @@ internal sealed class PrefetchCache : IDisposable
     public void Dispose()
     {
         _cts.Cancel();
+        _centreCts.Cancel();
         _previewTier.Signal.Set();
         _hqTier.Signal.Set();
         _diskCacheSignal.Set();

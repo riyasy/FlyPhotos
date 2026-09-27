@@ -128,6 +128,26 @@ internal class CanvasViewManager : IAnimationHost
     /// </summary>
     private const float ScaleTolerance = 0.001f;
 
+    /// <summary>Zoom-out floor for normal images.</summary>
+    private const float MinZoomOutFixedScale = 0.05f;
+
+    /// <summary>Zoom-out floor for very large images: the longer side shrinks to this many pixels on screen.</summary>
+    private const float MinZoomOutLongSidePixels = 50f;
+
+    /// <summary>
+    /// Lowest scale a zoom-out may reach: 5%, or whatever shrinks the image's longer side to 50 px on screen
+    /// when that is smaller. At 5% a 100k px image is still 5000 px wide, so very large images need the
+    /// lower floor. It also sits below the fit scale for any usable window, so fit stays reachable by wheel.
+    /// Zoom-in is never floored.
+    /// </summary>
+    private float MinZoomOutScale()
+    {
+        var longSide = Math.Max(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
+        return longSide > 0
+            ? Math.Min(MinZoomOutFixedScale, MinZoomOutLongSidePixels / (float)longSide)
+            : MinZoomOutFixedScale;
+    }
+
     // --- Events ---
 
     /// <summary>
@@ -525,7 +545,7 @@ internal class CanvasViewManager : IAnimationHost
         var scaleTo = AppConfig.Settings.StickyZoomLevels
             ? ZoomGeometry.ApplyZoomSnap(rawScaleTo, _canvasViewState.LastScaleTo, zoomDirection)
             : rawScaleTo;
-        if (scaleTo < 0.05) return;
+        if (zoomDirection == ZoomDirection.Out && scaleTo < MinZoomOutScale()) return;
         _canvasViewState.LastScaleTo = scaleTo;
         StartZoomAnimation(scaleTo, zoomAnchor);
 
@@ -544,12 +564,11 @@ internal class CanvasViewManager : IAnimationHost
 
         // Base scale for one "full" mouse wheel step
         const float baseZoomIn = 1.25f;
-        const float minScale = 0.05f;
 
         // Compute scale factor proportional to delta
         float scaleFactor = (float)Math.Pow(baseZoomIn, delta / 120.0);
         float newScale = _canvasViewState.LastScaleTo * scaleFactor;
-        if (newScale < minScale) return;
+        if (delta < 0 && newScale < MinZoomOutScale()) return;
 
         // 1. Capture the scale *before* it's changed.
         float oldScale = _canvasViewState.Scale;

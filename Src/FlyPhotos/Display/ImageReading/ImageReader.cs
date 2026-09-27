@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
@@ -28,10 +29,23 @@ internal static class ImageReader
 
     /// <summary>
     /// Loads the best available display item for the first frame of an image, using format-specific
-    /// fast paths (embedded thumbnails, native decoders) before falling back to heavier decoders. 
+    /// fast paths (embedded thumbnails, native decoders) before falling back to heavier decoders.
     /// </summary>
     public static async Task<DisplayItem> GetFirstPreviewSpecialHandlingAsync(
         ICanvasResourceCreatorWithDpi d2dCanvas, string path)
+    {
+        var item = await GetFirstPreviewCoreAsync(d2dCanvas, path);
+
+        // For PNG, GIF, TIFF, etc. the fast path goes straight to the normal HQ readers, which all fail on an
+        // image over the GPU's maximum bitmap size. Return a preview instead, so the caller's HQ load
+        // (GetHqImage) runs next and takes the large-image path while the preview is on screen.
+        if (await FailedBecauseOversized(d2dCanvas, item, path) &&
+            await GetPreview(d2dCanvas, path) is { } preview && !preview.IsErrorOrUndefined())
+            return preview;
+        return item;
+    }
+
+    private static async Task<DisplayItem> GetFirstPreviewCoreAsync(ICanvasResourceCreatorWithDpi d2dCanvas, string path)
     {
         try
         {
@@ -225,10 +239,63 @@ internal static class ImageReader
     }
 
     /// <summary>
-    /// Loads the full high-quality image for display in the main viewer.
-    /// Uses format-specific decoders in priority order.
+    /// Loads the full high-quality image for display in the main viewer. Images over the GPU's maximum bitmap
+    /// size fail every normal decoder, so they fall through to <see cref="LargeImageReader"/> as the last step.
     /// </summary>
-    public static async Task<HqDisplayItem> GetHqImage(ICanvasResourceCreatorWithDpi d2dCanvas, string path)
+    /// <param name="knownOversized">
+    /// The caller already knows the image is too big (preview metadata, or an earlier call's
+    /// <c>Oversized</c>), so the doomed normal decode is skipped.
+    /// </param>
+    /// <param name="allowLarge">
+    /// False when prefetching a neighbour: an oversized image's tiles could take gigabytes, so it is not
+    /// decoded yet.
+    /// </param>
+    /// <param name="ct">Cancels a large decode (the user moved on). Normal decodes don't observe it.</param>
+    /// <returns>
+    /// <c>Item</c>: the image, or the error screen when nothing could read it; null when an oversized image
+    /// was not allowed here or its decode was cancelled, so the caller retries later. <c>Oversized</c>: the
+    /// image is too big for a single GPU bitmap; pass it back as <paramref name="knownOversized"/>.
+    /// </returns>
+    public static async Task<(HqDisplayItem Item, bool Oversized)> GetHqImage(ICanvasResourceCreatorWithDpi d2dCanvas,
+        string path, bool knownOversized = false, bool allowLarge = true, CancellationToken ct = default)
+    {
+        HqDisplayItem failed = null;
+        if (!knownOversized)
+        {
+            var hq = await GetHqCoreAsync(d2dCanvas, path);
+            // Preview metadata can't always tell up front (missing, or cached by an older build), so a failure
+            // may mean "too big". The header probe keeps a genuinely broken file on the old error path.
+            if (!await FailedBecauseOversized(d2dCanvas, hq, path)) return (hq, false);
+            failed = hq;
+        }
+
+        if (!allowLarge) return (null, true);
+        try
+        {
+            if (await LargeImageReader.GetHq(d2dCanvas, path, ct) is { } large) return (large, true);
+        }
+        catch (OperationCanceledException)
+        {
+            return (null, true);
+        }
+
+        // No decoder could read it at any size: show the normal error screen.
+        return (failed ?? await GetHqCoreAsync(d2dCanvas, path), true);
+    }
+
+    /// <summary>
+    /// Whether <paramref name="item"/> is a failure caused by the image being over the GPU's maximum bitmap
+    /// size rather than by a broken file. Only failures pay for the header probe.
+    /// </summary>
+    private static async Task<bool> FailedBecauseOversized(ICanvasResourceCreatorWithDpi d2dCanvas,
+        DisplayItem item, string path) =>
+        item is HqDisplayItem { Origin: Origin.ErrorScreen } && File.Exists(path) &&
+        await LargeImageReader.IsOversizedAsync(path, d2dCanvas.Device.MaximumBitmapSizeInPixels);
+
+    /// <summary>
+    /// The normal HQ decode: format-specific decoders in priority order, each producing one CanvasBitmap.
+    /// </summary>
+    private static async Task<HqDisplayItem> GetHqCoreAsync(ICanvasResourceCreatorWithDpi d2dCanvas, string path)
     {
         if (!File.Exists(path))
             return new StaticHqDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen);

@@ -42,6 +42,16 @@ internal sealed partial class AnimatedHqDisplayItem(CanvasBitmap firstFrame, Ori
     public byte[] FileAsByteArray { get; } = fileAsByteArray;
 }
 
+/// <summary>
+/// An image larger than the GPU's maximum bitmap size. <see cref="DisplayItem.Bitmap"/> is a small overview
+/// (the pyramid's top level); the full-resolution pixels live in CPU-side tiles drawn by TiledImageRenderer.
+/// </summary>
+internal sealed partial class TiledHqDisplayItem(CanvasBitmap overview, Origin origin, TilePyramid pyramid)
+    : HqDisplayItem(overview, origin, 0)
+{
+    public TilePyramid Pyramid { get; } = pyramid;
+}
+
 internal sealed partial class MultiPageHqDisplayItem(CanvasBitmap firstFrame, Origin origin, byte[] fileAsByteArray,
     int[] pageOrder) : HqDisplayItem(firstFrame, origin, 0)
 {
