@@ -62,6 +62,7 @@ public sealed partial class CtrlDragWindowMover : IDisposable
 
     private void OnPointerPressed(object sender, PointerRoutedEventArgs e)
     {
+        if (_isActive) return; // a second touch contact mid-drag must not restart the move
         var point = e.GetCurrentPoint(_canvas);
         if (point.Properties.PointerUpdateKind != Microsoft.UI.Input.PointerUpdateKind.LeftButtonPressed) return;
         bool onBackground = IsOnBackground?.Invoke(point.Position) ?? false;
@@ -99,7 +100,8 @@ public sealed partial class CtrlDragWindowMover : IDisposable
         _canvas.ReleasePointerCapture(e.Pointer);
     }
 
-    private void CancelDrag() => _isActive = false;
+    /// <summary>Stops an in-progress window move (e.g. when a touch gesture turns into a pinch on the image).</summary>
+    public void CancelDrag() => _isActive = false;
 
     public void Dispose()
     {

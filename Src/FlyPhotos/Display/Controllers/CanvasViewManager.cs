@@ -536,18 +536,13 @@ internal class CanvasViewManager : IAnimationHost
     }
 
     /// <summary>
-    /// Performs a precision zoom (e.g., from a touchpad) anchored at a specific point.
+    /// Immediately (without animation) multiplies the scale by <paramref name="scaleFactor"/>, keeping
+    /// <paramref name="zoomAnchor"/> fixed on screen. Used by touchpad precision zoom and touchscreen pinch.
     /// </summary>
-    public void ZoomAtPointPrecision(int delta, Point zoomAnchor)
+    public void ZoomAtPointByFactor(float scaleFactor, Point zoomAnchor)
     {
-        if (delta == 0) return;
-
-        // Base scale for one "full" mouse wheel step
-        const float baseZoomIn = 1.25f;
         const float minScale = 0.05f;
 
-        // Compute scale factor proportional to delta
-        float scaleFactor = (float)Math.Pow(baseZoomIn, delta / 120.0);
         float newScale = _canvasViewState.LastScaleTo * scaleFactor;
         if (newScale < minScale) return;
 
