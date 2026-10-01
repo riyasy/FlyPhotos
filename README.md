@@ -165,7 +165,6 @@ Rows marked **configurable** can be changed in **Settings → Mouse**; the value
 ## 🚧 Known Limitations
 - SVG rendering is capped at 2000 px on the longest side.
 - HDR photos are displayed tone-mapped to SDR; true HDR output is not implemented yet.
-- Very large images (roughly >16384 px) may not display on all hardware, due to DirectX texture size limits.
 - Multiple instances is still beta: extra instances only show the selected image, with no navigation, delete, or settings.
 
 ---
