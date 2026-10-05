@@ -87,7 +87,7 @@ internal partial class MultiPageRenderer : IRenderer
             session.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
             if (drawCheckeredBackground)
             {
-                var brushScale = viewState.MatInv.M11;
+                var brushScale = 1f / viewState.Scale;
                 _checkeredBrush.Transform = System.Numerics.Matrix3x2.CreateScale(brushScale);
                 session.FillRectangle(viewState.ImageRect, _checkeredBrush);
             }

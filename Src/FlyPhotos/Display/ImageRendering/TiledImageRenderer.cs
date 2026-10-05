@@ -72,7 +72,7 @@ internal partial class TiledImageRenderer : IRenderer
 
         if (AppConfig.Settings.CheckeredBackground && _supportsTransparency)
         {
-            _checkeredBrush.Transform = Matrix3x2.CreateScale(viewState.MatInv.M11);
+            _checkeredBrush.Transform = Matrix3x2.CreateScale(1f / viewState.Scale);
             session.FillRectangle(viewState.ImageRect, _checkeredBrush);
         }
 
