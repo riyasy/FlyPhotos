@@ -159,6 +159,11 @@ public sealed partial class PhotoDisplayWindow
         D2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
         D2dCanvas.DoubleTapped += D2dCanvas_DoubleTapped;
         D2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;
+        // Touchscreen pan/pinch (#246). Mouse and pen stay on the pointer handlers above.
+        D2dCanvas.ManipulationMode = ManipulationModes.TranslateX | ManipulationModes.TranslateY | ManipulationModes.Scale;
+        D2dCanvas.ManipulationStarted += D2dCanvas_ManipulationStarted;
+        D2dCanvas.ManipulationDelta += D2dCanvas_ManipulationDelta;
+        D2dCanvas.Tapped += D2dCanvas_Tapped;
 
         D2dCanvasThumbNail.PointerWheelChanged += ThumbNail_PointerWheelChanged;
 
@@ -322,6 +327,9 @@ public sealed partial class PhotoDisplayWindow
         D2dCanvas.PointerReleased -= D2dCanvas_PointerReleased;
         D2dCanvas.DoubleTapped -= D2dCanvas_DoubleTapped;
         D2dCanvas.PointerWheelChanged -= D2dCanvas_PointerWheelChanged;
+        D2dCanvas.ManipulationStarted -= D2dCanvas_ManipulationStarted;
+        D2dCanvas.ManipulationDelta -= D2dCanvas_ManipulationDelta;
+        D2dCanvas.Tapped -= D2dCanvas_Tapped;
 
         D2dCanvasThumbNail.PointerWheelChanged -= ThumbNail_PointerWheelChanged;
 
@@ -556,6 +564,10 @@ public sealed partial class PhotoDisplayWindow
 
     private void D2dCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
+        // Touch pans/pinches through the manipulation handlers; the mouse-drag path below would
+        // jitter between contacts because each finger overwrites _lastPoint.
+        if (e.Pointer.PointerDeviceType == PointerDeviceType.Touch) return;
+
         var pointerPoint = e.GetCurrentPoint(D2dCanvas);
         var dpiAdjustedPos = pointerPoint.Position.AdjustForDpi(D2dCanvas);
         var updateKind = pointerPoint.Properties.PointerUpdateKind;
@@ -634,21 +646,9 @@ public sealed partial class PhotoDisplayWindow
                 _isDragging = false;
                 break;
 
-            case PointerUpdateKind.LeftButtonReleased:
-                if (Environment.TickCount64 - _lastDoubleTappedAt < Win32Methods.GetDoubleClickTime()) break;
-
-                if (currentPoint.Position.Y < AppTitlebar.ActualHeight ||
-                    _canvasController.IsPressedOnImage(dpiAdjustedPosition)) break;
-
-                switch (AppConfig.Settings.ClickOutsideBehavior)
-                {
-                    case ClickOutsideBehavior.RestoreWindow when _windFullScreenManager.IsMaximizedOrFullScreen:
-                        _windFullScreenManager.Restore(ButtonFullScreenClose);
-                        break;
-                    case ClickOutsideBehavior.CloseApp:
-                        _ = AnimatePhotoDisplayWindowClose();
-                        break;
-                }
+            // Touch goes through Tapped instead, which WinUI doesn't raise after a pan/pinch.
+            case PointerUpdateKind.LeftButtonReleased when e.Pointer.PointerDeviceType != PointerDeviceType.Touch:
+                HandleClickOutside(currentPoint.Position);
                 break;
 
             case PointerUpdateKind.MiddleButtonReleased:
@@ -711,9 +711,61 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
+    private void HandleClickOutside(Point rawPosition)
+    {
+        if (Environment.TickCount64 - _lastDoubleTappedAt < Win32Methods.GetDoubleClickTime()) return;
+
+        if (rawPosition.Y < AppTitlebar.ActualHeight ||
+            _canvasController.IsPressedOnImage(rawPosition.AdjustForDpi(D2dCanvas))) return;
+
+        switch (AppConfig.Settings.ClickOutsideBehavior)
+        {
+            case ClickOutsideBehavior.RestoreWindow when _windFullScreenManager.IsMaximizedOrFullScreen:
+                _windFullScreenManager.Restore(ButtonFullScreenClose);
+                break;
+            case ClickOutsideBehavior.CloseApp:
+                _ = AnimatePhotoDisplayWindowClose();
+                break;
+        }
+    }
+
+    private void D2dCanvas_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        if (e.PointerDeviceType == PointerDeviceType.Touch)
+            HandleClickOutside(e.GetPosition(D2dCanvas));
+    }
+
+    // Mouse/pen manipulations are completed at once, so ManipulationDelta only ever sees touch.
+    // Like a mouse drag, a touch gesture must start on the image; on the background it's left to
+    // CtrlDragWindowMover (window move when restored, nothing when maximized).
+    // Start position is the contacts' centroid just past the drag threshold, not the exact press point.
+    private void D2dCanvas_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
+    {
+        if (e.PointerDeviceType != PointerDeviceType.Touch ||
+            !_canvasController.IsPressedOnImage(e.Position.AdjustForDpi(D2dCanvas)))
+        {
+            e.Complete();
+            return;
+        }
+        // A pinch whose first finger landed on the background started a window move; the image wins.
+        _ctrlDragWindowMover.CancelDrag();
+    }
+
+    private void D2dCanvas_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
+    {
+        var delta = e.Delta;
+        // Pan(0,0) isn't a no-op (it clears the fitted state), so skip pure-scale events.
+        if (delta.Translation.X != 0 || delta.Translation.Y != 0)
+            _canvasController.Pan(delta.Translation.X.AdjustForDpi(D2dCanvas), delta.Translation.Y.AdjustForDpi(D2dCanvas));
+        // Pan first, then scale about the contacts' current centroid so the pinch point stays under the fingers.
+        _canvasController.ZoomAtPointByFactor(delta.Scale, e.Position.AdjustForDpi(D2dCanvas));
+    }
+
     private void D2dCanvas_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
     {
-        if (_lastPointerDownKind is PointerUpdateKind.XButton1Pressed or PointerUpdateKind.XButton2Pressed) return;
+        // Touch presses don't update _lastPointerDownKind, so the X-button check only applies to mouse.
+        if (e.PointerDeviceType != PointerDeviceType.Touch &&
+            _lastPointerDownKind is PointerUpdateKind.XButton1Pressed or PointerUpdateKind.XButton2Pressed) return;
         var rawPosition = e.GetPosition(D2dCanvas);
         var point = rawPosition.AdjustForDpi(D2dCanvas);
 
