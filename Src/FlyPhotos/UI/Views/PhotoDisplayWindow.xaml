@@ -53,6 +53,23 @@
             Background="Transparent"
             ClearColor="Transparent"
             IsFixedTimeStep="False" />
+        <!--  Caption-button scrim (#168): keeps the glyphs legible over pure white/black photo areas. CaptionScrimFader shows it on hover and re-tints the stops to contrast with the glyphs. Height is in DIPs, so it scales with the caption buttons.  -->
+        <Rectangle
+            x:Name="CaptionScrim"
+            Height="48"
+            VerticalAlignment="Top"
+            IsHitTestVisible="False"
+            Opacity="0">
+            <Rectangle.Fill>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop x:Name="CaptionScrimTop" Offset="0" Color="#88000000" />
+                    <GradientStop x:Name="CaptionScrimBottom" Offset="1" Color="#00000000" />
+                </LinearGradientBrush>
+            </Rectangle.Fill>
+            <Rectangle.OpacityTransition>
+                <ScalarTransition />
+            </Rectangle.OpacityTransition>
+        </Rectangle>
         <Border
             x:Name="BorderTxtZoom"
             Padding="10,5,10,5"

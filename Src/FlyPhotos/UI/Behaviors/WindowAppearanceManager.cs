@@ -310,15 +310,25 @@ namespace FlyPhotos.UI.Behaviors
         /// </summary>
         private void UpdateCaptionButtonForeground()
         {
-            var titleBar = _window.AppWindow.TitleBar;
-
-            titleBar.ButtonForegroundColor = _currentBackdropType switch
+            CaptionButtonForeground = _currentBackdropType switch
             {
                 WindowBackdropType.Transparent => Colors.White,
                 WindowBackdropType.Custom => IsLight(CustomColor()) ? Colors.Black : Colors.White,
                 _ => _root.ActualTheme == ElementTheme.Light ? Colors.Black : Colors.White
             };
+            _window.AppWindow.TitleBar.ButtonForegroundColor = CaptionButtonForeground;
+            CaptionButtonForegroundChanged?.Invoke(CaptionButtonForeground);
         }
+
+        /// <summary>
+        /// The caption button glyph colour currently applied. Always set by the end of construction.
+        /// Read this rather than <c>AppWindowTitleBar.ButtonForegroundColor</c>, whose getter
+        /// (an <c>IReference&lt;Color&gt;</c>) is not safe under Native AOT.
+        /// </summary>
+        public Color CaptionButtonForeground { get; private set; }
+
+        /// <summary>Raised whenever the backdrop or theme changes the caption glyph colour.</summary>
+        public event Action<Color>? CaptionButtonForegroundChanged;
 
         /// <summary>Perceived-brightness test (ITU-R BT.601 luma) used to pick a legible glyph colour.</summary>
         private static bool IsLight(Color c) => (0.299 * c.R) + (0.587 * c.G) + (0.114 * c.B) > 140;

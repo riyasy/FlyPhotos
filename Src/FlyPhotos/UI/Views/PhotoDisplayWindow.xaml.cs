@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.System;
+using Windows.UI;
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Display.Controllers;
@@ -71,6 +72,7 @@ public sealed partial class PhotoDisplayWindow
     private readonly MouseAutoHider _mouseAutoHider;
     private readonly WindowCaptionButtonFader _captionButtonFader;
     private readonly EdgeNavArrowFader _edgeNavArrowFader;
+    private readonly CaptionScrimFader _captionScrimFader;
     private readonly WindowPlacementManager _windPlacementManager;
     private readonly WindowFullScreenManager _windFullScreenManager;
     private readonly WindowAppearanceManager _windAppearanceManager;
@@ -193,6 +195,9 @@ public sealed partial class PhotoDisplayWindow
         _windFullScreenManager = new WindowFullScreenManager(this);
         _captionButtonFader = new WindowCaptionButtonFader(AppWindow.TitleBar, MainLayout, AppConfig.Settings.AutoHideCaptionButtons, ButtonFullScreenClose);
         _edgeNavArrowFader = new EdgeNavArrowFader(MainLayout, EdgeButtonPrev, EdgeButtonNext, EdgeNavArrowsWanted());
+        _captionScrimFader = new CaptionScrimFader(MainLayout, CaptionScrim, CaptionScrimTop, CaptionScrimBottom,
+            AppWindow, _windAppearanceManager.CaptionButtonForeground);
+        _windAppearanceManager.CaptionButtonForegroundChanged += WindAppearanceManager_CaptionButtonForegroundChanged;
         // Drag-to-move-window is no longer a setting. Enabled stays on the mover so the
         // toggle can come back without touching this class.
         _ctrlDragWindowMover = new CtrlDragWindowMover(D2dCanvas, AppWindow, enabled: true);
@@ -338,6 +343,8 @@ public sealed partial class PhotoDisplayWindow
         MainLayout.KeyUp -= HandleKeyUp;
 
         _windFullScreenManager.FullScreenToggled -= WindFullScreenManager_FullScreenToggled;
+        _windAppearanceManager.CaptionButtonForegroundChanged -= WindAppearanceManager_CaptionButtonForegroundChanged;
+        _captionScrimFader.Dispose();
 
         _canvasController.Dispose();
         _thumbNailController.Dispose();
@@ -356,7 +363,11 @@ public sealed partial class PhotoDisplayWindow
     {
         _windPlacementManager.PauseTracking = isFullScreen;
         _captionButtonFader.IsFullScreen = isFullScreen;
+        _captionScrimFader.IsFullScreen = isFullScreen;
     }
+
+    private void WindAppearanceManager_CaptionButtonForegroundChanged(Color glyphColor) =>
+        _captionScrimFader.GlyphColor = glyphColor;
 
     private void ToggleMaximizeRestore()
     {
