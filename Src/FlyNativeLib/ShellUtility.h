@@ -30,7 +30,13 @@ public:
 
 	/// @brief Retrieves a list of full paths for all items in the active Windows Explorer window.
 	/// @param arr A reference to a vector of wstring that will be populated with the file paths.
-	/// @return An HRESULT indicating success (S_OK) or an error code.
+	/// @param hwndExplorer The Explorer window to enumerate, or nullptr to use GetForegroundWindow().
+	/// @return An HRESULT indicating success (S_OK) or an error code. On failure this is
+	///         0x8004020n, where n is the enumeration stage that gave up — see the table at the
+	///         bottom of GetFileListFromExplorerWindow.
 	/// @note This function appends the found paths to the vector; it does not clear it first.
-	static HRESULT GetFileListFromExplorerWindow(vector<wstring>& arr);
+	/// @note Prefer passing an explicitly captured HWND. Resolving the foreground window inside this
+	///       call races the caller's own window activation: once the caller is foreground, no
+	///       ShellTabWindowClass child is found and enumeration fails at stage 0.
+	static HRESULT GetFileListFromExplorerWindow(vector<wstring>& arr, HWND hwndExplorer = nullptr);
 };

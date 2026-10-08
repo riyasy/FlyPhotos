@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Services;
@@ -22,6 +23,9 @@ internal partial class Photo : IDisposable
     public bool IsVector { get; }
 
     public bool IsRaw { get; }
+
+    /// <summary>An earlier HQ load found the image larger than the GPU's maximum bitmap size.</summary>
+    private bool _probedOversized;
 
     public Photo(string selectedFilePath)
     {
@@ -68,17 +72,60 @@ internal partial class Photo : IDisposable
 
     public async Task LoadHqFirstPhoto(ICanvasResourceCreatorWithDpi device)
     {
-        async Task GetHqImage()
-        {
-            Hq = await ImageReader.GetHqImage(device, FilePath);
-        }
-        await Task.Run(GetHqImage);
+        await Task.Run(() => LoadHq(device));
     }
 
-    public async Task LoadHq(ICanvasResourceCreatorWithDpi device)
+    /// <summary>
+    /// Loads the HQ item via <see cref="ImageReader.GetHqImage"/>. Returns false, leaving HQ unloaded, when an
+    /// oversized image is not allowed here (<paramref name="allowLarge"/> false: prefetching a neighbour) or
+    /// its decode was cancelled (<paramref name="ct"/>: the user moved on). The cache retries it once it is
+    /// the photo on screen again.
+    /// </summary>
+    public async Task<bool> LoadHq(ICanvasResourceCreatorWithDpi device, bool allowLarge = true,
+        CancellationToken ct = default)
     {
-        Hq ??= await ImageReader.GetHqImage(device, FilePath);
+        if (Hq != null) return true;
+        var (hq, oversized) = await ImageReader.GetHqImage(device, FilePath,
+            IsKnownOversized(device.Device.MaximumBitmapSizeInPixels), allowLarge, ct);
+        _probedOversized |= oversized; // a deferred neighbour skips the doomed normal decode next time
+        if (hq == null) return false;
+        if (hq is TiledHqDisplayItem tiled) await HealCachedPreviewSize(tiled);
+        Hq = hq;
+        return true;
     }
+
+    /// <summary>
+    /// Drops a tiled HQ so its gigabytes of CPU tiles can be reclaimed once the user has moved on. Not
+    /// disposed: the canvas may still draw the old renderer (and its overview bitmap) until its render thread
+    /// swaps renderers, so the tiles go to the GC once that renderer lets go.
+    /// </summary>
+    // The ≤4 MB overview bitmap is left to its finalizer; dispose it via the canvas pump if that shows up.
+    public void ReleaseTiledHq()
+    {
+        if (Hq is TiledHqDisplayItem) Hq = null;
+    }
+
+    /// <summary>
+    /// Older builds cached a failed large image's preview with the error icon's size as the photo's size,
+    /// which fools size-based routing and the initial fit. Rewrite that entry with the real size.
+    /// </summary>
+    // One-off migration for disk-cache entries written before large-image support; delete once
+    // those builds are a few releases old (a stale entry otherwise only costs a wrong first fit).
+    private async Task HealCachedPreviewSize(TiledHqDisplayItem tiled)
+    {
+        if (Preview is not { Origin: Origin.DiskCache, Bitmap: not null } p) return;
+        int w = tiled.Pyramid.FullWidth, h = tiled.Pyramid.FullHeight;
+        if (p.Metadata is { } m && (int)Math.Round(m.FullWidth) == w && (int)Math.Round(m.FullHeight) == h) return;
+        await DiskCacherWithSqlite.Instance.PutInCache(FilePath, p.Bitmap, w, h, p.Rotation);
+    }
+
+    /// <summary>
+    /// Whether the HQ load already knows the image exceeds the GPU's maximum bitmap size (<paramref name="maxSize"/>),
+    /// so it can go straight to the tiled reader and skip the normal decoders, which would fail. Known when an
+    /// earlier load found it oversized, or when the preview metadata gives the full size.
+    /// </summary>
+    private bool IsKnownOversized(int maxSize) => _probedOversized ||
+        Preview?.Metadata is { FullWidth: > 0, FullHeight: > 0 } m && (m.FullWidth > maxSize || m.FullHeight > maxSize);
 
     public async Task LoadPreview(ICanvasResourceCreatorWithDpi device)
     {
@@ -104,6 +151,8 @@ internal partial class Photo : IDisposable
 
     public (double, double) GetActualSize()
     {
+        if (Hq is TiledHqDisplayItem tiled)
+            return (tiled.Pyramid.FullWidth, tiled.Pyramid.FullHeight);
         if (Hq?.Bitmap != null)
         {
             return (Hq.Bitmap.SizeInPixels.Width, Hq.Bitmap.SizeInPixels.Height);
@@ -117,6 +166,19 @@ internal partial class Photo : IDisposable
             return (Preview.Bitmap.SizeInPixels.Width, Preview.Bitmap.SizeInPixels.Height);
         }
         return (100, 100);
+    }
+
+    /// <summary>
+    /// The photo's real pixel size — what the disk cache stores. <see cref="GetActualSize"/> sizes whatever is
+    /// on screen, which is the error icon when HQ failed; this skips that and falls back to the preview.
+    /// </summary>
+    public (double, double) GetSourcePixelSize()
+    {
+        if (Hq is not { } hq || !hq.IsErrorOrUndefined() || Preview?.Bitmap == null)
+            return GetActualSize();
+        if (Preview.Metadata is { FullWidth: > 0, FullHeight: > 0 } m)
+            return (m.FullWidth, m.FullHeight);
+        return (Preview.Bitmap.SizeInPixels.Width, Preview.Bitmap.SizeInPixels.Height);
     }
 
     public static DisplayItem GetLoadingIndicator() => ImageReader.GetLoadingIndicator();
@@ -175,7 +237,6 @@ internal partial class Photo : IDisposable
     {
         Hq?.Dispose();
         Preview?.Dispose();
-        Thumbnail?.Dispose();
         Thumbnail = null;
     }
 
@@ -189,7 +250,6 @@ internal partial class Photo : IDisposable
     {
         Preview?.Dispose();
         Preview = null;
-        Thumbnail?.Dispose();
-        Thumbnail = null;
+        Thumbnail = null; // its GPU copy is released by ThumbNailController on the W2D thread
     }
 }

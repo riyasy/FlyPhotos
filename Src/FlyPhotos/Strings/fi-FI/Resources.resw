@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>Sovita ikkunaan</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>Napsauta muuttaaksesi valintaväriä.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Asetukset</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>Napsauta muuttaaksesi ikkunan taustaväriä.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>Sovellus on käynnistettävä uudelleen näytön kielen vaihtamiseksi.</value>
@@ -192,14 +198,17 @@
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Ohut akryyli</value>
   </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>Mukautettu</value>
+  </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>Jäätynyt</value>
+    <value>Huurrelasi</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Kiille</value>
   </data>
   <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
-    <value>Kiille Alt</value>
+    <value>Vaihtoehtoinen kiille</value>
   </data>
   <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
     <value>Ei mitään</value>
@@ -217,13 +226,13 @@
     <value>Lähennä tai loitonna</value>
   </data>
   <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
-    <value>Muista panorointi/zoomi/kierto kuvaa kohti</value>
+    <value>Muista panorointi/zoomaus/kierto kuvaa kohti</value>
   </data>
   <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
-    <value>Palauta panorointi/zoomi/kierto</value>
+    <value>Palauta panorointi/zoomaus/kierto</value>
   </data>
   <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
-    <value>Säilytä näkymä ja zoomaus edellisestä kuvasta</value>
+    <value>Säilytä panorointi ja zoomaus edellisestä kuvasta</value>
   </data>
   <data name="ComboThemeItemDark.Content" xml:space="preserve">
     <value>Tumma</value>
@@ -256,12 +265,12 @@
     <value>Vahvista poisto</value>
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
-    <value>Voit asettaa FlyPhotosin oletussovellukseksi: 
-Napsauta kuvaa hiiren kakkospainikkeella &gt; Avaa sovelluksessa &gt; Valitse muu sovellus. 
+    <value>Voit asettaa FlyPhotosin oletussovellukseksi:
+Napsauta kuvaa hiiren kakkospainikkeella &gt; Avaa sovelluksessa &gt; Valitse muu sovellus.
 Valitse FlyPhotos ja napsauta Aina.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
-    <value>Windows 11:ssä voit myös asettaa FlyPhotosin oletussovellukseksi kohdassa 
+    <value>Windows 11:ssä voit myös asettaa FlyPhotosin oletussovellukseksi kohdassa
 Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   </data>
   <data name="DeletionFailed.CloseButton" xml:space="preserve">
@@ -357,6 +366,18 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>GPS-sijainti</value>
   </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Muoto</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Tekstuurin tyyppi</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Mipmapit</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Alfa</value>
+  </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Ladataan korkearesoluutioista versiota. Odota hetki…</value>
   </data>
@@ -391,7 +412,7 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Piilota hiiren osoitin automaattisesti</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Fly tallentaa viimeisimmät pikakatsaukset levylle nopeampaa latausta varten seuraavalla kerralla. Tyhjennä poistaa kaikki tallennetut esikatselut levyn välimuistista.</value>
+    <value>Fly tallentaa viimeisimmät pikaesikatselut levylle nopeampaa latausta varten seuraavalla kerralla. ”Tyhjennä” poistaa kaikki tallennetut pikaesikatselut levyn välimuistista.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Tyhjennä levyn välimuisti</value>
@@ -433,7 +454,7 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Tue FlyPhotosia</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Valitse ulkoisia sovelluksia lisättäväksi pikanäppäimiksi.</value>
+    <value>Valitse ulkoisia sovelluksia lisättäväksi pikakuvakkeiksi.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Valitse ulkoiset sovellukset</value>
@@ -457,68 +478,16 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Automaattisen häivytyksen voimakkuus (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Kummallekin puolelle esiladattujen täysresoluutioisten kuvien määrä.</value>
+    <value>Nykyisen kuvan kummallekin puolelle esiladattujen täysresoluutioisten kuvien määrä.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Korkearesoluutioinen esilataus (Muistissa)</value>
+    <value>Korkearesoluutioinen esilataus (muistissa)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
-    <value>Valitse kuinka paljon näytöstä kuva täyttää. (%)</value>
+    <value>Valitse, kuinka suuren osan näytöstä kuva täyttää. (%)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Kuvan sovittaminen näyttöön</value>
-  </data>
-  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
-    <value>Vasen/Oikea Nuolinäppäin : Selaa kuvia
-Ylös/Alas Nuolinäppäin : Zoomaa sisään tai ulos
-Hiiren vasen painike ja veto : Siirrä kuvaa
-Hiiren oikean painikkeen pohjassa pitäminen : Lähennä
-Hiiren oikea painike : Windowsin Resurssienhallinnan pikavalikko
-
-Hiiren rulla : Zoomaa / Selaa (asetuksesta riippuen)
-Ctrl + Hiiren rulla : Zoomaa sisään tai ulos
-Alt + Hiiren rulla : Selaa kuvia
-Hiiren vasen painike + Hiiren rulla : Selaa kuvia
-Hiiren rullan kallistus Vasen/Oikea : Selaa kuvia
-Hiiren rullan painallus : Koko näyttö
-
-Ctrl + Nuolinäppäimet : Panoroi kuvaa
-Ctrl + + : Zoomaa sisään
-Ctrl + - : Zoomaa ulos
-
-Alt + Vasen/Oikea Nuolinäppäin : Vaihda sivua monisivuisessa TIFF/ICO:ssä
-
-Page Up / Page Down : Zoomaa seuraavaan esiasetukseen (100%, 400%, Sovita)
-Home : Siirry ensimmäiseen kuvaan
-End : Siirry viimeiseen kuvaan
-
-Hiiren rulla pikkukuvanauhalla : Selaa kuvia
-Hiiren rulla näytön Vasen/Oikea-painikkeilla : Selaa kuvia
-Hiiren rulla kiertopainikkeella : Kierrä kuvaa
-
-Kosketuslevy kahden sormen pyyhkäisy : Selaa kuvia (Vasen/Oikea)
-Kosketuslevy kahden sormen pyyhkäisy (Ylös/Alas) : Zoomaa / Selaa
-Kosketuslevy nipistys (Pinch) : Zoomaa sisään tai ulos
-
-F11 : Koko näyttö
-Enter : Suurenna
-
-Alt + Enter : Näytä tiedoston ominaisuudet (Yleiset)
-D : Näytä tiedoston ominaisuudet (Tiedot)
-I : Näytä Valokuvan tiedot (metatiedot) -paneeli
-
-W : Näytä tiedosto Windowsin Resurssienhallinnassa
-S : Avaa Windowsin jakovalinta tiedostolle
-P : Tulosta valokuva
-A : Zoomaa todelliseen kokoon
-F : Sovita ikkunaan
-E : Näytä ulkoisten sovellusten paneeli
-Ctrl + 1–4: Avaa ulkoisessa sovelluksessa 1–4
-M : Näytä Lisää toimintoja -valikko
-
-Del : Poista kuva
-
-Esc : Sulje asetukset tai Poistu</value>
   </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>Valitse kieli</value>
@@ -530,20 +499,16 @@ Esc : Sulje asetukset tai Poistu</value>
     <value>Lokitiedosto</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Kummallekin puolelle esikatseltavaksi esiladattujen pikkukuvien määrä.</value>
+    <value>Nykyisen kuvan kummallekin puolelle esiladattujen pikaesikatselujen määrä.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Matalaresoluutioinen esilataus (Muistissa)</value>
+    <value>Matalaresoluutioinen esilataus (muistissa)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
-    <value>Valitse hiiren vierityspyörän oletustoiminto.</value>
+    <value>Valitse hiiren rullan oletustoiminto.</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
-    <value>Hiiren vierityspyörä</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + hiiren vierityspyörä zoomaa aina. 
-👉 Alt + hiiren vierityspyörä selaa aina.</value>
+    <value>Hiiren rulla</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
     <value>⚠ Voi hidastaa käynnistystä. Fly odottaa täyden resoluution kuvan latautumista käynnistyksessä.</value>
@@ -555,7 +520,7 @@ Esc : Sulje asetukset tai Poistu</value>
     <value>⚠ Käytä Säilytä-vaihtoehtoa vain kansioissa, joissa on samankokoisia kuvia.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
-    <value>Panoroinnin, zoomin ja kierron käyttäytyminen navigoinnin aikana</value>
+    <value>Panoroinnin, zoomauksen ja kierron käyttäytyminen navigoinnin aikana</value>
   </data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Ilmoita ongelmista GitHubissa tai lähetä sähköpostia osoitteeseen ryftools@outlook.com</value>
@@ -594,6 +559,12 @@ Esc : Sulje asetukset tai Poistu</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Näytä pikkukuvapalkki</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Näytä edellisen/seuraavan kuvan nuolet, kun hiiri on lähellä ikkunan vasenta tai oikeaa reunaa.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Näytä siirtymisnuolet ikkunan reunoilla</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Näytä zoomausprosentti näytön keskellä zoomattaessa.</value>
   </data>
@@ -619,22 +590,22 @@ Esc : Sulje asetukset tai Poistu</value>
     <value>Ikkunan teema</value>
   </data>
   <data name="SettingsCardThumbnailAnimation.Description" xml:space="preserve">
-    <value>Liu'uta pienoiskuvariviä pehmeästi kuvien välillä siirryttäessä.</value>
+    <value>Liu'uta pikkukuvapalkkia pehmeästi kuvien välillä siirryttäessä.</value>
   </data>
   <data name="SettingsCardThumbnailAnimation.Header" xml:space="preserve">
-    <value>Animoi pienoiskuvarivi</value>
+    <value>Animoi pikkukuvapalkki</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
     <value>Aseta valittuihin pikkukuviin käytettävä korostusväri.</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
-    <value>Pikkukuvan valintaväri</value>
+    <value>Pikkukuvien valintaväri</value>
   </data>
   <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
     <value>Säädä pikkukuvien kokoa katseluohjelmassa.</value>
   </data>
   <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
-    <value>Pikkukuvan koko</value>
+    <value>Pikkukuvien koko</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
     <value>Soveltuu vain läpinäkyvälle ikkunan taustalle.</value>
@@ -654,29 +625,20 @@ Esc : Sulje asetukset tai Poistu</value>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Ikkunan tausta</value>
   </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>Koskee vain mukautettua ikkunan taustaa.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>Taustaväri</value>
+  </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
-    <value>’Edellinen tila’ palauttaa ikkunan viimeisimmän koon (ikkunoitu tai maksimoitu), sijainnin ja näytön.</value>
+    <value>”Edellinen tila” palauttaa ikkunan viimeisimmän koon (ikkunoitu tai maksimoitu), sijainnin ja näytön.</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Header" xml:space="preserve">
     <value>Ikkunan tila käynnistyksessä</value>
   </data>
   <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
     <value>Automaattinen häivytys ja piilotus</value>
-  </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>Määritä, miten Fly käsittelee valokuvien välimuistiin tallennusta.</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>Välimuistiin tallennus</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>Näppäinoikotiet</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>Mukauta panoroinnin ja zoomin toimintaa.</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>Panorointi ja zoomaus</value>
   </data>
   <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - Asetukset</value>
@@ -688,7 +650,7 @@ Esc : Sulje asetukset tai Poistu</value>
     <value>Koodekit</value>
   </data>
   <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
-    <value>Yleinen</value>
+    <value>Yleiset</value>
   </data>
   <data name="Status_FileNotFound" xml:space="preserve">
     <value>Tiedostoa ei löydy</value>
@@ -714,8 +676,8 @@ Esc : Sulje asetukset tai Poistu</value>
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Lisäasetukset</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>Näppäimistö ja hiiri</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>Toiminta</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Kuvan näyttö</value>
@@ -742,7 +704,7 @@ Esc : Sulje asetukset tai Poistu</value>
     <value>Pudotettu tiedosto ei ole tuettu kuvatyyppi.</value>
   </data>
   <data name="UnsupportedFileAlert.Title" xml:space="preserve">
-    <value>Ei tuettu tiedosto</value>
+    <value>Tiedostoa ei tueta</value>
   </data>
   <data name="_end" xml:space="preserve">
     <value>end</value>
@@ -753,14 +715,38 @@ Esc : Sulje asetukset tai Poistu</value>
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
     <value>Valitse, mitä hiiren eteen- ja taaksepäin-painikkeet tekevät (käytettävissä joissakin hiirissä).</value>
   </data>
+  <data name="SettingsCardSwapMouseFwdBack.Header" xml:space="preserve">
+    <value>Vaihda eteen- ja taaksepainikkeet keskenään</value>
+  </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Portaittainen zoomaus</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Description" xml:space="preserve">
     <value>Kuvan ulkopuolelle napsauttaminen palauttaa ikkunan kokonäytön tilasta tai maksimoidusta tilasta. Kaksoisnapsauttaminen maksimoi sen uudelleen.</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Napsauta kuvan ulkopuolelle palauttaaksesi ikkunan</value>
+  <data name="SettingsCardLeftClickOutside.Header" xml:space="preserve">
+    <value>Hiiren vasen painike kuvan ulkopuolella</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Palauta ikkuna</value>
+  </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>Sulje FlyPhotos</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Ei mitään</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Kaksoisnapsautus kuvan ulkopuolella</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Suurenna ikkuna</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionClose.Text" xml:space="preserve">
+    <value>Sulje FlyPhotos</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Ei mitään</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>Pienennä-, suurenna- ja sulje-painikkeet näytetään vain, kun hiiri on lähellä ikkunan yläreunaa.</value>
@@ -768,11 +754,8 @@ Esc : Sulje asetukset tai Poistu</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Piilota ikkunapainikkeet automaattisesti</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Vedä taustaa tai pidä Ctrl-näppäintä painettuna ja vedä kuvaa siirtääksesi ikkunaa.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Vetäminen ikkunan siirtämiseksi</value>
+    <value>Hiiren vasen painike ja veto kuvan ulkopuolella</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Kuvien skaalaustapa</value>
@@ -805,7 +788,7 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
     <value>Lisää toimintoja</value>
   </data>
   <data name="MenuItemPhotoInfo.Text" xml:space="preserve">
-    <value>Valokuvan tiedot</value>
+    <value>Kuvan tiedot</value>
   </data>
   <data name="MenuItemOpenFileLocation.Text" xml:space="preserve">
     <value>Avaa tiedoston sijainti</value>
@@ -839,5 +822,395 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
+  </data>
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
+    <value>Hiiri</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Ctrl + hiiren rulla</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>Aina lähennä tai loitonna</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + hiiren rulla</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>Näytä aina seuraava tai edellinen</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>Hiiren rullan kallistus vasemmalle tai oikealle</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>Näytä seuraava tai edellinen</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>Hiiren vasen painike ja veto kuvan päällä</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>Siirrä kuvaa</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>Hiiren rullan painallus</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>Koko näyttö</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>Suurenna tai palauta</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>Ei mitään</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>Hiiren oikea painike</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>Windowsin Resurssienhallinnan pikavalikko</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>Hiiren oikean painikkeen pohjassa pitäminen</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>Lähennä</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>Ei mitään</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>Kaksoisnapsautus kuvan päällä</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>Zoomaa todelliseen kokoon tai sovita ikkunaan</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Ctrl + veto siirtää aina ikkunaa</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>Siirrä ikkunaa</value>
+  </data>
+  <data name="SettingsPivotItemKeyboard.Header" xml:space="preserve">
+    <value>Näppäimistö</value>
+  </data>
+  <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
+    <value>Etsi komentoja ja näppäimiä…</value>
+  </data>
+  <data name="ButtonResetAllShortcuts.Content" xml:space="preserve">
+    <value>Palauta kaikki…</value>
+  </data>
+  <data name="TxtNoShortcutResults.Text" xml:space="preserve">
+    <value>Yksikään komento ei vastaa hakuasi.</value>
+  </data>
+  <data name="TextShortcutNoKeys.Text" xml:space="preserve">
+    <value>Ei mitään</value>
+  </data>
+  <data name="ButtonShortcutEdit.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Muuta pikanäppäimiä</value>
+  </data>
+  <data name="ShortcutEditToolTip.Content" xml:space="preserve">
+    <value>Muuta pikanäppäimiä</value>
+  </data>
+  <data name="ShortcutResetAll_Title" xml:space="preserve">
+    <value>Palautetaanko kaikki pikanäppäimet?</value>
+  </data>
+  <data name="ShortcutResetAll_Message" xml:space="preserve">
+    <value>Kaikki komennot palaavat oletusnäppäimiinsä.</value>
+  </data>
+  <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
+    <value>Palauta kaikki</value>
+  </data>
+  <data name="ShortcutResetAll_CancelButton" xml:space="preserve">
+    <value>Peruuta</value>
+  </data>
+  <data name="TextShortcutCurrent.Text" xml:space="preserve">
+    <value>Nykyiset pikanäppäimet</value>
+  </data>
+  <data name="TextShortcutNoneAssigned.Text" xml:space="preserve">
+    <value>Pikanäppäintä ei ole määritetty.</value>
+  </data>
+  <data name="TextShortcutCapturePrompt.Text" xml:space="preserve">
+    <value>Napsauta alla olevaa ruutua ja paina sitten näppäimiä, jotka haluat lisätä.</value>
+  </data>
+  <data name="ButtonShortcutRemove.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Poista tämä pikanäppäin</value>
+  </data>
+  <data name="ShortcutRemoveToolTip.Content" xml:space="preserve">
+    <value>Poista</value>
+  </data>
+  <data name="ButtonShortcutReassign.Content" xml:space="preserve">
+    <value>Määritä uudelleen</value>
+  </data>
+  <data name="ButtonShortcutResetDefault.Content" xml:space="preserve">
+    <value>Palauta oletusarvot</value>
+  </data>
+  <data name="ShortcutCapture_DoneButton" xml:space="preserve">
+    <value>Valmis</value>
+  </data>
+  <data name="ShortcutCapture_Idle" xml:space="preserve">
+    <value>Lisää pikanäppäin napsauttamalla tästä</value>
+  </data>
+  <data name="ShortcutCapture_Waiting" xml:space="preserve">
+    <value>Odotetaan näppäimiä…</value>
+  </data>
+  <data name="ShortcutCapture_WinKeyRejected" xml:space="preserve">
+    <value>Windows varaa pikanäppäimet, joissa käytetään Windows-näppäintä.</value>
+  </data>
+  <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
+    <value>Vaihda latinalaiseen syöttötapaan määrittääksesi pikanäppäimen.</value>
+  </data>
+  <data name="ShortcutCapture_AlreadyOnThisCommand" xml:space="preserve">
+    <value>{0} on jo määritetty tälle komennolle.</value>
+  </data>
+  <data name="ShortcutCapture_ReservedByOther" xml:space="preserve">
+    <value>{0} on kiinteästi varattu komennolle ”{1}”, eikä sitä voi muuttaa.</value>
+  </data>
+  <data name="ShortcutCapture_Conflict" xml:space="preserve">
+    <value>{0} on jo komennon ”{1}” käytössä. Uudelleenmäärityksen jälkeen kyseinen komento jää ilman tätä pikanäppäintä.</value>
+  </data>
+  <data name="ShortcutGroup_Navigation" xml:space="preserve">
+    <value>Selaus</value>
+  </data>
+  <data name="ShortcutGroup_ZoomPan" xml:space="preserve">
+    <value>Zoomaus ja panorointi</value>
+  </data>
+  <data name="ShortcutGroup_Rotate" xml:space="preserve">
+    <value>Kierto</value>
+  </data>
+  <data name="ShortcutGroup_View" xml:space="preserve">
+    <value>Näkymä</value>
+  </data>
+  <data name="ShortcutGroup_File" xml:space="preserve">
+    <value>Tiedosto</value>
+  </data>
+  <data name="ShortcutGroup_OpenWith" xml:space="preserve">
+    <value>Avaa sovelluksessa</value>
+  </data>
+  <data name="ShortcutName_NextPhoto" xml:space="preserve">
+    <value>Seuraava kuva</value>
+  </data>
+  <data name="ShortcutName_PrevPhoto" xml:space="preserve">
+    <value>Edellinen kuva</value>
+  </data>
+  <data name="ShortcutName_FirstPhoto" xml:space="preserve">
+    <value>Ensimmäinen kuva</value>
+  </data>
+  <data name="ShortcutName_LastPhoto" xml:space="preserve">
+    <value>Viimeinen kuva</value>
+  </data>
+  <data name="ShortcutName_NextPage" xml:space="preserve">
+    <value>Seuraava sivu</value>
+  </data>
+  <data name="ShortcutName_PrevPage" xml:space="preserve">
+    <value>Edellinen sivu</value>
+  </data>
+  <data name="ShortcutName_ZoomIn" xml:space="preserve">
+    <value>Lähennä</value>
+  </data>
+  <data name="ShortcutName_ZoomOut" xml:space="preserve">
+    <value>Loitonna</value>
+  </data>
+  <data name="ShortcutName_StepZoomIn" xml:space="preserve">
+    <value>Lähennä portaittain</value>
+  </data>
+  <data name="ShortcutName_StepZoomOut" xml:space="preserve">
+    <value>Loitonna portaittain</value>
+  </data>
+  <data name="ShortcutName_ActualSize" xml:space="preserve">
+    <value>Todellinen koko (1:1)</value>
+  </data>
+  <data name="ShortcutName_FitToWindow" xml:space="preserve">
+    <value>Sovita ikkunaan</value>
+  </data>
+  <data name="ShortcutName_PanUp" xml:space="preserve">
+    <value>Panoroi ylös</value>
+  </data>
+  <data name="ShortcutName_PanDown" xml:space="preserve">
+    <value>Panoroi alas</value>
+  </data>
+  <data name="ShortcutName_PanLeft" xml:space="preserve">
+    <value>Panoroi vasemmalle</value>
+  </data>
+  <data name="ShortcutName_PanRight" xml:space="preserve">
+    <value>Panoroi oikealle</value>
+  </data>
+  <data name="ShortcutName_RotateLeft" xml:space="preserve">
+    <value>Kierrä vasemmalle</value>
+  </data>
+  <data name="ShortcutName_RotateRight" xml:space="preserve">
+    <value>Kierrä oikealle</value>
+  </data>
+  <data name="ShortcutName_FullScreen" xml:space="preserve">
+    <value>Koko näyttö</value>
+  </data>
+  <data name="ShortcutName_MaximizeRestore" xml:space="preserve">
+    <value>Suurenna tai palauta</value>
+  </data>
+  <data name="ShortcutName_PhotoInfoPanel" xml:space="preserve">
+    <value>Kuvan tiedot -paneeli</value>
+  </data>
+  <data name="ShortcutName_CloseApp" xml:space="preserve">
+    <value>Sulje FlyPhotos</value>
+  </data>
+  <data name="ShortcutName_CopyPhoto" xml:space="preserve">
+    <value>Kopioi kuva</value>
+  </data>
+  <data name="ShortcutName_DeletePhoto" xml:space="preserve">
+    <value>Poista kuva</value>
+  </data>
+  <data name="ShortcutName_RenamePhoto" xml:space="preserve">
+    <value>Nimeä kuva uudelleen</value>
+  </data>
+  <data name="ShortcutName_PrintPhoto" xml:space="preserve">
+    <value>Tulosta kuva</value>
+  </data>
+  <data name="ShortcutName_SharePhoto" xml:space="preserve">
+    <value>Jaa kuva</value>
+  </data>
+  <data name="ShortcutName_ShowInExplorer" xml:space="preserve">
+    <value>Avaa tiedoston sijainti</value>
+  </data>
+  <data name="ShortcutName_FileProperties" xml:space="preserve">
+    <value>Tiedoston ominaisuudet</value>
+  </data>
+  <data name="ShortcutName_FileDetails" xml:space="preserve">
+    <value>Tiedoston tiedot</value>
+  </data>
+  <data name="ShortcutName_MoreActionsMenu" xml:space="preserve">
+    <value>Lisää toimintoja -valikko</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp1" xml:space="preserve">
+    <value>Avaa sovelluksessa 1</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp2" xml:space="preserve">
+    <value>Avaa sovelluksessa 2</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp3" xml:space="preserve">
+    <value>Avaa sovelluksessa 3</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp4" xml:space="preserve">
+    <value>Avaa sovelluksessa 4</value>
+  </data>
+  <data name="ShortcutName_OpenWithPanel" xml:space="preserve">
+    <value>Avaa sovelluksessa -paneeli</value>
+  </data>
+  <data name="ShortcutDesc_NextPage" xml:space="preserve">
+    <value>Monisivuiset TIFF- ja ICO-tiedostot</value>
+  </data>
+  <data name="ShortcutDesc_PrevPage" xml:space="preserve">
+    <value>Monisivuiset TIFF- ja ICO-tiedostot</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
+    <value>Siirtyy seuraavaan esiasetukseen: 100 %, 400 %, Sovita ikkunaan</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
+    <value>Palaa edelliseen esiasetukseen</value>
+  </data>
+  <data name="ShortcutDesc_PhotoInfoPanel" xml:space="preserve">
+    <value>Kameran tiedot ja EXIF-metatiedot</value>
+  </data>
+  <data name="ShortcutDesc_CloseApp" xml:space="preserve">
+    <value>Aina käytettävissä – ei voi määrittää uudelleen</value>
+  </data>
+  <data name="ShortcutDesc_CopyPhoto" xml:space="preserve">
+    <value>Kopioi tiedoston leikepöydälle</value>
+  </data>
+  <data name="ShortcutDesc_DeletePhoto" xml:space="preserve">
+    <value>Ei voi määrittää uudelleen</value>
+  </data>
+  <data name="ShortcutDesc_SharePhoto" xml:space="preserve">
+    <value>Avaa Windowsin jakoikkunan</value>
+  </data>
+  <data name="ShortcutDesc_FileProperties" xml:space="preserve">
+    <value>Yleiset-välilehti</value>
+  </data>
+  <data name="ShortcutDesc_FileDetails" xml:space="preserve">
+    <value>Tiedot-välilehti</value>
+  </data>
+  <data name="ShortcutDesc_OpenWithPanel" xml:space="preserve">
+    <value>Näyttää kaikki määritetyt sovellukset</value>
+  </data>
+  <data name="ShortcutMod_Ctrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="ShortcutMod_Alt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="ShortcutMod_Shift" xml:space="preserve">
+    <value>Vaihto</value>
+  </data>
+  <data name="ShortcutKey_LeftArrow" xml:space="preserve">
+    <value>Nuoli vasemmalle</value>
+  </data>
+  <data name="ShortcutKey_RightArrow" xml:space="preserve">
+    <value>Nuoli oikealle</value>
+  </data>
+  <data name="ShortcutKey_UpArrow" xml:space="preserve">
+    <value>Nuoli ylös</value>
+  </data>
+  <data name="ShortcutKey_DownArrow" xml:space="preserve">
+    <value>Nuoli alas</value>
+  </data>
+  <data name="ShortcutKey_Esc" xml:space="preserve">
+    <value>Esc</value>
+  </data>
+  <data name="ShortcutKey_Backspace" xml:space="preserve">
+    <value>Askelpalautin</value>
+  </data>
+  <data name="ShortcutKey_PageUp" xml:space="preserve">
+    <value>Page Up</value>
+  </data>
+  <data name="ShortcutKey_PageDown" xml:space="preserve">
+    <value>Page Down</value>
+  </data>
+  <data name="ShortcutKey_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="ShortcutKey_End" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="ShortcutKey_Enter" xml:space="preserve">
+    <value>Enter</value>
+  </data>
+  <data name="ShortcutKey_Delete" xml:space="preserve">
+    <value>Del</value>
+  </data>
+  <data name="ShortcutKey_Space" xml:space="preserve">
+    <value>Välilyönti</value>
+  </data>
+  <data name="ShortcutKey_Tab" xml:space="preserve">
+    <value>Sarkain</value>
+  </data>
+  <data name="ShortcutKey_NumAdd" xml:space="preserve">
+    <value>Num +</value>
+  </data>
+  <data name="ShortcutKey_NumSubtract" xml:space="preserve">
+    <value>Num -</value>
+  </data>
+  <data name="ShortcutKey_NumMultiply" xml:space="preserve">
+    <value>Num *</value>
+  </data>
+  <data name="ShortcutKey_NumDivide" xml:space="preserve">
+    <value>Num /</value>
+  </data>
+  <data name="ShortcutKey_NumDecimal" xml:space="preserve">
+    <value>Num ,</value>
+  </data>
+  <data name="ShortcutKey_NumPad" xml:space="preserve">
+    <value>Num {0}</value>
+  </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>Muut sovellukset</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>Sade- ja lumisimulaattori Windowsin työpöydälle</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>Kellonaika maailman kaupungeissa, työpöydälläsi.</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>Monikellotauluinen kellowidget Windowsin työpöydälle</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>Kääntökellowidget Windowsin työpöydälle</value>
   </data>
 </root>

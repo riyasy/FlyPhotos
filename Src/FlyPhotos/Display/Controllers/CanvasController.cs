@@ -62,7 +62,7 @@ internal partial class CanvasController : ICanvasController
 
     // W2D-owned: set inside the ZoomOutOnExit action, read in WaitForPanZoomAnimationAsync.
 
-    // W2D-owned: true while ZoomAtPointPrecision ticks are arriving (right-click continuous zoom).
+    // W2D-owned: true while ZoomAtPointByFactor ticks are arriving (touchpad/right-click/pinch continuous zoom).
     // Treated as animating so Draw uses mip-based quality. Cleared 700 ms after the last tick.
     private bool _continuousZoomActive;
     private CancellationTokenSource _continuousZoomCts;
@@ -166,7 +166,7 @@ internal partial class CanvasController : ICanvasController
         var ctx = new PhotoInstallContext(_currentPhotoPath, previousPhotoPath, canvasSize,
             isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
 
-        // Handle the specific type of display item (Animated, HQ Static, Preview, MultiPage)
+        // Handle the specific type of display item (Animated, HQ Static, Preview, MultiPage, Tiled)
         switch (displayItem)
         {
             case AnimatedHqDisplayItem animDispItem:
@@ -174,6 +174,9 @@ internal partial class CanvasController : ICanvasController
                 break;
             case MultiPageHqDisplayItem multiDispItem:
                 HandleHqMultiPageDisplayItem(photo, multiDispItem, ctx);
+                break;
+            case TiledHqDisplayItem tiledDispItem:
+                HandleHqTiledDisplayItem(photo, tiledDispItem, ctx);
                 break;
             case HqDisplayItem hqDispItem:
                 HandleHqStaticDisplayItem(photo, hqDispItem, ctx);
@@ -242,6 +245,14 @@ internal partial class CanvasController : ICanvasController
             new MultiPageRenderer(_d2dCanvas, multiDispItem.FileAsByteArray, 0,
                 photo.SupportsTransparency, RequestInvalidate, multiDispItem.PageOrder),
             _imageSize, multiDispItem.Rotation, ctx, forceThumbNailRedraw: true);
+    }
+
+    private void HandleHqTiledDisplayItem(Photo photo, TiledHqDisplayItem tiledDispItem, PhotoInstallContext ctx)
+    {
+        InstallRenderer(
+            new TiledImageRenderer(_d2dCanvas, tiledDispItem,
+                photo.SupportsTransparency, RequestInvalidate),
+            _imageSize, tiledDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
     private void HandlePreviewDisplayItem(Photo photo, PreviewDisplayItem previewDispItem, PhotoInstallContext ctx)
@@ -327,12 +338,24 @@ internal partial class CanvasController : ICanvasController
     public void ZoomAtPoint(ZoomDirection zoomDirection, Point zoomAnchor) =>
         SafeEnqueue(v => v.ZoomAtPoint(zoomDirection, zoomAnchor));
 
+    /// <summary>
+    /// Precision zoom (e.g., touchpad) anchored at a point: one 120-unit wheel step scales by 1.25.
+    /// </summary>
     public void ZoomAtPointPrecision(int delta, Point zoomAnchor)
     {
+        const double baseZoomIn = 1.25; // scale for one full mouse-wheel step
+        const double wheelDelta = 120.0; // WHEEL_DELTA
+        ZoomAtPointByFactor((float)Math.Pow(baseZoomIn, delta / wheelDelta), zoomAnchor);
+    }
+
+    public void ZoomAtPointByFactor(float scaleFactor, Point zoomAnchor)
+    {
+        // A no-op factor must not re-arm the continuous-zoom debounce below.
+        if (scaleFactor == 1f) return;
         _pump.Enqueue(() =>
         {
             if (_currentRenderer == null) return;
-            _canvasViewManager.ZoomAtPointPrecision(delta, zoomAnchor);
+            _canvasViewManager.ZoomAtPointByFactor(scaleFactor, zoomAnchor);
 
             // Mark the burst as active so the render path uses mip-based quality instead of
             // source-bitmap quality. Debounced 700ms after the last tick so Draw reverts to

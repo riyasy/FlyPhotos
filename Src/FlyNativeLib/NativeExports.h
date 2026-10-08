@@ -22,9 +22,12 @@ extern "C" {
 
     /// @brief Gets the full paths of all items in the active Windows Explorer window.
     /// @param callback A pointer to a callback function that will be invoked for each file path found.
+    /// @param hwndExplorer The Explorer window to enumerate. Callers should sample this at process
+    ///        start, before their own window exists — see the note in ShellUtility.h. Pass nullptr
+    ///        to fall back to GetForegroundWindow().
     /// @return An HRESULT indicating success (S_OK) or an error code.
     /// @note The callback function will be called multiple times, once for each item.
-    __declspec(dllexport) HRESULT GetFileListFromExplorer(FileListCallback callback);
+    __declspec(dllexport) HRESULT GetFileListFromExplorer(FileListCallback callback, HWND hwndExplorer);
 
     /// @brief Displays the native Windows Shell context menu for a specific file.
     /// @param ownerHwnd Handle to the owner window for the context menu.

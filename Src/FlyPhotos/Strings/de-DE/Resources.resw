@@ -169,10 +169,16 @@
     <value>Foto drehen</value>
   </data>
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
-    <value>An Anzeigebereich anpassen</value>
+    <value>An Fenster anpassen</value>
+  </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>Klicken Sie, um die Auswahlfarbe zu ändern.</value>
   </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Einstellungen</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>Klicken Sie, um die Fensterhintergrundfarbe zu ändern.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>Die App muss neu gestartet werden, um die Anzeigesprache zu ändern.</value>
@@ -190,10 +196,13 @@
     <value>Acryl</value>
   </data>
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
-    <value>Acryl dünn</value>
+    <value>Acryl (dünn)</value>
+  </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>Benutzerdefiniert</value>
   </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>Gefroren</value>
+    <value>Milchglas</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Mica</value>
@@ -202,7 +211,7 @@
     <value>Mica Alt</value>
   </data>
   <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
-    <value>Kein</value>
+    <value>Ohne</value>
   </data>
   <data name="ComboBackgroundItemTransparent.Content" xml:space="preserve">
     <value>Transparent</value>
@@ -277,7 +286,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Spenden</value>
   </data>
   <data name="DropAreaRun.Text" xml:space="preserve">
-    <value>Bild hierher ziehen oder</value>
+    <value>Foto hierher ziehen oder</value>
   </data>
   <data name="HeaderCodec.Text" xml:space="preserve">
     <value>Codec</value>
@@ -289,7 +298,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Typ</value>
   </data>
   <data name="ExifPanelTitle.Text" xml:space="preserve">
-    <value>Foto-Info</value>
+    <value>Fotoinfo</value>
   </data>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Schließen</value>
@@ -357,6 +366,18 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>GPS-Standort</value>
   </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Texturtyp</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Mipmaps</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Alpha</value>
+  </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Hochauflösende Version wird geladen. Bitte warten…</value>
   </data>
@@ -364,7 +385,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>OK</value>
   </data>
   <data name="NoShortcutsCreated.Message" xml:space="preserve">
-    <value>Keine Verknüpfungen gefunden. Konfigurieren Sie diese in den Einstellungen.</value>
+    <value>Es wurden keine Verknüpfungen erstellt. Konfigurieren Sie sie in den Einstellungen.</value>
   </data>
   <data name="OpenFileHyperlink.Text" xml:space="preserve">
     <value>Datei öffnen</value>
@@ -391,7 +412,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Mauszeiger automatisch ausblenden</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Fly speichert aktuelle schnelle Vorschauen auf dem Datenträger für ein schnelleres Laden beim nächsten Mal. „Löschen" entfernt alle zwischengespeicherten Vorschauen aus dem Festplatten-Cache.</value>
+    <value>Fly speichert aktuelle schnelle Vorschauen auf dem Datenträger für ein schnelleres Laden beim nächsten Mal. „Leeren“ entfernt alle zwischengespeicherten Vorschauen aus dem Festplatten-Cache.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Festplatten-Cache leeren</value>
@@ -400,7 +421,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Vor dem Löschen einer Datei um Bestätigung bitten.</value>
   </data>
   <data name="SettingsCardConfirmBeforeDelete.Header" xml:space="preserve">
-    <value>Bestätigungsdialog zum Löschen von Dateien anzeigen</value>
+    <value>Vor dem Löschen von Dateien bestätigen</value>
   </data>
   <data name="SettingsCardCredits.Description" xml:space="preserve">
     <value>FlyPhotos dankt Resvg, Magick.NET, MagicScaler, Rawler, NLog und WinUIEx.</value>
@@ -415,7 +436,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Decoder geändert</value>
   </data>
   <data name="SettingsCardDecodeRawData.Description" xml:space="preserve">
-    <value>Verwenden Sie echte RAW-Daten anstelle des eingebetteten JPEGs in der RAW-Datei</value>
+    <value>Echte RAW-Daten anstelle des eingebetteten JPEGs in der RAW-Datei verwenden.</value>
   </data>
   <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
     <value>Kamera-RAW decodieren</value>
@@ -427,13 +448,13 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>RAW-Decoder-Priorität anpassen (Ziehen zum Neuanordnen)</value>
   </data>
   <data name="SettingsCardDeveloperSupport.Description" xml:space="preserve">
-    <value>Helfen Sie, Fly noch besser zu machen.</value>
+    <value>Fly noch besser machen.</value>
   </data>
   <data name="SettingsCardDeveloperSupport.Header" xml:space="preserve">
     <value>FlyPhotos unterstützen</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Wählen Sie externe Programme aus, um sie als Verknüpfungen hinzuzufügen.</value>
+    <value>Externe Apps auswählen, um sie als Verknüpfungen hinzuzufügen.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Externe Apps auswählen</value>
@@ -454,71 +475,19 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Stärke des automatischen Ausblendeffekts anpassen.</value>
   </data>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
-    <value>Intensität des automatischen Ausblendens %</value>
+    <value>Intensität des automatischen Ausblendens (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Anzahl der vollauflösenden Bilder, die auf jeder Seite vorgeladen werden.</value>
+    <value>Anzahl der Bilder in voller Auflösung, die auf jeder Seite vorgeladen werden.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Hochauflösungs-Vorabladen (Im Arbeitsspeicher)</value>
+    <value>Vorladen in hoher Auflösung (im Arbeitsspeicher)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Legt fest, wie viel % des Bildschirms das Foto ausfüllt.</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Bild an Bildschirm anpassen</value>
-  </data>
-  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
-    <value>Pfeiltasten Links/Rechts : Durch Fotos blättern
-Pfeiltasten Oben/Unten : Vergrößern oder Verkleinern (Zoom)
-Linke Maustaste + Ziehen : Ausschnitt verschieben
-Rechte Maustaste halten : Vergrößern
-Rechte Maustaste : Windows-Explorer-Kontextmenü
-
-Mausrad : Zoomen / Blättern (je nach Einstellung)
-Strg + Mausrad : Vergrößern oder Verkleinern
-Alt + Mausrad : Durch Fotos blättern
-Linke Maustaste + Mausrad : Durch Fotos blättern
-Mausrad nach links/rechts neigen : Durch Fotos blättern
-Mausrad-Klick : Vollbild
-
-Strg + Pfeiltasten : Ausschnitt verschieben
-Strg + + : Vergrößern
-Strg + - : Verkleinern
-
-Alt + Pfeiltasten Links/Rechts : Seiten in mehrseitigen TIFF/ICOs wechseln
-
-Bild Auf / Bild Ab : Zur nächsten Zoomstufe (100%, 400%, Einpassen)
-Pos1 : Zum ersten Foto
-Ende : Zum letzten Foto
-
-Mausrad auf der Vorschauleiste : Durch Fotos blättern
-Mausrad auf Bildschirmtasten Links/Rechts : Durch Fotos blättern
-Mausrad auf der Drehen-Schaltfläche : Foto drehen
-
-Touchpad Zweifinger-Wischen Links/Rechts : Durch Fotos blättern
-Touchpad Zweifinger-Wischen Oben/Unten : Zoomen / Blättern (je nach Einstellung)
-Touchpad Auf- oder Zuziehen (Pinch) : Vergrößern oder Verkleinern
-
-F11 : Vollbild
-Eingabetaste : Maximieren
-
-Alt + Eingabetaste : Dateieigenschaften anzeigen (Allgemein)
-D : Dateieigenschaften anzeigen (Details)
-I : Bereich „Fotoinfo“ (Metadaten) anzeigen
-
-W : Datei im Windows-Explorer anzeigen
-S : Windows-Freigabedialog für die Datei öffnen
-P : Foto drucken
-A : Foto in Originalgröße anzeigen
-F : An Fenster anpassen
-E : Panel für externe Apps anzeigen
-Strg + 1–4: In externer App 1–4 öffnen
-M : Menü „Weitere Aktionen“ anzeigen
-
-Entf : Foto löschen
-
-Esc : Einstellungen schließen oder App beenden</value>
   </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>Sprache auswählen</value>
@@ -533,32 +502,28 @@ Esc : Einstellungen schließen oder App beenden</value>
     <value>Anzahl der schnellen Vorschauen, die auf jeder Seite vorgeladen werden.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Niedrigauflösungs-Vorabladen (Im Arbeitsspeicher)</value>
+    <value>Vorladen in niedriger Auflösung (im Arbeitsspeicher)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
-    <value>Wählen Sie das Standardverhalten des Mausrads.</value>
+    <value>Standardverhalten des Mausrads auswählen.</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>Mausrad</value>
   </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Strg + Mausrad zoomt immer hinein oder heraus.
-👉 Alt + Mausrad navigiert immer zum nächsten oder Vorherigen.</value>
-  </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
-    <value>⚠ Kann den Start verlangsamen: Fly wartet beim Start auf das Laden des vollständigen Bildes statt die Vorschau zu verwenden.</value>
+    <value>⚠ Kann den Start verlangsamen. Fly wartet beim Start auf das Laden des Fotos in voller Auflösung.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
     <value>Zoom-Animation beim Start und Auszoomen beim Beenden</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ Verwenden Sie die Option „Beibehalten“ nur in Ordnern mit gleich großen Fotos.</value>
+    <value>⚠ Option „Beibehalten“ nur in Ordnern mit ähnlich großen Fotos verwenden.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Schwenk-, Zoom- und Drehverhalten bei der Navigation</value>
   </data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
-    <value>Melden Sie Probleme auf GitHub oder per E-Mail an ryftools@outlook.com</value>
+    <value>Probleme auf GitHub melden oder per E-Mail an ryftools@outlook.com</value>
   </data>
   <data name="SettingsCardReportBugs.Header" xml:space="preserve">
     <value>Fehler und Probleme</value>
@@ -570,11 +535,11 @@ Esc : Einstellungen schließen oder App beenden</value>
     <value>Cache-Status anzeigen</value>
   </data>
   <data name="SettingsCardShowCheckeredBackground.Description" xml:space="preserve">
-    <value>Karierten Hintergrund für transparente Bilder anzeigen. 
+    <value>Schachbrettmuster für transparente Bilder anzeigen. 
 ⚠ Kann die Leistung beeinträchtigen.</value>
   </data>
   <data name="SettingsCardShowCheckeredBackground.Header" xml:space="preserve">
-    <value>Karierten Hintergrund anzeigen</value>
+    <value>Schachbretthintergrund anzeigen</value>
   </data>
   <data name="SettingsCardShowFileName.Description" xml:space="preserve">
     <value>Dateinamen der aktuell geöffneten Datei anzeigen</value>
@@ -589,10 +554,16 @@ Esc : Einstellungen schließen oder App beenden</value>
     <value>Fotoabmessungen anzeigen</value>
   </data>
   <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
-    <value>Miniaturansichtleiste am unteren Fensterrand anzeigen</value>
+    <value>Miniaturansichtsleiste am unteren Fensterrand anzeigen</value>
   </data>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
-    <value>Miniaturansichtleiste anzeigen</value>
+    <value>Miniaturansichtsleiste anzeigen</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Pfeile für vorheriges/nächstes Foto anzeigen, wenn sich die Maus in der Nähe des linken oder rechten Fensterrands befindet.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Navigationspfeile an den Fensterrändern anzeigen</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Zoomprozentsatz beim Zoomen in der Bildschirmmitte anzeigen.</value>
@@ -607,13 +578,13 @@ Esc : Einstellungen schließen oder App beenden</value>
     <value>GitHub-Repository</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
-    <value>Große Fotos passen immer in den Anzeigebereich. Kleine Fotos werden standardmäßig in Originalgröße (1:1) angezeigt; aktivieren Sie dies, um sie zu vergrößern und anzupassen.</value>
+    <value>Große Fotos passen immer in den Anzeigebereich. Kleine Fotos werden standardmäßig in Originalgröße (1:1) angezeigt; diese Option aktivieren, um sie zu vergrößern und anzupassen.</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
     <value>Kleine Fotos an Anzeigebereich anpassen</value>
   </data>
   <data name="SettingsCardTheme.Description" xml:space="preserve">
-    <value>Wählen Sie das App-Design.</value>
+    <value>App-Design auswählen.</value>
   </data>
   <data name="SettingsCardTheme.Header" xml:space="preserve">
     <value>Fensterdesign</value>
@@ -625,16 +596,16 @@ Esc : Einstellungen schließen oder App beenden</value>
     <value>Miniaturansichtsleiste animieren</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Description" xml:space="preserve">
-    <value>Legen Sie die Hervorhebungsfarbe für ausgewählte Miniaturansichten fest.</value>
+    <value>Hervorhebungsfarbe für ausgewählte Miniaturansichten festlegen.</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
     <value>Auswahlfarbe für Miniaturansichten</value>
   </data>
   <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
-    <value>Passen Sie die Größe der Miniaturansichten im Viewer an.</value>
+    <value>Größe der Miniaturansichten im Viewer anpassen.</value>
   </data>
   <data name="SettingsCardThumbnailSize.Header" xml:space="preserve">
-    <value>Größe der Miniaturansicht</value>
+    <value>Größe der Miniaturansichten</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
     <value>Nur für transparenten Fensterhintergrund anwendbar.</value>
@@ -649,10 +620,16 @@ Esc : Einstellungen schließen oder App beenden</value>
     <value>Aktuelle Version</value>
   </data>
   <data name="SettingsCardWindowBackground.Description" xml:space="preserve">
-    <value>Legen Sie den Fensterhintergrund fest.</value>
+    <value>Fensterhintergrund auswählen.</value>
   </data>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Fensterhintergrund</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>Gilt nur für den benutzerdefinierten Fensterhintergrund.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>Hintergrundfarbe</value>
   </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>„Vorheriger Zustand“ stellt die letzte Fenstergröße (normal oder maximiert), Position und den Bildschirm wieder her.</value>
@@ -661,22 +638,7 @@ Esc : Einstellungen schließen oder App beenden</value>
     <value>Fensterzustand beim Start</value>
   </data>
   <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
-    <value>Automatisches Ein- und Ausblenden</value>
-  </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>Konfigurieren Sie, wie Fly das Foto-Caching handhabt.</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>Caching</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>Tastaturkürzel</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>Passen Sie das Schwenk- und Zoomverhalten an.</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>Schwenk- und Zoom-Einstellungen</value>
+    <value>Automatisches Ausblenden</value>
   </data>
   <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - Einstellungen</value>
@@ -706,16 +668,16 @@ Esc : Einstellungen schließen oder App beenden</value>
     <value>Diagnose</value>
   </data>
   <data name="TextBlockCaching.Text" xml:space="preserve">
-    <value>Caching</value>
+    <value>Zwischenspeicherung</value>
   </data>
   <data name="TextBlockCodecsInfo.Text" xml:space="preserve">
-    <value>FlyPhotos verwendet hauptsächlich integrierte Windows Imaging Component (WIC) Codecs.</value>
+    <value>FlyPhotos verwendet hauptsächlich die integrierten Windows Imaging Component (WIC)-Codecs.</value>
   </data>
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Erweitert</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>Tastatur und Maus</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>Verhalten</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Fotoanzeige</value>
@@ -739,7 +701,7 @@ Esc : Einstellungen schließen oder App beenden</value>
     <value>Testversion abgelaufen</value>
   </data>
   <data name="UnsupportedFileAlert.Description" xml:space="preserve">
-    <value>Die abgelegte Datei wird nicht als unterstütztes Bildformat erkannt.</value>
+    <value>Die abgelegte Datei ist kein unterstütztes Bildformat.</value>
   </data>
   <data name="UnsupportedFileAlert.Title" xml:space="preserve">
     <value>Nicht unterstützte Datei</value>
@@ -751,16 +713,40 @@ Esc : Einstellungen schließen oder App beenden</value>
     <value>Vorwärts-/Zurück-Tasten der Maus</value>
   </data>
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
-    <value>Wählen Sie aus, was die Vorwärts- und Zurück-Tasten der Maus tun (nur bei einigen Mäusen verfügbar).</value>
+    <value>Auswählen, was die Vorwärts- und Zurück-Tasten der Maus tun (nur bei einigen Mäusen verfügbar).</value>
+  </data>
+  <data name="SettingsCardSwapMouseFwdBack.Header" xml:space="preserve">
+    <value>Vorwärts- und Zurück-Tasten vertauschen</value>
   </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Stufenweises Zoomen</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Description" xml:space="preserve">
     <value>Ein Klick außerhalb des Fotos stellt das Fenster aus dem Vollbildmodus oder dem maximierten Zustand wieder her. Ein Doppelklick maximiert es erneut.</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Außerhalb des Bildes klicken, um das Fenster wiederherzustellen</value>
+  <data name="SettingsCardLeftClickOutside.Header" xml:space="preserve">
+    <value>Linke Maustaste außerhalb des Fotos</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Fenster wiederherstellen</value>
+  </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>FlyPhotos schließen</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Nichts</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Doppelklick außerhalb des Fotos</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Fenster maximieren</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionClose.Text" xml:space="preserve">
+    <value>FlyPhotos schließen</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Nichts</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>Die Schaltflächen zum Minimieren, Maximieren und Schließen werden nur angezeigt, wenn sich die Maus in der Nähe des oberen Fensterrands befindet.</value>
@@ -768,14 +754,11 @@ Esc : Einstellungen schließen oder App beenden</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Fensterschaltflächen automatisch ausblenden</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Ziehen Sie den Hintergrund, oder halten Sie die Strg-Taste gedrückt und ziehen Sie das Bild, um das Fenster zu verschieben.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Fenster verschieben durch Ziehen</value>
+    <value>Linke Maustaste + Ziehen außerhalb des Fotos</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
-    <value>Skalierungsmethode</value>
+    <value>Bildskalierungsmethode</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Description" xml:space="preserve">
     <value>Nearest Neighbor – Nur für Pixel-Art verwenden. Bewahrt scharfe Pixelkanten.
@@ -839,5 +822,395 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
+  </data>
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
+    <value>Maus</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Strg + Mausrad</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>Immer vergrößern oder verkleinern</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + Mausrad</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>Immer nächstes oder vorheriges ansehen</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>Mausrad nach links/rechts neigen</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>Nächstes oder Vorheriges ansehen</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>Linke Maustaste + Ziehen auf dem Foto</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>Foto schwenken</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>Mausrad-Klick</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>Vollbild</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>Maximieren oder wiederherstellen</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>Nichts</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>Rechte Maustaste</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>Windows-Explorer-Kontextmenü</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>Rechte Maustaste gedrückt halten</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>Vergrößern</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>Nichts</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>Doppelklick auf das Foto</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>Originalgröße oder an Fenster anpassen</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Strg + Ziehen verschiebt immer das Fenster</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>Fenster verschieben</value>
+  </data>
+  <data name="SettingsPivotItemKeyboard.Header" xml:space="preserve">
+    <value>Tastatur</value>
+  </data>
+  <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
+    <value>Befehle und Tasten suchen</value>
+  </data>
+  <data name="ButtonResetAllShortcuts.Content" xml:space="preserve">
+    <value>Alle zurücksetzen…</value>
+  </data>
+  <data name="TxtNoShortcutResults.Text" xml:space="preserve">
+    <value>Keine Befehle entsprechen Ihrer Suche.</value>
+  </data>
+  <data name="TextShortcutNoKeys.Text" xml:space="preserve">
+    <value>Keine</value>
+  </data>
+  <data name="ButtonShortcutEdit.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Tastenkürzel ändern</value>
+  </data>
+  <data name="ShortcutEditToolTip.Content" xml:space="preserve">
+    <value>Tastenkürzel ändern</value>
+  </data>
+  <data name="ShortcutResetAll_Title" xml:space="preserve">
+    <value>Alle Tastenkürzel zurücksetzen?</value>
+  </data>
+  <data name="ShortcutResetAll_Message" xml:space="preserve">
+    <value>Alle Befehle erhalten wieder ihre Standardtasten.</value>
+  </data>
+  <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
+    <value>Alle zurücksetzen</value>
+  </data>
+  <data name="ShortcutResetAll_CancelButton" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="TextShortcutCurrent.Text" xml:space="preserve">
+    <value>Aktuelle Tastenkürzel</value>
+  </data>
+  <data name="TextShortcutNoneAssigned.Text" xml:space="preserve">
+    <value>Kein Tastenkürzel zugewiesen.</value>
+  </data>
+  <data name="TextShortcutCapturePrompt.Text" xml:space="preserve">
+    <value>Klicken Sie in das Feld unten und drücken Sie dann die gewünschten Tasten.</value>
+  </data>
+  <data name="ButtonShortcutRemove.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Dieses Tastenkürzel entfernen</value>
+  </data>
+  <data name="ShortcutRemoveToolTip.Content" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="ButtonShortcutReassign.Content" xml:space="preserve">
+    <value>Neu zuweisen</value>
+  </data>
+  <data name="ButtonShortcutResetDefault.Content" xml:space="preserve">
+    <value>Auf Standard zurücksetzen</value>
+  </data>
+  <data name="ShortcutCapture_DoneButton" xml:space="preserve">
+    <value>Fertig</value>
+  </data>
+  <data name="ShortcutCapture_Idle" xml:space="preserve">
+    <value>Hier klicken, um ein Tastenkürzel hinzuzufügen</value>
+  </data>
+  <data name="ShortcutCapture_Waiting" xml:space="preserve">
+    <value>Warten auf Tasteneingabe…</value>
+  </data>
+  <data name="ShortcutCapture_WinKeyRejected" xml:space="preserve">
+    <value>Tastenkürzel mit der Windows-Taste sind für Windows reserviert.</value>
+  </data>
+  <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
+    <value>Wechseln Sie zu einer lateinischen Eingabemethode, um ein Tastenkürzel festzulegen.</value>
+  </data>
+  <data name="ShortcutCapture_AlreadyOnThisCommand" xml:space="preserve">
+    <value>{0} ist diesem Befehl bereits zugewiesen.</value>
+  </data>
+  <data name="ShortcutCapture_ReservedByOther" xml:space="preserve">
+    <value>{0} ist fest für „{1}“ vergeben und kann nicht geändert werden.</value>
+  </data>
+  <data name="ShortcutCapture_Conflict" xml:space="preserve">
+    <value>{0} wird bereits von „{1}“ verwendet. Beim Neuzuweisen verliert dieser Befehl das Tastenkürzel.</value>
+  </data>
+  <data name="ShortcutGroup_Navigation" xml:space="preserve">
+    <value>Navigation</value>
+  </data>
+  <data name="ShortcutGroup_ZoomPan" xml:space="preserve">
+    <value>Zoomen und Schwenken</value>
+  </data>
+  <data name="ShortcutGroup_Rotate" xml:space="preserve">
+    <value>Drehen</value>
+  </data>
+  <data name="ShortcutGroup_View" xml:space="preserve">
+    <value>Ansicht</value>
+  </data>
+  <data name="ShortcutGroup_File" xml:space="preserve">
+    <value>Datei</value>
+  </data>
+  <data name="ShortcutGroup_OpenWith" xml:space="preserve">
+    <value>Öffnen mit</value>
+  </data>
+  <data name="ShortcutName_NextPhoto" xml:space="preserve">
+    <value>Nächstes Foto</value>
+  </data>
+  <data name="ShortcutName_PrevPhoto" xml:space="preserve">
+    <value>Vorheriges Foto</value>
+  </data>
+  <data name="ShortcutName_FirstPhoto" xml:space="preserve">
+    <value>Erstes Foto</value>
+  </data>
+  <data name="ShortcutName_LastPhoto" xml:space="preserve">
+    <value>Letztes Foto</value>
+  </data>
+  <data name="ShortcutName_NextPage" xml:space="preserve">
+    <value>Nächste Seite</value>
+  </data>
+  <data name="ShortcutName_PrevPage" xml:space="preserve">
+    <value>Vorherige Seite</value>
+  </data>
+  <data name="ShortcutName_ZoomIn" xml:space="preserve">
+    <value>Vergrößern</value>
+  </data>
+  <data name="ShortcutName_ZoomOut" xml:space="preserve">
+    <value>Verkleinern</value>
+  </data>
+  <data name="ShortcutName_StepZoomIn" xml:space="preserve">
+    <value>Stufenweise vergrößern</value>
+  </data>
+  <data name="ShortcutName_StepZoomOut" xml:space="preserve">
+    <value>Stufenweise verkleinern</value>
+  </data>
+  <data name="ShortcutName_ActualSize" xml:space="preserve">
+    <value>Originalgröße (1:1)</value>
+  </data>
+  <data name="ShortcutName_FitToWindow" xml:space="preserve">
+    <value>An Fenster anpassen</value>
+  </data>
+  <data name="ShortcutName_PanUp" xml:space="preserve">
+    <value>Nach oben schwenken</value>
+  </data>
+  <data name="ShortcutName_PanDown" xml:space="preserve">
+    <value>Nach unten schwenken</value>
+  </data>
+  <data name="ShortcutName_PanLeft" xml:space="preserve">
+    <value>Nach links schwenken</value>
+  </data>
+  <data name="ShortcutName_PanRight" xml:space="preserve">
+    <value>Nach rechts schwenken</value>
+  </data>
+  <data name="ShortcutName_RotateLeft" xml:space="preserve">
+    <value>Nach links drehen</value>
+  </data>
+  <data name="ShortcutName_RotateRight" xml:space="preserve">
+    <value>Nach rechts drehen</value>
+  </data>
+  <data name="ShortcutName_FullScreen" xml:space="preserve">
+    <value>Vollbild</value>
+  </data>
+  <data name="ShortcutName_MaximizeRestore" xml:space="preserve">
+    <value>Maximieren oder wiederherstellen</value>
+  </data>
+  <data name="ShortcutName_PhotoInfoPanel" xml:space="preserve">
+    <value>Fotoinfo-Bereich</value>
+  </data>
+  <data name="ShortcutName_CloseApp" xml:space="preserve">
+    <value>FlyPhotos schließen</value>
+  </data>
+  <data name="ShortcutName_CopyPhoto" xml:space="preserve">
+    <value>Foto kopieren</value>
+  </data>
+  <data name="ShortcutName_DeletePhoto" xml:space="preserve">
+    <value>Foto löschen</value>
+  </data>
+  <data name="ShortcutName_RenamePhoto" xml:space="preserve">
+    <value>Foto umbenennen</value>
+  </data>
+  <data name="ShortcutName_PrintPhoto" xml:space="preserve">
+    <value>Foto drucken</value>
+  </data>
+  <data name="ShortcutName_SharePhoto" xml:space="preserve">
+    <value>Foto teilen</value>
+  </data>
+  <data name="ShortcutName_ShowInExplorer" xml:space="preserve">
+    <value>Dateispeicherort öffnen</value>
+  </data>
+  <data name="ShortcutName_FileProperties" xml:space="preserve">
+    <value>Dateieigenschaften</value>
+  </data>
+  <data name="ShortcutName_FileDetails" xml:space="preserve">
+    <value>Dateidetails</value>
+  </data>
+  <data name="ShortcutName_MoreActionsMenu" xml:space="preserve">
+    <value>Menü „Weitere Aktionen“</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp1" xml:space="preserve">
+    <value>Mit App 1 öffnen</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp2" xml:space="preserve">
+    <value>Mit App 2 öffnen</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp3" xml:space="preserve">
+    <value>Mit App 3 öffnen</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp4" xml:space="preserve">
+    <value>Mit App 4 öffnen</value>
+  </data>
+  <data name="ShortcutName_OpenWithPanel" xml:space="preserve">
+    <value>Bereich „Öffnen mit“</value>
+  </data>
+  <data name="ShortcutDesc_NextPage" xml:space="preserve">
+    <value>Mehrseitige TIFF- und ICO-Dateien</value>
+  </data>
+  <data name="ShortcutDesc_PrevPage" xml:space="preserve">
+    <value>Mehrseitige TIFF- und ICO-Dateien</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
+    <value>Springt zur nächsten Stufe: 100 %, 400 %, Anpassen</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
+    <value>Springt zur vorherigen Stufe</value>
+  </data>
+  <data name="ShortcutDesc_PhotoInfoPanel" xml:space="preserve">
+    <value>Kamera- und EXIF-Metadaten</value>
+  </data>
+  <data name="ShortcutDesc_CloseApp" xml:space="preserve">
+    <value>Immer verfügbar – kann nicht neu zugewiesen werden</value>
+  </data>
+  <data name="ShortcutDesc_CopyPhoto" xml:space="preserve">
+    <value>Kopiert die Datei in die Zwischenablage</value>
+  </data>
+  <data name="ShortcutDesc_DeletePhoto" xml:space="preserve">
+    <value>Kann nicht neu zugewiesen werden</value>
+  </data>
+  <data name="ShortcutDesc_SharePhoto" xml:space="preserve">
+    <value>Öffnet den „Teilen“-Dialog von Windows</value>
+  </data>
+  <data name="ShortcutDesc_FileProperties" xml:space="preserve">
+    <value>Registerkarte „Allgemein“</value>
+  </data>
+  <data name="ShortcutDesc_FileDetails" xml:space="preserve">
+    <value>Registerkarte „Details“</value>
+  </data>
+  <data name="ShortcutDesc_OpenWithPanel" xml:space="preserve">
+    <value>Zeigt alle konfigurierten Apps</value>
+  </data>
+  <data name="ShortcutMod_Ctrl" xml:space="preserve">
+    <value>Strg</value>
+  </data>
+  <data name="ShortcutMod_Alt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="ShortcutMod_Shift" xml:space="preserve">
+    <value>Umschalt</value>
+  </data>
+  <data name="ShortcutKey_LeftArrow" xml:space="preserve">
+    <value>Pfeil links</value>
+  </data>
+  <data name="ShortcutKey_RightArrow" xml:space="preserve">
+    <value>Pfeil rechts</value>
+  </data>
+  <data name="ShortcutKey_UpArrow" xml:space="preserve">
+    <value>Pfeil oben</value>
+  </data>
+  <data name="ShortcutKey_DownArrow" xml:space="preserve">
+    <value>Pfeil unten</value>
+  </data>
+  <data name="ShortcutKey_Esc" xml:space="preserve">
+    <value>Esc</value>
+  </data>
+  <data name="ShortcutKey_Backspace" xml:space="preserve">
+    <value>Rücktaste</value>
+  </data>
+  <data name="ShortcutKey_PageUp" xml:space="preserve">
+    <value>Bild auf</value>
+  </data>
+  <data name="ShortcutKey_PageDown" xml:space="preserve">
+    <value>Bild ab</value>
+  </data>
+  <data name="ShortcutKey_Home" xml:space="preserve">
+    <value>Pos1</value>
+  </data>
+  <data name="ShortcutKey_End" xml:space="preserve">
+    <value>Ende</value>
+  </data>
+  <data name="ShortcutKey_Enter" xml:space="preserve">
+    <value>Eingabe</value>
+  </data>
+  <data name="ShortcutKey_Delete" xml:space="preserve">
+    <value>Entf</value>
+  </data>
+  <data name="ShortcutKey_Space" xml:space="preserve">
+    <value>Leertaste</value>
+  </data>
+  <data name="ShortcutKey_Tab" xml:space="preserve">
+    <value>Tab</value>
+  </data>
+  <data name="ShortcutKey_NumAdd" xml:space="preserve">
+    <value>Num +</value>
+  </data>
+  <data name="ShortcutKey_NumSubtract" xml:space="preserve">
+    <value>Num -</value>
+  </data>
+  <data name="ShortcutKey_NumMultiply" xml:space="preserve">
+    <value>Num *</value>
+  </data>
+  <data name="ShortcutKey_NumDivide" xml:space="preserve">
+    <value>Num /</value>
+  </data>
+  <data name="ShortcutKey_NumDecimal" xml:space="preserve">
+    <value>Num ,</value>
+  </data>
+  <data name="ShortcutKey_NumPad" xml:space="preserve">
+    <value>Num {0}</value>
+  </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>Weitere Apps</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>Regen- und Schneesimulator für den Windows-Desktop</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>Die Uhrzeit in Städten rund um die Welt, auf Ihrem Desktop.</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>Uhr-Widget mit vielen Zifferblättern für den Windows-Desktop</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>Klappuhr-Widget für den Windows-Desktop</value>
   </data>
 </root>

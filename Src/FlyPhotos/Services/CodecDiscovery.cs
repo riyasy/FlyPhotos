@@ -135,6 +135,12 @@ internal static class CodecDiscovery
 
     public static bool IsRawlerRaw(string extension) => _rawlerRawExtensions.Contains(extension);
 
+    /// <summary>Extensions decoded by the native libheif decoder (FlyNativeLibHeif).</summary>
+    private static readonly string[] HeifExtensions = [".heic", ".heif", ".hif", ".avif"];
+
+    public static bool IsHeif(string extension) =>
+        Array.Exists(HeifExtensions, e => e.Equals(extension, StringComparison.OrdinalIgnoreCase));
+
     public static bool IsRawFile(string extension) =>
         IsRawlerRaw(extension) || IsWicRaw(extension) || IsMagickRaw(extension);
 
@@ -151,7 +157,7 @@ internal static class CodecDiscovery
         {
             new() { FriendlyName = "PSD Decoder", Type = "Fly", FileExtensions = [".psd"] },
             new() { FriendlyName = "SVG Decoder", Type = "Fly", FileExtensions = [".svg"] },
-            new() { FriendlyName = "HEIC Decoder", Type = "Fly", FileExtensions = [".heic", ".heif", ".hif", ".avif"] }
+            new() { FriendlyName = "HEIC Decoder", Type = "Fly", FileExtensions = [.. HeifExtensions] }
         };
         return list;
     }

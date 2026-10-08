@@ -145,7 +145,7 @@
     <value>Föregående foto</value>
   </data>
   <data name="ButtonClearDiskCache.Content" xml:space="preserve">
-    <value>Töm</value>
+    <value>Rensa</value>
   </data>
   <data name="ButtonExpanderToolTip.Content" xml:space="preserve">
     <value>Visa cachestatus</value>
@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>Anpassa till fönster</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>Klicka för att ändra markeringsfärgen.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Inställningar</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>Klicka för att ändra fönstrets bakgrundsfärg.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>Appen måste startas om för att ändra visningsspråk.</value>
@@ -192,8 +198,11 @@
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Tunn akryl</value>
   </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>Anpassad</value>
+  </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>Frusen</value>
+    <value>Frostad</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Mica</value>
@@ -208,22 +217,22 @@
     <value>Transparent</value>
   </data>
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
-    <value>Visa nästa eller föregående</value>
+    <value>Visa nästa eller föregående foto</value>
   </data>
   <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
-    <value>Visa nästa eller föregående</value>
+    <value>Visa nästa eller föregående foto</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Zooma in eller ut</value>
   </data>
   <data name="ComboPanZoomItemRemember.Content" xml:space="preserve">
-    <value>Kom ihåg Pan/Zoom/Rotation per foto</value>
+    <value>Kom ihåg panorering/zoom/rotation per foto</value>
   </data>
   <data name="ComboPanZoomItemReset.Content" xml:space="preserve">
-    <value>Återställ Pan/Zoom/Rotation</value>
+    <value>Återställ panorering/zoom/rotation</value>
   </data>
   <data name="ComboPanZoomItemRetain.Content" xml:space="preserve">
-    <value>Behåll Pan/Zoom från föregående foto</value>
+    <value>Behåll panorering och zoom från föregående foto</value>
   </data>
   <data name="ComboThemeItemDark.Content" xml:space="preserve">
     <value>Mörk</value>
@@ -256,12 +265,12 @@
     <value>Bekräfta borttagning</value>
   </data>
   <data name="DefaultViewerInstruction1.Text" xml:space="preserve">
-    <value>Så här ställer du in FlyPhotos som standardapp: 
-Högerklicka på ett foto &gt; Öppna med &gt; Välj en annan app. 
+    <value>Så här ställer du in FlyPhotos som standardapp:
+Högerklicka på ett foto &gt; Öppna med &gt; Välj en annan app.
 Välj FlyPhotos och välj Alltid.</value>
   </data>
   <data name="DefaultViewerInstruction2.Text" xml:space="preserve">
-    <value>I Windows 11 kan du också ställa in FlyPhotos som standardapp i 
+    <value>I Windows 11 kan du också ställa in FlyPhotos som standardapp i
 Inställningar &gt; Appar &gt; Standardappar.</value>
   </data>
   <data name="DeletionFailed.CloseButton" xml:space="preserve">
@@ -310,7 +319,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Filstorlek</value>
   </data>
   <data name="Exif_DateTaken" xml:space="preserve">
-    <value>Datum taget</value>
+    <value>Fotograferingsdatum</value>
   </data>
   <data name="Exif_CameraMake" xml:space="preserve">
     <value>Kameratillverkare</value>
@@ -357,6 +366,18 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>GPS-plats</value>
   </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Texturtyp</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Mipmaps</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Alfa</value>
+  </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Laddar högupplöst version. Vänta…</value>
   </data>
@@ -391,7 +412,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Dölj muspekaren automatiskt</value>
   </data>
   <data name="SettingsCardClearDiskCache.Description" xml:space="preserve">
-    <value>Fly cachar senaste snabbförhandsvisningar till disk för snabbare laddning nästa gång. Rensa tar bort alla cachade förhandsvisningar från diskcachen.</value>
+    <value>Fly cachar de senaste snabbförhandsvisningarna till disk för snabbare laddning nästa gång. ”Rensa” tar bort alla cachade förhandsvisningar från diskcachen.</value>
   </data>
   <data name="SettingsCardClearDiskCache.Header" xml:space="preserve">
     <value>Rensa diskcache</value>
@@ -406,7 +427,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>FlyPhotos tackar Resvg, Magick.NET, MagicScaler, Rawler, NLog och WinUIEx.</value>
   </data>
   <data name="SettingsCardCredits.Header" xml:space="preserve">
-    <value>Bidrag</value>
+    <value>Tack till</value>
   </data>
   <data name="RawDecodeTeachingTip.Subtitle" xml:space="preserve">
     <value>Det aktuella fotot laddas snart om.</value>
@@ -454,71 +475,19 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Justera styrkan på auto-toningseffekten.</value>
   </data>
   <data name="SettingsCardFadeIntensity.Header" xml:space="preserve">
-    <value>Automatisk toningintensitet (%)</value>
+    <value>Automatisk toningsintensitet (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Antal bilder i full upplösning som förinläses på varje sida.</value>
+    <value>Antal bilder i full upplösning som förinläses på varje sida om det aktuella fotot.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Högupplöst förinläsning (I minnet)</value>
+    <value>Högupplöst förinläsning (i minnet)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Välj hur stor del av skärmen fotot fyller. (%)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
-    <value>Bild till skärmpassning</value>
-  </data>
-  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
-    <value>Vänster/Höger Pil : Bläddra bland bilder
-Upp/Ner Pil : Zooma in eller ut
-Vänsterklick och dra : Panorera bild
-Håll ned höger musknapp : Zooma in
-Högerklicka : Windows Explorer snabbmeny
-
-Mushjul : Zooma / Bläddra (beroende på inställning)
-Ctrl + Mushjul : Zooma in eller ut
-Alt + Mushjul : Bläddra bland bilder
-Vänsterklick + Mushjul : Bläddra bland bilder
-Luta mushjul Vänster/Höger : Bläddra bland bilder
-Klick på mushjulet : Helskärm
-
-Ctrl + Piltangenter : Panorera bild
-Ctrl + + : Zooma in
-Ctrl + - : Zooma ut
-
-Alt + Vänster/Höger Pil : Bläddra sidor i flersidig TIFF/ICO
-
-Page Up / Page Down : Zooma till nästa förinställning (100%, 400%, Anpassa)
-Home : Gå till första bilden
-End : Gå till sista bilden
-
-Mushjul på miniatyrfält : Bläddra bland bilder
-Mushjul på skärmknappar Vänster/Höger : Bläddra bland bilder
-Mushjul på roteringsknapp : Rotera bild
-
-Pekplatta tvåfingerssvep Vänster/Höger : Bläddra bland bilder
-Pekplatta tvåfingerssvep Upp/Ner : Zooma / Bläddra (beroende på inställning)
-Pekplatta nyp (Pinch) : Zooma in eller ut
-
-F11 : Helskärm
-Enter : Maximera
-
-Alt + Enter : Visa filegenskaper (Allmänt)
-D : Visa filegenskaper (Detaljer)
-I : Visa panelen Fotoinfo (metadata)
-
-W : Visa fil i Windows Explorer
-S : Öppna Windows delningsfönster för filen
-P : Skriv ut foto
-A : Zooma till faktisk storlek
-F : Anpassa till fönster
-E : Visa panel för externa appar
-Ctrl + 1–4: Öppna i extern app 1–4
-M : Visa menyn Fler åtgärder
-
-Del : Ta bort bild
-
-Esc : Stäng inställningar eller Avsluta</value>
+    <value>Bildanpassning till skärm</value>
   </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>Välj språk</value>
@@ -530,20 +499,16 @@ Esc : Stäng inställningar eller Avsluta</value>
     <value>Loggfil</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Antal snabbförhandsvisningar som förinläses på varje sida.</value>
+    <value>Antal snabbförhandsvisningar som förinläses på varje sida om det aktuella fotot.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Lågupplöst förinläsning (I minnet)</value>
+    <value>Lågupplöst förinläsning (i minnet)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Välj standardbeteende för mushjulet.</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>Mushjul</value>
-  </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + Mushjul zoomar alltid. 
-👉 Alt + Mushjul navigerar alltid.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
     <value>⚠ Kan sakta ner starten. Fly väntar med att ladda fotot i full upplösning vid start.</value>
@@ -552,10 +517,10 @@ Esc : Stäng inställningar eller Avsluta</value>
     <value>Animera zoom vid start och zooma ut vid avslut</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ Använd endast alternativet Behåll för mappar med liknande storlek på foton.</value>
+    <value>⚠ Använd endast alternativet ”Behåll” för mappar med foton av liknande storlek.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
-    <value>Pan, Zoom &amp; Rotation-beteende under navigering</value>
+    <value>Beteende för panorering, zoom och rotation under navigering</value>
   </data>
   <data name="SettingsCardReportBugs.Description" xml:space="preserve">
     <value>Rapportera problem på GitHub eller maila till ryftools@outlook.com</value>
@@ -564,7 +529,7 @@ Esc : Stäng inställningar eller Avsluta</value>
     <value>Buggar och problem</value>
   </data>
   <data name="SettingsCardShowCacheStatusExpander.Description" xml:space="preserve">
-    <value>Visa cachestatus i det nedre panelen.</value>
+    <value>Visa cachestatus i den nedre panelen.</value>
   </data>
   <data name="SettingsCardShowCacheStatusExpander.Header" xml:space="preserve">
     <value>Visa cachestatus</value>
@@ -577,7 +542,7 @@ Esc : Stäng inställningar eller Avsluta</value>
     <value>Visa rutig bakgrund</value>
   </data>
   <data name="SettingsCardShowFileName.Description" xml:space="preserve">
-    <value>Visa filnamnet på det aktuella fotot</value>
+    <value>Visa filnamnet på den fil som är öppen</value>
   </data>
   <data name="SettingsCardShowFileName.Header" xml:space="preserve">
     <value>Visa filnamn</value>
@@ -594,6 +559,12 @@ Esc : Stäng inställningar eller Avsluta</value>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
     <value>Visa miniatyrbildsremsa</value>
   </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Visa pilar för föregående/nästa foto när musen är nära fönstrets vänstra eller högra kant.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Visa navigeringspilar vid fönsterkanterna</value>
+  </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Visa zoomprocent i mitten av skärmen vid zoomning.</value>
   </data>
@@ -607,10 +578,10 @@ Esc : Stäng inställningar eller Avsluta</value>
     <value>GitHub-lagringsplats</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Description" xml:space="preserve">
-    <value>Stora bilder anpassas alltid till visningsytan. Små bilder visas i 1:1 som standard; aktivera detta för att zooma in och anpassa dem.</value>
+    <value>Stora foton anpassas alltid till visningsytan. Små foton visas i 1:1 som standard; aktivera detta för att zooma in och anpassa dem.</value>
   </data>
   <data name="SettingsCardStretchSmallImages.Header" xml:space="preserve">
-    <value>Zooma små bilder för att passa visningsytan</value>
+    <value>Zooma små foton för att passa visningsytan</value>
   </data>
   <data name="SettingsCardTheme.Description" xml:space="preserve">
     <value>Välj apptemat.</value>
@@ -628,7 +599,7 @@ Esc : Stäng inställningar eller Avsluta</value>
     <value>Ställ in markeringsfärgen som används för valda miniatyrer.</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
-    <value>Färg för miniatyrval</value>
+    <value>Markeringsfärg för miniatyrer</value>
   </data>
   <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
     <value>Justera storleken på miniatyrerna i visningsprogrammet.</value>
@@ -654,6 +625,12 @@ Esc : Stäng inställningar eller Avsluta</value>
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Fönsterbakgrund</value>
   </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>Gäller endast anpassad fönsterbakgrund.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>Bakgrundsfärg</value>
+  </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>”Föregående tillstånd” återställer fönstrets senaste storlek (fönsterläge eller maximerat), position och skärm.</value>
   </data>
@@ -661,22 +638,7 @@ Esc : Stäng inställningar eller Avsluta</value>
     <value>Fönsterläge vid start</value>
   </data>
   <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
-    <value>Automatisk toning och dölj</value>
-  </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>Konfigurera hur Fly hanterar fotocache.</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>Cache</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>Tangentbordsgenvägar</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>Anpassa Pan och Zoom-beteende.</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>Panorera och zooma</value>
+    <value>Automatisk toning och döljning</value>
   </data>
   <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - Inställningar</value>
@@ -685,7 +647,7 @@ Esc : Stäng inställningar eller Avsluta</value>
     <value>Om</value>
   </data>
   <data name="SettingsPivotItemCodecs.Header" xml:space="preserve">
-    <value>Codec</value>
+    <value>Codecs</value>
   </data>
   <data name="SettingsPivotItemGeneral.Header" xml:space="preserve">
     <value>Allmänt</value>
@@ -714,8 +676,8 @@ Esc : Stäng inställningar eller Avsluta</value>
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Avancerat</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>Tangentbord och mus</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>Beteende</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Fotovisning</value>
@@ -739,7 +701,7 @@ Esc : Stäng inställningar eller Avsluta</value>
     <value>Provperioden har löpt ut</value>
   </data>
   <data name="UnsupportedFileAlert.Description" xml:space="preserve">
-    <value>Den släppta filen är inte en stödd bildtyp.</value>
+    <value>Den släppta filen är inte en bildtyp som stöds.</value>
   </data>
   <data name="UnsupportedFileAlert.Title" xml:space="preserve">
     <value>Filtyp stöds inte</value>
@@ -753,14 +715,38 @@ Esc : Stäng inställningar eller Avsluta</value>
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
     <value>Välj vad musens framåt- och bakåtknappar gör (finns på vissa möss).</value>
   </data>
+  <data name="SettingsCardSwapMouseFwdBack.Header" xml:space="preserve">
+    <value>Byt plats på framåt- och bakåtknapparna</value>
+  </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Stegvis zoom</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Description" xml:space="preserve">
     <value>Genom att klicka utanför fotot återställs fönstret från helskärmsläge eller maximerat läge. Dubbelklick maximerar det igen.</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Klicka utanför bilden för att återställa fönstret</value>
+  <data name="SettingsCardLeftClickOutside.Header" xml:space="preserve">
+    <value>Vänsterklick utanför fotot</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Återställ fönstret</value>
+  </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>Stäng FlyPhotos</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Ingenting</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Dubbelklick utanför fotot</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Maximera fönstret</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionClose.Text" xml:space="preserve">
+    <value>Stäng FlyPhotos</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Ingenting</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>Knapparna för att minimera, maximera och stänga visas endast när musen är nära fönstrets överkant.</value>
@@ -768,11 +754,8 @@ Esc : Stäng inställningar eller Avsluta</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Dölj fönsterknappar automatiskt</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Dra bakgrunden eller håll ned Ctrl och dra bilden för att flytta fönstret.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Dra för att flytta fönstret</value>
+    <value>Vänsterklick och dra utanför fotot</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Skalningsmetod för bilder</value>
@@ -839,5 +822,395 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
     <value>OK</value>
+  </data>
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
+    <value>Mus</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Ctrl + Mushjul</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>Zoomar alltid in eller ut</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + Mushjul</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>Visar alltid nästa eller föregående foto</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>Luta mushjul vänster/höger</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>Visa nästa eller föregående foto</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>Vänsterklick och dra på fotot</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>Panorera foto</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>Klick på mushjulet</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>Helskärm</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>Maximera eller återställ</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>Ingenting</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>Högerklick</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>Utforskarens snabbmeny</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>Håll ned höger musknapp</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>Zooma in</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>Ingenting</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>Dubbelklick på fotot</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>Zooma till faktisk storlek eller anpassa till fönster</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Ctrl + dra flyttar alltid fönstret</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>Flytta fönstret</value>
+  </data>
+  <data name="SettingsPivotItemKeyboard.Header" xml:space="preserve">
+    <value>Tangentbord</value>
+  </data>
+  <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
+    <value>Sök kommandon och tangenter…</value>
+  </data>
+  <data name="ButtonResetAllShortcuts.Content" xml:space="preserve">
+    <value>Återställ alla…</value>
+  </data>
+  <data name="TxtNoShortcutResults.Text" xml:space="preserve">
+    <value>Inga kommandon matchar din sökning.</value>
+  </data>
+  <data name="TextShortcutNoKeys.Text" xml:space="preserve">
+    <value>Ingen</value>
+  </data>
+  <data name="ButtonShortcutEdit.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Ändra genvägar</value>
+  </data>
+  <data name="ShortcutEditToolTip.Content" xml:space="preserve">
+    <value>Ändra genvägar</value>
+  </data>
+  <data name="ShortcutResetAll_Title" xml:space="preserve">
+    <value>Återställa alla genvägar?</value>
+  </data>
+  <data name="ShortcutResetAll_Message" xml:space="preserve">
+    <value>Alla kommandon återgår till sina standardtangenter.</value>
+  </data>
+  <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
+    <value>Återställ alla</value>
+  </data>
+  <data name="ShortcutResetAll_CancelButton" xml:space="preserve">
+    <value>Avbryt</value>
+  </data>
+  <data name="TextShortcutCurrent.Text" xml:space="preserve">
+    <value>Aktuella genvägar</value>
+  </data>
+  <data name="TextShortcutNoneAssigned.Text" xml:space="preserve">
+    <value>Ingen genväg tilldelad.</value>
+  </data>
+  <data name="TextShortcutCapturePrompt.Text" xml:space="preserve">
+    <value>Klicka i rutan nedan och tryck sedan på tangenterna du vill lägga till.</value>
+  </data>
+  <data name="ButtonShortcutRemove.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Ta bort den här genvägen</value>
+  </data>
+  <data name="ShortcutRemoveToolTip.Content" xml:space="preserve">
+    <value>Ta bort</value>
+  </data>
+  <data name="ButtonShortcutReassign.Content" xml:space="preserve">
+    <value>Tilldela om</value>
+  </data>
+  <data name="ButtonShortcutResetDefault.Content" xml:space="preserve">
+    <value>Återställ till standard</value>
+  </data>
+  <data name="ShortcutCapture_DoneButton" xml:space="preserve">
+    <value>Klar</value>
+  </data>
+  <data name="ShortcutCapture_Idle" xml:space="preserve">
+    <value>Klicka här för att lägga till en genväg</value>
+  </data>
+  <data name="ShortcutCapture_Waiting" xml:space="preserve">
+    <value>Väntar på tangenter…</value>
+  </data>
+  <data name="ShortcutCapture_WinKeyRejected" xml:space="preserve">
+    <value>Windows reserverar genvägar som använder Windows-tangenten.</value>
+  </data>
+  <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
+    <value>Byt till en latinsk inmatningsmetod för att ange en genväg.</value>
+  </data>
+  <data name="ShortcutCapture_AlreadyOnThisCommand" xml:space="preserve">
+    <value>{0} är redan tilldelad det här kommandot.</value>
+  </data>
+  <data name="ShortcutCapture_ReservedByOther" xml:space="preserve">
+    <value>{0} är fast tilldelad ”{1}” och kan inte ändras.</value>
+  </data>
+  <data name="ShortcutCapture_Conflict" xml:space="preserve">
+    <value>{0} används redan av ”{1}”. Om du tilldelar om den blir det kommandot utan den här genvägen.</value>
+  </data>
+  <data name="ShortcutGroup_Navigation" xml:space="preserve">
+    <value>Navigering</value>
+  </data>
+  <data name="ShortcutGroup_ZoomPan" xml:space="preserve">
+    <value>Zoom och panorering</value>
+  </data>
+  <data name="ShortcutGroup_Rotate" xml:space="preserve">
+    <value>Rotera</value>
+  </data>
+  <data name="ShortcutGroup_View" xml:space="preserve">
+    <value>Visa</value>
+  </data>
+  <data name="ShortcutGroup_File" xml:space="preserve">
+    <value>Arkiv</value>
+  </data>
+  <data name="ShortcutGroup_OpenWith" xml:space="preserve">
+    <value>Öppna med</value>
+  </data>
+  <data name="ShortcutName_NextPhoto" xml:space="preserve">
+    <value>Nästa foto</value>
+  </data>
+  <data name="ShortcutName_PrevPhoto" xml:space="preserve">
+    <value>Föregående foto</value>
+  </data>
+  <data name="ShortcutName_FirstPhoto" xml:space="preserve">
+    <value>Första fotot</value>
+  </data>
+  <data name="ShortcutName_LastPhoto" xml:space="preserve">
+    <value>Sista fotot</value>
+  </data>
+  <data name="ShortcutName_NextPage" xml:space="preserve">
+    <value>Nästa sida</value>
+  </data>
+  <data name="ShortcutName_PrevPage" xml:space="preserve">
+    <value>Föregående sida</value>
+  </data>
+  <data name="ShortcutName_ZoomIn" xml:space="preserve">
+    <value>Zooma in</value>
+  </data>
+  <data name="ShortcutName_ZoomOut" xml:space="preserve">
+    <value>Zooma ut</value>
+  </data>
+  <data name="ShortcutName_StepZoomIn" xml:space="preserve">
+    <value>Zooma in stegvis</value>
+  </data>
+  <data name="ShortcutName_StepZoomOut" xml:space="preserve">
+    <value>Zooma ut stegvis</value>
+  </data>
+  <data name="ShortcutName_ActualSize" xml:space="preserve">
+    <value>Faktisk storlek (1:1)</value>
+  </data>
+  <data name="ShortcutName_FitToWindow" xml:space="preserve">
+    <value>Anpassa till fönster</value>
+  </data>
+  <data name="ShortcutName_PanUp" xml:space="preserve">
+    <value>Panorera uppåt</value>
+  </data>
+  <data name="ShortcutName_PanDown" xml:space="preserve">
+    <value>Panorera nedåt</value>
+  </data>
+  <data name="ShortcutName_PanLeft" xml:space="preserve">
+    <value>Panorera åt vänster</value>
+  </data>
+  <data name="ShortcutName_PanRight" xml:space="preserve">
+    <value>Panorera åt höger</value>
+  </data>
+  <data name="ShortcutName_RotateLeft" xml:space="preserve">
+    <value>Rotera åt vänster</value>
+  </data>
+  <data name="ShortcutName_RotateRight" xml:space="preserve">
+    <value>Rotera åt höger</value>
+  </data>
+  <data name="ShortcutName_FullScreen" xml:space="preserve">
+    <value>Helskärm</value>
+  </data>
+  <data name="ShortcutName_MaximizeRestore" xml:space="preserve">
+    <value>Maximera eller återställ</value>
+  </data>
+  <data name="ShortcutName_PhotoInfoPanel" xml:space="preserve">
+    <value>Panelen Fotoinfo</value>
+  </data>
+  <data name="ShortcutName_CloseApp" xml:space="preserve">
+    <value>Stäng FlyPhotos</value>
+  </data>
+  <data name="ShortcutName_CopyPhoto" xml:space="preserve">
+    <value>Kopiera foto</value>
+  </data>
+  <data name="ShortcutName_DeletePhoto" xml:space="preserve">
+    <value>Ta bort foto</value>
+  </data>
+  <data name="ShortcutName_RenamePhoto" xml:space="preserve">
+    <value>Byt namn på foto</value>
+  </data>
+  <data name="ShortcutName_PrintPhoto" xml:space="preserve">
+    <value>Skriv ut foto</value>
+  </data>
+  <data name="ShortcutName_SharePhoto" xml:space="preserve">
+    <value>Dela foto</value>
+  </data>
+  <data name="ShortcutName_ShowInExplorer" xml:space="preserve">
+    <value>Öppna filens plats</value>
+  </data>
+  <data name="ShortcutName_FileProperties" xml:space="preserve">
+    <value>Filegenskaper</value>
+  </data>
+  <data name="ShortcutName_FileDetails" xml:space="preserve">
+    <value>Fildetaljer</value>
+  </data>
+  <data name="ShortcutName_MoreActionsMenu" xml:space="preserve">
+    <value>Menyn Fler åtgärder</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp1" xml:space="preserve">
+    <value>Öppna med app 1</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp2" xml:space="preserve">
+    <value>Öppna med app 2</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp3" xml:space="preserve">
+    <value>Öppna med app 3</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp4" xml:space="preserve">
+    <value>Öppna med app 4</value>
+  </data>
+  <data name="ShortcutName_OpenWithPanel" xml:space="preserve">
+    <value>Panelen Öppna med</value>
+  </data>
+  <data name="ShortcutDesc_NextPage" xml:space="preserve">
+    <value>Flersidiga TIFF- och ICO-filer</value>
+  </data>
+  <data name="ShortcutDesc_PrevPage" xml:space="preserve">
+    <value>Flersidiga TIFF- och ICO-filer</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
+    <value>Hoppar till nästa förinställning: 100 %, 400 %, Anpassa till fönster</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
+    <value>Går till föregående förinställning</value>
+  </data>
+  <data name="ShortcutDesc_PhotoInfoPanel" xml:space="preserve">
+    <value>Kamera- och EXIF-metadata</value>
+  </data>
+  <data name="ShortcutDesc_CloseApp" xml:space="preserve">
+    <value>Alltid tillgänglig – kan inte tilldelas om</value>
+  </data>
+  <data name="ShortcutDesc_CopyPhoto" xml:space="preserve">
+    <value>Kopierar filen till Urklipp</value>
+  </data>
+  <data name="ShortcutDesc_DeletePhoto" xml:space="preserve">
+    <value>Kan inte tilldelas om</value>
+  </data>
+  <data name="ShortcutDesc_SharePhoto" xml:space="preserve">
+    <value>Öppnar Windows delningsfönster</value>
+  </data>
+  <data name="ShortcutDesc_FileProperties" xml:space="preserve">
+    <value>Fliken Allmänt</value>
+  </data>
+  <data name="ShortcutDesc_FileDetails" xml:space="preserve">
+    <value>Fliken Detaljer</value>
+  </data>
+  <data name="ShortcutDesc_OpenWithPanel" xml:space="preserve">
+    <value>Visar alla konfigurerade appar</value>
+  </data>
+  <data name="ShortcutMod_Ctrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="ShortcutMod_Alt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="ShortcutMod_Shift" xml:space="preserve">
+    <value>Skift</value>
+  </data>
+  <data name="ShortcutKey_LeftArrow" xml:space="preserve">
+    <value>Vänsterpil</value>
+  </data>
+  <data name="ShortcutKey_RightArrow" xml:space="preserve">
+    <value>Högerpil</value>
+  </data>
+  <data name="ShortcutKey_UpArrow" xml:space="preserve">
+    <value>Uppil</value>
+  </data>
+  <data name="ShortcutKey_DownArrow" xml:space="preserve">
+    <value>Nedpil</value>
+  </data>
+  <data name="ShortcutKey_Esc" xml:space="preserve">
+    <value>Esc</value>
+  </data>
+  <data name="ShortcutKey_Backspace" xml:space="preserve">
+    <value>Backsteg</value>
+  </data>
+  <data name="ShortcutKey_PageUp" xml:space="preserve">
+    <value>Page Up</value>
+  </data>
+  <data name="ShortcutKey_PageDown" xml:space="preserve">
+    <value>Page Down</value>
+  </data>
+  <data name="ShortcutKey_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="ShortcutKey_End" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="ShortcutKey_Enter" xml:space="preserve">
+    <value>Retur</value>
+  </data>
+  <data name="ShortcutKey_Delete" xml:space="preserve">
+    <value>Del</value>
+  </data>
+  <data name="ShortcutKey_Space" xml:space="preserve">
+    <value>Blanksteg</value>
+  </data>
+  <data name="ShortcutKey_Tab" xml:space="preserve">
+    <value>Tabb</value>
+  </data>
+  <data name="ShortcutKey_NumAdd" xml:space="preserve">
+    <value>Num +</value>
+  </data>
+  <data name="ShortcutKey_NumSubtract" xml:space="preserve">
+    <value>Num -</value>
+  </data>
+  <data name="ShortcutKey_NumMultiply" xml:space="preserve">
+    <value>Num *</value>
+  </data>
+  <data name="ShortcutKey_NumDivide" xml:space="preserve">
+    <value>Num /</value>
+  </data>
+  <data name="ShortcutKey_NumDecimal" xml:space="preserve">
+    <value>Num ,</value>
+  </data>
+  <data name="ShortcutKey_NumPad" xml:space="preserve">
+    <value>Num {0}</value>
+  </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>Andra appar</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>Regn- och snösimulator för Windows-skrivbordet</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>Tiden i städer runt om i världen, på ditt skrivbord.</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>Klockwidget med flera urtavlor för Windows-skrivbordet</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>Flipklockwidget för Windows-skrivbordet</value>
   </data>
 </root>

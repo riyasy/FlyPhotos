@@ -42,6 +42,24 @@ internal static partial class Win32Methods
     internal static partial short VkKeyScanEx(byte ch, IntPtr dwhkl);
 
     /// <summary>
+    /// Imports the `MapVirtualKeyExW` function from `user32.dll`.
+    /// This function translates a virtual-key code into a scan code or character value, using the
+    /// given input locale identifier. The inverse direction of <see cref="VkKeyScanEx"/>.
+    /// </summary>
+    /// <param name="uCode">The virtual-key code to translate.</param>
+    /// <param name="uMapType">What to translate it into, such as <see cref="MAPVK_VK_TO_CHAR"/>.</param>
+    /// <param name="dwhkl">The input locale identifier to use for the translation.</param>
+    /// <returns>The translation, or 0 when the key has none.</returns>
+    [LibraryImport("user32.dll", EntryPoint = "MapVirtualKeyExW")]
+    internal static partial uint MapVirtualKeyEx(uint uCode, uint uMapType, IntPtr dwhkl);
+
+    /// <summary>
+    /// <c>MapVirtualKeyEx</c> map type: virtual-key code to unshifted character value, returned in
+    /// the low word. The top bit of the return value flags a dead key.
+    /// </summary>
+    internal const uint MAPVK_VK_TO_CHAR = 2;
+
+    /// <summary>
     /// Returns the maximum number of milliseconds that may occur between the first and second clicks
     /// of a double-click, as configured in the system's mouse settings.
     /// </summary>
@@ -121,6 +139,13 @@ internal static partial class Win32Methods
     /// </returns>
     [LibraryImport("user32.dll", EntryPoint = "FindWindowW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
     internal static partial IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+    /// <summary>
+    /// Retrieves a handle to the window the user is currently working with.
+    /// </summary>
+    /// <returns>A handle to the foreground window, or <see cref="IntPtr.Zero"/> if there is none.</returns>
+    [LibraryImport("user32.dll")]
+    internal static partial IntPtr GetForegroundWindow();
 
     /// <summary>
     /// Sends the specified message to a window or windows. This overload is used to send a <see cref="COPYDATASTRUCT"/> with the <c>WM_COPYDATA</c> message.

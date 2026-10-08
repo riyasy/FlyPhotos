@@ -11,9 +11,10 @@
       * en-us\          - the only language pack kept (drops the other ~87 locales).
       * Microsoft.UI.Xaml\ - required WinUI runtime resources (map.html, acrylic
                              noise texture); not a language folder.
-      * Assets\          - only the four files the app actually loads at runtime:
-                             app-icon.ico, file-type.ico, transparent.cur, and
-                             Fonts\Segoe Fluent Icons.ttf. The MSIX tile/logo PNGs
+      * Assets\          - only the files the app actually loads at runtime:
+                             app-icon.ico, file-type.ico, transparent.cur,
+                             Fonts\Segoe Fluent Icons.ttf, and the About tab's
+                             OtherApps\*.png icons. The MSIX tile/logo PNGs
                              are not used by the installed (non-packaged) app.
 
     Each <Files> element still assigns stable, path-derived component GUIDs, so
@@ -33,11 +34,12 @@
       <!-- WinUI runtime resources (not a locale). -->
       <Files Include="$(var.PublishDir)\Microsoft.UI.Xaml\**" Subdirectory="Microsoft.UI.Xaml" />
 
-      <!-- Only the four Assets files the app loads at runtime. -->
+      <!-- Only the Assets files the app loads at runtime. -->
       <Files Include="$(var.PublishDir)\Assets\app-icon.ico" Subdirectory="Assets" />
       <Files Include="$(var.PublishDir)\Assets\file-type.ico" Subdirectory="Assets" />
       <Files Include="$(var.PublishDir)\Assets\transparent.cur" Subdirectory="Assets" />
       <Files Include="$(var.PublishDir)\Assets\Fonts\Segoe Fluent Icons.ttf" Subdirectory="Assets\Fonts" />
+      <Files Include="$(var.PublishDir)\Assets\OtherApps\*.png" Subdirectory="Assets\OtherApps" />
 
     </ComponentGroup>
   </Fragment>

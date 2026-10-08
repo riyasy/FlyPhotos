@@ -59,10 +59,18 @@ public sealed partial class InitWindow
     private void DropArea_DragOver(object sender, DragEventArgs e)
     {
         // Check if the dragged content contains storage items (files)
-        // If it's a file, show the "copy" icon.
-        if (e.DataView.Contains(StandardDataFormats.StorageItems))
-            e.AcceptedOperation = DataPackageOperation.Copy;
+        if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
 
+        e.AcceptedOperation = DataPackageOperation.Copy;
+
+        // Copy is the only operation the shell will offer for a read-only open, but its "+" glyph
+        // reads as "duplicate this file", which is not what dropping here does. Hide the glyph and
+        // caption the drag with the same wording as the "Open file" link — reusing that key keeps
+        // this out of all 17 locale .resw files. DragUIOverride is only writable during DragOver.
+        if (e.DragUIOverride == null) return;
+        e.DragUIOverride.IsGlyphVisible = false;
+        e.DragUIOverride.Caption = L.Get("OpenFileHyperlink/Text");
+        e.DragUIOverride.IsCaptionVisible = true;
     }
 
     private async void DropArea_Drop(object sender, DragEventArgs e)

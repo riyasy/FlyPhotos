@@ -116,6 +116,11 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <!-- /PDBALTPATH:%_PDB% embeds just the PDB filename instead of the full build-machine
+           path, which would otherwise leak a local directory into every shipped binary.
+           /Brepro drops build timestamps so the output is byte-reproducible.
+           The %25 are MSBuild-escaped percent signs; the linker receives %_PDB%. -->
+      <AdditionalOptions>/PDBALTPATH:%25_PDB%25 /Brepro %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
@@ -152,9 +157,17 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <!-- /PDBALTPATH:%_PDB% embeds just the PDB filename instead of the full build-machine
+           path, which would otherwise leak a local directory into every shipped binary.
+           /Brepro drops build timestamps so the output is byte-reproducible.
+           The %25 are MSBuild-escaped percent signs; the linker receives %_PDB%. -->
+      <AdditionalOptions>/PDBALTPATH:%25_PDB%25 /Brepro %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <!-- Included by FlyNativeLib.rc. Listed here so it is reachable from Solution Explorer;
+         the incremental build already picks up changes to it through the RC file tracker. -->
+    <ClInclude Include="..\build\version.h" />
     <ClInclude Include="DllGlobals.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="NativeExports.h" />
@@ -177,6 +190,9 @@
     <ClCompile Include="ShellProgramScanner.cpp" />
     <ClCompile Include="ShellUtility.cpp" />
     <ClCompile Include="WicUtility.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="FlyNativeLib.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

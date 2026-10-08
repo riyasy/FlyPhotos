@@ -31,7 +31,8 @@ public enum WindowBackdropType
     Acrylic,
     AcrylicThin,
     Transparent,
-    Frozen
+    Frozen,
+    Custom
 }
 
 public enum ZoomDirection
@@ -52,6 +53,26 @@ public enum MouseFwdBackBehavior
     StepZoom
 }
 
+public enum MiddleClickBehavior
+{
+    FullScreen,
+    MaximizeRestore,
+    Nothing
+}
+
+public enum ClickOutsideBehavior
+{
+    RestoreWindow,
+    CloseApp,
+    Nothing
+}
+
+public enum RightClickHoldBehavior
+{
+    ZoomIn,
+    Nothing
+}
+
 public enum Setting
 {
     ThumbnailShowHide,
@@ -66,11 +87,12 @@ public enum Setting
     ExtShortcutsShowHide,
     ImageDimensionsShowHide,
     CaptionButtonsAutoHideToggle,
-    CtrlDragToMoveWindowToggle,
     AutoFadeToggle,
     AutoHideMouseToggle,
     ImageScalingQualityChange,
-    RawDecodingChange
+    RawDecodingChange,
+    KeyBindingsChanged,
+    EdgeNavArrowsShowHide
 }
 
 public enum ScrollDirection

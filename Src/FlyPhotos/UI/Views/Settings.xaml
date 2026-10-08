@@ -8,8 +8,46 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:model="using:FlyPhotos.Core.Model"
     xmlns:ui="using:CommunityToolkit.WinUI"
+    xmlns:views="using:FlyPhotos.UI.Views"
     mc:Ignorable="d">
     <Grid x:Name="MainLayout" Background="Transparent">
+        <Grid.Resources>
+            <!--
+                Glyph-only buttons. WinUI's default Button padding (11,5,11,6) and MinWidth/MinHeight
+                of 32 leave a fixed-size icon button no room for its glyph, so all three are zeroed
+                and the size is set explicitly.
+            -->
+            <Style x:Key="ShortcutIconButtonStyle" TargetType="Button">
+                <Setter Property="Width" Value="32" />
+                <Setter Property="Height" Value="32" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="FontFamily" Value="{StaticResource FluentIcons}" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+            </Style>
+            <Style x:Key="ShortcutChipButtonStyle" TargetType="Button">
+                <Setter Property="Width" Value="20" />
+                <Setter Property="Height" Value="20" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="2,0,0,0" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="FontFamily" Value="{StaticResource FluentIcons}" />
+                <Setter Property="FontSize" Value="10" />
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+            </Style>
+            <Style x:Key="FixedMouseActionTextStyle" TargetType="TextBlock">
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Opacity" Value="0.6" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+        </Grid.Resources>
         <Pivot x:Uid="SettingsPage">
             <PivotItem x:Uid="SettingsPivotItemGeneral">
                 <ScrollViewer>
@@ -34,7 +72,7 @@
                         </Flyout>
                     </ScrollViewer.Resources>
 
-                    <StackPanel Margin="0,5,15,0" Orientation="Vertical">
+                    <StackPanel Margin="0,5,15,30" Orientation="Vertical">
                         <controls:SettingsCard
                             x:Name="SettingsCardDeveloperSupport"
                             x:Uid="SettingsCardDeveloperSupport"
@@ -107,6 +145,7 @@
                                 <ComboBoxItem x:Uid="ComboBackgroundItemMica" />
                                 <ComboBoxItem x:Uid="ComboBackgroundItemMicaAlt" />
                                 <ComboBoxItem x:Uid="ComboBackgroundItemNone" />
+                                <ComboBoxItem x:Uid="ComboBackgroundItemCustom" />
                             </ComboBox>
                             <controls:SettingsExpander.Items>
                                 <controls:SettingsCard
@@ -121,6 +160,28 @@
                                         SmallChange="10"
                                         StepFrequency="10"
                                         Value="60" />
+                                </controls:SettingsCard>
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardWindowBackgroundColor"
+                                    x:Uid="SettingsCardWindowBackgroundColor"
+                                    IsEnabled="{x:Bind ShouldEnableBackgroundColor(ComboBackGround.SelectedIndex), Mode=OneWay}">
+                                    <Button
+                                        x:Name="ButtonSetWindowBackgroundColor"
+                                        HorizontalAlignment="Right"
+                                        FlyoutBase.AttachedFlyout="{StaticResource ColorPickerFlyout}"
+                                        Tapped="RectWindowBackground_Tapped">
+                                        <ToolTipService.ToolTip>
+                                            <ToolTip x:Uid="ButtonSetWindowBackgroundColorToolTip" />
+                                        </ToolTipService.ToolTip>
+                                        <Button.Content>
+                                            <Rectangle
+                                                x:Name="RectWindowBackground"
+                                                Width="20"
+                                                Height="20"
+                                                Stroke="{ThemeResource ControlStrongStrokeColorDefaultBrush}"
+                                                StrokeThickness="1" />
+                                        </Button.Content>
+                                    </Button>
                                 </controls:SettingsCard>
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
@@ -216,52 +277,9 @@
                         <!--  *****************  -->
 
                         <TextBlock
-                            x:Uid="TextBlockKeyboardAndMouse"
+                            x:Uid="TextBlockBehaviour"
                             Margin="0,20,0,0"
                             Style="{StaticResource BodyStrongTextBlockStyle}" />
-
-                        <controls:SettingsExpander
-                            x:Uid="SettingsExpanderKeyboardShortcuts"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE765;, FontFamily={StaticResource FluentIcons}}">
-                            <controls:SettingsExpander.Items>
-                                <controls:SettingsCard
-                                    x:Name="SettingsCardKeyboardShortCuts"
-                                    x:Uid="SettingsCardKeyboardShortCuts"
-                                    Description="" />
-                            </controls:SettingsExpander.Items>
-                        </controls:SettingsExpander>
-
-                        <controls:SettingsExpander
-                            x:Name="SettingsCardMouseWheelBehaviour"
-                            x:Uid="SettingsCardMouseWheelBehaviour"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;, FontFamily={StaticResource FluentIcons}}">
-                            <ComboBox
-                                x:Name="ComboMouseWheelBehaviour"
-                                MinWidth="150"
-                                SelectedIndex="0">
-                                <ComboBoxItem x:Uid="ComboMouseWheelItemZoom" />
-                                <ComboBoxItem x:Uid="ComboMouseWheelItemNav" />
-                            </ComboBox>
-                            <controls:SettingsExpander.Items>
-                                <controls:SettingsCard x:Name="SettingsCardMouseWheelBehaviourInfo" x:Uid="SettingsCardMouseWheelBehaviourInfo" />
-                            </controls:SettingsExpander.Items>
-                        </controls:SettingsExpander>
-
-                        <controls:SettingsCard
-                            x:Name="SettingsCardMouseFwdBackBehaviour"
-                            x:Uid="SettingsCardMouseFwdBackBehaviour"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;, FontFamily={StaticResource FluentIcons}}">
-                            <ComboBox
-                                x:Name="ComboMouseFwdBackBehaviour"
-                                MinWidth="150"
-                                SelectedIndex="0">
-                                <ComboBoxItem x:Uid="ComboMouseFwdBackItemNav" />
-                                <ComboBoxItem x:Uid="ComboMouseFwdBackItemStepZoom" />
-                            </ComboBox>
-                        </controls:SettingsCard>
 
                         <controls:SettingsCard
                             x:Name="SettingsCardConfirmBeforeDelete"
@@ -269,22 +287,6 @@
                             Margin="0,5,0,0"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE74D;, FontFamily={StaticResource FluentIcons}}">
                             <ToggleSwitch x:Name="ButtonConfirmBeforeDelete" />
-                        </controls:SettingsCard>
-
-                        <controls:SettingsCard
-                            x:Name="SettingsCardClickOutsideImageToRestoreWindow"
-                            x:Uid="SettingsCardClickOutsideImageToRestoreWindow"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE944;, FontFamily={StaticResource FluentIcons}}">
-                            <ToggleSwitch x:Name="ButtonClickOutsideImageToRestoreWindow" />
-                        </controls:SettingsCard>
-
-                        <controls:SettingsCard
-                            x:Name="SettingsCardCtrlDragToMoveWindow"
-                            x:Uid="SettingsCardCtrlDragToMoveWindow"
-                            Margin="0,5,0,0"
-                            HeaderIcon="{ui:FontIcon Glyph=&#xE7C2;, FontFamily={StaticResource FluentIcons}}">
-                            <ToggleSwitch x:Name="ButtonCtrlDragToMoveWindow" HorizontalAlignment="Right" />
                         </controls:SettingsCard>
 
                         <!--  *****************  -->
@@ -408,8 +410,10 @@
                                         x:Name="ButtonSetThumbnailSelColor"
                                         HorizontalAlignment="Right"
                                         FlyoutBase.AttachedFlyout="{StaticResource ColorPickerFlyout}"
-                                        Tapped="RectThumbnailSelection_Tapped"
-                                        ToolTipService.ToolTip="Click to change selection color.">
+                                        Tapped="RectThumbnailSelection_Tapped">
+                                        <ToolTipService.ToolTip>
+                                            <ToolTip x:Uid="ButtonSetThumbnailSelColorToolTip" />
+                                        </ToolTipService.ToolTip>
                                         <Button.Content>
                                             <Rectangle
                                                 x:Name="RectThumbnailSelection"
@@ -421,6 +425,14 @@
                                 </controls:SettingsCard>
                             </controls:SettingsExpander.Items>
                         </controls:SettingsExpander>
+
+                        <controls:SettingsCard
+                            x:Name="SettingsCardShowEdgeNavArrows"
+                            x:Uid="SettingsCardShowEdgeNavArrows"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE8AB;, FontFamily={StaticResource FluentIcons}}">
+                            <ToggleSwitch x:Name="ButtonShowEdgeNavArrows" />
+                        </controls:SettingsCard>
 
                         <!--  *****************  -->
 
@@ -615,9 +627,194 @@
                 </ScrollViewer>
             </PivotItem>
 
+            <!--
+                Command names, hints and key names come from the catalog in code, which resolves them
+                through L.Get; everything static on the page uses x:Uid as usual.
+            -->
+            <PivotItem x:Uid="SettingsPivotItemKeyboard">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid
+                        Grid.Row="0"
+                        Margin="0,8,15,4"
+                        ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <AutoSuggestBox
+                            x:Uid="ShortcutSearchBox"
+                            QueryIcon="Find"
+                            TextChanged="ShortcutSearchBox_OnTextChanged" />
+                        <Button
+                            x:Uid="ButtonResetAllShortcuts"
+                            Grid.Column="1"
+                            Click="ButtonResetAllShortcuts_OnClick" />
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="1">
+                        <StackPanel Margin="0,5,15,30" Orientation="Vertical">
+
+                            <TextBlock
+                                x:Name="TxtNoShortcutResults"
+                                x:Uid="TxtNoShortcutResults"
+                                Margin="0,24,0,0"
+                                Opacity="0.7"
+                                Visibility="Collapsed" />
+
+                            <ItemsControl x:Name="ShortcutGroupsList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="views:ShortcutGroup">
+                                        <StackPanel Orientation="Vertical" Visibility="{x:Bind GroupVisibility, Mode=OneWay}">
+                                            <TextBlock
+                                                Margin="0,20,0,0"
+                                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                                Text="{x:Bind Name}" />
+                                            <ItemsControl Margin="0,5,0,0" ItemsSource="{x:Bind Rows}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="views:ShortcutRow">
+                                                        <controls:SettingsCard
+                                                            Margin="0,0,0,2"
+                                                            Description="{x:Bind Description}"
+                                                            Header="{x:Bind Name}"
+                                                            Visibility="{x:Bind RowVisibility, Mode=OneWay}">
+                                                            <controls:SettingsCard.HeaderIcon>
+                                                                <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="{x:Bind Glyph}" />
+                                                            </controls:SettingsCard.HeaderIcon>
+
+                                                            <!--
+                                                                Horizontal StackPanel, not a wrap panel: WinUI has no built-in
+                                                                WrapPanel and the toolkit's lives in a package this project does
+                                                                not reference. Zoom is the widest row at 4 chords, and SettingsCard
+                                                                drops this block below the header at narrow widths, which is what
+                                                                keeps it usable at high scaling. Revisit if a 5th ever lands.
+                                                            -->
+                                                            <StackPanel
+                                                                VerticalAlignment="Center"
+                                                                Orientation="Horizontal"
+                                                                Spacing="4">
+                                                                <TextBlock
+                                                                    x:Uid="TextShortcutNoKeys"
+                                                                    VerticalAlignment="Center"
+                                                                    Opacity="0.6"
+                                                                    Visibility="{x:Bind NoKeysVisibility, Mode=OneWay}" />
+
+                                                                <ItemsControl ItemsSource="{x:Bind Keys}">
+                                                                    <ItemsControl.ItemsPanel>
+                                                                        <ItemsPanelTemplate>
+                                                                            <StackPanel Orientation="Horizontal" Spacing="4" />
+                                                                        </ItemsPanelTemplate>
+                                                                    </ItemsControl.ItemsPanel>
+                                                                    <ItemsControl.ItemTemplate>
+                                                                        <DataTemplate x:DataType="views:ShortcutKey">
+                                                                            <Border
+                                                                                Padding="8,3,8,3"
+                                                                                VerticalAlignment="Center"
+                                                                                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                                                BorderThickness="1"
+                                                                                CornerRadius="4">
+                                                                                <TextBlock
+                                                                                    VerticalAlignment="Center"
+                                                                                    FontFamily="Consolas"
+                                                                                    FontSize="13"
+                                                                                    Text="{x:Bind Text}" />
+                                                                            </Border>
+                                                                        </DataTemplate>
+                                                                    </ItemsControl.ItemTemplate>
+                                                                </ItemsControl>
+
+                                                                <!--  Add, remove and reset all live inside the edit dialog.  -->
+                                                                <Button
+                                                                    x:Uid="ButtonShortcutEdit"
+                                                                    Click="ShortcutEdit_OnClick"
+                                                                    Content="&#xE70F;"
+                                                                    Style="{StaticResource ShortcutIconButtonStyle}"
+                                                                    Tag="{x:Bind}"
+                                                                    Visibility="{x:Bind EditableVisibility}">
+                                                                    <ToolTipService.ToolTip>
+                                                                        <ToolTip x:Uid="ShortcutEditToolTip" />
+                                                                    </ToolTipService.ToolTip>
+                                                                </Button>
+                                                            </StackPanel>
+                                                        </controls:SettingsCard>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </PivotItem>
+
+            <!--
+                Mouse: pickers, not capture. See design doc section 5. Rows are rendered from
+                MouseCatalog, so a new row costs no XAML; only a row with child settings (Fwd/Back,
+                below the list) is hand-written. Its own tab because the Keyboard tab's search box
+                and Reset all apply to key bindings only. Resource keys are unchanged from when
+                these were hand-written cards.
+            -->
+            <PivotItem x:Uid="SettingsPivotItemMouse">
+                <ScrollViewer>
+                    <StackPanel Margin="0,5,15,30" Orientation="Vertical">
+                        <ItemsControl x:Name="MouseRowsList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="views:MouseRow">
+                                    <controls:SettingsCard
+                                        Margin="0,0,0,2"
+                                        Description="{x:Bind Description}"
+                                        Header="{x:Bind Header}">
+                                        <controls:SettingsCard.HeaderIcon>
+                                            <FontIcon FontFamily="{StaticResource FluentIcons}" Glyph="&#xE962;" />
+                                        </controls:SettingsCard.HeaderIcon>
+
+                                        <!--  A row is one or the other; the unused half stays collapsed.  -->
+                                        <Grid>
+                                            <TextBlock
+                                                Style="{StaticResource FixedMouseActionTextStyle}"
+                                                Text="{x:Bind FixedAction, Mode=OneWay}"
+                                                Visibility="{x:Bind FixedVisibility}" />
+                                            <ComboBox
+                                                MinWidth="170"
+                                                ItemsSource="{x:Bind Options}"
+                                                SelectedIndex="{x:Bind SelectedIndex}"
+                                                SelectionChanged="MouseOption_OnSelectionChanged"
+                                                Tag="{x:Bind}"
+                                                Visibility="{x:Bind PickerVisibility}" />
+                                        </Grid>
+                                    </controls:SettingsCard>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!--  Hand-written: MouseRow has no shape for a child setting.  -->
+                        <controls:SettingsExpander
+                            x:Uid="SettingsCardMouseFwdBackBehaviour"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;, FontFamily={StaticResource FluentIcons}}">
+                            <ComboBox x:Name="ComboMouseFwdBack" MinWidth="170">
+                                <ComboBoxItem x:Uid="ComboMouseFwdBackItemNav" />
+                                <ComboBoxItem x:Uid="ComboMouseFwdBackItemStepZoom" />
+                            </ComboBox>
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard x:Uid="SettingsCardSwapMouseFwdBack">
+                                    <ToggleSwitch x:Name="ButtonSwapMouseFwdBack" />
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
+                    </StackPanel>
+                </ScrollViewer>
+            </PivotItem>
+
             <PivotItem x:Uid="SettingsPivotItemCodecs">
                 <ScrollViewer>
-                    <StackPanel Margin="0,5,15,0" Orientation="Vertical">
+                    <StackPanel Margin="0,5,15,30" Orientation="Vertical">
                         <TextBlock
                             x:Uid="TextBlockCodecsInfo"
                             Margin="0,10,0,0"
@@ -656,41 +853,100 @@
                 </ScrollViewer>
             </PivotItem>
             <PivotItem x:Uid="SettingsPivotItemAbout">
-                <StackPanel Orientation="Vertical">
-                    <controls:SettingsCard
-                        x:Name="SettingsCardVersion"
-                        x:Uid="SettingsCardVersion"
-                        Margin="0,5,0,0"
-                        HeaderIcon="{ui:FontIcon Glyph=&#xF133;, FontFamily={StaticResource FluentIcons}}">
-                        <HyperlinkButton
-                            x:Name="BtnCheckVersion"
-                            x:Uid="BtnCheckVersion"
-                            NavigateUri="https://github.com/riyasy/FlyPhotos/releases" />
-                    </controls:SettingsCard>
-                    <controls:SettingsCard
-                        x:Name="SettingsCardSourceCode"
-                        x:Uid="SettingsCardSourceCode"
-                        Margin="0,5,0,0">
-                        <controls:SettingsCard.HeaderIcon>
-                            <PathIcon Data="M15,3C8.373,3,3,8.373,3,15c0,5.623,3.872,10.328,9.092,11.63C12.036,26.468,12,26.28,12,26.047v-2.051 c-0.487,0-1.303,0-1.508,0c-0.821,0-1.551-0.353-1.905-1.009c-0.393-0.729-0.461-1.844-1.435-2.526 c-0.289-0.227-0.069-0.486,0.264-0.451c0.615,0.174,1.125,0.596,1.605,1.222c0.478,0.627,0.703,0.769,1.596,0.769 c0.433,0,1.081-0.025,1.691-0.121c0.328-0.833,0.895-1.6,1.588-1.962c-3.996-0.411-5.903-2.399-5.903-5.098 c0-1.162,0.495-2.286,1.336-3.233C9.053,10.647,8.706,8.73,9.435,8c1.798,0,2.885,1.166,3.146,1.481C13.477,9.174,14.461,9,15.495,9 c1.036,0,2.024,0.174,2.922,0.483C18.675,9.17,19.763,8,21.565,8c0.732,0.731,0.381,2.656,0.102,3.594 c0.836,0.945,1.328,2.066,1.328,3.226c0,2.697-1.904,4.684-5.894,5.097C18.199,20.49,19,22.1,19,23.313v2.734 c0,0.104-0.023,0.179-0.035,0.268C23.641,24.676,27,20.236,27,15C27,8.373,21.627,3,15,3z" />
-                        </controls:SettingsCard.HeaderIcon>
-                        <HyperlinkButton x:Uid="BtnGithubRepo" NavigateUri="https://github.com/riyasy/FlyPhotos" />
-                    </controls:SettingsCard>
-                    <controls:SettingsCard
-                        x:Name="SettingsCardReportBugs"
-                        x:Uid="SettingsCardReportBugs"
-                        Margin="0,5,0,0"
-                        HeaderIcon="{ui:FontIcon Glyph=&#xE730;, FontFamily={StaticResource FluentIcons}}">
-                        <HyperlinkButton x:Uid="BtnReportBugs" NavigateUri="https://github.com/riyasy/FlyPhotos/issues" />
-                    </controls:SettingsCard>
-                    <controls:SettingsCard
-                        x:Name="SettingsCardCredits"
-                        x:Uid="SettingsCardCredits"
-                        Margin="0,5,0,0"
-                        HeaderIcon="{ui:FontIcon Glyph=&#xE728;, FontFamily={StaticResource FluentIcons}}">
-                        <HyperlinkButton x:Uid="BtnThirdPartyLicenses" Click="ButtonThirdPartyLicenses_Click" />
-                    </controls:SettingsCard>
-                </StackPanel>
+                <ScrollViewer>
+                    <StackPanel Margin="0,0,15,30" Orientation="Vertical">
+                        <controls:SettingsCard
+                            x:Name="SettingsCardVersion"
+                            x:Uid="SettingsCardVersion"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xF133;, FontFamily={StaticResource FluentIcons}}">
+                            <HyperlinkButton
+                                x:Name="BtnCheckVersion"
+                                x:Uid="BtnCheckVersion"
+                                NavigateUri="https://github.com/riyasy/FlyPhotos/releases" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardSourceCode"
+                            x:Uid="SettingsCardSourceCode"
+                            Margin="0,5,0,0">
+                            <controls:SettingsCard.HeaderIcon>
+                                <PathIcon Data="M15,3C8.373,3,3,8.373,3,15c0,5.623,3.872,10.328,9.092,11.63C12.036,26.468,12,26.28,12,26.047v-2.051 c-0.487,0-1.303,0-1.508,0c-0.821,0-1.551-0.353-1.905-1.009c-0.393-0.729-0.461-1.844-1.435-2.526 c-0.289-0.227-0.069-0.486,0.264-0.451c0.615,0.174,1.125,0.596,1.605,1.222c0.478,0.627,0.703,0.769,1.596,0.769 c0.433,0,1.081-0.025,1.691-0.121c0.328-0.833,0.895-1.6,1.588-1.962c-3.996-0.411-5.903-2.399-5.903-5.098 c0-1.162,0.495-2.286,1.336-3.233C9.053,10.647,8.706,8.73,9.435,8c1.798,0,2.885,1.166,3.146,1.481C13.477,9.174,14.461,9,15.495,9 c1.036,0,2.024,0.174,2.922,0.483C18.675,9.17,19.763,8,21.565,8c0.732,0.731,0.381,2.656,0.102,3.594 c0.836,0.945,1.328,2.066,1.328,3.226c0,2.697-1.904,4.684-5.894,5.097C18.199,20.49,19,22.1,19,23.313v2.734 c0,0.104-0.023,0.179-0.035,0.268C23.641,24.676,27,20.236,27,15C27,8.373,21.627,3,15,3z" />
+                            </controls:SettingsCard.HeaderIcon>
+                            <HyperlinkButton x:Uid="BtnGitHubRepo" NavigateUri="https://github.com/riyasy/FlyPhotos" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardReportBugs"
+                            x:Uid="SettingsCardReportBugs"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE730;, FontFamily={StaticResource FluentIcons}}">
+                            <HyperlinkButton x:Uid="BtnReportBugs" NavigateUri="https://github.com/riyasy/FlyPhotos/issues" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Name="SettingsCardCredits"
+                            x:Uid="SettingsCardCredits"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE728;, FontFamily={StaticResource FluentIcons}}">
+                            <HyperlinkButton x:Uid="BtnThirdPartyLicenses" Click="ButtonThirdPartyLicenses_Click" />
+                        </controls:SettingsCard>
+
+                        <!--  *****************  -->
+
+                        <!--  App names are product names and stay untranslated. Tag is the Store product id.  -->
+                        <TextBlock
+                            x:Uid="TextBlockOtherApps"
+                            Margin="0,20,0,0"
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
+
+                        <controls:SettingsCard
+                            x:Uid="SettingsCardOtherAppLetItRain"
+                            Margin="0,5,0,0"
+                            ActionIcon="{ui:FontIcon Glyph=&#xE8A7;, FontFamily={StaticResource FluentIcons}}"
+                            Click="OtherApp_Click"
+                            Header="Let It Rain"
+                            IsClickEnabled="True"
+                            Tag="9P1H1VCJHJZP">
+                            <controls:SettingsCard.HeaderIcon>
+                                <ImageIcon Source="ms-appx:///Assets/OtherApps/letitrain.png" />
+                            </controls:SettingsCard.HeaderIcon>
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Uid="SettingsCardOtherAppWTick"
+                            Margin="0,5,0,0"
+                            ActionIcon="{ui:FontIcon Glyph=&#xE8A7;, FontFamily={StaticResource FluentIcons}}"
+                            Click="OtherApp_Click"
+                            Header="WTick"
+                            IsClickEnabled="True"
+                            Tag="9P039TR9SW9S">
+                            <controls:SettingsCard.HeaderIcon>
+                                <ImageIcon Source="ms-appx:///Assets/OtherApps/wtick.png" />
+                            </controls:SettingsCard.HeaderIcon>
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Uid="SettingsCardOtherAppDeskTick"
+                            Margin="0,5,0,0"
+                            ActionIcon="{ui:FontIcon Glyph=&#xE8A7;, FontFamily={StaticResource FluentIcons}}"
+                            Click="OtherApp_Click"
+                            Header="DeskTick"
+                            IsClickEnabled="True"
+                            Tag="9NQGFVNBX4WJ">
+                            <controls:SettingsCard.HeaderIcon>
+                                <ImageIcon Source="ms-appx:///Assets/OtherApps/desktick.png" />
+                            </controls:SettingsCard.HeaderIcon>
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Uid="SettingsCardOtherAppDeskFlip"
+                            Margin="0,5,0,0"
+                            ActionIcon="{ui:FontIcon Glyph=&#xE8A7;, FontFamily={StaticResource FluentIcons}}"
+                            Click="OtherApp_Click"
+                            Header="DeskFlip"
+                            IsClickEnabled="True"
+                            Tag="9MSXBKV3295F">
+                            <controls:SettingsCard.HeaderIcon>
+                                <ImageIcon Source="ms-appx:///Assets/OtherApps/deskflip.png" />
+                            </controls:SettingsCard.HeaderIcon>
+                        </controls:SettingsCard>
+                    </StackPanel>
+                </ScrollViewer>
             </PivotItem>
         </Pivot>
     </Grid>

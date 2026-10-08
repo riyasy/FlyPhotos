@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<AssemblyVersion>2.7.1.0</AssemblyVersion>
+		<AssemblyVersion>2.7.3.0</AssemblyVersion>
 		<TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 		<RootNamespace>FlyPhotos</RootNamespace>
@@ -86,21 +86,21 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
-		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.16.0" Condition="'$(Platform)' == 'x64'" />
-		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-arm64" Version="14.16.0" Condition="'$(Platform)' == 'ARM64'" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11" />
+		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="14.17.2" Condition="'$(Platform)' == 'x64'" />
+		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-arm64" Version="14.17.2" Condition="'$(Platform)' == 'ARM64'" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
 		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.11" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.12" />
 		<PackageReference Include="MetadataExtractor" Version="2.9.3" />
 		<PackageReference Include="Microsoft.Graphics.Win2D" Version="1.4.0" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.4.0" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2526" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
 		<PackageReference Include="PhotoSauce.MagicScaler" Version="0.15.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.11" />
-		<PackageReference Include="NLog.Extensions.Logging" Version="6.1.4" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+		<PackageReference Include="NLog.Extensions.Logging" Version="6.2.1" />
 		<PackageReference Include="WinUIEx" Version="2.9.3" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
@@ -168,11 +168,13 @@
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 		<WarningsAsErrors>NU1605</WarningsAsErrors>
+		<MSBuildWarningsAsErrors>$(WarningsAsErrors);MSB3270</MSBuildWarningsAsErrors>
 		<DebugSymbols>False</DebugSymbols>
 		<DebugType>None</DebugType>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
 		<WarningsAsErrors>NU1605</WarningsAsErrors>
+		<MSBuildWarningsAsErrors>$(WarningsAsErrors);MSB3270</MSBuildWarningsAsErrors>
 		<DebugSymbols>False</DebugSymbols>
 		<DebugType>None</DebugType>
 	</PropertyGroup>

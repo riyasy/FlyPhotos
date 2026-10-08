@@ -171,8 +171,14 @@
   <data name="ButtonScaleSetToolTip.Content" xml:space="preserve">
     <value>Вписати у вікно</value>
   </data>
+  <data name="ButtonSetThumbnailSelColorToolTip.Content" xml:space="preserve">
+    <value>Натисніть, щоб змінити колір виділення.</value>
+  </data>
   <data name="ButtonSettingsToolTip.Content" xml:space="preserve">
     <value>Налаштування</value>
+  </data>
+  <data name="ButtonSetWindowBackgroundColorToolTip.Content" xml:space="preserve">
+    <value>Натисніть, щоб змінити колір фону вікна.</value>
   </data>
   <data name="ChangeLanguageAlert.Description" xml:space="preserve">
     <value>Для зміни мови інтерфейсу необхідно перезапустити програму.</value>
@@ -192,14 +198,17 @@
   <data name="ComboBackgroundItemAcrylicThin.Content" xml:space="preserve">
     <value>Тонкий акрил</value>
   </data>
+  <data name="ComboBackgroundItemCustom.Content" xml:space="preserve">
+    <value>Власний</value>
+  </data>
   <data name="ComboBackgroundItemFrozen.Content" xml:space="preserve">
-    <value>Заморожений</value>
+    <value>Матове скло</value>
   </data>
   <data name="ComboBackgroundItemMica.Content" xml:space="preserve">
     <value>Міка</value>
   </data>
   <data name="ComboBackgroundItemMicaAlt.Content" xml:space="preserve">
-    <value>Міка Alt</value>
+    <value>Альтернативна Міка</value>
   </data>
   <data name="ComboBackgroundItemNone.Content" xml:space="preserve">
     <value>Немає</value>
@@ -208,10 +217,10 @@
     <value>Прозорий</value>
   </data>
   <data name="ComboMouseWheelItemNav.Content" xml:space="preserve">
-    <value>Наступне або попереднє</value>
+    <value>Перегляд наступного або попереднього фото</value>
   </data>
   <data name="ComboMouseFwdBackItemNav.Content" xml:space="preserve">
-    <value>Наступне або попереднє</value>
+    <value>Перегляд наступного або попереднього фото</value>
   </data>
   <data name="ComboMouseWheelItemZoom.Content" xml:space="preserve">
     <value>Збільшити або зменшити</value>
@@ -289,7 +298,7 @@
     <value>Тип</value>
   </data>
   <data name="ExifPanelTitle.Text" xml:space="preserve">
-    <value>Інформація про фото</value>
+    <value>Відомості про фото</value>
   </data>
   <data name="ExifPanelClose.Content" xml:space="preserve">
     <value>Закрити</value>
@@ -357,6 +366,18 @@
   <data name="Exif_GpsLocation" xml:space="preserve">
     <value>Розташування GPS</value>
   </data>
+  <data name="Exif_DdsFormat" xml:space="preserve">
+    <value>Формат</value>
+  </data>
+  <data name="Exif_DdsTextureType" xml:space="preserve">
+    <value>Тип текстури</value>
+  </data>
+  <data name="Exif_DdsMipmaps" xml:space="preserve">
+    <value>Міп-карти</value>
+  </data>
+  <data name="Exif_DdsAlpha" xml:space="preserve">
+    <value>Альфа</value>
+  </data>
   <data name="LoadingHighQuality.Message" xml:space="preserve">
     <value>Завантаження версії у високій роздільній здатності. Будь ласка, зачекайте…</value>
   </data>
@@ -364,7 +385,7 @@
     <value>OK</value>
   </data>
   <data name="NoShortcutsCreated.Message" xml:space="preserve">
-    <value>Ярлики не створено. Налаштуйте їх у Параметрах.</value>
+    <value>Ярлики не створено. Налаштуйте їх у Налаштуваннях.</value>
   </data>
   <data name="OpenFileHyperlink.Text" xml:space="preserve">
     <value>Відкрити файл</value>
@@ -373,7 +394,7 @@
     <value>Щоб використовувати FlyPhotos, клацніть правою кнопкою миші на фото та виберіть Відкрити за допомогою &gt; FlyPhotos.</value>
   </data>
   <data name="ScanningTextBlock.Text" xml:space="preserve">
-    <value>Пошук програм…</value>
+    <value>Пошук установлених програм…</value>
   </data>
   <data name="SearchBox.PlaceholderText" xml:space="preserve">
     <value>Пошук програм…</value>
@@ -418,7 +439,7 @@
     <value>Використовувати справжні RAW-дані замість вбудованого JPEG у RAW-файлі.</value>
   </data>
   <data name="SettingsCardDecodeRawData.Header" xml:space="preserve">
-    <value>Декодування Camera RAW</value>
+    <value>Декодування RAW камери</value>
   </data>
   <data name="SettingsCardDecoderPriority.Description" xml:space="preserve">
     <value>WIC (Windows Imaging Component) : системні кодеки • Rawler : найшвидший • ImageMagick : найкраща сумісність</value>
@@ -445,10 +466,10 @@
     <value>Показати ярлики зовнішніх програм</value>
   </data>
   <data name="SettingsCardFadeControls.Description" xml:space="preserve">
-    <value>Зникання елементів керування, коли миша відводиться.</value>
+    <value>Приховувати елементи керування, коли миша віддаляється.</value>
   </data>
   <data name="SettingsCardFadeControls.Header" xml:space="preserve">
-    <value>Автоматичне зникання елементів інтерфейсу</value>
+    <value>Автоматичне зникання елементів керування</value>
   </data>
   <data name="SettingsCardFadeIntensity.Description" xml:space="preserve">
     <value>Налаштувати інтенсивність ефекту автозникання.</value>
@@ -457,10 +478,10 @@
     <value>Інтенсивність автозникання (%)</value>
   </data>
   <data name="SettingsCardHighResCache.Description" xml:space="preserve">
-    <value>Кількість зображень у повній роздільній здатності, попередньо завантажених з кожного боку.</value>
+    <value>Кількість зображень у повній роздільній здатності, попередньо завантажених з кожного боку від поточного фото.</value>
   </data>
   <data name="SettingsCardHighResCache.Header" xml:space="preserve">
-    <value>Попереднє завантаження високої роздільної здатності (У пам'яті)</value>
+    <value>Попереднє завантаження високої роздільної здатності (у пам'яті)</value>
   </data>
   <data name="SettingsCardImageFitPercentage.Description" xml:space="preserve">
     <value>Вибрати, яку частину екрана займає фото. (%)</value>
@@ -468,72 +489,20 @@
   <data name="SettingsCardImageFitPercentage.Header" xml:space="preserve">
     <value>Підгонка зображення до екрана</value>
   </data>
-  <data name="SettingsCardKeyboardShortCuts.Description" xml:space="preserve">
-    <value>Стрілки ліво/право : Навігація між фото
-Стрілки вгору/вниз : Збільшити або зменшити
-Лівий клік миші та перетягування : Переміщення фото
-Утримання правої кнопки миші : Збільшити
-Правий клік миші : Контекстне меню Провідника Windows
-
-Коліщатко миші : Збільшити/зменшити / Навігація (залежно від налаштування)
-Ctrl + коліщатко миші : Збільшити або зменшити
-Alt + коліщатко миші : Навігація між фото
-Лівий клік + коліщатко миші : Навігація між фото
-Нахил коліщатка миші ліворуч або праворуч : Навігація між фото
-Натискання коліщатка миші : На весь екран
-
-Ctrl + стрілки : Переміщення фото
-Ctrl + + : Збільшити
-Ctrl + - : Зменшити
-
-Alt + стрілки ліво/право : Навігація між сторінками багатосторінкового TIFF/ICO
-
-Page Up/Page Down : Збільшити/зменшити до наступного пресету (100%, 400%, вписати)
-Home : Перейти до першого фото
-End : Перейти до останнього фото
-
-Коліщатко миші на панелі мініатюр : Навігація між фото
-Коліщатко миші на екранних кнопках ліво/право : Навігація між фото
-Коліщатко миші на екранній кнопці повороту : Повернути фото
-
-Свайп двома пальцями по тачпаду ліво/право : Навігація між фото
-Свайп двома пальцями по тачпаду вгору/вниз : Збільшити/зменшити / Навігація (залежно від налаштування коліщатка)
-Зведення/розведення пальців на тачпаді : Збільшити або зменшити
-
-F11 : На весь екран
-Enter : Розгорнути
-
-Alt + Enter : Показати властивості файлу (вкладка «Загальні»)
-D : Показати властивості файлу (вкладка «Відомості»)
-I : Показати панель відомостей про фото (метаданих)
-
-W : Показати файл у Провіднику Windows
-S : Показати діалог «Поділитися» для файлу
-P : Друк фото
-A : Масштаб 1:1
-F : Вписати у вікно
-E : Показати панель зовнішніх програм
-Ctrl + 1–4: Відкрити у зовнішній програмі 1–4
-M : Показати меню додаткових дій
-
-Del : Видалити фото
-
-Esc : Закрити налаштування або вийти з програми</value>
-  </data>
   <data name="SettingsCardLanguage.Header" xml:space="preserve">
     <value>Вибрати мову</value>
   </data>
   <data name="SettingsCardLog.Description" xml:space="preserve">
-    <value>Відкрити файл журналу</value>
+    <value>Відкрити, щоб переглянути файл журналу</value>
   </data>
   <data name="SettingsCardLog.Header" xml:space="preserve">
     <value>Файл журналу</value>
   </data>
   <data name="SettingsCardLowResCache.Description" xml:space="preserve">
-    <value>Кількість швидких прев'ю, попередньо завантажених з кожного боку.</value>
+    <value>Кількість швидких прев'ю, попередньо завантажених з кожного боку від поточного фото.</value>
   </data>
   <data name="SettingsCardLowResCache.Header" xml:space="preserve">
-    <value>Попереднє завантаження низької роздільної здатності (У пам'яті)</value>
+    <value>Попереднє завантаження низької роздільної здатності (у пам'яті)</value>
   </data>
   <data name="SettingsCardMouseWheelBehaviour.Description" xml:space="preserve">
     <value>Вибрати поведінку коліщатка миші за замовчуванням.</value>
@@ -541,18 +510,14 @@ Esc : Закрити налаштування або вийти з програ�
   <data name="SettingsCardMouseWheelBehaviour.Header" xml:space="preserve">
     <value>Коліщатко миші</value>
   </data>
-  <data name="SettingsCardMouseWheelBehaviourInfo.Description" xml:space="preserve">
-    <value>👉 Ctrl + коліщатко миші завжди масштабує.
-👉 Alt + коліщатко миші завжди виконує навігацію.</value>
-  </data>
   <data name="SettingsCardOpenExitZoom.Description" xml:space="preserve">
     <value>⚠ Може сповільнити запуск. Fly чекає завантаження фото у повній роздільній здатності при старті.</value>
   </data>
   <data name="SettingsCardOpenExitZoom.Header" xml:space="preserve">
-    <value>Анімація масштабування при запуску та зменшенні при виході</value>
+    <value>Анімація масштабування при запуску та зменшення при виході</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Description" xml:space="preserve">
-    <value>⚠ Використовуйте «Зберегти» лише для папок із фото подібного розміру.</value>
+    <value>⚠ Використовуйте варіант «Зберегти» лише для папок із фото подібного розміру.</value>
   </data>
   <data name="SettingsCardPanZoomNavBehaviour.Header" xml:space="preserve">
     <value>Поведінка переміщення, масштабу та повороту при навігації</value>
@@ -589,10 +554,16 @@ Esc : Закрити налаштування або вийти з програ�
     <value>Показувати розміри фото</value>
   </data>
   <data name="SettingsCardShowThumbnail.Description" xml:space="preserve">
-    <value>Показувати панель мініатюр внизу вікна</value>
+    <value>Показувати стрічку мініатюр внизу вікна</value>
   </data>
   <data name="SettingsCardShowThumbnail.Header" xml:space="preserve">
-    <value>Показувати панель мініатюр</value>
+    <value>Показувати стрічку мініатюр</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Description" xml:space="preserve">
+    <value>Показувати стрілки переходу до попереднього/наступного фото, коли миша знаходиться біля лівого або правого краю вікна.</value>
+  </data>
+  <data name="SettingsCardShowEdgeNavArrows.Header" xml:space="preserve">
+    <value>Показувати стрілки навігації по краях вікна</value>
   </data>
   <data name="SettingsCardShowZoomPercent.Description" xml:space="preserve">
     <value>Показувати відсоток масштабування в центрі екрана під час масштабування.</value>
@@ -601,7 +572,7 @@ Esc : Закрити налаштування або вийти з програ�
     <value>Показувати відсоток масштабування</value>
   </data>
   <data name="SettingsCardSourceCode.Description" xml:space="preserve">
-    <value>FlyPhotos є відкритим вихідним кодом і розміщений на GitHub</value>
+    <value>FlyPhotos має відкритий вихідний код і розміщений на GitHub</value>
   </data>
   <data name="SettingsCardSourceCode.Header" xml:space="preserve">
     <value>Репозиторій GitHub</value>
@@ -628,7 +599,7 @@ Esc : Закрити налаштування або вийти з програ�
     <value>Встановити колір виділення для вибраних мініатюр.</value>
   </data>
   <data name="SettingsCardThumbnailSelectionColor.Header" xml:space="preserve">
-    <value>Колір виділення мініатюри</value>
+    <value>Колір виділення мініатюр</value>
   </data>
   <data name="SettingsCardThumbnailSize.Description" xml:space="preserve">
     <value>Налаштувати розмір мініатюр у переглядачі.</value>
@@ -637,7 +608,7 @@ Esc : Закрити налаштування або вийти з програ�
     <value>Розмір мініатюр</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Description" xml:space="preserve">
-    <value>Застосовується лише для прозорого фону вікна.</value>
+    <value>Застосовується лише до прозорого фону вікна.</value>
   </data>
   <data name="SettingsCardTransparentBackgroundIntensity.Header" xml:space="preserve">
     <value>Прозорість (%)</value>
@@ -654,6 +625,12 @@ Esc : Закрити налаштування або вийти з програ�
   <data name="SettingsCardWindowBackground.Header" xml:space="preserve">
     <value>Фон вікна</value>
   </data>
+  <data name="SettingsCardWindowBackgroundColor.Description" xml:space="preserve">
+    <value>Застосовується лише до власного фону вікна.</value>
+  </data>
+  <data name="SettingsCardWindowBackgroundColor.Header" xml:space="preserve">
+    <value>Колір фону</value>
+  </data>
   <data name="SettingsCardWindowLaunchMode.Description" xml:space="preserve">
     <value>«Попередній стан» відновлює останній розмір (у віконному режимі або розгорнутий), положення та монітор.</value>
   </data>
@@ -662,21 +639,6 @@ Esc : Закрити налаштування або вийти з програ�
   </data>
   <data name="TextBlockAutoFadeSettings.Text" xml:space="preserve">
     <value>Автозникання та приховування</value>
-  </data>
-  <data name="SettingsExpanderCaching.Description" xml:space="preserve">
-    <value>Налаштувати кешування фото у Fly.</value>
-  </data>
-  <data name="SettingsExpanderCaching.Header" xml:space="preserve">
-    <value>Кешування</value>
-  </data>
-  <data name="SettingsExpanderKeyboardShortcuts.Header" xml:space="preserve">
-    <value>Гарячі клавіші</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Description" xml:space="preserve">
-    <value>Налаштувати поведінку переміщення та масштабування.</value>
-  </data>
-  <data name="SettingsExpanderPanZoom.Header" xml:space="preserve">
-    <value>Переміщення та масштабування</value>
   </data>
   <data name="SettingsPage.Title" xml:space="preserve">
     <value>FlyPhotos - Налаштування</value>
@@ -714,8 +676,8 @@ Esc : Закрити налаштування або вийти з програ�
   <data name="TextBlockAdvanced.Text" xml:space="preserve">
     <value>Додатково</value>
   </data>
-  <data name="TextBlockKeyboardAndMouse.Text" xml:space="preserve">
-    <value>Клавіатура та миша</value>
+  <data name="TextBlockBehaviour.Text" xml:space="preserve">
+    <value>Поведінка</value>
   </data>
   <data name="TextBlockPhotoDisplay.Text" xml:space="preserve">
     <value>Відображення фото</value>
@@ -724,7 +686,7 @@ Esc : Закрити налаштування або вийти з програ�
     <value>Запуск та зовнішній вигляд</value>
   </data>
   <data name="TextBlockUIControls.Text" xml:space="preserve">
-    <value>Елементи інтерфейсу</value>
+    <value>Елементи керування</value>
   </data>
   <data name="TitleTextBlock.Text" xml:space="preserve">
     <value>FlyPhotos - Відкрити фото</value>
@@ -753,14 +715,38 @@ Esc : Закрити налаштування або вийти з програ�
   <data name="SettingsCardMouseFwdBackBehaviour.Description" xml:space="preserve">
     <value>Вибрати дію для кнопок «вперед» та «назад» миші (доступно на деяких мишах).</value>
   </data>
+  <data name="SettingsCardSwapMouseFwdBack.Header" xml:space="preserve">
+    <value>Поміняти місцями кнопки «вперед» і «назад»</value>
+  </data>
   <data name="ComboMouseFwdBackItemStepZoom.Content" xml:space="preserve">
     <value>Покрокове масштабування</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Description" xml:space="preserve">
+  <data name="SettingsCardLeftClickOutside.Description" xml:space="preserve">
     <value>Клік за межами фотографії відновлює вікно з повноекранного або розгорнутого стану. Подвійний клік знову розгортає вікно.</value>
   </data>
-  <data name="SettingsCardClickOutsideImageToRestoreWindow.Header" xml:space="preserve">
-    <value>Клік за межами зображення, щоб відновити вікно</value>
+  <data name="SettingsCardLeftClickOutside.Header" xml:space="preserve">
+    <value>Лівий клік миші поза фото</value>
+  </data>
+  <data name="ComboClickOutsideItemRestore.Content" xml:space="preserve">
+    <value>Відновити вікно</value>
+  </data>
+  <data name="ComboClickOutsideItemClose.Content" xml:space="preserve">
+    <value>Закрити FlyPhotos</value>
+  </data>
+  <data name="ComboClickOutsideItemNothing.Content" xml:space="preserve">
+    <value>Нічого</value>
+  </data>
+  <data name="SettingsCardDoubleClickOutside.Header" xml:space="preserve">
+    <value>Подвійний клік поза фото</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionMaximize.Text" xml:space="preserve">
+    <value>Розгорнути вікно</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionClose.Text" xml:space="preserve">
+    <value>Закрити FlyPhotos</value>
+  </data>
+  <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
+    <value>Нічого</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>Кнопки згортання, розгортання та закриття відображаються лише тоді, коли миша знаходиться біля верхнього краю вікна.</value>
@@ -768,11 +754,8 @@ Esc : Закрити налаштування або вийти з програ�
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Автоматично ховати кнопки вікна</value>
   </data>
-  <data name="SettingsCardCtrlDragToMoveWindow.Description" xml:space="preserve">
-    <value>Перетягніть фон або утримуйте Ctrl і перетягуйте зображення, щоб перемістити вікно.</value>
-  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
-    <value>Перетягування для переміщення вікна</value>
+    <value>Лівий клік миші та перетягування поза фото</value>
   </data>
   <data name="SettingsCardImageScalingQuality.Header" xml:space="preserve">
     <value>Метод масштабування зображення</value>
@@ -823,7 +806,7 @@ High Quality Cubic – Масштабування найвищої якості 
     <value>Перейменувати</value>
   </data>
   <data name="RenameFailed.CloseButton" xml:space="preserve">
-    <value>ОК</value>
+    <value>OK</value>
   </data>
   <data name="RenameFailed.Message" xml:space="preserve">
     <value>Не вдалося перейменувати файл.</value>
@@ -838,6 +821,396 @@ High Quality Cubic – Масштабування найвищої якості 
     <value>Файл із таким ім'ям уже існує.</value>
   </data>
   <data name="RenameFlyout.OkButton" xml:space="preserve">
-    <value>ОК</value>
+    <value>OK</value>
+  </data>
+  <data name="SettingsPivotItemMouse.Header" xml:space="preserve">
+    <value>Миша</value>
+  </data>
+  <data name="SettingsCardCtrlMouseWheel.Header" xml:space="preserve">
+    <value>Ctrl + коліщатко миші</value>
+  </data>
+  <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
+    <value>Завжди збільшує або зменшує масштаб</value>
+  </data>
+  <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
+    <value>Alt + коліщатко миші</value>
+  </data>
+  <data name="TextAltMouseWheelAction.Text" xml:space="preserve">
+    <value>Завжди показує наступне або попереднє фото</value>
+  </data>
+  <data name="SettingsCardTiltWheel.Header" xml:space="preserve">
+    <value>Нахил коліщатка миші ліворуч або праворуч</value>
+  </data>
+  <data name="TextTiltWheelAction.Text" xml:space="preserve">
+    <value>Перегляд наступного або попереднього фото</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Header" xml:space="preserve">
+    <value>Лівий клік миші та перетягування по фото</value>
+  </data>
+  <data name="TextLeftClickDragAction.Text" xml:space="preserve">
+    <value>Переміщення фото</value>
+  </data>
+  <data name="SettingsCardMiddleClick.Header" xml:space="preserve">
+    <value>Натискання коліщатка миші</value>
+  </data>
+  <data name="ComboMiddleClickItemFullScreen.Content" xml:space="preserve">
+    <value>На весь екран</value>
+  </data>
+  <data name="ComboMiddleClickItemMaximize.Content" xml:space="preserve">
+    <value>Розгорнути або відновити</value>
+  </data>
+  <data name="ComboMiddleClickItemNothing.Content" xml:space="preserve">
+    <value>Нічого</value>
+  </data>
+  <data name="SettingsCardRightClick.Header" xml:space="preserve">
+    <value>Правий клік миші</value>
+  </data>
+  <data name="TextRightClickAction.Text" xml:space="preserve">
+    <value>Контекстне меню Провідника Windows</value>
+  </data>
+  <data name="SettingsCardRightClickHold.Header" xml:space="preserve">
+    <value>Утримання правої кнопки миші</value>
+  </data>
+  <data name="ComboRightClickHoldItemZoomIn.Content" xml:space="preserve">
+    <value>Збільшити</value>
+  </data>
+  <data name="ComboRightClickHoldItemNothing.Content" xml:space="preserve">
+    <value>Нічого</value>
+  </data>
+  <data name="SettingsCardDoubleClick.Header" xml:space="preserve">
+    <value>Подвійний клік по фото</value>
+  </data>
+  <data name="TextDoubleClickAction.Text" xml:space="preserve">
+    <value>Масштаб 1:1 або вписати у вікно</value>
+  </data>
+  <data name="SettingsCardLeftClickDrag.Description" xml:space="preserve">
+    <value>Ctrl + перетягування завжди переміщує вікно</value>
+  </data>
+  <data name="TextCtrlDragAction.Text" xml:space="preserve">
+    <value>Перемістити вікно</value>
+  </data>
+  <data name="SettingsPivotItemKeyboard.Header" xml:space="preserve">
+    <value>Клавіатура</value>
+  </data>
+  <data name="ShortcutSearchBox.PlaceholderText" xml:space="preserve">
+    <value>Пошук команд і клавіш…</value>
+  </data>
+  <data name="ButtonResetAllShortcuts.Content" xml:space="preserve">
+    <value>Скинути все…</value>
+  </data>
+  <data name="TxtNoShortcutResults.Text" xml:space="preserve">
+    <value>Немає команд, що відповідають запиту.</value>
+  </data>
+  <data name="TextShortcutNoKeys.Text" xml:space="preserve">
+    <value>Немає</value>
+  </data>
+  <data name="ButtonShortcutEdit.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Змінити гарячі клавіші</value>
+  </data>
+  <data name="ShortcutEditToolTip.Content" xml:space="preserve">
+    <value>Змінити гарячі клавіші</value>
+  </data>
+  <data name="ShortcutResetAll_Title" xml:space="preserve">
+    <value>Скинути всі гарячі клавіші?</value>
+  </data>
+  <data name="ShortcutResetAll_Message" xml:space="preserve">
+    <value>Усі команди повернуться до клавіш за замовчуванням.</value>
+  </data>
+  <data name="ShortcutResetAll_ResetButton" xml:space="preserve">
+    <value>Скинути все</value>
+  </data>
+  <data name="ShortcutResetAll_CancelButton" xml:space="preserve">
+    <value>Скасувати</value>
+  </data>
+  <data name="TextShortcutCurrent.Text" xml:space="preserve">
+    <value>Поточні гарячі клавіші</value>
+  </data>
+  <data name="TextShortcutNoneAssigned.Text" xml:space="preserve">
+    <value>Гарячу клавішу не призначено.</value>
+  </data>
+  <data name="TextShortcutCapturePrompt.Text" xml:space="preserve">
+    <value>Клацніть поле нижче, а потім натисніть клавіші, які потрібно додати.</value>
+  </data>
+  <data name="ButtonShortcutRemove.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Видалити цю гарячу клавішу</value>
+  </data>
+  <data name="ShortcutRemoveToolTip.Content" xml:space="preserve">
+    <value>Видалити</value>
+  </data>
+  <data name="ButtonShortcutReassign.Content" xml:space="preserve">
+    <value>Перепризначити</value>
+  </data>
+  <data name="ButtonShortcutResetDefault.Content" xml:space="preserve">
+    <value>Відновити значення за замовчуванням</value>
+  </data>
+  <data name="ShortcutCapture_DoneButton" xml:space="preserve">
+    <value>Готово</value>
+  </data>
+  <data name="ShortcutCapture_Idle" xml:space="preserve">
+    <value>Клацніть тут, щоб додати гарячу клавішу</value>
+  </data>
+  <data name="ShortcutCapture_Waiting" xml:space="preserve">
+    <value>Очікування натискання клавіш…</value>
+  </data>
+  <data name="ShortcutCapture_WinKeyRejected" xml:space="preserve">
+    <value>Windows резервує гарячі клавіші з клавішею Windows.</value>
+  </data>
+  <data name="ShortcutCapture_ImeRejected" xml:space="preserve">
+    <value>Перейдіть на латинську розкладку, щоб задати гарячу клавішу.</value>
+  </data>
+  <data name="ShortcutCapture_AlreadyOnThisCommand" xml:space="preserve">
+    <value>{0} уже призначено цій команді.</value>
+  </data>
+  <data name="ShortcutCapture_ReservedByOther" xml:space="preserve">
+    <value>{0} закріплено за командою «{1}» і не може бути змінено.</value>
+  </data>
+  <data name="ShortcutCapture_Conflict" xml:space="preserve">
+    <value>{0} уже використовується командою «{1}». Після перепризначення та команда залишиться без цієї гарячої клавіші.</value>
+  </data>
+  <data name="ShortcutGroup_Navigation" xml:space="preserve">
+    <value>Навігація</value>
+  </data>
+  <data name="ShortcutGroup_ZoomPan" xml:space="preserve">
+    <value>Масштаб і переміщення</value>
+  </data>
+  <data name="ShortcutGroup_Rotate" xml:space="preserve">
+    <value>Поворот</value>
+  </data>
+  <data name="ShortcutGroup_View" xml:space="preserve">
+    <value>Вигляд</value>
+  </data>
+  <data name="ShortcutGroup_File" xml:space="preserve">
+    <value>Файл</value>
+  </data>
+  <data name="ShortcutGroup_OpenWith" xml:space="preserve">
+    <value>Відкрити за допомогою</value>
+  </data>
+  <data name="ShortcutName_NextPhoto" xml:space="preserve">
+    <value>Наступне фото</value>
+  </data>
+  <data name="ShortcutName_PrevPhoto" xml:space="preserve">
+    <value>Попереднє фото</value>
+  </data>
+  <data name="ShortcutName_FirstPhoto" xml:space="preserve">
+    <value>Перше фото</value>
+  </data>
+  <data name="ShortcutName_LastPhoto" xml:space="preserve">
+    <value>Останнє фото</value>
+  </data>
+  <data name="ShortcutName_NextPage" xml:space="preserve">
+    <value>Наступна сторінка</value>
+  </data>
+  <data name="ShortcutName_PrevPage" xml:space="preserve">
+    <value>Попередня сторінка</value>
+  </data>
+  <data name="ShortcutName_ZoomIn" xml:space="preserve">
+    <value>Збільшити</value>
+  </data>
+  <data name="ShortcutName_ZoomOut" xml:space="preserve">
+    <value>Зменшити</value>
+  </data>
+  <data name="ShortcutName_StepZoomIn" xml:space="preserve">
+    <value>Покроково збільшити</value>
+  </data>
+  <data name="ShortcutName_StepZoomOut" xml:space="preserve">
+    <value>Покроково зменшити</value>
+  </data>
+  <data name="ShortcutName_ActualSize" xml:space="preserve">
+    <value>Масштаб 1:1</value>
+  </data>
+  <data name="ShortcutName_FitToWindow" xml:space="preserve">
+    <value>Вписати у вікно</value>
+  </data>
+  <data name="ShortcutName_PanUp" xml:space="preserve">
+    <value>Перемістити вгору</value>
+  </data>
+  <data name="ShortcutName_PanDown" xml:space="preserve">
+    <value>Перемістити вниз</value>
+  </data>
+  <data name="ShortcutName_PanLeft" xml:space="preserve">
+    <value>Перемістити ліворуч</value>
+  </data>
+  <data name="ShortcutName_PanRight" xml:space="preserve">
+    <value>Перемістити праворуч</value>
+  </data>
+  <data name="ShortcutName_RotateLeft" xml:space="preserve">
+    <value>Повернути ліворуч</value>
+  </data>
+  <data name="ShortcutName_RotateRight" xml:space="preserve">
+    <value>Повернути праворуч</value>
+  </data>
+  <data name="ShortcutName_FullScreen" xml:space="preserve">
+    <value>На весь екран</value>
+  </data>
+  <data name="ShortcutName_MaximizeRestore" xml:space="preserve">
+    <value>Розгорнути або відновити</value>
+  </data>
+  <data name="ShortcutName_PhotoInfoPanel" xml:space="preserve">
+    <value>Панель відомостей про фото</value>
+  </data>
+  <data name="ShortcutName_CloseApp" xml:space="preserve">
+    <value>Закрити FlyPhotos</value>
+  </data>
+  <data name="ShortcutName_CopyPhoto" xml:space="preserve">
+    <value>Копіювати фото</value>
+  </data>
+  <data name="ShortcutName_DeletePhoto" xml:space="preserve">
+    <value>Видалити фото</value>
+  </data>
+  <data name="ShortcutName_RenamePhoto" xml:space="preserve">
+    <value>Перейменувати фото</value>
+  </data>
+  <data name="ShortcutName_PrintPhoto" xml:space="preserve">
+    <value>Друк фото</value>
+  </data>
+  <data name="ShortcutName_SharePhoto" xml:space="preserve">
+    <value>Поділитися фото</value>
+  </data>
+  <data name="ShortcutName_ShowInExplorer" xml:space="preserve">
+    <value>Відкрити розташування файлу</value>
+  </data>
+  <data name="ShortcutName_FileProperties" xml:space="preserve">
+    <value>Властивості файлу</value>
+  </data>
+  <data name="ShortcutName_FileDetails" xml:space="preserve">
+    <value>Відомості про файл</value>
+  </data>
+  <data name="ShortcutName_MoreActionsMenu" xml:space="preserve">
+    <value>Меню додаткових дій</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp1" xml:space="preserve">
+    <value>Відкрити у програмі 1</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp2" xml:space="preserve">
+    <value>Відкрити у програмі 2</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp3" xml:space="preserve">
+    <value>Відкрити у програмі 3</value>
+  </data>
+  <data name="ShortcutName_OpenWithApp4" xml:space="preserve">
+    <value>Відкрити у програмі 4</value>
+  </data>
+  <data name="ShortcutName_OpenWithPanel" xml:space="preserve">
+    <value>Панель «Відкрити за допомогою»</value>
+  </data>
+  <data name="ShortcutDesc_NextPage" xml:space="preserve">
+    <value>Багатосторінкові файли TIFF та ICO</value>
+  </data>
+  <data name="ShortcutDesc_PrevPage" xml:space="preserve">
+    <value>Багатосторінкові файли TIFF та ICO</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomIn" xml:space="preserve">
+    <value>Перехід до наступного пресету: 100 %, 400 %, Вписати у вікно</value>
+  </data>
+  <data name="ShortcutDesc_StepZoomOut" xml:space="preserve">
+    <value>Повернення до попереднього пресету</value>
+  </data>
+  <data name="ShortcutDesc_PhotoInfoPanel" xml:space="preserve">
+    <value>Метадані камери та EXIF</value>
+  </data>
+  <data name="ShortcutDesc_CloseApp" xml:space="preserve">
+    <value>Завжди доступно — перепризначити неможливо</value>
+  </data>
+  <data name="ShortcutDesc_CopyPhoto" xml:space="preserve">
+    <value>Копіює файл у буфер обміну</value>
+  </data>
+  <data name="ShortcutDesc_DeletePhoto" xml:space="preserve">
+    <value>Перепризначити неможливо</value>
+  </data>
+  <data name="ShortcutDesc_SharePhoto" xml:space="preserve">
+    <value>Відкриває діалог «Поділитися» Windows</value>
+  </data>
+  <data name="ShortcutDesc_FileProperties" xml:space="preserve">
+    <value>Вкладка «Загальні»</value>
+  </data>
+  <data name="ShortcutDesc_FileDetails" xml:space="preserve">
+    <value>Вкладка «Відомості»</value>
+  </data>
+  <data name="ShortcutDesc_OpenWithPanel" xml:space="preserve">
+    <value>Показує всі налаштовані програми</value>
+  </data>
+  <data name="ShortcutMod_Ctrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="ShortcutMod_Alt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="ShortcutMod_Shift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="ShortcutKey_LeftArrow" xml:space="preserve">
+    <value>Стрілка ліворуч</value>
+  </data>
+  <data name="ShortcutKey_RightArrow" xml:space="preserve">
+    <value>Стрілка праворуч</value>
+  </data>
+  <data name="ShortcutKey_UpArrow" xml:space="preserve">
+    <value>Стрілка вгору</value>
+  </data>
+  <data name="ShortcutKey_DownArrow" xml:space="preserve">
+    <value>Стрілка вниз</value>
+  </data>
+  <data name="ShortcutKey_Esc" xml:space="preserve">
+    <value>Esc</value>
+  </data>
+  <data name="ShortcutKey_Backspace" xml:space="preserve">
+    <value>Backspace</value>
+  </data>
+  <data name="ShortcutKey_PageUp" xml:space="preserve">
+    <value>Page Up</value>
+  </data>
+  <data name="ShortcutKey_PageDown" xml:space="preserve">
+    <value>Page Down</value>
+  </data>
+  <data name="ShortcutKey_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="ShortcutKey_End" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="ShortcutKey_Enter" xml:space="preserve">
+    <value>Enter</value>
+  </data>
+  <data name="ShortcutKey_Delete" xml:space="preserve">
+    <value>Del</value>
+  </data>
+  <data name="ShortcutKey_Space" xml:space="preserve">
+    <value>Пробіл</value>
+  </data>
+  <data name="ShortcutKey_Tab" xml:space="preserve">
+    <value>Tab</value>
+  </data>
+  <data name="ShortcutKey_NumAdd" xml:space="preserve">
+    <value>Num +</value>
+  </data>
+  <data name="ShortcutKey_NumSubtract" xml:space="preserve">
+    <value>Num -</value>
+  </data>
+  <data name="ShortcutKey_NumMultiply" xml:space="preserve">
+    <value>Num *</value>
+  </data>
+  <data name="ShortcutKey_NumDivide" xml:space="preserve">
+    <value>Num /</value>
+  </data>
+  <data name="ShortcutKey_NumDecimal" xml:space="preserve">
+    <value>Num ,</value>
+  </data>
+  <data name="ShortcutKey_NumPad" xml:space="preserve">
+    <value>Num {0}</value>
+  </data>
+  <data name="TextBlockOtherApps.Text" xml:space="preserve">
+    <value>Інші застосунки</value>
+  </data>
+  <data name="SettingsCardOtherAppLetItRain.Description" xml:space="preserve">
+    <value>Симулятор дощу та снігу для робочого столу Windows</value>
+  </data>
+  <data name="SettingsCardOtherAppWTick.Description" xml:space="preserve">
+    <value>Час у містах по всьому світу, на вашому робочому столі.</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskTick.Description" xml:space="preserve">
+    <value>Віджет годинника з різними циферблатами для робочого столу Windows</value>
+  </data>
+  <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
+    <value>Віджет перекидного годинника для робочого столу Windows</value>
   </data>
 </root>

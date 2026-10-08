@@ -6,6 +6,11 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib"]
 
+# build.rs only: stamps the DLL with the VERSIONINFO resource read from Src/build/version.h,
+# so the Rust DLL carries the same publisher and version strings as the C++ binaries.
+[build-dependencies]
+winresource = "0.1"
+
 [dependencies]
 # Version 0.7 doesn't use the 'develop' or 'jpeg' features anymore
 rawler = "0.7" 

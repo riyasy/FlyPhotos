@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Graphics;
 using Windows.System;
+using Windows.UI;
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Display.Controllers;
@@ -52,27 +53,34 @@ public sealed partial class PhotoDisplayWindow
     private FileActionRename? _fileActionRename;
     private readonly long _backIsPressedToken;
     private readonly long _nextIsPressedToken;
+    private readonly long _edgePrevIsPressedToken;
+    private readonly long _edgeNextIsPressedToken;
     private readonly DispatcherTimer _wheelScrollBrakeTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
     private PointerUpdateKind _lastPointerDownKind;
     private readonly SideButtonNavBehavior _sideButtonNav = null!;
 
-    private readonly VirtualKey _plusVk = Util.GetKeyThatProduces('+');
-    private readonly VirtualKey _minusVk = Util.GetKeyThatProduces('-');
+    private Dictionary<CommandId, Func<Task>> _commands = null!;
+    private Dictionary<KeyChord, CommandId> _routes = ShortcutCatalog.Resolve();
 
-    private Dictionary<(VirtualKey Key, bool Ctrl, bool Alt), Func<Task>> _keyActions = null!;
-    private HashSet<(VirtualKey, bool, bool)> _handledKeys = null!;
+    /// <summary>The key currently held down on a navigation burst, so key-up brakes on whatever
+    /// chord is bound to Next/Prev rather than on a hard-coded Left/Right.</summary>
+    private VirtualKey _burstKey = VirtualKey.None;
+
     private bool _cacheStatusExpanded;
 
     private readonly OpacityFader _opacityFader;
     private readonly InactivityFader _inactivityFader;
     private readonly MouseAutoHider _mouseAutoHider;
     private readonly WindowCaptionButtonFader _captionButtonFader;
+    private readonly EdgeNavArrowFader _edgeNavArrowFader;
+    private readonly CaptionScrimFader _captionScrimFader;
     private readonly WindowPlacementManager _windPlacementManager;
     private readonly WindowFullScreenManager _windFullScreenManager;
     private readonly WindowAppearanceManager _windAppearanceManager;
     private readonly CtrlDragWindowMover _ctrlDragWindowMover;
 
     private bool _loadingStarted;
+    private bool _isClosing;
 
     // Accumulators for smooth scrolling
     private int _verticalDeltaAccumulator;
@@ -154,6 +162,11 @@ public sealed partial class PhotoDisplayWindow
         D2dCanvas.PointerReleased += D2dCanvas_PointerReleased;
         D2dCanvas.DoubleTapped += D2dCanvas_DoubleTapped;
         D2dCanvas.PointerWheelChanged += D2dCanvas_PointerWheelChanged;
+        // Touchscreen pan/pinch (#246). Mouse and pen stay on the pointer handlers above.
+        D2dCanvas.ManipulationMode = ManipulationModes.TranslateX | ManipulationModes.TranslateY | ManipulationModes.Scale;
+        D2dCanvas.ManipulationStarted += D2dCanvas_ManipulationStarted;
+        D2dCanvas.ManipulationDelta += D2dCanvas_ManipulationDelta;
+        D2dCanvas.Tapped += D2dCanvas_Tapped;
 
         D2dCanvasThumbNail.PointerWheelChanged += ThumbNail_PointerWheelChanged;
 
@@ -163,6 +176,8 @@ public sealed partial class PhotoDisplayWindow
 
         _backIsPressedToken = ButtonBack.RegisterPropertyChangedCallback(ButtonBase.IsPressedProperty, ButtonBackNext_IsPressedChanged);
         _nextIsPressedToken = ButtonNext.RegisterPropertyChangedCallback(ButtonBase.IsPressedProperty, ButtonBackNext_IsPressedChanged);
+        _edgePrevIsPressedToken = EdgeButtonPrev.RegisterPropertyChangedCallback(ButtonBase.IsPressedProperty, ButtonBackNext_IsPressedChanged);
+        _edgeNextIsPressedToken = EdgeButtonNext.RegisterPropertyChangedCallback(ButtonBase.IsPressedProperty, ButtonBackNext_IsPressedChanged);
 
         _wheelScrollBrakeTimer.Tick += WheelScrollBrakeTimer_Tick;
         _rightClickZoomHoldTimer.Tick += RightClickZoomHoldTimer_Tick;
@@ -172,17 +187,24 @@ public sealed partial class PhotoDisplayWindow
             MainLayout,
             dir => _photoController.Fly(dir),
             () => _photoController.Brake(),
-            () => AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom);
+            () => AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom,
+            () => AppConfig.Settings.SwapMouseFwdBack);
         _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout, BottomPanel, AppConfig.Settings.AutoFade);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
         _mouseAutoHider = new MouseAutoHider(MainLayout, AppConfig.Settings.AutoHideMouse, TimeSpan.FromSeconds(1));
         _windPlacementManager = new WindowPlacementManager(this, AppConfig.Settings.WindowState);
         _windFullScreenManager = new WindowFullScreenManager(this);
         _captionButtonFader = new WindowCaptionButtonFader(AppWindow.TitleBar, MainLayout, AppConfig.Settings.AutoHideCaptionButtons, ButtonFullScreenClose);
-        _ctrlDragWindowMover = new CtrlDragWindowMover(D2dCanvas, AppWindow, AppConfig.Settings.CtrlDragToMoveWindow);
+        _edgeNavArrowFader = new EdgeNavArrowFader(MainLayout, EdgeButtonPrev, EdgeButtonNext, EdgeNavArrowsWanted());
+        _captionScrimFader = new CaptionScrimFader(MainLayout, CaptionScrim, CaptionScrimTop, CaptionScrimBottom,
+            AppWindow, _windAppearanceManager.CaptionButtonForeground);
+        _windAppearanceManager.CaptionButtonForegroundChanged += WindAppearanceManager_CaptionButtonForegroundChanged;
+        // Drag-to-move-window is no longer a setting. Enabled stays on the mover so the
+        // toggle can come back without touching this class.
+        _ctrlDragWindowMover = new CtrlDragWindowMover(D2dCanvas, AppWindow, enabled: true);
         _ctrlDragWindowMover.IsOnBackground = pos => !_canvasController.IsPressedOnImage(pos.AdjustForDpi(D2dCanvas));
         _windFullScreenManager.FullScreenToggled += WindFullScreenManager_FullScreenToggled;
-        InitKeyActions();
+        InitCommands();
     }
 
     private static Func<Task> Act(Action a) => () =>
@@ -191,86 +213,76 @@ public sealed partial class PhotoDisplayWindow
         return Task.CompletedTask;
     };
 
-    private void InitKeyActions()
+    /// <summary>
+    /// What each command does. The chords that reach them come from <see cref="ShortcutCatalog"/>,
+    /// so this table says nothing about keys. The handlers stay closures over window-local state
+    /// (<see cref="CurrentDragAnchor"/>, ButtonFullScreenClose, ExifInfoPanel, the gates) rather
+    /// than becoming command objects that would each need the window injected into them.
+    /// </summary>
+    private void InitCommands()
     {
-        // KEY, CTRL, ALT, whether to mark event as handled after executing the action
-        _handledKeys =
-        [
-            (VirtualKey.C, true, false), // Ctrl+C — prevent browser-style copy
-            (VirtualKey.Enter, false, false), // Enter — prevent WinUI default button activation
-            (VirtualKey.Enter, false, true), // Alt+Enter — prevent default Enter handling
-            (VirtualKey.Delete, false, false) // Delete — prevent WinUI focus-loss default
-        ];
-
-        // KEY, CTRL, ALT, Action
-        _keyActions = new Dictionary<(VirtualKey, bool, bool), Func<Task>>
+        _commands = new Dictionary<CommandId, Func<Task>>
         {
             // File operations
-            [(VirtualKey.C, true, false)] = () => _photoController.CopyFileToClipboardAsync(),
-            [(VirtualKey.Delete, false, false)] = DeleteCurrentlyDisplayedPhoto,
-            [(VirtualKey.F2, false, false)] = ShowRenameFlyoutAsync,
-            [(VirtualKey.W, false, false)] = Act(OpenFileInExplorer),
-            [(VirtualKey.S, false, false)] = Act(() => FileShareDialogService.ShareFile(this, _photoController.GetFullPathCurrentFile())),
-            [(VirtualKey.P, false, false)] = Act(() => Util.PrintFile(_photoController.GetFullPathCurrentFile())),
-            [(VirtualKey.M, false, false)] = ShowMoreMenuAsync,
+            [CommandId.CopyPhoto] = () => _photoController.CopyFileToClipboardAsync(),
+            [CommandId.DeletePhoto] = DeleteCurrentlyDisplayedPhoto,
+            [CommandId.RenamePhoto] = ShowRenameFlyoutAsync,
+            [CommandId.ShowInExplorer] = Act(OpenFileInExplorer),
+            [CommandId.SharePhoto] = Act(() => FileShareDialogService.ShareFile(this, _photoController.GetFullPathCurrentFile())),
+            [CommandId.PrintPhoto] = Act(() => Util.PrintFile(_photoController.GetFullPathCurrentFile())),
+            [CommandId.MoreActionsMenu] = ShowMoreMenuAsync,
 
             // Window
-            [(VirtualKey.Escape, false, false)] = AnimatePhotoDisplayWindowClose,
-            [(VirtualKey.F11, false, false)] = Act(() => _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose)),
-            [(VirtualKey.Enter, false, false)] = Act(ToggleMaximizeRestore),
+            [CommandId.CloseApp] = AnimatePhotoDisplayWindowClose,
+            [CommandId.FullScreen] = Act(() => _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose)),
+            [CommandId.MaximizeRestore] = Act(ToggleMaximizeRestore),
 
             // Photo navigation
-            [(VirtualKey.Right, false, false)] = () => _photoController.Fly(NavDirection.Next),
-            [(VirtualKey.Left, false, false)] = () => _photoController.Fly(NavDirection.Prev),
-            [(VirtualKey.Home, false, false)] = () => _photoController.FlyToFirst(),
-            [(VirtualKey.End, false, false)] = () => _photoController.FlyToLast(),
+            [CommandId.NextPhoto] = () => _photoController.Fly(NavDirection.Next),
+            [CommandId.PrevPhoto] = () => _photoController.Fly(NavDirection.Prev),
+            [CommandId.FirstPhoto] = () => _photoController.FlyToFirst(),
+            [CommandId.LastPhoto] = () => _photoController.FlyToLast(),
 
-            // Multi-page navigation (Alt+Arrow)
-            [(VirtualKey.Right, false, true)] = Act(() => _canvasController.ChangePage(NavDirection.Next)),
-            [(VirtualKey.Left, false, true)] = Act(() => _canvasController.ChangePage(NavDirection.Prev)),
+            // Multi-page navigation
+            [CommandId.NextPage] = Act(() => _canvasController.ChangePage(NavDirection.Next)),
+            [CommandId.PrevPage] = Act(() => _canvasController.ChangePage(NavDirection.Prev)),
 
             // Zoom
-            [(VirtualKey.Add, true, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In, CurrentDragAnchor())),
-            [(VirtualKey.Subtract, true, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out, CurrentDragAnchor())),
-            [(VirtualKey.Up, false, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In, CurrentDragAnchor())),
-            [(VirtualKey.Down, false, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out, CurrentDragAnchor())),
-            [(VirtualKey.PageUp, false, false)] = Act(() => _canvasController.StepZoom(ZoomDirection.In, CurrentDragAnchor())),
-            [(VirtualKey.PageDown, false, false)] = Act(() => _canvasController.StepZoom(ZoomDirection.Out, CurrentDragAnchor())),
+            [CommandId.ZoomIn] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In, CurrentDragAnchor())),
+            [CommandId.ZoomOut] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out, CurrentDragAnchor())),
+            [CommandId.StepZoomIn] = Act(() => _canvasController.StepZoom(ZoomDirection.In, CurrentDragAnchor())),
+            [CommandId.StepZoomOut] = Act(() => _canvasController.StepZoom(ZoomDirection.Out, CurrentDragAnchor())),
 
-            // Pan (Ctrl+Arrow)
-            [(VirtualKey.Up, true, false)] = Act(() => _canvasController.Pan(0, -20)),
-            [(VirtualKey.Down, true, false)] = Act(() => _canvasController.Pan(0, 20)),
-            [(VirtualKey.Left, true, false)] = Act(() => _canvasController.Pan(-20, 0)),
-            [(VirtualKey.Right, true, false)] = Act(() => _canvasController.Pan(20, 0)),
+            // Pan
+            [CommandId.PanUp] = Act(() => _canvasController.Pan(0, -20)),
+            [CommandId.PanDown] = Act(() => _canvasController.Pan(0, 20)),
+            [CommandId.PanLeft] = Act(() => _canvasController.Pan(-20, 0)),
+            [CommandId.PanRight] = Act(() => _canvasController.Pan(20, 0)),
 
             // Rotate
-            [(VirtualKey.L, false, false)] = Act(() => _canvasController.RotateCurrentPhotoBy90(false)),
-            [(VirtualKey.R, false, false)] = Act(() => _canvasController.RotateCurrentPhotoBy90(true)),
+            [CommandId.RotateLeft] = Act(() => _canvasController.RotateCurrentPhotoBy90(false)),
+            [CommandId.RotateRight] = Act(() => _canvasController.RotateCurrentPhotoBy90(true)),
 
             // View
-            [(VirtualKey.F, false, false)] = Act(() => _canvasController.FitToScreen(true)),
-            [(VirtualKey.A, false, false)] = Act(() => _canvasController.ZoomToHundred()),
+            [CommandId.FitToWindow] = Act(() => _canvasController.FitToScreen(true)),
+            [CommandId.ActualSize] = Act(() => _canvasController.ZoomToHundred()),
 
             // File properties
-            [(VirtualKey.Enter, false, true)] = Act(() => Util.ShowFileProperties(_photoController.GetFullPathCurrentFile())),
-            [(VirtualKey.D, false, false)] = Act(() => Util.ShowFileProperties(_photoController.GetFullPathCurrentFile(), true)),
-            [(VirtualKey.I, false, false)] = Act(() => ExifInfoPanel.Toggle(_photoController.GetFullPathCurrentFile())),
+            [CommandId.FileProperties] = Act(() => Util.ShowFileProperties(_photoController.GetFullPathCurrentFile())),
+            [CommandId.FileDetails] = Act(() => Util.ShowFileProperties(_photoController.GetFullPathCurrentFile(), true)),
+            [CommandId.PhotoInfoPanel] = Act(() => ExifInfoPanel.Toggle(_photoController.GetFullPathCurrentFile())),
 
             // External apps
-            [(VirtualKey.E, false, false)] = ShowShortcutsPanelAsync,
-            [(VirtualKey.Number1, true, false)] = () => LaunchExternalAppAsync(0),
-            [(VirtualKey.NumberPad1, true, false)] = () => LaunchExternalAppAsync(0),
-            [(VirtualKey.Number2, true, false)] = () => LaunchExternalAppAsync(1),
-            [(VirtualKey.NumberPad2, true, false)] = () => LaunchExternalAppAsync(1),
-            [(VirtualKey.Number3, true, false)] = () => LaunchExternalAppAsync(2),
-            [(VirtualKey.NumberPad3, true, false)] = () => LaunchExternalAppAsync(2),
-            [(VirtualKey.Number4, true, false)] = () => LaunchExternalAppAsync(3),
-            [(VirtualKey.NumberPad4, true, false)] = () => LaunchExternalAppAsync(3),
-
-            // Layout-aware zoom (keyboard-layout-dependent keys for + and -)
-            [(_plusVk, true, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In)),
-            [(_minusVk, true, false)] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out))
+            [CommandId.OpenWithPanel] = ShowShortcutsPanelAsync,
+            [CommandId.OpenWithApp1] = () => LaunchExternalAppAsync(0),
+            [CommandId.OpenWithApp2] = () => LaunchExternalAppAsync(1),
+            [CommandId.OpenWithApp3] = () => LaunchExternalAppAsync(2),
+            [CommandId.OpenWithApp4] = () => LaunchExternalAppAsync(3)
         };
+
+#if DEBUG
+        ShortcutCatalog.AssertConsistent(_commands.Keys);
+#endif
     }
 
     #endregion
@@ -290,6 +302,8 @@ public sealed partial class PhotoDisplayWindow
     {
         ButtonBack.UnregisterPropertyChangedCallback(ButtonBase.IsPressedProperty, _backIsPressedToken);
         ButtonNext.UnregisterPropertyChangedCallback(ButtonBase.IsPressedProperty, _nextIsPressedToken);
+        EdgeButtonPrev.UnregisterPropertyChangedCallback(ButtonBase.IsPressedProperty, _edgePrevIsPressedToken);
+        EdgeButtonNext.UnregisterPropertyChangedCallback(ButtonBase.IsPressedProperty, _edgeNextIsPressedToken);
         _wheelScrollBrakeTimer.Stop();
         _wheelScrollBrakeTimer.Tick -= WheelScrollBrakeTimer_Tick;
         _rightClickZoomHoldTimer.Stop();
@@ -297,6 +311,7 @@ public sealed partial class PhotoDisplayWindow
         _rightClickZoomRepeatTimer.Stop();
         _rightClickZoomRepeatTimer.Tick -= RightClickZoomRepeatTimer_Tick;
         _sideButtonNav.Detach();
+        _edgeNavArrowFader.Enabled = false;
 
         AppWindow.Closing -= PhotoDisplayWindow_Closing;
 
@@ -318,6 +333,9 @@ public sealed partial class PhotoDisplayWindow
         D2dCanvas.PointerReleased -= D2dCanvas_PointerReleased;
         D2dCanvas.DoubleTapped -= D2dCanvas_DoubleTapped;
         D2dCanvas.PointerWheelChanged -= D2dCanvas_PointerWheelChanged;
+        D2dCanvas.ManipulationStarted -= D2dCanvas_ManipulationStarted;
+        D2dCanvas.ManipulationDelta -= D2dCanvas_ManipulationDelta;
+        D2dCanvas.Tapped -= D2dCanvas_Tapped;
 
         D2dCanvasThumbNail.PointerWheelChanged -= ThumbNail_PointerWheelChanged;
 
@@ -326,6 +344,8 @@ public sealed partial class PhotoDisplayWindow
         MainLayout.KeyUp -= HandleKeyUp;
 
         _windFullScreenManager.FullScreenToggled -= WindFullScreenManager_FullScreenToggled;
+        _windAppearanceManager.CaptionButtonForegroundChanged -= WindAppearanceManager_CaptionButtonForegroundChanged;
+        _captionScrimFader.Dispose();
 
         _canvasController.Dispose();
         _thumbNailController.Dispose();
@@ -344,7 +364,11 @@ public sealed partial class PhotoDisplayWindow
     {
         _windPlacementManager.PauseTracking = isFullScreen;
         _captionButtonFader.IsFullScreen = isFullScreen;
+        _captionScrimFader.IsFullScreen = isFullScreen;
     }
+
+    private void WindAppearanceManager_CaptionButtonForegroundChanged(Color glyphColor) =>
+        _captionScrimFader.GlyphColor = glyphColor;
 
     private void ToggleMaximizeRestore()
     {
@@ -398,6 +422,8 @@ public sealed partial class PhotoDisplayWindow
 
     private async Task AnimatePhotoDisplayWindowClose()
     {
+        if (_isClosing) return; // A second Esc / click-outside during the exit animation.
+        _isClosing = true;
         _settingWindow?.Close();
 
         if (AppConfig.Settings.OpenExitZoom)
@@ -456,12 +482,20 @@ public sealed partial class PhotoDisplayWindow
     {
         try
         {
-            var key = (e.Key, Util.IsControlPressed(), Util.IsAltPressed());
-            if (_keyActions.TryGetValue(key, out var action))
-            {
-                await action();
-                if (_handledKeys.Contains(key)) e.Handled = true;
-            }
+            if (!_routes.TryGetValue(KeyChord.FromCurrentModifiers(e.Key), out var id)) return;
+            if (!_commands.TryGetValue(id, out var action)) return;
+
+            // Set before awaiting: an async handler suspends here and the routed event finishes
+            // bubbling while it runs, so an e.Handled set afterwards is ignored. Suppression also
+            // has to survive the repeat guard below, or a held Enter reaches the focused button.
+            if (ShortcutCatalog.Has(id, CommandFlags.Suppress)) e.Handled = true;
+
+            // Windows repeats KeyDown while a key is held. That is the point for navigation, zoom
+            // and pan; for anything that toggles it flickers, which is what holding I used to do.
+            if (e.KeyStatus.WasKeyDown && !ShortcutCatalog.Has(id, CommandFlags.Repeat)) return;
+
+            if (ShortcutCatalog.Has(id, CommandFlags.Burst)) _burstKey = e.Key;
+            await action();
         }
         catch (Exception ex)
         {
@@ -469,9 +503,15 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
+    /// <summary>
+    /// Ends a navigation burst. Fly() parks the HQ tier for as long as the key is held and only
+    /// Brake() unwinds it, so this has to follow whatever chord is bound to Next/Prev — braking on
+    /// a hard-coded Left/Right would leave every photo at preview quality once they are rebound.
+    /// </summary>
     private async void HandleKeyUp(object sender, KeyRoutedEventArgs e)
     {
-        if (e.Key is not (VirtualKey.Right or VirtualKey.Left)) return;
+        if (e.Key != _burstKey) return;
+        _burstKey = VirtualKey.None;
         await _photoController.Brake();
     }
 
@@ -482,8 +522,13 @@ public sealed partial class PhotoDisplayWindow
     private async void ButtonBackNext_OnClick(object sender, RoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
-        await _photoController.Fly(ReferenceEquals(sender, ButtonBack) ? NavDirection.Prev : NavDirection.Next);
+        var isPrev = ReferenceEquals(sender, ButtonBack) || ReferenceEquals(sender, EdgeButtonPrev);
+        await _photoController.Fly(isPrev ? NavDirection.Prev : NavDirection.Next);
     }
+
+    /// <summary>Secondary instances hide the toolbar nav buttons, so they get no edge arrows either.</summary>
+    private static bool EdgeNavArrowsWanted() =>
+        AppConfig.Settings.ShowEdgeNavArrows && !AppConfig.Volatile.IsSecondaryInstance;
 
     /// <summary>
     /// Brakes once neither nav RepeatButton is held. RepeatButton has no "released" event, but
@@ -494,15 +539,18 @@ public sealed partial class PhotoDisplayWindow
     /// </summary>
     private void ButtonBackNext_IsPressedChanged(DependencyObject sender, DependencyProperty dp)
     {
-        if (ButtonBack.IsPressed || ButtonNext.IsPressed) return;
+        if (AnyNavButtonPressed()) return;
         DispatcherQueue.TryEnqueue(async () =>
         {
-            if (ButtonBack.IsPressed || ButtonNext.IsPressed) return; // re-pressed before this ran
+            if (AnyNavButtonPressed()) return; // re-pressed before this ran
             if (_photoController.IsSinglePhoto()) return;             // no navigation happened, nothing to brake
             try { await _photoController.Brake(); }
             catch (Exception ex) { Logger.Error(ex); }
         });
     }
+
+    private bool AnyNavButtonPressed() =>
+        ButtonBack.IsPressed || ButtonNext.IsPressed || EdgeButtonPrev.IsPressed || EdgeButtonNext.IsPressed;
 
     private async void ButtonBackNext_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
@@ -570,6 +618,10 @@ public sealed partial class PhotoDisplayWindow
 
     private void D2dCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
+        // Touch pans/pinches through the manipulation handlers; the mouse-drag path below would
+        // jitter between contacts because each finger overwrites _lastPoint.
+        if (e.Pointer.PointerDeviceType == PointerDeviceType.Touch) return;
+
         var pointerPoint = e.GetCurrentPoint(D2dCanvas);
         var dpiAdjustedPos = pointerPoint.Position.AdjustForDpi(D2dCanvas);
         var updateKind = pointerPoint.Properties.PointerUpdateKind;
@@ -584,7 +636,9 @@ public sealed partial class PhotoDisplayWindow
                 _rightClickZoomRepeatTimer.Stop();
                 _rightClickPosition = dpiAdjustedPos;
                 _isRightClickHeld = true;
-                _rightClickZoomHoldTimer.Start();
+                // Not starting the timer leaves the release path to open the context menu as usual.
+                if (AppConfig.Settings.RightClickHoldBehavior == RightClickHoldBehavior.ZoomIn)
+                    _rightClickZoomHoldTimer.Start();
                 break;
 
             case PointerUpdateKind.LeftButtonPressed when pointerOverImage:
@@ -646,33 +700,35 @@ public sealed partial class PhotoDisplayWindow
                 _isDragging = false;
                 break;
 
-            case PointerUpdateKind.LeftButtonReleased:
-                if (Environment.TickCount64 - _lastDoubleTappedAt < Win32Methods.GetDoubleClickTime()) break;
-
-                if (AppConfig.Settings.ClickOutsideImageToRestoreWindow &&
-                    !(currentPoint.Position.Y < AppTitlebar.ActualHeight) &&
-                    !_canvasController.IsPressedOnImage(dpiAdjustedPosition) &&
-                    _windFullScreenManager.IsMaximizedOrFullScreen)
-                {
-                    if (AppConfig.Settings.SizeWindowToImageOnRestore)
-                        RestoreWindowToImage();
-                    else
-                        _windFullScreenManager.Restore(ButtonFullScreenClose);
-                }
+            // Touch goes through Tapped instead, which WinUI doesn't raise after a pan/pinch.
+            case PointerUpdateKind.LeftButtonReleased when e.Pointer.PointerDeviceType != PointerDeviceType.Touch:
+                HandleClickOutside(currentPoint.Position);
+                break;
                 break;
 
             case PointerUpdateKind.MiddleButtonReleased:
-                _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
+                switch (AppConfig.Settings.MiddleClickBehavior)
+                {
+                    case MiddleClickBehavior.FullScreen:
+                        _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
+                        break;
+                    case MiddleClickBehavior.MaximizeRestore:
+                        if (_windFullScreenManager.IsMaximizedOrFullScreen)
+                            _windFullScreenManager.Restore(ButtonFullScreenClose);
+                        else
+                            _windFullScreenManager.Maximize();
+                        break;
+                }
                 break;
 
             case PointerUpdateKind.XButton1Released:
-                if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom)
-                    _canvasController.StepZoom(ZoomDirection.Out, dpiAdjustedPosition);
-                break;
-
             case PointerUpdateKind.XButton2Released:
                 if (AppConfig.Settings.MouseFwdBackBehavior == MouseFwdBackBehavior.StepZoom)
-                    _canvasController.StepZoom(ZoomDirection.In, dpiAdjustedPosition);
+                {
+                    var isBack = (properties.PointerUpdateKind == PointerUpdateKind.XButton1Released)
+                                 != AppConfig.Settings.SwapMouseFwdBack;
+                    _canvasController.StepZoom(isBack ? ZoomDirection.Out : ZoomDirection.In, dpiAdjustedPosition);
+                }
                 break;
         }
     }
@@ -710,9 +766,61 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
+    private void HandleClickOutside(Point rawPosition)
+    {
+        if (Environment.TickCount64 - _lastDoubleTappedAt < Win32Methods.GetDoubleClickTime()) return;
+
+        if (rawPosition.Y < AppTitlebar.ActualHeight ||
+            _canvasController.IsPressedOnImage(rawPosition.AdjustForDpi(D2dCanvas))) return;
+
+        switch (AppConfig.Settings.ClickOutsideBehavior)
+        {
+            case ClickOutsideBehavior.RestoreWindow when _windFullScreenManager.IsMaximizedOrFullScreen:
+                _windFullScreenManager.Restore(ButtonFullScreenClose);
+                break;
+            case ClickOutsideBehavior.CloseApp:
+                _ = AnimatePhotoDisplayWindowClose();
+                break;
+        }
+    }
+
+    private void D2dCanvas_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        if (e.PointerDeviceType == PointerDeviceType.Touch)
+            HandleClickOutside(e.GetPosition(D2dCanvas));
+    }
+
+    // Mouse/pen manipulations are completed at once, so ManipulationDelta only ever sees touch.
+    // Like a mouse drag, a touch gesture must start on the image; on the background it's left to
+    // CtrlDragWindowMover (window move when restored, nothing when maximized).
+    // Start position is the contacts' centroid just past the drag threshold, not the exact press point.
+    private void D2dCanvas_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
+    {
+        if (e.PointerDeviceType != PointerDeviceType.Touch ||
+            !_canvasController.IsPressedOnImage(e.Position.AdjustForDpi(D2dCanvas)))
+        {
+            e.Complete();
+            return;
+        }
+        // A pinch whose first finger landed on the background started a window move; the image wins.
+        _ctrlDragWindowMover.CancelDrag();
+    }
+
+    private void D2dCanvas_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
+    {
+        var delta = e.Delta;
+        // Pan(0,0) isn't a no-op (it clears the fitted state), so skip pure-scale events.
+        if (delta.Translation.X != 0 || delta.Translation.Y != 0)
+            _canvasController.Pan(delta.Translation.X.AdjustForDpi(D2dCanvas), delta.Translation.Y.AdjustForDpi(D2dCanvas));
+        // Pan first, then scale about the contacts' current centroid so the pinch point stays under the fingers.
+        _canvasController.ZoomAtPointByFactor(delta.Scale, e.Position.AdjustForDpi(D2dCanvas));
+    }
+
     private void D2dCanvas_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
     {
-        if (_lastPointerDownKind is PointerUpdateKind.XButton1Pressed or PointerUpdateKind.XButton2Pressed) return;
+        // Touch presses don't update _lastPointerDownKind, so the X-button check only applies to mouse.
+        if (e.PointerDeviceType != PointerDeviceType.Touch &&
+            _lastPointerDownKind is PointerUpdateKind.XButton1Pressed or PointerUpdateKind.XButton2Pressed) return;
         var rawPosition = e.GetPosition(D2dCanvas);
         var point = rawPosition.AdjustForDpi(D2dCanvas);
 
@@ -728,7 +836,7 @@ public sealed partial class PhotoDisplayWindow
         }
         else
         {
-            if (AppConfig.Settings.ClickOutsideImageToRestoreWindow &&
+            if (AppConfig.Settings.ClickOutsideBehavior == ClickOutsideBehavior.RestoreWindow &&
                 !(rawPosition.Y < AppTitlebar.ActualHeight) &&
                 !_windFullScreenManager.IsMaximizedOrFullScreen)
             {
@@ -1059,14 +1167,17 @@ public sealed partial class PhotoDisplayWindow
             case Setting.CaptionButtonsAutoHideToggle:
                 _captionButtonFader.Enabled = AppConfig.Settings.AutoHideCaptionButtons;
                 break;
-            case Setting.CtrlDragToMoveWindowToggle:
-                _ctrlDragWindowMover.Enabled = AppConfig.Settings.CtrlDragToMoveWindow;
-                break;
             case Setting.AutoFadeToggle:
                 _opacityFader.Enabled = AppConfig.Settings.AutoFade;
                 break;
             case Setting.AutoHideMouseToggle:
                 _mouseAutoHider.Enabled = AppConfig.Settings.AutoHideMouse;
+                break;
+            case Setting.KeyBindingsChanged:
+                _routes = ShortcutCatalog.Resolve();
+                break;
+            case Setting.EdgeNavArrowsShowHide:
+                _edgeNavArrowFader.Enabled = EdgeNavArrowsWanted();
                 break;
         }
     }
