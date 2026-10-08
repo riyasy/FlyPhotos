@@ -704,7 +704,6 @@ public sealed partial class PhotoDisplayWindow
             case PointerUpdateKind.LeftButtonReleased when e.Pointer.PointerDeviceType != PointerDeviceType.Touch:
                 HandleClickOutside(currentPoint.Position);
                 break;
-                break;
 
             case PointerUpdateKind.MiddleButtonReleased:
                 switch (AppConfig.Settings.MiddleClickBehavior)
@@ -776,7 +775,10 @@ public sealed partial class PhotoDisplayWindow
         switch (AppConfig.Settings.ClickOutsideBehavior)
         {
             case ClickOutsideBehavior.RestoreWindow when _windFullScreenManager.IsMaximizedOrFullScreen:
-                _windFullScreenManager.Restore(ButtonFullScreenClose);
+                if (AppConfig.Settings.SizeWindowToImageOnRestore)
+                    RestoreWindowToImage();
+                else
+                    _windFullScreenManager.Restore(ButtonFullScreenClose);
                 break;
             case ClickOutsideBehavior.CloseApp:
                 _ = AnimatePhotoDisplayWindowClose();

@@ -114,8 +114,6 @@ internal sealed partial class Settings
         ComboPanZoomNavBehaviour.SelectedIndex = GetIndexForPanZoomBehaviour(AppConfig.Settings.PanZoomBehaviourOnNavigation);
         ButtonEnableAutoHideMouse.IsOn = AppConfig.Settings.AutoHideMouse;
         ButtonEnableAutoHideCaptionButtons.IsOn = AppConfig.Settings.AutoHideCaptionButtons;
-        ButtonCtrlDragToMoveWindow.IsOn = AppConfig.Settings.CtrlDragToMoveWindow;
-        ButtonClickOutsideImageToRestoreWindow.IsOn = AppConfig.Settings.ClickOutsideImageToRestoreWindow;
         ButtonSizeWindowToImageOnRestore.IsOn = AppConfig.Settings.SizeWindowToImageOnRestore;
         ButtonEnableExternalShortcut.IsOn = AppConfig.Settings.ShowExternalAppShortcuts;
         ButtonDecodeRawData.IsOn = AppConfig.Settings.DecodeRawData;
@@ -149,8 +147,6 @@ internal sealed partial class Settings
         ComboPanZoomNavBehaviour.SelectionChanged += ComboPanZoomNavBehaviour_OnSelectionChanged;
         ButtonEnableAutoHideMouse.Toggled += ButtonEnableAutoHideMouse_OnToggled;
         ButtonEnableAutoHideCaptionButtons.Toggled += ButtonEnableAutoHideCaptionButtons_OnToggled;
-        ButtonCtrlDragToMoveWindow.Toggled += ButtonCtrlDragToMoveWindow_OnToggled;
-        ButtonClickOutsideImageToRestoreWindow.Toggled += ButtonClickOutsideImageToRestoreWindow_OnToggled;
         ButtonSizeWindowToImageOnRestore.Toggled += ButtonSizeWindowToImageOnRestore_OnToggled;
         ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
         ButtonDecodeRawData.Toggled += ButtonDecodeRawData_OnToggled;
@@ -257,19 +253,6 @@ internal sealed partial class Settings
     {
         AppConfig.Settings.AutoHideCaptionButtons = ButtonEnableAutoHideCaptionButtons.IsOn;
         SettingChanged?.Invoke(Setting.CaptionButtonsAutoHideToggle);
-        await AppConfig.SaveAsync();
-    }
-
-    private async void ButtonCtrlDragToMoveWindow_OnToggled(object sender, RoutedEventArgs e)
-    {
-        AppConfig.Settings.CtrlDragToMoveWindow = ButtonCtrlDragToMoveWindow.IsOn;
-        SettingChanged?.Invoke(Setting.CtrlDragToMoveWindowToggle);
-        await AppConfig.SaveAsync();
-    }
-
-    private async void ButtonClickOutsideImageToRestoreWindow_OnToggled(object sender, RoutedEventArgs e)
-    {
-        AppConfig.Settings.ClickOutsideImageToRestoreWindow = ButtonClickOutsideImageToRestoreWindow.IsOn;
         await AppConfig.SaveAsync();
     }
 
