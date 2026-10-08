@@ -71,15 +71,50 @@ internal sealed class WindowFullScreenManager
         if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped)
         {
             if (AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Maximized } op)
+            {
+                EnsureNormalPlacementVisible();
                 op.Restore();
+            }
         }
         else if (AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen)
         {
+            EnsureNormalPlacementVisible();
             FullScreenToggled?.Invoke(false);
             exitFullScreenButton?.Visibility = Visibility.Collapsed;
             AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
             (AppWindow.Presenter as OverlappedPresenter)?.Restore();
         }
+    }
+
+    /// <summary>
+    /// Moves a saved/restored normal placement into the current monitor before Windows reveals it.
+    /// </summary>
+    private void EnsureNormalPlacementVisible()
+    {
+        var hwnd = WindowNative.GetWindowHandle(_window);
+        if (!Win32Methods.GetWindowPlacement(hwnd, out var placement)) return;
+
+        var normal = placement.rcNormalPosition;
+        var width = normal.Right - normal.Left;
+        var height = normal.Bottom - normal.Top;
+        if (width <= 0 || height <= 0) return;
+
+        var workArea = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest).WorkArea;
+        var visible = normal.Left < workArea.X + workArea.Width && normal.Right > workArea.X &&
+                      normal.Top < workArea.Y + workArea.Height && normal.Bottom > workArea.Y;
+        if (visible) return;
+
+        var newWidth = Math.Min(width, workArea.Width);
+        var newHeight = Math.Min(height, workArea.Height);
+        placement.rcNormalPosition = new Win32Methods.RECT
+        {
+            Left = workArea.X,
+            Top = workArea.Y,
+            Right = workArea.X + newWidth,
+            Bottom = workArea.Y + newHeight
+        };
+        placement.length = (uint)System.Runtime.InteropServices.Marshal.SizeOf<Win32Methods.WINDOWPLACEMENT>();
+        Win32Methods.SetWindowPlacement(hwnd, in placement);
     }
 
     /// <summary>
@@ -90,6 +125,7 @@ internal sealed class WindowFullScreenManager
     internal void RestoreToClientRect(RectInt32 clientRect, UIElement? exitFullScreenButton = null)
     {
         var hwnd = WindowNative.GetWindowHandle(_window);
+        clientRect = ConstrainClientRectToWorkArea(clientRect);
 
         // The image has already been prepared for the destination client rect. Suppress the
         // DWM resize transition so Windows does not move the photo during this transition.
@@ -141,6 +177,25 @@ internal sealed class WindowFullScreenManager
                 ref transitionsDisabled,
                 sizeof(int));
         }
+    }
+
+    /// <summary>
+    /// Keeps an image-sized client area inside the current monitor's work area. A zoomed and
+    /// panned image can otherwise produce a target rectangle wholly outside the display.
+    /// </summary>
+    private RectInt32 ConstrainClientRectToWorkArea(RectInt32 clientRect)
+    {
+        var workArea = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest).WorkArea;
+        var width = Math.Min(Math.Max(clientRect.Width, 1), workArea.Width);
+        var height = Math.Min(Math.Max(clientRect.Height, 1), workArea.Height);
+        var maxX = workArea.X + workArea.Width - width;
+        var maxY = workArea.Y + workArea.Height - height;
+
+        return new RectInt32(
+            Math.Clamp(clientRect.X, workArea.X, maxX),
+            Math.Clamp(clientRect.Y, workArea.Y, maxY),
+            width,
+            height);
     }
 
     /// <summary>

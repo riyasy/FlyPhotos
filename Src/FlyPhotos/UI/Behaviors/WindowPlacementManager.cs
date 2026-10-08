@@ -153,7 +153,7 @@ public sealed partial class WindowPlacementManager : IDisposable
         var (loadedState, loadedHash) = Deserialize(serialisedData);
         var currentHash = BuildMonitorLayoutHash();
 
-        if (loadedState != null && loadedHash == currentHash)
+        if (loadedState is { } state && loadedHash == currentHash && IsPlacementVisible(state))
         {
             _state = loadedState;
             MonitorLayoutChanged = false;
@@ -177,6 +177,27 @@ public sealed partial class WindowPlacementManager : IDisposable
         _monitor.WindowMessageReceived += OnWindowMessage;
         AppWindow.Changed += OnAppWindowChanged;
     }
+
+    /// <summary>Returns whether a restored window rectangle intersects a connected monitor.</summary>
+    private static bool IsPlacementVisible(WindowStateData state)
+    {
+        if (state.Width <= 0 || state.Height <= 0) return false;
+
+        var right = (long)state.X + state.Width;
+        var bottom = (long)state.Y + state.Height;
+        var monitors = DisplayArea.FindAll();
+        // Do NOT use foreach / LINQ on this list – it can crash.
+        for (var index = 0; index < monitors.Count; index++)
+        {
+            var bounds = monitors[index].OuterBounds;
+            if (state.X < (long)bounds.X + bounds.Width && right > bounds.X &&
+                state.Y < (long)bounds.Y + bounds.Height && bottom > bounds.Y)
+                return true;
+        }
+
+        return false;
+    }
+
 
     /// <summary>
     ///     Event handler for intercepted Win32 window messages.
