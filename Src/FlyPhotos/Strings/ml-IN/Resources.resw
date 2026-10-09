@@ -751,6 +751,12 @@
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>വിൻഡോ ബട്ടണുകൾ സ്വയമേവ മറയ്ക്കുക</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>ഫോട്ടോ സ്ക്രീനിൽ അതേ സ്ഥാനത്ത് നിലനിർത്തിക്കൊണ്ട് വിൻഡോ ചെറുതാക്കുക.</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>പുനഃസ്ഥാപിക്കുമ്പോൾ വിൻഡോയുടെ വലുപ്പം ഫോട്ടോയ്ക്ക് അനുയോജ്യമാക്കുക</value>
+  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>ഫോട്ടോയ്ക്ക് പുറത്ത് മൗസ് ലെഫ്റ്റ് ക്ലിക്ക് ചെയ്ത് നീക്കുക</value>
   </data>

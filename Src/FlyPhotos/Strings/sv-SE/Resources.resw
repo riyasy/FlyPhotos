@@ -754,6 +754,12 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Dölj fönsterknappar automatiskt</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>Krymp fönstret runt fotot så att fotot stannar på samma plats på skärmen.</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>Anpassa fönstret till fotot vid återställning</value>
+  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Vänsterklick och dra utanför fotot</value>
   </data>

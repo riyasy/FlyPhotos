@@ -749,10 +749,10 @@
     <value>Ничего</value>
   </data>
   <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
-    <value>При восстановлении окна кликом вне изображения изменять его размер под отображаемое изображение.</value>
+    <value>Уменьшать окно вокруг фото, оставляя фото на том же месте на экране.</value>
   </data>
   <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
-    <value>Размер окна по изображению</value>
+    <value>Подгонять окно под фото при восстановлении</value>
   </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>Кнопки свертывания, развертывания и закрытия отображаются только тогда, когда мышь находится у верхнего края окна.</value>

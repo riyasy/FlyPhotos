@@ -754,6 +754,12 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Masquer automatiquement les boutons de la fenêtre</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>Réduire la fenêtre autour de la photo, en gardant la photo à sa place à l&apos;écran.</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>Ajuster la fenêtre à la photo lors de la restauration</value>
+  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Clic gauche + Glisser en dehors de la photo</value>
   </data>

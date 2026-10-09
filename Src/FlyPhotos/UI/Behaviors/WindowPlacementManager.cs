@@ -96,14 +96,6 @@ public sealed partial class WindowPlacementManager : IDisposable
     /// <summary>Indicates whether the manager has been disposed to prevent further event handling.</summary>
     private bool _isDisposed;
 
-    // Win32 show-command constants supplementary to Win32Methods
-
-    /// <summary>SW_SHOWNORMAL – activate and show in original size/position.</summary>
-    private const uint SW_SHOWNORMAL = 1;
-
-    /// <summary>SW_SHOWMINIMIZED – window is minimised (used to detect minimise state).</summary>
-    private const uint SW_SHOWMINIMIZED = 2;
-
     /// <summary>
     ///     The separator character used to delimit fields in the serialized string.
     /// </summary>
@@ -153,7 +145,7 @@ public sealed partial class WindowPlacementManager : IDisposable
         var (loadedState, loadedHash) = Deserialize(serialisedData);
         var currentHash = BuildMonitorLayoutHash();
 
-        if (loadedState is { } state && loadedHash == currentHash && IsPlacementVisible(state))
+        if (loadedState != null && loadedHash == currentHash)
         {
             _state = loadedState;
             MonitorLayoutChanged = false;
@@ -177,27 +169,6 @@ public sealed partial class WindowPlacementManager : IDisposable
         _monitor.WindowMessageReceived += OnWindowMessage;
         AppWindow.Changed += OnAppWindowChanged;
     }
-
-    /// <summary>Returns whether a restored window rectangle intersects a connected monitor.</summary>
-    private static bool IsPlacementVisible(WindowStateData state)
-    {
-        if (state.Width <= 0 || state.Height <= 0) return false;
-
-        var right = (long)state.X + state.Width;
-        var bottom = (long)state.Y + state.Height;
-        var monitors = DisplayArea.FindAll();
-        // Do NOT use foreach / LINQ on this list – it can crash.
-        for (var index = 0; index < monitors.Count; index++)
-        {
-            var bounds = monitors[index].OuterBounds;
-            if (state.X < (long)bounds.X + bounds.Width && right > bounds.X &&
-                state.Y < (long)bounds.Y + bounds.Height && bottom > bounds.Y)
-                return true;
-        }
-
-        return false;
-    }
-
 
     /// <summary>
     ///     Event handler for intercepted Win32 window messages.
@@ -250,7 +221,7 @@ public sealed partial class WindowPlacementManager : IDisposable
             Bottom = state.Y + state.Height
         };
 
-        wp.showCmd = SW_SHOWNORMAL;
+        wp.showCmd = Win32Methods.SW_SHOWNORMAL;
 
         // Bracket SetWindowPlacement with the flag so that WM_DPICHANGED fired
         // by moving the window to a different-DPI monitor is suppressed above.
@@ -296,7 +267,7 @@ public sealed partial class WindowPlacementManager : IDisposable
         // In that case inherit the IsMaximized flag from the previous snapshot
         // so we don't accidentally clear it.
         bool isMaximized = wp.showCmd == Win32Methods.SW_SHOWMAXIMIZED
-                           || (wp.showCmd == SW_SHOWMINIMIZED && _state?.IsMaximized == true);
+                           || (wp.showCmd == Win32Methods.SW_SHOWMINIMIZED && _state?.IsMaximized == true);
 
         var newState = new WindowStateData(
             rc.Left,

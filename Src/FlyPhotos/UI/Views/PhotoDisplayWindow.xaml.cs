@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -384,59 +384,37 @@ public sealed partial class PhotoDisplayWindow
     /// <summary>
     /// Restores the window with its client area sized around the currently displayed image.
     /// </summary>
-    private void RestoreWindowToImage()
+    /// <returns><see langword="false"/> if the image bounds aren't usable; the caller does a plain restore.</returns>
+    private bool TryRestoreWindowToImage()
     {
         // Mid-animation bounds are an in-between frame; sizing to them would freeze the zoom there.
         if (_canvasController.IsPanZoomAnimating ||
             !_canvasController.TryGetDisplayedImageBounds(out var imageBounds))
-        {
-            _windFullScreenManager.Restore(ButtonFullScreenClose);
-            return;
-        }
+            return false;
 
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-        var clientOrigin = new Win32Methods.POINT();
-        if (!Win32Methods.ClientToScreen(hwnd, ref clientOrigin) ||
-            !Win32Methods.GetClientRect(hwnd, out var clientRect))
-        {
-            _windFullScreenManager.Restore(ButtonFullScreenClose);
-            return;
-        }
+        if (!_windFullScreenManager.TryGetClientScreenRect(out var client))
+            return false;
 
-        var dpiScale = D2dCanvas.Dpi / 96.0;
-        var canvasOffset = D2dCanvas.TransformToVisual(MainLayout).TransformPoint(default);
-        var canvasOffsetX = (int)Math.Round(canvasOffset.X * dpiScale);
-        var canvasOffsetY = (int)Math.Round(canvasOffset.Y * dpiScale);
-        var nonCanvasWidth = clientRect.Right - clientRect.Left - (int)Math.Round(D2dCanvas.ActualWidth * dpiScale);
-        var nonCanvasHeight = clientRect.Bottom - clientRect.Top - (int)Math.Round(D2dCanvas.ActualHeight * dpiScale);
+        var canvasSize = D2dCanvas.GetSize();
+        var nonCanvasWidth = client.Width - (int)Math.Round(canvasSize.Width);
+        var nonCanvasHeight = client.Height - (int)Math.Round(canvasSize.Height);
 
-        // Image bounds on screen, in physical pixels.
-        var canvasScreenX = clientOrigin.X + canvasOffsetX;
-        var canvasScreenY = clientOrigin.Y + canvasOffsetY;
-        var imageLeft = canvasScreenX + (int)Math.Floor(imageBounds.Left);
-        var imageTop = canvasScreenY + (int)Math.Floor(imageBounds.Top);
-        var imageRight = canvasScreenX + (int)Math.Ceiling(imageBounds.Right);
-        var imageBottom = canvasScreenY + (int)Math.Ceiling(imageBounds.Bottom);
-
-        // Cut the image rect to where the canvas can sit with the whole client area on the work area:
-        // sides where the image is visible align to its edges, sides where it crosses a screen edge stop
-        // there. Zoom and pan are kept, so the visible part of the image doesn't move.
+        // The image's rect on screen (physical pixels) plus the non-canvas part of the client area, cut
+        // to the work area: sides where the image is visible align to its edges, sides where it crosses
+        // a screen edge stop there. Zoom and pan are kept, so the visible part of the image doesn't move.
+        // The canvas's offset inside the client area is the same before and after, so it cancels out.
         var workArea = _windFullScreenManager.WorkArea;
-        var left = Math.Max(imageLeft, workArea.X + canvasOffsetX);
-        var top = Math.Max(imageTop, workArea.Y + canvasOffsetY);
-        var right = Math.Min(imageRight, workArea.X + workArea.Width - (nonCanvasWidth - canvasOffsetX));
-        var bottom = Math.Min(imageBottom, workArea.Y + workArea.Height - (nonCanvasHeight - canvasOffsetY));
-        if (right <= left || bottom <= top)
-        {
-            _windFullScreenManager.Restore(ButtonFullScreenClose);
-            return;
-        }
+        var left = Math.Max(client.X + (int)Math.Floor(imageBounds.Left), workArea.X);
+        var top = Math.Max(client.Y + (int)Math.Floor(imageBounds.Top), workArea.Y);
+        var right = Math.Min(client.X + (int)Math.Ceiling(imageBounds.Right) + nonCanvasWidth,
+            workArea.X + workArea.Width);
+        var bottom = Math.Min(client.Y + (int)Math.Ceiling(imageBounds.Bottom) + nonCanvasHeight,
+            workArea.Y + workArea.Height);
+        if (right - left <= nonCanvasWidth || bottom - top <= nonCanvasHeight)
+            return false;
 
-        var requested = new RectInt32(
-            left - canvasOffsetX,
-            top - canvasOffsetY,
-            right - left + nonCanvasWidth,
-            bottom - top + nonCanvasHeight);
+        var requested = new RectInt32(left, top, right - left, bottom - top);
+        var dpiScale = D2dCanvas.Dpi / 96.0;
 
         // Windows enforces the minimum window size anyway; grow around the image's centre ourselves so
         // the image stays centred instead of pinned to the top-left. Scaling by DPI over-sizes slightly
@@ -455,15 +433,16 @@ public sealed partial class PhotoDisplayWindow
         }
 
         // Only needed if the minimum-size growth above pushed the rect off the work area.
-        var target = _windFullScreenManager.ConstrainClientRectToWorkArea(requested);
+        var target = WindowFullScreenManager.ConstrainToWorkArea(requested, workArea);
 
         // The canvas origin moves with the client origin; shifting by the final rect keeps the image
         // at the same place on screen.
         _canvasController.PrepareForImageSizedWindow(
-            new Point(target.X - clientOrigin.X, target.Y - clientOrigin.Y),
+            new Point(target.X - client.X, target.Y - client.Y),
             target.Width - nonCanvasWidth,
             target.Height - nonCanvasHeight);
         _windFullScreenManager.RestoreToClientRect(target, ButtonFullScreenClose);
+        return true;
     }
 
     private async Task AnimatePhotoDisplayWindowClose()
@@ -821,9 +800,7 @@ public sealed partial class PhotoDisplayWindow
         switch (AppConfig.Settings.ClickOutsideBehavior)
         {
             case ClickOutsideBehavior.RestoreWindow when _windFullScreenManager.IsMaximizedOrFullScreen:
-                if (AppConfig.Settings.SizeWindowToImageOnRestore)
-                    RestoreWindowToImage();
-                else
+                if (!AppConfig.Settings.SizeWindowToImageOnRestore || !TryRestoreWindowToImage())
                     _windFullScreenManager.Restore(ButtonFullScreenClose);
                 break;
             case ClickOutsideBehavior.CloseApp:

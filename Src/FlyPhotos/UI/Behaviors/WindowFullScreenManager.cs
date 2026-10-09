@@ -23,6 +23,8 @@ internal sealed class WindowFullScreenManager
 
     private bool _wasMaximizedBeforeFullScreen;
 
+    private readonly nint _hwnd;
+
     /// <summary>
     ///     Raised when full-screen is entered (<see langword="true" />) or exited (<see langword="false" />).
     /// </summary>
@@ -31,6 +33,7 @@ internal sealed class WindowFullScreenManager
     internal WindowFullScreenManager(Window window)
     {
         _window = window;
+        _hwnd = WindowNative.GetWindowHandle(window);
     }
 
     // .Kind discriminates without a memberless cast; { State: ... } reads a member to root the
@@ -71,14 +74,10 @@ internal sealed class WindowFullScreenManager
         if (AppWindow.Presenter.Kind == AppWindowPresenterKind.Overlapped)
         {
             if (AppWindow.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Maximized } op)
-            {
-                EnsureNormalPlacementVisible();
                 op.Restore();
-            }
         }
         else if (AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen)
         {
-            EnsureNormalPlacementVisible();
             FullScreenToggled?.Invoke(false);
             exitFullScreenButton?.Visibility = Visibility.Collapsed;
             AppWindow.SetPresenter(AppWindowPresenterKind.Overlapped);
@@ -87,55 +86,36 @@ internal sealed class WindowFullScreenManager
     }
 
     /// <summary>
-    /// Moves a saved/restored normal placement into the current monitor before Windows reveals it.
+    /// Gets the window's client area in physical screen pixels.
     /// </summary>
-    private void EnsureNormalPlacementVisible()
+    internal bool TryGetClientScreenRect(out RectInt32 rect)
     {
-        var hwnd = WindowNative.GetWindowHandle(_window);
-        if (!Win32Methods.GetWindowPlacement(hwnd, out var placement)) return;
+        rect = default;
+        var origin = new Win32Methods.POINT();
+        if (!Win32Methods.ClientToScreen(_hwnd, ref origin) ||
+            !Win32Methods.GetClientRect(_hwnd, out var client))
+            return false;
 
-        var normal = placement.rcNormalPosition;
-        var width = normal.Right - normal.Left;
-        var height = normal.Bottom - normal.Top;
-        if (width <= 0 || height <= 0) return;
-
-        var workArea = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest).WorkArea;
-        var visible = normal.Left < workArea.X + workArea.Width && normal.Right > workArea.X &&
-                      normal.Top < workArea.Y + workArea.Height && normal.Bottom > workArea.Y;
-        if (visible) return;
-
-        var newWidth = Math.Min(width, workArea.Width);
-        var newHeight = Math.Min(height, workArea.Height);
-        placement.rcNormalPosition = new Win32Methods.RECT
-        {
-            Left = workArea.X,
-            Top = workArea.Y,
-            Right = workArea.X + newWidth,
-            Bottom = workArea.Y + newHeight
-        };
-        placement.length = (uint)System.Runtime.InteropServices.Marshal.SizeOf<Win32Methods.WINDOWPLACEMENT>();
-        Win32Methods.SetWindowPlacement(hwnd, in placement);
+        rect = new RectInt32(origin.X, origin.Y, client.Right - client.Left, client.Bottom - client.Top);
+        return true;
     }
 
     /// <summary>
     /// Restores the window and makes its client area match the requested screen-space rectangle.
     /// </summary>
     /// <param name="clientRect">The desired client-area rectangle in physical screen pixels, already
-    /// passed through <see cref="ConstrainClientRectToWorkArea"/>.</param>
+    /// passed through <see cref="ConstrainToWorkArea"/>.</param>
     /// <param name="exitFullScreenButton">The optional button to hide when leaving full-screen mode.</param>
     internal void RestoreToClientRect(RectInt32 clientRect, UIElement? exitFullScreenButton = null)
     {
-        var hwnd = WindowNative.GetWindowHandle(_window);
+        var hwnd = _hwnd;
+
+        void SetTransitionsDisabled(int disabled) => Win32Methods.DwmSetWindowAttribute(
+            hwnd, Win32Methods.DWMWA_TRANSITIONS_FORCEDISABLED, ref disabled, sizeof(int));
 
         // The image has already been prepared for the destination client rect. Suppress the
         // DWM resize transition so Windows does not move the photo during this transition.
-        int transitionsDisabled = 1;
-        Win32Methods.DwmSetWindowAttribute(
-            hwnd,
-            Win32Methods.DWMWA_TRANSITIONS_FORCEDISABLED,
-            ref transitionsDisabled,
-            sizeof(int));
-
+        SetTransitionsDisabled(1);
         try
         {
             // Seed the hidden normal placement with the requested rectangle so the presenter switch
@@ -170,12 +150,7 @@ internal sealed class WindowFullScreenManager
         }
         finally
         {
-            transitionsDisabled = 0;
-            Win32Methods.DwmSetWindowAttribute(
-                hwnd,
-                Win32Methods.DWMWA_TRANSITIONS_FORCEDISABLED,
-                ref transitionsDisabled,
-                sizeof(int));
+            SetTransitionsDisabled(0);
         }
     }
 
@@ -183,14 +158,12 @@ internal sealed class WindowFullScreenManager
     internal RectInt32 WorkArea => DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest).WorkArea;
 
     /// <summary>
-    /// Keeps an image-sized client area inside the current monitor's work area. A zoomed and
-    /// panned image can otherwise produce a target rectangle wholly outside the display.
+    /// Shrinks and moves <paramref name="clientRect"/> as needed to fit inside <paramref name="workArea"/>.
     /// </summary>
-    internal RectInt32 ConstrainClientRectToWorkArea(RectInt32 clientRect)
+    internal static RectInt32 ConstrainToWorkArea(RectInt32 clientRect, RectInt32 workArea)
     {
-        var workArea = WorkArea;
-        var width = Math.Min(Math.Max(clientRect.Width, 1), workArea.Width);
-        var height = Math.Min(Math.Max(clientRect.Height, 1), workArea.Height);
+        var width = Math.Min(clientRect.Width, workArea.Width);
+        var height = Math.Min(clientRect.Height, workArea.Height);
         var maxX = workArea.X + workArea.Width - width;
         var maxY = workArea.Y + workArea.Height - height;
 

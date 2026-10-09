@@ -753,6 +753,12 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>ウィンドウボタンを自動的に非表示にする</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>写真の画面上の位置を保ったまま、ウィンドウを写真の大きさまで縮小します。</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>元に戻すときにウィンドウを写真に合わせる</value>
+  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>写真の外でマウスの左クリック + ドラッグ</value>
   </data>

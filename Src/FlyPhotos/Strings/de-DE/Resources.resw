@@ -754,6 +754,12 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Fensterschaltflächen automatisch ausblenden</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>Das Fenster um das Foto herum verkleinern, sodass das Foto an derselben Stelle auf dem Bildschirm bleibt.</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>Fenster beim Wiederherstellen an das Foto anpassen</value>
+  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Linke Maustaste + Ziehen außerhalb des Fotos</value>
   </data>

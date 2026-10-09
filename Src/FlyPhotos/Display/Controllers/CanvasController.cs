@@ -81,9 +81,6 @@ internal partial class CanvasController : ICanvasController
     // A Lock is used because Matrix3x2 (6 floats) and Rect (4 doubles) are not atomically writable,
     // making volatile inadequate. Contention is negligible: pointer events are rare vs. 144 Hz Update.
     private Matrix3x2 _hitTestMatInv = Matrix3x2.Identity;
-
-    /// <summary>The latest canvas transform published for UI-thread bounds calculations.</summary>
-    private Matrix3x2 _hitTestMat = Matrix3x2.Identity;
     private Rect _hitTestImageRect;
     private readonly Lock _hitTestLock = new();
 
@@ -509,7 +506,6 @@ internal partial class CanvasController : ICanvasController
         // ④ Publish the current transform for UI-thread hit-testing (IsPressedOnImage).
         lock (_hitTestLock)
         {
-            _hitTestMat = _canvasViewState.Mat;
             _hitTestMatInv = _canvasViewState.MatInv;
             _hitTestImageRect = _canvasViewState.ImageRect;
         }
@@ -609,30 +605,23 @@ internal partial class CanvasController : ICanvasController
     /// <returns><see langword="true"/> when valid image bounds are available; otherwise, <see langword="false"/>.</returns>
     public bool TryGetDisplayedImageBounds(out Rect bounds)
     {
-        Matrix3x2 transform;
+        Matrix3x2 matInv;
         Rect imageRect;
         lock (_hitTestLock)
         {
-            transform = _hitTestMat;
+            matInv = _hitTestMatInv;
             imageRect = _hitTestImageRect;
         }
 
-        if (imageRect.Width <= 0 || imageRect.Height <= 0)
-        {
-            bounds = default;
+        bounds = default;
+        if (imageRect.Width <= 0 || imageRect.Height <= 0 || !Matrix3x2.Invert(matInv, out var mat))
             return false;
-        }
 
-        var topLeft = Vector2.Transform(new Vector2((float)imageRect.Left, (float)imageRect.Top), transform);
-        var topRight = Vector2.Transform(new Vector2((float)imageRect.Right, (float)imageRect.Top), transform);
-        var bottomLeft = Vector2.Transform(new Vector2((float)imageRect.Left, (float)imageRect.Bottom), transform);
-        var bottomRight = Vector2.Transform(new Vector2((float)imageRect.Right, (float)imageRect.Bottom), transform);
-
-        var left = MathF.Min(MathF.Min(topLeft.X, topRight.X), MathF.Min(bottomLeft.X, bottomRight.X));
-        var top = MathF.Min(MathF.Min(topLeft.Y, topRight.Y), MathF.Min(bottomLeft.Y, bottomRight.Y));
-        var right = MathF.Max(MathF.Max(topLeft.X, topRight.X), MathF.Max(bottomLeft.X, bottomRight.X));
-        var bottom = MathF.Max(MathF.Max(topLeft.Y, topRight.Y), MathF.Max(bottomLeft.Y, bottomRight.Y));
-        bounds = new Rect(left, top, right - left, bottom - top);
+        // Rotation is in 90° steps, so two opposite corners still span the box; Rect(Point, Point)
+        // sorts them into left/top/right/bottom.
+        var a = Vector2.Transform(new Vector2((float)imageRect.Left, (float)imageRect.Top), mat);
+        var b = Vector2.Transform(new Vector2((float)imageRect.Right, (float)imageRect.Bottom), mat);
+        bounds = new Rect(new Point(a.X, a.Y), new Point(b.X, b.Y));
         return true;
     }
 

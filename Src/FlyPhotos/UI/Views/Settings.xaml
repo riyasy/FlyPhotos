@@ -748,9 +748,9 @@
             <!--
                 Mouse: pickers, not capture. See design doc section 5. Rows are rendered from
                 MouseCatalog, so a new row costs no XAML; only rows with child settings (Left click
-                outside, between the two lists, and Fwd/Back, below them) are hand-written. Its own tab because the Keyboard tab's search box
-                and Reset all apply to key bindings only. Resource keys are unchanged from when
-                these were hand-written cards.
+                outside, between the two lists, and Fwd/Back, below them) are hand-written. Its own
+                tab because the Keyboard tab's search box and Reset all apply to key bindings only.
+                Resource keys are unchanged from when these were hand-written cards.
             -->
             <PivotItem x:Uid="SettingsPivotItemMouse">
                 <ScrollViewer>

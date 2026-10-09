@@ -754,6 +754,12 @@
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>自動隱藏視窗按鈕</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>將視窗縮小至照片大小，並讓照片維持在螢幕上的原位置。</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>還原視窗時讓視窗大小配合照片</value>
+  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>在照片外滑鼠左鍵拖曳</value>
   </data>

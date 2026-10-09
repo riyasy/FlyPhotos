@@ -229,14 +229,6 @@ internal static partial class Win32Methods
 
     #region Window placement (user32.dll)
 
-    /// <summary>Disables DWM transitions for the specified window while the value is true.</summary>
-    internal const uint DWMWA_TRANSITIONS_FORCEDISABLED = 3;
-
-    /// <summary>Sets a Desktop Window Manager attribute for a window.</summary>
-    [LibraryImport("dwmapi.dll")]
-    internal static partial int DwmSetWindowAttribute(
-        nint hwnd, uint dwAttribute, ref int pvAttribute, uint cbAttribute);
-
     /// <summary>Retrieves the dimensions of a window's client area.</summary>
     [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -262,23 +254,6 @@ internal static partial class Win32Methods
     [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool ClientToScreen(nint hWnd, ref POINT lpPoint);
-
-    /// <summary>Retrieves the DPI value for a window.</summary>
-    [LibraryImport("user32.dll")]
-    internal static partial uint GetDpiForWindow(nint hWnd);
-
-    /// <summary>Retrieves a system metric for the specified DPI.</summary>
-    [LibraryImport("user32.dll")]
-    internal static partial int GetSystemMetricsForDpi(int nIndex, uint dpi);
-
-    /// <summary>Width of a sizing window frame.</summary>
-    internal const int SM_CXSIZEFRAME = 32;
-
-    /// <summary>Height of a sizing window frame.</summary>
-    internal const int SM_CYSIZEFRAME = 33;
-
-    /// <summary>Thickness of the padded border around a resizable window.</summary>
-    internal const int SM_CXPADDEDBORDER = 92;
 
 #pragma warning disable SYSLIB1054
     /// <summary>
@@ -371,6 +346,21 @@ internal static partial class Win32Methods
 
     /// <summary>Activates and displays a window in its normal position and size.</summary>
     internal const uint SW_SHOWNORMAL = 1;
+
+    /// <summary>The window is minimized. Read back from <see cref="WINDOWPLACEMENT.showCmd"/> to detect minimize state.</summary>
+    internal const uint SW_SHOWMINIMIZED = 2;
+
+    #endregion
+
+    #region Desktop Window Manager (dwmapi.dll)
+
+    /// <summary>Disables DWM transitions for the specified window while the value is true.</summary>
+    internal const uint DWMWA_TRANSITIONS_FORCEDISABLED = 3;
+
+    /// <summary>Sets a Desktop Window Manager attribute for a window.</summary>
+    [LibraryImport("dwmapi.dll")]
+    internal static partial int DwmSetWindowAttribute(
+        nint hwnd, uint dwAttribute, ref int pvAttribute, uint cbAttribute);
 
     #endregion
 

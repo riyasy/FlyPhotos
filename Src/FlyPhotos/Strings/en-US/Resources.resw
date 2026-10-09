@@ -755,10 +755,10 @@ Settings &gt; Apps &gt; Default apps.</value>
     <value>Automatically hide caption buttons</value>
   </data>
   <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
-    <value>When restoring the window by clicking outside the image, resize it to match the displayed image.</value>
+    <value>Shrink the window around the photo, keeping it in place on screen.</value>
   </data>
   <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
-    <value>Size restored window to image</value>
+    <value>Fit window to photo when restoring</value>
   </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Mouse Left Click and Drag outside Photo</value>

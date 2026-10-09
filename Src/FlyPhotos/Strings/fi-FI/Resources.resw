@@ -754,6 +754,12 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Piilota ikkunapainikkeet automaattisesti</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>Pienennä ikkuna kuvan ympärille niin, että kuva pysyy paikallaan näytöllä.</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>Sovita ikkuna kuvaan palautettaessa</value>
+  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Hiiren vasen painike ja veto kuvan ulkopuolella</value>
   </data>
