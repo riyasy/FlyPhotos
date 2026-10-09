@@ -481,13 +481,26 @@ internal class CanvasViewManager : IAnimationHost
     }
 
     /// <summary>
-    /// Keeps the current scale and moves the displayed image bounds to the new canvas origin.
+    /// Keeps the image at its screen position after the window was resized around it. The canvas
+    /// origin moved by <paramref name="canvasOriginShift"/> physical pixels. If the window had to be
+    /// clamped to the work area and a fitted image no longer fits, it is re-fitted instead.
     /// </summary>
-    public void HandleImageSizedWindowResize(Point previousImageOrigin)
+    public void HandleImageSizedWindowResize(Point canvasOriginShift, Size newSize)
     {
         ClearActiveAnimation();
-        _canvasViewState.ImagePos.X -= previousImageOrigin.X;
-        _canvasViewState.ImagePos.Y -= previousImageOrigin.Y;
+        if (IsFittedToScreen)
+        {
+            var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
+            var fitScale = ZoomGeometry.CalculateScreenFitScale(newSize, imageSize, _canvasViewState.Rotation);
+            if (fitScale < _canvasViewState.Scale - ScaleTolerance)
+            {
+                HandleSizeChange(newSize, newSize); // fitted branch: re-fit to the new canvas
+                return;
+            }
+        }
+
+        _canvasViewState.ImagePos.X -= canvasOriginShift.X;
+        _canvasViewState.ImagePos.Y -= canvasOriginShift.Y;
         _canvasViewState.UpdateTransform();
         ViewChanged?.Invoke();
     }

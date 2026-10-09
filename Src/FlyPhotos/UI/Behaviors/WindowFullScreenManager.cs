@@ -120,12 +120,12 @@ internal sealed class WindowFullScreenManager
     /// <summary>
     /// Restores the window and makes its client area match the requested screen-space rectangle.
     /// </summary>
-    /// <param name="clientRect">The desired client-area rectangle in physical screen pixels.</param>
+    /// <param name="clientRect">The desired client-area rectangle in physical screen pixels, already
+    /// passed through <see cref="ConstrainClientRectToWorkArea"/>.</param>
     /// <param name="exitFullScreenButton">The optional button to hide when leaving full-screen mode.</param>
     internal void RestoreToClientRect(RectInt32 clientRect, UIElement? exitFullScreenButton = null)
     {
         var hwnd = WindowNative.GetWindowHandle(_window);
-        clientRect = ConstrainClientRectToWorkArea(clientRect);
 
         // The image has already been prepared for the destination client rect. Suppress the
         // DWM resize transition so Windows does not move the photo during this transition.
@@ -179,13 +179,16 @@ internal sealed class WindowFullScreenManager
         }
     }
 
+    /// <summary>The work area (excluding taskbar) of the monitor the window is on, in physical pixels.</summary>
+    internal RectInt32 WorkArea => DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest).WorkArea;
+
     /// <summary>
     /// Keeps an image-sized client area inside the current monitor's work area. A zoomed and
     /// panned image can otherwise produce a target rectangle wholly outside the display.
     /// </summary>
-    private RectInt32 ConstrainClientRectToWorkArea(RectInt32 clientRect)
+    internal RectInt32 ConstrainClientRectToWorkArea(RectInt32 clientRect)
     {
-        var workArea = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest).WorkArea;
+        var workArea = WorkArea;
         var width = Math.Min(Math.Max(clientRect.Width, 1), workArea.Width);
         var height = Math.Min(Math.Max(clientRect.Height, 1), workArea.Height);
         var maxX = workArea.X + workArea.Width - width;

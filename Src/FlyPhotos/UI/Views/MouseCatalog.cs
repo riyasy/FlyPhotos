@@ -97,8 +97,9 @@ public sealed class MouseRow : INotifyPropertyChanged
 }
 
 /// <summary>
-/// The Mouse tab's templated rows, in display order; the hand-written Fwd/Back row follows them.
-/// Resource keys are the ones the cards already used as x:Uid, so
+/// The Mouse tab's templated rows, in display order. Two lists because the hand-written
+/// Left-click-outside row (it has a child setting) sits between them; the hand-written Fwd/Back
+/// row follows the second. Resource keys are the ones the cards already used as x:Uid, so
 /// moving to a template cost no translation work in any locale.
 /// </summary>
 internal static class MouseCatalog
@@ -106,19 +107,20 @@ internal static class MouseCatalog
     /// <summary>Double-click outside the photo follows the single-click-outside setting: it
     /// maximizes when that restores, and its first click already closes when that closes. So the
     /// row reports that setting rather than owning one of its own.</summary>
-    private static string DoubleClickOutsideActionKey(ClickOutsideBehavior clickOutside) => clickOutside switch
+    internal static string DoubleClickOutsideActionKey(ClickOutsideBehavior clickOutside) => clickOutside switch
     {
         ClickOutsideBehavior.RestoreWindow => "TextDoubleClickOutsideActionMaximize",
         ClickOutsideBehavior.CloseApp => "TextDoubleClickOutsideActionClose",
         _ => "TextDoubleClickOutsideActionNothing"
     };
 
-    public static List<MouseRow> BuildAll()
-    {
-        var doubleClickOutside = MouseRow.Fixed("SettingsCardDoubleClickOutside",
+    /// <summary>The row the Settings page retargets when the click-outside picker changes.</summary>
+    public static MouseRow BuildDoubleClickOutside() =>
+        MouseRow.Fixed("SettingsCardDoubleClickOutside",
             DoubleClickOutsideActionKey(AppConfig.Settings.ClickOutsideBehavior));
 
-        return
+    /// <summary>Rows above the hand-written Left-click-outside row.</summary>
+    public static List<MouseRow> BuildUpper() =>
         [
             MouseRow.Picker("SettingsCardMouseWheelBehaviour",
                 ["ComboMouseWheelItemZoom", "ComboMouseWheelItemNav"],
@@ -136,18 +138,12 @@ internal static class MouseCatalog
                 i => AppConfig.Settings.MiddleClickBehavior = (MiddleClickBehavior)i),
 
             MouseRow.Fixed("SettingsCardLeftClickDrag", "TextLeftClickDragAction"),
-            MouseRow.Fixed("SettingsCardCtrlDragToMoveWindow", "TextCtrlDragAction"),
+            MouseRow.Fixed("SettingsCardCtrlDragToMoveWindow", "TextCtrlDragAction")
+        ];
 
-            MouseRow.Picker("SettingsCardLeftClickOutside",
-                ["ComboClickOutsideItemRestore", "ComboClickOutsideItemClose", "ComboClickOutsideItemNothing"],
-                (int)AppConfig.Settings.ClickOutsideBehavior,
-                i =>
-                {
-                    var behavior = (ClickOutsideBehavior)i;
-                    AppConfig.Settings.ClickOutsideBehavior = behavior;
-                    doubleClickOutside.SetFixedAction(DoubleClickOutsideActionKey(behavior));
-                }),
-
+    /// <summary>Rows between the Left-click-outside row and the hand-written Fwd/Back row.</summary>
+    public static List<MouseRow> BuildLower(MouseRow doubleClickOutside) =>
+        [
             MouseRow.Fixed("SettingsCardDoubleClick", "TextDoubleClickAction"),
             doubleClickOutside,
             MouseRow.Fixed("SettingsCardRightClick", "TextRightClickAction"),
@@ -160,5 +156,4 @@ internal static class MouseCatalog
             // Fwd/Back is hand-written in Settings.xaml below this list: it has a child setting,
             // which this template has no shape for.
         ];
-    }
 }
