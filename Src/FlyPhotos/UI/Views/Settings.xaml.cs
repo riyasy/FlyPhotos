@@ -114,6 +114,7 @@ internal sealed partial class Settings
         ComboPanZoomNavBehaviour.SelectedIndex = GetIndexForPanZoomBehaviour(AppConfig.Settings.PanZoomBehaviourOnNavigation);
         ButtonEnableAutoHideMouse.IsOn = AppConfig.Settings.AutoHideMouse;
         ButtonEnableAutoHideCaptionButtons.IsOn = AppConfig.Settings.AutoHideCaptionButtons;
+        ButtonSizeWindowToImageOnRestore.IsOn = AppConfig.Settings.SizeWindowToImageOnRestore;
         ButtonEnableExternalShortcut.IsOn = AppConfig.Settings.ShowExternalAppShortcuts;
         ButtonDecodeRawData.IsOn = AppConfig.Settings.DecodeRawData;
 
@@ -146,6 +147,7 @@ internal sealed partial class Settings
         ComboPanZoomNavBehaviour.SelectionChanged += ComboPanZoomNavBehaviour_OnSelectionChanged;
         ButtonEnableAutoHideMouse.Toggled += ButtonEnableAutoHideMouse_OnToggled;
         ButtonEnableAutoHideCaptionButtons.Toggled += ButtonEnableAutoHideCaptionButtons_OnToggled;
+        ButtonSizeWindowToImageOnRestore.Toggled += ButtonSizeWindowToImageOnRestore_OnToggled;
         ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
         ButtonDecodeRawData.Toggled += ButtonDecodeRawData_OnToggled;
         AppConfig.Settings.RawDecoderPriority.CollectionChanged += RawDecoderPriority_CollectionChanged;
@@ -254,6 +256,12 @@ internal sealed partial class Settings
         await AppConfig.SaveAsync();
     }
 
+    /// <summary>Persists whether image-sized restoration is enabled.</summary>
+    private async void ButtonSizeWindowToImageOnRestore_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.SizeWindowToImageOnRestore = ButtonSizeWindowToImageOnRestore.IsOn;
+        await AppConfig.SaveAsync();
+    }
     private async void ComboPanZoomNavBehaviour_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         var panZoomEnum = GetPanZoomForIndex(ComboPanZoomNavBehaviour.SelectedIndex);

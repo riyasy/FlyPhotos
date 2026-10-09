@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using Windows.Graphics;
 using Windows.System;
 using Windows.UI;
 using FlyPhotos.Core;
@@ -377,6 +378,48 @@ public sealed partial class PhotoDisplayWindow
             _windFullScreenManager.Maximize();
     }
 
+    /// <summary>
+    /// Restores the window with its client area sized around the currently displayed image.
+    /// </summary>
+    private void RestoreWindowToImage()
+    {
+        if (!_canvasController.TryGetDisplayedImageBounds(out var imageBounds))
+        {
+            _windFullScreenManager.Restore(ButtonFullScreenClose);
+            return;
+        }
+
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        var clientOrigin = new Win32Methods.POINT();
+        if (!Win32Methods.ClientToScreen(hwnd, ref clientOrigin) ||
+            !Win32Methods.GetClientRect(hwnd, out var clientRect))
+        {
+            _windFullScreenManager.Restore(ButtonFullScreenClose);
+            return;
+        }
+
+        var dpiScale = D2dCanvas.Dpi / 96.0;
+        var canvasOffset = D2dCanvas.TransformToVisual(MainLayout).TransformPoint(default);
+        var canvasOffsetX = (int)Math.Round(canvasOffset.X * dpiScale);
+        var canvasOffsetY = (int)Math.Round(canvasOffset.Y * dpiScale);
+        var nonCanvasWidth = clientRect.Right - clientRect.Left - (int)Math.Round(D2dCanvas.ActualWidth * dpiScale);
+        var nonCanvasHeight = clientRect.Bottom - clientRect.Top - (int)Math.Round(D2dCanvas.ActualHeight * dpiScale);
+
+        var imageLeft = clientOrigin.X + canvasOffsetX + (int)Math.Floor(imageBounds.Left);
+        var imageTop = clientOrigin.Y + canvasOffsetY + (int)Math.Floor(imageBounds.Top);
+        var imageWidth = (int)Math.Ceiling(imageBounds.Right) - (int)Math.Floor(imageBounds.Left);
+        var imageHeight = (int)Math.Ceiling(imageBounds.Bottom) - (int)Math.Floor(imageBounds.Top);
+
+        _canvasController.PrepareForImageSizedWindow(imageBounds);
+        _windFullScreenManager.RestoreToClientRect(
+            new RectInt32(
+                imageLeft - canvasOffsetX,
+                imageTop - canvasOffsetY,
+                Math.Max(1, imageWidth + nonCanvasWidth),
+                Math.Max(1, imageHeight + nonCanvasHeight)),
+            ButtonFullScreenClose);
+    }
+
     private async Task AnimatePhotoDisplayWindowClose()
     {
         if (_isClosing) return; // A second Esc / click-outside during the exit animation.
@@ -732,7 +775,10 @@ public sealed partial class PhotoDisplayWindow
         switch (AppConfig.Settings.ClickOutsideBehavior)
         {
             case ClickOutsideBehavior.RestoreWindow when _windFullScreenManager.IsMaximizedOrFullScreen:
-                _windFullScreenManager.Restore(ButtonFullScreenClose);
+                if (AppConfig.Settings.SizeWindowToImageOnRestore)
+                    RestoreWindowToImage();
+                else
+                    _windFullScreenManager.Restore(ButtonFullScreenClose);
                 break;
             case ClickOutsideBehavior.CloseApp:
                 _ = AnimatePhotoDisplayWindowClose();
