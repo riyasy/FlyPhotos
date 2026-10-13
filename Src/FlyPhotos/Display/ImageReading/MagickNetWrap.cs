@@ -30,10 +30,10 @@ internal static class MagickNetWrap
             using var pingImage = new MagickImage();
             pingImage.Ping(path);
 
-            var verticalOrientation = pingImage.Orientation == OrientationType.RightTop ||
-                                      pingImage.Orientation == OrientationType.LeftBottom ||
-                                      pingImage.Orientation == OrientationType.RightBottom ||
-                                      pingImage.Orientation == OrientationType.LeftTop;
+            var verticalOrientation = pingImage.Orientation == Orientation.RightTop ||
+                                      pingImage.Orientation == Orientation.LeftBottom ||
+                                      pingImage.Orientation == Orientation.RightBottom ||
+                                      pingImage.Orientation == Orientation.LeftTop;
 
             var width = verticalOrientation ? pingImage.Height : pingImage.Width;
             var height = verticalOrientation ? pingImage.Width : pingImage.Height;
@@ -133,12 +133,12 @@ internal static class MagickNetWrap
             using var image = new MagickImage(path);
             image.AutoOrient();
             image.Depth = 8;
-            image.Alpha(AlphaOption.Set);
+            image.Alpha(AlphaAction.Set);
 
             // --- 2. Premultiply alpha inside Magick, then export raw BGRA pixels.
             // This avoids the two SoftwareBitmap copies that straight→premultiplied
             // conversion would otherwise require (saves ~2× full-res frame in managed memory).
-            image.Alpha(AlphaOption.Associate);
+            image.Alpha(AlphaAction.Associate);
             var pixelBytes = image.ToByteArray(MagickFormat.Bgra);
 
             // --- 3. Upload directly to Win2D — no SoftwareBitmap intermediaries needed ---

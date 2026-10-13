@@ -166,8 +166,8 @@ internal static class LargeImageReader
         ct.ThrowIfCancellationRequested();
         image.AutoOrient();
         image.Depth = 8;
-        image.Alpha(AlphaOption.Set);
-        image.Alpha(AlphaOption.Associate); // premultiply, as MagickNetWrap.GetHq does
+        image.Alpha(AlphaAction.Set);
+        image.Alpha(AlphaAction.Associate); // premultiply, as MagickNetWrap.GetHq does
         var level0 = new TileLevel((int)image.Width, (int)image.Height);
         using var pixels = image.GetPixelsUnsafe();
         for (var row = 0; row < level0.Rows; row++)
