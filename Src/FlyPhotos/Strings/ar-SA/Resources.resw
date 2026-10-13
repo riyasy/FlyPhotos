@@ -754,6 +754,12 @@
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>إخفاء أزرار التحكم في النافذة تلقائيًا</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>تصغير النافذة حول الصورة مع إبقاء الصورة في مكانها على الشاشة.</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>ملاءمة النافذة للصورة عند الاستعادة</value>
+  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>النقر بزر الماوس الأيسر والسحب خارج الصورة</value>
   </data>

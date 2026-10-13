@@ -753,6 +753,12 @@ FlyPhotos를 선택한 다음 항상을 선택합니다.</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>창 버튼 자동 숨기기</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>사진의 화면 위치를 유지한 채 창을 사진 크기에 맞게 줄입니다.</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>복원 시 창을 사진에 맞추기</value>
+  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>사진 바깥에서 마우스 왼쪽 클릭 후 드래그</value>
   </data>

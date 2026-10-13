@@ -229,6 +229,32 @@ internal static partial class Win32Methods
 
     #region Window placement (user32.dll)
 
+    /// <summary>Retrieves the dimensions of a window's client area.</summary>
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool GetClientRect(nint hWnd, out RECT lpRect);
+
+    /// <summary>Changes the size and position of a window.</summary>
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool SetWindowPos(nint hWnd, nint hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+    /// <summary>Does not activate the window when repositioning it.</summary>
+    internal const uint SWP_NOACTIVATE = 0x0010;
+
+    /// <summary>Keeps the current Z order.</summary>
+    internal const uint SWP_NOZORDER = 0x0004;
+
+    /// <summary>Retrieves the bounding rectangle of a window in screen coordinates.</summary>
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool GetWindowRect(nint hWnd, out RECT lpRect);
+
+    /// <summary>Converts client-area coordinates to screen coordinates.</summary>
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool ClientToScreen(nint hWnd, ref POINT lpPoint);
+
 #pragma warning disable SYSLIB1054
     /// <summary>
     /// Retrieves the show state and the restored, minimized, and maximized positions of the specified window.
@@ -317,6 +343,24 @@ internal static partial class Win32Methods
     /// This is one of the command flags used in the <see cref="WINDOWPLACEMENT.showCmd"/> member.
     /// </summary>
     internal const uint SW_SHOWMAXIMIZED = 3;
+
+    /// <summary>Activates and displays a window in its normal position and size.</summary>
+    internal const uint SW_SHOWNORMAL = 1;
+
+    /// <summary>The window is minimized. Read back from <see cref="WINDOWPLACEMENT.showCmd"/> to detect minimize state.</summary>
+    internal const uint SW_SHOWMINIMIZED = 2;
+
+    #endregion
+
+    #region Desktop Window Manager (dwmapi.dll)
+
+    /// <summary>Disables DWM transitions for the specified window while the value is true.</summary>
+    internal const uint DWMWA_TRANSITIONS_FORCEDISABLED = 3;
+
+    /// <summary>Sets a Desktop Window Manager attribute for a window.</summary>
+    [LibraryImport("dwmapi.dll")]
+    internal static partial int DwmSetWindowAttribute(
+        nint hwnd, uint dwAttribute, ref int pvAttribute, uint cbAttribute);
 
     #endregion
 

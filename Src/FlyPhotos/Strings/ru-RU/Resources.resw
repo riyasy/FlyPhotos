@@ -748,6 +748,12 @@
   <data name="TextDoubleClickOutsideActionNothing.Text" xml:space="preserve">
     <value>Ничего</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>Уменьшать окно вокруг фото, оставляя фото на том же месте на экране.</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>Подгонять окно под фото при восстановлении</value>
+  </data>
   <data name="SettingsCardAutoHideCaptionButtons.Description" xml:space="preserve">
     <value>Кнопки свертывания, развертывания и закрытия отображаются только тогда, когда мышь находится у верхнего края окна.</value>
   </data>

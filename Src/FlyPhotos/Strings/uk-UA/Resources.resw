@@ -754,6 +754,12 @@
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Автоматично ховати кнопки вікна</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>Зменшувати вікно навколо фото, залишаючи фото на тому самому місці на екрані.</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>Підганяти вікно під фото під час відновлення</value>
+  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Лівий клік миші та перетягування поза фото</value>
   </data>

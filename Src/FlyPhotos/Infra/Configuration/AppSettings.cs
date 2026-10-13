@@ -60,6 +60,7 @@ public class AppSettings
     public bool ShowImageDimensions { get; set; } = false;
     public bool AutoHideMouse { get; set; } = false;
     public bool AutoHideCaptionButtons { get; set; } = false;
+    public bool SizeWindowToImageOnRestore { get; set; } = false;
 
     [JsonConverter(typeof(JsonStringEnumConverter<ClickOutsideBehavior>))]
     public ClickOutsideBehavior ClickOutsideBehavior { get; set; } = ClickOutsideBehavior.RestoreWindow;

@@ -754,6 +754,12 @@ Settings &gt; Apps &gt; Default apps.</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Automatically hide caption buttons</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>Shrink the window around the photo, keeping it in place on screen.</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>Fit window to photo when restoring</value>
+  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Mouse Left Click and Drag outside Photo</value>
   </data>

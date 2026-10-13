@@ -84,6 +84,9 @@ internal partial class CanvasController : ICanvasController
     private Rect _hitTestImageRect;
     private readonly Lock _hitTestLock = new();
 
+    /// <summary>The pending image-sized window resize: canvas origin shift and the canvas size it expects.</summary>
+    private (Point Shift, Size CanvasSize)? _pendingImageSizedResize;
+
     private int _zoomPercentUiUpdatePending;
     private int _pendingZoomPercent;
     private int _lastDispatchedZoomPercent = -1;
@@ -523,7 +526,7 @@ internal partial class CanvasController : ICanvasController
         var renderer = _currentRenderer;
         if (renderer == null) return;
 
-        var isAnimating = _canvasViewManager.PanZoomAnimationOnGoing || _continuousZoomActive;
+        var isAnimating = IsPanZoomAnimating;
         var drawingQuality = AppConfig.Settings.ImageScalingQuality.ToCanvasInterpolation(isAnimating);
 
         args.DrawingSession.Transform = _canvasViewState.Mat;
@@ -534,6 +537,17 @@ internal partial class CanvasController : ICanvasController
     {
         var newSize = args.NewSize.AdjustForDpi(_d2dCanvas);
         var previousSize = args.PreviousSize.AdjustForDpi(_d2dCanvas);
+        // Consume the pending marker on the first resize either way; it only applies if this is the
+        // resize it was prepared for, so a restore that never resized can't hijack a later resize.
+        if (_pendingImageSizedResize is { } pending)
+        {
+            _pendingImageSizedResize = null;
+            if (IsSameCanvasSize(newSize, pending.CanvasSize))
+            {
+                SafeEnqueue(v => v.HandleImageSizedWindowResize(pending.Shift, newSize));
+                return;
+            }
+        }
         SafeEnqueue(v => v.HandleSizeChange(newSize, previousSize));
     }
 
@@ -580,6 +594,56 @@ internal partial class CanvasController : ICanvasController
         return tp.X >= imageRect.X && tp.Y >= imageRect.Y
                                    && tp.X <= imageRect.Right && tp.Y <= imageRect.Bottom;
     }
+
+    /// <summary>True while a pan/zoom animation or continuous zoom is in progress.</summary>
+    public bool IsPanZoomAnimating => _canvasViewManager.PanZoomAnimationOnGoing || _continuousZoomActive;
+
+    /// <summary>
+    /// Tries to get the axis-aligned bounds of the displayed image in physical canvas pixels.
+    /// </summary>
+    /// <param name="bounds">The displayed image bounds when available.</param>
+    /// <returns><see langword="true"/> when valid image bounds are available; otherwise, <see langword="false"/>.</returns>
+    public bool TryGetDisplayedImageBounds(out Rect bounds)
+    {
+        Matrix3x2 matInv;
+        Rect imageRect;
+        lock (_hitTestLock)
+        {
+            matInv = _hitTestMatInv;
+            imageRect = _hitTestImageRect;
+        }
+
+        bounds = default;
+        if (imageRect.Width <= 0 || imageRect.Height <= 0 || !Matrix3x2.Invert(matInv, out var mat))
+            return false;
+
+        // Rotation is in 90° steps, so two opposite corners still span the box; Rect(Point, Point)
+        // sorts them into left/top/right/bottom.
+        var a = Vector2.Transform(new Vector2((float)imageRect.Left, (float)imageRect.Top), mat);
+        var b = Vector2.Transform(new Vector2((float)imageRect.Right, (float)imageRect.Bottom), mat);
+        bounds = new Rect(new Point(a.X, a.Y), new Point(b.X, b.Y));
+        return true;
+    }
+
+    /// <summary>
+    /// Marks the next canvas resize as an image-sized window resize and preserves the image's screen position.
+    /// </summary>
+    /// <param name="canvasOriginShift">How far the canvas origin moves on screen, in physical pixels.</param>
+    /// <param name="canvasWidth">The expected canvas width after the resize, in physical pixels.</param>
+    /// <param name="canvasHeight">The expected canvas height after the resize, in physical pixels.</param>
+    public void PrepareForImageSizedWindow(Point canvasOriginShift, double canvasWidth, double canvasHeight)
+    {
+        var newSize = new Size(canvasWidth, canvasHeight);
+        // Same size → no SizeChanged will follow, so apply the shift now rather than leave a stale marker.
+        if (IsSameCanvasSize(_d2dCanvas.GetSize(), newSize))
+            SafeEnqueue(v => v.HandleImageSizedWindowResize(canvasOriginShift, newSize));
+        else
+            _pendingImageSizedResize = (canvasOriginShift, newSize);
+    }
+
+    // Layout rounds DIPs to physical pixels, so allow a pixel of slack.
+    private static bool IsSameCanvasSize(Size a, Size b) =>
+        Math.Abs(a.Width - b.Width) <= 1.5 && Math.Abs(a.Height - b.Height) <= 1.5;
 
     // --- Settings ---
 

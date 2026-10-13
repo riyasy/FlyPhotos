@@ -753,6 +753,12 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Címsorgombok automatikus elrejtése</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>Az ablak kicsinyítése a kép köré úgy, hogy a kép a helyén maradjon a képernyőn.</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>Ablak illesztése a képhez visszaállításkor</value>
+  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Bal gomb + húzás a képen kívül</value>
   </data>

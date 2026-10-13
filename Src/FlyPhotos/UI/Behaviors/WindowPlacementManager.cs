@@ -96,14 +96,6 @@ public sealed partial class WindowPlacementManager : IDisposable
     /// <summary>Indicates whether the manager has been disposed to prevent further event handling.</summary>
     private bool _isDisposed;
 
-    // Win32 show-command constants supplementary to Win32Methods
-
-    /// <summary>SW_SHOWNORMAL – activate and show in original size/position.</summary>
-    private const uint SW_SHOWNORMAL = 1;
-
-    /// <summary>SW_SHOWMINIMIZED – window is minimised (used to detect minimise state).</summary>
-    private const uint SW_SHOWMINIMIZED = 2;
-
     /// <summary>
     ///     The separator character used to delimit fields in the serialized string.
     /// </summary>
@@ -229,7 +221,7 @@ public sealed partial class WindowPlacementManager : IDisposable
             Bottom = state.Y + state.Height
         };
 
-        wp.showCmd = SW_SHOWNORMAL;
+        wp.showCmd = Win32Methods.SW_SHOWNORMAL;
 
         // Bracket SetWindowPlacement with the flag so that WM_DPICHANGED fired
         // by moving the window to a different-DPI monitor is suppressed above.
@@ -275,7 +267,7 @@ public sealed partial class WindowPlacementManager : IDisposable
         // In that case inherit the IsMaximized flag from the previous snapshot
         // so we don't accidentally clear it.
         bool isMaximized = wp.showCmd == Win32Methods.SW_SHOWMAXIMIZED
-                           || (wp.showCmd == SW_SHOWMINIMIZED && _state?.IsMaximized == true);
+                           || (wp.showCmd == Win32Methods.SW_SHOWMINIMIZED && _state?.IsMaximized == true);
 
         var newState = new WindowStateData(
             rc.Left,

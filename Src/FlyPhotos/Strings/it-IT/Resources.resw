@@ -754,6 +754,12 @@ Impostazioni &gt; App &gt; App predefinite.</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Nascondi automaticamente i pulsanti della finestra</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>Riduci la finestra attorno alla foto, mantenendo la foto nella sua posizione sullo schermo.</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>Adatta la finestra alla foto durante il ripristino</value>
+  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Clic sinistro e trascina fuori dalla foto</value>
   </data>

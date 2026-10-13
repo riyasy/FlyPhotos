@@ -100,6 +100,8 @@ internal sealed partial class Settings
         ButtonStretchSmallImages.IsOn = AppConfig.Settings.StretchSmallImages;
         // Items are in enum order.
         ComboMouseFwdBack.SelectedIndex = (int)AppConfig.Settings.MouseFwdBackBehavior;
+        ComboClickOutside.SelectedIndex = (int)AppConfig.Settings.ClickOutsideBehavior;
+        ButtonSizeWindowToImageOnRestore.IsEnabled = AppConfig.Settings.ClickOutsideBehavior == ClickOutsideBehavior.RestoreWindow;
         ButtonSwapMouseFwdBack.IsOn = AppConfig.Settings.SwapMouseFwdBack;
         SliderTransparentBackgroundIntensity.Value = AppConfig.Settings.TransparentBackgroundIntensity;
         RectThumbnailSelection.Stroke = new SolidColorBrush(ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor));
@@ -114,6 +116,7 @@ internal sealed partial class Settings
         ComboPanZoomNavBehaviour.SelectedIndex = GetIndexForPanZoomBehaviour(AppConfig.Settings.PanZoomBehaviourOnNavigation);
         ButtonEnableAutoHideMouse.IsOn = AppConfig.Settings.AutoHideMouse;
         ButtonEnableAutoHideCaptionButtons.IsOn = AppConfig.Settings.AutoHideCaptionButtons;
+        ButtonSizeWindowToImageOnRestore.IsOn = AppConfig.Settings.SizeWindowToImageOnRestore;
         ButtonEnableExternalShortcut.IsOn = AppConfig.Settings.ShowExternalAppShortcuts;
         ButtonDecodeRawData.IsOn = AppConfig.Settings.DecodeRawData;
 
@@ -134,6 +137,7 @@ internal sealed partial class Settings
         SliderImageFitPercentage.ValueChanged += SliderImageFitPercentage_ValueChanged;
         ButtonStretchSmallImages.Toggled += ButtonStretchSmallImages_OnToggled;
         ComboMouseFwdBack.SelectionChanged += ComboMouseFwdBack_OnSelectionChanged;
+        ComboClickOutside.SelectionChanged += ComboClickOutside_OnSelectionChanged;
         ButtonSwapMouseFwdBack.Toggled += ButtonSwapMouseFwdBack_OnToggled;
         SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
         SliderThumbnailSize.ValueChanged += SliderThumbnailSize_ValueChanged;
@@ -146,6 +150,7 @@ internal sealed partial class Settings
         ComboPanZoomNavBehaviour.SelectionChanged += ComboPanZoomNavBehaviour_OnSelectionChanged;
         ButtonEnableAutoHideMouse.Toggled += ButtonEnableAutoHideMouse_OnToggled;
         ButtonEnableAutoHideCaptionButtons.Toggled += ButtonEnableAutoHideCaptionButtons_OnToggled;
+        ButtonSizeWindowToImageOnRestore.Toggled += ButtonSizeWindowToImageOnRestore_OnToggled;
         ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
         ButtonDecodeRawData.Toggled += ButtonDecodeRawData_OnToggled;
         AppConfig.Settings.RawDecoderPriority.CollectionChanged += RawDecoderPriority_CollectionChanged;
@@ -254,6 +259,13 @@ internal sealed partial class Settings
         await AppConfig.SaveAsync();
     }
 
+    /// <summary>Persists whether image-sized restoration is enabled.</summary>
+    private async void ButtonSizeWindowToImageOnRestore_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.SizeWindowToImageOnRestore = ButtonSizeWindowToImageOnRestore.IsOn;
+        await AppConfig.SaveAsync();
+    }
+
     private async void ComboPanZoomNavBehaviour_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         var panZoomEnum = GetPanZoomForIndex(ComboPanZoomNavBehaviour.SelectedIndex);
@@ -330,6 +342,16 @@ internal sealed partial class Settings
     private async void ComboMouseFwdBack_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         AppConfig.Settings.MouseFwdBackBehavior = (MouseFwdBackBehavior)ComboMouseFwdBack.SelectedIndex;
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ComboClickOutside_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        var behavior = (ClickOutsideBehavior)ComboClickOutside.SelectedIndex;
+        AppConfig.Settings.ClickOutsideBehavior = behavior;
+        _doubleClickOutsideRow.SetFixedAction(MouseCatalog.DoubleClickOutsideActionKey(behavior));
+        // Sizing to the image only applies when the click restores the window.
+        ButtonSizeWindowToImageOnRestore.IsEnabled = behavior == ClickOutsideBehavior.RestoreWindow;
         await AppConfig.SaveAsync();
     }
 
@@ -663,13 +685,18 @@ internal sealed partial class Settings
     /// persistence only care about the rows. Never bound to XAML, so the interface type is safe.</summary>
     private IEnumerable<ShortcutRow> AllShortcutRows => _allShortcutGroups.SelectMany(g => g.Rows);
 
+    /// <summary>Reports the click-outside setting; retargeted when that picker changes.</summary>
+    private readonly MouseRow _doubleClickOutsideRow = MouseCatalog.BuildDoubleClickOutside();
+
     private void InitializeShortcutsTab()
     {
         ShortcutGroupsList.ItemsSource = _allShortcutGroups;
 
         // No field for these: nothing outside the binding reads them, and ItemsSource keeps the
-        // rows alive, so a row that another row retargets holds whatever it was set to.
-        MouseRowsList.ItemsSource = MouseCatalog.BuildAll();
+        // rows alive. The exception is the double-click-outside row, which the hand-written
+        // click-outside picker retargets.
+        MouseRowsListUpper.ItemsSource = MouseCatalog.BuildUpper();
+        MouseRowsListLower.ItemsSource = MouseCatalog.BuildLower(_doubleClickOutsideRow);
 
         ApplyShortcutFilter(string.Empty);
     }

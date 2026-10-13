@@ -754,6 +754,12 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
   <data name="SettingsCardAutoHideCaptionButtons.Header" xml:space="preserve">
     <value>Ocultar automaticamente os botões da barra de título</value>
   </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Description" xml:space="preserve">
+    <value>Reduzir a janela ao redor da foto, mantendo a foto no mesmo lugar na tela.</value>
+  </data>
+  <data name="SettingsCardSizeWindowToImageOnRestore.Header" xml:space="preserve">
+    <value>Ajustar a janela à foto ao restaurar</value>
+  </data>
   <data name="SettingsCardCtrlDragToMoveWindow.Header" xml:space="preserve">
     <value>Clique esquerdo e arraste fora da foto</value>
   </data>
