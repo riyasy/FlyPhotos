@@ -1219,4 +1219,58 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Kääntökellowidget Windowsin työpöydälle</value>
   </data>
+  <data name="ShortcutGroup_Rating" xml:space="preserve">
+    <value>Arvostelu</value>
+  </data>
+  <data name="ShortcutName_Rate1" xml:space="preserve">
+    <value>Anna 1 tähti</value>
+  </data>
+  <data name="ShortcutName_Rate2" xml:space="preserve">
+    <value>Anna 2 tähteä</value>
+  </data>
+  <data name="ShortcutName_Rate3" xml:space="preserve">
+    <value>Anna 3 tähteä</value>
+  </data>
+  <data name="ShortcutName_Rate4" xml:space="preserve">
+    <value>Anna 4 tähteä</value>
+  </data>
+  <data name="ShortcutName_Rate5" xml:space="preserve">
+    <value>Anna 5 tähteä</value>
+  </data>
+  <data name="ShortcutName_Rate0" xml:space="preserve">
+    <value>Tyhjennä arvostelu</value>
+  </data>
+  <data name="ShortcutDesc_Rate1" xml:space="preserve">
+    <value>Saman arvostelun painaminen uudelleen poistaa sen.</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>Ei arvostelua</value>
+  </data>
+  <data name="Rating.Failed" xml:space="preserve">
+    <value>Arvostelun tallennus epäonnistui</value>
+  </data>
+  <data name="Exif_Rating" xml:space="preserve">
+    <value>Arvostelu</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
+    <value>Arvostelutiedostot</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
+    <value>Poista arvostelutiedostot kuvan mukana</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
+    <value>Kuvan poistaminen siirtää myös sen .xmp-tiedostot roskakoriin. Ne voivat sisältää muiden sovellusten muokkauksia.</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
+    <value>Tallenna arvostelut JPEG-, TIFF-, DNG- ja PNG-tiedostojen sisään</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
+    <value>Pois: kirjoittaa vain kuvan vieressä olevan .xmp-tiedoston. Lähinnä darktablea varten. Adoben sovellukset ohittavat sen.</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
+    <value>RAW-kuvat saavat viereensä .xmp-tiedoston.</value>
+  </data>
+  <data name="Rating.Unsupported" xml:space="preserve">
+    <value>Tätä tiedostotyyppiä ei voi arvostella</value>
+  </data>
 </root>

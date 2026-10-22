@@ -1219,4 +1219,58 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Widget d&apos;horloge à volets pour le bureau Windows</value>
   </data>
+  <data name="ShortcutGroup_Rating" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="ShortcutName_Rate1" xml:space="preserve">
+    <value>Noter 1 étoile</value>
+  </data>
+  <data name="ShortcutName_Rate2" xml:space="preserve">
+    <value>Noter 2 étoiles</value>
+  </data>
+  <data name="ShortcutName_Rate3" xml:space="preserve">
+    <value>Noter 3 étoiles</value>
+  </data>
+  <data name="ShortcutName_Rate4" xml:space="preserve">
+    <value>Noter 4 étoiles</value>
+  </data>
+  <data name="ShortcutName_Rate5" xml:space="preserve">
+    <value>Noter 5 étoiles</value>
+  </data>
+  <data name="ShortcutName_Rate0" xml:space="preserve">
+    <value>Effacer la note</value>
+  </data>
+  <data name="ShortcutDesc_Rate1" xml:space="preserve">
+    <value>Appuyer de nouveau sur la même note l'efface.</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>Aucune note</value>
+  </data>
+  <data name="Rating.Failed" xml:space="preserve">
+    <value>Impossible d'enregistrer la note</value>
+  </data>
+  <data name="Exif_Rating" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
+    <value>Fichiers de notes</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
+    <value>Supprimer les fichiers de notes avec la photo</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
+    <value>Supprimer une photo envoie aussi ses fichiers .xmp à la Corbeille. Ils peuvent contenir des retouches d'autres applications.</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
+    <value>Enregistrer les notes dans les fichiers JPEG, TIFF, DNG et PNG</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
+    <value>Désactivé : écrit seulement le fichier .xmp à côté de la photo. Surtout pour darktable. Les apps Adobe l'ignorent.</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
+    <value>Les photos RAW reçoivent un fichier .xmp à côté.</value>
+  </data>
+  <data name="Rating.Unsupported" xml:space="preserve">
+    <value>Impossible de noter ce type de fichier</value>
+  </data>
 </root>

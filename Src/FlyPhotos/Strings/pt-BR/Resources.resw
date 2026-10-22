@@ -1219,4 +1219,58 @@ High Quality Cubic – Dimensionamento de alta qualidade para fotos.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Widget de relógio flip para a área de trabalho do Windows</value>
   </data>
+  <data name="ShortcutGroup_Rating" xml:space="preserve">
+    <value>Avaliação</value>
+  </data>
+  <data name="ShortcutName_Rate1" xml:space="preserve">
+    <value>Avaliar com 1 estrela</value>
+  </data>
+  <data name="ShortcutName_Rate2" xml:space="preserve">
+    <value>Avaliar com 2 estrelas</value>
+  </data>
+  <data name="ShortcutName_Rate3" xml:space="preserve">
+    <value>Avaliar com 3 estrelas</value>
+  </data>
+  <data name="ShortcutName_Rate4" xml:space="preserve">
+    <value>Avaliar com 4 estrelas</value>
+  </data>
+  <data name="ShortcutName_Rate5" xml:space="preserve">
+    <value>Avaliar com 5 estrelas</value>
+  </data>
+  <data name="ShortcutName_Rate0" xml:space="preserve">
+    <value>Limpar avaliação</value>
+  </data>
+  <data name="ShortcutDesc_Rate1" xml:space="preserve">
+    <value>Pressionar a mesma avaliação novamente a remove.</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>Sem avaliação</value>
+  </data>
+  <data name="Rating.Failed" xml:space="preserve">
+    <value>Não foi possível salvar a avaliação</value>
+  </data>
+  <data name="Exif_Rating" xml:space="preserve">
+    <value>Avaliação</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
+    <value>Arquivos de avaliação</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
+    <value>Excluir arquivos de avaliação com a foto</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
+    <value>Ao excluir uma foto, os arquivos .xmp dela também vão para a Lixeira. Eles podem conter edições de outros apps.</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
+    <value>Salvar avaliações dentro de arquivos JPEG, TIFF, DNG e PNG</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
+    <value>Desativado: grava apenas o arquivo .xmp ao lado da foto. Principalmente para o darktable. Apps da Adobe o ignoram.</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
+    <value>Fotos RAW recebem um arquivo .xmp ao lado.</value>
+  </data>
+  <data name="Rating.Unsupported" xml:space="preserve">
+    <value>Não é possível avaliar este tipo de arquivo</value>
+  </data>
 </root>

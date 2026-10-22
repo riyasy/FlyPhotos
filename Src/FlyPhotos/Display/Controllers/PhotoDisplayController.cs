@@ -33,6 +33,9 @@ internal partial class PhotoDisplayController
     // ConcurrentDictionary for lock-free reads + a volatile copy-on-write key snapshot) lives inside it.
     private readonly PhotoList _photoList = new();
 
+    // Photos with a rating write running. UI thread only; see RateCurrentPhoto.
+    private readonly HashSet<Photo> _photosWithRatingWriteInFlight = [];
+
     // Owns all background loading (preview/HQ/disk tiers, threads, throttling, the sliding window,
     // disk write-back). The controller keeps the photo list and navigation; it drives the cache with
     // MoveWindow and listens to its ready events.
@@ -288,11 +291,88 @@ internal partial class PhotoDisplayController
                 }
             }
 
-            FileNameOrDetailsChanged?.Invoke(new FileDisplayDetails(positionText, fileName, dimensionText));
+            BeginRatingReadIfNeeded(photo);
+            FileNameOrDetailsChanged?.Invoke(new FileDisplayDetails(positionText, fileName, dimensionText,
+                Math.Max(photo.Rating, 0)));
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
+        }
+    }
+
+    // --- Rating ---
+
+    // Reads the rating once per photo, off the UI thread, then refreshes the footer.
+    private void BeginRatingReadIfNeeded(Photo photo)
+    {
+        if (string.IsNullOrEmpty(photo.FilePath) || photo.Rating != Photo.RatingUnknown) return;
+        if (IsContinuousKeyPress() || !photo.TryBeginRatingRead()) return;
+
+        var path = photo.FilePath;
+        _ = Task.Run(() =>
+        {
+            photo.SetRatingIfUnknown(RatingMetadata.ReadRating(path) ?? 0);
+            RefreshFooterIfCurrent(photo);
+        });
+    }
+
+    private void RefreshFooterIfCurrent(Photo photo)
+    {
+        if (ReferenceEquals(CurrentPhotoOrNull(), photo)) UpdateFileNameAndDetails();
+    }
+
+    private Photo? CurrentPhotoOrNull()
+    {
+        var photo = _initialFileListingCompleted ? _photoList.GetPhoto(_photoSessionState.CurrentPhotoKey) : _firstPhoto;
+        return photo == null || string.IsNullOrEmpty(photo.FilePath) ? null : photo;
+    }
+
+    public bool CanRateCurrentPhoto() => !IsContinuousKeyPress() && CurrentPhotoOrNull() != null;
+
+    /// <summary>
+    /// Sets the current photo's star rating. Pressing the rating it already has clears it (<paramref name="requested"/> 0 always clears).
+    /// The new rating shows at once. Writes are coalesced per photo: a press during a write only changes the value
+    /// that write saves next, so spamming a key costs at most two writes instead of a queue.
+    /// </summary>
+    public async Task<RatingResult> RateCurrentPhoto(int requested)
+    {
+        // Capture the photo before any await: the user may navigate while the write runs.
+        if (CurrentPhotoOrNull() is not { } photo) return new RatingResult(false, "App - Inconsistent State");
+        var path = photo.FilePath;
+
+        // Another press or the background read may fill it in during the await; theirs wins.
+        if (photo.Rating == Photo.RatingUnknown)
+            photo.SetRatingIfUnknown(await Task.Run(() => RatingMetadata.ReadRating(path)) ?? 0);
+
+        var previous = photo.Rating;
+        var target = requested == previous ? 0 : requested;
+        photo.Rating = target;
+        RefreshFooterIfCurrent(photo);
+
+        // Called and resumed on the UI thread, so the set needs no lock: the loop's last check and the removal in
+        // finally run in one continuation, with no await between them for another press to slip into.
+        if (!_photosWithRatingWriteInFlight.Add(photo)) return new RatingResult(true, rating: target, queued: true);
+        try
+        {
+            var saved = previous; // no write in flight, so this is what is on disk
+            while (true)
+            {
+                var toWrite = photo.Rating;
+                var result = await StorageOps.SetRatingOnDisk(path, toWrite);
+                if (!result.Success)
+                {
+                    photo.Rating = saved;
+                    RefreshFooterIfCurrent(photo);
+                    return result;
+                }
+                saved = toWrite;
+                if (photo.Rating == toWrite) return result;
+            }
+        }
+        finally
+        {
+            _photosWithRatingWriteInFlight.Remove(photo);
         }
     }
 

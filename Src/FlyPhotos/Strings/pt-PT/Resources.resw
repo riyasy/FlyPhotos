@@ -1219,4 +1219,58 @@ High Quality Cubic – Redimensionamento de alta qualidade para fotos.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Widget de relógio flip para o ambiente de trabalho do Windows</value>
   </data>
+  <data name="ShortcutGroup_Rating" xml:space="preserve">
+    <value>Classificação</value>
+  </data>
+  <data name="ShortcutName_Rate1" xml:space="preserve">
+    <value>Classificar com 1 estrela</value>
+  </data>
+  <data name="ShortcutName_Rate2" xml:space="preserve">
+    <value>Classificar com 2 estrelas</value>
+  </data>
+  <data name="ShortcutName_Rate3" xml:space="preserve">
+    <value>Classificar com 3 estrelas</value>
+  </data>
+  <data name="ShortcutName_Rate4" xml:space="preserve">
+    <value>Classificar com 4 estrelas</value>
+  </data>
+  <data name="ShortcutName_Rate5" xml:space="preserve">
+    <value>Classificar com 5 estrelas</value>
+  </data>
+  <data name="ShortcutName_Rate0" xml:space="preserve">
+    <value>Limpar classificação</value>
+  </data>
+  <data name="ShortcutDesc_Rate1" xml:space="preserve">
+    <value>Premir novamente a mesma classificação remove-a.</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>Sem classificação</value>
+  </data>
+  <data name="Rating.Failed" xml:space="preserve">
+    <value>Não foi possível guardar a classificação</value>
+  </data>
+  <data name="Exif_Rating" xml:space="preserve">
+    <value>Classificação</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
+    <value>Ficheiros de classificação</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
+    <value>Eliminar ficheiros de classificação com a fotografia</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
+    <value>Ao eliminar uma fotografia, os seus ficheiros .xmp também vão para a Reciclagem. Podem conter edições de outras aplicações.</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
+    <value>Guardar classificações dentro de ficheiros JPEG, TIFF, DNG e PNG</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
+    <value>Desativado: escreve apenas o ficheiro .xmp ao lado da fotografia. Sobretudo para o darktable. As apps da Adobe ignoram-no.</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
+    <value>Fotografias RAW recebem um ficheiro .xmp ao lado.</value>
+  </data>
+  <data name="Rating.Unsupported" xml:space="preserve">
+    <value>Não é possível classificar este tipo de ficheiro</value>
+  </data>
 </root>

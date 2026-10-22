@@ -1218,4 +1218,58 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Lapozós óra widget a Windows asztalára</value>
   </data>
+  <data name="ShortcutGroup_Rating" xml:space="preserve">
+    <value>Értékelés</value>
+  </data>
+  <data name="ShortcutName_Rate1" xml:space="preserve">
+    <value>Értékelés: 1 csillag</value>
+  </data>
+  <data name="ShortcutName_Rate2" xml:space="preserve">
+    <value>Értékelés: 2 csillag</value>
+  </data>
+  <data name="ShortcutName_Rate3" xml:space="preserve">
+    <value>Értékelés: 3 csillag</value>
+  </data>
+  <data name="ShortcutName_Rate4" xml:space="preserve">
+    <value>Értékelés: 4 csillag</value>
+  </data>
+  <data name="ShortcutName_Rate5" xml:space="preserve">
+    <value>Értékelés: 5 csillag</value>
+  </data>
+  <data name="ShortcutName_Rate0" xml:space="preserve">
+    <value>Értékelés törlése</value>
+  </data>
+  <data name="ShortcutDesc_Rate1" xml:space="preserve">
+    <value>Ugyanannak az értékelésnek az újbóli megnyomása törli azt.</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>Nincs értékelés</value>
+  </data>
+  <data name="Rating.Failed" xml:space="preserve">
+    <value>Az értékelés mentése nem sikerült</value>
+  </data>
+  <data name="Exif_Rating" xml:space="preserve">
+    <value>Értékelés</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
+    <value>Értékelésfájlok</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
+    <value>Értékelésfájlok törlése a fotóval együtt</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
+    <value>Egy fotó törlésekor az .xmp-fájljai is a Lomtárba kerülnek. Ezek más alkalmazások szerkesztéseit is tartalmazhatják.</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
+    <value>Értékelések mentése a JPEG-, TIFF-, DNG- és PNG-fájlokba</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
+    <value>Ki: csak a fotó melletti .xmp-fájlt írja. Főleg darktable-hez. Az Adobe-alkalmazások figyelmen kívül hagyják.</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
+    <value>A RAW fotók mellé egy .xmp-fájl kerül.</value>
+  </data>
+  <data name="Rating.Unsupported" xml:space="preserve">
+    <value>Ez a fájltípus nem értékelhető</value>
+  </data>
 </root>

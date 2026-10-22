@@ -110,6 +110,8 @@ internal sealed partial class Settings
         ComboWindowLaunchMode.SelectedIndex = GetIndexForWindowLaunchMode(AppConfig.Settings.WindowLaunchMode);
         ButtonAllowMultiInstance.IsOn = AppConfig.Settings.AllowMultiInstance;
         ButtonConfirmBeforeDelete.IsOn = AppConfig.Settings.ConfirmForDelete;
+        ButtonEmbedRatingsInFiles.IsOn = AppConfig.Settings.EmbedRatingsInFiles;
+        ButtonDeleteRatingSidecars.IsOn = AppConfig.Settings.DeleteRatingSidecarsWithPhoto;
         ButtonShowFileName.IsOn = AppConfig.Settings.ShowFileName;
         ButtonShowCacheStatusExpander.IsOn = AppConfig.Settings.ShowCacheStatus;
         ButtonShowImageDimensions.IsOn = AppConfig.Settings.ShowImageDimensions;
@@ -142,6 +144,8 @@ internal sealed partial class Settings
         SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
         SliderThumbnailSize.ValueChanged += SliderThumbnailSize_ValueChanged;
         ComboWindowLaunchMode.SelectionChanged += ComboWindowLaunchMode_OnSelectionChanged;
+        ButtonEmbedRatingsInFiles.Toggled += ButtonEmbedRatingsInFiles_OnToggled;
+        ButtonDeleteRatingSidecars.Toggled += ButtonDeleteRatingSidecars_OnToggled;
         ButtonAllowMultiInstance.Toggled += ButtonAllowMultiInstance_OnToggled;
         ButtonConfirmBeforeDelete.Toggled += ButtonConfirmBeforeDelete_OnToggled;
         ButtonShowFileName.Toggled += ButtonShowFileName_OnToggled;
@@ -300,6 +304,18 @@ internal sealed partial class Settings
         await AppConfig.SaveAsync();
     }
 
+
+    private async void ButtonEmbedRatingsInFiles_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.EmbedRatingsInFiles = ButtonEmbedRatingsInFiles.IsOn;
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ButtonDeleteRatingSidecars_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.DeleteRatingSidecarsWithPhoto = ButtonDeleteRatingSidecars.IsOn;
+        await AppConfig.SaveAsync();
+    }
 
     private async void ComboWindowLaunchMode_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {

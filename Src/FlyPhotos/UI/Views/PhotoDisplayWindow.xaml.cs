@@ -140,6 +140,7 @@ public sealed partial class PhotoDisplayWindow
 
         TxtFileName.Text = Path.GetFileName(firstPhotoPath);
         BorderTxtFileName.Visibility = AppConfig.Settings.ShowFileName ? Visibility.Visible : Visibility.Collapsed;
+        ApplyRatingColor();
         ButtonExpander.Visibility = AppConfig.Settings.ShowCacheStatus ? Visibility.Visible : Visibility.Collapsed;
 
         // The canvas/photo and keyboard navigation must never mirror, regardless of app
@@ -280,7 +281,15 @@ public sealed partial class PhotoDisplayWindow
             [CommandId.OpenWithApp1] = () => LaunchExternalAppAsync(0),
             [CommandId.OpenWithApp2] = () => LaunchExternalAppAsync(1),
             [CommandId.OpenWithApp3] = () => LaunchExternalAppAsync(2),
-            [CommandId.OpenWithApp4] = () => LaunchExternalAppAsync(3)
+            [CommandId.OpenWithApp4] = () => LaunchExternalAppAsync(3),
+
+            // Rating
+            [CommandId.Rate0] = () => RateCurrentPhotoAsync(0),
+            [CommandId.Rate1] = () => RateCurrentPhotoAsync(1),
+            [CommandId.Rate2] = () => RateCurrentPhotoAsync(2),
+            [CommandId.Rate3] = () => RateCurrentPhotoAsync(3),
+            [CommandId.Rate4] = () => RateCurrentPhotoAsync(4),
+            [CommandId.Rate5] = () => RateCurrentPhotoAsync(5)
         };
 
 #if DEBUG
@@ -1157,6 +1166,7 @@ public sealed partial class PhotoDisplayWindow
                 _thumbNailController.RefreshThumbnail();
                 break;
             case Setting.ThumbnailSelectionColor:
+                ApplyRatingColor();
                 _thumbNailController.RefreshThumbnail();
                 break;
             case Setting.ThumbnailShowHide:
@@ -1234,7 +1244,44 @@ public sealed partial class PhotoDisplayWindow
             CloseRenameFlyoutIfFileChanged(currentFilePath);
             TxtFileName.Text = fileDisplayDetails.DisplayText;
             Title = fileDisplayDetails.FileName;
+            ShowRating(fileDisplayDetails.Rating);
         });
+    }
+
+    // One filled star per rating point, none at 0. Same color as the active thumbnail border.
+    private void ShowRating(int rating)
+    {
+        TxtRating.Text = new string('', Math.Clamp(rating, 0, 5));
+        TxtRating.Visibility = rating > 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void ApplyRatingColor() =>
+        TxtRating.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+            ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor));
+
+    private async Task RateCurrentPhotoAsync(int rating)
+    {
+        if (!_photoController.CanRateCurrentPhoto())
+        {
+            _canvasController.Shrug();
+            return;
+        }
+
+        // Captured before the await: the user may navigate away while the write runs.
+        var ratedPath = _photoController.GetFullPathCurrentFile();
+        var result = await _photoController.RateCurrentPhoto(rating);
+        if (!result.Success)
+        {
+            TxtZoom.Text = L.Get(result.Unsupported ? "Rating/Unsupported" : "Rating/Failed");
+            _canvasController.Shrug();
+        }
+        else
+        {
+            TxtZoom.Text = result.Rating == 0 ? L.Get("Rating/None") : new string('★', result.Rating);
+            // A queued press has not reached the disk yet. The running write refreshes the panel when it ends.
+            if (!result.Queued) ExifInfoPanel.RefreshIfShowing(ratedPath);
+        }
+        _inactivityFader.ReportActivity();
     }
 
     private void CanvasController_OnZoomChanged(int zoomPercent)

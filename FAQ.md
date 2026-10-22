@@ -214,3 +214,31 @@ It contains all the text displayed in Fly. Translate the values into your langua
 - Submit a Pull Request on GitHub.
 
 **If that sounds too technical**, raise a ticket on [GitHub](https://github.com/riyasy/FlyPhotos/issues) and the developer will send you an online spreadsheet you can fill in directly.
+
+---
+
+## 12. I rated photos in Fly, but another app does not show the rating. Why?
+
+Photo apps read the rating when they import a photo. For photos the app imported before you rated them in Fly, tell it to read them again:
+
+| App | What to do |
+|---|---|
+| Lightroom Classic | Select the photos, then **Metadata → Read Metadata from File** |
+| Capture One | Turn on **Auto Sync Sidecar XMP** |
+| darktable, digiKam | Reload the metadata from the `.xmp` file |
+
+Windows Explorer never shows the rating for RAW photos.
+
+---
+
+## 13. I changed the rating in another app. Why doesn't Fly show them?
+
+Fly reads the rating when it opens a photo. Close and reopen Fly to see the change.
+
+For darktable, also turn on its setting that writes ratings to `.xmp` files.
+
+---
+
+## 14. Where does Fly save the rating?
+
+Inside the photo for JPEG, TIFF, DNG and PNG. RAW photos are never changed: their rating goes in an `.xmp` file next to the photo.

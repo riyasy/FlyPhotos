@@ -2,11 +2,14 @@
 
 namespace FlyPhotos.Core.Model;
 
-public readonly struct FileDisplayDetails(string? position, string fileName, string? dimensions)
+public readonly struct FileDisplayDetails(string? position, string fileName, string? dimensions, int rating = 0)
 {
     public readonly string? Position = position;
     public readonly string FileName = fileName;
     public readonly string? Dimensions = dimensions;
+
+    /// <summary>Star rating 0-5 shown after the file name; 0 shows nothing.</summary>
+    public readonly int Rating = rating;
 
     public string DisplayText
     {

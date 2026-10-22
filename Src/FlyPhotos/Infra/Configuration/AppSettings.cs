@@ -55,6 +55,11 @@ public class AppSettings
     public RightClickHoldBehavior RightClickHoldBehavior { get; set; } = RightClickHoldBehavior.ZoomIn;
 
     public bool ConfirmForDelete { get; set; } = true;
+
+    public bool EmbedRatingsInFiles { get; set; } = true;
+
+    public bool DeleteRatingSidecarsWithPhoto { get; set; } = true;
+
     public bool ShowFileName { get; set; } = true;
     public bool ShowCacheStatus { get; set; } = true;
     public bool ShowImageDimensions { get; set; } = false;
