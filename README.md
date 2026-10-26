@@ -175,5 +175,4 @@ Rows marked **configurable** can be changed in **Settings → Mouse**; the value
 
 ---
 
-### 🧩 Compatibility Note
-Older **1.x** versions were based on WPF and remain available only for Windows 7/8, but are no longer updated.  
+(c) 2026 RYF Tools. All rights reserved.
