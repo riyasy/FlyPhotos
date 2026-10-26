@@ -35,6 +35,15 @@ internal static class ImageReader
         ICanvasResourceCreatorWithDpi d2dCanvas, string path)
     {
         var item = await GetFirstPreviewCoreAsync(d2dCanvas, path);
+        if (item.IsErrorOrUndefined() && File.Exists(path))
+        {
+            var extension = Path.GetExtension(path).ToUpperInvariant();
+            if (await ImageFormatSniffer.GetMismatchedExtensionAsync(path, extension) is { } detectedExtension)
+            {
+                var fallback = await GetFirstPreviewCoreAsync(d2dCanvas, path, detectedExtension);
+                if (!fallback.IsErrorOrUndefined()) return fallback;
+            }
+        }
 
         // For PNG, GIF, TIFF, etc. the fast path goes straight to the normal HQ readers, which all fail on an
         // image over the GPU's maximum bitmap size. Return a preview instead, so the caller's HQ load
@@ -45,7 +54,8 @@ internal static class ImageReader
         return item;
     }
 
-    private static async Task<DisplayItem> GetFirstPreviewCoreAsync(ICanvasResourceCreatorWithDpi d2dCanvas, string path)
+    private static async Task<DisplayItem> GetFirstPreviewCoreAsync(ICanvasResourceCreatorWithDpi d2dCanvas, string path,
+        string extensionOverride = null)
     {
         try
         {
@@ -62,7 +72,7 @@ internal static class ImageReader
                 }
             }
 
-            var extension = Path.GetExtension(path).ToUpperInvariant();
+            var extension = extensionOverride ?? Path.GetExtension(path).ToUpperInvariant();
             switch (extension)
             {
                 case ".HEIC":
@@ -161,6 +171,21 @@ internal static class ImageReader
     /// </summary>
     public static async Task<PreviewDisplayItem> GetPreview(ICanvasResourceCreatorWithDpi d2dCanvas, string path)
     {
+        var preview = await GetPreviewCoreAsync(d2dCanvas, path);
+        if (!preview.IsErrorOrUndefined() || !File.Exists(path))
+            return preview;
+
+        var extension = Path.GetExtension(path).ToUpperInvariant();
+        if (await ImageFormatSniffer.GetMismatchedExtensionAsync(path, extension) is not { } detectedExtension)
+            return preview;
+
+        var fallback = await GetPreviewCoreAsync(d2dCanvas, path, detectedExtension);
+        return fallback.IsErrorOrUndefined() ? preview : fallback;
+    }
+
+    private static async Task<PreviewDisplayItem> GetPreviewCoreAsync(ICanvasResourceCreatorWithDpi d2dCanvas,
+        string path, string extensionOverride = null)
+    {
         if (!File.Exists(path))
             return new PreviewDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen);
 
@@ -173,7 +198,7 @@ internal static class ImageReader
                 return new PreviewDisplayItem(cachedBmp, Origin.DiskCache, metadata);
             }
 
-            var extension = Path.GetExtension(path).ToUpperInvariant();
+            var extension = extensionOverride ?? Path.GetExtension(path).ToUpperInvariant();
             switch (extension)
             {
                 case ".HEIC":
@@ -260,19 +285,39 @@ internal static class ImageReader
         string path, bool knownOversized = false, bool allowLarge = true, CancellationToken ct = default)
     {
         HqDisplayItem failed = null;
+        string detectedExtension = null;
         if (!knownOversized)
         {
             var hq = await GetHqCoreAsync(d2dCanvas, path);
+            if (!hq.IsErrorOrUndefined()) return (hq, false);
+
+            if (File.Exists(path))
+            {
+                var extension = Path.GetExtension(path).ToUpperInvariant();
+                detectedExtension = await ImageFormatSniffer.GetMismatchedExtensionAsync(path, extension);
+                if (detectedExtension is not null)
+                {
+                    var fallback = await GetHqCoreAsync(d2dCanvas, path, detectedExtension);
+                    if (!fallback.IsErrorOrUndefined()) return (fallback, false);
+                }
+            }
+
             // Preview metadata can't always tell up front (missing, or cached by an older build), so a failure
             // may mean "too big". The header probe keeps a genuinely broken file on the old error path.
             if (!await FailedBecauseOversized(d2dCanvas, hq, path)) return (hq, false);
             failed = hq;
         }
+        else if (File.Exists(path))
+        {
+            var extension = Path.GetExtension(path).ToUpperInvariant();
+            detectedExtension = await ImageFormatSniffer.GetMismatchedExtensionAsync(path, extension);
+        }
 
         if (!allowLarge) return (null, true);
         try
         {
-            if (await LargeImageReader.GetHq(d2dCanvas, path, ct) is { } large) return (large, true);
+            if (await LargeImageReader.GetHq(d2dCanvas, path, ct, detectedExtension) is { } large)
+                return (large, true);
         }
         catch (OperationCanceledException)
         {
@@ -295,7 +340,8 @@ internal static class ImageReader
     /// <summary>
     /// The normal HQ decode: format-specific decoders in priority order, each producing one CanvasBitmap.
     /// </summary>
-    private static async Task<HqDisplayItem> GetHqCoreAsync(ICanvasResourceCreatorWithDpi d2dCanvas, string path)
+    private static async Task<HqDisplayItem> GetHqCoreAsync(ICanvasResourceCreatorWithDpi d2dCanvas, string path,
+        string extensionOverride = null)
     {
         if (!File.Exists(path))
             return new StaticHqDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen);
@@ -304,7 +350,7 @@ internal static class ImageReader
 
         try
         {
-            var extension = Path.GetExtension(path).ToUpperInvariant();
+            var extension = extensionOverride ?? Path.GetExtension(path).ToUpperInvariant();
 
             switch (extension)
             {

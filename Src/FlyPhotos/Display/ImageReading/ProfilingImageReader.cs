@@ -41,7 +41,13 @@ internal static class ProfilingImageReader
         var a = new Attempt();
         var sw = Stopwatch.StartNew();
         bool ok;
-        try { ok = await RunHq(a, d, path); }
+        try
+        {
+            ok = await RunHq(a, d, path);
+            if (!ok && File.Exists(path) &&
+                await ImageFormatSniffer.GetMismatchedExtensionAsync(path, Path.GetExtension(path)) is { } detectedExtension)
+                ok = await RunHq(a, d, path, detectedExtension);
+        }
         catch (Exception ex) { Logger.Error(ex); ok = false; }
         sw.Stop();
 
@@ -58,7 +64,13 @@ internal static class ProfilingImageReader
         var a = new Attempt();
         var sw = Stopwatch.StartNew();
         bool ok;
-        try { ok = await RunPreview(a, d, path); }
+        try
+        {
+            ok = await RunPreview(a, d, path);
+            if (!ok && File.Exists(path) &&
+                await ImageFormatSniffer.GetMismatchedExtensionAsync(path, Path.GetExtension(path)) is { } detectedExtension)
+                ok = await RunPreview(a, d, path, detectedExtension);
+        }
         catch (Exception ex) { Logger.Error(ex); ok = false; }
         sw.Stop();
         a.WinningItem?.Dispose();
@@ -86,11 +98,12 @@ internal static class ProfilingImageReader
         }
     }
 
-    private static async Task<bool> RunHq(Attempt a, ICanvasResourceCreatorWithDpi d, string path)
+    private static async Task<bool> RunHq(Attempt a, ICanvasResourceCreatorWithDpi d, string path,
+        string extensionOverride = null)
     {
         if (!File.Exists(path)) return false;
 
-        var extension = Path.GetExtension(path).ToUpperInvariant();
+        var extension = extensionOverride ?? Path.GetExtension(path).ToUpperInvariant();
         switch (extension)
         {
             case ".HEIC":
@@ -142,11 +155,12 @@ internal static class ProfilingImageReader
         }
     }
 
-    private static async Task<bool> RunPreview(Attempt a, ICanvasResourceCreatorWithDpi d, string path)
+    private static async Task<bool> RunPreview(Attempt a, ICanvasResourceCreatorWithDpi d, string path,
+        string extensionOverride = null)
     {
         if (!File.Exists(path)) return false;
 
-        var extension = Path.GetExtension(path).ToUpperInvariant();
+        var extension = extensionOverride ?? Path.GetExtension(path).ToUpperInvariant();
         switch (extension)
         {
             case ".HEIC":

@@ -32,9 +32,9 @@ internal static class LargeImageReader
     /// <returns>The tiled display item, or null when no decoder could read the file.</returns>
     /// <exception cref="OperationCanceledException">The user left the photo before the decode finished.</exception>
     public static async Task<TiledHqDisplayItem?> GetHq(ICanvasResourceCreatorWithDpi ctrl, string path,
-        CancellationToken ct = default)
+        CancellationToken ct = default, string? extensionOverride = null)
     {
-        var ext = Path.GetExtension(path);
+        var ext = extensionOverride ?? Path.GetExtension(path);
 
         TilePyramid? pyramid = null;
         if (CodecDiscovery.IsHeif(ext)) pyramid = await Try(path, "libheif", () => Task.FromResult(DecodeHeif(path, ct)));
