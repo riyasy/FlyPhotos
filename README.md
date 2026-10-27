@@ -85,6 +85,13 @@ To open images with Fly Photos automatically when you double-click them:
   - Choose whether pan/zoom/rotation resets, is remembered per photo, or carries over during navigation.
   - Multi-monitor support (remembers the last used monitor); starts maximized, full screen, or in its previous window state.
 
+- **Ratings for sorting photos**
+  - Press `1`–`5` to rate the current photo and `0` to clear. Pressing the same number again also clears it.
+  - Saved as the standard XMP rating (`xmp:Rating`), so Lightroom, Bridge, Capture One, darktable and digiKam can read it.
+  - Camera RAW files get an `.xmp` file next to them and are never modified. JPEG, DNG, TIFF and PNG are updated in place without re-encoding (or an `.xmp` file instead, set in **Settings**). Only the rating value changes in existing metadata.
+  - The rating shows after the file name (hidden when the file name is turned off) and in the photo info panel.
+  - Apps like Lightroom read the rating when they import a photo. Photos that are already imported need a metadata refresh in that app. See the [FAQ](FAQ.md).
+
 - **Controls**
   - **Fully customizable keyboard shortcuts** - rebind almost any command in **Settings → Keyboard**.
   - **Configurable mouse** - wheel, wheel click, right-click-and-hold, and the back/forward buttons are all set in **Settings → Mouse**.
@@ -129,6 +136,10 @@ These are the **defaults**. Every command below except `Esc` and `Del` can be re
 | | More actions menu | `M` |
 | **Open with** | Open in external app 1–4 | `Ctrl` + `1`–`4` |
 | | Open-with panel | `E` |
+| **Rating** | Rate 1–5 (same key again clears) | `1`–`5` |
+| | Clear rating | `0` |
+
+The rating keys can be rebound in **Settings → Keyboard** like the others.
 
 ### 🖱 Mouse
 

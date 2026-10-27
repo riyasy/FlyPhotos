@@ -1222,4 +1222,58 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Windows ഡെസ്ക്ടോപ്പിനുള്ള ഫ്ലിപ്പ് ക്ലോക്ക് വിജറ്റ്</value>
   </data>
+  <data name="ShortcutGroup_Rating" xml:space="preserve">
+    <value>റേറ്റിംഗ്</value>
+  </data>
+  <data name="ShortcutName_Rate1" xml:space="preserve">
+    <value>1 നക്ഷത്രം നൽകുക</value>
+  </data>
+  <data name="ShortcutName_Rate2" xml:space="preserve">
+    <value>2 നക്ഷത്രങ്ങൾ നൽകുക</value>
+  </data>
+  <data name="ShortcutName_Rate3" xml:space="preserve">
+    <value>3 നക്ഷത്രങ്ങൾ നൽകുക</value>
+  </data>
+  <data name="ShortcutName_Rate4" xml:space="preserve">
+    <value>4 നക്ഷത്രങ്ങൾ നൽകുക</value>
+  </data>
+  <data name="ShortcutName_Rate5" xml:space="preserve">
+    <value>5 നക്ഷത്രങ്ങൾ നൽകുക</value>
+  </data>
+  <data name="ShortcutName_Rate0" xml:space="preserve">
+    <value>റേറ്റിംഗ് മായ്ക്കുക</value>
+  </data>
+  <data name="ShortcutDesc_Rate1" xml:space="preserve">
+    <value>അതേ റേറ്റിംഗ് വീണ്ടും അമർത്തിയാൽ അത് മായ്ക്കപ്പെടും.</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>റേറ്റിംഗ് ഇല്ല</value>
+  </data>
+  <data name="Rating.Failed" xml:space="preserve">
+    <value>റേറ്റിംഗ് സേവ് ചെയ്യാനായില്ല</value>
+  </data>
+  <data name="Exif_Rating" xml:space="preserve">
+    <value>റേറ്റിംഗ്</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
+    <value>റേറ്റിംഗ് ഫയലുകൾ</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
+    <value>ഫോട്ടോയ്‌ക്കൊപ്പം റേറ്റിംഗ് ഫയലുകളും ഇല്ലാതാക്കുക</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
+    <value>ഒരു ഫോട്ടോ ഇല്ലാതാക്കുമ്പോൾ അതിന്റെ .xmp ഫയലുകളും റീസൈക്കിൾ ബിന്നിലേക്ക് മാറ്റുന്നു. അവയിൽ മറ്റ് ആപ്പുകളിലെ എഡിറ്റുകൾ ഉണ്ടാകാം.</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
+    <value>റേറ്റിംഗുകൾ JPEG, TIFF, DNG, PNG ഫയലുകൾക്കുള്ളിൽ സേവ് ചെയ്യുക</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
+    <value>ഓഫ്: ഫോട്ടോയുടെ അടുത്തുള്ള .xmp ഫയലിൽ മാത്രം എഴുതുന്നു. പ്രധാനമായും darktable-നായി. Adobe ആപ്പുകൾ ഇത് അവഗണിക്കുന്നു.</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
+    <value>RAW ഫോട്ടോകൾക്ക് അടുത്ത് ഒരു .xmp ഫയൽ ഉണ്ടാകും.</value>
+  </data>
+  <data name="Rating.Unsupported" xml:space="preserve">
+    <value>ഈ ഫയൽ തരം റേറ്റ് ചെയ്യാൻ കഴിയില്ല</value>
+  </data>
 </root>

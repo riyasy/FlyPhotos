@@ -1225,4 +1225,58 @@ High Quality Cubic – Масштабування найвищої якості 
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Віджет перекидного годинника для робочого столу Windows</value>
   </data>
+  <data name="ShortcutGroup_Rating" xml:space="preserve">
+    <value>Оцінка</value>
+  </data>
+  <data name="ShortcutName_Rate1" xml:space="preserve">
+    <value>Оцінка: 1 зірка</value>
+  </data>
+  <data name="ShortcutName_Rate2" xml:space="preserve">
+    <value>Оцінка: 2 зірки</value>
+  </data>
+  <data name="ShortcutName_Rate3" xml:space="preserve">
+    <value>Оцінка: 3 зірки</value>
+  </data>
+  <data name="ShortcutName_Rate4" xml:space="preserve">
+    <value>Оцінка: 4 зірки</value>
+  </data>
+  <data name="ShortcutName_Rate5" xml:space="preserve">
+    <value>Оцінка: 5 зірок</value>
+  </data>
+  <data name="ShortcutName_Rate0" xml:space="preserve">
+    <value>Скинути оцінку</value>
+  </data>
+  <data name="ShortcutDesc_Rate1" xml:space="preserve">
+    <value>Повторне натискання тієї самої оцінки скидає її.</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>Немає оцінки</value>
+  </data>
+  <data name="Rating.Failed" xml:space="preserve">
+    <value>Не вдалося зберегти оцінку</value>
+  </data>
+  <data name="Exif_Rating" xml:space="preserve">
+    <value>Оцінка</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
+    <value>Файли оцінок</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
+    <value>Видаляти файли оцінок разом із фото</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
+    <value>Під час видалення фото його файли .xmp теж переміщуються до кошика. Вони можуть містити зміни з інших програм.</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
+    <value>Зберігати оцінки всередині файлів JPEG, TIFF, DNG і PNG</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
+    <value>Вимк.: записує лише файл .xmp поруч із фото. Переважно для darktable. Програми Adobe його ігнорують.</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
+    <value>Для фото RAW поруч створюється файл .xmp.</value>
+  </data>
+  <data name="Rating.Unsupported" xml:space="preserve">
+    <value>Цей тип файлів не можна оцінити</value>
+  </data>
 </root>

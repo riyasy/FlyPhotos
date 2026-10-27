@@ -1225,4 +1225,58 @@ High Quality Cubic – 适合照片的最高质量缩放。</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>适用于 Windows 桌面的翻页时钟小组件</value>
   </data>
+  <data name="ShortcutGroup_Rating" xml:space="preserve">
+    <value>评分</value>
+  </data>
+  <data name="ShortcutName_Rate1" xml:space="preserve">
+    <value>评 1 星</value>
+  </data>
+  <data name="ShortcutName_Rate2" xml:space="preserve">
+    <value>评 2 星</value>
+  </data>
+  <data name="ShortcutName_Rate3" xml:space="preserve">
+    <value>评 3 星</value>
+  </data>
+  <data name="ShortcutName_Rate4" xml:space="preserve">
+    <value>评 4 星</value>
+  </data>
+  <data name="ShortcutName_Rate5" xml:space="preserve">
+    <value>评 5 星</value>
+  </data>
+  <data name="ShortcutName_Rate0" xml:space="preserve">
+    <value>清除评分</value>
+  </data>
+  <data name="ShortcutDesc_Rate1" xml:space="preserve">
+    <value>再次按下相同的评分将清除它。</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>无评分</value>
+  </data>
+  <data name="Rating.Failed" xml:space="preserve">
+    <value>无法保存评分</value>
+  </data>
+  <data name="Exif_Rating" xml:space="preserve">
+    <value>评分</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
+    <value>评分文件</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
+    <value>删除照片时一并删除评分文件</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
+    <value>删除照片时，其 .xmp 文件也会移到回收站。这些文件可能包含其他应用的编辑。</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
+    <value>将评分保存在 JPEG、TIFF、DNG 和 PNG 文件内</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
+    <value>关闭：只写入照片旁的 .xmp 文件。主要供 darktable 使用。Adobe 应用会忽略它。</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
+    <value>RAW 照片会在旁边生成 .xmp 文件。</value>
+  </data>
+  <data name="Rating.Unsupported" xml:space="preserve">
+    <value>无法为此文件类型评分</value>
+  </data>
 </root>

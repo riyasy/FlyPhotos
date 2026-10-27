@@ -1225,4 +1225,58 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Klapklokwidget voor het Windows-bureaublad</value>
   </data>
+  <data name="ShortcutGroup_Rating" xml:space="preserve">
+    <value>Waardering</value>
+  </data>
+  <data name="ShortcutName_Rate1" xml:space="preserve">
+    <value>1 ster geven</value>
+  </data>
+  <data name="ShortcutName_Rate2" xml:space="preserve">
+    <value>2 sterren geven</value>
+  </data>
+  <data name="ShortcutName_Rate3" xml:space="preserve">
+    <value>3 sterren geven</value>
+  </data>
+  <data name="ShortcutName_Rate4" xml:space="preserve">
+    <value>4 sterren geven</value>
+  </data>
+  <data name="ShortcutName_Rate5" xml:space="preserve">
+    <value>5 sterren geven</value>
+  </data>
+  <data name="ShortcutName_Rate0" xml:space="preserve">
+    <value>Waardering wissen</value>
+  </data>
+  <data name="ShortcutDesc_Rate1" xml:space="preserve">
+    <value>Dezelfde waardering opnieuw indrukken wist haar.</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>Geen waardering</value>
+  </data>
+  <data name="Rating.Failed" xml:space="preserve">
+    <value>Waardering kon niet worden opgeslagen</value>
+  </data>
+  <data name="Exif_Rating" xml:space="preserve">
+    <value>Waardering</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
+    <value>Waarderingsbestanden</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
+    <value>Waarderingsbestanden met de foto verwijderen</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
+    <value>Bij het verwijderen van een foto gaan ook de .xmp-bestanden naar de Prullenbak. Die kunnen bewerkingen uit andere apps bevatten.</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
+    <value>Waarderingen in JPEG-, TIFF-, DNG- en PNG-bestanden opslaan</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
+    <value>Uit: schrijft alleen het .xmp-bestand naast de foto. Vooral voor darktable. Adobe-apps negeren het.</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
+    <value>RAW-foto's krijgen een .xmp-bestand ernaast.</value>
+  </data>
+  <data name="Rating.Unsupported" xml:space="preserve">
+    <value>Dit bestandstype kan geen waardering krijgen</value>
+  </data>
 </root>

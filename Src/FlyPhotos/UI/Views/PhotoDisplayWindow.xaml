@@ -143,14 +143,23 @@
                 VerticalAlignment="Bottom"
                 Background="{ThemeResource FileNameBackgroundBrush}"
                 CornerRadius="5">
-                <TextBlock
-                    x:Name="TxtFileName"
-                    Width="Auto"
-                    Height="Auto"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    FontSize="12"
-                    Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock
+                        x:Name="TxtFileName"
+                        Width="Auto"
+                        Height="Auto"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="12"
+                        Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                    <TextBlock
+                        x:Name="TxtRating"
+                        VerticalAlignment="Center"
+                        CharacterSpacing="100"
+                        FontFamily="{StaticResource FluentIcons}"
+                        FontSize="12"
+                        Visibility="Collapsed" />
+                </StackPanel>
             </Border>
             <Border
                 x:Name="BorderButtonPanel"

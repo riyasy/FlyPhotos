@@ -1225,4 +1225,58 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Flipklockwidget för Windows-skrivbordet</value>
   </data>
+  <data name="ShortcutGroup_Rating" xml:space="preserve">
+    <value>Betyg</value>
+  </data>
+  <data name="ShortcutName_Rate1" xml:space="preserve">
+    <value>Ge 1 stjärna</value>
+  </data>
+  <data name="ShortcutName_Rate2" xml:space="preserve">
+    <value>Ge 2 stjärnor</value>
+  </data>
+  <data name="ShortcutName_Rate3" xml:space="preserve">
+    <value>Ge 3 stjärnor</value>
+  </data>
+  <data name="ShortcutName_Rate4" xml:space="preserve">
+    <value>Ge 4 stjärnor</value>
+  </data>
+  <data name="ShortcutName_Rate5" xml:space="preserve">
+    <value>Ge 5 stjärnor</value>
+  </data>
+  <data name="ShortcutName_Rate0" xml:space="preserve">
+    <value>Rensa betyg</value>
+  </data>
+  <data name="ShortcutDesc_Rate1" xml:space="preserve">
+    <value>Att trycka på samma betyg igen tar bort det.</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>Inget betyg</value>
+  </data>
+  <data name="Rating.Failed" xml:space="preserve">
+    <value>Det gick inte att spara betyget</value>
+  </data>
+  <data name="Exif_Rating" xml:space="preserve">
+    <value>Betyg</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
+    <value>Betygsfiler</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
+    <value>Ta bort betygsfiler med fotot</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
+    <value>När ett foto tas bort flyttas även dess .xmp-filer till papperskorgen. De kan innehålla redigeringar från andra appar.</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
+    <value>Spara betyg i JPEG-, TIFF-, DNG- och PNG-filer</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
+    <value>Av: skriver bara .xmp-filen bredvid fotot. Främst för darktable. Adobes appar ignorerar den.</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
+    <value>RAW-foton får en .xmp-fil bredvid sig.</value>
+  </data>
+  <data name="Rating.Unsupported" xml:space="preserve">
+    <value>Den här filtypen kan inte betygsättas</value>
+  </data>
 </root>

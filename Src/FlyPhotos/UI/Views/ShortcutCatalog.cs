@@ -206,7 +206,8 @@ public enum CommandId
     CopyPhoto, DeletePhoto, RenamePhoto, PrintPhoto, SharePhoto, ShowInExplorer,
     FileProperties, FileDetails,
     OpenWithApp1, OpenWithApp2, OpenWithApp3, OpenWithApp4, OpenWithPanel,
-    MoreActionsMenu
+    MoreActionsMenu,
+    Rate0, Rate1, Rate2, Rate3, Rate4, Rate5
 }
 
 /// <summary>
@@ -472,6 +473,16 @@ internal static class ShortcutCatalog
             Row(CommandId.OpenWithApp4, "\uE8A7", None,
                 [K(VirtualKey.Number4, ctrl: true), K(VirtualKey.NumberPad4, ctrl: true)]),
             Row(CommandId.OpenWithPanel, "\uE71D", None, K(VirtualKey.E))
+        ]),
+
+        ("Rating",
+        [
+            Row(CommandId.Rate1, "\uE734", None, [K(VirtualKey.Number1), K(VirtualKey.NumberPad1)]),
+            Row(CommandId.Rate2, "\uE734", None, [K(VirtualKey.Number2), K(VirtualKey.NumberPad2)]),
+            Row(CommandId.Rate3, "\uE734", None, [K(VirtualKey.Number3), K(VirtualKey.NumberPad3)]),
+            Row(CommandId.Rate4, "\uE734", None, [K(VirtualKey.Number4), K(VirtualKey.NumberPad4)]),
+            Row(CommandId.Rate5, "\uE734", None, [K(VirtualKey.Number5), K(VirtualKey.NumberPad5)]),
+            Row(CommandId.Rate0, "\uE734", None, [K(VirtualKey.Number0), K(VirtualKey.NumberPad0)])
         ])
     ];
 

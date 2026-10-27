@@ -1224,4 +1224,58 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Windows 바탕 화면용 플립 시계 위젯</value>
   </data>
+  <data name="ShortcutGroup_Rating" xml:space="preserve">
+    <value>평점</value>
+  </data>
+  <data name="ShortcutName_Rate1" xml:space="preserve">
+    <value>별 1개로 평가</value>
+  </data>
+  <data name="ShortcutName_Rate2" xml:space="preserve">
+    <value>별 2개로 평가</value>
+  </data>
+  <data name="ShortcutName_Rate3" xml:space="preserve">
+    <value>별 3개로 평가</value>
+  </data>
+  <data name="ShortcutName_Rate4" xml:space="preserve">
+    <value>별 4개로 평가</value>
+  </data>
+  <data name="ShortcutName_Rate5" xml:space="preserve">
+    <value>별 5개로 평가</value>
+  </data>
+  <data name="ShortcutName_Rate0" xml:space="preserve">
+    <value>평점 지우기</value>
+  </data>
+  <data name="ShortcutDesc_Rate1" xml:space="preserve">
+    <value>같은 평점을 다시 누르면 지워집니다.</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>평점 없음</value>
+  </data>
+  <data name="Rating.Failed" xml:space="preserve">
+    <value>평점을 저장할 수 없습니다</value>
+  </data>
+  <data name="Exif_Rating" xml:space="preserve">
+    <value>평점</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
+    <value>평점 파일</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
+    <value>사진과 함께 평점 파일 삭제</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
+    <value>사진을 삭제하면 해당 .xmp 파일도 휴지통으로 이동합니다. 다른 앱의 편집 내용이 들어 있을 수 있습니다.</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
+    <value>평점을 JPEG, TIFF, DNG 및 PNG 파일 안에 저장</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
+    <value>끄기: 사진 옆의 .xmp 파일에만 씁니다. 주로 darktable용입니다. Adobe 앱은 이 파일을 무시합니다.</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
+    <value>RAW 사진 옆에는 .xmp 파일이 만들어집니다.</value>
+  </data>
+  <data name="Rating.Unsupported" xml:space="preserve">
+    <value>이 파일 형식은 평가할 수 없습니다</value>
+  </data>
 </root>

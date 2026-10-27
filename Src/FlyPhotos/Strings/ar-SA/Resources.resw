@@ -1225,4 +1225,58 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>أداة ساعة قلّابة لسطح مكتب Windows</value>
   </data>
+  <data name="ShortcutGroup_Rating" xml:space="preserve">
+    <value>التقييم</value>
+  </data>
+  <data name="ShortcutName_Rate1" xml:space="preserve">
+    <value>تقييم بنجمة واحدة</value>
+  </data>
+  <data name="ShortcutName_Rate2" xml:space="preserve">
+    <value>تقييم بنجمتين</value>
+  </data>
+  <data name="ShortcutName_Rate3" xml:space="preserve">
+    <value>تقييم بثلاث نجوم</value>
+  </data>
+  <data name="ShortcutName_Rate4" xml:space="preserve">
+    <value>تقييم بأربع نجوم</value>
+  </data>
+  <data name="ShortcutName_Rate5" xml:space="preserve">
+    <value>تقييم بخمس نجوم</value>
+  </data>
+  <data name="ShortcutName_Rate0" xml:space="preserve">
+    <value>مسح التقييم</value>
+  </data>
+  <data name="ShortcutDesc_Rate1" xml:space="preserve">
+    <value>الضغط على التقييم نفسه مرة أخرى يمسحه.</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>بلا تقييم</value>
+  </data>
+  <data name="Rating.Failed" xml:space="preserve">
+    <value>تعذر حفظ التقييم</value>
+  </data>
+  <data name="Exif_Rating" xml:space="preserve">
+    <value>التقييم</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
+    <value>ملفات التقييم</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
+    <value>حذف ملفات التقييم مع الصورة</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
+    <value>عند حذف صورة تُنقل ملفات .xmp الخاصة بها أيضًا إلى سلة المحذوفات. قد تحتوي على تعديلات من تطبيقات أخرى.</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
+    <value>حفظ التقييمات داخل ملفات JPEG وTIFF وDNG وPNG</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
+    <value>إيقاف: يكتب ملف .xmp المجاور للصورة فقط. مخصص غالبًا لـ darktable. تتجاهله تطبيقات Adobe.</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
+    <value>تحصل صور RAW على ملف .xmp بجانبها.</value>
+  </data>
+  <data name="Rating.Unsupported" xml:space="preserve">
+    <value>لا يمكن تقييم هذا النوع من الملفات</value>
+  </data>
 </root>

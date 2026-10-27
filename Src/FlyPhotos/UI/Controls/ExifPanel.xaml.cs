@@ -53,6 +53,12 @@ public sealed partial class ExifPanel : UserControl
         if (IsOpen && !IsShowing(currentFilePath)) Close();
     }
 
+    // Re-reads the open panel after the file's metadata changed (e.g. a new star rating).
+    public void RefreshIfShowing(string filePath)
+    {
+        if (IsOpen && IsShowing(filePath)) _ = LoadAsync(filePath);
+    }
+
     private bool IsOpen => Visibility == Visibility.Visible;
 
     private bool IsShowing(string filePath) =>

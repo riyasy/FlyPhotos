@@ -1225,4 +1225,58 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Klappuhr-Widget für den Windows-Desktop</value>
   </data>
+  <data name="ShortcutGroup_Rating" xml:space="preserve">
+    <value>Bewertung</value>
+  </data>
+  <data name="ShortcutName_Rate1" xml:space="preserve">
+    <value>1 Stern vergeben</value>
+  </data>
+  <data name="ShortcutName_Rate2" xml:space="preserve">
+    <value>2 Sterne vergeben</value>
+  </data>
+  <data name="ShortcutName_Rate3" xml:space="preserve">
+    <value>3 Sterne vergeben</value>
+  </data>
+  <data name="ShortcutName_Rate4" xml:space="preserve">
+    <value>4 Sterne vergeben</value>
+  </data>
+  <data name="ShortcutName_Rate5" xml:space="preserve">
+    <value>5 Sterne vergeben</value>
+  </data>
+  <data name="ShortcutName_Rate0" xml:space="preserve">
+    <value>Bewertung entfernen</value>
+  </data>
+  <data name="ShortcutDesc_Rate1" xml:space="preserve">
+    <value>Erneutes Drücken derselben Bewertung entfernt sie.</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>Keine Bewertung</value>
+  </data>
+  <data name="Rating.Failed" xml:space="preserve">
+    <value>Bewertung konnte nicht gespeichert werden</value>
+  </data>
+  <data name="Exif_Rating" xml:space="preserve">
+    <value>Bewertung</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
+    <value>Bewertungsdateien</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
+    <value>Bewertungsdateien mit dem Foto löschen</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
+    <value>Beim Löschen eines Fotos werden auch seine .xmp-Dateien in den Papierkorb verschoben. Sie können Bearbeitungen anderer Apps enthalten.</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
+    <value>Bewertungen in JPEG-, TIFF-, DNG- und PNG-Dateien speichern</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
+    <value>Aus: schreibt nur die .xmp-Datei neben dem Foto. Vor allem für darktable. Adobe-Apps ignorieren sie.</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
+    <value>RAW-Fotos erhalten eine .xmp-Datei daneben.</value>
+  </data>
+  <data name="Rating.Unsupported" xml:space="preserve">
+    <value>Dieser Dateityp kann nicht bewertet werden</value>
+  </data>
 </root>

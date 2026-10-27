@@ -1224,4 +1224,58 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Windows デスクトップ用のフリップ時計ウィジェット</value>
   </data>
+  <data name="ShortcutGroup_Rating" xml:space="preserve">
+    <value>評価</value>
+  </data>
+  <data name="ShortcutName_Rate1" xml:space="preserve">
+    <value>星1つで評価</value>
+  </data>
+  <data name="ShortcutName_Rate2" xml:space="preserve">
+    <value>星2つで評価</value>
+  </data>
+  <data name="ShortcutName_Rate3" xml:space="preserve">
+    <value>星3つで評価</value>
+  </data>
+  <data name="ShortcutName_Rate4" xml:space="preserve">
+    <value>星4つで評価</value>
+  </data>
+  <data name="ShortcutName_Rate5" xml:space="preserve">
+    <value>星5つで評価</value>
+  </data>
+  <data name="ShortcutName_Rate0" xml:space="preserve">
+    <value>評価をクリア</value>
+  </data>
+  <data name="ShortcutDesc_Rate1" xml:space="preserve">
+    <value>同じ評価をもう一度押すとクリアされます。</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>評価なし</value>
+  </data>
+  <data name="Rating.Failed" xml:space="preserve">
+    <value>評価を保存できませんでした</value>
+  </data>
+  <data name="Exif_Rating" xml:space="preserve">
+    <value>評価</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
+    <value>評価ファイル</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
+    <value>写真と一緒に評価ファイルを削除</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
+    <value>写真を削除すると、その .xmp ファイルもごみ箱に移動します。他のアプリの編集内容が含まれている場合があります。</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
+    <value>評価を JPEG、TIFF、DNG、PNG ファイル内に保存</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
+    <value>オフ: 写真の横の .xmp ファイルだけに書き込みます。主に darktable 向けです。Adobe のアプリはこれを無視します。</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
+    <value>RAW 写真には、横に .xmp ファイルが作られます。</value>
+  </data>
+  <data name="Rating.Unsupported" xml:space="preserve">
+    <value>このファイル形式は評価できません</value>
+  </data>
 </root>

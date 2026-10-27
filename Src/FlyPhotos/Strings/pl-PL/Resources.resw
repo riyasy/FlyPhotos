@@ -1225,4 +1225,58 @@ High Quality Cubic – Najwyższej jakości skalowanie dla zdjęć.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Widżet zegara z klapkami na pulpit systemu Windows</value>
   </data>
+  <data name="ShortcutGroup_Rating" xml:space="preserve">
+    <value>Ocena</value>
+  </data>
+  <data name="ShortcutName_Rate1" xml:space="preserve">
+    <value>Oceń na 1 gwiazdkę</value>
+  </data>
+  <data name="ShortcutName_Rate2" xml:space="preserve">
+    <value>Oceń na 2 gwiazdki</value>
+  </data>
+  <data name="ShortcutName_Rate3" xml:space="preserve">
+    <value>Oceń na 3 gwiazdki</value>
+  </data>
+  <data name="ShortcutName_Rate4" xml:space="preserve">
+    <value>Oceń na 4 gwiazdki</value>
+  </data>
+  <data name="ShortcutName_Rate5" xml:space="preserve">
+    <value>Oceń na 5 gwiazdek</value>
+  </data>
+  <data name="ShortcutName_Rate0" xml:space="preserve">
+    <value>Wyczyść ocenę</value>
+  </data>
+  <data name="ShortcutDesc_Rate1" xml:space="preserve">
+    <value>Ponowne naciśnięcie tej samej oceny usuwa ją.</value>
+  </data>
+  <data name="Rating.None" xml:space="preserve">
+    <value>Brak oceny</value>
+  </data>
+  <data name="Rating.Failed" xml:space="preserve">
+    <value>Nie można zapisać oceny</value>
+  </data>
+  <data name="Exif_Rating" xml:space="preserve">
+    <value>Ocena</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
+    <value>Pliki ocen</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
+    <value>Usuwaj pliki ocen razem ze zdjęciem</value>
+  </data>
+  <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
+    <value>Usunięcie zdjęcia przenosi też jego pliki .xmp do Kosza. Mogą zawierać edycje z innych aplikacji.</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
+    <value>Zapisuj oceny w plikach JPEG, TIFF, DNG i PNG</value>
+  </data>
+  <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
+    <value>Wyłączone: zapisuje tylko plik .xmp obok zdjęcia. Głównie dla darktable. Aplikacje Adobe go ignorują.</value>
+  </data>
+  <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
+    <value>Zdjęcia RAW otrzymują obok plik .xmp.</value>
+  </data>
+  <data name="Rating.Unsupported" xml:space="preserve">
+    <value>Nie można ocenić tego typu pliku</value>
+  </data>
 </root>
