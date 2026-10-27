@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Infra.Utils;
 using MetadataExtractor;
 using MetadataExtractor.Formats.Exif;
@@ -46,14 +47,16 @@ internal static class RatingMetadata
 
     private static readonly ConcurrentDictionary<string, object> PathLocks = new(StringComparer.OrdinalIgnoreCase);
 
-    private static readonly HashSet<string> JpegExtensions = new(StringComparer.OrdinalIgnoreCase)
-        { ".jpg", ".jpeg", ".jpe", ".jfif" };
+    private static object LockFor(string filePath) => PathLocks.GetOrAdd(filePath, _ => new object());
 
-    /// <summary>Rating 0-5 from the sidecar or the file itself; null when neither has rating info.</summary>
-    public static int? ReadRating(string filePath)
+    /// <summary>
+    /// Rating 0-5 from the sidecar or the file itself; null when neither has rating info. Pass
+    /// <paramref name="directories"/> when the file's metadata is already parsed, so it is not parsed again.
+    /// </summary>
+    public static int? ReadRating(string filePath, IReadOnlyList<MetadataExtractor.Directory>? directories = null)
     {
         // Same lock as writes, so a read never races a file being swapped in.
-        lock (PathLocks.GetOrAdd(filePath, _ => new object()))
+        lock (LockFor(filePath))
         {
             try
             {
@@ -61,7 +64,7 @@ internal static class RatingMetadata
                 // (RAW, embedding off, a file it cannot patch), so it holds the newer rating; an embedded write keeps
                 // any existing sidecar in step. Clearing a rating stored in the file is recorded as a sidecar 0.
                 // Modified dates are not compared: they change with any edit, not only rating changes.
-                return ReadSidecarRating(SidecarPaths(filePath)) ?? ReadInFileRating(filePath);
+                return ReadSidecarRating(SidecarPaths(filePath)) ?? ReadInFileRating(filePath, directories);
             }
             catch (Exception ex)
             {
@@ -78,8 +81,7 @@ internal static class RatingMetadata
     public static RatingResult WriteRating(string filePath, int rating, bool embedInFile)
     {
         rating = Math.Clamp(rating, 0, 5);
-        var gate = PathLocks.GetOrAdd(filePath, _ => new object());
-        lock (gate)
+        lock (LockFor(filePath))
         {
             try
             {
@@ -143,16 +145,19 @@ internal static class RatingMetadata
             ? newFilePath + ".xmp"
             : Path.ChangeExtension(newFilePath, ".xmp");
 
-    private static readonly HashSet<string> TiffExtensions = new(StringComparer.OrdinalIgnoreCase)
-        { ".dng", ".tif", ".tiff" };
-
-    private static bool IsJpeg(string filePath) => JpegExtensions.Contains(Path.GetExtension(filePath));
+    private static bool IsJpeg(string filePath) =>
+        ImageFormats.FromExtension(Path.GetExtension(filePath)) == ImageFormat.Jpeg;
 
     // DNG is TIFF-based and Lightroom ignores sidecars for it, so it embeds like TIFF.
-    private static bool IsTiffBased(string filePath) => TiffExtensions.Contains(Path.GetExtension(filePath));
+    private static bool IsTiffBased(string filePath)
+    {
+        var extension = Path.GetExtension(filePath);
+        return ImageFormats.FromExtension(extension) == ImageFormat.Tiff
+               || string.Equals(extension, ".dng", StringComparison.OrdinalIgnoreCase);
+    }
 
     private static bool IsPng(string filePath) =>
-        string.Equals(Path.GetExtension(filePath), ".png", StringComparison.OrdinalIgnoreCase);
+        ImageFormats.FromExtension(Path.GetExtension(filePath)) == ImageFormat.Png;
 
     private static bool IsEmbeddable(string filePath) => IsJpeg(filePath) || IsTiffBased(filePath) || IsPng(filePath);
 
@@ -250,7 +255,7 @@ internal static class RatingMetadata
     private const int FujifilmRatingTag = 0x1431;
 
     /// <summary>What the file itself says, ignoring sidecars. Null when it has no rating or cannot be read.</summary>
-    private static int? ReadInFileRating(string filePath)
+    private static int? ReadInFileRating(string filePath, IReadOnlyList<MetadataExtractor.Directory>? directories = null)
     {
         // Each source fails on its own: malformed XMP must not hide a valid EXIF or maker-note rating.
         int? rating = null;
@@ -266,19 +271,18 @@ internal static class RatingMetadata
             // fall through to MetadataExtractor
             Logger.Warn($"Could not read embedded rating of '{filePath}': {ex.Message}");
         }
-        return rating ?? ReadCameraRating(filePath);
+        return rating ?? ReadCameraRating(filePath, directories);
     }
 
     /// <summary>
     /// Rating set in camera or by another app, for formats Fly does not write into (RAW, HEIC) and for JPEG/TIFF/PNG
     /// without an XMP rating. Checks XMP, then EXIF Rating (0x4746), then Sony and Fujifilm maker notes. Read-only.
     /// </summary>
-    private static int? ReadCameraRating(string filePath)
+    private static int? ReadCameraRating(string filePath, IReadOnlyList<MetadataExtractor.Directory>? directories)
     {
-        IReadOnlyList<MetadataExtractor.Directory> directories;
         try
         {
-            directories = ImageMetadataReader.ReadMetadata(filePath);
+            directories ??= ImageMetadataReader.ReadMetadata(filePath);
         }
         catch (Exception ex)
         {
@@ -396,7 +400,7 @@ internal static class RatingMetadata
             if (!exists && rating == 0 && !createAtZero) continue;
             WriteAtomic(target, exists
                 ? EditExistingSidecar(target, rating)
-                : StrictUtf8.GetBytes(ApplyRating(null, rating, standalone: true)));
+                : StrictUtf8.GetBytes(NewPacket(rating, standalone: true)));
         }
     }
 
@@ -491,12 +495,12 @@ internal static class RatingMetadata
         destination.Write(payload);
         CopyRange(source, destination, cutEnd, source.Length);
 
-        // A segment moved by the size change only when it sits after the XMP segment.
-        var delta = 2 + length - (cutEnd - cutStart);
-        long ShiftOf(Segment segment) => segment.Start < cutStart ? 0 : delta;
-
         if (FindSegment(segments, App1, "Exif") is { } exif)
-            SyncExifRating(destination, exif.PayloadStart + ShiftOf(exif) + 6, rating, exif.End + ShiftOf(exif)); // 6 = "Exif\0\0"
+        {
+            // The Exif segment moved by the size change only when it sits after the XMP segment.
+            var shift = exif.Start < cutStart ? 0 : 2 + length - (cutEnd - cutStart);
+            SyncExifRating(destination, exif.PayloadStart + shift + 6, rating, exif.End + shift); // 6 = "Exif\0\0"
+        }
         return true;
     });
 
@@ -808,22 +812,22 @@ internal static class RatingMetadata
     {
         // Decide on the original first, so a file that needs no change (or cannot be patched) is never copied.
         string? existingXml;
+        TiffLayout? layout;
         using (var source = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
         {
-            var sourceLayout = ReadTiffLayout(source);
-            if (sourceLayout == null) return false;
-            existingXml = ReadTiffXmp(source, sourceLayout);
+            layout = ReadTiffLayout(source);
+            if (layout == null) return false;
+            existingXml = ReadTiffXmp(source, layout);
         }
         if (existingXml == null && rating == 0 && !recordZero) return true;
 
+        // The copy is identical and the path lock keeps it that way, so the layout read above still holds.
         File.Copy(filePath, temp);
         using var stream = new FileStream(temp, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-        var layout = ReadTiffLayout(stream)!; // identical copy, and the path lock keeps it that way
         var index = layout.FindXmp();
         var xml = ApplyRating(existingXml, rating);
-        var inPlace = index >= 0 && layout.HasPacketWithin(index, stream.Length)
-            ? FitPacket(xml, layout.Count(index))
-            : null;
+        // existingXml is non-null exactly when the XMP entry points at a readable packet.
+        var inPlace = existingXml != null ? FitPacket(xml, layout.Count(index)) : null;
 
         if (inPlace != null)
         {

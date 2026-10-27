@@ -72,7 +72,7 @@ public static class ExifReader
         var fields = new List<ExifField>();
         AddField(fields, L.Get("Exif_FileName"), fileInfo.Name);
         AddField(fields, L.Get("Exif_FileSize"), FormatFileSize(fileInfo.Length));
-        AddField(fields, L.Get("Exif_Rating"), GetRating(filePath));
+        AddField(fields, L.Get("Exif_Rating"), GetRating(filePath, directories));
         AddField(fields, L.Get("Exif_Dimensions"), GetDimensions(subIfds));
         AddField(fields, L.Get("Exif_CameraMake"), ifd0?.GetDescription(ExifDirectoryBase.TagMake));
         AddField(fields, L.Get("Exif_CameraModel"), ifd0?.GetDescription(ExifDirectoryBase.TagModel));
@@ -92,10 +92,10 @@ public static class ExifReader
         return fields;
     }
 
-    // Same read path as the footer, so the panel and the footer cannot disagree.
-    private static string? GetRating(string filePath)
+    // Same read path as the footer, so the panel and the footer cannot disagree. Reuses the metadata parsed above.
+    private static string? GetRating(string filePath, IReadOnlyList<MetadataExtractor.Directory> directories)
     {
-        var rating = RatingMetadata.ReadRating(filePath);
+        var rating = RatingMetadata.ReadRating(filePath, directories);
         return rating is > 0 ? new string('★', rating.Value) : null;
     }
 

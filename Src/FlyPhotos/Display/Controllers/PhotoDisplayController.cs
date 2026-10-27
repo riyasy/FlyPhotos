@@ -345,17 +345,15 @@ internal partial class PhotoDisplayController
         if (photo.Rating == Photo.RatingUnknown)
             photo.SetRatingIfUnknown(await Task.Run(() => RatingMetadata.ReadRating(path)) ?? 0);
 
-        var previous = photo.Rating;
-        var target = requested;
-        photo.Rating = target;
+        var saved = photo.Rating; // what is on disk when no write is in flight
+        photo.Rating = requested;
         RefreshFooterIfCurrent(photo);
 
         // Called and resumed on the UI thread, so the set needs no lock: the loop's last check and the removal in
         // finally run in one continuation, with no await between them for another press to slip into.
-        if (!_photosWithRatingWriteInFlight.Add(photo)) return new RatingResult(true, rating: target, queued: true);
+        if (!_photosWithRatingWriteInFlight.Add(photo)) return new RatingResult(true, rating: requested, queued: true);
         try
         {
-            var saved = previous; // no write in flight, so this is what is on disk
             while (true)
             {
                 var toWrite = photo.Rating;
