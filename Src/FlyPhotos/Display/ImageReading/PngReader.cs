@@ -29,7 +29,7 @@ internal static class PngReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    /// <summary>Standard 8-byte PNG file signature, per PNG spec §5.2.</summary>
+    /// <summary>Standard 8-byte PNG file signature, per PNG spec Â§5.2.</summary>
     private static readonly byte[] PngSignature = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
 
     /// <summary>Size of a PNG chunk header: 4-byte data length + 4-byte type tag.</summary>
@@ -38,7 +38,7 @@ internal static class PngReader
     /// <summary>Size of the CRC field that follows every PNG chunk's data.</summary>
     private const int PngChunkCrcSize = 4;
 
-    // u8 literals produce stack-allocated ReadOnlySpan<byte> backed by PE read-only data —
+    // u8 literals produce stack-allocated ReadOnlySpan<byte> backed by PE read-only data â€”
     // zero heap allocation per access, replacing the previous byte[] fields that allocated
     // on class initialisation.
 
@@ -81,37 +81,39 @@ internal static class PngReader
     ///     Decodes the PNG file at full quality and returns either a static or animated display item.
     /// </summary>
     /// <param name="ctrl">The Win2D <see cref="ICanvasResourceCreatorWithDpi" /> that owns the GPU device.</param>
-    /// <param name="inputPath">Absolute path to the .png file on disk.</param>
+    /// <param name="file">The image file.</param>
     /// <returns>
     ///     A tuple of (<c>success</c>, <see cref="HqDisplayItem" />):
     ///     <list type="bullet">
-    ///         <item><see cref="StaticHqDisplayItem" /> — for single-frame PNG files.</item>
+    ///         <item><see cref="StaticHqDisplayItem" /> â€” for single-frame PNG files.</item>
     ///         <item>
-    ///             <see cref="AnimatedHqDisplayItem" /> — for APNG files, carrying the first decoded
+    ///             <see cref="AnimatedHqDisplayItem" /> â€” for APNG files, carrying the first decoded
     ///             frame and the raw file bytes for the animator.
     ///         </item>
     ///     </list>
     ///     On failure, returns <c>(false, HqDisplayItem.Empty())</c> and logs the error.
     /// </returns>
     /// <remarks>
-    ///     <c>CanvasBitmap.LoadAsync</c> decodes the full first frame in a single pass; the stream
-    ///     is then scanned for the <c>acTL</c> chunk to determine whether the file is animated.
-    ///     For animated files the stream is rewound and re-read as a raw byte array for the animator;
-    ///     this is cheaper than a second full pixel decode pass.
+    ///     The first 4 KB are scanned for the PNG signature and the <c>acTL</c> chunk, then
+    ///     <c>CanvasBitmap.LoadAsync</c> decodes the full first frame in a single pass. Data of another format
+    ///     that has its own reader fails here, so the header check can send it there: a GIF saved as .png would
+    ///     otherwise decode as a still. Anything else WIC can read still decodes here, as before. For animated
+    ///     files the raw file bytes are read for the animator; this is cheaper than a second full pixel decode
+    ///     pass.
     /// </remarks>
-    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
+    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, ImageFile file)
     {
         try
         {
-            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
+            var stream = await file.GetStreamAsync();
+            if (await IsAnimatedPngAsync(stream) is not { } isAnimated) return (false, HqDisplayItem.Empty());
+
+            stream.Seek(0);
             var firstFrame = await CanvasBitmap.LoadAsync(ctrl, stream);
-            if (await IsAnimatedPngAsync(stream)) // Animated PNG
+            if (isAnimated) // Animated PNG
             {
-                // IsAnimatedPngAsync leaves the stream at a mid-file position after scanning.
-                // Seek to 0 before reading the full byte array for the animator.
-                stream.Seek(0);
-                var bytes = await StorageOps.GetInMemByteArray(stream);
-                return (true, new AnimatedHqDisplayItem(firstFrame, Origin.Disk, bytes));
+                var bytes = await file.GetBytesAsync();
+                return (true, new AnimatedHqDisplayItem(firstFrame, Origin.Disk, bytes, ImageFormat.Png));
             }
             else
             {
@@ -120,7 +122,7 @@ internal static class PngReader
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Failed to process PNG/APNG file at {0}", inputPath);
+            Logger.Error(ex, "Failed to process PNG/APNG file at {0}", file.Path);
             return (false, HqDisplayItem.Empty());
         }
     }
@@ -135,7 +137,8 @@ internal static class PngReader
     /// </param>
     /// <returns>
     ///     <c>true</c> if an <c>acTL</c> chunk is found before any <c>IDAT</c> or <c>IEND</c>
-    ///     chunk; <c>false</c> otherwise. Returns <c>false</c> on any read or parse error.
+    ///     chunk; <c>false</c> otherwise or on any read or parse error; <c>null</c> when the data is
+    ///     another format that <see cref="ImageFormats.Detect"/> recognises (it has its own reader).
     /// </returns>
     /// <remarks>
     ///     <para>
@@ -148,12 +151,12 @@ internal static class PngReader
     ///     </para>
     ///     <para>
     ///         <b>APNG spec reference:</b> The <c>acTL</c> chunk is defined in the APNG specification
-    ///         §2.1 as a PNG ancillary chunk that appears before the first <c>IDAT</c> in an animated
+    ///         Â§2.1 as a PNG ancillary chunk that appears before the first <c>IDAT</c> in an animated
     ///         file. A PNG file without an <c>acTL</c> chunk before its first <c>IDAT</c> is a
     ///         standard static PNG and must be treated as such by decoders.
     ///     </para>
     /// </remarks>
-    private static async Task<bool> IsAnimatedPngAsync(IRandomAccessStream stream)
+    private static async Task<bool?> IsAnimatedPngAsync(IRandomAccessStream stream)
     {
         try
         {
@@ -168,8 +171,8 @@ internal static class PngReader
 
             var data = buffer.AsSpan(0, (int)read.Length);
 
-            // Verify PNG signature.
-            if (!data[..8].SequenceEqual(PngSignature)) return false;
+            // Not PNG: hand back data whose format has its own reader; anything else WIC decodes as a still.
+            if (!data[..8].SequenceEqual(PngSignature)) return ImageFormats.Detect(data) is null ? false : null;
 
             int offset = 8;
             while (offset + PngChunkHeaderSize <= data.Length)
@@ -177,8 +180,8 @@ internal static class PngReader
                 uint chunkLength = BinaryPrimitives.ReadUInt32BigEndian(data.Slice(offset, 4));
                 var chunkType = data.Slice(offset + 4, 4);
 
-                if (chunkType.SequenceEqual(ChunkAcTL)) return true; // Animation control ? APNG
-                if (chunkType.SequenceEqual(ChunkIDAT)) return false; // Image data before acTL ? static
+                if (chunkType.SequenceEqual(ChunkAcTL)) return true; // Animation control â†’ APNG
+                if (chunkType.SequenceEqual(ChunkIDAT)) return false; // Image data before acTL â†’ static
                 if (chunkType.SequenceEqual(ChunkIEND)) return false; // End of file
 
                 // Advance past: length(4) + type(4) + data(chunkLength) + CRC(4)

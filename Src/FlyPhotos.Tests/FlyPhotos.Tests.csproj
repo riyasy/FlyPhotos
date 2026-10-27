@@ -1,0 +1,17 @@
+<Project Sdk="MSTest.Sdk/4.4.1">
+
+  <!-- Plain .NET: the tested sources are linked in, not referenced through the WinUI/AOT app project,
+       so the tests need no Windows App SDK, Win2D or native DLLs and run with a plain `dotnet test`. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\FlyPhotos\Core\Model\Enums.cs" Link="Linked\Enums.cs" />
+    <Compile Include="..\FlyPhotos\Display\ImageReading\ImageFormat.cs" Link="Linked\ImageFormat.cs" />
+    <Compile Include="..\FlyPhotos\Display\ImageReading\DecoderChains.cs" Link="Linked\DecoderChains.cs" />
+  </ItemGroup>
+
+</Project>

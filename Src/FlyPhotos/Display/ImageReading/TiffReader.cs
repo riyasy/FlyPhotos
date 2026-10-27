@@ -35,11 +35,11 @@ internal static class TiffReader
         }
     }
 
-    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
+    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, ImageFile file)
     {
         try
         {
-            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
+            var stream = await file.GetStreamAsync();
 
             // One decoder, one stream read.
             // GetPixelDataAsync extracts frame 0 pixels directly from the decoder we already
@@ -63,10 +63,9 @@ internal static class TiffReader
 
             if (decoder.FrameCount > 1) // Multi-page TIFF
             {
-                // Seeking back to read the raw bytes is a simple memcpy — far cheaper
+                // Reading the raw bytes is a simple memcpy of the file, far cheaper
                 // than a second pixel decode pass.
-                stream.Seek(0);
-                var bytes = await StorageOps.GetInMemByteArray(stream);
+                var bytes = await file.GetBytesAsync();
                 // Pages are the frames, in file order.
                 var pageOrder = Enumerable.Range(0, (int)decoder.FrameCount).ToArray();
                 return (true, new MultiPageHqDisplayItem(firstFrame, Origin.Disk, bytes, pageOrder));
@@ -76,7 +75,7 @@ internal static class TiffReader
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "TiffReader - GetHq failed for {0}", inputPath);
+            Logger.Error(ex, "TiffReader - GetHq failed for {0}", file.Path);
             return (false, HqDisplayItem.Empty());
         }
     }

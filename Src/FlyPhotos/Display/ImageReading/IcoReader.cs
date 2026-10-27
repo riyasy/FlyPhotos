@@ -6,7 +6,6 @@ using Windows.Graphics.Imaging;
 using FlyPhotos.Core.Model;
 using Microsoft.Graphics.Canvas;
 using NLog;
-using FlyPhotos.Services;
 
 
 namespace FlyPhotos.Display.ImageReading;
@@ -23,12 +22,11 @@ internal static class IcoReader
     /// <summary>
     /// Gets the highest-resolution image from an ICO file for preview purposes.
     /// </summary>
-    public static async Task<(bool, PreviewDisplayItem)> GetPreview(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetPreview(ICanvasResourceCreatorWithDpi ctrl, ImageFile file)
     {
         try
         {
-            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
-            var decoder = await BitmapDecoder.CreateAsync(stream);
+            var decoder = await BitmapDecoder.CreateAsync(await file.GetStreamAsync());
             var order = await GetFramesLargestFirstAsync(decoder);
 
             var (bitmap, width, height) = await DecodeFrameAsync(ctrl, decoder, order[0]);
@@ -37,7 +35,7 @@ internal static class IcoReader
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "IcoReader - GetPreview failed for {0}", inputPath);
+            Logger.Error(ex, "IcoReader - GetPreview failed for {0}", file.Path);
             return (false, PreviewDisplayItem.Empty());
         }
     }
@@ -46,12 +44,16 @@ internal static class IcoReader
     /// Opens an ICO file for high-quality display. A single-frame icon becomes a plain static item;
     /// a multi-frame one becomes a multi-page item whose pages run from the largest frame downwards.
     /// </summary>
-    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
+    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, ImageFile file)
     {
         try
         {
-            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
-            var decoder = await BitmapDecoder.CreateAsync(stream);
+            var decoder = await BitmapDecoder.CreateAsync(await file.GetStreamAsync());
+            // GIF, WebP or PNG data in an .ico: fail, so the header check sends it to its own (animating) reader.
+            // Anything else WIC can read still decodes here, as before.
+            var codec = decoder.DecoderInformation.CodecId;
+            if (codec == BitmapDecoder.GifDecoderId || codec == BitmapDecoder.WebpDecoderId || codec == BitmapDecoder.PngDecoderId)
+                return (false, HqDisplayItem.Empty());
             var order = await GetFramesLargestFirstAsync(decoder);
 
             // Page 1 is the largest frame; it also sizes the initial view via Photo.GetActualSize().
@@ -59,15 +61,14 @@ internal static class IcoReader
 
             if (order.Length <= 1) return (true, new StaticHqDisplayItem(bitmap, Origin.Disk));
 
-            // Seeking back to read the raw bytes is a simple memcpy - the renderer decodes the
+            // Reading the raw bytes is a simple memcpy - the renderer decodes the
             // remaining frames on demand from them.
-            stream.Seek(0);
-            var bytes = await StorageOps.GetInMemByteArray(stream);
+            var bytes = await file.GetBytesAsync();
             return (true, new MultiPageHqDisplayItem(bitmap, Origin.Disk, bytes, order));
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "IcoReader - GetHq failed for {0}", inputPath);
+            Logger.Error(ex, "IcoReader - GetHq failed for {0}", file.Path);
             return (false, HqDisplayItem.Empty());
         }
     }

@@ -3,7 +3,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
-using FlyPhotos.Services;
 using Microsoft.Graphics.Canvas;
 using NLog;
 using PhotoSauce.MagicScaler;
@@ -22,7 +21,7 @@ internal static class MagicScalerWrap
         });
     }
 
-    public static async Task<(bool, PreviewDisplayItem)> GetResized(ICanvasResourceCreatorWithDpi ctrl, string inputPath, int maxDimension = 800)
+    public static async Task<(bool, PreviewDisplayItem)> GetResized(ICanvasResourceCreatorWithDpi ctrl, ImageFile file, int maxDimension = 800)
     {
         if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA) return await Task.Run(Action);
         return await Action();
@@ -30,26 +29,26 @@ internal static class MagicScalerWrap
         {
             try
             {
-                var fileInfo = ImageFileInfo.Load(inputPath);
+                var fileInfo = ImageFileInfo.Load(file.Path);
                 int originalWidth = fileInfo.Frames[0].Width;
                 int originalHeight = fileInfo.Frames[0].Height;
                 var metadata = new ImageMetadata(originalWidth, originalHeight);
                 var settings = new ProcessImageSettings { Width = maxDimension, Height = maxDimension, ResizeMode = CropScaleMode.Max, HybridMode = HybridScaleMode.Turbo };
-                // Force JPEG output — a static format cannot carry animation, so MagicScaler
+                // Force JPEG output â€” a static format cannot carry animation, so MagicScaler
                 // processes only frame 0 instead of all frames of an animated GIF.
                 settings.TrySetEncoderFormat(ImageMimeTypes.Jpeg);
 
                 CanvasBitmap canvasBitmap;
                 if (originalWidth <= maxDimension && originalHeight <= maxDimension)
                 {
-                    // Load directly from file path without resizing
-                    using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
+                    // Small enough already: load it without resizing
+                    var stream = await file.GetStreamAsync();
                     canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
                 }
                 else
                 {
                     // Create pipeline for resizing
-                    using var pipeline = MagicImageProcessor.BuildPipeline(inputPath, settings);
+                    using var pipeline = MagicImageProcessor.BuildPipeline(file.Path, settings);
                     using var ms = new MemoryStream(256 * 1024); // pre-size to avoid repeated buffer doublings
                     pipeline.WriteOutput(ms);
                     canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());

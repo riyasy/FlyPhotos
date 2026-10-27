@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using Windows.Graphics.DirectX;
 using FlyPhotos.Core.Model;
@@ -25,13 +24,13 @@ internal static class NativeAvifReader
     ///     subsequent deletion.
     /// </summary>
     /// <param name="canvas">The ICanvasResourceCreatorWithDpi surface context used for creating Win2D bitmaps.</param>
-    /// <param name="inputPath">The absolute path to the .avif or .heic file.</param>
+    /// <param name="file">The image file.</param>
     /// <returns>A tuple of (success, HqDisplayItem).</returns>
-    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi canvas, string inputPath)
+    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi canvas, ImageFile file)
     {
         try
         {
-            byte[] fileData = await File.ReadAllBytesAsync(inputPath);
+            byte[] fileData = await file.GetBytesAsync();
 
             var heifImage = NativeHeifWrapper.DecodePrimaryImageFromMemory(fileData, out bool isAnimated);
 
@@ -47,13 +46,13 @@ internal static class NativeAvifReader
             );
 
             if (isAnimated)
-                return (true, new AnimatedHqDisplayItem(firstFrameBitmap, Origin.Disk, fileData));
+                return (true, new AnimatedHqDisplayItem(firstFrameBitmap, Origin.Disk, fileData, ImageFormat.Avif));
             else
                 return (true, new StaticHqDisplayItem(firstFrameBitmap, Origin.Disk));
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Failed to read Avif High Quality {0}", inputPath);
+            Logger.Error(ex, "Failed to read Avif High Quality {0}", file.Path);
             return (false, HqDisplayItem.Empty());
         }
     }

@@ -1,5 +1,8 @@
+#nullable enable
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
@@ -10,13 +13,17 @@ using NLog;
 
 namespace FlyPhotos.Display.ImageReading;
 
+/// <summary>
+/// Loads display items for a path. Each load opens one <see cref="ImageFile"/>, runs the decoder chain that
+/// <see cref="DecoderChains"/> picks for its format, and only when that fails looks further: at the header
+/// (a mislabelled file) and, for the full image, at the size (larger than the GPU can hold).
+/// </summary>
 internal static class ImageReader
 {
-    /// <summary>Logger instance for ImageReader.</summary>
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>Provides pre-rendered indicator bitmaps (loading, error, file-not-found) used as fallback display items.</summary>
-    private static IndicatorFactory _indicators;
+    private static IndicatorFactory _indicators = null!;
 
     /// <summary>
     /// Initializes shared resources that depend on the Win2D canvas, specifically the <see cref="IndicatorFactory"/>.
@@ -28,214 +35,38 @@ internal static class ImageReader
     }
 
     /// <summary>
-    /// Loads the best available display item for the first frame of an image, using format-specific
-    /// fast paths (embedded thumbnails, native decoders) before falling back to heavier decoders.
+    /// Loads the best available display item for the first photo: a fast embedded preview where the format
+    /// has one, otherwise the full image.
     /// </summary>
     public static async Task<DisplayItem> GetFirstPreviewSpecialHandlingAsync(
         ICanvasResourceCreatorWithDpi d2dCanvas, string path)
     {
-        var item = await GetFirstPreviewCoreAsync(d2dCanvas, path);
+        if (!File.Exists(path)) return new StaticHqDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen);
+        if (!AppConfig.Settings.OpenExitZoom && await FromDiskCache(d2dCanvas, path) is { } cached) return cached;
 
-        // For PNG, GIF, TIFF, etc. the fast path goes straight to the normal HQ readers, which all fail on an
+        using var file = new ImageFile(path);
+        if (await Decode(d2dCanvas, file, Purpose.FirstPreview) is { } item) return item;
+
+        // For PNG, GIF, TIFF, etc. the first-photo chain is the full-image readers, which all fail on an
         // image over the GPU's maximum bitmap size. Return a preview instead, so the caller's HQ load
         // (GetHqImage) runs next and takes the large-image path while the preview is on screen.
-        if (await FailedBecauseOversized(d2dCanvas, item, path) &&
-            await GetPreview(d2dCanvas, path) is { } preview && !preview.IsErrorOrUndefined())
+        if (await IsOversized(d2dCanvas, file) && await Decode(d2dCanvas, file, Purpose.Preview) is { } preview)
             return preview;
-        return item;
-    }
-
-    private static async Task<DisplayItem> GetFirstPreviewCoreAsync(ICanvasResourceCreatorWithDpi d2dCanvas, string path)
-    {
-        try
-        {
-            if (!File.Exists(path))
-                return new StaticHqDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen);
-
-            if (!AppConfig.Settings.OpenExitZoom)
-            {
-                var (cachedBmp, actualWidth, actualHeight) = await DiskCacherWithSqlite.Instance.ReturnFromCache(d2dCanvas, path);
-                if (null != cachedBmp)
-                {
-                    var metadata = new ImageMetadata(actualWidth, actualHeight);
-                    return new PreviewDisplayItem(cachedBmp, Origin.DiskCache, metadata);
-                }
-            }
-
-            var extension = Path.GetExtension(path).ToUpperInvariant();
-            switch (extension)
-            {
-                case ".HEIC":
-                case ".HEIF":
-                case ".HIF":
-                    {
-                        if (!AppConfig.Settings.OpenExitZoom)
-                            if (NativeHeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (NativeHeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                        if (CodecDiscovery.IsWicSupported(extension))
-                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
-                        if (CodecDiscovery.IsMagickSupported(extension))
-                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp4)) return retBmp4;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".AVIF":
-                    {
-                        if (!AppConfig.Settings.OpenExitZoom)
-                            if (NativeHeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (await NativeAvifReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                        if (CodecDiscovery.IsWicSupported(extension))
-                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
-                        if (CodecDiscovery.IsMagickSupported(extension))
-                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp4)) return retBmp4;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".PSD":
-                    {
-                        if (await PsdReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".SVG":
-                    {
-                        if (ResvgWrap.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".GIF":
-                    {
-                        if (await GifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".WEBP":
-                    {
-                        if (await WebpReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".PNG":
-                    {
-                        if (await PngReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".ICO":
-                case ".ICON":
-                    {
-                        if (await IcoReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".TIF":
-                case ".TIFF":
-                    {
-                        if (await TiffReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                default:
-                    {
-                        if (!AppConfig.Settings.OpenExitZoom)
-                        {
-                            if (CodecDiscovery.IsWicSupported(extension))
-                                if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                            if (CodecDiscovery.IsMagickRaw(extension))
-                                if (await MagickNetWrap.GetEmbeddedForRawFile(d2dCanvas, path) is (true, { } retBmp1)) return retBmp1;
-                        }
-
-                        if (await GetHqFromRawDecoderPipeLine(d2dCanvas, path, extension) is (true, { } rawResult)) return rawResult;
-                        // Non-RAW fallback
-                        if (CodecDiscovery.IsWicNonRaw(extension))
-                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmpW)) return retBmpW;
-                        if (CodecDiscovery.IsMagickNonRaw(extension))
-                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmpM)) return retBmpM;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-            return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
-        }
+        return HqFailed();
     }
 
     /// <summary>
-    /// Loads a low-resolution preview of an image suitable for the thumbnail ribbon or preview.
-    /// Tries cheap embedded previews first (EXIF thumbnail, embedded JPEG), then resizes via WIC or ImageMagick.
-    /// Format-specific decoders are used.
+    /// Loads a low-resolution preview of an image suitable for the thumbnail ribbon or preview: the disk
+    /// cache, else an embedded preview (EXIF thumbnail, embedded JPEG), else a resized decode.
     /// </summary>
     public static async Task<PreviewDisplayItem> GetPreview(ICanvasResourceCreatorWithDpi d2dCanvas, string path)
     {
-        if (!File.Exists(path))
-            return new PreviewDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen);
+        if (!File.Exists(path)) return new PreviewDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen);
+        if (await FromDiskCache(d2dCanvas, path) is { } cached) return cached;
 
-        try
-        {
-            var (cachedBmp, actualWidth, actualHeight) = await DiskCacherWithSqlite.Instance.ReturnFromCache(d2dCanvas, path);
-            if (null != cachedBmp)
-            {
-                var metadata = new ImageMetadata(actualWidth, actualHeight);
-                return new PreviewDisplayItem(cachedBmp, Origin.DiskCache, metadata);
-            }
-
-            var extension = Path.GetExtension(path).ToUpperInvariant();
-            switch (extension)
-            {
-                case ".HEIC":
-                case ".HEIF":
-                case ".HIF":
-                case ".AVIF":
-                    {
-                        if (NativeHeifReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (CodecDiscovery.IsMagickSupported(extension))
-                            if (await MagickNetWrap.GetResized(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
-                        return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
-                    }
-                case ".PSD":
-                    {
-                        if (await PsdReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
-                    }
-                case ".SVG":
-                    {
-                        if (ResvgWrap.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
-                    }
-                case ".GIF":
-                case ".PNG":
-                case ".BMP":
-                case ".WEBP":
-                    {
-                        if (await WicReader.GetResized(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
-                    }
-                case ".ICO":
-                case ".ICON":
-                    {
-                        if (await IcoReader.GetPreview(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new PreviewDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".TIF":
-                case ".TIFF":
-                    {
-                        if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (await WicReader.GetResized(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                        return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
-                    }
-                default:
-                    {
-                        if (CodecDiscovery.IsWicSupported(extension))
-                            if (await WicReader.GetEmbedded(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (CodecDiscovery.IsMagickRaw(extension))
-                            if (await MagickNetWrap.GetEmbeddedForRawFile(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
-                        if (CodecDiscovery.IsWicSupported(extension))
-                            if (await MagicScalerWrap.GetResized(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                        if (CodecDiscovery.IsMagickSupported(extension))
-                            if (await MagickNetWrap.GetResized(d2dCanvas, path) is (true, { } retBmp4)) return retBmp4;
-                        return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
-                    }
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-            return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
-        }
+        using var file = new ImageFile(path);
+        return await Decode(d2dCanvas, file, Purpose.Preview) as PreviewDisplayItem ??
+               new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
     }
 
     /// <summary>
@@ -256,23 +87,24 @@ internal static class ImageReader
     /// was not allowed here or its decode was cancelled, so the caller retries later. <c>Oversized</c>: the
     /// image is too big for a single GPU bitmap; pass it back as <paramref name="knownOversized"/>.
     /// </returns>
-    public static async Task<(HqDisplayItem Item, bool Oversized)> GetHqImage(ICanvasResourceCreatorWithDpi d2dCanvas,
+    public static async Task<(HqDisplayItem? Item, bool Oversized)> GetHqImage(ICanvasResourceCreatorWithDpi d2dCanvas,
         string path, bool knownOversized = false, bool allowLarge = true, CancellationToken ct = default)
     {
-        HqDisplayItem failed = null;
+        if (!File.Exists(path)) return (new StaticHqDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen), false);
+
+        using var file = new ImageFile(path);
         if (!knownOversized)
         {
-            var hq = await GetHqCoreAsync(d2dCanvas, path);
+            if (await Decode(d2dCanvas, file, Purpose.Hq, ct: CancellationToken.None) is HqDisplayItem hq) return (hq, false);
             // Preview metadata can't always tell up front (missing, or cached by an older build), so a failure
-            // may mean "too big". The header probe keeps a genuinely broken file on the old error path.
-            if (!await FailedBecauseOversized(d2dCanvas, hq, path)) return (hq, false);
-            failed = hq;
+            // may mean "too big". The size probe keeps a genuinely broken file on the error path.
+            if (!await IsOversized(d2dCanvas, file)) return (HqFailed(), false);
         }
 
         if (!allowLarge) return (null, true);
         try
         {
-            if (await LargeImageReader.GetHq(d2dCanvas, path, ct) is { } large) return (large, true);
+            if (await Decode(d2dCanvas, file, Purpose.Large, ct: ct) is HqDisplayItem large) return (large, true);
         }
         catch (OperationCanceledException)
         {
@@ -280,144 +112,120 @@ internal static class ImageReader
         }
 
         // No decoder could read it at any size: show the normal error screen.
-        return (failed ?? await GetHqCoreAsync(d2dCanvas, path), true);
-    }
-
-    /// <summary>
-    /// Whether <paramref name="item"/> is a failure caused by the image being over the GPU's maximum bitmap
-    /// size rather than by a broken file. Only failures pay for the header probe.
-    /// </summary>
-    private static async Task<bool> FailedBecauseOversized(ICanvasResourceCreatorWithDpi d2dCanvas,
-        DisplayItem item, string path) =>
-        item is HqDisplayItem { Origin: Origin.ErrorScreen } && File.Exists(path) &&
-        await LargeImageReader.IsOversizedAsync(path, d2dCanvas.Device.MaximumBitmapSizeInPixels);
-
-    /// <summary>
-    /// The normal HQ decode: format-specific decoders in priority order, each producing one CanvasBitmap.
-    /// </summary>
-    private static async Task<HqDisplayItem> GetHqCoreAsync(ICanvasResourceCreatorWithDpi d2dCanvas, string path)
-    {
-        if (!File.Exists(path))
-            return new StaticHqDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen);
-
-        //var sw = Stopwatch.StartNew();
-
-        try
-        {
-            var extension = Path.GetExtension(path).ToUpperInvariant();
-
-            switch (extension)
-            {
-                case ".HEIC":
-                case ".HEIF":
-                case ".HIF":
-                    {
-                        if (NativeHeifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (CodecDiscovery.IsWicSupported(extension))
-                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                        if (CodecDiscovery.IsMagickSupported(extension))
-                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".AVIF":
-                    {
-                        if (await NativeAvifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        if (CodecDiscovery.IsWicSupported(extension))
-                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmp2)) return retBmp2;
-                        if (CodecDiscovery.IsMagickSupported(extension))
-                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp3)) return retBmp3;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".PSD":
-                    {
-                        if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".SVG":
-                    {
-                        if (ResvgWrap.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".GIF":
-                    {
-                        if (await GifReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".WEBP":
-                    {
-                        if (await WebpReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".PNG":
-                    {
-                        if (await PngReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".ICO":
-                case ".ICON":
-                    {
-                        if (await IcoReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                case ".TIF":
-                case ".TIFF":
-                    {
-                        if (await TiffReader.GetHq(d2dCanvas, path) is (true, { } retBmp)) return retBmp;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-                default:
-                    {
-                        if (await GetHqFromRawDecoderPipeLine(d2dCanvas, path, extension) is (true, { } rawResult)) return rawResult;
-                        // Non-RAW fallback
-                        if (CodecDiscovery.IsWicNonRaw(extension))
-                            if (await WicReader.GetHq(d2dCanvas, path) is (true, { } retBmpW)) return retBmpW;
-                        if (CodecDiscovery.IsMagickNonRaw(extension))
-                            if (await MagickNetWrap.GetHq(d2dCanvas, path) is (true, { } retBmpM)) return retBmpM;
-                        return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-                    }
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-            return new StaticHqDisplayItem(_indicators.HqFailed, Origin.ErrorScreen);
-        }
-        //finally
-        //{
-        //    sw.Stop();
-        //    try { Logger.Debug("GetHqImage total time for {0}: {1} ms", path, sw.ElapsedMilliseconds); }
-        //    catch { }
-        //}
+        return (HqFailed(), true);
     }
 
     /// <summary>Returns a loading indicator display item to show while an image is being asynchronously decoded.</summary>
     public static DisplayItem GetLoadingIndicator() => new PreviewDisplayItem(_indicators.Loading, Origin.ErrorScreen);
 
     /// <summary>
-    /// Tries each RAW decoder in the configured priority order (Rawler → WIC → Magick).
-    /// Returns empty if no decoder succeeds.
+    /// Runs the decoder chain for the file's format; null when every decoder failed. Only then is the header
+    /// read: a file whose content doesn't match its extension is decoded once more as what it really is.
     /// </summary>
-    private static async Task<(bool, HqDisplayItem)> GetHqFromRawDecoderPipeLine(
-        ICanvasResourceCreatorWithDpi d2dCanvas, string path, string extension)
+    /// <param name="onAttempt">Called before each reader runs (the profiler counts and names them).</param>
+    /// <param name="ct">Cancels a <see cref="Purpose.Large"/> decode; surfaces as OperationCanceledException.</param>
+    internal static async Task<DisplayItem?> Decode(ICanvasResourceCreatorWithDpi ctrl, ImageFile file,
+        Purpose purpose, Action<DecodeStep>? onAttempt = null, CancellationToken ct = default)
     {
-        foreach (var decoder in AppConfig.Settings.RawDecoderPriority)
+        var chain = ChainFor(file, purpose);
+        if (await RunChain(ctrl, file, chain, onAttempt, ct) is { } item) return item;
+        if (!await file.CorrectFormatFromHeaderAsync()) return null;
+
+        // Content whose format gets the same chain (e.g. JPEG data in a .mpo) would only fail the same way.
+        var corrected = ChainFor(file, purpose);
+        return corrected.SequenceEqual(chain) ? null : await RunChain(ctrl, file, corrected, onAttempt, ct);
+    }
+
+    /// <summary>The decoder chain for the file's current format, with the user's settings.</summary>
+    private static List<DecodeStep> ChainFor(ImageFile file, Purpose purpose) =>
+        DecoderChains.For(file.Format, file.Extension, purpose,
+            new ReadOptions(AppConfig.Settings.OpenExitZoom, AppConfig.Settings.RawDecoderPriority),
+            CodecDiscovery.Support);
+
+    /// <summary>
+    /// Tries each step in order and returns the first item decoded, or null when all failed. A step that throws
+    /// is logged and skipped; cancellation is not swallowed.
+    /// </summary>
+    private static async Task<DisplayItem?> RunChain(ICanvasResourceCreatorWithDpi ctrl, ImageFile file,
+        List<DecodeStep> chain, Action<DecodeStep>? onAttempt, CancellationToken ct)
+    {
+        foreach (var step in chain)
         {
-            switch (decoder)
+            onAttempt?.Invoke(step);
+            if (ReadsByPath(step)) file.CloseStream();
+            try
             {
-                case RawDecoder.Rawler:
-                    if (CodecDiscovery.IsRawlerRaw(extension))
-                        if (RawlerWrapper.GetHq(d2dCanvas, path) is (true, { } bmp1)) return (true, bmp1);
-                    break;
-                case RawDecoder.WIC:
-                    if (CodecDiscovery.IsWicRaw(extension))
-                        if (await WicReader.GetHq(d2dCanvas, path, true) is (true, { } bmp2)) return (true, bmp2);
-                    break;
-                case RawDecoder.ImageMagick:
-                    if (CodecDiscovery.IsMagickRaw(extension))
-                        if (await MagickNetWrap.GetHq(d2dCanvas, path, true) is (true, { } bmp3)) return (true, bmp3);
-                    break;
+                if (await Run(step, ctrl, file, ct) is { } item) return item;
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                Logger.Error(ex, "{0} failed for {1}", step, file.Path);
             }
         }
-        return (false, HqDisplayItem.Empty());
+        return null;
     }
+
+    /// <summary>
+    /// The steps whose reader opens the file itself from <c>file.Path</c> (native libraries) rather than using the
+    /// shared stream. Must match the <see cref="Run"/> arms that pass <c>file.Path</c>.
+    /// </summary>
+    private static bool ReadsByPath(DecodeStep step) => step is
+        DecodeStep.HeifEmbedded or DecodeStep.HeifHq or
+        DecodeStep.MagickHq or DecodeStep.MagickRawHq or DecodeStep.MagickResized or DecodeStep.MagickRawEmbedded or
+        DecodeStep.PsdEmbedded or DecodeStep.SvgHq or DecodeStep.SvgResized or DecodeStep.Rawler or
+        DecodeStep.LargeHeif or DecodeStep.LargeMagick;
+
+    /// <summary>Runs one reader; null when it couldn't read the file.</summary>
+    internal static async Task<DisplayItem?> Run(DecodeStep step, ICanvasResourceCreatorWithDpi ctrl, ImageFile file,
+        CancellationToken ct = default) =>
+        step switch
+        {
+            DecodeStep.HeifEmbedded => ItemOrNull(NativeHeifReader.GetEmbedded(ctrl, file.Path)),
+            DecodeStep.HeifHq => ItemOrNull(NativeHeifReader.GetHq(ctrl, file.Path)),
+            DecodeStep.AvifHq => ItemOrNull(await NativeAvifReader.GetHq(ctrl, file)),
+            DecodeStep.WicEmbedded => ItemOrNull(await WicReader.GetEmbedded(ctrl, file)),
+            DecodeStep.WicResized => ItemOrNull(await WicReader.GetResized(ctrl, file)),
+            DecodeStep.WicHq => ItemOrNull(await WicReader.GetHq(ctrl, file)),
+            DecodeStep.WicRawHq => ItemOrNull(await WicReader.GetHq(ctrl, file, isRaw: true)),
+            DecodeStep.MagickHq => ItemOrNull(await MagickNetWrap.GetHq(ctrl, file.Path)),
+            DecodeStep.MagickRawHq => ItemOrNull(await MagickNetWrap.GetHq(ctrl, file.Path, isRaw: true)),
+            DecodeStep.MagickResized => ItemOrNull(await MagickNetWrap.GetResized(ctrl, file.Path)),
+            DecodeStep.MagickRawEmbedded => ItemOrNull(await MagickNetWrap.GetEmbeddedForRawFile(ctrl, file.Path)),
+            DecodeStep.MagicScalerResized => ItemOrNull(await MagicScalerWrap.GetResized(ctrl, file)),
+            DecodeStep.PsdEmbedded => ItemOrNull(await PsdReader.GetEmbedded(ctrl, file.Path)),
+            DecodeStep.SvgHq => ItemOrNull(ResvgWrap.GetHq(ctrl, file.Path)),
+            DecodeStep.SvgResized => ItemOrNull(ResvgWrap.GetResized(ctrl, file.Path)),
+            DecodeStep.Gif => ItemOrNull(await GifReader.GetHq(ctrl, file)),
+            DecodeStep.Webp => ItemOrNull(await WebpReader.GetHq(ctrl, file)),
+            DecodeStep.Png => ItemOrNull(await PngReader.GetHq(ctrl, file)),
+            DecodeStep.Tiff => ItemOrNull(await TiffReader.GetHq(ctrl, file)),
+            DecodeStep.IcoHq => ItemOrNull(await IcoReader.GetHq(ctrl, file)),
+            DecodeStep.IcoPreview => ItemOrNull(await IcoReader.GetPreview(ctrl, file)),
+            DecodeStep.Rawler => ItemOrNull(RawlerWrapper.GetHq(ctrl, file.Path)),
+            DecodeStep.LargeHeif => LargeImageReader.DecodeHeif(ctrl, file.Path, ct),
+            DecodeStep.LargeWic => await LargeImageReader.DecodeWic(ctrl, file, ct),
+            DecodeStep.LargeMagick => LargeImageReader.DecodeMagick(ctrl, file.Path, ct),
+            _ => throw new ArgumentOutOfRangeException(nameof(step), step, null)
+        };
+
+    /// <summary>A reader's (success, item) result as the item, or null when it failed.</summary>
+    private static DisplayItem? ItemOrNull<T>((bool Ok, T Item) result) where T : DisplayItem =>
+        result.Ok ? result.Item : null;
+
+    /// <summary>The file's cached preview, or null on a cache miss.</summary>
+    private static async Task<PreviewDisplayItem?> FromDiskCache(ICanvasResourceCreatorWithDpi d2dCanvas, string path)
+    {
+        var (bitmap, width, height) = await DiskCacherWithSqlite.Instance.ReturnFromCache(d2dCanvas, path);
+        return bitmap == null ? null : new PreviewDisplayItem(bitmap, Origin.DiskCache, new ImageMetadata(width, height));
+    }
+
+    /// <summary>
+    /// Whether a failed decode was caused by the image being over the GPU's maximum bitmap size rather than
+    /// by a broken file. Only failures pay for this size probe.
+    /// </summary>
+    private static Task<bool> IsOversized(ICanvasResourceCreatorWithDpi d2dCanvas, ImageFile file) =>
+        LargeImageReader.IsOversizedAsync(file, d2dCanvas.Device.MaximumBitmapSizeInPixels);
+
+    /// <summary>The error screen shown when no decoder could read the image.</summary>
+    private static StaticHqDisplayItem HqFailed() => new(_indicators.HqFailed, Origin.ErrorScreen);
 }

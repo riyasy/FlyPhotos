@@ -25,7 +25,7 @@ internal static class GifReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    // Identity transform reused across calls � avoids a COM object allocation per decode.
+    // Identity transform reused across calls — avoids a COM object allocation per decode.
     private static readonly BitmapTransform IdentityTransform = new();
 
     /// <summary>
@@ -58,13 +58,13 @@ internal static class GifReader
     ///     Decodes the GIF file at full quality and returns either a static or animated display item.
     /// </summary>
     /// <param name="ctrl">The Win2D <see cref="ICanvasResourceCreatorWithDpi" /> that owns the GPU device.</param>
-    /// <param name="inputPath">Absolute path to the .gif file on disk.</param>
+    /// <param name="file">The image file.</param>
     /// <returns>
     ///     A tuple of (<c>success</c>, <see cref="HqDisplayItem" />):
     ///     <list type="bullet">
-    ///         <item><see cref="StaticHqDisplayItem" /> � for single-frame GIF files.</item>
+    ///         <item><see cref="StaticHqDisplayItem" /> — for single-frame GIF files.</item>
     ///         <item>
-    ///             <see cref="AnimatedHqDisplayItem" /> � for multi-frame (animated) GIF files,
+    ///             <see cref="AnimatedHqDisplayItem" /> — for multi-frame (animated) GIF files,
     ///             carrying the first decoded frame and the raw file bytes for the animator.
     ///         </item>
     ///     </list>
@@ -72,20 +72,20 @@ internal static class GifReader
     /// </returns>
     /// <remarks>
     ///     Frame 0 pixels are decoded via <see cref="BitmapFrame.GetPixelDataAsync()" /> on the
-    ///     same decoder instance used for the frame-count check � no second decode pass needed.
+    ///     same decoder instance used for the frame-count check — no second decode pass needed.
     ///     EXIF orientation is applied so the resulting bitmap is always correctly oriented.
-    ///     For animated files, the stream is rewound and re-read as a raw byte array for the
+    ///     For animated files, the raw file bytes are read for the
     ///     animator; this is cheaper than a second full pixel decode.
     /// </remarks>
-    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
+    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, ImageFile file)
     {
         try
         {
-            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
+            var stream = await file.GetStreamAsync();
 
             // One decoder, one stream read.
             // GetPixelDataAsync extracts frame 0 pixels directly from the decoder we already
-            // have � no second BitmapDecoder or second CanvasBitmap.LoadAsync needed.
+            // have — no second BitmapDecoder or second CanvasBitmap.LoadAsync needed.
             var decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.GifDecoderId, stream);
             var frame0 = await decoder.GetFrameAsync(0);
             var pixelProvider = await frame0.GetPixelDataAsync(
@@ -105,18 +105,17 @@ internal static class GifReader
 
             if (decoder.FrameCount > 1) // Animated GIF
             {
-                // Seeking back to read the raw bytes is a simple memcpy � far cheaper
+                // Reading the raw bytes is a simple memcpy of the file, far cheaper
                 // than a second pixel decode pass.
-                stream.Seek(0);
-                var bytes = await StorageOps.GetInMemByteArray(stream);
-                return (true, new AnimatedHqDisplayItem(firstFrame, Origin.Disk, bytes));
+                var bytes = await file.GetBytesAsync();
+                return (true, new AnimatedHqDisplayItem(firstFrame, Origin.Disk, bytes, ImageFormat.Gif));
             }
 
             return (true, new StaticHqDisplayItem(firstFrame, Origin.Disk));
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Failed to process GIF file at {0}", inputPath);
+            Logger.Error(ex, "Failed to process GIF file at {0}", file.Path);
             return (false, HqDisplayItem.Empty());
         }
     }

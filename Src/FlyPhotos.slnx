@@ -5,6 +5,7 @@
   </Configurations>
   <Project Path="FlyNativeLib/FlyNativeLib.vcxproj" Id="36109967-4dd0-4c5e-8668-26a0b60c6beb" />
   <Project Path="FlyNativeLibHeif/FlyNativeLibHeif.vcxproj" Id="962401e3-d795-4b90-95e8-fac78bdf728c" />
+  <Project Path="FlyPhotos.Tests/FlyPhotos.Tests.csproj" />
   <Project Path="FlyPhotos/FlyPhotos.csproj">
     <Platform Solution="*|ARM64" Project="ARM64" />
     <Platform Solution="*|x64" Project="x64" />

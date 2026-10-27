@@ -201,34 +201,20 @@ public sealed partial class FlyProfilerWindow : Window
                     if (parts.Length < 1) continue;
 
                     var imagePath = parts[0];
-                    // Map function names to their execution logic
+                    // Map function names to their execution logic. Every reader in the decoder chains is listed
+                    // under its DecodeStep name (e.g. "WicHq"), the same name the folder profile reports as used.
                     var functionMap = new Dictionary<string, Func<Task<bool>>>()
                     {
-                        { "WicReader.GetEmbedded", async () => { var (ok, item) = await WicReader.GetEmbedded(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "WicReader.GetHq", async () => { var (ok, item) = await WicReader.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "WicReader.GetResized", async () => { var (ok, item) = await WicReader.GetResized(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "MagickNetWrap.GetResized", async () => { var (ok, item) = await MagickNetWrap.GetResized(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "MagickNetWrap.GetEmbeddedForRawFile", async () => { var (ok, item) = await MagickNetWrap.GetEmbeddedForRawFile(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "MagickNetWrap.GetHq", async () => { var (ok, item) = await MagickNetWrap.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "MagicScalerWrap.GetResized", async () => { var (ok, item) = await MagicScalerWrap.GetResized(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
+                        // Readers outside the chains, kept for comparison runs.
                         { "GifReader.GetFirstFrameFullSize", async () => { var (ok, item) = await GifReader.GetFirstFrameFullSize(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "GifReader.GetHq", async () => { var (ok, item) = await GifReader.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
                         { "PngReader.GetFirstFrameFullSize", async () => { var (ok, item) = await PngReader.GetFirstFrameFullSize(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "PngReader.GetHq", async () => { var (ok, item) = await PngReader.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "PsdReader.GetEmbedded", async () => { var (ok, item) = await PsdReader.GetEmbedded(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
                         //{ "SvgSkiaWrap.GetResized", async () => { var (ok, item) = SvgSkiaWrap.GetResized(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
                         //{ "SvgSkiaWrap.GetHq", async () => { var (ok, item) = SvgSkiaWrap.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "ResvgWrap.GetResized", async () => { var (ok, item) = ResvgWrap.GetResized(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "ResvgWrap.GetHq", async () => { var (ok, item) = ResvgWrap.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
                         { "TiffReader.GetFirstFrameFullSize", async () => { var (ok, item) = await TiffReader.GetFirstFrameFullSize(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "TiffReader.GetHq", async () => { var (ok, item) = await TiffReader.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "IcoReader.GetPreview", async () => { var (ok, item) = await IcoReader.GetPreview(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "IcoReader.GetHq", async () => { var (ok, item) = await IcoReader.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "NativeHeifReader.GetEmbedded", async () => { var (ok, item) = NativeHeifReader.GetEmbedded(TestCanvas, imagePath); if (ok) item?.Dispose(); await Task.CompletedTask; return ok; } },
-                        { "NativeHeifReader.GetHq", async () => { var (ok, item) = NativeHeifReader.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); await Task.CompletedTask; return ok; } },
                         { "RawlerWrapper.GetEmbeddedPreview", async () => { var (ok, item) = RawlerWrapper.GetEmbeddedPreview(TestCanvas, imagePath); if (ok) item?.Dispose(); await Task.CompletedTask; return ok; } },
-                        { "RawlerWrapper.GetHq", async () => { var (ok, item) = RawlerWrapper.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); await Task.CompletedTask; return ok; } },
                     };
+                    foreach (var step in Enum.GetValues<DecodeStep>())
+                        functionMap[step.ToString()] = () => ProfilingImageReader.RunOne(TestCanvas, imagePath, step);
 
                     var outRow = new List<string>(new string[headers.Length]) { [0] = imagePath };
 

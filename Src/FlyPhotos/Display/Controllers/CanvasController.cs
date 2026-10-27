@@ -8,6 +8,7 @@ using Windows.Foundation;
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Display.Animators;
+using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Display.ImageRendering;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
@@ -196,12 +197,15 @@ internal partial class CanvasController : ICanvasController
                 _imageSize, animDispItem.Rotation, ctx, forceThumbNailRedraw: true);
 
             // Asynchronously create the appropriate animator (GIF, WebP, APNG, or AVIF).
-            var ext = Path.GetExtension(photo.FilePath);
-            IAnimator newAnimator =
-                string.Equals(ext, ".avif", StringComparison.OrdinalIgnoreCase) ? await AvifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas) :
-                string.Equals(ext, ".gif", StringComparison.OrdinalIgnoreCase) ? await GifAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas) :
-                string.Equals(ext, ".webp", StringComparison.OrdinalIgnoreCase) ? await WebpAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas) :
-                                                                                  await PngAnimator.CreateAsync(animDispItem.FileAsByteArray, _d2dCanvas);
+            var bytes = animDispItem.FileAsByteArray;
+            IAnimator newAnimator = animDispItem.Format switch
+            {
+                ImageFormat.Avif => await AvifAnimator.CreateAsync(bytes, _d2dCanvas),
+                ImageFormat.Gif => await GifAnimator.CreateAsync(bytes, _d2dCanvas),
+                ImageFormat.Webp => await WebpAnimator.CreateAsync(bytes, _d2dCanvas),
+                ImageFormat.Png => await PngAnimator.CreateAsync(bytes, _d2dCanvas),
+                _ => throw new ArgumentOutOfRangeException(nameof(animDispItem), animDispItem.Format, null)
+            };
 
             // RACE CONDITION CHECK: If another SetSource call has started while we were creating the
             // animator, this operation is now obsolete. We should discard the result and clean up.

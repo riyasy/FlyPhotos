@@ -331,7 +331,7 @@ internal class StorageOps
     /// Determines if a file should be buffered into RAM.
     /// Returns true for UNC paths (\\server) and Mapped Network Drives (Z:\).
     /// </summary>
-    private static bool ShouldBufferFile(string path)
+    internal static bool ShouldBufferFile(string path)
     {
         // 1. Check for explicit UNC paths
         if (path.StartsWith(@"\\")) return true;

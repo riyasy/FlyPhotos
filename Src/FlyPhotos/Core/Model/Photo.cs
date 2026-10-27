@@ -33,7 +33,7 @@ internal partial class Photo : IDisposable
         string extension = Path.GetExtension(FilePath);
         SupportsTransparency = !string.IsNullOrEmpty(extension) && FormatsSupportingTransparency.Contains(extension);
         IsVector = extension.Contains(".svg", StringComparison.OrdinalIgnoreCase);
-        IsRaw = !string.IsNullOrEmpty(extension) && CodecDiscovery.IsRawFile(extension);
+        IsRaw = !string.IsNullOrEmpty(extension) && CodecDiscovery.Support.Raw(extension);
     }
 
     // Extension is never changed by a rename (UI keeps it fixed), so the format-derived

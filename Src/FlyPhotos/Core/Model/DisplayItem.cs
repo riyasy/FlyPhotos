@@ -1,4 +1,5 @@
 ﻿using System;
+using FlyPhotos.Display.ImageReading;
 using Microsoft.Graphics.Canvas;
 
 namespace FlyPhotos.Core.Model;
@@ -37,9 +38,13 @@ internal abstract partial class HqDisplayItem(CanvasBitmap bitmap, Origin origin
 
 internal sealed partial class StaticHqDisplayItem(CanvasBitmap bitmap, Origin origin, int rotation = 0) : HqDisplayItem(bitmap, origin, rotation);
 
-internal sealed partial class AnimatedHqDisplayItem(CanvasBitmap firstFrame, Origin origin, byte[] fileAsByteArray) : HqDisplayItem(firstFrame, origin, 0)
+internal sealed partial class AnimatedHqDisplayItem(CanvasBitmap firstFrame, Origin origin, byte[] fileAsByteArray,
+    ImageFormat format) : HqDisplayItem(firstFrame, origin, 0)
 {
     public byte[] FileAsByteArray { get; } = fileAsByteArray;
+
+    /// <summary>The format the reader decoded, which picks the animator; the file's extension may be wrong.</summary>
+    public ImageFormat Format { get; } = format;
 }
 
 /// <summary>

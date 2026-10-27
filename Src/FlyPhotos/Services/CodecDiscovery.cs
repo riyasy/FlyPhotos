@@ -1,5 +1,6 @@
 #nullable enable
 using FlyPhotos.Core.Model;
+using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Infra.Interop;
 using ImageMagick;
 using System;
@@ -119,30 +120,16 @@ internal static class CodecDiscovery
                 _imageMagickNonRawExtensions.Add(ext);
 
         _rawlerRawExtensions.UnionWith(GetRawlerSupportedExtensions_FromSnapShot());
+
+        Support = new CodecSupport(_wicExtensions, _wicRawExtensions, _imageMagickExtensions,
+            _imageMagickRawExtensions, _rawlerRawExtensions);
     }
 
-    public static bool IsWicSupported(string extension) => _wicExtensions.Contains(extension);
-
-    public static bool IsWicRaw(string extension) => _wicRawExtensions.Contains(extension);
-
-    public static bool IsWicNonRaw(string extension) => _wicNonRawExtensions.Contains(extension);
-
-    public static bool IsMagickSupported(string extension) => _imageMagickExtensions.Contains(extension);
-
-    public static bool IsMagickRaw(string extension) => _imageMagickRawExtensions.Contains(extension);
-
-    public static bool IsMagickNonRaw(string extension) => _imageMagickNonRawExtensions.Contains(extension);
-
-    public static bool IsRawlerRaw(string extension) => _rawlerRawExtensions.Contains(extension);
+    /// <summary>Which extensions each codec family reads: the one place callers ask.</summary>
+    public static CodecSupport Support { get; }
 
     /// <summary>Extensions decoded by the native libheif decoder (FlyNativeLibHeif).</summary>
     private static readonly string[] HeifExtensions = [".heic", ".heif", ".hif", ".avif"];
-
-    public static bool IsHeif(string extension) =>
-        Array.Exists(HeifExtensions, e => e.Equals(extension, StringComparison.OrdinalIgnoreCase));
-
-    public static bool IsRawFile(string extension) =>
-        IsRawlerRaw(extension) || IsWicRaw(extension) || IsMagickRaw(extension);
 
     // Return type MUST stay concrete List (not IReadOnlyList). Under Native AOT the CsWinRT
     // optimizer pre-bakes the CCW vtable from this declared type when the result flows into
