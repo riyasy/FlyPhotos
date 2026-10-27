@@ -838,6 +838,12 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
     <value>Altijd in- of uitzoomen</value>
   </data>
+  <data name="SettingsCardShiftMouseWheel.Header" xml:space="preserve">
+    <value>Shift + Muiswiel</value>
+  </data>
+  <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
+    <value>Altijd in- of uitzoomen in kleine stappen</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Muiswiel</value>
   </data>

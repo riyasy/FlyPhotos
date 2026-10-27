@@ -835,6 +835,12 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
     <value>എപ്പോഴും സൂം ഇൻ / ഔട്ട്</value>
   </data>
+  <data name="SettingsCardShiftMouseWheel.Header" xml:space="preserve">
+    <value>Shift + മൗസ് വീൽ</value>
+  </data>
+  <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
+    <value>എപ്പോഴും ചെറിയ ഘട്ടങ്ങളായി സൂം ഇൻ / ഔട്ട്</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + മൗസ് വീൽ</value>
   </data>

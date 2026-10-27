@@ -838,6 +838,12 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
     <value>Aina lähennä tai loitonna</value>
   </data>
+  <data name="SettingsCardShiftMouseWheel.Header" xml:space="preserve">
+    <value>Vaihto + hiiren rulla</value>
+  </data>
+  <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
+    <value>Aina lähennä tai loitonna pienin askelin</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + hiiren rulla</value>
   </data>

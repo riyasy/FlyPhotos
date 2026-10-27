@@ -582,11 +582,14 @@ internal class CanvasViewManager : IAnimationHost
 
     /// <summary>
     /// Immediately (without animation) multiplies the scale by <paramref name="scaleFactor"/>, keeping
-    /// <paramref name="zoomAnchor"/> fixed on screen. Used by touchpad precision zoom and touchscreen pinch.
+    /// <paramref name="zoomAnchor"/> fixed on screen. Used by touchpad precision zoom, Shift + wheel fine
+    /// zoom and touchscreen pinch. <paramref name="stopAtOneToOne"/> clamps a step that would cross 100% onto it.
     /// </summary>
-    public void ZoomAtPointByFactor(float scaleFactor, Point zoomAnchor)
+    public void ZoomAtPointByFactor(float scaleFactor, Point zoomAnchor, bool stopAtOneToOne = false)
     {
-        float newScale = _canvasViewState.LastScaleTo * scaleFactor;
+        float oldScaleTo = _canvasViewState.LastScaleTo;
+        float newScale = oldScaleTo * scaleFactor;
+        if (stopAtOneToOne) newScale = ZoomGeometry.StopOnCrossing(newScale, oldScaleTo, 1f);
         if (scaleFactor < 1f && newScale < MinZoomOutScale()) return;
 
         // 1. Capture the scale *before* it's changed.

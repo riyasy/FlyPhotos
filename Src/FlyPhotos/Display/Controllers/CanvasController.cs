@@ -342,21 +342,28 @@ internal partial class CanvasController : ICanvasController
     /// <summary>
     /// Precision zoom (e.g., touchpad) anchored at a point: one 120-unit wheel step scales by 1.25.
     /// </summary>
-    public void ZoomAtPointPrecision(int delta, Point zoomAnchor)
+    public void ZoomAtPointPrecision(double delta, Point zoomAnchor, bool stopAtOneToOne = false)
     {
         const double baseZoomIn = 1.25; // scale for one full mouse-wheel step
         const double wheelDelta = 120.0; // WHEEL_DELTA
-        ZoomAtPointByFactor((float)Math.Pow(baseZoomIn, delta / wheelDelta), zoomAnchor);
+        ZoomAtPointByFactor((float)Math.Pow(baseZoomIn, delta / wheelDelta), zoomAnchor, stopAtOneToOne);
     }
 
-    public void ZoomAtPointByFactor(float scaleFactor, Point zoomAnchor)
+    /// <summary>
+    /// Fine zoom (Shift + wheel): a tenth of a normal wheel step (~2.3% per notch), relative to the
+    /// current scale so it feels the same on an icon and on a huge photo. Stops at 1:1 on the way past.
+    /// </summary>
+    public void ZoomAtPointFine(int delta, Point zoomAnchor) =>
+        ZoomAtPointPrecision(delta / 10.0, zoomAnchor, stopAtOneToOne: true);
+
+    public void ZoomAtPointByFactor(float scaleFactor, Point zoomAnchor, bool stopAtOneToOne = false)
     {
         // A no-op factor must not re-arm the continuous-zoom debounce below.
         if (scaleFactor == 1f) return;
         _pump.Enqueue(() =>
         {
             if (_currentRenderer == null) return;
-            _canvasViewManager.ZoomAtPointByFactor(scaleFactor, zoomAnchor);
+            _canvasViewManager.ZoomAtPointByFactor(scaleFactor, zoomAnchor, stopAtOneToOne);
 
             // Mark the burst as active so the render path uses mip-based quality instead of
             // source-bitmap quality. Debounced 700ms after the last tick so Draw reverts to

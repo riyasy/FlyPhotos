@@ -773,6 +773,11 @@ public sealed partial class PhotoDisplayWindow
             case ScrollDirection.Vertical when Util.IsAltPressed():
                 await HandleMouseWheelNavigation(delta, false);
                 break;
+            // Shift + vertical scroll always zooms, in fine steps. Checked before Ctrl so Shift also
+            // slows a touchpad pinch, which Windows delivers as Ctrl + wheel.
+            case ScrollDirection.Vertical when Util.IsShiftPressed():
+                _canvasController.ZoomAtPointFine(delta, currentPoint.AdjustForDpi(D2dCanvas));
+                break;
             // Ctrl + vertical scroll always zooms
             case ScrollDirection.Vertical when Util.IsControlPressed():
                 HandleMouseWheelZoom(delta, currentPoint);

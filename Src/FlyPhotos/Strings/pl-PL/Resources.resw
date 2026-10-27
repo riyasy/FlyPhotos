@@ -838,6 +838,12 @@ High Quality Cubic – Najwyższej jakości skalowanie dla zdjęć.</value>
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
     <value>Zawsze powiększa lub pomniejsza</value>
   </data>
+  <data name="SettingsCardShiftMouseWheel.Header" xml:space="preserve">
+    <value>Shift + Kółko myszy</value>
+  </data>
+  <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
+    <value>Zawsze powiększa lub pomniejsza małymi krokami</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Kółko myszy</value>
   </data>

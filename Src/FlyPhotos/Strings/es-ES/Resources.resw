@@ -838,6 +838,12 @@ High Quality Cubic – Escalado de la más alta calidad para fotos.</value>
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
     <value>Siempre acercar o alejar</value>
   </data>
+  <data name="SettingsCardShiftMouseWheel.Header" xml:space="preserve">
+    <value>Mayús + Rueda del ratón</value>
+  </data>
+  <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
+    <value>Siempre acercar o alejar en pequeños pasos</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Rueda del ratón</value>
   </data>

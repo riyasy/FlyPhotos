@@ -838,6 +838,12 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
     <value>一律放大或縮小</value>
   </data>
+  <data name="SettingsCardShiftMouseWheel.Header" xml:space="preserve">
+    <value>Shift + 滑鼠滾輪</value>
+  </data>
+  <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
+    <value>一律以細微幅度放大或縮小</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + 滑鼠滾輪</value>
   </data>

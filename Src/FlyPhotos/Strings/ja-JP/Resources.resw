@@ -837,6 +837,12 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
     <value>常にズームインまたはズームアウト</value>
   </data>
+  <data name="SettingsCardShiftMouseWheel.Header" xml:space="preserve">
+    <value>Shift + マウスホイール</value>
+  </data>
+  <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
+    <value>常に細かくズームインまたはズームアウト</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + マウスホイール</value>
   </data>

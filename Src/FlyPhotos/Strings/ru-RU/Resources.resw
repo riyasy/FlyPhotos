@@ -838,6 +838,12 @@ High Quality Cubic – Масштабирование наивысшего ка�
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
     <value>Всегда увеличивать или уменьшать масштаб</value>
   </data>
+  <data name="SettingsCardShiftMouseWheel.Header" xml:space="preserve">
+    <value>Shift + колесо мыши</value>
+  </data>
+  <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
+    <value>Всегда увеличивать или уменьшать масштаб мелкими шагами</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + колесо мыши</value>
   </data>

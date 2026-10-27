@@ -129,6 +129,7 @@ internal static class MouseCatalog
 
             // The fixed wheel behaviours sit next to the wheel setting they qualify.
             MouseRow.Fixed("SettingsCardCtrlMouseWheel", "TextCtrlMouseWheelAction"),
+            MouseRow.Fixed("SettingsCardShiftMouseWheel", "TextShiftMouseWheelAction"),
             MouseRow.Fixed("SettingsCardAltMouseWheel", "TextAltMouseWheelAction"),
             MouseRow.Fixed("SettingsCardTiltWheel", "TextTiltWheelAction"),
 

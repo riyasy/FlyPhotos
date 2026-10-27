@@ -838,6 +838,12 @@ High Quality Cubic – Dimensionamento de alta qualidade para fotos.</value>
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
     <value>Sempre ampliar ou reduzir</value>
   </data>
+  <data name="SettingsCardShiftMouseWheel.Header" xml:space="preserve">
+    <value>Shift + Roda do mouse</value>
+  </data>
+  <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
+    <value>Sempre ampliar ou reduzir em pequenos passos</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Roda do mouse</value>
   </data>

@@ -837,6 +837,12 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
     <value>Mindig nagyítás vagy kicsinyítés</value>
   </data>
+  <data name="SettingsCardShiftMouseWheel.Header" xml:space="preserve">
+    <value>Shift + Egérgörgő</value>
+  </data>
+  <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
+    <value>Mindig nagyítás vagy kicsinyítés finom lépésekben</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Egérgörgő</value>
   </data>

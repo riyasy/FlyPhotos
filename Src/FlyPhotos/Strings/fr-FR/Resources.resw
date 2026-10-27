@@ -838,6 +838,12 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
     <value>Toujours zoomer avant ou arrière</value>
   </data>
+  <data name="SettingsCardShiftMouseWheel.Header" xml:space="preserve">
+    <value>Maj + Molette de la souris</value>
+  </data>
+  <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
+    <value>Toujours zoomer avant ou arrière par petits paliers</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Molette de la souris</value>
   </data>

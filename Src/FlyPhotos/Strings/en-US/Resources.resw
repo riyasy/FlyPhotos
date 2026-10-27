@@ -838,6 +838,12 @@ High Quality Cubic – Highest-quality scaling for photos.</value>
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
     <value>Always zooms in or out</value>
   </data>
+  <data name="SettingsCardShiftMouseWheel.Header" xml:space="preserve">
+    <value>Shift + Mouse Wheel</value>
+  </data>
+  <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
+    <value>Always zooms in or out, in fine steps</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Mouse Wheel</value>
   </data>

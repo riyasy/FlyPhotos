@@ -838,6 +838,12 @@ High Quality Cubic – Ridimensionamento della massima qualità per le foto.</va
   <data name="TextCtrlMouseWheelAction.Text" xml:space="preserve">
     <value>Ingrandisce o riduce sempre</value>
   </data>
+  <data name="SettingsCardShiftMouseWheel.Header" xml:space="preserve">
+    <value>Maiusc + Rotellina del mouse</value>
+  </data>
+  <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
+    <value>Ingrandisce o riduce sempre a piccoli passi</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Rotellina del mouse</value>
   </data>

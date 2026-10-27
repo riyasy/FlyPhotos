@@ -82,6 +82,13 @@ internal static class ZoomGeometry
     }
 
     /// <summary>
+    /// Returns <paramref name="stop"/> if the step from <paramref name="oldScale"/> to <paramref name="newScale"/>
+    /// crosses it (in either direction); otherwise <paramref name="newScale"/> unchanged.
+    /// </summary>
+    public static float StopOnCrossing(float newScale, float oldScale, float stop) =>
+        (oldScale - stop) * (newScale - stop) < 0f ? stop : newScale;
+
+    /// <summary>
     /// The ordered, de-duplicated step-zoom stops: the dynamic screen-fit scale plus 100% and 400%.
     /// </summary>
     public static List<float> BuildZoomStops(float screenFitScale) =>
