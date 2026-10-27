@@ -126,6 +126,9 @@
   <data name="AppSelectionDialog.Title" xml:space="preserve">
     <value>Valitse sovellus</value>
   </data>
+  <data name="AppSelectionDialog_RemoveApp" xml:space="preserve">
+    <value>Poista ”{0}”</value>
+  </data>
   <data name="BrowseBtn.Content" xml:space="preserve">
     <value>Selaa sovelluksia…</value>
   </data>

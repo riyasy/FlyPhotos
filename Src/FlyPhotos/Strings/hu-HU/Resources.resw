@@ -126,6 +126,9 @@
   <data name="AppSelectionDialog.Title" xml:space="preserve">
     <value>Alkalmazás kiválasztása</value>
   </data>
+  <data name="AppSelectionDialog_RemoveApp" xml:space="preserve">
+    <value>„{0}” eltávolítása</value>
+  </data>
   <data name="BrowseBtn.Content" xml:space="preserve">
     <value>Alkalmazás tallózása…</value>
   </data>
