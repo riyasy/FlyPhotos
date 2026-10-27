@@ -218,6 +218,7 @@ internal sealed partial class Settings
         var app = await ShellAppProvider.GetAppAsync(appShortCut);
         if (app == null) return;
         
+        btnShortcut.Tag = app;
         var bmp = app.Icon;
         btnShortcut.Content = bmp != null
             ? new Image { Source = bmp, Width = 32, Height = 32 }
@@ -634,7 +635,8 @@ internal sealed partial class Settings
 
     private async void OnShortcutButtonClick(object sender, RoutedEventArgs e)
     {
-        var dialog = new AppSelectionDialog(this)
+        var button = (Button)sender;
+        var dialog = new AppSelectionDialog(this, (button.Tag as InstalledApp)?.DisplayName)
         {
             XamlRoot = Content.XamlRoot,
             Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
@@ -643,12 +645,21 @@ internal sealed partial class Settings
 
         await dialog.ShowAsync();
 
+        if (dialog.RemoveRequested)
+        {
+            SetShortCutSettingForButton(button, string.Empty);
+            await AppConfig.SaveAsync();
+            button.Tag = null;
+            button.Content = new FontIcon { Glyph = "\uE8E5", FontFamily = App.FluentIconFont };
+            return;
+        }
+
         if (dialog.SelectedApp == null) return;
 
-        var button = (Button)sender;
         SetShortCutSettingForButton(button, dialog.SelectedApp.GetSerializedState());
         await AppConfig.SaveAsync();
 
+        button.Tag = dialog.SelectedApp;
         var bmp = dialog.SelectedApp.Icon;
         button.Content = bmp != null
             ? new Image { Source = bmp, Width = 32, Height = 32 }

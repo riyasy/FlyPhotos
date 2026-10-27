@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using Windows.Storage.Pickers;
+using FlyPhotos.Infra.Localization;
 using FlyPhotos.Infra.Utils;
 using FlyPhotos.Services.ExternalAppListing;
 using Microsoft.UI.Xaml;
@@ -37,16 +38,26 @@ public sealed partial class AppSelectionDialog
     /// </summary>
     public InstalledApp? SelectedApp { get; private set; }
 
+    /// <summary>
+    /// Gets whether the user chose to remove the app currently in the slot.
+    /// </summary>
+    public bool RemoveRequested { get; private set; }
+
     // Temporary pending selection from the list or browse picker
     private InstalledApp? _pendingSelection;
 
     // Parent window reference for file picker initialization
     private readonly Window _parentWindow;
 
-    public AppSelectionDialog(Window parentWindow)
+    public AppSelectionDialog(Window parentWindow, string? currentAppName = null)
     {
         _parentWindow = parentWindow;
         InitializeComponent();
+        if (!string.IsNullOrEmpty(currentAppName))
+        {
+            RemoveBtnText.Text = string.Format(L.Get("AppSelectionDialog_RemoveApp"), currentAppName);
+            RemoveBtn.Visibility = Visibility.Visible;
+        }
         AppListView.ItemsSource = Apps;
         AppListView.DoubleTapped += AppListView_DoubleTapped;
         Loaded += AppSelectionDialog_Loaded;
@@ -127,6 +138,12 @@ public sealed partial class AppSelectionDialog
         {
             Logger.Error(ex, "AppSelectionDialog - BrowseBtn_Click Error");
         }
+    }
+
+    private void RemoveBtn_Click(object sender, RoutedEventArgs e)
+    {
+        RemoveRequested = true;
+        Hide();
     }
 
     private void AppListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
