@@ -1283,7 +1283,7 @@ public sealed partial class PhotoDisplayWindow
         }
         else
         {
-            TxtZoom.Text = result.Rating == 0 ? L.Get("Rating/None") : new string('★', result.Rating);
+            TxtZoom.Text = result.Rating == 0 ? L.Get("Rating/None") : RatingMetadata.Stars(result.Rating);
             // A queued press has not reached the disk yet. The running write refreshes the panel when it ends.
             if (!result.Queued) ExifInfoPanel.RefreshIfShowing(ratedPath);
         }

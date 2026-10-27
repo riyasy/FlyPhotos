@@ -49,6 +49,9 @@ internal static class RatingMetadata
 
     private static object LockFor(string filePath) => PathLocks.GetOrAdd(filePath, _ => new object());
 
+    /// <summary>The rating as text stars ("★★★"), for the info panel and the rating toast.</summary>
+    public static string Stars(int rating) => new('★', Math.Clamp(rating, 0, 5));
+
     /// <summary>
     /// Rating 0-5 from the sidecar or the file itself; null when neither has rating info. Pass
     /// <paramref name="directories"/> when the file's metadata is already parsed, so it is not parsed again.
@@ -87,26 +90,29 @@ internal static class RatingMetadata
             {
                 // Clearing a rating stored in the file (by the camera or another app) needs an explicit 0 written
                 // over it, or the old value shows again on the next read.
-                var recordZero = rating == 0 && ReadInFileRating(filePath) is > 0;
+                var overwriteInFileRating = rating == 0 && ReadInFileRating(filePath) is > 0;
 
-                var embedded = embedInFile && (IsJpeg(filePath) ? TryWriteJpeg(filePath, rating, recordZero)
-                    : IsTiffBased(filePath) ? TryWriteTiff(filePath, rating, recordZero)
-                    : IsPng(filePath) && TryWritePng(filePath, rating, recordZero));
-
+                // Existing sidecars are edited in memory before the photo is touched, so one that cannot be edited
+                // never leaves the photo changed while the call reports a failure.
                 var sidecars = SidecarPaths(filePath);
+                var sidecarEdits = PrepareSidecarEdits(sidecars.Where(File.Exists), rating);
+
+                var embedded = embedInFile && (IsJpeg(filePath) ? TryWriteJpeg(filePath, rating, overwriteInFileRating)
+                    : IsTiffBased(filePath) ? TryWriteTiff(filePath, rating, overwriteInFileRating)
+                    : IsPng(filePath) && TryWritePng(filePath, rating, overwriteInFileRating));
+
                 if (!embedded && (IsEmbeddable(filePath) || IsProprietaryRaw(filePath)))
                 {
                     // RAW, or JPEG/TIFF/PNG with embedding off or unsafe (XMP over 64 KB, multi-picture JPEG, BigTIFF, broken PNG).
-                    WriteSidecars(sidecars, rating, createAtZero: recordZero);
+                    WriteSidecars(sidecars, rating, createAtZero: overwriteInFileRating);
                     return new RatingResult(true, rating: rating);
                 }
 
                 // Embedded: keep an existing sidecar in step so apps that read it agree, never create one.
                 // Formats Fly does not write into get no new .xmp either, since Lightroom and most apps only read
                 // ratings stored inside those files. One another app created (darktable) is kept in step.
-                var existing = sidecars.Where(File.Exists).ToList();
-                if (!embedded && existing.Count == 0) return new RatingResult(false, unsupported: true);
-                if (existing.Count > 0) WriteSidecars(existing, rating);
+                if (!embedded && sidecarEdits.Count == 0) return new RatingResult(false, unsupported: true);
+                foreach (var (path, contents) in sidecarEdits) WriteAtomic(path, contents);
                 return new RatingResult(true, rating: rating);
             }
             catch (Exception ex)
@@ -404,6 +410,27 @@ internal static class RatingMetadata
         }
     }
 
+    /// <summary>
+    /// The new contents of each existing sidecar, ready to write. One that cannot be read or edited (corrupt, not
+    /// XMP) is skipped with a warning; <see cref="ReadRating"/> skips one it cannot parse too.
+    /// </summary>
+    private static List<(string Path, byte[] Contents)> PrepareSidecarEdits(IEnumerable<string> existing, int rating)
+    {
+        var edits = new List<(string Path, byte[] Contents)>();
+        foreach (var path in existing)
+        {
+            try
+            {
+                edits.Add((path, EditExistingSidecar(path, rating)));
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn($"Skipping sidecar that cannot be updated '{path}': {ex.Message}");
+            }
+        }
+        return edits;
+    }
+
     /// <summary>Changes only the rating in an existing sidecar. Every other byte, a BOM included, stays as it is.</summary>
     private static byte[] EditExistingSidecar(string target, int rating)
     {
@@ -464,7 +491,7 @@ internal static class RatingMetadata
     }
 
     /// <summary>Embeds the rating; false when the file cannot be patched safely (caller falls back to a sidecar).</summary>
-    private static bool TryWriteJpeg(string filePath, int rating, bool recordZero) => ReplaceViaTemp(filePath, temp =>
+    private static bool TryWriteJpeg(string filePath, int rating, bool overwriteInFileRating) => ReplaceViaTemp(filePath, temp =>
     {
         using var source = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
         var segments = ScanJpeg(source);
@@ -475,7 +502,7 @@ internal static class RatingMetadata
         if (FindSegment(segments, App2, "MPF") != null) return false;
 
         var existing = FindSegment(segments, App1, XmpSegmentId);
-        if (existing == null && rating == 0 && !recordZero) return true;
+        if (existing == null && rating == 0 && !overwriteInFileRating) return true;
 
         var xml = ApplyRating(existing is { } e ? ReadXmp(source, e) : null, rating);
         var payload = StrictUtf8.GetBytes(xml);
@@ -658,14 +685,14 @@ internal static class RatingMetadata
     /// and compression; a new one goes before the first IDAT, where readers look for metadata. Every other chunk is
     /// copied byte for byte. False for files that are not a complete PNG.
     /// </summary>
-    private static bool TryWritePng(string filePath, int rating, bool recordZero) => ReplaceViaTemp(filePath, temp =>
+    private static bool TryWritePng(string filePath, int rating, bool overwriteInFileRating) => ReplaceViaTemp(filePath, temp =>
     {
         using var source = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
         var chunks = ScanPng(source);
         if (chunks == null) return false;
 
         var xmp = FindPngXmp(source, chunks);
-        if (xmp == null && rating == 0 && !recordZero) return true;
+        if (xmp == null && rating == 0 && !overwriteInFileRating) return true;
 
         var text = StrictUtf8.GetBytes(ApplyRating(xmp?.Xml, rating));
         if (xmp is { Compressed: true })
@@ -808,7 +835,7 @@ internal static class RatingMetadata
     /// the packet is overwritten in place when it fits, otherwise appended at the end and the tag repointed.
     /// A file without the tag gets a rewritten IFD0 appended at the end. False for files this cannot patch (BigTIFF).
     /// </summary>
-    private static bool TryWriteTiff(string filePath, int rating, bool recordZero) => ReplaceViaTemp(filePath, temp =>
+    private static bool TryWriteTiff(string filePath, int rating, bool overwriteInFileRating) => ReplaceViaTemp(filePath, temp =>
     {
         // Decide on the original first, so a file that needs no change (or cannot be patched) is never copied.
         string? existingXml;
@@ -819,7 +846,7 @@ internal static class RatingMetadata
             if (layout == null) return false;
             existingXml = ReadTiffXmp(source, layout);
         }
-        if (existingXml == null && rating == 0 && !recordZero) return true;
+        if (existingXml == null && rating == 0 && !overwriteInFileRating) return true;
 
         // The copy is identical and the path lock keeps it that way, so the layout read above still holds.
         File.Copy(filePath, temp);

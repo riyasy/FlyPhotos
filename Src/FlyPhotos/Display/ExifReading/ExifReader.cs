@@ -96,7 +96,7 @@ public static class ExifReader
     private static string? GetRating(string filePath, IReadOnlyList<MetadataExtractor.Directory> directories)
     {
         var rating = RatingMetadata.ReadRating(filePath, directories);
-        return rating is > 0 ? new string('★', rating.Value) : null;
+        return rating is > 0 ? RatingMetadata.Stars(rating.Value) : null;
     }
 
     internal static string FormatFileSize(long bytes)

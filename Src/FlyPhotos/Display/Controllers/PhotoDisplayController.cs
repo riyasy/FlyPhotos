@@ -345,7 +345,7 @@ internal partial class PhotoDisplayController
         if (photo.Rating == Photo.RatingUnknown)
             photo.SetRatingIfUnknown(await Task.Run(() => RatingMetadata.ReadRating(path)) ?? 0);
 
-        var saved = photo.Rating; // what is on disk when no write is in flight
+        var onDisk = photo.Rating; // what is on disk when no write is in flight
         photo.Rating = requested;
         RefreshFooterIfCurrent(photo);
 
@@ -360,11 +360,11 @@ internal partial class PhotoDisplayController
                 var result = await StorageOps.SetRatingOnDisk(path, toWrite);
                 if (!result.Success)
                 {
-                    photo.Rating = saved;
+                    photo.Rating = onDisk;
                     RefreshFooterIfCurrent(photo);
                     return result;
                 }
-                saved = toWrite;
+                onDisk = toWrite;
                 if (photo.Rating == toWrite) return result;
             }
         }
