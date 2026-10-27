@@ -345,7 +345,7 @@ internal static class RatingMetadata
 
     // DNG is RAW too, but it embeds like TIFF.
     private static bool IsProprietaryRaw(string filePath) =>
-        !IsEmbeddable(filePath) && CodecDiscovery.IsRawFile(Path.GetExtension(filePath));
+        !IsEmbeddable(filePath) && CodecDiscovery.Support.Raw(Path.GetExtension(filePath));
 
     /// <summary>
     /// Rating from the first readable sidecar in <paramref name="candidates"/> order: the standard IMG.xmp wins
