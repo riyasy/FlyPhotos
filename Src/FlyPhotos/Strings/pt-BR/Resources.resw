@@ -1246,9 +1246,6 @@ High Quality Cubic – Dimensionamento de alta qualidade para fotos.</value>
   <data name="ShortcutName_Rate0" xml:space="preserve">
     <value>Limpar avaliação</value>
   </data>
-  <data name="ShortcutDesc_Rate1" xml:space="preserve">
-    <value>Pressionar a mesma avaliação novamente a remove.</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>Sem avaliação</value>
   </data>

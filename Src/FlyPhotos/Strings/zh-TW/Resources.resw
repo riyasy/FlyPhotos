@@ -1246,9 +1246,6 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
   <data name="ShortcutName_Rate0" xml:space="preserve">
     <value>清除評分</value>
   </data>
-  <data name="ShortcutDesc_Rate1" xml:space="preserve">
-    <value>再次按下相同的評分會清除它。</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>無評分</value>
   </data>

@@ -16,6 +16,7 @@ using MetadataExtractor;
 using MetadataExtractor.Formats.Exif;
 using MetadataExtractor.Formats.Exif.Makernotes;
 using MetadataExtractor.Formats.Xmp;
+using NLog;
 
 namespace FlyPhotos.Services;
 
@@ -28,6 +29,8 @@ namespace FlyPhotos.Services;
 /// </summary>
 internal static class RatingMetadata
 {
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
     private static readonly XNamespace Xmp = "http://ns.adobe.com/xap/1.0/";
     private static readonly XNamespace Rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
     private const string MicrosoftPhotoNamespace = "http://ns.microsoft.com/photo/1.0/";
@@ -54,16 +57,15 @@ internal static class RatingMetadata
         {
             try
             {
-                // The file's own rating is the source of truth. A sidecar (Fly with embedding off, a file Fly could
-                // not patch, or darktable/digiKam) is used only when the file has none. Modified dates are not compared:
-                // they change with any edit, not only rating changes.
-                if (IsEmbeddable(filePath))
-                    return ReadInFileRating(filePath) ?? ReadSidecarRating(SidecarPaths(filePath));
-                // A sidecar wins even at 0: that is how clearing a rating set in camera is recorded.
+                // A sidecar wins for every format, even at 0. Fly writes one only when it does not write into the file
+                // (RAW, embedding off, a file it cannot patch), so it holds the newer rating; an embedded write keeps
+                // any existing sidecar in step. Clearing a rating stored in the file is recorded as a sidecar 0.
+                // Modified dates are not compared: they change with any edit, not only rating changes.
                 return ReadSidecarRating(SidecarPaths(filePath)) ?? ReadInFileRating(filePath);
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.Warn($"Could not read rating of '{filePath}': {ex.Message}");
                 return null;
             }
         }
@@ -92,7 +94,7 @@ internal static class RatingMetadata
                 var sidecars = SidecarPaths(filePath);
                 if (!embedded && (IsEmbeddable(filePath) || IsProprietaryRaw(filePath)))
                 {
-                    // RAW, or JPEG/TIFF/PNG with embedding off or unsafe (XMP over 64 KB, unreadable MPF, BigTIFF, broken PNG).
+                    // RAW, or JPEG/TIFF/PNG with embedding off or unsafe (XMP over 64 KB, multi-picture JPEG, BigTIFF, broken PNG).
                     WriteSidecars(sidecars, rating, createAtZero: recordZero);
                     return new RatingResult(true, rating: rating);
                 }
@@ -259,9 +261,10 @@ internal static class RatingMetadata
                 : IsPng(filePath) ? ReadPngRating(filePath)
                 : null;
         }
-        catch
+        catch (Exception ex)
         {
             // fall through to MetadataExtractor
+            Logger.Warn($"Could not read embedded rating of '{filePath}': {ex.Message}");
         }
         return rating ?? ReadCameraRating(filePath);
     }
@@ -277,9 +280,11 @@ internal static class RatingMetadata
         {
             directories = ImageMetadataReader.ReadMetadata(filePath);
         }
-        catch
+        catch (Exception ex)
         {
-            return null; // formats MetadataExtractor cannot parse
+            // Expected for formats MetadataExtractor cannot parse, so not a warning.
+            Logger.Debug($"No camera rating read from '{filePath}': {ex.Message}");
+            return null;
         }
 
         foreach (var xmp in directories.OfType<XmpDirectory>())
@@ -289,9 +294,11 @@ internal static class RatingMetadata
             {
                 text = xmp.XmpMeta?.GetPropertyString(Xmp.NamespaceName, "Rating");
             }
-            catch
+            catch (Exception ex)
             {
-                continue; // malformed XMP property: try the next source
+                // malformed XMP property: try the next source
+                Logger.Warn($"Malformed XMP rating in '{filePath}': {ex.Message}");
+                continue;
             }
             if (ParseRatingValue(text) is { } rating) return rating;
         }
@@ -366,8 +373,9 @@ internal static class RatingMetadata
             rating = ParseRating(File.ReadAllText(path, Encoding.UTF8));
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            Logger.Warn($"Could not read sidecar '{path}': {ex.Message}");
             rating = null;
             return false;
         }
@@ -458,10 +466,9 @@ internal static class RatingMetadata
         var segments = ScanJpeg(source);
         if (segments == null) return false;
 
-        // Multi-picture JPEG (Ultra HDR, motion photo): its MP entries must follow the size change below.
-        var mpf = FindSegment(segments, App2, "MPF");
-        var mpEntries = mpf is { } m ? ReadMpEntries(source, m) : null;
-        if (mpf != null && mpEntries == null) return false;
+        // Multi-picture JPEG (Ultra HDR, motion photo): the extra pictures are found by offsets that a size
+        // change would break, so it gets a sidecar instead.
+        if (FindSegment(segments, App2, "MPF") != null) return false;
 
         var existing = FindSegment(segments, App1, XmpSegmentId);
         if (existing == null && rating == 0 && !recordZero) return true;
@@ -490,52 +497,8 @@ internal static class RatingMetadata
 
         if (FindSegment(segments, App1, "Exif") is { } exif)
             SyncExifRating(destination, exif.PayloadStart + ShiftOf(exif) + 6, rating, exif.End + ShiftOf(exif)); // 6 = "Exif\0\0"
-
-        if (mpf is { } mpfSegment && mpEntries is { } entries && delta != 0)
-            ShiftMpEntries(destination, entries.Header, entries.At + ShiftOf(mpfSegment), entries.Count, delta,
-                shiftOffsets: mpfSegment.Start < cutStart);
         return true;
     });
-
-    private const int MpEntryTag = 0xB002;
-
-    /// <summary>
-    /// The MP entry table of a multi-picture JPEG: absolute position and entry count (16 bytes each), plus the MP
-    /// header layout for its byte order. Null when the MPF segment cannot be read.
-    /// </summary>
-    private static (TiffLayout Header, long At, int Count)? ReadMpEntries(Stream stream, Segment mpf)
-    {
-        var header = ReadTiffLayout(stream, mpf.PayloadStart + 4, mpf.End); // 4 = "MPF\0"
-        if (header == null) return null;
-        for (var i = 0; i < header.EntryCount; i++)
-        {
-            if (header.Tag(i) != MpEntryTag) continue;
-            var count = header.Count(i) / 16; // type UNDEFINED: the count is in bytes
-            var at = header.Value(i);
-            return count >= 1 && at + count * 16 <= mpf.End ? (header, at, (int)count) : null;
-        }
-        return null;
-    }
-
-    /// <summary>
-    /// Keeps the MP entries valid after the primary image grew by <paramref name="delta"/> bytes. Entry 0 holds the
-    /// primary image size. The other entries hold offsets relative to the MP header, which change only when the
-    /// header sits before the edit (<paramref name="shiftOffsets"/>); otherwise header and images moved together.
-    /// </summary>
-    private static void ShiftMpEntries(Stream stream, TiffLayout header, long at, int count, long delta, bool shiftOffsets)
-    {
-        var entries = new byte[count * 16];
-        stream.Position = at;
-        stream.ReadExactly(entries);
-        if (header.U32(entries, 4) is var primarySize and > 0)
-            header.Put32(entries, 4, primarySize + delta);
-        if (shiftOffsets)
-            for (var i = 1; i < count; i++)
-                if (header.U32(entries, i * 16 + 8) is var offset and > 0)
-                    header.Put32(entries, i * 16 + 8, offset + delta);
-        stream.Position = at;
-        stream.Write(entries);
-    }
 
     private static long InsertionOffset(List<Segment> segments)
     {

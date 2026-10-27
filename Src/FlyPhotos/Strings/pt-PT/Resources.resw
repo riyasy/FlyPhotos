@@ -1246,9 +1246,6 @@ High Quality Cubic – Redimensionamento de alta qualidade para fotos.</value>
   <data name="ShortcutName_Rate0" xml:space="preserve">
     <value>Limpar classificação</value>
   </data>
-  <data name="ShortcutDesc_Rate1" xml:space="preserve">
-    <value>Premir novamente a mesma classificação remove-a.</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>Sem classificação</value>
   </data>

@@ -1246,9 +1246,6 @@ High Quality Cubic – Highest-quality scaling for photos.</value>
   <data name="ShortcutName_Rate0" xml:space="preserve">
     <value>Clear rating</value>
   </data>
-  <data name="ShortcutDesc_Rate1" xml:space="preserve">
-    <value>Pressing the same rating again clears it.</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>No rating</value>
   </data>

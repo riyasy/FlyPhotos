@@ -1246,9 +1246,6 @@ High Quality Cubic – Escalado de la más alta calidad para fotos.</value>
   <data name="ShortcutName_Rate0" xml:space="preserve">
     <value>Quitar valoración</value>
   </data>
-  <data name="ShortcutDesc_Rate1" xml:space="preserve">
-    <value>Pulsar de nuevo la misma valoración la quita.</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>Sin valoración</value>
   </data>

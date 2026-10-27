@@ -1246,9 +1246,6 @@ High Quality Cubic – Масштабування найвищої якості 
   <data name="ShortcutName_Rate0" xml:space="preserve">
     <value>Скинути оцінку</value>
   </data>
-  <data name="ShortcutDesc_Rate1" xml:space="preserve">
-    <value>Повторне натискання тієї самої оцінки скидає її.</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>Немає оцінки</value>
   </data>

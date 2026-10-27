@@ -331,7 +331,7 @@ internal partial class PhotoDisplayController
     public bool CanRateCurrentPhoto() => !IsContinuousKeyPress() && CurrentPhotoOrNull() != null;
 
     /// <summary>
-    /// Sets the current photo's star rating. Pressing the rating it already has clears it (<paramref name="requested"/> 0 always clears).
+    /// Sets the current photo's star rating (<paramref name="requested"/> 0 clears it).
     /// The new rating shows at once. Writes are coalesced per photo: a press during a write only changes the value
     /// that write saves next, so spamming a key costs at most two writes instead of a queue.
     /// </summary>
@@ -346,7 +346,7 @@ internal partial class PhotoDisplayController
             photo.SetRatingIfUnknown(await Task.Run(() => RatingMetadata.ReadRating(path)) ?? 0);
 
         var previous = photo.Rating;
-        var target = requested == previous ? 0 : requested;
+        var target = requested;
         photo.Rating = target;
         RefreshFooterIfCurrent(photo);
 

@@ -1246,9 +1246,6 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
   <data name="ShortcutName_Rate0" xml:space="preserve">
     <value>Effacer la note</value>
   </data>
-  <data name="ShortcutDesc_Rate1" xml:space="preserve">
-    <value>Appuyer de nouveau sur la même note l'efface.</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>Aucune note</value>
   </data>

@@ -1245,9 +1245,6 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
   <data name="ShortcutName_Rate0" xml:space="preserve">
     <value>評価をクリア</value>
   </data>
-  <data name="ShortcutDesc_Rate1" xml:space="preserve">
-    <value>同じ評価をもう一度押すとクリアされます。</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>評価なし</value>
   </data>

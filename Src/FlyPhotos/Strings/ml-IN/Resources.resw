@@ -1243,9 +1243,6 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
   <data name="ShortcutName_Rate0" xml:space="preserve">
     <value>റേറ്റിംഗ് മായ്ക്കുക</value>
   </data>
-  <data name="ShortcutDesc_Rate1" xml:space="preserve">
-    <value>അതേ റേറ്റിംഗ് വീണ്ടും അമർത്തിയാൽ അത് മായ്ക്കപ്പെടും.</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>റേറ്റിംഗ് ഇല്ല</value>
   </data>

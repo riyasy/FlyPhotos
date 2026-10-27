@@ -1246,9 +1246,6 @@ High Quality Cubic – Ridimensionamento della massima qualità per le foto.</va
   <data name="ShortcutName_Rate0" xml:space="preserve">
     <value>Cancella valutazione</value>
   </data>
-  <data name="ShortcutDesc_Rate1" xml:space="preserve">
-    <value>Premere di nuovo la stessa valutazione la cancella.</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>Nessuna valutazione</value>
   </data>

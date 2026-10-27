@@ -1246,9 +1246,6 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
   <data name="ShortcutName_Rate0" xml:space="preserve">
     <value>مسح التقييم</value>
   </data>
-  <data name="ShortcutDesc_Rate1" xml:space="preserve">
-    <value>الضغط على التقييم نفسه مرة أخرى يمسحه.</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>بلا تقييم</value>
   </data>

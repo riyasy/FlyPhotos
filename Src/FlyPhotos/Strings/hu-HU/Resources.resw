@@ -1245,9 +1245,6 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
   <data name="ShortcutName_Rate0" xml:space="preserve">
     <value>Értékelés törlése</value>
   </data>
-  <data name="ShortcutDesc_Rate1" xml:space="preserve">
-    <value>Ugyanannak az értékelésnek az újbóli megnyomása törli azt.</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>Nincs értékelés</value>
   </data>

@@ -29,6 +29,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using NLog;
 using WinUIEx;
 
@@ -1256,12 +1257,12 @@ public sealed partial class PhotoDisplayWindow
     // One filled star per rating point, none at 0. Same color as the active thumbnail border.
     private void ShowRating(int rating)
     {
-        TxtRating.Text = new string('', Math.Clamp(rating, 0, 5));
+        TxtRating.Text = new string('\uE735', Math.Clamp(rating, 0, 5));
         TxtRating.Visibility = rating > 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void ApplyRatingColor() =>
-        TxtRating.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+        TxtRating.Foreground = new SolidColorBrush(
             ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor));
 
     private async Task RateCurrentPhotoAsync(int rating)

@@ -1245,9 +1245,6 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
   <data name="ShortcutName_Rate0" xml:space="preserve">
     <value>평점 지우기</value>
   </data>
-  <data name="ShortcutDesc_Rate1" xml:space="preserve">
-    <value>같은 평점을 다시 누르면 지워집니다.</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>평점 없음</value>
   </data>

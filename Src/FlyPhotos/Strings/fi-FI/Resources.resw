@@ -1246,9 +1246,6 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
   <data name="ShortcutName_Rate0" xml:space="preserve">
     <value>Tyhjennä arvostelu</value>
   </data>
-  <data name="ShortcutDesc_Rate1" xml:space="preserve">
-    <value>Saman arvostelun painaminen uudelleen poistaa sen.</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>Ei arvostelua</value>
   </data>

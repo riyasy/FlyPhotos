@@ -1246,9 +1246,6 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
   <data name="ShortcutName_Rate0" xml:space="preserve">
     <value>Waardering wissen</value>
   </data>
-  <data name="ShortcutDesc_Rate1" xml:space="preserve">
-    <value>Dezelfde waardering opnieuw indrukken wist haar.</value>
-  </data>
   <data name="Rating.None" xml:space="preserve">
     <value>Geen waardering</value>
   </data>
