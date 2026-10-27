@@ -115,8 +115,9 @@ HeifError HeifReader::ExtractThumbnail(const std::string& input_filename, PixelB
 
 /**
  * @brief Extracts the primary image and decodes it into a raw RGBA buffer.
+ *        Also outputs whether the file contains sequence tracks (an animation).
  */
-HeifError HeifReader::ExtractPrimaryImage(const std::string& input_filename, PixelBuffer& out_buffer) {
+HeifError HeifReader::ExtractPrimaryImage(const std::string& input_filename, PixelBuffer& out_buffer, bool& out_is_animated) {
     // 1. Open the file and create the context.
     std::shared_ptr<heif_context> context(heif_context_alloc(),
         [](heif_context* c) { heif_context_free(c); });
@@ -125,6 +126,9 @@ HeifError HeifReader::ExtractPrimaryImage(const std::string& input_filename, Pix
     if (err.code != 0) {
         return HeifError::FileReadError;
     }
+
+    // Sequence tracks are already parsed by the read above; this only checks whether that list is empty.
+    out_is_animated = heif_context_has_sequence(context.get());
 
     // 2. Get the primary image handle.
     heif_image_handle* primary_image_handle = nullptr;

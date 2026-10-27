@@ -16,14 +16,25 @@ static std::string WStringToString(const std::wstring& wstr)
 
 /**
  * @brief C-API function to extract the primary image into a raw RGBA buffer.
+ * Kept for callers that don't need the animation status; delegates to
+ * ExtractPrimaryImageAndAnimationStatus.
+ */
+HeifError ExtractPrimaryImage(const wchar_t* heic_path, PixelBuffer* out_buffer) {
+    bool is_animated = false;
+    return ExtractPrimaryImageAndAnimationStatus(heic_path, out_buffer, &is_animated);
+}
+
+/**
+ * @brief C-API function to extract the primary image into a raw RGBA buffer, reporting sequence status.
  * This function serves as the boundary between managed C# and native C++,
  * wrapping the object-oriented C++ HeifReader class in a simple C-style function.
  */
-HeifError ExtractPrimaryImage(const wchar_t* heic_path, PixelBuffer* out_buffer) {
+HeifError ExtractPrimaryImageAndAnimationStatus(const wchar_t* heic_path, PixelBuffer* out_buffer, bool* out_is_animated) {
     // Basic input validation to prevent null pointer dereferences.
-    if (!heic_path || !out_buffer) { return HeifError::InvalidInput; }
+    if (!heic_path || !out_buffer || !out_is_animated) { return HeifError::InvalidInput; }
     // Zero out the output buffer to ensure it's in a known-good state, especially on failure.
     memset(out_buffer, 0, sizeof(PixelBuffer));
+    *out_is_animated = false;
 
     // Instantiate the C++ reader class which contains the core logic.
     HeifReader reader;
@@ -33,7 +44,7 @@ HeifError ExtractPrimaryImage(const wchar_t* heic_path, PixelBuffer* out_buffer)
     const std::string input_file = WStringToString(heic_path);
 
     // Call the main C++ implementation. This allocates memory for pixel data inside cppBuffer.
-    HeifError result = reader.ExtractPrimaryImage(input_file, cppBuffer);
+    HeifError result = reader.ExtractPrimaryImage(input_file, cppBuffer, *out_is_animated);
 
     // If successful, copy the pointer and dimensions directly. NO memcpy of pixels!
     // This struct copy transfers ownership of the allocated memory (cppBuffer.data)

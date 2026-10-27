@@ -43,8 +43,8 @@ public:
 	/// @brief Extracts the thumbnail into a raw RGBA pixel buffer. If no thumbnail exists, generates one from primary image.
     HeifError ExtractThumbnail(const std::string& input_filename, PixelBuffer& out_buffer);
 
-    /// @brief Extracts the primary image into a raw RGBA pixel buffer.
-    HeifError ExtractPrimaryImage(const std::string& input_filename, PixelBuffer& out_buffer);
+    /// @brief Extracts the primary image into a raw RGBA pixel buffer, and outputs whether the file contains sequence tracks.
+    HeifError ExtractPrimaryImage(const std::string& input_filename, PixelBuffer& out_buffer, bool& out_is_animated);
 
     /// @brief Extracts the primary image into a raw RGBA pixel buffer directly from memory, and outputs whether it contains sequence tracks.
     HeifError ExtractPrimaryImageFromMemory(const uint8_t* data, size_t size, PixelBuffer& out_buffer, bool& out_is_animated);

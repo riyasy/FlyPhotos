@@ -2,6 +2,7 @@
 // Also assuming the HeifDecoder class we created is available in this project.
 
 using System;
+using System.IO;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
@@ -61,7 +62,7 @@ internal static class NativeHeifReader
         try
         {
             // 1. Call our new native decoder to get the primary image's pixel data.
-            var heifImage = NativeHeifWrapper.DecodePrimaryImage(inputPath);
+            var heifImage = NativeHeifWrapper.DecodePrimaryImage(inputPath, out bool isAnimated);
 
             // 2. Check if a valid image was returned.
             if (heifImage == null || heifImage.Pixels == null || heifImage.Pixels.Length == 0)
@@ -70,7 +71,12 @@ internal static class NativeHeifReader
                 return (false, HqDisplayItem.Empty());
             }
 
-            // 3. Create the Win2D bitmap directly from the raw RGBA byte array.
+            // 3. An image sequence (e.g. an animated AVIF saved as .heic): only then are the file's bytes read, for
+            //    AvifAnimator, which plays any libheif sequence. Read before the bitmap exists, so a failed read
+            //    leaves no GPU bitmap behind.
+            var animationBytes = isAnimated ? File.ReadAllBytes(inputPath) : null;
+
+            // 4. Create the Win2D bitmap directly from the raw RGBA byte array.
             var canvasBitmap = CanvasBitmap.CreateFromBytes(
                 ctrl,
                 heifImage.Pixels,
@@ -79,7 +85,9 @@ internal static class NativeHeifReader
                 Windows.Graphics.DirectX.DirectXPixelFormat.R8G8B8A8UIntNormalized // RGBA passthrough from native decoder
             );
 
-            // 4. Return the complete display item.
+            // 5. Return the complete display item.
+            if (animationBytes != null)
+                return (true, new AnimatedHqDisplayItem(canvasBitmap, Origin.Disk, animationBytes, ImageFormat.Avif));
             return (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk));
         }
         catch (Exception ex)

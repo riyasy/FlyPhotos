@@ -106,6 +106,20 @@ internal static partial class NativeHeifBridge
     public static partial HeifError ExtractPrimaryImage(string heicPath, out PixelBuffer outBuffer);
 
     /// <summary>
+    /// Imports the native `ExtractPrimaryImageAndAnimationStatus` function from `FlyNativeLibHeif.dll`.
+    /// This function decodes the primary image from a HEIF file into 32-bit RGBA pixel format,
+    /// and reports whether the file contains an animated sequence track.
+    /// </summary>
+    /// <param name="heicPath">The file path to the HEIC/HEIF image.</param>
+    /// <param name="outBuffer">An output <see cref="PixelBuffer"/> struct containing the pointer to the decoded pixel data and image metadata.</param>
+    /// <param name="outIsAnimated">An output boolean that is true if the file contains an animation sequence.</param>
+    /// <returns>A <see cref="HeifError"/> indicating the success or failure of the operation.</returns>
+    [LibraryImport(DllName, EntryPoint = "ExtractPrimaryImageAndAnimationStatus", StringMarshalling = StringMarshalling.Utf16)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial HeifError ExtractPrimaryImageAndAnimationStatus(string heicPath, out PixelBuffer outBuffer,
+        out byte outIsAnimated);
+
+    /// <summary>
     /// Imports the native `ExtractThumbnail` function from `FlyNativeLibHeif.dll`.
     /// This function decodes the thumbnail image from a HEIF file into 32-bit RGBA pixel format.
     /// </summary>
@@ -196,9 +210,22 @@ public static class NativeHeifWrapper
     /// <returns>A <see cref="HeifImage"/> object containing the decoded RGBA pixel data and dimensions, or null if the image data is empty.</returns>
     /// <exception cref="Exception">Thrown if the native DLL returns an error code during decoding,
     /// indicating issues like file not found, decoding errors, or no primary image.</exception>
-    public static HeifImage DecodePrimaryImage(string filePath)
+    public static HeifImage DecodePrimaryImage(string filePath) => DecodePrimaryImage(filePath, out _);
+
+    /// <summary>
+    /// Decodes the primary image from a HEIC/HEIF file, like <see cref="DecodePrimaryImage(string)"/>, and reports
+    /// whether the file is an image sequence (an animation). The check reads libheif's already-parsed track list,
+    /// so it costs nothing extra.
+    /// </summary>
+    /// <param name="filePath">The full path to the .heic, .heif, .hif or .avif file.</param>
+    /// <param name="isAnimated">Output parameter indicating whether the file has animation sequence tracks.</param>
+    /// <returns>A <see cref="HeifImage"/> object containing the decoded RGBA pixel data and dimensions, or null if the image data is empty.</returns>
+    /// <exception cref="Exception">Thrown if the native DLL returns an error code during decoding.</exception>
+    public static HeifImage DecodePrimaryImage(string filePath, out bool isAnimated)
     {
-        HeifError result = NativeHeifBridge.ExtractPrimaryImage(filePath, out NativeHeifBridge.PixelBuffer buffer);
+        HeifError result = NativeHeifBridge.ExtractPrimaryImageAndAnimationStatus(filePath,
+            out NativeHeifBridge.PixelBuffer buffer, out byte isAnimatedByte);
+        isAnimated = isAnimatedByte != 0;
 
         if (result != HeifError.Ok)
             throw new Exception($"Native HEIF decoder failed to decode primary image. Error: {result}");

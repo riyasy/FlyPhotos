@@ -26,6 +26,14 @@ extern "C" {
     /// @note The caller MUST call FreePixelBuffer() on the out_buffer to prevent a memory leak.
     __declspec(dllexport) HeifError ExtractPrimaryImage(const wchar_t* heic_path, PixelBuffer* out_buffer);
 
+    /// @brief Decodes the primary HEIC image into a raw RGBA pixel buffer, reporting sequence status.
+    /// @param heic_path Path to the input .heic file (UTF-16).
+    /// @param out_buffer Pointer to a struct to receive the decoded image data.
+    /// @param out_is_animated Boolean pointer to receive whether the file contains an animation sequence.
+    /// @return A HeifError code indicating the result.
+    /// @note The caller MUST call FreePixelBuffer() on the out_buffer to prevent a memory leak.
+    __declspec(dllexport) HeifError ExtractPrimaryImageAndAnimationStatus(const wchar_t* heic_path, PixelBuffer* out_buffer, bool* out_is_animated);
+
     /// @brief Decodes the thumbnail from a HEIC image into a raw RGBA pixel buffer.
     /// @param heic_path Path to the input .heic file (UTF-16).
     /// @param out_buffer Pointer to a struct to receive the decoded image data.
