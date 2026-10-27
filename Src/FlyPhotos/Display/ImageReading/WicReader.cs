@@ -55,7 +55,7 @@ internal static class WicReader
         try
         {
             // Auto-detect format — no codec ID needed.
-            var decoder = await BitmapDecoder.CreateAsync(await file.GetStreamAsync(bufferNetworkFile: false));
+            var decoder = await BitmapDecoder.CreateAsync(await file.GetPartialReadStreamAsync());
 
             uint originalWidth = decoder.OrientedPixelWidth;
             uint originalHeight = decoder.OrientedPixelHeight;
@@ -230,7 +230,7 @@ internal static class WicReader
     {
         try
         {
-            var decoder = await BitmapDecoder.CreateAsync(await file.GetStreamAsync(bufferNetworkFile: false));
+            var decoder = await BitmapDecoder.CreateAsync(await file.GetPartialReadStreamAsync());
             // OrientedPixelWidth/Height account for EXIF rotation automatically —
             // no need to read the property bag and swap manually.
             var originalWidth = (int)decoder.OrientedPixelWidth;

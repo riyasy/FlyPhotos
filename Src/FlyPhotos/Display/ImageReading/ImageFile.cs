@@ -53,16 +53,25 @@ internal sealed class ImageFile : IDisposable
     public ImageFormat Format { get; private set; }
 
     /// <summary>
-    /// The shared stream, rewound to the start. <paramref name="bufferNetworkFile"/> false (readers that only
-    /// need the header or an embedded thumbnail) leaves a network file unbuffered, as
-    /// <see cref="StorageOps.GetWin2DPerformantStream"/> does; a later full read re-opens it buffered, once.
+    /// The shared stream, rewound to the start, for a reader that decodes the whole file. A network file is
+    /// copied into memory first, as <see cref="StorageOps.GetWin2DPerformantStream"/> does.
     /// Readers must not dispose it.
     /// </summary>
-    public async Task<IRandomAccessStream> GetStreamAsync(bool bufferNetworkFile = true)
+    public Task<IRandomAccessStream> GetStreamAsync() => OpenStreamAsync(fullRead: true);
+
+    /// <summary>
+    /// The shared stream, rewound to the start, for a reader that needs only part of the file (the header, an
+    /// embedded thumbnail, a size probe). A network file is read in place, without copying it; a later full read
+    /// re-opens it buffered, once. Readers must not dispose it.
+    /// </summary>
+    public Task<IRandomAccessStream> GetPartialReadStreamAsync() => OpenStreamAsync(fullRead: false);
+
+    /// <summary>Opens the shared stream on first use, or upgrades a partial-read one for a full read.</summary>
+    private async Task<IRandomAccessStream> OpenStreamAsync(bool fullRead)
     {
-        // A stream opened for a header-only read, now wanted for a full read: a local file's stream already
+        // A stream opened for a partial read, now wanted for a full read: a local file's stream already
         // serves it; only a network file is re-opened buffered. The network-path check runs at most once.
-        if (_stream != null && bufferNetworkFile && !_streamReadyForFullRead)
+        if (_stream != null && fullRead && !_streamReadyForFullRead)
         {
             if (StorageOps.ShouldBufferFile(Path)) CloseStreamOnly();
             else _streamReadyForFullRead = true;
@@ -70,8 +79,8 @@ internal sealed class ImageFile : IDisposable
 
         if (_stream == null)
         {
-            _stream = await StorageOps.GetWin2DPerformantStream(Path, bufferNetworkFile);
-            _streamReadyForFullRead = bufferNetworkFile;
+            _stream = await StorageOps.GetWin2DPerformantStream(Path, useBufferForNwPaths: fullRead);
+            _streamReadyForFullRead = fullRead;
         }
         _stream.Seek(0);
         return _stream;
@@ -115,7 +124,7 @@ internal sealed class ImageFile : IDisposable
         _headerChecked = true;
         try
         {
-            var stream = await GetStreamAsync(bufferNetworkFile: false);
+            var stream = await GetPartialReadStreamAsync();
             var header = (await stream.ReadAsync(new byte[HeaderSize].AsBuffer(), HeaderSize, InputStreamOptions.None)).ToArray();
             if (ImageFormats.Detect(header) is not { } actual || actual == Format) return false;
 

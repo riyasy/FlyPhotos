@@ -30,7 +30,7 @@ internal static class LargeImageReader
     {
         try
         {
-            var decoder = await BitmapDecoder.CreateAsync(await file.GetStreamAsync(bufferNetworkFile: false));
+            var decoder = await BitmapDecoder.CreateAsync(await file.GetPartialReadStreamAsync());
             return decoder.PixelWidth > maxSize || decoder.PixelHeight > maxSize;
         }
         catch (Exception) { /* not WIC-readable; try Magick */ }
