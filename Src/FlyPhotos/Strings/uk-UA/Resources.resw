@@ -1256,22 +1256,22 @@ High Quality Cubic – Масштабування найвищої якості 
     <value>Оцінка</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>Файли оцінок</value>
+    <value>Дозволити оцінювання фото (бета)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>Видаляти файли оцінок разом із фото</value>
+    <value>Видаляти файли .xmp разом із фото</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>Під час видалення фото його файли .xmp теж переміщуються до кошика. Вони можуть містити зміни з інших програм.</value>
+    <value>Під час видалення фото у Fly його файли .xmp теж переміщуються до кошика.</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>Зберігати оцінки всередині файлів JPEG, TIFF, DNG і PNG</value>
+    <value>Для JPEG, TIFF, DNG і PNG зберігати оцінку всередині фото</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>Вимк.: записує лише файл .xmp поруч із фото. Переважно для darktable. Програми Adobe його ігнорують.</value>
+    <value>Вимк.: фото не змінюється, а оцінка записується в окремий файл .xmp поруч із ним. Провідник Windows і Lightroom не читають цей файл. Для фото RAW завжди використовується файл .xmp.</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>Для фото RAW поруч створюється файл .xmp.</value>
+    <value>Натисніть 1–5, щоб оцінити фото, або 0, щоб зняти оцінку. Інші фотопрограми (Lightroom, darktable, digiKam) можуть читати ці оцінки.</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>Цей тип файлів не можна оцінити</value>

@@ -241,6 +241,8 @@ For darktable, also turn on its setting that writes ratings to `.xmp` files.
 
 ## 14. Where does Fly save the rating?
 
+Ratings are off by default. Turn on **Settings → Behaviour → Allow photo ratings (Beta)** first.
+
 Inside the photo for JPEG, TIFF, DNG and PNG. RAW photos are never changed: their rating goes in an `.xmp` file next to the photo.
 
-Multi-picture JPEGs (Ultra HDR, motion photos) also get an `.xmp` file (`photo.jpg.xmp`) instead, so their extra pictures stay intact. To keep JPEG, TIFF, DNG and PNG files untouched too, turn off **Settings → Behaviour → Rating files → Save ratings inside JPEG, TIFF, DNG and PNG files**.
+Multi-picture JPEGs (Ultra HDR, motion photos) also get an `.xmp` file (`photo.jpg.xmp`) instead, so their extra pictures stay intact. To keep JPEG, TIFF, DNG and PNG files untouched too, turn off **Settings → Behaviour → Allow photo ratings (Beta) → For JPEG, TIFF, DNG and PNG, save the rating inside the photo**.

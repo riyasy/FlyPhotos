@@ -1256,22 +1256,22 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
     <value>評分</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>評分檔案</value>
+    <value>允許相片評分 (Beta)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>刪除相片時一併刪除評分檔案</value>
+    <value>刪除相片時一併刪除 .xmp 檔案</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>刪除相片時，其 .xmp 檔案也會移到資源回收筒。這些檔案可能包含其他應用程式的編輯。</value>
+    <value>在 Fly 中刪除相片時，其 .xmp 檔案也會移到資源回收筒。</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>將評分儲存在 JPEG、TIFF、DNG 和 PNG 檔案內</value>
+    <value>對於 JPEG、TIFF、DNG 和 PNG，將評分儲存在相片內</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>關閉：只寫入相片旁的 .xmp 檔案。主要供 darktable 使用。Adobe 應用程式會忽略它。</value>
+    <value>關閉：相片保持不變，評分會儲存在相片旁獨立的 .xmp 檔案中。Windows 檔案總管和 Lightroom 不會讀取該檔案。RAW 相片一律使用 .xmp 檔案。</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>RAW 相片會在旁邊產生 .xmp 檔案。</value>
+    <value>按 1–5 為相片評分，按 0 清除評分。其他相片應用程式（Lightroom、darktable、digiKam）可以讀取這些評分。</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>無法為此檔案類型評分</value>

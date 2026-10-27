@@ -1253,22 +1253,22 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
     <value>റേറ്റിംഗ്</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>റേറ്റിംഗ് ഫയലുകൾ</value>
+    <value>ഫോട്ടോ റേറ്റിംഗ് അനുവദിക്കുക (Beta)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>ഫോട്ടോയ്‌ക്കൊപ്പം റേറ്റിംഗ് ഫയലുകളും ഇല്ലാതാക്കുക</value>
+    <value>ഫോട്ടോയ്‌ക്കൊപ്പം .xmp ഫയലുകളും ഇല്ലാതാക്കുക</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>ഒരു ഫോട്ടോ ഇല്ലാതാക്കുമ്പോൾ അതിന്റെ .xmp ഫയലുകളും റീസൈക്കിൾ ബിന്നിലേക്ക് മാറ്റുന്നു. അവയിൽ മറ്റ് ആപ്പുകളിലെ എഡിറ്റുകൾ ഉണ്ടാകാം.</value>
+    <value>Fly-ൽ ഒരു ഫോട്ടോ ഇല്ലാതാക്കുമ്പോൾ അതിന്റെ .xmp ഫയലുകളും റീസൈക്കിൾ ബിന്നിലേക്ക് മാറ്റുന്നു.</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>റേറ്റിംഗുകൾ JPEG, TIFF, DNG, PNG ഫയലുകൾക്കുള്ളിൽ സേവ് ചെയ്യുക</value>
+    <value>JPEG, TIFF, DNG, PNG ഫയലുകളിൽ റേറ്റിംഗ് ഫോട്ടോയ്ക്കുള്ളിൽ സേവ് ചെയ്യുക</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>ഓഫ്: ഫോട്ടോയുടെ അടുത്തുള്ള .xmp ഫയലിൽ മാത്രം എഴുതുന്നു. പ്രധാനമായും darktable-നായി. Adobe ആപ്പുകൾ ഇത് അവഗണിക്കുന്നു.</value>
+    <value>ഓഫ്: ഫോട്ടോയിൽ മാറ്റമൊന്നും വരുത്തില്ല, റേറ്റിംഗ് അതിനടുത്തുള്ള ഒരു പ്രത്യേക .xmp ഫയലിലേക്ക് പോകും. Windows Explorer-ഉം Lightroom-ഉം ആ ഫയൽ വായിക്കില്ല. RAW ഫോട്ടോകൾ എപ്പോഴും ഒരു .xmp ഫയൽ ഉപയോഗിക്കുന്നു.</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>RAW ഫോട്ടോകൾക്ക് അടുത്ത് ഒരു .xmp ഫയൽ ഉണ്ടാകും.</value>
+    <value>ഒരു ഫോട്ടോ റേറ്റ് ചെയ്യാൻ 1–5 അമർത്തുക, റേറ്റിംഗ് മായ്‌ക്കാൻ 0 അമർത്തുക. മറ്റ് ഫോട്ടോ ആപ്പുകൾക്ക് (Lightroom, darktable, digiKam) ഈ റേറ്റിംഗുകൾ വായിക്കാനാകും.</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>ഈ ഫയൽ തരം റേറ്റ് ചെയ്യാൻ കഴിയില്ല</value>

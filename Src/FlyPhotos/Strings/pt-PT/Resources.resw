@@ -1256,22 +1256,22 @@ High Quality Cubic – Redimensionamento de alta qualidade para fotos.</value>
     <value>Classificação</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>Ficheiros de classificação</value>
+    <value>Permitir classificação de fotografias (Beta)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>Eliminar ficheiros de classificação com a fotografia</value>
+    <value>Eliminar ficheiros .xmp com a fotografia</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>Ao eliminar uma fotografia, os seus ficheiros .xmp também vão para a Reciclagem. Podem conter edições de outras aplicações.</value>
+    <value>Ao eliminar uma fotografia no Fly, os seus ficheiros .xmp também são movidos para a Reciclagem.</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>Guardar classificações dentro de ficheiros JPEG, TIFF, DNG e PNG</value>
+    <value>Para JPEG, TIFF, DNG e PNG, guardar a classificação dentro da fotografia</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>Desativado: escreve apenas o ficheiro .xmp ao lado da fotografia. Sobretudo para o darktable. As apps da Adobe ignoram-no.</value>
+    <value>Desativado: a fotografia não é alterada e a classificação é guardada num ficheiro .xmp separado ao lado dela. O Explorador de Ficheiros do Windows e o Lightroom não leem esse ficheiro. As fotografias RAW usam sempre um ficheiro .xmp.</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>Fotografias RAW recebem um ficheiro .xmp ao lado.</value>
+    <value>Prima 1–5 para classificar uma fotografia e 0 para limpar a classificação. Outras apps de fotografia (Lightroom, darktable, digiKam) podem ler estas classificações.</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>Não é possível classificar este tipo de ficheiro</value>

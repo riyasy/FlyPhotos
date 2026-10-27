@@ -1256,22 +1256,22 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
     <value>Waardering</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>Waarderingsbestanden</value>
+    <value>Fotowaarderingen toestaan (Beta)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>Waarderingsbestanden met de foto verwijderen</value>
+    <value>.xmp-bestanden met de foto verwijderen</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>Bij het verwijderen van een foto gaan ook de .xmp-bestanden naar de Prullenbak. Die kunnen bewerkingen uit andere apps bevatten.</value>
+    <value>Bij het verwijderen van een foto in Fly worden de bijbehorende .xmp-bestanden ook naar de Prullenbak verplaatst.</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>Waarderingen in JPEG-, TIFF-, DNG- en PNG-bestanden opslaan</value>
+    <value>Voor JPEG, TIFF, DNG en PNG de waardering in de foto opslaan</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>Uit: schrijft alleen het .xmp-bestand naast de foto. Vooral voor darktable. Adobe-apps negeren het.</value>
+    <value>Uit: de foto blijft ongewijzigd en de waardering wordt opgeslagen in een apart .xmp-bestand ernaast. Windows Verkenner en Lightroom lezen dat bestand niet. RAW-foto's gebruiken altijd een .xmp-bestand.</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>RAW-foto's krijgen een .xmp-bestand ernaast.</value>
+    <value>Druk op 1–5 om een foto te waarderen en op 0 om de waardering te wissen. Andere foto-apps (Lightroom, darktable, digiKam) kunnen deze waarderingen lezen.</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>Dit bestandstype kan geen waardering krijgen</value>

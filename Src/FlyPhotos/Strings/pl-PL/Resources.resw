@@ -1256,22 +1256,22 @@ High Quality Cubic – Najwyższej jakości skalowanie dla zdjęć.</value>
     <value>Ocena</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>Pliki ocen</value>
+    <value>Zezwól na ocenianie zdjęć (Beta)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>Usuwaj pliki ocen razem ze zdjęciem</value>
+    <value>Usuwaj pliki .xmp razem ze zdjęciem</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>Usunięcie zdjęcia przenosi też jego pliki .xmp do Kosza. Mogą zawierać edycje z innych aplikacji.</value>
+    <value>Usunięcie zdjęcia w aplikacji Fly przenosi również jego pliki .xmp do Kosza.</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>Zapisuj oceny w plikach JPEG, TIFF, DNG i PNG</value>
+    <value>Dla JPEG, TIFF, DNG i PNG zapisuj ocenę wewnątrz zdjęcia</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>Wyłączone: zapisuje tylko plik .xmp obok zdjęcia. Głównie dla darktable. Aplikacje Adobe go ignorują.</value>
+    <value>Wyłączone: zdjęcie pozostaje bez zmian, a ocena jest zapisywana w osobnym pliku .xmp obok niego. Eksplorator plików Windows i Lightroom nie odczytują tego pliku. Zdjęcia RAW zawsze używają pliku .xmp.</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>Zdjęcia RAW otrzymują obok plik .xmp.</value>
+    <value>Naciśnij 1–5, aby ocenić zdjęcie, lub 0, aby usunąć ocenę. Inne aplikacje do zdjęć (Lightroom, darktable, digiKam) mogą odczytać te oceny.</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>Nie można ocenić tego typu pliku</value>

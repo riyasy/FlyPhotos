@@ -1256,22 +1256,22 @@ High Quality Cubic – Highest-quality scaling for photos.</value>
     <value>Rating</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>Rating files</value>
+    <value>Allow photo ratings (Beta)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>Delete rating files with the photo</value>
+    <value>Delete .xmp files with the photo</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>Deleting a photo also moves its .xmp files to the Recycle Bin. They can hold edits from other apps.</value>
+    <value>Deleting a photo in Fly also moves its .xmp files to the Recycle Bin.</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>Save ratings inside JPEG, TIFF, DNG and PNG files</value>
+    <value>For JPEG, TIFF, DNG and PNG, save the rating inside the photo</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>Off: writes only the .xmp file next to the photo. Mainly for darktable. Adobe apps ignore it.</value>
+    <value>Off: the photo is left unchanged and the rating goes in a separate .xmp file next to it. Windows Explorer and Lightroom don't read that file. RAW photos always use an .xmp file.</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>RAW photos get an .xmp file next to them.</value>
+    <value>Press 1–5 to rate a photo, 0 to clear the rating. Other photo apps (Lightroom, darktable, digiKam) can read these ratings.</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>Can't rate this file type</value>

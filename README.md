@@ -85,7 +85,8 @@ To open images with Fly Photos automatically when you double-click them:
   - Choose whether pan/zoom/rotation resets, is remembered per photo, or carries over during navigation.
   - Multi-monitor support (remembers the last used monitor); starts maximized, full screen, or in its previous window state.
 
-- **Ratings for sorting photos**
+- **Ratings for sorting photos** (beta)
+  - Off by default. Turn on **Settings → Behaviour → Allow photo ratings (Beta)**.
   - Press `1`–`5` to rate the current photo and `0` to clear.
   - Saved as the standard XMP rating (`xmp:Rating`), so Lightroom, Bridge, Capture One, darktable and digiKam can read it.
   - Camera RAW files get an `.xmp` file next to them and are never modified. JPEG, DNG, TIFF and PNG are updated in place without re-encoding (or an `.xmp` file instead, set in **Settings**). Multi-picture JPEGs (Ultra HDR, motion photos) always get an `.xmp` file, so their extra pictures stay intact. Only the rating value changes in existing metadata.
@@ -139,7 +140,7 @@ These are the **defaults**. Every command below except `Esc` and `Del` can be re
 | **Rating** | Rate 1–5 | `1`–`5` |
 | | Clear rating | `0` |
 
-The rating keys can be rebound in **Settings → Keyboard** like the others.
+The rating keys work only when **Settings → Behaviour → Allow photo ratings (Beta)** is on, and can be rebound in **Settings → Keyboard** like the others.
 
 ### 🖱 Mouse
 

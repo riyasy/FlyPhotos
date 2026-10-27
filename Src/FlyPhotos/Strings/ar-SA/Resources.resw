@@ -1256,22 +1256,22 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
     <value>التقييم</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>ملفات التقييم</value>
+    <value>السماح بتقييم الصور (تجريبي)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>حذف ملفات التقييم مع الصورة</value>
+    <value>حذف ملفات .xmp مع الصورة</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>عند حذف صورة تُنقل ملفات .xmp الخاصة بها أيضًا إلى سلة المحذوفات. قد تحتوي على تعديلات من تطبيقات أخرى.</value>
+    <value>عند حذف صورة في Fly، تُنقل ملفات .xmp الخاصة بها أيضًا إلى سلة المحذوفات.</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>حفظ التقييمات داخل ملفات JPEG وTIFF وDNG وPNG</value>
+    <value>لملفات JPEG وTIFF وDNG وPNG، احفظ التقييم داخل الصورة</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>إيقاف: يكتب ملف .xmp المجاور للصورة فقط. مخصص غالبًا لـ darktable. تتجاهله تطبيقات Adobe.</value>
+    <value>إيقاف: تبقى الصورة دون تغيير ويُحفظ التقييم في ملف .xmp منفصل بجانبها. لا يقرأ مستكشف Windows وLightroom هذا الملف. تستخدم صور RAW دائمًا ملف .xmp.</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>تحصل صور RAW على ملف .xmp بجانبها.</value>
+    <value>اضغط 1–5 لتقييم صورة، و0 لمسح التقييم. يمكن لتطبيقات الصور الأخرى (Lightroom وdarktable وdigiKam) قراءة هذه التقييمات.</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>لا يمكن تقييم هذا النوع من الملفات</value>

@@ -1256,22 +1256,22 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
     <value>Arvostelu</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>Arvostelutiedostot</value>
+    <value>Salli kuvien arvostelu (Beta)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>Poista arvostelutiedostot kuvan mukana</value>
+    <value>Poista .xmp-tiedostot kuvan mukana</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>Kuvan poistaminen siirtää myös sen .xmp-tiedostot roskakoriin. Ne voivat sisältää muiden sovellusten muokkauksia.</value>
+    <value>Kun kuva poistetaan Fly-sovelluksessa, myös sen .xmp-tiedostot siirretään Roskakoriin.</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>Tallenna arvostelut JPEG-, TIFF-, DNG- ja PNG-tiedostojen sisään</value>
+    <value>Tallenna JPEG-, TIFF-, DNG- ja PNG-kuvien arvostelu kuvan sisään</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>Pois: kirjoittaa vain kuvan vieressä olevan .xmp-tiedoston. Lähinnä darktablea varten. Adoben sovellukset ohittavat sen.</value>
+    <value>Pois: kuvaa ei muuteta, ja arvostelu tallennetaan erilliseen .xmp-tiedostoon kuvan viereen. Windowsin Resurssienhallinta ja Lightroom eivät lue tätä tiedostoa. RAW-kuvat käyttävät aina .xmp-tiedostoa.</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>RAW-kuvat saavat viereensä .xmp-tiedoston.</value>
+    <value>Arvostele kuva painamalla 1–5 ja poista arvostelu painamalla 0. Muut kuvasovellukset (Lightroom, darktable, digiKam) voivat lukea nämä arvostelut.</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>Tätä tiedostotyyppiä ei voi arvostella</value>

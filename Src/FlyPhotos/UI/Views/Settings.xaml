@@ -294,11 +294,18 @@
                             x:Uid="SettingsCardRatingFiles"
                             Margin="0,5,0,0"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE734;, FontFamily={StaticResource FluentIcons}}">
+                            <ToggleSwitch x:Name="ButtonEnableRatings" HorizontalAlignment="Right" />
                             <controls:SettingsExpander.Items>
-                                <controls:SettingsCard x:Name="SettingsCardEmbedRatingsInFiles" x:Uid="SettingsCardEmbedRatingsInFiles">
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardEmbedRatingsInFiles"
+                                    x:Uid="SettingsCardEmbedRatingsInFiles"
+                                    IsEnabled="{x:Bind ButtonEnableRatings.IsOn, Mode=OneWay}">
                                     <ToggleSwitch x:Name="ButtonEmbedRatingsInFiles" />
                                 </controls:SettingsCard>
-                                <controls:SettingsCard x:Name="SettingsCardDeleteRatingSidecars" x:Uid="SettingsCardDeleteRatingSidecars">
+                                <controls:SettingsCard
+                                    x:Name="SettingsCardDeleteRatingSidecars"
+                                    x:Uid="SettingsCardDeleteRatingSidecars"
+                                    IsEnabled="{x:Bind ButtonEnableRatings.IsOn, Mode=OneWay}">
                                     <ToggleSwitch x:Name="ButtonDeleteRatingSidecars" />
                                 </controls:SettingsCard>
                             </controls:SettingsExpander.Items>

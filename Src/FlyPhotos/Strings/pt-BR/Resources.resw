@@ -1256,22 +1256,22 @@ High Quality Cubic – Dimensionamento de alta qualidade para fotos.</value>
     <value>Avaliação</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>Arquivos de avaliação</value>
+    <value>Permitir avaliação de fotos (Beta)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>Excluir arquivos de avaliação com a foto</value>
+    <value>Excluir arquivos .xmp com a foto</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>Ao excluir uma foto, os arquivos .xmp dela também vão para a Lixeira. Eles podem conter edições de outros apps.</value>
+    <value>Ao excluir uma foto no Fly, os arquivos .xmp dela também são movidos para a Lixeira.</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>Salvar avaliações dentro de arquivos JPEG, TIFF, DNG e PNG</value>
+    <value>Para JPEG, TIFF, DNG e PNG, salvar a avaliação dentro da foto</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>Desativado: grava apenas o arquivo .xmp ao lado da foto. Principalmente para o darktable. Apps da Adobe o ignoram.</value>
+    <value>Desativado: a foto não é alterada e a avaliação é salva em um arquivo .xmp separado ao lado dela. O Explorador de Arquivos do Windows e o Lightroom não leem esse arquivo. Fotos RAW sempre usam um arquivo .xmp.</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>Fotos RAW recebem um arquivo .xmp ao lado.</value>
+    <value>Pressione 1–5 para avaliar uma foto e 0 para limpar a avaliação. Outros apps de fotos (Lightroom, darktable, digiKam) podem ler essas avaliações.</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>Não é possível avaliar este tipo de arquivo</value>

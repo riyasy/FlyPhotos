@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Localization;
 using FlyPhotos.Services;
 using MetadataExtractor;
@@ -95,6 +96,7 @@ public static class ExifReader
     // Same read path as the footer, so the panel and the footer cannot disagree. Reuses the metadata parsed above.
     private static string? GetRating(string filePath, IReadOnlyList<MetadataExtractor.Directory> directories)
     {
+        if (!AppConfig.Settings.EnableRatings) return null;
         var rating = RatingMetadata.ReadRating(filePath, directories);
         return rating is > 0 ? RatingMetadata.Stars(rating.Value) : null;
     }

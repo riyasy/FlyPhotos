@@ -1256,22 +1256,22 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
     <value>Note</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>Fichiers de notes</value>
+    <value>Autoriser la notation des photos (Beta)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>Supprimer les fichiers de notes avec la photo</value>
+    <value>Supprimer les fichiers .xmp avec la photo</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>Supprimer une photo envoie aussi ses fichiers .xmp à la Corbeille. Ils peuvent contenir des retouches d'autres applications.</value>
+    <value>La suppression d'une photo dans Fly déplace également ses fichiers .xmp vers la Corbeille.</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>Enregistrer les notes dans les fichiers JPEG, TIFF, DNG et PNG</value>
+    <value>Pour JPEG, TIFF, DNG et PNG, enregistrer la note dans la photo</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>Désactivé : écrit seulement le fichier .xmp à côté de la photo. Surtout pour darktable. Les apps Adobe l'ignorent.</value>
+    <value>Désactivé : la photo reste inchangée et la note est enregistrée dans un fichier .xmp distinct à côté. L'Explorateur de fichiers Windows et Lightroom ne lisent pas ce fichier. Les photos RAW utilisent toujours un fichier .xmp.</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>Les photos RAW reçoivent un fichier .xmp à côté.</value>
+    <value>Appuyez sur 1–5 pour noter une photo, et sur 0 pour effacer la note. D'autres applications photo (Lightroom, darktable, digiKam) peuvent lire ces notes.</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>Impossible de noter ce type de fichier</value>

@@ -1255,22 +1255,22 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
     <value>평점</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>평점 파일</value>
+    <value>사진 평점 기능 사용 (Beta)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>사진과 함께 평점 파일 삭제</value>
+    <value>사진과 함께 .xmp 파일 삭제</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>사진을 삭제하면 해당 .xmp 파일도 휴지통으로 이동합니다. 다른 앱의 편집 내용이 들어 있을 수 있습니다.</value>
+    <value>Fly에서 사진을 삭제하면 해당 .xmp 파일도 휴지통으로 이동합니다.</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>평점을 JPEG, TIFF, DNG 및 PNG 파일 안에 저장</value>
+    <value>JPEG, TIFF, DNG 및 PNG는 평점을 사진 안에 저장</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>끄기: 사진 옆의 .xmp 파일에만 씁니다. 주로 darktable용입니다. Adobe 앱은 이 파일을 무시합니다.</value>
+    <value>끄기: 사진은 변경되지 않고 평점은 사진 옆의 별도 .xmp 파일에 저장됩니다. Windows 파일 탐색기와 Lightroom은 이 파일을 읽지 않습니다. RAW 사진은 항상 .xmp 파일을 사용합니다.</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>RAW 사진 옆에는 .xmp 파일이 만들어집니다.</value>
+    <value>1–5를 눌러 사진에 평점을 매기고 0을 눌러 평점을 지웁니다. 다른 사진 앱(Lightroom, darktable, digiKam)도 이 평점을 읽을 수 있습니다.</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>이 파일 형식은 평가할 수 없습니다</value>

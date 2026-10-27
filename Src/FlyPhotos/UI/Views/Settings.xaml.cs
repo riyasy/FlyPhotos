@@ -110,6 +110,7 @@ internal sealed partial class Settings
         ComboWindowLaunchMode.SelectedIndex = GetIndexForWindowLaunchMode(AppConfig.Settings.WindowLaunchMode);
         ButtonAllowMultiInstance.IsOn = AppConfig.Settings.AllowMultiInstance;
         ButtonConfirmBeforeDelete.IsOn = AppConfig.Settings.ConfirmForDelete;
+        ButtonEnableRatings.IsOn = AppConfig.Settings.EnableRatings;
         ButtonEmbedRatingsInFiles.IsOn = AppConfig.Settings.EmbedRatingsInFiles;
         ButtonDeleteRatingSidecars.IsOn = AppConfig.Settings.DeleteRatingSidecarsWithPhoto;
         ButtonShowFileName.IsOn = AppConfig.Settings.ShowFileName;
@@ -144,6 +145,7 @@ internal sealed partial class Settings
         SliderTransparentBackgroundIntensity.ValueChanged += SliderTransparentBackgroundIntensity_ValueChanged;
         SliderThumbnailSize.ValueChanged += SliderThumbnailSize_ValueChanged;
         ComboWindowLaunchMode.SelectionChanged += ComboWindowLaunchMode_OnSelectionChanged;
+        ButtonEnableRatings.Toggled += ButtonEnableRatings_OnToggled;
         ButtonEmbedRatingsInFiles.Toggled += ButtonEmbedRatingsInFiles_OnToggled;
         ButtonDeleteRatingSidecars.Toggled += ButtonDeleteRatingSidecars_OnToggled;
         ButtonAllowMultiInstance.Toggled += ButtonAllowMultiInstance_OnToggled;
@@ -304,6 +306,12 @@ internal sealed partial class Settings
         await AppConfig.SaveAsync();
     }
 
+
+    private async void ButtonEnableRatings_OnToggled(object sender, RoutedEventArgs e)
+    {
+        AppConfig.Settings.EnableRatings = ButtonEnableRatings.IsOn;
+        await AppConfig.SaveAsync();
+    }
 
     private async void ButtonEmbedRatingsInFiles_OnToggled(object sender, RoutedEventArgs e)
     {

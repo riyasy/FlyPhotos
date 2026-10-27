@@ -293,7 +293,7 @@ internal partial class PhotoDisplayController
 
             BeginRatingReadIfNeeded(photo);
             FileNameOrDetailsChanged?.Invoke(new FileDisplayDetails(positionText, fileName, dimensionText,
-                Math.Max(photo.Rating, 0)));
+                AppConfig.Settings.EnableRatings ? Math.Max(photo.Rating, 0) : 0));
         }
         catch (Exception ex)
         {
@@ -306,6 +306,7 @@ internal partial class PhotoDisplayController
     // Reads the rating once per photo, off the UI thread, then refreshes the footer.
     private void BeginRatingReadIfNeeded(Photo photo)
     {
+        if (!AppConfig.Settings.EnableRatings) return;
         if (string.IsNullOrEmpty(photo.FilePath) || photo.Rating != Photo.RatingUnknown) return;
         if (IsContinuousKeyPress() || !photo.TryBeginRatingRead()) return;
 
@@ -328,7 +329,8 @@ internal partial class PhotoDisplayController
         return photo == null || string.IsNullOrEmpty(photo.FilePath) ? null : photo;
     }
 
-    public bool CanRateCurrentPhoto() => !IsContinuousKeyPress() && CurrentPhotoOrNull() != null;
+    public bool CanRateCurrentPhoto() =>
+        AppConfig.Settings.EnableRatings && !IsContinuousKeyPress() && CurrentPhotoOrNull() != null;
 
     /// <summary>
     /// Sets the current photo's star rating (<paramref name="requested"/> 0 clears it).

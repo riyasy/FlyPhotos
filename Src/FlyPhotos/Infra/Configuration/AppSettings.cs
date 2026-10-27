@@ -56,6 +56,8 @@ public class AppSettings
 
     public bool ConfirmForDelete { get; set; } = true;
 
+    public bool EnableRatings { get; set; } = false;
+
     public bool EmbedRatingsInFiles { get; set; } = true;
 
     public bool DeleteRatingSidecarsWithPhoto { get; set; } = true;

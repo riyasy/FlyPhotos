@@ -1256,22 +1256,22 @@ High Quality Cubic – Ridimensionamento della massima qualità per le foto.</va
     <value>Valutazione</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>File di valutazione</value>
+    <value>Consenti la valutazione delle foto (Beta)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>Elimina i file di valutazione con la foto</value>
+    <value>Elimina i file .xmp con la foto</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>Eliminando una foto, anche i suoi file .xmp vanno nel Cestino. Possono contenere modifiche di altre app.</value>
+    <value>Eliminando una foto in Fly, anche i suoi file .xmp vengono spostati nel Cestino.</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>Salva le valutazioni nei file JPEG, TIFF, DNG e PNG</value>
+    <value>Per JPEG, TIFF, DNG e PNG, salva la valutazione nella foto</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>Disattivato: scrive solo il file .xmp accanto alla foto. Pensato soprattutto per darktable. Le app Adobe lo ignorano.</value>
+    <value>Disattivato: la foto resta invariata e la valutazione viene salvata in un file .xmp separato accanto ad essa. Esplora file di Windows e Lightroom non leggono quel file. Le foto RAW usano sempre un file .xmp.</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>Le foto RAW ricevono un file .xmp accanto.</value>
+    <value>Premi 1–5 per valutare una foto e 0 per rimuovere la valutazione. Altre app per foto (Lightroom, darktable, digiKam) possono leggere queste valutazioni.</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>Impossibile valutare questo tipo di file</value>

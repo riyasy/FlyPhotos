@@ -1255,22 +1255,22 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
     <value>評価</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>評価ファイル</value>
+    <value>写真の評価を有効にする (Beta)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>写真と一緒に評価ファイルを削除</value>
+    <value>写真と一緒に .xmp ファイルを削除</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>写真を削除すると、その .xmp ファイルもごみ箱に移動します。他のアプリの編集内容が含まれている場合があります。</value>
+    <value>Fly で写真を削除すると、その .xmp ファイルもごみ箱に移動します。</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>評価を JPEG、TIFF、DNG、PNG ファイル内に保存</value>
+    <value>JPEG、TIFF、DNG、PNG では評価を写真内に保存</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>オフ: 写真の横の .xmp ファイルだけに書き込みます。主に darktable 向けです。Adobe のアプリはこれを無視します。</value>
+    <value>オフ: 写真は変更されず、評価は写真の横にある別の .xmp ファイルに保存されます。Windows エクスプローラーと Lightroom はこのファイルを読み取りません。RAW 写真は常に .xmp ファイルを使います。</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>RAW 写真には、横に .xmp ファイルが作られます。</value>
+    <value>1～5 キーで写真を評価し、0 キーで評価を消去します。他の写真アプリ (Lightroom、darktable、digiKam) もこの評価を読み取れます。</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>このファイル形式は評価できません</value>

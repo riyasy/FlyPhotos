@@ -1255,22 +1255,22 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
     <value>Értékelés</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>Értékelésfájlok</value>
+    <value>Fotóértékelés engedélyezése (Beta)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>Értékelésfájlok törlése a fotóval együtt</value>
+    <value>.xmp-fájlok törlése a fotóval együtt</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>Egy fotó törlésekor az .xmp-fájljai is a Lomtárba kerülnek. Ezek más alkalmazások szerkesztéseit is tartalmazhatják.</value>
+    <value>Ha a Flyban töröl egy fotót, az .xmp-fájljai is a Lomtárba kerülnek.</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>Értékelések mentése a JPEG-, TIFF-, DNG- és PNG-fájlokba</value>
+    <value>JPEG, TIFF, DNG és PNG esetén az értékelés mentése a fotóba</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>Ki: csak a fotó melletti .xmp-fájlt írja. Főleg darktable-hez. Az Adobe-alkalmazások figyelmen kívül hagyják.</value>
+    <value>Ki: a fotó változatlan marad, az értékelés pedig egy külön .xmp-fájlba kerül mellette. A Windows Fájlkezelő és a Lightroom nem olvassa ezt a fájlt. A RAW fotók mindig .xmp-fájlt használnak.</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>A RAW fotók mellé egy .xmp-fájl kerül.</value>
+    <value>Nyomja meg az 1–5 billentyűt egy fotó értékeléséhez, a 0-t az értékelés törléséhez. Más fotóalkalmazások (Lightroom, darktable, digiKam) is olvashatják ezeket az értékeléseket.</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>Ez a fájltípus nem értékelhető</value>

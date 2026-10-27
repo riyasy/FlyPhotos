@@ -1256,22 +1256,22 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
     <value>Betyg</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>Betygsfiler</value>
+    <value>Aktivera betygsättning av foton (Beta)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>Ta bort betygsfiler med fotot</value>
+    <value>Ta bort .xmp-filer med fotot</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>När ett foto tas bort flyttas även dess .xmp-filer till papperskorgen. De kan innehålla redigeringar från andra appar.</value>
+    <value>När ett foto tas bort i Fly flyttas även dess .xmp-filer till Papperskorgen.</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>Spara betyg i JPEG-, TIFF-, DNG- och PNG-filer</value>
+    <value>För JPEG, TIFF, DNG och PNG, spara betyget i fotot</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>Av: skriver bara .xmp-filen bredvid fotot. Främst för darktable. Adobes appar ignorerar den.</value>
+    <value>Av: fotot lämnas oförändrat och betyget sparas i en separat .xmp-fil bredvid det. Utforskaren i Windows och Lightroom läser inte den filen. RAW-foton använder alltid en .xmp-fil.</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>RAW-foton får en .xmp-fil bredvid sig.</value>
+    <value>Tryck på 1–5 för att betygsätta ett foto och 0 för att ta bort betyget. Andra fotoappar (Lightroom, darktable, digiKam) kan läsa dessa betyg.</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>Den här filtypen kan inte betygsättas</value>

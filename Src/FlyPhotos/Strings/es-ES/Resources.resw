@@ -1256,22 +1256,22 @@ High Quality Cubic – Escalado de la más alta calidad para fotos.</value>
     <value>Valoración</value>
   </data>
   <data name="SettingsCardRatingFiles.Header" xml:space="preserve">
-    <value>Archivos de valoración</value>
+    <value>Permitir valorar fotos (Beta)</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Header" xml:space="preserve">
-    <value>Eliminar los archivos de valoración con la foto</value>
+    <value>Eliminar los archivos .xmp con la foto</value>
   </data>
   <data name="SettingsCardDeleteRatingSidecars.Description" xml:space="preserve">
-    <value>Al eliminar una foto, sus archivos .xmp también se envían a la Papelera de reciclaje. Pueden contener ediciones de otras aplicaciones.</value>
+    <value>Al eliminar una foto en Fly, sus archivos .xmp también se envían a la Papelera de reciclaje.</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Header" xml:space="preserve">
-    <value>Guardar las valoraciones dentro de archivos JPEG, TIFF, DNG y PNG</value>
+    <value>En JPEG, TIFF, DNG y PNG, guardar la valoración dentro de la foto</value>
   </data>
   <data name="SettingsCardEmbedRatingsInFiles.Description" xml:space="preserve">
-    <value>Desactivado: solo escribe el archivo .xmp junto a la foto. Sobre todo para darktable. Las apps de Adobe lo ignoran.</value>
+    <value>Desactivado: la foto no se modifica y la valoración se guarda en un archivo .xmp independiente junto a ella. El Explorador de archivos de Windows y Lightroom no leen ese archivo. Las fotos RAW siempre usan un archivo .xmp.</value>
   </data>
   <data name="SettingsCardRatingFiles.Description" xml:space="preserve">
-    <value>Las fotos RAW reciben un archivo .xmp junto a ellas.</value>
+    <value>Pulse 1–5 para valorar una foto y 0 para quitar la valoración. Otras aplicaciones de fotos (Lightroom, darktable, digiKam) pueden leer estas valoraciones.</value>
   </data>
   <data name="Rating.Unsupported" xml:space="preserve">
     <value>No se puede valorar este tipo de archivo</value>
