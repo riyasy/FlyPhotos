@@ -12,6 +12,14 @@
     <Compile Include="..\FlyPhotos\Core\Model\Enums.cs" Link="Linked\Enums.cs" />
     <Compile Include="..\FlyPhotos\Display\ImageReading\ImageFormat.cs" Link="Linked\ImageFormat.cs" />
     <Compile Include="..\FlyPhotos\Display\ImageReading\DecoderChains.cs" Link="Linked\DecoderChains.cs" />
+    <Compile Include="..\FlyPhotos\Services\RatingMetadata.cs" Link="Linked\RatingMetadata.cs" />
+    <Compile Include="..\FlyPhotos\Core\Model\RatingResult.cs" Link="Linked\RatingResult.cs" />
+    <Compile Include="..\FlyPhotos\Infra\Utils\Crc32.cs" Link="Linked\Crc32.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MetadataExtractor" Version="2.9.3" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="6.2.1" />
   </ItemGroup>
 
 </Project>
