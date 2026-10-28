@@ -34,6 +34,15 @@
                 HorizontalAlignment="Stretch"
                 Click="BrowseBtn_Click"
                 Content="Browse for app..." />
+
+            <Button
+                x:Name="RemoveBtn"
+                Margin="0,6,0,0"
+                HorizontalAlignment="Stretch"
+                Click="RemoveBtn_Click"
+                Visibility="Collapsed">
+                <TextBlock x:Name="RemoveBtnText" TextTrimming="CharacterEllipsis" />
+            </Button>
         </StackPanel>
 
         <!--  Progress Ring while loading  -->

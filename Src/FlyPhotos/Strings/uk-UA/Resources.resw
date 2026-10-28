@@ -126,6 +126,9 @@
   <data name="AppSelectionDialog.Title" xml:space="preserve">
     <value>Виберіть програму</value>
   </data>
+  <data name="AppSelectionDialog_RemoveApp" xml:space="preserve">
+    <value>Видалити «{0}»</value>
+  </data>
   <data name="BrowseBtn.Content" xml:space="preserve">
     <value>Огляд програм…</value>
   </data>

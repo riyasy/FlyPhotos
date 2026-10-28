@@ -126,6 +126,9 @@
   <data name="AppSelectionDialog.Title" xml:space="preserve">
     <value>选择应用</value>
   </data>
+  <data name="AppSelectionDialog_RemoveApp" xml:space="preserve">
+    <value>移除“{0}”</value>
+  </data>
   <data name="BrowseBtn.Content" xml:space="preserve">
     <value>浏览应用…</value>
   </data>
