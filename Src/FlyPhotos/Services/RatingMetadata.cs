@@ -53,10 +53,9 @@ internal static class RatingMetadata
     public static string Stars(int rating) => new('★', Math.Clamp(rating, 0, 5));
 
     /// <summary>
-    /// Rating 0-5 from the sidecar or the file itself; null when neither has rating info. Pass
-    /// <paramref name="directories"/> when the file's metadata is already parsed, so it is not parsed again.
+    /// Rating 0-5 from the sidecar or the file itself; null when neither has rating info.
     /// </summary>
-    public static int? ReadRating(string filePath, IReadOnlyList<MetadataExtractor.Directory>? directories = null)
+    public static int? ReadRating(string filePath)
     {
         // Same lock as writes, so a read never races a file being swapped in.
         lock (LockFor(filePath))
@@ -67,7 +66,7 @@ internal static class RatingMetadata
                 // (RAW, embedding off, a file it cannot patch), so it holds the newer rating; an embedded write keeps
                 // any existing sidecar in step. Clearing a rating stored in the file is recorded as a sidecar 0.
                 // Modified dates are not compared: they change with any edit, not only rating changes.
-                return ReadSidecarRating(SidecarPaths(filePath)) ?? ReadInFileRating(filePath, directories);
+                return ReadSidecarRating(SidecarPaths(filePath)) ?? ReadInFileRating(filePath);
             }
             catch (Exception ex)
             {
@@ -103,7 +102,7 @@ internal static class RatingMetadata
 
                 if (!embedded && (IsEmbeddable(filePath) || IsProprietaryRaw(filePath)))
                 {
-                    // RAW, or JPEG/TIFF/PNG with embedding off or unsafe (XMP over 64 KB, multi-picture JPEG, BigTIFF, broken PNG).
+                    // RAW, or JPEG/TIFF/PNG with embedding off or unsafe (XMP over 64 KB, unreadable MPF, BigTIFF, broken PNG).
                     WriteSidecars(sidecars, rating, createAtZero: overwriteInFileRating);
                     return new RatingResult(true, rating: rating);
                 }
@@ -261,7 +260,7 @@ internal static class RatingMetadata
     private const int FujifilmRatingTag = 0x1431;
 
     /// <summary>What the file itself says, ignoring sidecars. Null when it has no rating or cannot be read.</summary>
-    private static int? ReadInFileRating(string filePath, IReadOnlyList<MetadataExtractor.Directory>? directories = null)
+    private static int? ReadInFileRating(string filePath)
     {
         // Each source fails on its own: malformed XMP must not hide a valid EXIF or maker-note rating.
         int? rating = null;
@@ -277,18 +276,19 @@ internal static class RatingMetadata
             // fall through to MetadataExtractor
             Logger.Warn($"Could not read embedded rating of '{filePath}': {ex.Message}");
         }
-        return rating ?? ReadCameraRating(filePath, directories);
+        return rating ?? ReadCameraRating(filePath);
     }
 
     /// <summary>
     /// Rating set in camera or by another app, for formats Fly does not write into (RAW, HEIC) and for JPEG/TIFF/PNG
     /// without an XMP rating. Checks XMP, then EXIF Rating (0x4746), then Sony and Fujifilm maker notes. Read-only.
     /// </summary>
-    private static int? ReadCameraRating(string filePath, IReadOnlyList<MetadataExtractor.Directory>? directories)
+    private static int? ReadCameraRating(string filePath)
     {
+        IReadOnlyList<MetadataExtractor.Directory> directories;
         try
         {
-            directories ??= ImageMetadataReader.ReadMetadata(filePath);
+            directories = ImageMetadataReader.ReadMetadata(filePath);
         }
         catch (Exception ex)
         {
@@ -497,12 +497,14 @@ internal static class RatingMetadata
         var segments = ScanJpeg(source);
         if (segments == null) return false;
 
-        // Multi-picture JPEG (Ultra HDR, motion photo): the extra pictures are found by offsets that a size
-        // change would break, so it gets a sidecar instead.
-        if (FindSegment(segments, App2, "MPF") != null) return false;
-
         var existing = FindSegment(segments, App1, XmpSegmentId);
         if (existing == null && rating == 0 && !overwriteInFileRating) return true;
+
+        // Multi-picture JPEG (Ultra HDR, motion photo): its MP entries must follow the size change below.
+        // Embedded rather than a sidecar because Lightroom and DxO ignore sidecars for JPEG.
+        var mpf = FindSegment(segments, App2, "MPF");
+        var mpEntries = mpf is { } m ? ReadMpEntries(source, m) : null;
+        if (mpf != null && mpEntries == null) return false;
 
         var xml = ApplyRating(existing is { } e ? ReadXmp(source, e) : null, rating);
         var payload = StrictUtf8.GetBytes(xml);
@@ -522,14 +524,53 @@ internal static class RatingMetadata
         destination.Write(payload);
         CopyRange(source, destination, cutEnd, source.Length);
 
+        // Segments after the XMP segment moved by the size change.
+        var delta = 2 + length - (cutEnd - cutStart);
+        long ShiftOf(Segment s) => s.Start < cutStart ? 0 : delta;
         if (FindSegment(segments, App1, "Exif") is { } exif)
-        {
-            // The Exif segment moved by the size change only when it sits after the XMP segment.
-            var shift = exif.Start < cutStart ? 0 : 2 + length - (cutEnd - cutStart);
-            SyncExifRating(destination, exif.PayloadStart + shift + 6, rating, exif.End + shift); // 6 = "Exif\0\0"
-        }
+            SyncExifRating(destination, exif.PayloadStart + ShiftOf(exif) + 6, rating, exif.End + ShiftOf(exif)); // 6 = "Exif\0\0"
+        if (mpf is { } mpfSegment && mpEntries is { } entries && delta != 0)
+            ShiftMpEntries(destination, entries, delta, ShiftOf(mpfSegment));
         return true;
     });
+
+    private const int MpEntryTag = 0xB002;
+    private const int MpEntrySize = 16;
+
+    /// <summary>
+    /// The MP entry table of a multi-picture JPEG: absolute position and entry count, plus the MP
+    /// header layout for its byte order. Null when the MPF segment cannot be read.
+    /// </summary>
+    private static (TiffLayout Header, long At, int Count)? ReadMpEntries(Stream stream, Segment mpf)
+    {
+        var header = ReadTiffLayout(stream, mpf.PayloadStart + 4, mpf.End); // 4 = "MPF\0"
+        if (header == null) return null;
+        var i = header.FindTag(MpEntryTag);
+        var count = i < 0 ? 0 : header.Count(i) / MpEntrySize; // type UNDEFINED: the count is in bytes
+        return count >= 1 && header.HasPacketWithin(i, mpf.End) ? (header, header.Value(i), (int)count) : null;
+    }
+
+    /// <summary>
+    /// Keeps the MP entries valid after the primary image grew by <paramref name="delta"/> bytes. Entry 0 holds the
+    /// primary image size. The other entries hold offsets relative to the MP header, which change only when the
+    /// header sits before the edit (<paramref name="mpfShift"/> 0); otherwise header and images moved together.
+    /// </summary>
+    private static void ShiftMpEntries(Stream stream, (TiffLayout Header, long At, int Count) table, long delta, long mpfShift)
+    {
+        var (header, at, count) = (table.Header, table.At + mpfShift, table.Count);
+        var shiftOffsets = mpfShift == 0;
+        var entries = new byte[count * MpEntrySize];
+        stream.Position = at;
+        stream.ReadExactly(entries);
+        if (header.U32(entries, 4) is var primarySize and > 0)
+            header.Put32(entries, 4, primarySize + delta);
+        if (shiftOffsets)
+            for (var i = 1; i < count; i++)
+                if (header.U32(entries, i * MpEntrySize + 8) is var offset and > 0)
+                    header.Put32(entries, i * MpEntrySize + 8, offset + delta);
+        stream.Position = at;
+        stream.Write(entries);
+    }
 
     private static long InsertionOffset(List<Segment> segments)
     {
@@ -767,11 +808,11 @@ internal static class RatingMetadata
         /// <summary>Entry <paramref name="i"/> points at an out-of-line value (over 4 bytes) that ends by <paramref name="limit"/>.</summary>
         public bool HasPacketWithin(int i, long limit) => Count(i) > 4 && Value(i) + Count(i) <= limit;
 
-        /// <summary>Index of the XMP entry, or -1.</summary>
-        public int FindXmp()
+        /// <summary>Index of the entry with <paramref name="tag"/>, or -1.</summary>
+        public int FindTag(int tag)
         {
             for (var i = 0; i < EntryCount; i++)
-                if (Tag(i) == TiffXmpTag) return i;
+                if (Tag(i) == tag) return i;
             return -1;
         }
     }
@@ -813,7 +854,7 @@ internal static class RatingMetadata
 
     private static string? ReadTiffXmp(Stream stream, TiffLayout layout)
     {
-        var index = layout.FindXmp();
+        var index = layout.FindTag(TiffXmpTag);
         if (index < 0) return null;
         if (!layout.HasPacketWithin(index, stream.Length)) return null;
 
@@ -851,7 +892,7 @@ internal static class RatingMetadata
         // The copy is identical and the path lock keeps it that way, so the layout read above still holds.
         File.Copy(filePath, temp);
         using var stream = new FileStream(temp, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-        var index = layout.FindXmp();
+        var index = layout.FindTag(TiffXmpTag);
         var xml = ApplyRating(existingXml, rating);
         // existingXml is non-null exactly when the XMP entry points at a readable packet.
         var inPlace = existingXml != null ? FitPacket(xml, layout.Count(index)) : null;

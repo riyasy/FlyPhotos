@@ -310,6 +310,7 @@ internal sealed partial class Settings
     private async void ButtonEnableRatings_OnToggled(object sender, RoutedEventArgs e)
     {
         AppConfig.Settings.EnableRatings = ButtonEnableRatings.IsOn;
+        SettingChanged?.Invoke(Setting.RatingsEnableDisable);
         await AppConfig.SaveAsync();
     }
 

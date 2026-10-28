@@ -292,7 +292,7 @@ internal partial class PhotoDisplayController
             }
 
             BeginRatingReadIfNeeded(photo);
-            FileNameOrDetailsChanged?.Invoke(new FileDisplayDetails(positionText, fileName, dimensionText,
+            FileNameOrDetailsChanged?.Invoke(new FileDisplayDetails(positionText, fileName, dimensionText, photo.FilePath,
                 AppConfig.Settings.EnableRatings ? Math.Max(photo.Rating, 0) : 0));
         }
         catch (Exception ex)
@@ -353,7 +353,7 @@ internal partial class PhotoDisplayController
 
         // Called and resumed on the UI thread, so the set needs no lock: the loop's last check and the removal in
         // finally run in one continuation, with no await between them for another press to slip into.
-        if (!_photosWithRatingWriteInFlight.Add(photo)) return new RatingResult(true, rating: requested, queued: true);
+        if (!_photosWithRatingWriteInFlight.Add(photo)) return new RatingResult(true, rating: requested);
         try
         {
             while (true)

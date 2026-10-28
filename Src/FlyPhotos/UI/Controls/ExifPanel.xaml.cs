@@ -1,11 +1,14 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Display.ExifReading;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Localization;
+using FlyPhotos.Services;
 using FlyPhotos.UI.Behaviors;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
@@ -21,6 +24,10 @@ public sealed partial class ExifPanel : UserControl
     private ExifData _data = ExifData.Empty;
     private int _loadToken;
     private string? _loadedFilePath;
+
+    // The footer's cached rating, so the panel and the footer always show the same stars.
+    private string? _ratingFilePath;
+    private int _rating;
 
     // Kept in volatile app state so the chosen view survives closing/reopening the panel.
     private static bool ShowAll
@@ -53,10 +60,13 @@ public sealed partial class ExifPanel : UserControl
         if (IsOpen && !IsShowing(currentFilePath)) Close();
     }
 
-    // Re-reads the open panel after the file's metadata changed (e.g. a new star rating).
-    public void RefreshIfShowing(string filePath)
+    // Called on every footer update, open or not, so opening the panel needs no rating read.
+    public void SetRating(string filePath, int rating)
     {
-        if (IsOpen && IsShowing(filePath)) _ = LoadAsync(filePath);
+        if (rating == _rating && string.Equals(_ratingFilePath, filePath, StringComparison.OrdinalIgnoreCase)) return;
+        _ratingFilePath = filePath;
+        _rating = rating;
+        if (IsOpen && IsShowing(filePath) && !ShowAll) Render();
     }
 
     private bool IsOpen => Visibility == Visibility.Visible;
@@ -113,10 +123,20 @@ public sealed partial class ExifPanel : UserControl
         }
         else
         {
-            foreach (var field in _data.Summary) sb.AppendLine($"{field.Label}: {field.Value}");
+            foreach (var field in Summary()) sb.AppendLine($"{field.Label}: {field.Value}");
         }
 
         return sb.ToString().TrimEnd();
+    }
+
+    // The read summary plus the rating row after file name and size. No row while loading, unrated or for another file.
+    private IEnumerable<ExifField> Summary()
+    {
+        if (_data.Summary.Count == 0 || _rating <= 0 || _ratingFilePath == null || !IsShowing(_ratingFilePath))
+            return _data.Summary;
+        var fields = _data.Summary.ToList();
+        fields.Insert(Math.Min(2, fields.Count), new ExifField(L.Get("Exif_Rating"), RatingMetadata.Stars(_rating)));
+        return fields;
     }
 
     private void ButtonToggleMode_Click(object _, RoutedEventArgs _1)
@@ -141,7 +161,7 @@ public sealed partial class ExifPanel : UserControl
         }
         else
         {
-            foreach (var field in _data.Summary) AddFieldRow(field);
+            foreach (var field in Summary()) AddFieldRow(field);
         }
     }
 

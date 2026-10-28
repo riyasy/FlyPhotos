@@ -6,9 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
-using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Localization;
-using FlyPhotos.Services;
 using MetadataExtractor;
 using MetadataExtractor.Formats.Exif;
 using NLog;
@@ -73,7 +71,7 @@ public static class ExifReader
         var fields = new List<ExifField>();
         AddField(fields, L.Get("Exif_FileName"), fileInfo.Name);
         AddField(fields, L.Get("Exif_FileSize"), FormatFileSize(fileInfo.Length));
-        AddField(fields, L.Get("Exif_Rating"), GetRating(filePath, directories));
+        // ExifPanel inserts the cached rating row here, after the first two rows.
         AddField(fields, L.Get("Exif_Dimensions"), GetDimensions(subIfds));
         AddField(fields, L.Get("Exif_CameraMake"), ifd0?.GetDescription(ExifDirectoryBase.TagMake));
         AddField(fields, L.Get("Exif_CameraModel"), ifd0?.GetDescription(ExifDirectoryBase.TagModel));
@@ -91,14 +89,6 @@ public static class ExifReader
         AddField(fields, L.Get("Exif_ColorSpace"), SubDescription(subIfds, ExifDirectoryBase.TagColorSpace));
         AddGpsField(fields, gps);
         return fields;
-    }
-
-    // Same read path as the footer, so the panel and the footer cannot disagree. Reuses the metadata parsed above.
-    private static string? GetRating(string filePath, IReadOnlyList<MetadataExtractor.Directory> directories)
-    {
-        if (!AppConfig.Settings.EnableRatings) return null;
-        var rating = RatingMetadata.ReadRating(filePath, directories);
-        return rating is > 0 ? RatingMetadata.Stars(rating.Value) : null;
     }
 
     internal static string FormatFileSize(long bytes)

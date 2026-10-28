@@ -1200,6 +1200,7 @@ public sealed partial class PhotoDisplayWindow
                 BorderTxtFileName.Visibility = AppConfig.Settings.ShowFileName ? Visibility.Visible : Visibility.Collapsed;
                 break;
             case Setting.ImageDimensionsShowHide:
+            case Setting.RatingsEnableDisable: // footer and info panel stars follow the toggle at once
                 _photoController.UpdateFileNameAndDetails();
                 break;
             case Setting.CacheStatusShowHide:
@@ -1251,6 +1252,7 @@ public sealed partial class PhotoDisplayWindow
             TxtFileName.Text = fileDisplayDetails.DisplayText;
             Title = fileDisplayDetails.FileName;
             ShowRating(fileDisplayDetails.Rating);
+            ExifInfoPanel.SetRating(fileDisplayDetails.FilePath, fileDisplayDetails.Rating);
         });
     }
 
@@ -1273,8 +1275,7 @@ public sealed partial class PhotoDisplayWindow
             return;
         }
 
-        // Captured before the await: the user may navigate away while the write runs.
-        var ratedPath = _photoController.GetFullPathCurrentFile();
+        // The footer and the info panel follow the cached rating through FileNameOrDetailsChanged.
         var result = await _photoController.RateCurrentPhoto(rating);
         if (!result.Success)
         {
@@ -1284,8 +1285,6 @@ public sealed partial class PhotoDisplayWindow
         else
         {
             TxtZoom.Text = result.Rating == 0 ? L.Get("Rating/None") : RatingMetadata.Stars(result.Rating);
-            // A queued press has not reached the disk yet. The running write refreshes the panel when it ends.
-            if (!result.Queued) ExifInfoPanel.RefreshIfShowing(ratedPath);
         }
         _inactivityFader.ReportActivity();
     }

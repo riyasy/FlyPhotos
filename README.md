@@ -89,7 +89,7 @@ To open images with Fly Photos automatically when you double-click them:
   - Off by default. Turn on **Settings → Behaviour → Allow photo ratings (Beta)**.
   - Press `1`–`5` to rate the current photo and `0` to clear.
   - Saved as the standard XMP rating (`xmp:Rating`), so Lightroom, Bridge, Capture One, darktable and digiKam can read it.
-  - Camera RAW files get an `.xmp` file next to them and are never modified. JPEG, DNG, TIFF and PNG are updated in place without re-encoding (or an `.xmp` file instead, set in **Settings**). Multi-picture JPEGs (Ultra HDR, motion photos) always get an `.xmp` file, so their extra pictures stay intact. Only the rating value changes in existing metadata.
+  - Camera RAW files get an `.xmp` file next to them and are never modified. JPEG, DNG, TIFF and PNG are updated in place without re-encoding (or an `.xmp` file instead, set in **Settings**). Multi-picture JPEGs (Ultra HDR, motion photos) keep their extra pictures intact. Only the rating value changes in existing metadata.
   - The rating shows after the file name (hidden when the file name is turned off) and in the photo info panel.
   - Apps like Lightroom read the rating when they import a photo. Photos that are already imported need a metadata refresh in that app. See the [FAQ](FAQ.md).
 
