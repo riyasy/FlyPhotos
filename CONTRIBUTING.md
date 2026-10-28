@@ -1,5 +1,6 @@
 # Contributing to FlyPhotos
 
+By submitting a pull request, you agree to the [Contributor License Agreement](CLA.md). You keep the copyright to your work.
 
 ## 1. Reporting Bugs
 
