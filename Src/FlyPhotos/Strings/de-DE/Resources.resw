@@ -844,6 +844,9 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
   <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
     <value>Immer in feinen Schritten vergrößern oder verkleinern</value>
   </data>
+  <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
+    <value>Feiner Zoomschritt (%)</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Mausrad</value>
   </data>

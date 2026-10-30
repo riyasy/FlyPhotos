@@ -844,6 +844,9 @@ High Quality Cubic – Масштабування найвищої якості 
   <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
     <value>Завжди збільшує або зменшує масштаб дрібними кроками</value>
   </data>
+  <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
+    <value>Крок точного масштабування (%)</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + коліщатко миші</value>
   </data>

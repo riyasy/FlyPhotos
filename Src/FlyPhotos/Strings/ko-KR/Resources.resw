@@ -843,6 +843,9 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
   <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
     <value>항상 세밀하게 확대 또는 축소</value>
   </data>
+  <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
+    <value>세밀한 확대/축소 간격 (%)</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + 마우스 휠</value>
   </data>

@@ -844,6 +844,9 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
   <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
     <value>Zoomar alltid in eller ut i små steg</value>
   </data>
+  <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
+    <value>Stegstorlek för fin zoom (%)</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Mushjul</value>
   </data>

@@ -342,19 +342,20 @@ internal partial class CanvasController : ICanvasController
     /// <summary>
     /// Precision zoom (e.g., touchpad) anchored at a point: one 120-unit wheel step scales by 1.25.
     /// </summary>
-    public void ZoomAtPointPrecision(double delta, Point zoomAnchor, bool stopAtOneToOne = false)
+    public void ZoomAtPointPrecision(double delta, Point zoomAnchor)
     {
         const double baseZoomIn = 1.25; // scale for one full mouse-wheel step
         const double wheelDelta = 120.0; // WHEEL_DELTA
-        ZoomAtPointByFactor((float)Math.Pow(baseZoomIn, delta / wheelDelta), zoomAnchor, stopAtOneToOne);
+        ZoomAtPointByFactor((float)Math.Pow(baseZoomIn, delta / wheelDelta), zoomAnchor);
     }
 
     /// <summary>
-    /// Fine zoom (Shift + wheel): a tenth of a normal wheel step (~2.3% per notch), relative to the
+    /// Fine zoom (Shift + wheel): each notch scales by the user's FineZoomStepPercent, relative to the
     /// current scale so it feels the same on an icon and on a huge photo. Stops at 1:1 on the way past.
     /// </summary>
     public void ZoomAtPointFine(int delta, Point zoomAnchor) =>
-        ZoomAtPointPrecision(delta / 10.0, zoomAnchor, stopAtOneToOne: true);
+        ZoomAtPointByFactor((float)Math.Pow(1 + AppConfig.Settings.FineZoomStepPercent / 100.0, delta / 120.0),
+            zoomAnchor, stopAtOneToOne: true);
 
     public void ZoomAtPointByFactor(float scaleFactor, Point zoomAnchor, bool stopAtOneToOne = false)
     {
