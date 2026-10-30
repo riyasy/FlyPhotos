@@ -845,7 +845,10 @@ High Quality Cubic – Масштабування найвищої якості 
     <value>Завжди збільшує або зменшує масштаб дрібними кроками</value>
   </data>
   <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
-    <value>Крок точного масштабування (%)</value>
+    <value>Крок точного масштабування</value>
+  </data>
+  <data name="SettingsCardFineZoomStep.Description" xml:space="preserve">
+    <value>Задає крок точного масштабування у % від поточного масштабу. Наприклад, крок 5% змінює масштаб з 50% на 52,5%.</value>
   </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + коліщатко миші</value>

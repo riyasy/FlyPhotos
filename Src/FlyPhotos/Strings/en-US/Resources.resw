@@ -845,7 +845,10 @@ High Quality Cubic – Highest-quality scaling for photos.</value>
     <value>Always zooms in or out, in fine steps</value>
   </data>
   <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
-    <value>Fine Zoom Step (%)</value>
+    <value>Fine Zoom Step</value>
+  </data>
+  <data name="SettingsCardFineZoomStep.Description" xml:space="preserve">
+    <value>Sets the fine zoom step as a percentage of the current zoom level. For example, a 5% step changes 50% zoom to 52.5%.</value>
   </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Mouse Wheel</value>

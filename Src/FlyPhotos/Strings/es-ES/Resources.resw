@@ -845,7 +845,10 @@ High Quality Cubic – Escalado de la más alta calidad para fotos.</value>
     <value>Siempre acercar o alejar en pequeños pasos</value>
   </data>
   <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
-    <value>Paso del zoom fino (%)</value>
+    <value>Paso del zoom fino</value>
+  </data>
+  <data name="SettingsCardFineZoomStep.Description" xml:space="preserve">
+    <value>Establece el paso del zoom fino en % respecto al nivel de zoom actual. Por ejemplo, un paso del 5% cambia un zoom del 50% al 52,5%.</value>
   </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Rueda del ratón</value>

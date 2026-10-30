@@ -845,7 +845,10 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
     <value>Zoomar alltid in eller ut i små steg</value>
   </data>
   <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
-    <value>Stegstorlek för fin zoom (%)</value>
+    <value>Stegstorlek för fin zoom</value>
+  </data>
+  <data name="SettingsCardFineZoomStep.Description" xml:space="preserve">
+    <value>Anger steget för fin zoom i % av den aktuella zoomnivån. Till exempel ändrar ett steg på 5 % zoomen från 50 % till 52,5 %.</value>
   </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Mushjul</value>

@@ -845,7 +845,10 @@ High Quality Cubic – Najwyższej jakości skalowanie dla zdjęć.</value>
     <value>Zawsze powiększa lub pomniejsza małymi krokami</value>
   </data>
   <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
-    <value>Krok precyzyjnego powiększania (%)</value>
+    <value>Krok precyzyjnego powiększania</value>
+  </data>
+  <data name="SettingsCardFineZoomStep.Description" xml:space="preserve">
+    <value>Ustawia krok precyzyjnego powiększania w % względem bieżącego poziomu powiększenia. Na przykład krok 5% zmienia powiększenie z 50% na 52,5%.</value>
   </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Kółko myszy</value>

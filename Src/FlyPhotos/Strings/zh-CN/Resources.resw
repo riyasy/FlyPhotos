@@ -845,7 +845,10 @@ High Quality Cubic – 适合照片的最高质量缩放。</value>
     <value>始终以细微幅度放大或缩小</value>
   </data>
   <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
-    <value>精细缩放步长 (%)</value>
+    <value>精细缩放步长</value>
+  </data>
+  <data name="SettingsCardFineZoomStep.Description" xml:space="preserve">
+    <value>设置精细缩放相对于当前缩放比例的百分比。例如，步长为 5% 时，50% 的缩放会变为 52.5%。</value>
   </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + 鼠标滚轮</value>

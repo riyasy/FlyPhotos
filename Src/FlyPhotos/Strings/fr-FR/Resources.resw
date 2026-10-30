@@ -845,7 +845,10 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
     <value>Toujours zoomer avant ou arrière par petits paliers</value>
   </data>
   <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
-    <value>Pas du zoom fin (%)</value>
+    <value>Pas du zoom fin</value>
+  </data>
+  <data name="SettingsCardFineZoomStep.Description" xml:space="preserve">
+    <value>Définit le pas du zoom fin en % du niveau de zoom actuel. Par exemple, un pas de 5 % fait passer un zoom de 50 % à 52,5 %.</value>
   </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Molette de la souris</value>

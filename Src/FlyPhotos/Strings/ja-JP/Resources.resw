@@ -844,7 +844,10 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
     <value>常に細かくズームインまたはズームアウト</value>
   </data>
   <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
-    <value>細かいズームの刻み幅 (%)</value>
+    <value>細かいズームの刻み幅</value>
+  </data>
+  <data name="SettingsCardFineZoomStep.Description" xml:space="preserve">
+    <value>細かいズームの刻み幅を現在の倍率に対する % で設定します。たとえば 5% の場合、50% のズームは 52.5% になります。</value>
   </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + マウスホイール</value>

@@ -845,7 +845,10 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
     <value>التكبير أو التصغير دائمًا بخطوات دقيقة</value>
   </data>
   <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
-    <value>خطوة التكبير الدقيق (%)</value>
+    <value>خطوة التكبير الدقيق</value>
+  </data>
+  <data name="SettingsCardFineZoomStep.Description" xml:space="preserve">
+    <value>يضبط خطوة التكبير الدقيق كنسبة مئوية من مستوى التكبير الحالي. على سبيل المثال، خطوة 5% تغيّر التكبير من 50% إلى 52.5%.</value>
   </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + عجلة الماوس</value>
