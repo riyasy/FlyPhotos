@@ -844,6 +844,12 @@ High Quality Cubic – Масштабирование наивысшего ка�
   <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
     <value>Всегда увеличивать или уменьшать масштаб мелкими шагами</value>
   </data>
+  <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
+    <value>Шаг точного масштабирования</value>
+  </data>
+  <data name="SettingsCardFineZoomStep.Description" xml:space="preserve">
+    <value>Задаёт шаг точного масштабирования в % от текущего масштаба. Например, шаг 5% изменяет масштаб с 50% на 52,5%.</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + колесо мыши</value>
   </data>

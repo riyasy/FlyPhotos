@@ -21,6 +21,7 @@ public class AppSettings
 
     [JsonConverter(typeof(JsonStringEnumConverter<DefaultMouseWheelBehavior>))]
     public DefaultMouseWheelBehavior DefaultMouseWheelBehavior { get; set; } = DefaultMouseWheelBehavior.Zoom;
+    public int FineZoomStepPercent { get; set; } = 2;
 
     [JsonConverter(typeof(JsonStringEnumConverter<PanZoomBehaviourOnNavigation>))]
     public PanZoomBehaviourOnNavigation PanZoomBehaviourOnNavigation { get; set; } = PanZoomBehaviourOnNavigation.Reset;

@@ -844,6 +844,12 @@ High Quality Cubic – Dimensionamento de alta qualidade para fotos.</value>
   <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
     <value>Sempre ampliar ou reduzir em pequenos passos</value>
   </data>
+  <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
+    <value>Passo do zoom fino</value>
+  </data>
+  <data name="SettingsCardFineZoomStep.Description" xml:space="preserve">
+    <value>Define o passo do zoom fino em % em relação ao nível de zoom atual. Por exemplo, um passo de 5% muda o zoom de 50% para 52,5%.</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Roda do mouse</value>
   </data>

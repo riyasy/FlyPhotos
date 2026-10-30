@@ -843,6 +843,12 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
   <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
     <value>Mindig nagyítás vagy kicsinyítés finom lépésekben</value>
   </data>
+  <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
+    <value>Finom nagyítás lépésköze</value>
+  </data>
+  <data name="SettingsCardFineZoomStep.Description" xml:space="preserve">
+    <value>A finom nagyítás lépésközét az aktuális nagyítási szint %-ában adja meg. Például 5%-os lépésköz esetén az 50%-os nagyítás 52,5%-ra változik.</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + Egérgörgő</value>
   </data>

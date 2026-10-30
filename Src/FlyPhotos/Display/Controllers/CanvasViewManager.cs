@@ -587,6 +587,8 @@ internal class CanvasViewManager : IAnimationHost
     /// </summary>
     public void ZoomAtPointByFactor(float scaleFactor, Point zoomAnchor, bool stopAtOneToOne = false)
     {
+        // A wheel zoom still animating would keep writing scale and pan over this step.
+        StopAnimationSnappingToTarget();
         float oldScaleTo = _canvasViewState.LastScaleTo;
         float newScale = oldScaleTo * scaleFactor;
         if (stopAtOneToOne) newScale = ZoomGeometry.StopOnCrossing(newScale, oldScaleTo, 1f);

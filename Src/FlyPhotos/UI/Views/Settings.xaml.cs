@@ -98,6 +98,7 @@ internal sealed partial class Settings
         ButtonShowCheckeredBackground.IsOn = AppConfig.Settings.CheckeredBackground;
         SliderImageFitPercentage.Value = AppConfig.Settings.ImageFitPercentage;
         ButtonStretchSmallImages.IsOn = AppConfig.Settings.StretchSmallImages;
+        SliderFineZoomStep.Value = AppConfig.Settings.FineZoomStepPercent;
         // Items are in enum order.
         ComboMouseFwdBack.SelectedIndex = (int)AppConfig.Settings.MouseFwdBackBehavior;
         ComboClickOutside.SelectedIndex = (int)AppConfig.Settings.ClickOutsideBehavior;
@@ -139,6 +140,7 @@ internal sealed partial class Settings
         ButtonShowCheckeredBackground.Toggled += ButtonShowCheckeredBackground_OnToggled;
         SliderImageFitPercentage.ValueChanged += SliderImageFitPercentage_ValueChanged;
         ButtonStretchSmallImages.Toggled += ButtonStretchSmallImages_OnToggled;
+        SliderFineZoomStep.ValueChanged += SliderFineZoomStep_ValueChanged;
         ComboMouseFwdBack.SelectionChanged += ComboMouseFwdBack_OnSelectionChanged;
         ComboClickOutside.SelectionChanged += ComboClickOutside_OnSelectionChanged;
         ButtonSwapMouseFwdBack.Toggled += ButtonSwapMouseFwdBack_OnToggled;
@@ -355,6 +357,12 @@ internal sealed partial class Settings
     private async void SliderImageFitPercentage_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
         AppConfig.Settings.ImageFitPercentage = (int)SliderImageFitPercentage.Value;
+        await AppConfig.SaveAsync();
+    }
+
+    private async void SliderFineZoomStep_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+    {
+        AppConfig.Settings.FineZoomStepPercent = (int)SliderFineZoomStep.Value;
         await AppConfig.SaveAsync();
     }
 
@@ -720,6 +728,7 @@ internal sealed partial class Settings
         // No field for these: nothing outside the binding reads them, and ItemsSource keeps the
         // rows alive. The exception is the double-click-outside row, which the hand-written
         // click-outside picker retargets.
+        MouseRowsListTop.ItemsSource = MouseCatalog.BuildTop();
         MouseRowsListUpper.ItemsSource = MouseCatalog.BuildUpper();
         MouseRowsListLower.ItemsSource = MouseCatalog.BuildLower(_doubleClickOutsideRow);
 

@@ -97,10 +97,10 @@ public sealed class MouseRow : INotifyPropertyChanged
 }
 
 /// <summary>
-/// The Mouse tab's templated rows, in display order. Two lists because the hand-written
-/// Left-click-outside row (it has a child setting) sits between them; the hand-written Fwd/Back
-/// row follows the second. Resource keys are the ones the cards already used as x:Uid, so
-/// moving to a template cost no translation work in any locale.
+/// The Mouse tab's templated rows, in display order. Three lists because the hand-written
+/// Shift-wheel and Left-click-outside rows (they have child settings) sit between them; the
+/// hand-written Fwd/Back row follows the last. Resource keys are the ones the cards already used
+/// as x:Uid, so moving to a template cost no translation work in any locale.
 /// </summary>
 internal static class MouseCatalog
 {
@@ -119,8 +119,8 @@ internal static class MouseCatalog
         MouseRow.Fixed("SettingsCardDoubleClickOutside",
             DoubleClickOutsideActionKey(AppConfig.Settings.ClickOutsideBehavior));
 
-    /// <summary>Rows above the hand-written Left-click-outside row.</summary>
-    public static List<MouseRow> BuildUpper() =>
+    /// <summary>Rows above the hand-written Shift-wheel row.</summary>
+    public static List<MouseRow> BuildTop() =>
         [
             MouseRow.Picker("SettingsCardMouseWheelBehaviour",
                 ["ComboMouseWheelItemZoom", "ComboMouseWheelItemNav"],
@@ -128,8 +128,12 @@ internal static class MouseCatalog
                 i => AppConfig.Settings.DefaultMouseWheelBehavior = (DefaultMouseWheelBehavior)i),
 
             // The fixed wheel behaviours sit next to the wheel setting they qualify.
-            MouseRow.Fixed("SettingsCardCtrlMouseWheel", "TextCtrlMouseWheelAction"),
-            MouseRow.Fixed("SettingsCardShiftMouseWheel", "TextShiftMouseWheelAction"),
+            MouseRow.Fixed("SettingsCardCtrlMouseWheel", "TextCtrlMouseWheelAction")
+        ];
+
+    /// <summary>Rows between the Shift-wheel row and the hand-written Left-click-outside row.</summary>
+    public static List<MouseRow> BuildUpper() =>
+        [
             MouseRow.Fixed("SettingsCardAltMouseWheel", "TextAltMouseWheelAction"),
             MouseRow.Fixed("SettingsCardTiltWheel", "TextTiltWheelAction"),
 

@@ -769,8 +769,8 @@
 
             <!--
                 Mouse: pickers, not capture. See design doc section 5. Rows are rendered from
-                MouseCatalog, so a new row costs no XAML; only rows with child settings (Left click
-                outside, between the two lists, and Fwd/Back, below them) are hand-written. Its own
+                MouseCatalog, so a new row costs no XAML; only rows with child settings (Shift wheel
+                and Left click outside, between the lists, and Fwd/Back, below them) are hand-written. Its own
                 tab because the Keyboard tab's search box and Reset all apply to key bindings only.
                 Resource keys are unchanged from when these were hand-written cards.
             -->
@@ -804,6 +804,27 @@
                                 </controls:SettingsCard>
                             </DataTemplate>
                         </StackPanel.Resources>
+
+                        <ItemsControl x:Name="MouseRowsListTop" ItemTemplate="{StaticResource MouseRowTemplate}" />
+
+                        <!--  Hand-written: MouseRow has no shape for a child setting.  -->
+                        <controls:SettingsExpander
+                            Margin="0,0,0,2"
+                            x:Uid="SettingsCardShiftMouseWheel"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE962;, FontFamily={StaticResource FluentIcons}}">
+                            <TextBlock x:Uid="TextShiftMouseWheelAction" Style="{StaticResource FixedMouseActionTextStyle}" />
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard x:Uid="SettingsCardFineZoomStep">
+                                    <Slider
+                                        x:Name="SliderFineZoomStep"
+                                        MinWidth="150"
+                                        Maximum="10"
+                                        Minimum="1"
+                                        SmallChange="1"
+                                        StepFrequency="1" />
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
 
                         <ItemsControl x:Name="MouseRowsListUpper" ItemTemplate="{StaticResource MouseRowTemplate}" />
 

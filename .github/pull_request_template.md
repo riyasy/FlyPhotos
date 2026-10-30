@@ -35,3 +35,4 @@ Please read CONTRIBUTING.md before opening this PR.
 
 - [ ] I have reviewed and understand every line of this change.
 - [ ] This change is focused and avoids unrelated or low-value edits.
+- [ ] I agree to the [Contributor License Agreement](https://github.com/riyasy/FlyPhotos/blob/main/CLA.md).

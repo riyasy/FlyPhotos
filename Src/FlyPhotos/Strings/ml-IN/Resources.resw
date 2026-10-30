@@ -841,6 +841,12 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
   <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
     <value>എപ്പോഴും ചെറിയ ഘട്ടങ്ങളായി സൂം ഇൻ / ഔട്ട്</value>
   </data>
+  <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
+    <value>സൂക്ഷ്മ സൂം ഘട്ടം</value>
+  </data>
+  <data name="SettingsCardFineZoomStep.Description" xml:space="preserve">
+    <value>നിലവിലെ സൂം നിലയുടെ ശതമാനമായി സൂക്ഷ്മ സൂം ഘട്ടം സജ്ജമാക്കുന്നു. ഉദാഹരണത്തിന്, 5% ഘട്ടം 50% സൂമിനെ 52.5% ആക്കുന്നു.</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + മൗസ് വീൽ</value>
   </data>

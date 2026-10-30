@@ -844,6 +844,12 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
   <data name="TextShiftMouseWheelAction.Text" xml:space="preserve">
     <value>Aina lähennä tai loitonna pienin askelin</value>
   </data>
+  <data name="SettingsCardFineZoomStep.Header" xml:space="preserve">
+    <value>Tarkan zoomauksen askel</value>
+  </data>
+  <data name="SettingsCardFineZoomStep.Description" xml:space="preserve">
+    <value>Määrittää tarkan zoomauksen askeleen prosentteina nykyisestä zoomaustasosta. Esimerkiksi 5 %:n askel muuttaa 50 %:n zoomauksen 52,5 %:iin.</value>
+  </data>
   <data name="SettingsCardAltMouseWheel.Header" xml:space="preserve">
     <value>Alt + hiiren rulla</value>
   </data>
