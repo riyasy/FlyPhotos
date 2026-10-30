@@ -303,6 +303,9 @@
   <data name="Exif_CopyTooltip" xml:space="preserve">
     <value>ക്ലിപ്പ്ബോർഡിലേക്ക് പകർത്തുക</value>
   </data>
+  <data name="Exif_ShowMore" xml:space="preserve">
+    <value>കൂടുതൽ കാണിക്കുക</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>എല്ലാം കാണിക്കുക</value>
   </data>

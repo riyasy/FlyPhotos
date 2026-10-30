@@ -18,6 +18,10 @@ public sealed partial class ExifPanel : UserControl
 {
     private const double FieldFontSize = 12;
 
+    // Longer values start collapsed behind a clickable "…", e.g. ICC tone curves run to 11,000+
+    // characters per channel. Copy reads ExifField.Value, so it still gets the full text.
+    private const int CollapsedValueLength = 200;
+
     private ExifData _data = ExifData.Empty;
     private int _loadToken;
     private string? _loadedFilePath;
@@ -175,7 +179,9 @@ public sealed partial class ExifPanel : UserControl
         Grid.SetRow(label, row);
         Grid.SetColumn(label, 0);
 
-        FrameworkElement value = field.LinkUrl == null ? CreateValueText(field.Value) : CreateValueLink(field.Value, field.LinkUrl);
+        FrameworkElement value = field.LinkUrl != null ? CreateValueLink(field.Value, field.LinkUrl)
+            : field.Value.Length > CollapsedValueLength ? CreateCollapsedValue(field.Value)
+            : CreateValueText(field.Value);
         Grid.SetRow(value, row);
         Grid.SetColumn(value, 1);
 
@@ -189,6 +195,27 @@ public sealed partial class ExifPanel : UserControl
         TextWrapping = TextWrapping.Wrap,
         FontSize = FieldFontSize
     };
+
+    private static StackPanel CreateCollapsedValue(string text)
+    {
+        var valueText = CreateValueText(text[..CollapsedValueLength]);
+        var expandButton = new HyperlinkButton
+        {
+            Content = "…",
+            Padding = new Thickness(0, 0, 16, 0),
+            FontSize = FieldFontSize
+        };
+        var tooltip = L.Get("Exif_ShowMore");
+        ToolTipService.SetToolTip(expandButton, tooltip);
+        AutomationProperties.SetName(expandButton, tooltip);
+
+        expandButton.Click += (_, _) =>
+        {
+            valueText.Text = text;
+            expandButton.Visibility = Visibility.Collapsed;
+        };
+        return new StackPanel { Children = { valueText, expandButton } };
+    }
 
     private static HyperlinkButton CreateValueLink(string text, Uri url) => new HyperlinkButton
     {

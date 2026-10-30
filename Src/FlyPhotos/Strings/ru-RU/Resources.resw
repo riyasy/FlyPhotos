@@ -306,6 +306,9 @@
   <data name="Exif_CopyTooltip" xml:space="preserve">
     <value>Копировать в буфер обмена</value>
   </data>
+  <data name="Exif_ShowMore" xml:space="preserve">
+    <value>Показать больше</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Показать все</value>
   </data>

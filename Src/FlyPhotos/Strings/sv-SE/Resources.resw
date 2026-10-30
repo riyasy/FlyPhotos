@@ -306,6 +306,9 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
   <data name="Exif_CopyTooltip" xml:space="preserve">
     <value>Kopiera till Urklipp</value>
   </data>
+  <data name="Exif_ShowMore" xml:space="preserve">
+    <value>Visa mer</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Visa alla</value>
   </data>

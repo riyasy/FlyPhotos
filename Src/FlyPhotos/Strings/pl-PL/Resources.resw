@@ -306,6 +306,9 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
   <data name="Exif_CopyTooltip" xml:space="preserve">
     <value>Kopiuj do schowka</value>
   </data>
+  <data name="Exif_ShowMore" xml:space="preserve">
+    <value>Pokaż więcej</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>Pokaż wszystko</value>
   </data>

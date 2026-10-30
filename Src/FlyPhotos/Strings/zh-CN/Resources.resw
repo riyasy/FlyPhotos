@@ -306,6 +306,9 @@
   <data name="Exif_CopyTooltip" xml:space="preserve">
     <value>复制到剪贴板</value>
   </data>
+  <data name="Exif_ShowMore" xml:space="preserve">
+    <value>显示更多</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>显示全部</value>
   </data>

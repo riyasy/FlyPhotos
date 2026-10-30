@@ -306,6 +306,9 @@
   <data name="Exif_CopyTooltip" xml:space="preserve">
     <value>نسخ إلى الحافظة</value>
   </data>
+  <data name="Exif_ShowMore" xml:space="preserve">
+    <value>عرض المزيد</value>
+  </data>
   <data name="Exif_ShowAll" xml:space="preserve">
     <value>عرض الكل</value>
   </data>
