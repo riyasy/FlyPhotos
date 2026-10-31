@@ -11,10 +11,6 @@ Watch Fly Photos in action:
 
 [![Fly Photos](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DncWzt-ZoIq4)](https://www.youtube.com/watch?v=ncWzt-ZoIq4)
 
-<a href="https://trackgit.com">
-<img src="https://us-central1-trackgit-analytics.cloudfunctions.net/token/ping/mvv79apkif0c7pqvenbm" alt="trackgit-views" />
-</a>
-
 ---
 
 ## 📥 Download
