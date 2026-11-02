@@ -10,9 +10,9 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 namespace FlyPhotos.Display.ImageRendering;
 
 /// <summary>
-/// Renderer for SVGs kept as a retained vector command list. At or below the raster's resolution (and while a
-/// heavy SVG is being panned/zoomed) it draws the 2000 px bitmap through a <see cref="StaticImageRenderer"/>
-/// (mip chain included); zoomed in past that it replays the command list, which stays sharp at any scale.
+/// Renderer for SVGs kept as a retained vector command list, replayed at every scale so edges stay sharp and
+/// there is no bitmap/vector seam while zooming. Only while a heavy SVG is being panned/zoomed does it draw the
+/// 2000 px bitmap through a <see cref="StaticImageRenderer"/> (mip chain included), to keep animation smooth.
 /// The command list and the bitmap belong to the <see cref="SvgVectorHqDisplayItem"/>, not to this renderer.
 /// </summary>
 internal partial class SvgVectorRenderer : IRenderer
@@ -41,13 +41,15 @@ internal partial class SvgVectorRenderer : IRenderer
     {
         _item = item;
         _supportsTransparency = supportsTransparency;
-        _bitmapRenderer = new StaticImageRenderer(canvas, item.Bitmap, supportsTransparency, invalidateCanvas);
+        // The mip chain only serves the heavy-SVG animation fallback; light SVGs never draw the bitmap here.
+        _bitmapRenderer = new StaticImageRenderer(canvas, item.Bitmap, supportsTransparency, invalidateCanvas,
+            generateMipChain: item.IsHeavy);
     }
 
     public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating)
     {
-        // Below 1:1 the raster (with mips) is as sharp as it gets and cheaper than replaying the vectors.
-        if (viewState.Scale <= 1f || (_item.IsHeavy && isAnimating))
+        // Replaying a heavy command list every animation frame can drop frames; the bitmap stands in until rest.
+        if (_item.IsHeavy && isAnimating)
         {
             _bitmapRenderer.Draw(session, viewState, quality, isAnimating);
             return;
