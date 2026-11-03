@@ -15,8 +15,9 @@ use usvg::fontdb;
 // contract: Rust allocates via Box<[u8]>, caller frees via free_rust_buffer.
 // Panics are caught at the boundary and returned as null rather than unwinding into C#.
 //
-// Pixel format: all functions return straight (unpremultiplied) RGBA8, matching
-// DirectXPixelFormat.R8G8B8A8UIntNormalized on the C# side.
+// Pixel format: all functions return RGBA8 matching DirectXPixelFormat.R8G8B8A8UIntNormalized
+// on the C# side. The rawler functions return opaque pixels (straight == premultiplied);
+// resvg_render_svg returns premultiplied alpha, which CanvasBitmap.CreateFromBytes expects.
 
 // Font database is initialised once on first SVG render and reused for all
 // subsequent calls. Loading system fonts on Windows can take tens to hundreds of
@@ -291,13 +292,13 @@ pub extern "C" fn free_formats_buffer(ptr: *mut *mut c_char, size: c_int) {
     }
 }
 
-/// Renders an SVG file into a heap-allocated straight RGBA8 buffer, scaled so
+/// Renders an SVG file into a heap-allocated premultiplied RGBA8 buffer, scaled so
 /// that the longer axis equals `max_dimension` (aspect ratio is preserved).
 /// Caller receives the final pixel dimensions via `width`/`height` out-params.
 ///
-/// tiny_skia produces premultiplied RGBA internally; this function unpremultiplies
-/// before returning so the output format is consistent with the rawler functions
-/// and matches DirectXPixelFormat.R8G8B8A8UIntNormalized on the C# side.
+/// The buffer is tiny_skia's premultiplied output, returned unchanged. It matches
+/// DirectXPixelFormat.R8G8B8A8UIntNormalized with CanvasBitmap.CreateFromBytes'
+/// default (premultiplied) alpha mode on the C# side.
 ///
 /// Returns null on any failure (bad path, parse error, zero dimensions, panic).
 /// On success, caller MUST free the buffer with `free_rust_buffer(ptr, width*height*4)`.
@@ -355,19 +356,10 @@ pub extern "C" fn resvg_render_svg(
                 &mut pixmap.as_mut(),
             );
 
-            // 7. Unpremultiply alpha in parallel (premultiplied → straight RGBA).
-            //    Pixels with a == 0 (fully transparent) or a == 255 (fully opaque)
-            //    need no correction and are left unchanged.
-            let mut pixels = pixmap.take();
-            pixels.par_chunks_exact_mut(4).for_each(|chunk| {
-                let a = chunk[3];
-                if a > 0 && a < 255 {
-                    let a_f = a as f32 / 255.0;
-                    chunk[0] = (chunk[0] as f32 / a_f).min(255.0) as u8;
-                    chunk[1] = (chunk[1] as f32 / a_f).min(255.0) as u8;
-                    chunk[2] = (chunk[2] as f32 / a_f).min(255.0) as u8;
-                }
-            });
+            // 7. Keep tiny_skia's premultiplied RGBA as-is: CanvasBitmap.CreateFromBytes
+            //    on the C# side assumes premultiplied alpha by default. Unpremultiplying
+            //    here made every semi-transparent (anti-aliased) edge pixel too bright.
+            let pixels = pixmap.take();
 
             // 8. Write out-params through safe_write_int to guard against null pointers.
             unsafe {
