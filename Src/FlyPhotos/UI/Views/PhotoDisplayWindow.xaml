@@ -19,7 +19,7 @@
                 <ResourceDictionary.ThemeDictionaries>
                     <ResourceDictionary x:Key="Light">
                         <SolidColorBrush x:Key="ButtonPanelBackgroundBrush" Color="Transparent" />
-                        <SolidColorBrush x:Key="FileNameBackgroundBrush" Color="#44FFFFFF" />
+                        <SolidColorBrush x:Key="FileNameBackgroundBrush" Color="#B3FFFFFF" />
                     </ResourceDictionary>
                     <ResourceDictionary x:Key="Dark">
                         <SolidColorBrush x:Key="ButtonPanelBackgroundBrush" Color="#44000000" />
