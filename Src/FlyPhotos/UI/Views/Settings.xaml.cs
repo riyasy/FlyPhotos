@@ -657,8 +657,8 @@ internal sealed partial class Settings
 
     private void ShortcutButton_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
-        foreach (var btn in new[] { BtnShortcut1, BtnShortcut2, BtnShortcut3, BtnShortcut4 })
-            ClearButtonFor(btn).Visibility = Visibility.Collapsed;
+        // Only the last long-pressed slot can be showing its X.
+        if (_longPressButton != null) ClearButtonFor(_longPressButton).Visibility = Visibility.Collapsed;
         _suppressShortcutClick = false;
         _longPressButton = (Button)sender;
         _longPressTimer.Start();
