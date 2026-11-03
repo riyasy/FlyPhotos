@@ -135,10 +135,16 @@ internal class CanvasViewManager : IAnimationHost
     private const float MinZoomOutLongSidePixels = 50f;
 
     /// <summary>
+    /// Zoom-in ceiling: the largest percentage the zoom label can show, which it holds as an int (as a float this
+    /// is 21,474,836, i.e. 2,147,483,600%). Vector images could otherwise be zoomed without limit.
+    /// </summary>
+    private const float MaxZoomInScale = int.MaxValue / 100f;
+
+    /// <summary>
     /// Lowest scale a zoom-out may reach: 5%, or whatever shrinks the image's longer side to 50 px on screen
     /// when that is smaller. At 5% a 100k px image is still 5000 px wide, so very large images need the
     /// lower floor. It also sits below the fit scale for any usable window, so fit stays reachable by wheel.
-    /// Zoom-in is never floored.
+    /// Zoom-in is capped separately by <see cref="MaxZoomInScale"/>.
     /// </summary>
     private float MinZoomOutScale()
     {
@@ -571,6 +577,12 @@ internal class CanvasViewManager : IAnimationHost
             ? ZoomGeometry.ApplyZoomSnap(rawScaleTo, _canvasViewState.LastScaleTo, zoomDirection)
             : rawScaleTo;
         if (zoomDirection == ZoomDirection.Out && scaleTo < MinZoomOutScale()) return;
+        // A step past the ceiling lands on it; at the ceiling, zooming in does nothing.
+        if (zoomDirection == ZoomDirection.In && scaleTo > MaxZoomInScale)
+        {
+            if (_canvasViewState.LastScaleTo >= MaxZoomInScale) return;
+            scaleTo = MaxZoomInScale;
+        }
         _canvasViewState.LastScaleTo = scaleTo;
         StartZoomAnimation(scaleTo, zoomAnchor);
 
@@ -593,6 +605,11 @@ internal class CanvasViewManager : IAnimationHost
         float newScale = oldScaleTo * scaleFactor;
         if (stopAtOneToOne) newScale = ZoomGeometry.StopOnCrossing(newScale, oldScaleTo, 1f);
         if (scaleFactor < 1f && newScale < MinZoomOutScale()) return;
+        if (scaleFactor > 1f && newScale > MaxZoomInScale)
+        {
+            if (oldScaleTo >= MaxZoomInScale) return;
+            newScale = MaxZoomInScale;
+        }
 
         // 1. Capture the scale *before* it's changed.
         float oldScale = _canvasViewState.Scale;
