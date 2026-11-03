@@ -45,6 +45,9 @@ internal partial class MultiPageRenderer : IRenderer
     // Display page -> decoder frame index. Identity for TIFF, largest-frame-first for ICO.
     private readonly int[] _pageOrder;
 
+    /// <summary>Draws the page at extreme zoom, where the float view matrix leaves gaps.</summary>
+    private readonly PreciseImageDrawing _precise = new();
+
     public MultiPageRenderer(CanvasAnimatedControl canvas, byte[] fileBytes, int initialPageIndex,
         bool supportsTransparency, Action invalidate, int[] pageOrder)
     {
@@ -75,6 +78,7 @@ internal partial class MultiPageRenderer : IRenderer
 
     public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating)
     {
+        _precise.BeginFrame();
         session.Units = CanvasUnits.Pixels;
 
         // Hold the lock across DrawImage so a ThreadPool page-load swap cannot dispose the bitmap
@@ -85,6 +89,13 @@ internal partial class MultiPageRenderer : IRenderer
 
             var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
             session.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
+            // At extreme zoom the float view matrix leaves gaps in the image; draw only the visible pixels, in double.
+            if (PreciseImageDrawing.IsNeeded(viewState))
+            {
+                _precise.DrawWholeImage(session, viewState, _canvas, _currentBitmap, _currentBitmap.Bounds,
+                    drawCheckeredBackground ? _checkeredBrush : null, quality);
+                return;
+            }
             if (drawCheckeredBackground)
             {
                 var brushScale = 1f / viewState.Scale;
@@ -106,6 +117,7 @@ internal partial class MultiPageRenderer : IRenderer
             _currentBitmap?.Dispose();
             _currentBitmap = null;
         }
+        _precise.Dispose();
         _fileStream.Dispose();
     }
 

@@ -47,6 +47,8 @@ internal partial class TiledImageRenderer : IRenderer
     private readonly List<(int Col, int Row)> _missing = [];
     /// <summary>Frame counter; the LRU clock.</summary>
     private long _frame;
+    /// <summary>Draws the tiles at extreme zoom, where the float view matrix leaves gaps between them.</summary>
+    private readonly PreciseImageDrawing _precise = new();
 
     /// <summary>Creates a renderer for <paramref name="item"/>. GPU tiles are uploaded lazily in <see cref="Draw"/>.</summary>
     public TiledImageRenderer(CanvasAnimatedControl canvas, TiledHqDisplayItem item,
@@ -66,14 +68,25 @@ internal partial class TiledImageRenderer : IRenderer
     public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating)
     {
         _frame++;
+        _precise.BeginFrame();
         session.Units = CanvasUnits.Pixels;
         // Aliased edges, otherwise adjacent tile rects leave hairline gaps where their AA edges meet.
         session.Antialiasing = CanvasAntialiasing.Aliased;
 
+        // At extreme zoom the float view matrix leaves gaps between tiles; draw only the visible pixels, in double.
+        var precise = PreciseImageDrawing.IsNeeded(viewState);
+        var visible = PreciseImageDrawing.VisibleArea(viewState, _canvas, session);
         if (AppConfig.Settings.CheckeredBackground && _supportsTransparency)
         {
-            _checkeredBrush.Transform = Matrix3x2.CreateScale(1f / viewState.Scale);
-            session.FillRectangle(viewState.ImageRect, _checkeredBrush);
+            if (precise)
+            {
+                PreciseImageDrawing.FillCheckered(session, viewState, visible, _checkeredBrush);
+            }
+            else
+            {
+                _checkeredBrush.Transform = Matrix3x2.CreateScale(1f / viewState.Scale);
+                session.FillRectangle(viewState.ImageRect, _checkeredBrush);
+            }
         }
 
         var pyramid = _item.Pyramid;
@@ -89,13 +102,20 @@ internal partial class TiledImageRenderer : IRenderer
 
         var level = pyramid.Levels[k];
         var f = 1 << k; // level pixel → full-image pixel
-        var visible = VisibleImageRect(session, viewState);
         if (visible.IsEmpty) return;
 
-        var c0 = Math.Max(0, (int)(visible.Left / f) / TileLevel.Size);
-        var c1 = Math.Min(level.Cols - 1, (int)(visible.Right / f) / TileLevel.Size);
-        var r0 = Math.Max(0, (int)(visible.Top / f) / TileLevel.Size);
-        var r1 = Math.Min(level.Rows - 1, (int)(visible.Bottom / f) / TileLevel.Size);
+        var c0 = Math.Max(0, (int)(visible.MinX / f) / TileLevel.Size);
+        var c1 = Math.Min(level.Cols - 1, (int)(visible.MaxX / f) / TileLevel.Size);
+        var r0 = Math.Max(0, (int)(visible.MinY / f) / TileLevel.Size);
+        var r1 = Math.Min(level.Rows - 1, (int)(visible.MaxY / f) / TileLevel.Size);
+
+        void DrawPart(ICanvasImage image, Rect dest, Rect src)
+        {
+            if (precise)
+                _precise.DrawImage(session, viewState, visible, image, dest, src, 1f, quality);
+            else
+                session.DrawImage(image, dest, src, 1f, quality);
+        }
 
         _missing.Clear();
         for (var r = r0; r <= r1; r++)
@@ -109,7 +129,7 @@ internal partial class TiledImageRenderer : IRenderer
                 }
                 entry.LastUsed = _frame;
                 var (dest, src) = TileRects(level, f, c, r);
-                session.DrawImage(entry.Bitmap, dest, src, 1f, quality);
+                DrawPart(entry.Bitmap, dest, src);
             }
 
         // Upload a few missing tiles; stand in for the rest with the matching patch of the overview.
@@ -125,13 +145,13 @@ internal partial class TiledImageRenderer : IRenderer
                 var bmp = CanvasBitmap.CreateFromBytes(session.Device, level.Tile(c, r),
                     TileLevel.Stride, TileLevel.Stride, pyramid.Format, 96f);
                 _gpuTiles[(k, c, r)] = (bmp, _frame);
-                session.DrawImage(bmp, dest, src, 1f, quality);
+                DrawPart(bmp, dest, src);
             }
             else
             {
                 var ovSrc = new Rect(dest.X * overviewScale, dest.Y * overviewScale,
                     dest.Width * overviewScale, dest.Height * overviewScale);
-                session.DrawImage(overview, dest, ovSrc, 1f, quality);
+                DrawPart(overview, dest, ovSrc);
             }
         }
 
@@ -155,28 +175,6 @@ internal partial class TiledImageRenderer : IRenderer
         var destH = Math.Min(h * f, _item.Pyramid.FullHeight - y * f);
         return (new Rect(x * f, y * f, destW, destH),
                 new Rect(TileLevel.Gutter, TileLevel.Gutter, (double)destW / f, (double)destH / f));
-    }
-
-    /// <summary>The part of the full-resolution image that is on screen, in image pixels.</summary>
-    private Rect VisibleImageRect(CanvasDrawingSession session, CanvasViewState viewState)
-    {
-        // CanvasAnimatedControl.Size is safe to read from the game-loop thread; read it once.
-        var size = _canvas.Size;
-        var scale = session.Dpi / 96f;
-        var w = (float)size.Width * scale;
-        var h = (float)size.Height * scale;
-
-        // MatInv maps screen → image, rotation included; take the bounding box of the four corners.
-        var p0 = Vector2.Transform(new Vector2(0, 0), viewState.MatInv);
-        var p1 = Vector2.Transform(new Vector2(w, 0), viewState.MatInv);
-        var p2 = Vector2.Transform(new Vector2(0, h), viewState.MatInv);
-        var p3 = Vector2.Transform(new Vector2(w, h), viewState.MatInv);
-        var min = Vector2.Min(Vector2.Min(p0, p1), Vector2.Min(p2, p3));
-        var max = Vector2.Max(Vector2.Max(p0, p1), Vector2.Max(p2, p3));
-
-        var rect = new Rect(new Point(min.X, min.Y), new Point(max.X, max.Y));
-        rect.Intersect(viewState.ImageRect);
-        return rect;
     }
 
     /// <summary>Disposes least-recently-drawn tiles until the cache is back to <see cref="MaxCachedTiles"/>.</summary>
@@ -208,5 +206,6 @@ internal partial class TiledImageRenderer : IRenderer
     {
         foreach (var entry in _gpuTiles.Values) entry.Bitmap.Dispose();
         _gpuTiles.Clear();
+        _precise.Dispose();
     }
 }

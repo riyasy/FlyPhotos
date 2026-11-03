@@ -26,6 +26,9 @@ internal partial class AnimatedImageRenderer : IRenderer
     // Read on the W2D thread (OnUpdate) and the ThreadPool decode continuation; written in Dispose.
     private volatile bool _isDisposed;
 
+    /// <summary>Draws the frame at extreme zoom, where the float view matrix leaves gaps.</summary>
+    private readonly PreciseImageDrawing _precise = new();
+
     public Rect SourceBounds => _animator.Surface.GetBounds(_canvas);
 
     public AnimatedImageRenderer(CanvasAnimatedControl canvas, IAnimator animator, bool supportsTransparency,
@@ -41,11 +44,20 @@ internal partial class AnimatedImageRenderer : IRenderer
 
     public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating)
     {
+        _precise.BeginFrame();
         session.Units = CanvasUnits.Pixels;
         if (_animator?.Surface == null) return;
 
         var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
         session.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
+        // At extreme zoom the float view matrix leaves gaps in the image; draw only the visible pixels, in double.
+        if (PreciseImageDrawing.IsNeeded(viewState))
+        {
+            _precise.DrawWholeImage(session, viewState, _canvas, _animator.Surface,
+                _animator.Surface.GetBounds(_canvas), drawCheckeredBackground ? _checkeredBrush : null, quality,
+                contentChanges: true);
+            return;
+        }
         if (drawCheckeredBackground)
         {
             var brushScale = 1f / viewState.Scale;
@@ -102,6 +114,7 @@ internal partial class AnimatedImageRenderer : IRenderer
         _animatorLock.Wait();
         _animatorLock.Release();
         _stopwatch.Stop();
+        _precise.Dispose();
         _animator?.Dispose();
     }
 }

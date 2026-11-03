@@ -12,6 +12,7 @@
     <Compile Include="..\FlyPhotos\Core\Model\Enums.cs" Link="Linked\Enums.cs" />
     <Compile Include="..\FlyPhotos\Display\ImageReading\ImageFormat.cs" Link="Linked\ImageFormat.cs" />
     <Compile Include="..\FlyPhotos\Display\ImageReading\DecoderChains.cs" Link="Linked\DecoderChains.cs" />
+    <Compile Include="..\FlyPhotos\Display\ImageRendering\PreciseViewMath.cs" Link="Linked\PreciseViewMath.cs" />
   </ItemGroup>
 
 </Project>

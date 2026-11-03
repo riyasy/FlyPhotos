@@ -38,6 +38,9 @@ internal partial class StaticImageRenderer : IRenderer
     private CancellationTokenSource _mipGenCts;
     private volatile bool _mipChainReady;
 
+    /// <summary>Draws the image at extreme zoom, where the float view matrix leaves gaps.</summary>
+    private readonly PreciseImageDrawing _precise = new();
+
     public StaticImageRenderer(CanvasAnimatedControl canvas, CanvasBitmap sourceBitmap,
         bool supportsTransparency, Action invalidateCanvas, bool generateMipChain = true)
     {
@@ -131,9 +134,17 @@ internal partial class StaticImageRenderer : IRenderer
 
     public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating)
     {
+        _precise.BeginFrame();
         session.Units = CanvasUnits.Pixels;
         var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
         session.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
+        // At extreme zoom the float view matrix leaves gaps in the image; draw only the visible pixels, in double.
+        if (PreciseImageDrawing.IsNeeded(viewState))
+        {
+            _precise.DrawWholeImage(session, viewState, _canvas, _sourceBitmap, _sourceBitmap.Bounds,
+                drawCheckeredBackground ? _checkeredBrush : null, quality);
+            return;
+        }
         if (drawCheckeredBackground)
         {
             var brushScale = 1f / viewState.Scale;
@@ -192,5 +203,6 @@ internal partial class StaticImageRenderer : IRenderer
             _mipGenCts?.Dispose();
             DestroyMipChain();
         }
+        _precise.Dispose();
     }
 }
