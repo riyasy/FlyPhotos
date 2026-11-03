@@ -167,7 +167,7 @@ internal partial class ThumbNailController : IThumbnailController
             // The off-screen is wider than the canvas by _offscreenMarginPx on each side; shift it left
             // by that margin so its center thumbnail lands at the canvas center, then add the slide offset.
             var drawRect = new Rect(-_offscreenMarginPx, 0, _thumbnailOffscreen.Size.Width, _thumbnailOffscreen.Size.Height);
-            args.DrawingSession.Transform = System.Numerics.Matrix3x2.CreateTranslation(_slideOffset.Position, 0f);
+            args.DrawingSession.Transform = System.Numerics.Matrix3x2.CreateTranslation((float)_slideOffset.Position, 0f);
             args.DrawingSession.DrawImage(_thumbnailOffscreen, drawRect, _thumbnailOffscreen.Bounds, 0.8f,
                 CanvasImageInterpolation.Linear);
 

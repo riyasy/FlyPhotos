@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Windows.Foundation;
+using FlyPhotos.Display.State;
 using Size = FlyPhotos.Core.Model.Size;
 
 namespace FlyPhotos.Display.Controllers;
@@ -22,20 +22,20 @@ namespace FlyPhotos.Display.Controllers;
 internal sealed class PerPhotoViewStore
 {
     private readonly record struct PerPhotoViewState(
-        float Scale, float LastScaleTo, Point NormalizedPan, int UserRotation);
+        float Scale, float LastScaleTo, PointD NormalizedPan, int UserRotation);
 
     private readonly Dictionary<string, PerPhotoViewState> _cache = [];
 
     /// <summary>A remembered view de-normalized for the current canvas and EXIF baseline.</summary>
     public readonly record struct RestoredView(
-        float Scale, float LastScaleTo, Point ImagePos, int Rotation, bool PanIsCentered);
+        float Scale, float LastScaleTo, PointD ImagePos, int Rotation, bool PanIsCentered);
 
     /// <summary>
     /// Saves the current view for <paramref name="photoPath"/>, normalized against <paramref name="canvasSize"/>
     /// and <paramref name="originalImageRotation"/> (the EXIF baseline) so it survives resize and baseline
     /// changes. The caller is responsible for only calling this when the view is worth remembering.
     /// </summary>
-    public void Save(string photoPath, float scale, float lastScaleTo, Point imagePos, int rotation,
+    public void Save(string photoPath, float scale, float lastScaleTo, PointD imagePos, int rotation,
                      int originalImageRotation, Size canvasSize)
     {
         // Convert the absolute pan to a canvas-size-independent offset from the centre.
@@ -49,7 +49,7 @@ internal sealed class PerPhotoViewStore
         var userRotation = rotation - originalImageRotation;
 
         _cache[photoPath] = new PerPhotoViewState(
-            scale, lastScaleTo, new Point(normalizedPanX, normalizedPanY), userRotation);
+            scale, lastScaleTo, new PointD(normalizedPanX, normalizedPanY), userRotation);
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ internal sealed class PerPhotoViewStore
         // Re-hydrate the absolute pan position from the normalized offset for the current canvas size.
         var panOffsetX = s.NormalizedPan.X * canvasSize.Width;
         var panOffsetY = s.NormalizedPan.Y * canvasSize.Height;
-        var imagePos = new Point(canvasSize.Width / 2.0 + panOffsetX, canvasSize.Height / 2.0 + panOffsetY);
+        var imagePos = new PointD(canvasSize.Width / 2.0 + panOffsetX, canvasSize.Height / 2.0 + panOffsetY);
 
         // A panned-at-fit-scale photo is not "fitted", so the caller needs to know the pan was centred.
         var panIsCentered = Math.Abs(s.NormalizedPan.X) < 0.001 && Math.Abs(s.NormalizedPan.Y) < 0.001;

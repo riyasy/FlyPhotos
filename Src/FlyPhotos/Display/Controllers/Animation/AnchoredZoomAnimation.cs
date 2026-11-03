@@ -1,5 +1,6 @@
 using System;
 using Windows.Foundation;
+using FlyPhotos.Display.State;
 using FlyPhotos.Core;
 
 namespace FlyPhotos.Display.Controllers.Animation;
@@ -45,7 +46,7 @@ internal sealed class AnchoredZoomAnimation : IViewAnimation
         var startScale = view.Scale;
         if (startScale > 0f)
         {
-            var anchorFinal = ZoomGeometry.AnchorPreservingPan(_zoomCenter, new Point(_anchorX, _anchorY), startScale, targetScale);
+            var anchorFinal = ZoomGeometry.AnchorPreservingPan(_zoomCenter, new PointD(_anchorX, _anchorY), startScale, targetScale);
             var aligned = view.SnapImagePosToPixelGrid(targetScale, anchorFinal);
             _gridOffsetX = aligned.X - anchorFinal.X;
             _gridOffsetY = aligned.Y - anchorFinal.Y;
@@ -76,7 +77,7 @@ internal sealed class AnchoredZoomAnimation : IViewAnimation
 
         // Advance the PURE anchor track: pan tied to scale so the zoom anchor stays pinned every frame with
         // zero wobble. The track never includes the grid offset, so it can't feed back into itself and drift.
-        var track = ZoomGeometry.AnchorPreservingPan(_zoomCenter, new Point(_anchorX, _anchorY), view.Scale, newScale);
+        var track = ZoomGeometry.AnchorPreservingPan(_zoomCenter, new PointD(_anchorX, _anchorY), view.Scale, newScale);
         _anchorX = track.X;
         _anchorY = track.Y;
         view.Scale = newScale;
@@ -123,7 +124,7 @@ internal sealed class AnchoredZoomAnimation : IViewAnimation
         var oldScale = view.Scale;
         if (oldScale > 0)
         {
-            var track = ZoomGeometry.AnchorPreservingPan(_zoomCenter, new Point(_anchorX, _anchorY), oldScale, _host.TargetScale);
+            var track = ZoomGeometry.AnchorPreservingPan(_zoomCenter, new PointD(_anchorX, _anchorY), oldScale, _host.TargetScale);
             _anchorX = track.X;
             _anchorY = track.Y;
         }

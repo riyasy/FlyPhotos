@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Windows.Foundation;
+using FlyPhotos.Display.State;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
 using Size = FlyPhotos.Core.Model.Size;
@@ -24,11 +25,13 @@ internal static class ZoomGeometry
     /// same image pixel when the scale changes from <paramref name="oldScale"/> to <paramref name="newScale"/>.
     /// The core anchored-zoom primitive.
     /// </summary>
-    public static Point AnchorPreservingPan(Point anchor, Point currentPos, float oldScale, float newScale)
+    public static PointD AnchorPreservingPan(Point anchor, PointD currentPos, float oldScale, float newScale)
     {
-        var k = newScale / oldScale;
-        return new Point(anchor.X - k * (anchor.X - currentPos.X),
-                         anchor.Y - k * (anchor.Y - currentPos.Y));
+        // In double: a float ratio is off by up to ~6e-8, which the pan offset (around 1e8 px at extreme zoom)
+        // turns into several pixels of drift per animation frame.
+        var k = (double)newScale / oldScale;
+        return new PointD(anchor.X - k * (anchor.X - currentPos.X),
+                          anchor.Y - k * (anchor.Y - currentPos.Y));
     }
 
     /// <summary>
