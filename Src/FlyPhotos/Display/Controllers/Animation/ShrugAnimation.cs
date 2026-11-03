@@ -1,5 +1,5 @@
 using System;
-using Windows.Foundation;
+using FlyPhotos.Display.State;
 using FlyPhotos.Core;
 
 namespace FlyPhotos.Display.Controllers.Animation;
@@ -12,7 +12,7 @@ namespace FlyPhotos.Display.Controllers.Animation;
 internal sealed class ShrugAnimation : IViewAnimation
 {
     private readonly IAnimationHost _host;
-    private Point _startPosition;
+    private PointD _startPosition;
 
     public ShrugAnimation(IAnimationHost host) => _host = host;
 

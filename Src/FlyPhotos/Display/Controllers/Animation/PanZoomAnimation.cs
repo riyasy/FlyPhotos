@@ -1,5 +1,6 @@
 using System;
 using Windows.Foundation;
+using FlyPhotos.Display.State;
 using FlyPhotos.Core;
 using Size = FlyPhotos.Core.Model.Size;
 
@@ -13,7 +14,7 @@ namespace FlyPhotos.Display.Controllers.Animation;
 internal sealed class PanZoomAnimation : IViewAnimation
 {
     private readonly IAnimationHost _host;
-    private Point _panTarget;
+    private PointD _panTarget;
     private Size _targetCanvasSize;
 
     public PanZoomAnimation(IAnimationHost host) => _host = host;
@@ -24,13 +25,13 @@ internal sealed class PanZoomAnimation : IViewAnimation
     /// pan springs from the live position (whenever the previous animation wasn't already a pan spring, or on a
     /// forced reseed); otherwise pan velocity carries forward for a seamless re-target.
     /// </summary>
-    public void Aim(float targetScale, Point targetPosition, Size targetCanvasSize, bool reseedPan)
+    public void Aim(float targetScale, PointD targetPosition, Size targetCanvasSize, bool reseedPan)
     {
         var view = _host.View;
         if (reseedPan)
         {
-            _host.PanXSpring.Reset((float)view.ImagePos.X);
-            _host.PanYSpring.Reset((float)view.ImagePos.Y);
+            _host.PanXSpring.Reset(view.ImagePos.X);
+            _host.PanYSpring.Reset(view.ImagePos.Y);
         }
         _host.TargetScale = targetScale;
         _panTarget = view.SnapImagePosToPixelGrid(targetScale, targetPosition);
@@ -48,19 +49,19 @@ internal sealed class PanZoomAnimation : IViewAnimation
 
         var targetLog = (float)Math.Log(_host.TargetScale);
         scale.Step(targetLog, dt);
-        panX.Step((float)_panTarget.X, dt);
-        panY.Step((float)_panTarget.Y, dt);
+        panX.Step(_panTarget.X, dt);
+        panY.Step(_panTarget.Y, dt);
 
         var scaleSettled = scale.IsSettled(targetLog, Constants.SpringScaleSettleEpsilon, Constants.SpringScaleVelocitySettle);
-        var panSettled = panX.IsSettled((float)_panTarget.X, Constants.SpringPanSettleEpsilon, Constants.SpringPanVelocitySettle)
-                         && panY.IsSettled((float)_panTarget.Y, Constants.SpringPanSettleEpsilon, Constants.SpringPanVelocitySettle);
+        var panSettled = panX.IsSettled(_panTarget.X, Constants.SpringPanSettleEpsilon, Constants.SpringPanVelocitySettle)
+                         && panY.IsSettled(_panTarget.Y, Constants.SpringPanSettleEpsilon, Constants.SpringPanVelocitySettle);
         var settled = scaleSettled && panSettled;
 
         if (settled)
         {
             scale.SettleTo(targetLog);
-            panX.SettleTo((float)_panTarget.X);
-            panY.SettleTo((float)_panTarget.Y);
+            panX.SettleTo(_panTarget.X);
+            panY.SettleTo(_panTarget.Y);
             view.Scale = _host.TargetScale;
         }
         else
@@ -87,8 +88,8 @@ internal sealed class PanZoomAnimation : IViewAnimation
         // instead of dragging the image back to the original target next Tick.
         _panTarget.X += dx;
         _panTarget.Y += dy;
-        _host.PanXSpring.Position += (float)dx;
-        _host.PanYSpring.Position += (float)dy;
+        _host.PanXSpring.Position += dx;
+        _host.PanYSpring.Position += dy;
 
         var view = _host.View;
         view.ImagePos.X += dx;

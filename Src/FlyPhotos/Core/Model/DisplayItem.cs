@@ -1,6 +1,7 @@
 ﻿using System;
 using FlyPhotos.Display.ImageReading;
 using Microsoft.Graphics.Canvas;
+using Windows.Foundation;
 
 namespace FlyPhotos.Core.Model;
 
@@ -15,7 +16,7 @@ internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, 
     public bool IsErrorOrUndefined() => 
         Origin == Origin.ErrorScreen || Origin == Origin.Undefined;
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         // We don't dispose bitmaps coming from the error screen as they are reused.
         if (!IsErrorOrUndefined()) 
@@ -37,6 +38,39 @@ internal abstract partial class HqDisplayItem(CanvasBitmap bitmap, Origin origin
 }
 
 internal sealed partial class StaticHqDisplayItem(CanvasBitmap bitmap, Origin origin, int rotation = 0) : HqDisplayItem(bitmap, origin, rotation);
+
+/// <summary>
+/// One entry of an SVG's display list: a recorded top-level draw (a fill, a stroke, or a whole layer) and the
+/// bounds of what it paints, in SVG user units. Culling tests <see cref="Bounds"/> against the visible area.
+/// <see cref="Shape"/> is the raw data of a single top-level fill or stroke (null for a layer), which lets the
+/// renderer draw a huge one from a pre-chopped path instead of <see cref="Commands"/>.
+/// </summary>
+internal readonly record struct SvgDisplayItem(CanvasCommandList Commands, Rect Bounds, SvgShape Shape = null);
+
+/// <summary>
+/// An SVG kept as a retained vector display list so it stays sharp at any zoom. <see cref="DisplayItem.Bitmap"/> is
+/// the rasterised fallback, used when zoomed out or while the SVG is animating too slowly as vectors. The items
+/// are in paint order, in SVG user units (<see cref="SvgWidth"/> x <see cref="SvgHeight"/>), and are drawn by
+/// SvgVectorRenderer, which skips the ones outside the view.
+/// </summary>
+internal sealed partial class SvgVectorHqDisplayItem(CanvasBitmap bitmap, Origin origin, SvgDisplayItem[] items,
+    float svgWidth, float svgHeight, bool isHeavy) : HqDisplayItem(bitmap, origin, 0)
+{
+    /// <summary>Paint order. A flat array so a spatial index could later replace the renderer's linear scan.</summary>
+    public SvgDisplayItem[] Items { get; } = items;
+    public float SvgWidth { get; } = svgWidth;
+    public float SvgHeight { get; } = svgHeight;
+
+    /// <summary>Many points or ops: replaying the vectors every frame would be too slow while panning/zooming.</summary>
+    public bool IsHeavy { get; } = isHeavy;
+
+    public override void Dispose()
+    {
+        base.Dispose();
+        foreach (var item in Items)
+            item.Commands?.Dispose();
+    }
+}
 
 internal sealed partial class AnimatedHqDisplayItem(CanvasBitmap firstFrame, Origin origin, byte[] fileAsByteArray,
     ImageFormat format) : HqDisplayItem(firstFrame, origin, 0)

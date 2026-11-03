@@ -7,7 +7,7 @@ namespace FlyPhotos.Display.State;
 internal class CanvasViewState
 {
     public Rect ImageRect;
-    public Point ImagePos = new(0, 0);
+    public PointD ImagePos = new(0, 0);
     public Matrix3x2 Mat;
     public Matrix3x2 MatInv;
 
@@ -56,7 +56,7 @@ internal class CanvasViewState
     /// snap. Shared by <see cref="UpdateTransform"/> and <see cref="SnapImagePosToPixelGrid"/> so the two can
     /// never disagree about how translation is composed.
     /// </summary>
-    private Matrix3x2 ComposeUnsnapped(float scale, Point imagePos)
+    private Matrix3x2 ComposeUnsnapped(float scale, PointD imagePos)
     {
         var m = Matrix3x2.Identity;
         m *= Matrix3x2.CreateTranslation((float)(-ImageRect.Width * 0.5f), (float)(-ImageRect.Height * 0.5f));
@@ -73,10 +73,10 @@ internal class CanvasViewState
     /// Feeding an animation this as its settle target makes the at-rest <see cref="SnapTranslation"/> round a
     /// no-op, so there is no end-of-zoom shift.
     /// </summary>
-    public Point SnapImagePosToPixelGrid(float scale, Point imagePos)
+    public PointD SnapImagePosToPixelGrid(float scale, PointD imagePos)
     {
         var m = ComposeUnsnapped(scale, imagePos);
-        return new Point(imagePos.X - (m.M31 - MathF.Round(m.M31)),
-                         imagePos.Y - (m.M32 - MathF.Round(m.M32)));
+        return new PointD(imagePos.X - (m.M31 - MathF.Round(m.M31)),
+                          imagePos.Y - (m.M32 - MathF.Round(m.M32)));
     }
 }

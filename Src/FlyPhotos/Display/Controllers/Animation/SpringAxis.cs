@@ -9,33 +9,37 @@ namespace FlyPhotos.Display.Controllers.Animation;
 /// knowledge of what it drives — scale springs in LOG space, pan X/Y spring in pixel space (see the
 /// animation model on <see cref="CanvasViewManager"/>). Held as a long-lived field and mutated in place.
 /// </summary>
+/// <remarks>
+/// Double precision: a pan position reaches around 1e8 px at extreme zoom, where a float only resolves steps of
+/// about 8 px.
+/// </remarks>
 internal sealed class SpringAxis
 {
     /// <summary>Current value (e.g. log-scale, or a pan coordinate in pixels).</summary>
-    public float Position;
+    public double Position;
 
     /// <summary>Current rate of change, in Position-units per second.</summary>
-    public float Velocity;
+    public double Velocity;
 
     /// <summary>Re-seeds the axis at <paramref name="position"/> with zero velocity (a deliberate reset).</summary>
-    public void Reset(float position)
+    public void Reset(double position)
     {
         Position = position;
-        Velocity = 0f;
+        Velocity = 0;
     }
 
     /// <summary>Snaps exactly onto <paramref name="target"/> and stops — used when the settle test passes.</summary>
-    public void SettleTo(float target)
+    public void SettleTo(double target)
     {
         Position = target;
-        Velocity = 0f;
+        Velocity = 0;
     }
 
     /// <summary>
     /// True once both the remaining displacement to <paramref name="target"/> and the velocity are under the
     /// given thresholds.
     /// </summary>
-    public bool IsSettled(float target, double positionEpsilon, double velocityEpsilon) =>
+    public bool IsSettled(double target, double positionEpsilon, double velocityEpsilon) =>
         Math.Abs(Position - target) < positionEpsilon && Math.Abs(Velocity) < velocityEpsilon;
 
     /// <summary>
@@ -44,7 +48,7 @@ internal sealed class SpringAxis
     /// first frame after launch — can't make a single Euler step overshoot. Pure math; the canvas still draws
     /// once per frame, and the motion is frame-rate independent.
     /// </summary>
-    public void Step(float target, float dt)
+    public void Step(double target, float dt)
     {
         var steps = Math.Max(1, (int)Math.Ceiling(dt / Constants.SpringMaxSubStepSeconds));
         var h = dt / steps;

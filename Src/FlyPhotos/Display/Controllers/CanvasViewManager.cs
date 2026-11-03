@@ -135,10 +135,16 @@ internal class CanvasViewManager : IAnimationHost
     private const float MinZoomOutLongSidePixels = 50f;
 
     /// <summary>
+    /// Zoom-in ceiling: the largest percentage the zoom label can show, which it holds as an int (as a float this
+    /// is 21,474,836, i.e. 2,147,483,600%). Vector images could otherwise be zoomed without limit.
+    /// </summary>
+    private const float MaxZoomInScale = int.MaxValue / 100f;
+
+    /// <summary>
     /// Lowest scale a zoom-out may reach: 5%, or whatever shrinks the image's longer side to 50 px on screen
     /// when that is smaller. At 5% a 100k px image is still 5000 px wide, so very large images need the
     /// lower floor. It also sits below the fit scale for any usable window, so fit stays reachable by wheel.
-    /// Zoom-in is never floored.
+    /// Zoom-in is capped separately by <see cref="MaxZoomInScale"/>.
     /// </summary>
     private float MinZoomOutScale()
     {
@@ -309,7 +315,7 @@ internal class CanvasViewManager : IAnimationHost
         {
             _canvasViewState.Scale = newFitScale;
             _canvasViewState.LastScaleTo = newFitScale;
-            _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
+            _canvasViewState.ImagePos = new PointD(canvasSize.Width / 2, canvasSize.Height / 2);
             IsAtOneToOne = Math.Abs(newFitScale - 1.0f) < ScaleTolerance;
         }
         else
@@ -375,7 +381,7 @@ internal class CanvasViewManager : IAnimationHost
         var defaultFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, imageRotation);
         var initialScale = AppConfig.Settings.StretchSmallImages ? defaultFitScale : Math.Min(defaultFitScale, 1.0f);
 
-        _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
+        _canvasViewState.ImagePos = new PointD(canvasSize.Width / 2, canvasSize.Height / 2);
         _canvasViewState.LastScaleTo = initialScale;
         _canvasViewState.Rotation = imageRotation; // Ensure rotation is set correctly for default view.
 
@@ -388,7 +394,7 @@ internal class CanvasViewManager : IAnimationHost
             // forceReseed: the open-zoom is a hard reset to 0.01 — it must seed from that scale even if a
             // spring is already mid-flight, otherwise it inherits stale internal state and springs from
             // ~100% down to fit instead of growing up from tiny.
-            StartSpringPanAndZoomAnimation(initialScale, new Point(canvasSize.Width / 2, canvasSize.Height / 2),
+            StartSpringPanAndZoomAnimation(initialScale, new PointD(canvasSize.Width / 2, canvasSize.Height / 2),
                 canvasSize, forceReseed: true);
         }
         else
@@ -432,7 +438,7 @@ internal class CanvasViewManager : IAnimationHost
             var newScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
             _canvasViewState.Scale = newScale;
             _canvasViewState.LastScaleTo = newScale;
-            _canvasViewState.ImagePos = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
+            _canvasViewState.ImagePos = new PointD(canvasSize.Width / 2, canvasSize.Height / 2);
             IsAtOneToOne = Math.Abs(newScale - 1.0f) < ScaleTolerance;
         }
         else if (oldImageSize.Width > 0 && oldImageSize.Height > 0 && oldImageSize != imageSize)
@@ -461,7 +467,7 @@ internal class CanvasViewManager : IAnimationHost
 
             _canvasViewState.Scale = newScale;
             _canvasViewState.LastScaleTo = newScale;
-            _canvasViewState.ImagePos = new Point(newSize.Width / 2, newSize.Height / 2);
+            _canvasViewState.ImagePos = new PointD(newSize.Width / 2, newSize.Height / 2);
 
             _canvasViewState.UpdateTransform();
             ViewChanged?.Invoke();
@@ -571,6 +577,12 @@ internal class CanvasViewManager : IAnimationHost
             ? ZoomGeometry.ApplyZoomSnap(rawScaleTo, _canvasViewState.LastScaleTo, zoomDirection)
             : rawScaleTo;
         if (zoomDirection == ZoomDirection.Out && scaleTo < MinZoomOutScale()) return;
+        // A step past the ceiling lands on it; at the ceiling, zooming in does nothing.
+        if (zoomDirection == ZoomDirection.In && scaleTo > MaxZoomInScale)
+        {
+            if (_canvasViewState.LastScaleTo >= MaxZoomInScale) return;
+            scaleTo = MaxZoomInScale;
+        }
         _canvasViewState.LastScaleTo = scaleTo;
         StartZoomAnimation(scaleTo, zoomAnchor);
 
@@ -593,6 +605,11 @@ internal class CanvasViewManager : IAnimationHost
         float newScale = oldScaleTo * scaleFactor;
         if (stopAtOneToOne) newScale = ZoomGeometry.StopOnCrossing(newScale, oldScaleTo, 1f);
         if (scaleFactor < 1f && newScale < MinZoomOutScale()) return;
+        if (scaleFactor > 1f && newScale > MaxZoomInScale)
+        {
+            if (oldScaleTo >= MaxZoomInScale) return;
+            newScale = MaxZoomInScale;
+        }
 
         // 1. Capture the scale *before* it's changed.
         float oldScale = _canvasViewState.Scale;
@@ -650,7 +667,7 @@ internal class CanvasViewManager : IAnimationHost
         if (zoomAnchor.HasValue)
             StartZoomAnimation(targetScale, anchor);
         else
-            StartSpringPanAndZoomAnimation(targetScale, anchor, canvasSize);
+            StartSpringPanAndZoomAnimation(targetScale, new PointD(anchor.X, anchor.Y), canvasSize);
 
         // Set state immediately for responsive UI.
         IsFittedToScreen = Math.Abs(targetScale - screenFitScale) < ScaleTolerance;
@@ -664,7 +681,7 @@ internal class CanvasViewManager : IAnimationHost
     public void ZoomToHundred(Size canvasSize)
     {
         const float targetScale = 1.0f;
-        var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
+        var targetPosition = new PointD(canvasSize.Width / 2, canvasSize.Height / 2);
         _canvasViewState.LastScaleTo = 1.0f;
         StartSpringPanAndZoomAnimation(1.0f, targetPosition, canvasSize);
 
@@ -691,7 +708,7 @@ internal class CanvasViewManager : IAnimationHost
         // If already at 1:1, just center on anchor
         if (Math.Abs(oldScale - targetScale) < 0.0001f)
         {
-            StartSpringPanAndZoomAnimation(targetScale, anchor, canvasSize);
+            StartSpringPanAndZoomAnimation(targetScale, new PointD(anchor.X, anchor.Y), canvasSize);
         }
         else
         {
@@ -716,7 +733,7 @@ internal class CanvasViewManager : IAnimationHost
         // fixed-duration tween — the spring settles on its own. In log space the shrink reaches a
         // sub-pixel dot well within the caller's close deadline (PanZoomAnimationDurationForExit * 2).
         _ = exitAnimationDuration;
-        var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
+        var targetPosition = new PointD(canvasSize.Width / 2, canvasSize.Height / 2);
         _suppressZoomUpdateForNextAnimation = true;
         StartSpringPanAndZoomAnimation(0.001f, targetPosition, canvasSize);
         IsFittedToScreen = false;
@@ -745,7 +762,7 @@ internal class CanvasViewManager : IAnimationHost
             return;
         }
 
-        var targetPosition = new Point(canvasSize.Width / 2, canvasSize.Height / 2);
+        var targetPosition = new PointD(canvasSize.Width / 2, canvasSize.Height / 2);
         _canvasViewState.LastScaleTo = scaleFactor;
         StartSpringPanAndZoomAnimation(scaleFactor, targetPosition, canvasSize);
 
@@ -872,7 +889,7 @@ internal class CanvasViewManager : IAnimationHost
     /// previous spring's internal state (which would otherwise render from the stale/default scale and
     /// spring from ~100% down to fit instead of growing up from tiny).
     /// </param>
-    private void StartSpringPanAndZoomAnimation(float targetScale, Point targetPosition, Size targetCanvasSize, bool forceReseed = false)
+    private void StartSpringPanAndZoomAnimation(float targetScale, PointD targetPosition, Size targetCanvasSize, bool forceReseed = false)
     {
         SeedScaleSpringIfFresh(forceReseed);
         // Pan state must be seeded whenever the previous animation wasn't already a pan spring (e.g. coming

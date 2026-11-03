@@ -12,6 +12,9 @@
     <Compile Include="..\FlyPhotos\Core\Model\Enums.cs" Link="Linked\Enums.cs" />
     <Compile Include="..\FlyPhotos\Display\ImageReading\ImageFormat.cs" Link="Linked\ImageFormat.cs" />
     <Compile Include="..\FlyPhotos\Display\ImageReading\DecoderChains.cs" Link="Linked\DecoderChains.cs" />
+    <Compile Include="..\FlyPhotos\Display\ImageRendering\SvgPathChopper.cs" Link="Linked\SvgPathChopper.cs" />
+    <Compile Include="..\FlyPhotos\Display\ImageRendering\SvgGeometryTypes.cs" Link="Linked\SvgGeometryTypes.cs" />
+    <Compile Include="..\FlyPhotos\Display\ImageRendering\SvgUniformCoverage.cs" Link="Linked\SvgUniformCoverage.cs" />
   </ItemGroup>
 
 </Project>
