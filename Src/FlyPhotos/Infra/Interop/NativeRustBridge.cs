@@ -26,6 +26,16 @@ internal static partial class NativeRustBridge
     [LibraryImport(DllName, StringMarshalling = StringMarshalling.Utf8)]
     internal static partial nint resvg_render_svg(string path, int maxDimension, out int width, out int height);
 
+    /// <summary>
+    /// Like <see cref="resvg_render_svg"/>, but also returns a binary draw-command stream (see
+    /// <see cref="SvgCommandListBuilder"/>) built from the same parsed tree. <paramref name="cmdStatus"/> is
+    /// 0 ok, 1 unsupported (<paramref name="cmdReason"/> says why), 2 error; the stream is null/0 unless 0.
+    /// Both returned buffers are freed by the caller with <see cref="free_rust_buffer"/>.
+    /// </summary>
+    [LibraryImport(DllName, StringMarshalling = StringMarshalling.Utf8)]
+    internal static partial nint resvg_render_svg_with_commands(string path, int maxDimension,
+        out int width, out int height, out nint cmdPtr, out nuint cmdLen, out int cmdStatus, out int cmdReason);
+
     // ── Memory management ─────────────────────────────────────────────────────
 
     /// <summary>

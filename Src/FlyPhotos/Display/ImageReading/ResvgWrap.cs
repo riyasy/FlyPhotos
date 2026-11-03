@@ -35,9 +35,47 @@ internal static unsafe partial class ResvgWrap
 
     public static (bool, HqDisplayItem) GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
-        var (bmp, _, _) = RenderSvg(ctrl, inputPath, HqMaxDimension);
-        if (bmp == null) return (false, HqDisplayItem.Empty());
-        return (true, new StaticHqDisplayItem(bmp, Origin.Disk));
+        nint pixelPtr = NativeRustBridge.resvg_render_svg_with_commands(
+            inputPath, HqMaxDimension, out int renderWidth, out int renderHeight,
+            out nint cmdPtr, out nuint cmdLen, out int cmdStatus, out int cmdReason);
+
+        try
+        {
+            if (pixelPtr == nint.Zero || renderWidth <= 0 || renderHeight <= 0)
+            {
+                Logger.Warn("Rust failed to render SVG or returned empty dimensions: {InputPath}", inputPath);
+                return (false, HqDisplayItem.Empty());
+            }
+
+            int totalBytes = renderWidth * renderHeight * 4;
+            var bmp = CreateBitmapAndFree(ctrl, pixelPtr, renderWidth, renderHeight, totalBytes, inputPath);
+            if (bmp == null) return (false, HqDisplayItem.Empty());
+
+            // Vector replay is an optional upgrade; on any failure the bitmap item below is the fallback.
+            if (cmdStatus == 0 && cmdPtr != nint.Zero && cmdLen > 0 && cmdLen <= int.MaxValue)
+            {
+                var vector = SvgCommandListBuilder.Build(ctrl, new ReadOnlySpan<byte>((void*)cmdPtr, (int)cmdLen),
+                    out float svgWidth, out float svgHeight, out bool isHeavy);
+                if (vector != null)
+                    return (true, new SvgVectorHqDisplayItem(bmp, Origin.Disk, vector, svgWidth, svgHeight, isHeavy));
+            }
+            else if (cmdStatus == 1)
+            {
+                Logger.Info("SVG uses a feature not supported by vector rendering (reason {Reason}), using bitmap: {InputPath}",
+                    cmdReason, inputPath);
+            }
+            else
+            {
+                Logger.Warn("SVG vector commands unavailable (status {Status}), using bitmap: {InputPath}",
+                    cmdStatus, inputPath);
+            }
+
+            return (true, new StaticHqDisplayItem(bmp, Origin.Disk));
+        }
+        finally
+        {
+            if (cmdPtr != nint.Zero) NativeRustBridge.free_rust_buffer(cmdPtr, cmdLen);
+        }
     }
 
     /// <summary>

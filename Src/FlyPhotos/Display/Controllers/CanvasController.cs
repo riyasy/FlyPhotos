@@ -176,6 +176,9 @@ internal partial class CanvasController : ICanvasController
             case TiledHqDisplayItem tiledDispItem:
                 HandleHqTiledDisplayItem(photo, tiledDispItem, ctx);
                 break;
+            case SvgVectorHqDisplayItem svgDispItem:
+                HandleHqSvgVectorDisplayItem(photo, svgDispItem, ctx);
+                break;
             case HqDisplayItem hqDispItem:
                 HandleHqStaticDisplayItem(photo, hqDispItem, ctx);
                 break;
@@ -238,6 +241,14 @@ internal partial class CanvasController : ICanvasController
             new StaticImageRenderer(_d2dCanvas, hqDispItem.Bitmap,
                 photo.SupportsTransparency, RequestInvalidate),
             _imageSize, hqDispItem.Rotation, ctx, forceThumbNailRedraw: true);
+    }
+
+    private void HandleHqSvgVectorDisplayItem(Photo photo, SvgVectorHqDisplayItem svgDispItem, PhotoInstallContext ctx)
+    {
+        InstallRenderer(
+            new SvgVectorRenderer(_d2dCanvas, svgDispItem,
+                photo.SupportsTransparency, RequestInvalidate),
+            _imageSize, svgDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
     private void HandleHqMultiPageDisplayItem(Photo photo, MultiPageHqDisplayItem multiDispItem, PhotoInstallContext ctx)

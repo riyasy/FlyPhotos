@@ -15,7 +15,7 @@ internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, 
     public bool IsErrorOrUndefined() => 
         Origin == Origin.ErrorScreen || Origin == Origin.Undefined;
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         // We don't dispose bitmaps coming from the error screen as they are reused.
         if (!IsErrorOrUndefined()) 
@@ -37,6 +37,28 @@ internal abstract partial class HqDisplayItem(CanvasBitmap bitmap, Origin origin
 }
 
 internal sealed partial class StaticHqDisplayItem(CanvasBitmap bitmap, Origin origin, int rotation = 0) : HqDisplayItem(bitmap, origin, rotation);
+
+/// <summary>
+/// An SVG kept as a retained vector command list so it stays sharp at any zoom. <see cref="DisplayItem.Bitmap"/> is
+/// the rasterised fallback, used when zoomed out or while a heavy SVG is animating. The list is in SVG user
+/// units (<see cref="SvgWidth"/> x <see cref="SvgHeight"/>), and is drawn by SvgVectorRenderer.
+/// </summary>
+internal sealed partial class SvgVectorHqDisplayItem(CanvasBitmap bitmap, Origin origin, CanvasCommandList vector,
+    float svgWidth, float svgHeight, bool isHeavy) : HqDisplayItem(bitmap, origin, 0)
+{
+    public CanvasCommandList Vector { get; } = vector;
+    public float SvgWidth { get; } = svgWidth;
+    public float SvgHeight { get; } = svgHeight;
+
+    /// <summary>Many points or ops: replaying the vectors every frame would be too slow while panning/zooming.</summary>
+    public bool IsHeavy { get; } = isHeavy;
+
+    public override void Dispose()
+    {
+        base.Dispose();
+        Vector?.Dispose();
+    }
+}
 
 internal sealed partial class AnimatedHqDisplayItem(CanvasBitmap firstFrame, Origin origin, byte[] fileAsByteArray,
     ImageFormat format) : HqDisplayItem(firstFrame, origin, 0)

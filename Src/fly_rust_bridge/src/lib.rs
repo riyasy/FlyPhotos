@@ -4,12 +4,14 @@ use rawler::imgop::develop::{Intermediate, RawDevelop};
 use rawler::rawsource::RawSource;
 use rayon::prelude::*;
 use std::ffi::CStr;
-use std::panic::catch_unwind;
+use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::path::Path;
 use std::slice;
 use std::sync::{Arc, LazyLock};
 use resvg::{usvg, tiny_skia};
 use usvg::fontdb;
+
+mod svg_commands;
 
 // FFI bridge to C# (via P/Invoke). All exported functions share the same memory
 // contract: Rust allocates via Box<[u8]>, caller frees via free_rust_buffer.
@@ -215,7 +217,8 @@ pub extern "C" fn rawler_get_embedded_preview_from_raw(
 }
 
 /// Frees a buffer previously returned by `rawler_render_raw`,
-/// `rawler_get_embedded_preview_from_raw`, or `resvg_render_svg`.
+/// `rawler_get_embedded_preview_from_raw`, `resvg_render_svg`, or the raster / command stream
+/// of `resvg_render_svg_with_commands` (the command stream is freed with its `cmd_len`).
 /// `size` MUST equal width * height * 4 — the exact byte count used at allocation.
 /// Passing the wrong size causes Rust to reconstruct a Box with incorrect length,
 /// resulting in heap corruption or a double-free.
@@ -292,6 +295,65 @@ pub extern "C" fn free_formats_buffer(ptr: *mut *mut c_char, size: c_int) {
     }
 }
 
+/// Reads and parses an SVG file with the global font database. The database is
+/// initialised once on first call via LazyLock — avoids a multi-hundred-ms hit per render.
+fn load_svg_tree(path_ptr: *const c_char) -> Option<usvg::Tree> {
+    // 1. Decode the path — reuses the same helper as the rawler functions.
+    let path = ptr_to_str(path_ptr)?;
+
+    let svg_data = std::fs::read(path).ok()?;
+
+    // 2. Configure usvg with the global font database.
+    let mut options = usvg::Options::default();
+    options.fontdb = FONT_DB.clone();
+    options.font_family = "Arial".to_string();
+
+    // 3. Parse the SVG into a usvg::Tree.
+    usvg::Tree::from_data(&svg_data, &options).ok()
+}
+
+/// Rasterises `tree` scaled so that the longer axis equals `max_dimension` (aspect ratio is
+/// preserved). Returns premultiplied RGBA8 pixels plus the final pixel size.
+fn rasterize_tree(tree: &usvg::Tree, max_dimension: c_int) -> Option<(Vec<u8>, u32, u32)> {
+    let svg_width = tree.size().width();
+    let svg_height = tree.size().height();
+
+    // 4. Aspect-ratio-preserving scale: fit the longer axis to max_dimension.
+    let (w, h) = if svg_width >= svg_height {
+        (max_dimension as f32, max_dimension as f32 * (svg_height / svg_width))
+    } else {
+        (max_dimension as f32 * (svg_width / svg_height), max_dimension as f32)
+    };
+
+    let (rw, rh) = (w.round() as u32, h.round() as u32);
+
+    // Guard: a zero-area pixmap would produce an empty but non-null buffer
+    // that the caller cannot usefully free via free_rust_buffer(ptr, 0).
+    if rw == 0 || rh == 0 {
+        return None;
+    }
+
+    // 5. Allocate the pixel buffer.
+    let mut pixmap = tiny_skia::Pixmap::new(rw, rh)?;
+
+    // 6. Render. resvg::render fills pixmap in-place with premultiplied RGBA.
+    resvg::render(
+        tree,
+        tiny_skia::Transform::from_scale(
+            rw as f32 / svg_width,
+            rh as f32 / svg_height,
+        ),
+        &mut pixmap.as_mut(),
+    );
+
+    // 7. Keep tiny_skia's premultiplied RGBA as-is: CanvasBitmap.CreateFromBytes
+    //    on the C# side assumes premultiplied alpha by default. Unpremultiplying
+    //    here made every semi-transparent (anti-aliased) edge pixel too bright.
+    let pixels = pixmap.take();
+
+    Some((pixels, rw, rh))
+}
+
 /// Renders an SVG file into a heap-allocated premultiplied RGBA8 buffer, scaled so
 /// that the longer axis equals `max_dimension` (aspect ratio is preserved).
 /// Caller receives the final pixel dimensions via `width`/`height` out-params.
@@ -311,55 +373,8 @@ pub extern "C" fn resvg_render_svg(
 ) -> *mut u8 {
     let result = catch_unwind(|| {
         let process = || -> Option<*mut u8> {
-            // 1. Decode the path — reuses the same helper as the rawler functions.
-            let path = ptr_to_str(path_ptr)?;
-
-            let svg_data = std::fs::read(path).ok()?;
-
-            // 2. Configure usvg with the global font database (initialised once on
-            //    first call via LazyLock — avoids a multi-hundred-ms hit per render).
-            let mut options = usvg::Options::default();
-            options.fontdb = FONT_DB.clone();
-            options.font_family = "Arial".to_string();
-
-            // 3. Parse the SVG into a usvg::Tree.
-            let tree = usvg::Tree::from_data(&svg_data, &options).ok()?;
-
-            let svg_width = tree.size().width();
-            let svg_height = tree.size().height();
-
-            // 4. Aspect-ratio-preserving scale: fit the longer axis to max_dimension.
-            let (w, h) = if svg_width >= svg_height {
-                (max_dimension as f32, max_dimension as f32 * (svg_height / svg_width))
-            } else {
-                (max_dimension as f32 * (svg_width / svg_height), max_dimension as f32)
-            };
-
-            let (rw, rh) = (w.round() as u32, h.round() as u32);
-
-            // Guard: a zero-area pixmap would produce an empty but non-null buffer
-            // that the caller cannot usefully free via free_rust_buffer(ptr, 0).
-            if rw == 0 || rh == 0 {
-                return None;
-            }
-
-            // 5. Allocate the pixel buffer.
-            let mut pixmap = tiny_skia::Pixmap::new(rw, rh)?;
-
-            // 6. Render. resvg::render fills pixmap in-place with premultiplied RGBA.
-            resvg::render(
-                &tree,
-                tiny_skia::Transform::from_scale(
-                    rw as f32 / svg_width,
-                    rh as f32 / svg_height,
-                ),
-                &mut pixmap.as_mut(),
-            );
-
-            // 7. Keep tiny_skia's premultiplied RGBA as-is: CanvasBitmap.CreateFromBytes
-            //    on the C# side assumes premultiplied alpha by default. Unpremultiplying
-            //    here made every semi-transparent (anti-aliased) edge pixel too bright.
-            let pixels = pixmap.take();
+            let tree = load_svg_tree(path_ptr)?;
+            let (pixels, rw, rh) = rasterize_tree(&tree, max_dimension)?;
 
             // 8. Write out-params through safe_write_int to guard against null pointers.
             unsafe {
@@ -376,4 +391,154 @@ pub extern "C" fn resvg_render_svg(
     });
 
     result.unwrap_or(std::ptr::null_mut())
+}
+
+// `cmd_status` values of `resvg_render_svg_with_commands`.
+const CMD_STATUS_OK: c_int = 0;
+const CMD_STATUS_UNSUPPORTED: c_int = 1;
+const CMD_STATUS_ERROR: c_int = 2;
+
+/// Like `resvg_render_svg`, but also serialises the parsed SVG into a vector draw-command
+/// stream (format: see svg_commands.rs) so the caller can replay it at any zoom.
+/// The SVG is parsed once; the raster is exactly what `resvg_render_svg` returns.
+///
+/// Returns the premultiplied RGBA8 raster, or null on failure (then `*cmd_ptr`/`*cmd_len` are
+/// null/0 and `*cmd_status` is 2). The command stream is independent of the raster:
+/// `*cmd_status` 0 = ok (`*cmd_ptr`/`*cmd_len` set), 1 = unsupported feature (`*cmd_reason`
+/// holds the reason code), 2 = error. Outside status 0 the stream is null/0 and the raster
+/// is still returned.
+///
+/// Caller MUST free the raster with `free_rust_buffer(ptr, width*height*4)` and the
+/// command stream with `free_rust_buffer(*cmd_ptr, *cmd_len)`.
+#[unsafe(no_mangle)]
+pub extern "C" fn resvg_render_svg_with_commands(
+    path_ptr: *const c_char,
+    max_dimension: c_int,
+    width: *mut c_int,
+    height: *mut c_int,
+    cmd_ptr: *mut *mut u8,
+    cmd_len: *mut usize,
+    cmd_status: *mut c_int,
+    cmd_reason: *mut c_int,
+) -> *mut u8 {
+    unsafe {
+        if !cmd_ptr.is_null() {
+            *cmd_ptr = std::ptr::null_mut();
+        }
+        if !cmd_len.is_null() {
+            *cmd_len = 0;
+        }
+        safe_write_int(cmd_status, CMD_STATUS_ERROR);
+        safe_write_int(cmd_reason, 0);
+    }
+
+    let result = catch_unwind(|| {
+        let process = || -> Option<*mut u8> {
+            let tree = load_svg_tree(path_ptr)?;
+            let (pixels, rw, rh) = rasterize_tree(&tree, max_dimension)?;
+
+            unsafe {
+                safe_write_int(width, rw as c_int);
+                safe_write_int(height, rh as c_int);
+            }
+
+            // A failure while building the commands must not lose the raster, so it gets its
+            // own catch_unwind and only affects the command outputs.
+            match catch_unwind(AssertUnwindSafe(|| svg_commands::build_commands(&tree))) {
+                Ok(Ok(commands)) if !cmd_ptr.is_null() && !cmd_len.is_null() => {
+                    let len = commands.len();
+                    let ptr = Box::into_raw(commands.into_boxed_slice()) as *mut u8;
+                    unsafe {
+                        *cmd_ptr = ptr;
+                        *cmd_len = len;
+                        safe_write_int(cmd_status, CMD_STATUS_OK);
+                    }
+                }
+                Ok(Err(reason)) => unsafe {
+                    safe_write_int(cmd_status, CMD_STATUS_UNSUPPORTED);
+                    safe_write_int(cmd_reason, reason);
+                },
+                _ => {} // stays CMD_STATUS_ERROR
+            }
+
+            Some(Box::into_raw(pixels.into_boxed_slice()) as *mut u8)
+        };
+
+        process().unwrap_or(std::ptr::null_mut())
+    });
+
+    result.unwrap_or(std::ptr::null_mut())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::ffi::CString;
+
+    fn write_temp_svg(name: &str, svg: &str) -> CString {
+        let path = std::env::temp_dir().join(format!("fly_rust_bridge_test_{}_{}.svg", std::process::id(), name));
+        std::fs::write(&path, svg).unwrap();
+        CString::new(path.to_str().unwrap()).unwrap()
+    }
+
+    #[test]
+    fn with_commands_raster_matches_resvg_render_svg() {
+        let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20">
+            <rect width="40" height="20" fill="#336699" fill-opacity="0.5"/></svg>"##;
+        let path = write_temp_svg("ok", svg);
+
+        let (mut w1, mut h1) = (0, 0);
+        let p1 = resvg_render_svg(path.as_ptr(), 64, &mut w1, &mut h1);
+        assert!(!p1.is_null());
+
+        let (mut w2, mut h2) = (0, 0);
+        let (mut cmd, mut len, mut status, mut reason) = (std::ptr::null_mut(), 0usize, -1, -1);
+        let p2 = resvg_render_svg_with_commands(path.as_ptr(), 64, &mut w2, &mut h2, &mut cmd, &mut len, &mut status, &mut reason);
+        assert!(!p2.is_null());
+        assert_eq!((w1, h1), (w2, h2));
+        assert_eq!((w1, h1), (64, 32));
+
+        let n = (w1 * h1 * 4) as usize;
+        unsafe {
+            assert_eq!(slice::from_raw_parts(p1, n), slice::from_raw_parts(p2, n));
+        }
+        assert_eq!((status, reason), (CMD_STATUS_OK, 0));
+        assert!(!cmd.is_null() && len > 0);
+        assert_eq!(unsafe { slice::from_raw_parts(cmd, 4) }, b"FSV1");
+
+        free_rust_buffer(p1, n);
+        free_rust_buffer(p2, n);
+        free_rust_buffer(cmd, len);
+        let _ = std::fs::remove_file(path.to_str().unwrap());
+    }
+
+    #[test]
+    fn with_commands_unsupported_still_returns_raster() {
+        let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+            <filter id="f"><feGaussianBlur stdDeviation="1"/></filter>
+            <rect width="10" height="10" filter="url(#f)"/></svg>"##;
+        let path = write_temp_svg("filter", svg);
+
+        let (mut w, mut h) = (0, 0);
+        let (mut cmd, mut len, mut status, mut reason) = (std::ptr::null_mut(), 0usize, -1, -1);
+        let p = resvg_render_svg_with_commands(path.as_ptr(), 32, &mut w, &mut h, &mut cmd, &mut len, &mut status, &mut reason);
+        assert!(!p.is_null());
+        assert_eq!((status, reason), (CMD_STATUS_UNSUPPORTED, svg_commands::REASON_FILTER));
+        assert!(cmd.is_null());
+        assert_eq!(len, 0);
+
+        free_rust_buffer(p, (w * h * 4) as usize);
+        let _ = std::fs::remove_file(path.to_str().unwrap());
+    }
+
+    #[test]
+    fn with_commands_bad_file_returns_null_and_error_status() {
+        let path = CString::new("this/file/does/not/exist.svg").unwrap();
+        let (mut w, mut h) = (0, 0);
+        let (mut cmd, mut len, mut status, mut reason) = (std::ptr::null_mut(), 5usize, -1, -1);
+        let p = resvg_render_svg_with_commands(path.as_ptr(), 32, &mut w, &mut h, &mut cmd, &mut len, &mut status, &mut reason);
+        assert!(p.is_null());
+        assert!(cmd.is_null());
+        assert_eq!((len, status, reason), (0, CMD_STATUS_ERROR, 0));
+    }
 }
