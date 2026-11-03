@@ -457,7 +457,7 @@ Configurações &gt; Aplicativos &gt; Aplicativos padrão.</value>
     <value>Apoiar o FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Selecione aplicativos externos para adicionar como atalhos.</value>
+    <value>Selecione aplicativos externos para adicionar como atalhos. Mantenha pressionado um atalho para removê-lo.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Selecionar aplicativos externos</value>

@@ -456,7 +456,7 @@ FlyPhotos를 선택한 다음 항상을 선택합니다.</value>
     <value>FlyPhotos 지원</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>바로 가기로 추가할 외부 앱 선택</value>
+    <value>바로 가기로 추가할 외부 앱 선택. 바로 가기를 길게 눌러 제거합니다.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>외부 앱 선택</value>

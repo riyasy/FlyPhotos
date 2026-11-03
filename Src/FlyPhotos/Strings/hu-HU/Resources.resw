@@ -456,7 +456,7 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>FlyPhotos támogatása</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Válassza ki a külső alkalmazásokat, amelyeket parancsikonként szeretne hozzáadni.</value>
+    <value>Válassza ki a külső alkalmazásokat, amelyeket parancsikonként szeretne hozzáadni. Egy parancsikon eltávolításához tartsa lenyomva.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Külső alkalmazások kiválasztása</value>

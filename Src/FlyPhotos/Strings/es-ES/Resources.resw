@@ -457,7 +457,7 @@ Configuración &gt; Aplicaciones &gt; Aplicaciones predeterminadas.</value>
     <value>Apoyar FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Seleccione aplicaciones externas para agregar como accesos directos.</value>
+    <value>Seleccione aplicaciones externas para agregar como accesos directos. Mantenga presionado un acceso directo para quitarlo.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Seleccionar aplicaciones externas</value>

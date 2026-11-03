@@ -55,6 +55,11 @@ internal sealed partial class Settings
     private Visual? _heartVisual;
     private SizeChangedEventHandler? _heartSizeChangedHandler;
 
+    private readonly DispatcherTimer _longPressTimer = new() { Interval = TimeSpan.FromMilliseconds(500) };
+    private Button? _longPressButton;
+    // Set when a long press revealed the clear X, so the Click raised on release doesn't open the picker.
+    private bool _suppressShortcutClick;
+
     internal Settings()
     {
         InitializeComponent();
@@ -73,6 +78,16 @@ internal sealed partial class Settings
         Util.SetWindowIcon(this);
 
         MainLayout.Loaded += Settings_Loaded;
+
+        // Long press on an assigned external-app slot reveals its red clear X. Button marks
+        // pointer events handled internally, so subscribe with handledEventsToo.
+        foreach (var btn in new[] { BtnShortcut1, BtnShortcut2, BtnShortcut3, BtnShortcut4 })
+        {
+            btn.AddHandler(UIElement.PointerPressedEvent, new PointerEventHandler(ShortcutButton_PointerPressed), true);
+            btn.AddHandler(UIElement.PointerReleasedEvent, new PointerEventHandler(ShortcutButton_PointerUp), true);
+            btn.AddHandler(UIElement.PointerCaptureLostEvent, new PointerEventHandler(ShortcutButton_PointerUp), true);
+        }
+        _longPressTimer.Tick += LongPressTimer_Tick;
 
         DispatcherQueue.EnsureSystemDispatcherQueue();
 
@@ -640,8 +655,45 @@ internal sealed partial class Settings
         FlyoutBase.ShowAttachedFlyout(ButtonSetWindowBackgroundColor);
     }
 
+    private void ShortcutButton_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        foreach (var btn in new[] { BtnShortcut1, BtnShortcut2, BtnShortcut3, BtnShortcut4 })
+            ClearButtonFor(btn).Visibility = Visibility.Collapsed;
+        _suppressShortcutClick = false;
+        _longPressButton = (Button)sender;
+        _longPressTimer.Start();
+    }
+
+    private void ShortcutButton_PointerUp(object sender, PointerRoutedEventArgs e) => _longPressTimer.Stop();
+
+    private void LongPressTimer_Tick(object? sender, object e)
+    {
+        _longPressTimer.Stop();
+        if (_longPressButton == null || string.IsNullOrEmpty(GetShortCutSettingForButton(_longPressButton))) return;
+        _suppressShortcutClick = true;
+        ClearButtonFor(_longPressButton).Visibility = Visibility.Visible;
+    }
+
+    private static Button ClearButtonFor(Button slotButton) => (Button)((Grid)slotButton.Parent).Children[1];
+
+    private async void OnClearShortcutClick(object sender, RoutedEventArgs e)
+    {
+        var clearBtn = (Button)sender;
+        clearBtn.Visibility = Visibility.Collapsed;
+        var slotButton = (Button)((Grid)clearBtn.Parent).Children[0];
+        SetShortCutSettingForButton(slotButton, string.Empty);
+        await AppConfig.SaveAsync();
+        slotButton.Content = new FontIcon { Glyph = "", FontFamily = App.FluentIconFont };
+    }
+
     private async void OnShortcutButtonClick(object sender, RoutedEventArgs e)
     {
+        if (_suppressShortcutClick)
+        {
+            _suppressShortcutClick = false;
+            return;
+        }
+
         var dialog = new AppSelectionDialog(this)
         {
             XamlRoot = Content.XamlRoot,
@@ -662,6 +714,15 @@ internal sealed partial class Settings
             ? new Image { Source = bmp, Width = 32, Height = 32 }
             : new FontIcon { Glyph = "\uED35", FontSize = 32, FontFamily = App.FluentIconFont };
     }
+
+    private static string GetShortCutSettingForButton(Button button) => button.Name switch
+    {
+        "BtnShortcut1" => AppConfig.Settings.ExternalApp1,
+        "BtnShortcut2" => AppConfig.Settings.ExternalApp2,
+        "BtnShortcut3" => AppConfig.Settings.ExternalApp3,
+        "BtnShortcut4" => AppConfig.Settings.ExternalApp4,
+        _ => string.Empty
+    };
 
     private static void SetShortCutSettingForButton(Button button, string shortCut)
     {

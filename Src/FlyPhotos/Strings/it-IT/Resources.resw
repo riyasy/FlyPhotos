@@ -457,7 +457,7 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Supporta FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Seleziona app esterne da aggiungere come collegamenti.</value>
+    <value>Seleziona app esterne da aggiungere come collegamenti. Tieni premuto un collegamento per rimuoverlo.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Seleziona app esterne</value>

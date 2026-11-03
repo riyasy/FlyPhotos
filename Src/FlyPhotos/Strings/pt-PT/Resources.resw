@@ -457,7 +457,7 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Apoiar FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Selecione aplicações externas para adicionar como atalhos.</value>
+    <value>Selecione aplicações externas para adicionar como atalhos. Mantenha premido um atalho para o remover.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Selecionar aplicações externas</value>

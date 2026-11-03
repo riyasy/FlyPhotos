@@ -457,7 +457,7 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Tue FlyPhotosia</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Valitse ulkoisia sovelluksia lisättäväksi pikakuvakkeiksi.</value>
+    <value>Valitse ulkoisia sovelluksia lisättäväksi pikakuvakkeiksi. Poista pikakuvake painamalla sitä pitkään.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Valitse ulkoiset sovellukset</value>

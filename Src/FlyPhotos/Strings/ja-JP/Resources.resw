@@ -456,7 +456,7 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>FlyPhotosをサポート</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>ショートカットとして追加する外部アプリを選択します。</value>
+    <value>ショートカットとして追加する外部アプリを選択します。ショートカットを長押しすると削除できます。</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>外部アプリを選択</value>

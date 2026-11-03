@@ -457,7 +457,7 @@ Inställningar &gt; Appar &gt; Standardappar.</value>
     <value>Stöd FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Välj externa appar att lägga till som genvägar.</value>
+    <value>Välj externa appar att lägga till som genvägar. Håll ned en genväg för att ta bort den.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Välj externa appar</value>

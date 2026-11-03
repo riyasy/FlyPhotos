@@ -457,7 +457,7 @@
     <value>Поддержка FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Выберите внешние приложения для добавления ярлыков.</value>
+    <value>Выберите внешние приложения для добавления ярлыков. Нажмите и удерживайте ярлык, чтобы удалить его.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Выбор внешних приложений</value>

@@ -457,7 +457,7 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Soutenir FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Sélectionner des applications externes à ajouter comme raccourcis.</value>
+    <value>Sélectionner des applications externes à ajouter comme raccourcis. Appuyez longuement sur un raccourci pour le supprimer.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Sélectionner des applications externes</value>

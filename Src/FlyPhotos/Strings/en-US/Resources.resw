@@ -457,7 +457,7 @@ Settings &gt; Apps &gt; Default apps.</value>
     <value>Support FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Select external apps to add as shortcuts.</value>
+    <value>Select external apps to add as shortcuts. Long press a shortcut to remove it.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Select external apps</value>

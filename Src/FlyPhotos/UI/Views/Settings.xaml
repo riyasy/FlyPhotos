@@ -42,6 +42,27 @@
                 <Setter Property="HorizontalContentAlignment" Value="Center" />
                 <Setter Property="VerticalContentAlignment" Value="Center" />
             </Style>
+            <!--  Red X shown on an assigned external-app slot after a long press; clears the slot.  -->
+            <Style x:Key="ShortcutClearButtonStyle" TargetType="Button">
+                <Setter Property="Width" Value="18" />
+                <Setter Property="Height" Value="18" />
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="#E81123" CornerRadius="9">
+                                <FontIcon
+                                    FontFamily="{StaticResource FluentIcons}"
+                                    FontSize="8"
+                                    Foreground="White"
+                                    Glyph="&#xE711;" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
             <Style x:Key="FixedMouseActionTextStyle" TargetType="TextBlock">
                 <Setter Property="VerticalAlignment" Value="Center" />
                 <Setter Property="Opacity" Value="0.6" />
@@ -339,35 +360,48 @@
                                     x:Name="SettingsCardExternalApps"
                                     x:Uid="SettingsCardExternalApps"
                                     IsEnabled="{x:Bind ButtonEnableExternalShortcut.IsOn, Mode=OneWay}">
+                                    <!--  Each slot: Grid with the slot button (Children[0]) and its clear X (Children[1]).  -->
                                     <StackPanel Orientation="Horizontal">
-                                        <Button
-                                            x:Name="BtnShortcut1"
-                                            Height="50"
-                                            Margin="2"
-                                            Click="OnShortcutButtonClick">
-                                            <FontIcon Glyph="&#xE8E5;" FontFamily="{StaticResource FluentIcons}" />
-                                        </Button>
-                                        <Button
-                                            x:Name="BtnShortcut2"
-                                            Height="50"
-                                            Margin="2"
-                                            Click="OnShortcutButtonClick">
-                                            <FontIcon Glyph="&#xE8E5;" FontFamily="{StaticResource FluentIcons}" />
-                                        </Button>
-                                        <Button
-                                            x:Name="BtnShortcut3"
-                                            Height="50"
-                                            Margin="2"
-                                            Click="OnShortcutButtonClick">
-                                            <FontIcon Glyph="&#xE8E5;" FontFamily="{StaticResource FluentIcons}" />
-                                        </Button>
-                                        <Button
-                                            x:Name="BtnShortcut4"
-                                            Height="50"
-                                            Margin="2"
-                                            Click="OnShortcutButtonClick">
-                                            <FontIcon Glyph="&#xE8E5;" FontFamily="{StaticResource FluentIcons}" />
-                                        </Button>
+                                        <Grid>
+                                            <Button
+                                                x:Name="BtnShortcut1"
+                                                Height="50"
+                                                Margin="2"
+                                                Click="OnShortcutButtonClick">
+                                                <FontIcon Glyph="&#xE8E5;" FontFamily="{StaticResource FluentIcons}" />
+                                            </Button>
+                                            <Button Click="OnClearShortcutClick" Style="{StaticResource ShortcutClearButtonStyle}" />
+                                        </Grid>
+                                        <Grid>
+                                            <Button
+                                                x:Name="BtnShortcut2"
+                                                Height="50"
+                                                Margin="2"
+                                                Click="OnShortcutButtonClick">
+                                                <FontIcon Glyph="&#xE8E5;" FontFamily="{StaticResource FluentIcons}" />
+                                            </Button>
+                                            <Button Click="OnClearShortcutClick" Style="{StaticResource ShortcutClearButtonStyle}" />
+                                        </Grid>
+                                        <Grid>
+                                            <Button
+                                                x:Name="BtnShortcut3"
+                                                Height="50"
+                                                Margin="2"
+                                                Click="OnShortcutButtonClick">
+                                                <FontIcon Glyph="&#xE8E5;" FontFamily="{StaticResource FluentIcons}" />
+                                            </Button>
+                                            <Button Click="OnClearShortcutClick" Style="{StaticResource ShortcutClearButtonStyle}" />
+                                        </Grid>
+                                        <Grid>
+                                            <Button
+                                                x:Name="BtnShortcut4"
+                                                Height="50"
+                                                Margin="2"
+                                                Click="OnShortcutButtonClick">
+                                                <FontIcon Glyph="&#xE8E5;" FontFamily="{StaticResource FluentIcons}" />
+                                            </Button>
+                                            <Button Click="OnClearShortcutClick" Style="{StaticResource ShortcutClearButtonStyle}" />
+                                        </Grid>
                                     </StackPanel>
                                 </controls:SettingsCard>
                             </controls:SettingsExpander.Items>

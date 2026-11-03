@@ -457,7 +457,7 @@
     <value>دعم FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>اختيار التطبيقات الخارجية لإضافتها كاختصارات.</value>
+    <value>اختيار التطبيقات الخارجية لإضافتها كاختصارات. اضغط مطولاً على اختصار لإزالته.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>اختيار التطبيقات الخارجية</value>

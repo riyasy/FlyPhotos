@@ -457,7 +457,7 @@
     <value>支援 FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>選擇要加入捷徑的外部應用程式。</value>
+    <value>選擇要加入捷徑的外部應用程式。長按捷徑即可移除。</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>選取外部應用程式</value>

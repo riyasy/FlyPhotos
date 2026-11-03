@@ -457,7 +457,7 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Wspomóż FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Wybierz zewnętrzne aplikacje do dodania jako skróty.</value>
+    <value>Wybierz zewnętrzne aplikacje do dodania jako skróty. Przytrzymaj skrót, aby go usunąć.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Wybierz zewnętrzne aplikacje</value>

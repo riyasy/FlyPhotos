@@ -454,7 +454,7 @@
     <value>FlyPhotos-നെ പിന്തുണയ്ക്കുക</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>കുറുക്കുവഴികളായി ചേർക്കാൻ ആപ്പുകൾ ബ്രൗസ് ചെയ്യുക.</value>
+    <value>കുറുക്കുവഴികളായി ചേർക്കാൻ ആപ്പുകൾ ബ്രൗസ് ചെയ്യുക. നീക്കം ചെയ്യാൻ കുറുക്കുവഴിയിൽ ദീർഘനേരം അമർത്തുക.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>മറ്റുള്ള ആപ്പുകൾ തിരഞ്ഞെടുക്കുക</value>

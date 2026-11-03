@@ -457,7 +457,7 @@ Instellingen &gt; Apps &gt; Standaard-apps.</value>
     <value>Steun FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Selecteer externe apps om als snelkoppelingen toe te voegen.</value>
+    <value>Selecteer externe apps om als snelkoppelingen toe te voegen. Houd een snelkoppeling lang ingedrukt om deze te verwijderen.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Externe apps selecteren</value>

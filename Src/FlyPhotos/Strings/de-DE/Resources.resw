@@ -457,7 +457,7 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>FlyPhotos unterstützen</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Externe Apps auswählen, um sie als Verknüpfungen hinzuzufügen.</value>
+    <value>Externe Apps auswählen, um sie als Verknüpfungen hinzuzufügen. Zum Entfernen eine Verknüpfung gedrückt halten.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Externe Apps auswählen</value>

@@ -457,7 +457,7 @@
     <value>支持 FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>选择要添加为快捷方式的外部应用。</value>
+    <value>选择要添加为快捷方式的外部应用。长按快捷方式可将其移除。</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>选择外部应用</value>

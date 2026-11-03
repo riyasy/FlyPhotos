@@ -457,7 +457,7 @@
     <value>Підтримати FlyPhotos</value>
   </data>
   <data name="SettingsCardExternalApps.Description" xml:space="preserve">
-    <value>Виберіть зовнішні програми для додавання як ярлики.</value>
+    <value>Виберіть зовнішні програми для додавання як ярлики. Натисніть і утримуйте ярлик, щоб видалити його.</value>
   </data>
   <data name="SettingsCardExternalApps.Header" xml:space="preserve">
     <value>Вибрати зовнішні програми</value>
