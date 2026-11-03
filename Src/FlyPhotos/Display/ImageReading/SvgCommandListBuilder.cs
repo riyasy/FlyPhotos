@@ -3,18 +3,21 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Numerics;
+using FlyPhotos.Core.Model;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.Geometry;
 using NLog;
+using Windows.Foundation;
 using Windows.UI;
 
 namespace FlyPhotos.Display.ImageReading;
 
 /// <summary>
 /// Replays the binary draw-command stream produced by the Rust bridge (<c>resvg_render_svg_with_commands</c>)
-/// into a <see cref="CanvasCommandList"/>, a retained Direct2D display list that can be drawn at any zoom
-/// without re-rasterising. All coordinates are in SVG user units; the stream is little-endian.
+/// into a scene of <see cref="SvgDisplayItem"/>s, each a retained Direct2D <see cref="CanvasCommandList"/> with its
+/// bounds, which can be drawn at any zoom without re-rasterising and culled against the viewport. All coordinates
+/// are in SVG user units; the stream is little-endian.
 /// </summary>
 /// <remarks>
 /// Format: header (magic "FSV1", f32 width, f32 height, u32 totalPoints, u32 totalOps), then ops until END.
@@ -30,6 +33,9 @@ internal static class SvgCommandListBuilder
 
     private const float ClipFlatteningTolerance = 0.001f;
 
+    // Each item's bounds are padded by this fraction of the SVG's larger side (0.1%), against float noise in the bounds.
+    private const float BoundsEpsilonFraction = 0.001f;
+
     private const byte OpEnd = 0;
     private const byte OpPushLayer = 1;
     private const byte OpPopLayer = 2;
@@ -37,18 +43,17 @@ internal static class SvgCommandListBuilder
     private const byte OpStroke = 4;
 
     /// <summary>
-    /// Builds a command list from <paramref name="data"/>. Returns null (after logging) if the stream is malformed
+    /// Builds the scene from <paramref name="data"/>. Returns null (after logging) if the stream is malformed
     /// or Win2D rejects it. <paramref name="width"/>/<paramref name="height"/> are the SVG's size in user units.
     /// </summary>
-    public static CanvasCommandList? Build(ICanvasResourceCreator creator, ReadOnlySpan<byte> data,
+    public static SvgDisplayItem[]? Build(ICanvasResourceCreator creator, ReadOnlySpan<byte> data,
         out float width, out float height, out bool isHeavy)
     {
         width = 0;
         height = 0;
         isHeavy = false;
 
-        CanvasCommandList? list = null;
-        var layers = new Stack<CanvasActiveLayer>();
+        var items = new List<SvgDisplayItem>();
         try
         {
             var r = new Reader(data);
@@ -62,61 +67,136 @@ internal static class SvgCommandListBuilder
             uint totalOps = r.U32();
             isHeavy = totalPoints > HeavyPointThreshold || totalOps > HeavyOpThreshold;
 
-            list = new CanvasCommandList(creator);
-            // The list only becomes drawable once the session that records it is disposed.
-            using (var ds = list.CreateDrawingSession())
-            {
-                ds.Units = CanvasUnits.Pixels;
-                try
-                {
-                    Replay(creator, ds, ref r, layers);
-                }
-                finally
-                {
-                    while (layers.Count > 0) layers.Pop().Dispose();
-                }
-            }
-            return list;
+            Replay(creator, ref r, items, BoundsEpsilonFraction * Math.Max(width, height));
+            return items.ToArray();
         }
         catch (Exception ex)
         {
-            Logger.Warn(ex, "Failed to build SVG command list");
-            list?.Dispose();
+            Logger.Warn(ex, "Failed to build SVG scene");
+            foreach (var item in items) item.Commands.Dispose();
             return null;
         }
     }
 
-    private static void Replay(ICanvasResourceCreator creator, CanvasDrawingSession ds, ref Reader r,
-        Stack<CanvasActiveLayer> layers)
+    /// <summary>Splits the stream into top-level items: one per fill/stroke, one per complete top-level layer.</summary>
+    private static void Replay(ICanvasResourceCreator creator, ref Reader r, List<SvgDisplayItem> items, float epsilon)
     {
         while (true)
         {
-            switch (r.U8())
+            var op = r.U8();
+            switch (op)
             {
                 case OpEnd:
-                    if (layers.Count != 0) throw new FormatException("Unbalanced layers");
                     return;
                 case OpPushLayer:
-                    PushLayer(creator, ds, ref r, layers);
+                case OpFill:
+                case OpStroke:
+                    var item = RecordItem(creator, ref r, op, epsilon);
+                    if (item != null) items.Add(item.Value);
                     break;
                 case OpPopLayer:
-                    if (layers.Count == 0) throw new FormatException("Pop without push");
-                    layers.Pop().Dispose();
-                    break;
-                case OpFill:
-                    Fill(creator, ds, ref r);
-                    break;
-                case OpStroke:
-                    Stroke(creator, ds, ref r);
-                    break;
+                    throw new FormatException("Pop without push");
                 default:
                     throw new FormatException("Unknown opcode");
             }
         }
     }
 
-    private static void PushLayer(ICanvasResourceCreator creator, CanvasDrawingSession ds, ref Reader r,
-        Stack<CanvasActiveLayer> layers)
+    /// <summary>
+    /// Records the op that follows (whose opcode <paramref name="op"/> was just read) into its own command list.
+    /// Returns null when it draws nothing visible, so the caller never has to draw or cull it.
+    /// </summary>
+    private static SvgDisplayItem? RecordItem(ICanvasResourceCreator creator, ref Reader r, byte op, float epsilon)
+    {
+        var list = new CanvasCommandList(creator);
+        try
+        {
+            Rect bounds;
+            // Kept with a lone fill or stroke so the renderer can chop its path; a layer is always drawn from its list.
+            SvgShape? shape = null;
+            // The list only becomes drawable once the session that records it is disposed.
+            using (var ds = list.CreateDrawingSession())
+            {
+                ds.Units = CanvasUnits.Pixels;
+                switch (op)
+                {
+                    case OpFill:
+                        shape = ReadFill(ref r);
+                        bounds = Record(creator, ds, shape);
+                        break;
+                    case OpStroke:
+                        shape = ReadStroke(ref r);
+                        bounds = Record(creator, ds, shape);
+                        break;
+                    default:
+                        bounds = ReplayLayer(creator, ds, ref r);
+                        break;
+                }
+            }
+
+            if (bounds.IsEmpty)
+            {
+                list.Dispose();
+                return null;
+            }
+            // Pad against float noise; antialiasing spill is a device-pixel matter, so the renderer pads the view.
+            return new SvgDisplayItem(list, new Rect(bounds.X - epsilon, bounds.Y - epsilon,
+                bounds.Width + 2 * epsilon, bounds.Height + 2 * epsilon), shape);
+        }
+        catch
+        {
+            list.Dispose();
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Records a top-level layer (its push opcode already read) up to the matching pop, nested layers included.
+    /// Returns the bounds of what it draws: the union of its children, cut down to each layer's clip.
+    /// </summary>
+    private static Rect ReplayLayer(ICanvasResourceCreator creator, CanvasDrawingSession ds, ref Reader r)
+    {
+        var layers = new Stack<LayerFrame>();
+        try
+        {
+            layers.Push(PushLayer(creator, ds, ref r));
+            while (true)
+            {
+                switch (r.U8())
+                {
+                    case OpEnd:
+                        throw new FormatException("Unbalanced layers");
+                    case OpPushLayer:
+                        layers.Push(PushLayer(creator, ds, ref r));
+                        break;
+                    case OpPopLayer:
+                    {
+                        var frame = layers.Pop();
+                        frame.Layer.Dispose();
+                        var bounds = frame.Content;
+                        if (frame.ClipBounds is { } clipBounds) bounds.Intersect(clipBounds);
+                        if (layers.Count == 0) return bounds;
+                        layers.Peek().Content.Union(bounds);
+                        break;
+                    }
+                    case OpFill:
+                        layers.Peek().Content.Union(Record(creator, ds, ReadFill(ref r)));
+                        break;
+                    case OpStroke:
+                        layers.Peek().Content.Union(Record(creator, ds, ReadStroke(ref r)));
+                        break;
+                    default:
+                        throw new FormatException("Unknown opcode");
+                }
+            }
+        }
+        finally
+        {
+            while (layers.Count > 0) layers.Pop().Layer.Dispose();
+        }
+    }
+
+    private static LayerFrame PushLayer(ICanvasResourceCreator creator, CanvasDrawingSession ds, ref Reader r)
     {
         float opacity = r.F32();
         uint nClip = r.U32();
@@ -144,29 +224,38 @@ internal static class SvgCommandListBuilder
 
         // The clip geometry already has its transform baked in, so the layer must be created with an identity transform.
         ds.Transform = Matrix3x2.Identity;
-        layers.Push(clip == null ? ds.CreateLayer(opacity) : ds.CreateLayer(opacity, clip));
+        var layer = clip == null ? ds.CreateLayer(opacity) : ds.CreateLayer(opacity, clip);
+        Rect? clipBounds = clip == null ? null : Sane(clip.ComputeBounds());
         clip?.Dispose();
+        return new LayerFrame(layer, clipBounds);
     }
 
-    private static void Fill(ICanvasResourceCreator creator, CanvasDrawingSession ds, ref Reader r)
+    /// <summary>Reads a fill (its opcode already read) without recording it.</summary>
+    private static SvgShape ReadFill(ref Reader r)
     {
         var mat = r.Mat();
         var fillRule = r.U8();
         var aliased = r.U8() != 0;
-        using var paint = ReadPaint(creator, ref r);
-        using var geo = ReadPath(creator, ref r, fillRule);
-
-        ds.Transform = mat;
-        ds.Antialiasing = aliased ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
-        if (paint.Brush != null) ds.FillGeometry(geo, paint.Brush);
-        else ds.FillGeometry(geo, paint.Solid);
+        var paint = ReadPaint(ref r);
+        ReadPathData(ref r, out var verbs, out var points);
+        return new SvgShape
+        {
+            IsStroke = false,
+            Transform = mat,
+            Verbs = verbs,
+            Points = points,
+            FillRule = fillRule,
+            Aliased = aliased,
+            Paint = paint
+        };
     }
 
-    private static void Stroke(ICanvasResourceCreator creator, CanvasDrawingSession ds, ref Reader r)
+    /// <summary>Reads a stroke (its opcode already read) without recording it.</summary>
+    private static SvgShape ReadStroke(ref Reader r)
     {
         var mat = r.Mat();
         var aliased = r.U8() != 0;
-        using var paint = ReadPaint(creator, ref r);
+        var paint = ReadPaint(ref r);
         float strokeWidth = r.F32();
         var cap = r.U8() switch
         {
@@ -190,39 +279,82 @@ internal static class SvgCommandListBuilder
         var dash = new float[nDash];
         for (var i = 0; i < dash.Length; i++) dash[i] = r.F32();
         float dashOffset = r.F32();
-        using var geo = ReadPath(creator, ref r, 0);
-
-        // A zero or negative width draws nothing (and would divide by zero below).
-        if (!(strokeWidth > 0)) return;
-
-        using var style = new CanvasStrokeStyle
+        ReadPathData(ref r, out var verbs, out var points);
+        return new SvgShape
         {
-            StartCap = cap,
-            EndCap = cap,
-            DashCap = cap,
-            LineJoin = join,
-            MiterLimit = miterLimit
+            IsStroke = true,
+            Transform = mat,
+            Verbs = verbs,
+            Points = points,
+            FillRule = 0,
+            Aliased = aliased,
+            Paint = paint,
+            Width = strokeWidth,
+            Cap = cap,
+            Join = join,
+            MiterLimit = miterLimit,
+            Dashes = dash,
+            DashOffset = dashOffset
         };
-        if (nDash > 0)
-        {
-            // Direct2D expresses dash lengths and offset in multiples of the stroke width.
-            for (var i = 0; i < dash.Length; i++) dash[i] /= strokeWidth;
-            style.CustomDashStyle = dash;
-            style.DashOffset = dashOffset / strokeWidth;
-        }
-
-        ds.Transform = mat;
-        ds.Antialiasing = aliased ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
-        if (paint.Brush != null) ds.DrawGeometry(geo, paint.Brush, strokeWidth, style);
-        else ds.DrawGeometry(geo, paint.Solid, strokeWidth, style);
     }
 
-    private static Paint ReadPaint(ICanvasResourceCreator creator, ref Reader r)
+    /// <summary>Records a fill or stroke; returns its bounds in SVG user space (empty if it draws nothing).</summary>
+    private static Rect Record(ICanvasResourceCreator creator, CanvasDrawingSession ds, SvgShape shape)
+    {
+        using var geo = BuildPath(creator, shape.Verbs, shape.Points, shape.FillRule);
+
+        // A zero or negative width draws nothing (and would divide by zero for dashes).
+        if (shape.IsStroke && !(shape.Width > 0)) return Rect.Empty;
+
+        using var paint = CreatePaint(creator, shape.Paint);
+        ds.Transform = shape.Transform;
+        ds.Antialiasing = shape.Aliased ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
+        if (!shape.IsStroke)
+        {
+            paint.Fill(ds, geo);
+            return Sane(geo.ComputeBounds(shape.Transform));
+        }
+
+        using var style = CreateStrokeStyle(shape);
+        paint.Stroke(ds, geo, shape.Width, style);
+        return Sane(geo.ComputeStrokeBounds(shape.Width, style, shape.Transform, CanvasGeometry.DefaultFlatteningTolerance));
+    }
+
+    /// <summary>Creates the stroke style of a stroke shape: caps, join, miter limit and dashes.</summary>
+    internal static CanvasStrokeStyle CreateStrokeStyle(SvgShape shape)
+    {
+        var style = new CanvasStrokeStyle
+        {
+            StartCap = shape.Cap,
+            EndCap = shape.Cap,
+            DashCap = shape.Cap,
+            LineJoin = shape.Join,
+            MiterLimit = shape.MiterLimit
+        };
+        if (shape.Dashes.Length > 0)
+        {
+            // Direct2D expresses dash lengths and offset in multiples of the stroke width.
+            var dash = new float[shape.Dashes.Length];
+            for (var i = 0; i < dash.Length; i++) dash[i] = shape.Dashes[i] / shape.Width;
+            style.CustomDashStyle = dash;
+            style.DashOffset = shape.DashOffset / shape.Width;
+        }
+        return style;
+    }
+
+    /// <summary>Maps the empty or non-finite rects Direct2D reports for degenerate geometry to <see cref="Rect.Empty"/>.</summary>
+    private static Rect Sane(Rect rect) =>
+        rect.IsEmpty || !double.IsFinite(rect.X) || !double.IsFinite(rect.Y)
+        || !double.IsFinite(rect.Width) || !double.IsFinite(rect.Height)
+            ? Rect.Empty
+            : rect;
+
+    private static SvgPaint ReadPaint(ref Reader r)
     {
         switch (r.U8())
         {
             case 0:
-                return new Paint(r.Color(), null);
+                return new SvgPaint { Kind = SvgPaintKind.Solid, Solid = r.Color() };
             case 1:
             {
                 var start = r.Vec2();
@@ -231,13 +363,16 @@ internal static class SvgCommandListBuilder
                 var edge = ReadSpread(ref r);
                 float opacity = r.F32();
                 var stops = ReadStops(ref r);
-                return new Paint(default, new CanvasLinearGradientBrush(creator, stops, edge, CanvasAlphaMode.Straight)
+                return new SvgPaint
                 {
-                    StartPoint = start,
-                    EndPoint = end,
+                    Kind = SvgPaintKind.LinearGradient,
+                    Start = start,
+                    End = end,
                     Transform = transform,
-                    Opacity = opacity
-                });
+                    Edge = edge,
+                    Opacity = opacity,
+                    Stops = stops
+                };
             }
             case 2:
             {
@@ -248,20 +383,49 @@ internal static class SvgCommandListBuilder
                 var edge = ReadSpread(ref r);
                 float opacity = r.F32();
                 var stops = ReadStops(ref r);
-                return new Paint(default, new CanvasRadialGradientBrush(creator, stops, edge, CanvasAlphaMode.Straight)
+                return new SvgPaint
                 {
-                    Center = center,
-                    OriginOffset = focal - center,
-                    RadiusX = radius,
-                    RadiusY = radius,
+                    Kind = SvgPaintKind.RadialGradient,
+                    Start = center,
+                    End = focal,
+                    Radius = radius,
                     Transform = transform,
-                    Opacity = opacity
-                });
+                    Edge = edge,
+                    Opacity = opacity,
+                    Stops = stops
+                };
             }
             default:
                 throw new FormatException("Bad paint kind");
         }
     }
+
+    /// <summary>
+    /// Creates the paint's brush (none for a solid color). Gradients are straight-alpha, as the stream's colors are.
+    /// The caller disposes the result.
+    /// </summary>
+    internal static ResolvedPaint CreatePaint(ICanvasResourceCreator creator, SvgPaint paint) => paint.Kind switch
+    {
+        SvgPaintKind.Solid => new ResolvedPaint(paint.Solid, null),
+        SvgPaintKind.LinearGradient => new ResolvedPaint(default,
+            new CanvasLinearGradientBrush(creator, paint.Stops, paint.Edge, CanvasAlphaMode.Straight)
+            {
+                StartPoint = paint.Start,
+                EndPoint = paint.End,
+                Transform = paint.Transform,
+                Opacity = paint.Opacity
+            }),
+        _ => new ResolvedPaint(default,
+            new CanvasRadialGradientBrush(creator, paint.Stops, paint.Edge, CanvasAlphaMode.Straight)
+            {
+                Center = paint.Start,
+                OriginOffset = paint.End - paint.Start,
+                RadiusX = paint.Radius,
+                RadiusY = paint.Radius,
+                Transform = paint.Transform,
+                Opacity = paint.Opacity
+            })
+    };
 
     private static CanvasEdgeBehavior ReadSpread(ref Reader r) => r.U8() switch
     {
@@ -288,11 +452,27 @@ internal static class SvgCommandListBuilder
     /// <summary>Reads a PathData block into a geometry using the given fill rule (0 nonzero, 1 evenodd).</summary>
     private static CanvasGeometry ReadPath(ICanvasResourceCreator creator, ref Reader r, byte fillRule)
     {
+        ReadPathData(ref r, out var verbs, out var points);
+        return BuildPath(creator, verbs, points, fillRule);
+    }
+
+    /// <summary>Reads a PathData block as is: the verbs and the x,y point pairs.</summary>
+    private static void ReadPathData(ref Reader r, out byte[] verbs, out float[] points)
+    {
         uint nVerbs = r.U32();
-        var verbs = r.Bytes(nVerbs);
+        verbs = r.Bytes(nVerbs).ToArray();
         uint nPoints = r.U32();
         r.EnsureAvailable(nPoints, 8);
+        points = new float[nPoints * 2];
+        for (var i = 0; i < points.Length; i++) points[i] = r.F32();
+    }
 
+    /// <summary>
+    /// Builds a geometry from path verbs and x,y point pairs using the given fill rule (0 nonzero, 1 evenodd).
+    /// Throws <see cref="FormatException"/> if the verbs and the points disagree.
+    /// </summary>
+    internal static CanvasGeometry BuildPath(ICanvasResourceCreator creator, byte[] verbs, float[] points, byte fillRule)
+    {
         using var pb = new CanvasPathBuilder(creator);
         // Must be set before the first figure begins.
         pb.SetFilledRegionDetermination(fillRule == 0
@@ -302,7 +482,15 @@ internal static class SvgCommandListBuilder
         var figureOpen = false;
         var hasStart = false;
         var start = Vector2.Zero;
-        uint pointsUsed = 0;
+        var pointsUsed = 0;
+
+        Vector2 Next()
+        {
+            if (2 * pointsUsed + 2 > points.Length) throw new FormatException("Path point count mismatch");
+            var p = new Vector2(points[2 * pointsUsed], points[2 * pointsUsed + 1]);
+            pointsUsed++;
+            return p;
+        }
 
         // A segment after a Close continues from the last Move point, as in tiny-skia.
         void EnsureFigure()
@@ -319,26 +507,22 @@ internal static class SvgCommandListBuilder
             {
                 case 0: // Move
                     if (figureOpen) pb.EndFigure(CanvasFigureLoop.Open);
-                    start = r.Vec2();
-                    pointsUsed++;
+                    start = Next();
                     pb.BeginFigure(start, CanvasFigureFill.Default);
                     hasStart = true;
                     figureOpen = true;
                     break;
                 case 1: // Line
                     EnsureFigure();
-                    pb.AddLine(r.Vec2());
-                    pointsUsed++;
+                    pb.AddLine(Next());
                     break;
                 case 2: // Quad
                     EnsureFigure();
-                    pb.AddQuadraticBezier(r.Vec2(), r.Vec2());
-                    pointsUsed += 2;
+                    pb.AddQuadraticBezier(Next(), Next());
                     break;
                 case 3: // Cubic
                     EnsureFigure();
-                    pb.AddCubicBezier(r.Vec2(), r.Vec2(), r.Vec2());
-                    pointsUsed += 3;
+                    pb.AddCubicBezier(Next(), Next(), Next());
                     break;
                 case 4: // Close
                     if (figureOpen)
@@ -352,16 +536,42 @@ internal static class SvgCommandListBuilder
             }
         }
         if (figureOpen) pb.EndFigure(CanvasFigureLoop.Open);
-        if (pointsUsed != nPoints) throw new FormatException("Path point count mismatch");
+        if (2 * pointsUsed != points.Length) throw new FormatException("Path point count mismatch");
 
         return CanvasGeometry.CreatePath(pb);
     }
 
+    /// <summary>An open layer while recording: what it has drawn so far and the bounds of its clip, if any.</summary>
+    private sealed class LayerFrame(CanvasActiveLayer layer, Rect? clipBounds)
+    {
+        public CanvasActiveLayer Layer { get; } = layer;
+        public Rect? ClipBounds { get; } = clipBounds;
+        public Rect Content = Rect.Empty;
+    }
+
     /// <summary>A solid color or a gradient brush; the brush (if any) is owned and disposed with the struct.</summary>
-    private readonly struct Paint(Color solid, ICanvasBrush? brush) : IDisposable
+    internal readonly struct ResolvedPaint(Color solid, ICanvasBrush? brush) : IDisposable
     {
         public Color Solid { get; } = solid;
         public ICanvasBrush? Brush { get; } = brush;
+
+        public void Fill(CanvasDrawingSession ds, CanvasGeometry geo)
+        {
+            if (Brush != null) ds.FillGeometry(geo, Brush);
+            else ds.FillGeometry(geo, Solid);
+        }
+
+        public void FillRectangle(CanvasDrawingSession ds, Rect rect)
+        {
+            if (Brush != null) ds.FillRectangle(rect, Brush);
+            else ds.FillRectangle(rect, Solid);
+        }
+
+        public void Stroke(CanvasDrawingSession ds, CanvasGeometry geo, float width, CanvasStrokeStyle style)
+        {
+            if (Brush != null) ds.DrawGeometry(geo, Brush, width, style);
+            else ds.DrawGeometry(geo, Solid, width, style);
+        }
 
         public void Dispose() => (Brush as IDisposable)?.Dispose();
     }
