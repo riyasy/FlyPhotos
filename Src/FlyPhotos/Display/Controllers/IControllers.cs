@@ -18,4 +18,5 @@ internal interface IThumbnailController : IDisposable
     void RedrawThumbNailsIfNeeded(int key);
     void SetPhotoProvider(IPhotoProvider provider);
     void SetPreviewLoadedProbe(Func<int, bool> isPreviewLoaded);
+    void BounceAtEdge(NavDirection direction);
 }

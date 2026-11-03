@@ -197,7 +197,11 @@ internal partial class PhotoDisplayController
         int currentPosition = _photoSessionState.CurrentPhotoListPosition;
         if (currentPosition < 0) return; // TODO Should not happen if state is consistent
         int newPosition = currentPosition + (direction == NavDirection.Next ? 1 : -1);
-        if (newPosition < 0 || newPosition >= keys.Count) return;
+        if (newPosition < 0 || newPosition >= keys.Count)
+        {
+            _thumbNailController.BounceAtEdge(direction);
+            return;
+        }
         int newKey = keys[newPosition];
         await FlyTo(newKey, newPosition, false);
     }
@@ -206,6 +210,7 @@ internal partial class PhotoDisplayController
     {
         var keys = _photoList.Keys;
         if (keys.Count <= 1) return;
+        if (_photoSessionState.CurrentPhotoListPosition == 0) _thumbNailController.BounceAtEdge(NavDirection.Prev);
         await FlyTo(keys[0], 0, true);
     }
 
@@ -213,6 +218,7 @@ internal partial class PhotoDisplayController
     {
         var keys = _photoList.Keys;
         if (keys.Count <= 1) return;
+        if (_photoSessionState.CurrentPhotoListPosition == keys.Count - 1) _thumbNailController.BounceAtEdge(NavDirection.Next);
         await FlyTo(keys[^1], keys.Count - 1, true);
     }
 

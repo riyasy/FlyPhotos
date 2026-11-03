@@ -88,6 +88,10 @@ internal static class Constants
     // can lag at most this far before the strip catches up — always covered by these rendered boxes.
     public const int ThumbnailSlideMarginBoxes = 3;
 
+    // Edge bounce when navigating past the first/last photo: an initial strip velocity, in box-widths per
+    // second, fed into the slide spring. With the current stiffness/damping the peak is ~1/4 of a box.
+    public const float ThumbnailEdgeBounceBoxesPerSec = 15f;
+
     // Others
     public const int CheckerSize = 10;
 

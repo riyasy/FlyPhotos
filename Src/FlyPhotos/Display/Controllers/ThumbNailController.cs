@@ -296,6 +296,25 @@ internal partial class ThumbNailController : IThumbnailController
     /// </summary>
     public void RequestThumbnailRedraw() => RequestRebuild();
 
+    /// <summary>
+    /// Overscroll feedback when navigation hits the first/last photo: kicks the strip the way it would
+    /// have scrolled for <paramref name="direction"/> and lets the slide spring pull it back. Thread-safe.
+    /// </summary>
+    public void BounceAtEdge(NavDirection direction)
+    {
+        if (!AppConfig.Settings.ShowThumbnails || !AppConfig.Settings.EnableThumbnailAnimation) return;
+        // Next scrolls the strip left (negative X) — the same way BeginSlide's +box offset settles back
+        // to 0 on a normal next-photo step — so the kick is negative for Next and positive for Prev.
+        var sign = direction == NavDirection.Next ? -1f : 1f;
+        _pump.Enqueue(() =>
+        {
+            // Ignore while already moving so a held key doesn't pile up velocity.
+            if (_slideAnimating || _thumbnailOffscreen == null) return;
+            _slideOffset.Velocity = sign * Constants.ThumbnailEdgeBounceBoxesPerSec * _thumbnailBoxSize;
+            _slideAnimating = true;
+        });
+    }
+
     // --- Slide animation ---
 
     /// <summary>
