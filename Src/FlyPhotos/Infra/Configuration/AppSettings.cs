@@ -84,6 +84,14 @@ public class AppSettings
     public bool AllowMultiInstance { get; set; } = false;
     public bool StickyZoomLevels { get; set; } = true;
 
+    [JsonConverter(typeof(JsonStringEnumConverter<ListSource>))]
+    public ListSource ListSource { get; set; } = ListSource.Explorer;
+
+    [JsonConverter(typeof(JsonStringEnumConverter<FolderSortBy>))]
+    public FolderSortBy FolderSortBy { get; set; } = FolderSortBy.Name;
+
+    public bool FolderSortDescending { get; set; } = false;
+
     // String serialization for elements is handled by [JsonConverter] on the RawDecoder type,
     // since property-level JsonStringEnumConverter<T> does not apply to collection elements.
     public ObservableCollection<RawDecoder> RawDecoderPriority { get; set; } =

@@ -1234,4 +1234,55 @@ High Quality Cubic – Dimensionamento de alta qualidade para fotos.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Widget de relógio flip para a área de trabalho do Windows</value>
   </data>
+  <data name="SettingsCardListSource.Header" xml:space="preserve">
+    <value>Criar a lista de fotos a partir de</value>
+  </data>
+  <data name="ListSourceDescription_Explorer" xml:space="preserve">
+    <value>Reflete exatamente o que você vê no Explorador de Arquivos. Mantém seus resultados de pesquisa atuais, filtros ativos e a ordem de classificação do Windows.</value>
+  </data>
+  <data name="ListSourceDescription_Folder" xml:space="preserve">
+    <value>Carrega todas as imagens da pasta de acordo com as configurações “Classificar por” e “Ordem” abaixo.</value>
+  </data>
+  <data name="ComboListSourceItemExplorer.Content" xml:space="preserve">
+    <value>Janela do Explorador de Arquivos</value>
+  </data>
+  <data name="ComboListSourceItemFolder.Content" xml:space="preserve">
+    <value>Pasta</value>
+  </data>
+  <data name="SettingsCardFolderSortBy.Header" xml:space="preserve">
+    <value>Classificar por</value>
+  </data>
+  <data name="ComboFolderSortByItemName.Content" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="ComboFolderSortByItemDateModified.Content" xml:space="preserve">
+    <value>Data de modificação</value>
+  </data>
+  <data name="ComboFolderSortByItemDateCreated.Content" xml:space="preserve">
+    <value>Data de criação</value>
+  </data>
+  <data name="ComboFolderSortByItemSize.Content" xml:space="preserve">
+    <value>Tamanho</value>
+  </data>
+  <data name="SettingsCardFolderSortOrder.Header" xml:space="preserve">
+    <value>Ordem</value>
+  </data>
+  <data name="ComboFolderSortOrderItemAscending.Content" xml:space="preserve">
+    <value>Crescente</value>
+  </data>
+  <data name="ComboFolderSortOrderItemDescending.Content" xml:space="preserve">
+    <value>Decrescente</value>
+  </data>
+  <data name="ShortcutName_NextFolder" xml:space="preserve">
+    <value>Próxima pasta</value>
+  </data>
+  <data name="ShortcutName_PrevFolder" xml:space="preserve">
+    <value>Pasta anterior</value>
+  </data>
+  <data name="ShortcutDesc_NextFolder" xml:space="preserve">
+    <value>Somente no modo Pasta: abre a próxima pasta dentro da pasta pai</value>
+  </data>
+  <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
+    <value>Somente no modo Pasta: abre a pasta anterior dentro da pasta pai</value>
+  </data>
 </root>

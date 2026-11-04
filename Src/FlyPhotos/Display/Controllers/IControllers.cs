@@ -10,6 +10,7 @@ internal interface ICanvasController : IDisposable
 {
     Task SetSource(Photo photo, DisplayLevel displayLevel);
     Task WaitForPanZoomAnimationAsync(int timeoutMs);
+    void RunAfterQueuedRenderWork(Action action);
 }
 
 internal interface IThumbnailController : IDisposable

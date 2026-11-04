@@ -1231,4 +1231,55 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Windows ഡെസ്ക്ടോപ്പിനുള്ള ഫ്ലിപ്പ് ക്ലോക്ക് വിജറ്റ്</value>
   </data>
+  <data name="SettingsCardListSource.Header" xml:space="preserve">
+    <value>ഫോട്ടോ ലിസ്റ്റിന്റെ ഉറവിടം</value>
+  </data>
+  <data name="ListSourceDescription_Explorer" xml:space="preserve">
+    <value>വിൻഡോസ് ഫയൽ എക്സ്പ്ലോററിൽ നിങ്ങൾ കാണുന്നത് അതേപടി കാണിക്കുന്നു. നിലവിലെ തിരയൽ ഫലങ്ങൾ, സജീവ ഫിൽട്ടറുകൾ, വിൻഡോസിലെ അടുക്കൽ ക്രമം എന്നിവ നിലനിർത്തുന്നു.</value>
+  </data>
+  <data name="ListSourceDescription_Folder" xml:space="preserve">
+    <value>ഫോൾഡറിലെ എല്ലാ ചിത്രങ്ങളും താഴെയുള്ള ‘ഇതനുസരിച്ച് അടുക്കുക’, ‘ക്രമം’ എന്നീ ക്രമീകരണങ്ങൾ അനുസരിച്ച് ലോഡ് ചെയ്യുന്നു.</value>
+  </data>
+  <data name="ComboListSourceItemExplorer.Content" xml:space="preserve">
+    <value>ഫയൽ എക്സ്പ്ലോറർ വിൻഡോ</value>
+  </data>
+  <data name="ComboListSourceItemFolder.Content" xml:space="preserve">
+    <value>ഫോൾഡർ</value>
+  </data>
+  <data name="SettingsCardFolderSortBy.Header" xml:space="preserve">
+    <value>ഇതനുസരിച്ച് അടുക്കുക</value>
+  </data>
+  <data name="ComboFolderSortByItemName.Content" xml:space="preserve">
+    <value>പേര്</value>
+  </data>
+  <data name="ComboFolderSortByItemDateModified.Content" xml:space="preserve">
+    <value>മാറ്റം വരുത്തിയ തീയതി</value>
+  </data>
+  <data name="ComboFolderSortByItemDateCreated.Content" xml:space="preserve">
+    <value>സൃഷ്ടിച്ച തീയതി</value>
+  </data>
+  <data name="ComboFolderSortByItemSize.Content" xml:space="preserve">
+    <value>വലുപ്പം</value>
+  </data>
+  <data name="SettingsCardFolderSortOrder.Header" xml:space="preserve">
+    <value>ക്രമം</value>
+  </data>
+  <data name="ComboFolderSortOrderItemAscending.Content" xml:space="preserve">
+    <value>ആരോഹണം</value>
+  </data>
+  <data name="ComboFolderSortOrderItemDescending.Content" xml:space="preserve">
+    <value>അവരോഹണം</value>
+  </data>
+  <data name="ShortcutName_NextFolder" xml:space="preserve">
+    <value>അടുത്ത ഫോൾഡർ</value>
+  </data>
+  <data name="ShortcutName_PrevFolder" xml:space="preserve">
+    <value>മുമ്പത്തെ ഫോൾഡർ</value>
+  </data>
+  <data name="ShortcutDesc_NextFolder" xml:space="preserve">
+    <value>ഫോൾഡർ മോഡിൽ മാത്രം: പാരന്റ് ഫോൾഡറിലെ അടുത്ത ഫോൾഡർ തുറക്കുന്നു</value>
+  </data>
+  <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
+    <value>ഫോൾഡർ മോഡിൽ മാത്രം: പാരന്റ് ഫോൾഡറിലെ മുമ്പത്തെ ഫോൾഡർ തുറക്കുന്നു</value>
+  </data>
 </root>

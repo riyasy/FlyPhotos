@@ -1234,4 +1234,55 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Widget d&apos;horloge à volets pour le bureau Windows</value>
   </data>
+  <data name="SettingsCardListSource.Header" xml:space="preserve">
+    <value>Créer la liste de photos à partir de</value>
+  </data>
+  <data name="ListSourceDescription_Explorer" xml:space="preserve">
+    <value>Reflète exactement ce que vous voyez dans l&apos;Explorateur de fichiers. Conserve vos résultats de recherche actuels, vos filtres actifs et l&apos;ordre de tri de Windows.</value>
+  </data>
+  <data name="ListSourceDescription_Folder" xml:space="preserve">
+    <value>Charge toutes les images du dossier selon les paramètres « Trier par » et « Ordre » ci-dessous.</value>
+  </data>
+  <data name="ComboListSourceItemExplorer.Content" xml:space="preserve">
+    <value>Fenêtre de l&apos;Explorateur</value>
+  </data>
+  <data name="ComboListSourceItemFolder.Content" xml:space="preserve">
+    <value>Dossier</value>
+  </data>
+  <data name="SettingsCardFolderSortBy.Header" xml:space="preserve">
+    <value>Trier par</value>
+  </data>
+  <data name="ComboFolderSortByItemName.Content" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="ComboFolderSortByItemDateModified.Content" xml:space="preserve">
+    <value>Date de modification</value>
+  </data>
+  <data name="ComboFolderSortByItemDateCreated.Content" xml:space="preserve">
+    <value>Date de création</value>
+  </data>
+  <data name="ComboFolderSortByItemSize.Content" xml:space="preserve">
+    <value>Taille</value>
+  </data>
+  <data name="SettingsCardFolderSortOrder.Header" xml:space="preserve">
+    <value>Ordre</value>
+  </data>
+  <data name="ComboFolderSortOrderItemAscending.Content" xml:space="preserve">
+    <value>Croissant</value>
+  </data>
+  <data name="ComboFolderSortOrderItemDescending.Content" xml:space="preserve">
+    <value>Décroissant</value>
+  </data>
+  <data name="ShortcutName_NextFolder" xml:space="preserve">
+    <value>Dossier suivant</value>
+  </data>
+  <data name="ShortcutName_PrevFolder" xml:space="preserve">
+    <value>Dossier précédent</value>
+  </data>
+  <data name="ShortcutDesc_NextFolder" xml:space="preserve">
+    <value>Mode Dossier uniquement : ouvre le dossier suivant dans le dossier parent</value>
+  </data>
+  <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
+    <value>Mode Dossier uniquement : ouvre le dossier précédent dans le dossier parent</value>
+  </data>
 </root>

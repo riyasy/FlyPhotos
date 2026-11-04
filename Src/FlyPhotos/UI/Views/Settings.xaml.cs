@@ -135,6 +135,11 @@ internal sealed partial class Settings
         ButtonSizeWindowToImageOnRestore.IsOn = AppConfig.Settings.SizeWindowToImageOnRestore;
         ButtonEnableExternalShortcut.IsOn = AppConfig.Settings.ShowExternalAppShortcuts;
         ButtonDecodeRawData.IsOn = AppConfig.Settings.DecodeRawData;
+        // Items are in enum order.
+        ComboListSource.SelectedIndex = (int)AppConfig.Settings.ListSource;
+        ComboFolderSortBy.SelectedIndex = (int)AppConfig.Settings.FolderSortBy;
+        ComboFolderSortOrder.SelectedIndex = AppConfig.Settings.FolderSortDescending ? 1 : 0;
+        UpdateFolderSortVisibility();
 
         MainLayout.KeyDown += MainLayout_OnKeyDown;
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
@@ -170,6 +175,9 @@ internal sealed partial class Settings
         ButtonSizeWindowToImageOnRestore.Toggled += ButtonSizeWindowToImageOnRestore_OnToggled;
         ButtonEnableExternalShortcut.Toggled += ButtonEnableExternalShortcut_OnToggled;
         ButtonDecodeRawData.Toggled += ButtonDecodeRawData_OnToggled;
+        ComboListSource.SelectionChanged += ComboListSource_OnSelectionChanged;
+        ComboFolderSortBy.SelectionChanged += ComboFolderSortBy_OnSelectionChanged;
+        ComboFolderSortOrder.SelectionChanged += ComboFolderSortOrder_OnSelectionChanged;
         AppConfig.Settings.RawDecoderPriority.CollectionChanged += RawDecoderPriority_CollectionChanged;
 
         // Initialize codec list view
@@ -290,6 +298,33 @@ internal sealed partial class Settings
         await AppConfig.SaveAsync();
     }
     
+    // The photo list is built when a photo is opened, so these apply from the next opened photo on.
+    private async void ComboListSource_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        AppConfig.Settings.ListSource = (ListSource)ComboListSource.SelectedIndex;
+        UpdateFolderSortVisibility();
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ComboFolderSortBy_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        AppConfig.Settings.FolderSortBy = (FolderSortBy)ComboFolderSortBy.SelectedIndex;
+        await AppConfig.SaveAsync();
+    }
+
+    private async void ComboFolderSortOrder_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        AppConfig.Settings.FolderSortDescending = ComboFolderSortOrder.SelectedIndex == 1;
+        await AppConfig.SaveAsync();
+    }
+
+    private void UpdateFolderSortVisibility()
+    {
+        var visibility = AppConfig.Settings.ListSource == ListSource.Folder ? Visibility.Visible : Visibility.Collapsed;
+        SettingsCardFolderSortBy.Visibility = visibility;
+        SettingsCardFolderSortOrder.Visibility = visibility;
+    }
+
     private async void ButtonShowCacheStatusExpander_OnToggled(object s, RoutedEventArgs e)
     {
         AppConfig.Settings.ShowCacheStatus = ButtonShowCacheStatusExpander.IsOn;
@@ -517,6 +552,10 @@ internal sealed partial class Settings
 
     // Show the "Previous state" explanation only for the LastWindowState option (index 2).
     private string LaunchModeDescription(int index) => index == 2 ? L.Get("SettingsCardWindowLaunchMode/Description") : string.Empty;
+
+    // Items are in ListSource enum order: 0 = Explorer window, 1 = Folder.
+    private string ListSourceDescription(int index) =>
+        L.Get(index == (int)ListSource.Folder ? "ListSourceDescription_Folder" : "ListSourceDescription_Explorer");
 
     // Mapping helpers to use index-based combo box handling while keeping AppSettings stored as enum names
     private static int GetIndexForTheme(ElementTheme theme)

@@ -36,9 +36,53 @@ internal partial class Photo : IDisposable
         IsRaw = !string.IsNullOrEmpty(extension) && CodecDiscovery.Support.Raw(extension);
     }
 
-    // Extension is never changed by a rename (UI keeps it fixed), so the format-derived
-    // flags above stay valid — only the path itself needs updating.
+    // Extension is never changed by a rename (the UI keeps it fixed, and the folder watcher reports an
+    // extension change as remove + add), so the format-derived flags above stay valid.
     public void Rename(string newFilePath) => FilePath = newFilePath;
+
+    // --- Lifetime: a photo that left the list is disposed only once nothing is still using its bitmaps ---
+
+    private readonly Lock _lifetimeLock = new();
+    private int _users;
+    private bool _retired;
+
+    /// <summary>
+    /// Registers a background user (a load) of this photo's bitmaps. False once the photo is retired — the
+    /// caller must then not touch it. Every true must be paired with <see cref="EndUse"/>.
+    /// </summary>
+    public bool TryBeginUse()
+    {
+        lock (_lifetimeLock)
+        {
+            if (_retired) return false;
+            _users++;
+            return true;
+        }
+    }
+
+    /// <summary>Ends a <see cref="TryBeginUse"/>; the last user of a retired photo disposes it.</summary>
+    public void EndUse()
+    {
+        bool dispose;
+        lock (_lifetimeLock) dispose = --_users == 0 && _retired;
+        if (dispose) Dispose();
+    }
+
+    /// <summary>
+    /// The photo has left the list for good: dispose it now, or — if a load is still using its bitmaps — when
+    /// that load ends. Idempotent. The caller must already be sure the canvas no longer draws it.
+    /// </summary>
+    public void Retire()
+    {
+        bool dispose;
+        lock (_lifetimeLock)
+        {
+            if (_retired) return;
+            _retired = true;
+            dispose = _users == 0;
+        }
+        if (dispose) Dispose();
+    }
 
     private static readonly Photo _empty = new(string.Empty);
     public static Photo Empty() => _empty;

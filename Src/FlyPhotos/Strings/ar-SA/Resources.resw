@@ -1234,4 +1234,55 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>أداة ساعة قلّابة لسطح مكتب Windows</value>
   </data>
+  <data name="SettingsCardListSource.Header" xml:space="preserve">
+    <value>إنشاء قائمة الصور من</value>
+  </data>
+  <data name="ListSourceDescription_Explorer" xml:space="preserve">
+    <value>يعرض بالضبط ما تراه في مستكشف Windows، مع الاحتفاظ بنتائج البحث الحالية وعوامل التصفية النشطة وترتيب الفرز في Windows.</value>
+  </data>
+  <data name="ListSourceDescription_Folder" xml:space="preserve">
+    <value>يحمّل جميع الصور الموجودة في المجلد وفقًا لإعدادَي «الفرز حسب» و«الترتيب» أدناه.</value>
+  </data>
+  <data name="ComboListSourceItemExplorer.Content" xml:space="preserve">
+    <value>نافذة المستكشف</value>
+  </data>
+  <data name="ComboListSourceItemFolder.Content" xml:space="preserve">
+    <value>مجلد</value>
+  </data>
+  <data name="SettingsCardFolderSortBy.Header" xml:space="preserve">
+    <value>الفرز حسب</value>
+  </data>
+  <data name="ComboFolderSortByItemName.Content" xml:space="preserve">
+    <value>الاسم</value>
+  </data>
+  <data name="ComboFolderSortByItemDateModified.Content" xml:space="preserve">
+    <value>تاريخ التعديل</value>
+  </data>
+  <data name="ComboFolderSortByItemDateCreated.Content" xml:space="preserve">
+    <value>تاريخ الإنشاء</value>
+  </data>
+  <data name="ComboFolderSortByItemSize.Content" xml:space="preserve">
+    <value>الحجم</value>
+  </data>
+  <data name="SettingsCardFolderSortOrder.Header" xml:space="preserve">
+    <value>الترتيب</value>
+  </data>
+  <data name="ComboFolderSortOrderItemAscending.Content" xml:space="preserve">
+    <value>تصاعدي</value>
+  </data>
+  <data name="ComboFolderSortOrderItemDescending.Content" xml:space="preserve">
+    <value>تنازلي</value>
+  </data>
+  <data name="ShortcutName_NextFolder" xml:space="preserve">
+    <value>المجلد التالي</value>
+  </data>
+  <data name="ShortcutName_PrevFolder" xml:space="preserve">
+    <value>المجلد السابق</value>
+  </data>
+  <data name="ShortcutDesc_NextFolder" xml:space="preserve">
+    <value>في وضع المجلد فقط: يفتح المجلد التالي داخل المجلد الأصل</value>
+  </data>
+  <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
+    <value>في وضع المجلد فقط: يفتح المجلد السابق داخل المجلد الأصل</value>
+  </data>
 </root>

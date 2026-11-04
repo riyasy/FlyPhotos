@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Services;
 using Microsoft.Graphics.Canvas;
@@ -61,12 +62,13 @@ internal sealed class PrefetchCache : IDisposable
     private readonly Func<int, Photo?> _getPhoto;
     private readonly ICanvasResourceCreatorWithDpi _device;
 
-    // True while the user is holding a navigation key. The HQ worker re-parks while this is set so it
-    // doesn't decode photos being skipped past. Supplied by the controller (IsContinuousKeyPress).
+    // True while the user is holding a navigation key or skipping through folders. The HQ worker re-parks
+    // while this is set so it doesn't decode photos being skipped past. Supplied by the controller.
     private readonly Func<bool> _isBursting;
 
     // Latest window pushed in by MoveWindow. Replaces the old reach-ins to PhotoSessionState +
-    // _sortedPhotoKeys. _windowKeys is the full sorted key list; _windowCentre is the position in it.
+    // _sortedPhotoKeys. _windowKeys is the full position-ordered key list (key values are NOT ordered);
+    // _windowCentre is the position in it.
     private volatile IReadOnlyList<int> _windowKeys = Array.Empty<int>();
     private volatile int _windowCentre;
 
@@ -157,7 +159,7 @@ internal sealed class PrefetchCache : IDisposable
         if (signalHqLoading) _hqTier.Signal.Set();
     }
 
-    /// <summary>Wake the HQ worker (used by Brake once a burst has ended).</summary>
+    /// <summary>Wake the HQ worker once navigation stops holding it back (a burst ended, a folder-switch quiet period passed).</summary>
     public void SignalHqLoading() => _hqTier.Signal.Set();
 
     /// <summary>Mark a key as already HQ-loaded so the cache never re-decodes it (e.g. the first photo).</summary>
@@ -229,10 +231,12 @@ internal sealed class PrefetchCache : IDisposable
         {
             while (!token.IsCancellationRequested)
             {
-                if (_hqTier.Queue.IsEmpty || _isBursting())
+                // Re-checked after every wake-up: a signal sent while navigation is still holding HQ back
+                // (a window move during a burst or a folder-switch quiet period) must not start a decode.
+                while (_hqTier.Queue.IsEmpty || _isBursting())
                 {
                     WaitHandle.WaitAny([_hqTier.Signal, token.WaitHandle]);
-                    if (token.IsCancellationRequested) break;
+                    token.ThrowIfCancellationRequested();
                 }
 
                 if (!_hqTier.Queue.TryPop(out var item)) continue;
@@ -274,32 +278,53 @@ internal sealed class PrefetchCache : IDisposable
     // Per-key loaders
     // -------------------------------------------------------------------------
 
+    // Every loader holds a use on its photo (Photo.TryBeginUse) for as long as it touches the photo's bitmaps,
+    // so a photo that leaves the list mid-load is disposed by whichever of the owner and the load finishes last.
+
     private async Task LoadPreviewAsync(int key)
     {
+        Photo? photo = null;
         try
         {
             _previewTier.InFlight[key] = 0;
-            if (_getPhoto(key) is not { } photo) return;
+            if (_getPhoto(key) is not { } p || !p.TryBeginUse())
+            {
+                _previewTier.InFlight.Remove(key, out _);
+                return;
+            }
+            photo = p;
             await photo.LoadPreview(_device);
+            if (DiscardIfRemoved(key, photo, _previewTier)) return;
             _previewTier.Done[key] = 0;
             _previewTier.InFlight.Remove(key, out _);
             if (photo.Preview?.Origin == Origin.Disk) _diskCacheQueue.Push(key);
             PreviewReady?.Invoke(key);
             FireProgress();
         }
-        finally { _previewThrottler.Release(); }
+        finally
+        {
+            photo?.EndUse();
+            _previewThrottler.Release();
+        }
     }
 
     private async Task LoadHqAsync(int key)
     {
+        Photo? photo = null;
         try
         {
             _hqTier.InFlight[key] = 0;
             int gen = _hqGeneration;
-            if (_getPhoto(key) is not { } photo) return;
+            if (_getPhoto(key) is not { } p || !p.TryBeginUse())
+            {
+                _hqTier.InFlight.Remove(key, out _);
+                return;
+            }
+            photo = p;
             var isCentre = IsWindowCentre(key);
             var loaded = await photo.LoadHq(_device, allowLarge: isCentre,
                 isCentre ? _centreCts.Token : CancellationToken.None);
+            if (DiscardIfRemoved(key, photo, _hqTier)) return;
 
             // A large image finished just as the user left it: don't keep gigabytes for a neighbour.
             if (loaded && photo.Hq is TiledHqDisplayItem && !IsWindowCentre(key))
@@ -325,7 +350,23 @@ internal sealed class PrefetchCache : IDisposable
             _hqTier.InFlight.Remove(key, out _);
             HqReady?.Invoke(key);
         }
-        finally { _hqThrottler.Release(); }
+        finally
+        {
+            photo?.EndUse();
+            _hqThrottler.Release();
+        }
+    }
+
+    /// <summary>
+    /// The photo left the list while it was loading (deleted, or removed by a folder change/switch): record
+    /// nothing for the key. Its bitmaps — including any this load just attached — are disposed when the photo
+    /// is retired and its last use ends. Returns true when the load was discarded.
+    /// </summary>
+    private bool DiscardIfRemoved(int key, Photo photo, PhotoCacheTier tier)
+    {
+        if (ReferenceEquals(_getPhoto(key), photo)) return false;
+        tier.InFlight.Remove(key, out _);
+        return true;
     }
 
     /// <summary>
@@ -352,11 +393,18 @@ internal sealed class PrefetchCache : IDisposable
         try
         {
             if (_previewTier.Done.ContainsKey(key) &&
-                _getPhoto(key) is { Preview.Origin: Origin.Disk } image)
+                _getPhoto(key) is { Preview.Origin: Origin.Disk } image && image.TryBeginUse())
             {
-                var (actualWidth, actualHeight) = image.GetSourcePixelSize();
-                await DiskCacherWithSqlite.Instance.PutInCache(image.FilePath, image.Preview.Bitmap,
-                    (int)Math.Round(actualWidth), (int)Math.Round(actualHeight), image.Preview.Rotation);
+                try
+                {
+                    if (image.Preview is { } preview)
+                    {
+                        var (actualWidth, actualHeight) = image.GetSourcePixelSize();
+                        await DiskCacherWithSqlite.Instance.PutInCache(image.FilePath, preview.Bitmap,
+                            (int)Math.Round(actualWidth), (int)Math.Round(actualHeight), preview.Rotation);
+                    }
+                }
+                finally { image.EndUse(); }
             }
         }
         finally { _diskCacheThrottler.Release(); }
@@ -393,12 +441,7 @@ internal sealed class PrefetchCache : IDisposable
         var keys = _windowKeys;
         int centre = _windowCentre;
         if (centre < 0 || centre >= keys.Count) return false;
-        int side = AppConfig.Settings.CacheSizeOneSideHqImages;
-        int lo = Math.Max(0, centre - side);
-        int hi = Math.Min(keys.Count - 1, centre + side);
-        for (int pos = lo; pos <= hi; pos++)
-            if (keys[pos] == key) return true;
-        return false;
+        return KeyWindow.IndexOf(keys, key, centre, AppConfig.Settings.CacheSizeOneSideHqImages) >= 0;
     }
 
     // A tiled HQ holds gigabytes of CPU tiles, so only the centre photo keeps one; a neighbour reloads on
@@ -443,17 +486,19 @@ internal sealed class PrefetchCache : IDisposable
     {
         var keys = _windowKeys;
         int centre = _windowCentre;
-        if (centre < 0 || keys.Count == 0) return;
-        int currentKey = keys[centre];
+        if (centre < 0 || centre >= keys.Count) return;
         int noOfFilesOnLeft = centre;
         int noOfFilesOnRight = keys.Count - 1 - centre;
+
+        // Counted by position, not by key value (keys are not ordered). Previews are only kept inside the
+        // window, so scanning it finds every cached one.
+        var (lo, hi) = KeyWindow.Range(keys.Count, centre, AppConfig.Settings.CacheSizeOneSidePreviews);
         int noOfCachedItemsOnLeft = 0;
         int noOfCachedItemsOnRight = 0;
-        foreach (int key in _previewTier.Done.Keys)
-        {
-            if (key < currentKey) noOfCachedItemsOnLeft++;
-            else if (key > currentKey) noOfCachedItemsOnRight++;
-        }
+        for (int pos = lo; pos < centre; pos++)
+            if (_previewTier.Done.ContainsKey(keys[pos])) noOfCachedItemsOnLeft++;
+        for (int pos = centre + 1; pos <= hi; pos++)
+            if (_previewTier.Done.ContainsKey(keys[pos])) noOfCachedItemsOnRight++;
         CacheStatusChanged?.Invoke($"{noOfCachedItemsOnLeft}/{noOfFilesOnLeft} < Cache > {noOfCachedItemsOnRight}/{noOfFilesOnRight}");
     }
 

@@ -1234,4 +1234,55 @@ High Quality Cubic – 适合照片的最高质量缩放。</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>适用于 Windows 桌面的翻页时钟小组件</value>
   </data>
+  <data name="SettingsCardListSource.Header" xml:space="preserve">
+    <value>照片列表来源</value>
+  </data>
+  <data name="ListSourceDescription_Explorer" xml:space="preserve">
+    <value>与 Windows 文件资源管理器中显示的内容完全一致，保留当前的搜索结果、已应用的筛选器和 Windows 排序方式。</value>
+  </data>
+  <data name="ListSourceDescription_Folder" xml:space="preserve">
+    <value>加载文件夹中的所有图像，并按照下方的“排序方式”和“顺序”设置排列。</value>
+  </data>
+  <data name="ComboListSourceItemExplorer.Content" xml:space="preserve">
+    <value>文件资源管理器窗口</value>
+  </data>
+  <data name="ComboListSourceItemFolder.Content" xml:space="preserve">
+    <value>文件夹</value>
+  </data>
+  <data name="SettingsCardFolderSortBy.Header" xml:space="preserve">
+    <value>排序方式</value>
+  </data>
+  <data name="ComboFolderSortByItemName.Content" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="ComboFolderSortByItemDateModified.Content" xml:space="preserve">
+    <value>修改日期</value>
+  </data>
+  <data name="ComboFolderSortByItemDateCreated.Content" xml:space="preserve">
+    <value>创建日期</value>
+  </data>
+  <data name="ComboFolderSortByItemSize.Content" xml:space="preserve">
+    <value>大小</value>
+  </data>
+  <data name="SettingsCardFolderSortOrder.Header" xml:space="preserve">
+    <value>顺序</value>
+  </data>
+  <data name="ComboFolderSortOrderItemAscending.Content" xml:space="preserve">
+    <value>升序</value>
+  </data>
+  <data name="ComboFolderSortOrderItemDescending.Content" xml:space="preserve">
+    <value>降序</value>
+  </data>
+  <data name="ShortcutName_NextFolder" xml:space="preserve">
+    <value>下一个文件夹</value>
+  </data>
+  <data name="ShortcutName_PrevFolder" xml:space="preserve">
+    <value>上一个文件夹</value>
+  </data>
+  <data name="ShortcutDesc_NextFolder" xml:space="preserve">
+    <value>仅限文件夹模式：打开父文件夹中的下一个文件夹</value>
+  </data>
+  <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
+    <value>仅限文件夹模式：打开父文件夹中的上一个文件夹</value>
+  </data>
 </root>

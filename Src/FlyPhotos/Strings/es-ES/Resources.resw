@@ -1234,4 +1234,55 @@ High Quality Cubic – Escalado de la más alta calidad para fotos.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Widget de reloj abatible para el escritorio de Windows</value>
   </data>
+  <data name="SettingsCardListSource.Header" xml:space="preserve">
+    <value>Crear la lista de fotos a partir de</value>
+  </data>
+  <data name="ListSourceDescription_Explorer" xml:space="preserve">
+    <value>Refleja exactamente lo que ve en el Explorador de archivos de Windows. Conserva sus resultados de búsqueda actuales, los filtros activos y el orden de Windows.</value>
+  </data>
+  <data name="ListSourceDescription_Folder" xml:space="preserve">
+    <value>Carga todas las imágenes de la carpeta según los ajustes «Ordenar por» y «Orden» de abajo.</value>
+  </data>
+  <data name="ComboListSourceItemExplorer.Content" xml:space="preserve">
+    <value>Ventana del Explorador de archivos</value>
+  </data>
+  <data name="ComboListSourceItemFolder.Content" xml:space="preserve">
+    <value>Carpeta</value>
+  </data>
+  <data name="SettingsCardFolderSortBy.Header" xml:space="preserve">
+    <value>Ordenar por</value>
+  </data>
+  <data name="ComboFolderSortByItemName.Content" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="ComboFolderSortByItemDateModified.Content" xml:space="preserve">
+    <value>Fecha de modificación</value>
+  </data>
+  <data name="ComboFolderSortByItemDateCreated.Content" xml:space="preserve">
+    <value>Fecha de creación</value>
+  </data>
+  <data name="ComboFolderSortByItemSize.Content" xml:space="preserve">
+    <value>Tamaño</value>
+  </data>
+  <data name="SettingsCardFolderSortOrder.Header" xml:space="preserve">
+    <value>Orden</value>
+  </data>
+  <data name="ComboFolderSortOrderItemAscending.Content" xml:space="preserve">
+    <value>Ascendente</value>
+  </data>
+  <data name="ComboFolderSortOrderItemDescending.Content" xml:space="preserve">
+    <value>Descendente</value>
+  </data>
+  <data name="ShortcutName_NextFolder" xml:space="preserve">
+    <value>Carpeta siguiente</value>
+  </data>
+  <data name="ShortcutName_PrevFolder" xml:space="preserve">
+    <value>Carpeta anterior</value>
+  </data>
+  <data name="ShortcutDesc_NextFolder" xml:space="preserve">
+    <value>Solo en modo Carpeta: abre la carpeta siguiente dentro de la carpeta principal</value>
+  </data>
+  <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
+    <value>Solo en modo Carpeta: abre la carpeta anterior dentro de la carpeta principal</value>
+  </data>
 </root>

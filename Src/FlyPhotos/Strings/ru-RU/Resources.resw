@@ -1234,4 +1234,55 @@ High Quality Cubic – Масштабирование наивысшего ка�
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Виджет перекидных часов для рабочего стола Windows</value>
   </data>
+  <data name="SettingsCardListSource.Header" xml:space="preserve">
+    <value>Формировать список фото из</value>
+  </data>
+  <data name="ListSourceDescription_Explorer" xml:space="preserve">
+    <value>Точно повторяет то, что вы видите в Проводнике Windows. Сохраняет текущие результаты поиска, активные фильтры и порядок сортировки Windows.</value>
+  </data>
+  <data name="ListSourceDescription_Folder" xml:space="preserve">
+    <value>Загружает все изображения в папке с учётом параметров «Сортировать по» и «Порядок» ниже.</value>
+  </data>
+  <data name="ComboListSourceItemExplorer.Content" xml:space="preserve">
+    <value>Окно Проводника</value>
+  </data>
+  <data name="ComboListSourceItemFolder.Content" xml:space="preserve">
+    <value>Папка</value>
+  </data>
+  <data name="SettingsCardFolderSortBy.Header" xml:space="preserve">
+    <value>Сортировать по</value>
+  </data>
+  <data name="ComboFolderSortByItemName.Content" xml:space="preserve">
+    <value>Имя</value>
+  </data>
+  <data name="ComboFolderSortByItemDateModified.Content" xml:space="preserve">
+    <value>Дата изменения</value>
+  </data>
+  <data name="ComboFolderSortByItemDateCreated.Content" xml:space="preserve">
+    <value>Дата создания</value>
+  </data>
+  <data name="ComboFolderSortByItemSize.Content" xml:space="preserve">
+    <value>Размер</value>
+  </data>
+  <data name="SettingsCardFolderSortOrder.Header" xml:space="preserve">
+    <value>Порядок</value>
+  </data>
+  <data name="ComboFolderSortOrderItemAscending.Content" xml:space="preserve">
+    <value>По возрастанию</value>
+  </data>
+  <data name="ComboFolderSortOrderItemDescending.Content" xml:space="preserve">
+    <value>По убыванию</value>
+  </data>
+  <data name="ShortcutName_NextFolder" xml:space="preserve">
+    <value>Следующая папка</value>
+  </data>
+  <data name="ShortcutName_PrevFolder" xml:space="preserve">
+    <value>Предыдущая папка</value>
+  </data>
+  <data name="ShortcutDesc_NextFolder" xml:space="preserve">
+    <value>Только в режиме «Папка»: открывает следующую папку в родительской папке</value>
+  </data>
+  <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
+    <value>Только в режиме «Папка»: открывает предыдущую папку в родительской папке</value>
+  </data>
 </root>

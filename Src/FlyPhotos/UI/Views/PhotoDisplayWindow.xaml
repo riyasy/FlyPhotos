@@ -91,6 +91,31 @@
                 Text=""
                 Typography.NumeralAlignment="Tabular" />
         </Border>
+        <!--  Folder name, flashed on a Folder mode folder switch. Sits above the zoom readout, which the new photo's fit also shows.  -->
+        <Border
+            x:Name="BorderTxtFolderName"
+            Margin="0,0,0,90"
+            Padding="14,8,14,8"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="#99000000"
+            CornerRadius="6"
+            IsHitTestVisible="False"
+            Visibility="Collapsed">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <FontIcon
+                    VerticalAlignment="Center"
+                    FontFamily="{StaticResource FluentIcons}"
+                    FontSize="16"
+                    Foreground="White"
+                    Glyph="&#xE8B7;" />
+                <TextBlock
+                    x:Name="TxtFolderName"
+                    VerticalAlignment="Center"
+                    FontSize="16"
+                    Foreground="White" />
+            </StackPanel>
+        </Border>
         <!--  Edge nav arrows (#243). Only the tile is hit-testable; EdgeNavArrowFader shows them and collapses them when the setting is off.  -->
         <RepeatButton
             x:Name="EdgeButtonPrev"

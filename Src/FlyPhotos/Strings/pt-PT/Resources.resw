@@ -1234,4 +1234,55 @@ High Quality Cubic – Redimensionamento de alta qualidade para fotos.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Widget de relógio flip para o ambiente de trabalho do Windows</value>
   </data>
+  <data name="SettingsCardListSource.Header" xml:space="preserve">
+    <value>Criar a lista de fotos a partir de</value>
+  </data>
+  <data name="ListSourceDescription_Explorer" xml:space="preserve">
+    <value>Reflete exatamente o que vê no Explorador de Ficheiros do Windows. Mantém os resultados de pesquisa atuais, os filtros ativos e a ordenação do Windows.</value>
+  </data>
+  <data name="ListSourceDescription_Folder" xml:space="preserve">
+    <value>Carrega todas as imagens da pasta de acordo com as definições «Ordenar por» e «Ordem» abaixo.</value>
+  </data>
+  <data name="ComboListSourceItemExplorer.Content" xml:space="preserve">
+    <value>Janela do Explorador de Ficheiros</value>
+  </data>
+  <data name="ComboListSourceItemFolder.Content" xml:space="preserve">
+    <value>Pasta</value>
+  </data>
+  <data name="SettingsCardFolderSortBy.Header" xml:space="preserve">
+    <value>Ordenar por</value>
+  </data>
+  <data name="ComboFolderSortByItemName.Content" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="ComboFolderSortByItemDateModified.Content" xml:space="preserve">
+    <value>Data de modificação</value>
+  </data>
+  <data name="ComboFolderSortByItemDateCreated.Content" xml:space="preserve">
+    <value>Data de criação</value>
+  </data>
+  <data name="ComboFolderSortByItemSize.Content" xml:space="preserve">
+    <value>Tamanho</value>
+  </data>
+  <data name="SettingsCardFolderSortOrder.Header" xml:space="preserve">
+    <value>Ordem</value>
+  </data>
+  <data name="ComboFolderSortOrderItemAscending.Content" xml:space="preserve">
+    <value>Ascendente</value>
+  </data>
+  <data name="ComboFolderSortOrderItemDescending.Content" xml:space="preserve">
+    <value>Descendente</value>
+  </data>
+  <data name="ShortcutName_NextFolder" xml:space="preserve">
+    <value>Pasta seguinte</value>
+  </data>
+  <data name="ShortcutName_PrevFolder" xml:space="preserve">
+    <value>Pasta anterior</value>
+  </data>
+  <data name="ShortcutDesc_NextFolder" xml:space="preserve">
+    <value>Apenas no modo Pasta: abre a pasta seguinte dentro da pasta principal</value>
+  </data>
+  <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
+    <value>Apenas no modo Pasta: abre a pasta anterior dentro da pasta principal</value>
+  </data>
 </root>

@@ -128,12 +128,14 @@ internal static class ImageReader
         Purpose purpose, Action<DecodeStep>? onAttempt = null, CancellationToken ct = default)
     {
         var chain = ChainFor(file, purpose);
-        if (await RunChain(ctrl, file, chain, onAttempt, ct) is { } item) return item;
+        bool fullImage = purpose is Purpose.Hq or Purpose.FirstPreview;
+        if (await RunChain(ctrl, file, chain, onAttempt, fullImage, ct) is { } item) return item;
+        if (fullImage && file.Oversized == true) return null; // no full-image decoder can read it
         if (!await file.CorrectFormatFromHeaderAsync()) return null;
 
         // Content whose format gets the same chain (e.g. JPEG data in a .mpo) would only fail the same way.
         var corrected = ChainFor(file, purpose);
-        return corrected.SequenceEqual(chain) ? null : await RunChain(ctrl, file, corrected, onAttempt, ct);
+        return corrected.SequenceEqual(chain) ? null : await RunChain(ctrl, file, corrected, onAttempt, fullImage, ct);
     }
 
     /// <summary>The decoder chain for the file's current format, with the user's settings.</summary>
@@ -146,8 +148,13 @@ internal static class ImageReader
     /// Tries each step in order and returns the first item decoded, or null when all failed. A step that throws
     /// is logged and skipped; cancellation is not swallowed.
     /// </summary>
+    /// <param name="stopWhenOversized">
+    /// Full-image chains: once a step fails, stop if the image is over the GPU's maximum bitmap size. Every
+    /// full-image decoder fails on such an image, and the later ones (ImageMagick) only after decoding all of
+    /// it — gigabytes and seconds per image, which the GC then keeps committed long after.
+    /// </param>
     private static async Task<DisplayItem?> RunChain(ICanvasResourceCreatorWithDpi ctrl, ImageFile file,
-        List<DecodeStep> chain, Action<DecodeStep>? onAttempt, CancellationToken ct)
+        List<DecodeStep> chain, Action<DecodeStep>? onAttempt, bool stopWhenOversized, CancellationToken ct)
     {
         foreach (var step in chain)
         {
@@ -161,6 +168,7 @@ internal static class ImageReader
             {
                 Logger.Error(ex, "{0} failed for {1}", step, file.Path);
             }
+            if (stopWhenOversized && await IsOversized(ctrl, file)) return null;
         }
         return null;
     }
@@ -223,8 +231,8 @@ internal static class ImageReader
     /// Whether a failed decode was caused by the image being over the GPU's maximum bitmap size rather than
     /// by a broken file. Only failures pay for this size probe.
     /// </summary>
-    private static Task<bool> IsOversized(ICanvasResourceCreatorWithDpi d2dCanvas, ImageFile file) =>
-        LargeImageReader.IsOversizedAsync(file, d2dCanvas.Device.MaximumBitmapSizeInPixels);
+    private static async Task<bool> IsOversized(ICanvasResourceCreatorWithDpi d2dCanvas, ImageFile file) =>
+        file.Oversized ??= await LargeImageReader.IsOversizedAsync(file, d2dCanvas.Device.MaximumBitmapSizeInPixels);
 
     /// <summary>The error screen shown when no decoder could read the image.</summary>
     private static StaticHqDisplayItem HqFailed() => new(_indicators.HqFailed, Origin.ErrorScreen);

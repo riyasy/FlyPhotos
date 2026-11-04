@@ -8,7 +8,8 @@ namespace FlyPhotos.Display.State;
 
 /// <summary>
 /// Owns the photo collection: the <see cref="Photo"/> objects keyed by int, and the immutable
-/// sorted-key snapshot used for positional navigation.
+/// position-ordered key snapshot used for navigation. Keys are stable identities, NOT positions: Folder
+/// mode inserts new keys anywhere, so key values say nothing about order — never compare or binary-search them.
 /// <para>
 /// The concurrency model is preserved verbatim from when these were two fields on
 /// <c>PhotoDisplayController</c>:
@@ -57,7 +58,44 @@ internal sealed class PhotoList : IPhotoProvider
             keys.Add(i);
             _photos[i] = new Photo(files[i]);
         }
+        _nextKey = files.Count;
         _keys = keys; // publish the fully populated list atomically
+    }
+
+    // Keys are never reused, so a cache entry or in-flight load for a removed key can never be
+    // mistaken for a newer photo. Only the thread that mutates the list touches this.
+    private int _nextKey;
+
+    /// <summary>
+    /// Applies one change batch by the rules of <see cref="ListChange.Apply{T}"/> (removals, renames that keep
+    /// the photo and key, sorted additions; the photo at <paramref name="keepKey"/> survives a batch that would
+    /// empty the list). New photos enter the dictionary before the new snapshot is published. Removed photos
+    /// stay in the dictionary until the caller calls <see cref="Forget"/>, so it can still decide where to
+    /// navigate. Returns the removed (key, photo) pairs. Call from the one thread that mutates the list.
+    /// </summary>
+    public List<(int Key, Photo Photo)> ApplyChanges(Predicate<string> isRemoved,
+        IReadOnlyDictionary<string, string>? renamed, IReadOnlyList<string> addedSorted,
+        IComparer<string>? order, int keepKey)
+    {
+        var result = ListChange.Apply(_keys, key => _photos[key].FilePath, isRemoved, renamed, addedSorted, order,
+            create: path =>
+            {
+                int key = _nextKey++;
+                _photos[key] = new Photo(path);
+                return key;
+            },
+            rename: (key, path) => _photos[key].Rename(path),
+            isKeep: key => key == keepKey);
+
+        if (result.Changed) _keys = result.Items; // publish atomically
+        return result.Removed.ConvertAll(key => (key, _photos[key]));
+    }
+
+    /// <summary>Drops photos returned by <see cref="ApplyChanges"/> from the dictionary. The caller owns disposal.</summary>
+    public void Forget(List<(int Key, Photo Photo)> removed)
+    {
+        foreach (var (key, _) in removed)
+            _photos.TryRemove(key, out _);
     }
 
     /// <summary>Replaces (or adds) the photo at <paramref name="key"/> without touching the snapshot.</summary>

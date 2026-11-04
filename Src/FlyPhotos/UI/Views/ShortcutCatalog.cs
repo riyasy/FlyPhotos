@@ -206,7 +206,8 @@ public enum CommandId
     CopyPhoto, DeletePhoto, RenamePhoto, PrintPhoto, SharePhoto, ShowInExplorer,
     FileProperties, FileDetails,
     OpenWithApp1, OpenWithApp2, OpenWithApp3, OpenWithApp4, OpenWithPanel,
-    MoreActionsMenu
+    MoreActionsMenu,
+    NextFolder, PrevFolder
 }
 
 /// <summary>
@@ -415,7 +416,10 @@ internal static class ShortcutCatalog
             Row(CommandId.FirstPhoto, "\uE892", Repeat, K(VirtualKey.Home)),
             Row(CommandId.LastPhoto, "\uE893", Repeat, K(VirtualKey.End)),
             Row(CommandId.NextPage, "\uF586", Repeat, K(VirtualKey.Right, alt: true)),
-            Row(CommandId.PrevPage, "\uF587", Repeat, K(VirtualKey.Left, alt: true))
+            Row(CommandId.PrevPage, "\uF587", Repeat, K(VirtualKey.Left, alt: true)),
+            // Not Repeat: a held key would race through folders, each one a full list swap.
+            Row(CommandId.NextFolder, "\uE8B7", None, K(VirtualKey.PageDown, ctrl: true)),
+            Row(CommandId.PrevFolder, "\uE8B7", None, K(VirtualKey.PageUp, ctrl: true))
         ]),
 
         ("ZoomPan",

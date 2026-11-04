@@ -1234,4 +1234,55 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Kääntökellowidget Windowsin työpöydälle</value>
   </data>
+  <data name="SettingsCardListSource.Header" xml:space="preserve">
+    <value>Muodosta kuvaluettelo lähteestä</value>
+  </data>
+  <data name="ListSourceDescription_Explorer" xml:space="preserve">
+    <value>Näyttää täsmälleen saman kuin Windowsin Resurssienhallinta. Nykyiset hakutulokset, aktiiviset suodattimet ja Windowsin lajittelujärjestys säilyvät.</value>
+  </data>
+  <data name="ListSourceDescription_Folder" xml:space="preserve">
+    <value>Lataa kaikki kansion kuvat alla olevien asetusten ”Lajitteluperuste” ja ”Järjestys” mukaisesti.</value>
+  </data>
+  <data name="ComboListSourceItemExplorer.Content" xml:space="preserve">
+    <value>Resurssienhallinnan ikkuna</value>
+  </data>
+  <data name="ComboListSourceItemFolder.Content" xml:space="preserve">
+    <value>Kansio</value>
+  </data>
+  <data name="SettingsCardFolderSortBy.Header" xml:space="preserve">
+    <value>Lajitteluperuste</value>
+  </data>
+  <data name="ComboFolderSortByItemName.Content" xml:space="preserve">
+    <value>Nimi</value>
+  </data>
+  <data name="ComboFolderSortByItemDateModified.Content" xml:space="preserve">
+    <value>Muokkauspäivä</value>
+  </data>
+  <data name="ComboFolderSortByItemDateCreated.Content" xml:space="preserve">
+    <value>Luontipäivä</value>
+  </data>
+  <data name="ComboFolderSortByItemSize.Content" xml:space="preserve">
+    <value>Koko</value>
+  </data>
+  <data name="SettingsCardFolderSortOrder.Header" xml:space="preserve">
+    <value>Järjestys</value>
+  </data>
+  <data name="ComboFolderSortOrderItemAscending.Content" xml:space="preserve">
+    <value>Nouseva</value>
+  </data>
+  <data name="ComboFolderSortOrderItemDescending.Content" xml:space="preserve">
+    <value>Laskeva</value>
+  </data>
+  <data name="ShortcutName_NextFolder" xml:space="preserve">
+    <value>Seuraava kansio</value>
+  </data>
+  <data name="ShortcutName_PrevFolder" xml:space="preserve">
+    <value>Edellinen kansio</value>
+  </data>
+  <data name="ShortcutDesc_NextFolder" xml:space="preserve">
+    <value>Vain kansiotilassa: avaa yläkansion seuraavan kansion</value>
+  </data>
+  <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
+    <value>Vain kansiotilassa: avaa yläkansion edellisen kansion</value>
+  </data>
 </root>

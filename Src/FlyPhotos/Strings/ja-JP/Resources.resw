@@ -1233,4 +1233,55 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Windows デスクトップ用のフリップ時計ウィジェット</value>
   </data>
+  <data name="SettingsCardListSource.Header" xml:space="preserve">
+    <value>写真リストの作成元</value>
+  </data>
+  <data name="ListSourceDescription_Explorer" xml:space="preserve">
+    <value>Windowsエクスプローラーでの表示をそのまま再現します。現在の検索結果、適用中のフィルター、Windows の並べ替え順序が保持されます。</value>
+  </data>
+  <data name="ListSourceDescription_Folder" xml:space="preserve">
+    <value>フォルダー内のすべての画像を、下の「並べ替え」と「順序」の設定に従って読み込みます。</value>
+  </data>
+  <data name="ComboListSourceItemExplorer.Content" xml:space="preserve">
+    <value>エクスプローラー ウィンドウ</value>
+  </data>
+  <data name="ComboListSourceItemFolder.Content" xml:space="preserve">
+    <value>フォルダー</value>
+  </data>
+  <data name="SettingsCardFolderSortBy.Header" xml:space="preserve">
+    <value>並べ替え</value>
+  </data>
+  <data name="ComboFolderSortByItemName.Content" xml:space="preserve">
+    <value>名前</value>
+  </data>
+  <data name="ComboFolderSortByItemDateModified.Content" xml:space="preserve">
+    <value>更新日時</value>
+  </data>
+  <data name="ComboFolderSortByItemDateCreated.Content" xml:space="preserve">
+    <value>作成日時</value>
+  </data>
+  <data name="ComboFolderSortByItemSize.Content" xml:space="preserve">
+    <value>サイズ</value>
+  </data>
+  <data name="SettingsCardFolderSortOrder.Header" xml:space="preserve">
+    <value>順序</value>
+  </data>
+  <data name="ComboFolderSortOrderItemAscending.Content" xml:space="preserve">
+    <value>昇順</value>
+  </data>
+  <data name="ComboFolderSortOrderItemDescending.Content" xml:space="preserve">
+    <value>降順</value>
+  </data>
+  <data name="ShortcutName_NextFolder" xml:space="preserve">
+    <value>次のフォルダー</value>
+  </data>
+  <data name="ShortcutName_PrevFolder" xml:space="preserve">
+    <value>前のフォルダー</value>
+  </data>
+  <data name="ShortcutDesc_NextFolder" xml:space="preserve">
+    <value>フォルダー モードのみ: 親フォルダー内の次のフォルダーを開きます</value>
+  </data>
+  <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
+    <value>フォルダー モードのみ: 親フォルダー内の前のフォルダーを開きます</value>
+  </data>
 </root>

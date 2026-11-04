@@ -1234,4 +1234,55 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Klappuhr-Widget für den Windows-Desktop</value>
   </data>
+  <data name="SettingsCardListSource.Header" xml:space="preserve">
+    <value>Fotoliste erstellen aus</value>
+  </data>
+  <data name="ListSourceDescription_Explorer" xml:space="preserve">
+    <value>Zeigt genau das, was Sie im Windows-Explorer sehen. Ihre aktuellen Suchergebnisse, aktiven Filter und die Windows-Sortierung bleiben erhalten.</value>
+  </data>
+  <data name="ListSourceDescription_Folder" xml:space="preserve">
+    <value>Lädt alle Bilder im Ordner gemäß den Einstellungen „Sortieren nach“ und „Reihenfolge“ unten.</value>
+  </data>
+  <data name="ComboListSourceItemExplorer.Content" xml:space="preserve">
+    <value>Explorer-Fenster</value>
+  </data>
+  <data name="ComboListSourceItemFolder.Content" xml:space="preserve">
+    <value>Ordner</value>
+  </data>
+  <data name="SettingsCardFolderSortBy.Header" xml:space="preserve">
+    <value>Sortieren nach</value>
+  </data>
+  <data name="ComboFolderSortByItemName.Content" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="ComboFolderSortByItemDateModified.Content" xml:space="preserve">
+    <value>Änderungsdatum</value>
+  </data>
+  <data name="ComboFolderSortByItemDateCreated.Content" xml:space="preserve">
+    <value>Erstelldatum</value>
+  </data>
+  <data name="ComboFolderSortByItemSize.Content" xml:space="preserve">
+    <value>Größe</value>
+  </data>
+  <data name="SettingsCardFolderSortOrder.Header" xml:space="preserve">
+    <value>Reihenfolge</value>
+  </data>
+  <data name="ComboFolderSortOrderItemAscending.Content" xml:space="preserve">
+    <value>Aufsteigend</value>
+  </data>
+  <data name="ComboFolderSortOrderItemDescending.Content" xml:space="preserve">
+    <value>Absteigend</value>
+  </data>
+  <data name="ShortcutName_NextFolder" xml:space="preserve">
+    <value>Nächster Ordner</value>
+  </data>
+  <data name="ShortcutName_PrevFolder" xml:space="preserve">
+    <value>Vorheriger Ordner</value>
+  </data>
+  <data name="ShortcutDesc_NextFolder" xml:space="preserve">
+    <value>Nur im Ordnermodus: öffnet den nächsten Ordner im übergeordneten Ordner</value>
+  </data>
+  <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
+    <value>Nur im Ordnermodus: öffnet den vorherigen Ordner im übergeordneten Ordner</value>
+  </data>
 </root>

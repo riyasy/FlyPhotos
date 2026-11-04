@@ -1233,4 +1233,55 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Windows 바탕 화면용 플립 시계 위젯</value>
   </data>
+  <data name="SettingsCardListSource.Header" xml:space="preserve">
+    <value>사진 목록 생성 기준</value>
+  </data>
+  <data name="ListSourceDescription_Explorer" xml:space="preserve">
+    <value>Windows 파일 탐색기에 보이는 그대로 표시합니다. 현재 검색 결과, 적용된 필터, Windows 정렬 순서가 그대로 유지됩니다.</value>
+  </data>
+  <data name="ListSourceDescription_Folder" xml:space="preserve">
+    <value>폴더의 모든 이미지를 아래의 &apos;정렬 기준&apos; 및 &apos;순서&apos; 설정에 따라 불러옵니다.</value>
+  </data>
+  <data name="ComboListSourceItemExplorer.Content" xml:space="preserve">
+    <value>파일 탐색기 창</value>
+  </data>
+  <data name="ComboListSourceItemFolder.Content" xml:space="preserve">
+    <value>폴더</value>
+  </data>
+  <data name="SettingsCardFolderSortBy.Header" xml:space="preserve">
+    <value>정렬 기준</value>
+  </data>
+  <data name="ComboFolderSortByItemName.Content" xml:space="preserve">
+    <value>이름</value>
+  </data>
+  <data name="ComboFolderSortByItemDateModified.Content" xml:space="preserve">
+    <value>수정한 날짜</value>
+  </data>
+  <data name="ComboFolderSortByItemDateCreated.Content" xml:space="preserve">
+    <value>만든 날짜</value>
+  </data>
+  <data name="ComboFolderSortByItemSize.Content" xml:space="preserve">
+    <value>크기</value>
+  </data>
+  <data name="SettingsCardFolderSortOrder.Header" xml:space="preserve">
+    <value>순서</value>
+  </data>
+  <data name="ComboFolderSortOrderItemAscending.Content" xml:space="preserve">
+    <value>오름차순</value>
+  </data>
+  <data name="ComboFolderSortOrderItemDescending.Content" xml:space="preserve">
+    <value>내림차순</value>
+  </data>
+  <data name="ShortcutName_NextFolder" xml:space="preserve">
+    <value>다음 폴더</value>
+  </data>
+  <data name="ShortcutName_PrevFolder" xml:space="preserve">
+    <value>이전 폴더</value>
+  </data>
+  <data name="ShortcutDesc_NextFolder" xml:space="preserve">
+    <value>폴더 모드 전용: 상위 폴더의 다음 폴더를 엽니다</value>
+  </data>
+  <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
+    <value>폴더 모드 전용: 상위 폴더의 이전 폴더를 엽니다</value>
+  </data>
 </root>

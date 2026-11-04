@@ -1234,4 +1234,55 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>適用於 Windows 桌面的翻頁時鐘小工具</value>
   </data>
+  <data name="SettingsCardListSource.Header" xml:space="preserve">
+    <value>照片清單來源</value>
+  </data>
+  <data name="ListSourceDescription_Explorer" xml:space="preserve">
+    <value>與 Windows 檔案總管中顯示的內容完全一致，保留目前的搜尋結果、已套用的篩選條件和 Windows 排序方式。</value>
+  </data>
+  <data name="ListSourceDescription_Folder" xml:space="preserve">
+    <value>載入資料夾中的所有影像，並依照下方的「排序方式」和「順序」設定排列。</value>
+  </data>
+  <data name="ComboListSourceItemExplorer.Content" xml:space="preserve">
+    <value>檔案總管視窗</value>
+  </data>
+  <data name="ComboListSourceItemFolder.Content" xml:space="preserve">
+    <value>資料夾</value>
+  </data>
+  <data name="SettingsCardFolderSortBy.Header" xml:space="preserve">
+    <value>排序方式</value>
+  </data>
+  <data name="ComboFolderSortByItemName.Content" xml:space="preserve">
+    <value>名稱</value>
+  </data>
+  <data name="ComboFolderSortByItemDateModified.Content" xml:space="preserve">
+    <value>修改日期</value>
+  </data>
+  <data name="ComboFolderSortByItemDateCreated.Content" xml:space="preserve">
+    <value>建立日期</value>
+  </data>
+  <data name="ComboFolderSortByItemSize.Content" xml:space="preserve">
+    <value>大小</value>
+  </data>
+  <data name="SettingsCardFolderSortOrder.Header" xml:space="preserve">
+    <value>順序</value>
+  </data>
+  <data name="ComboFolderSortOrderItemAscending.Content" xml:space="preserve">
+    <value>遞增</value>
+  </data>
+  <data name="ComboFolderSortOrderItemDescending.Content" xml:space="preserve">
+    <value>遞減</value>
+  </data>
+  <data name="ShortcutName_NextFolder" xml:space="preserve">
+    <value>下一個資料夾</value>
+  </data>
+  <data name="ShortcutName_PrevFolder" xml:space="preserve">
+    <value>上一個資料夾</value>
+  </data>
+  <data name="ShortcutDesc_NextFolder" xml:space="preserve">
+    <value>僅限資料夾模式：開啟上層資料夾中的下一個資料夾</value>
+  </data>
+  <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
+    <value>僅限資料夾模式：開啟上層資料夾中的上一個資料夾</value>
+  </data>
 </root>

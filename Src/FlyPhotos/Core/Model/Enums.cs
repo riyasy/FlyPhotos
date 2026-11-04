@@ -127,3 +127,21 @@ public enum ImageInterpolation
     Anisotropic,
     HighQualityCubic
 }
+
+/// <summary>Where the photo list comes from when a photo is opened.</summary>
+public enum ListSource
+{
+    /// <summary>The items, order and filter of the Explorer window the photo was opened from.</summary>
+    Explorer,
+    /// <summary>The supported images in the photo's folder, sorted by Fly and watched for changes.</summary>
+    Folder
+}
+
+/// <summary>The sort key for <see cref="ListSource.Folder"/>.</summary>
+public enum FolderSortBy
+{
+    Name,
+    DateModified,
+    DateCreated,
+    Size
+}

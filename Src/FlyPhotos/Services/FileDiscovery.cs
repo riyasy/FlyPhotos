@@ -2,29 +2,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Interop;
 using NLog;
 
 namespace FlyPhotos.Services;
 
-internal static partial class FileDiscovery
+internal static class FileDiscovery
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
-    /// <summary>
-    /// The comparison Explorer itself sorts filenames with: digit runs compare as numbers, so
-    /// "(3)" sorts before "(12)". Ordinal comparison puts '1' before '3' and gives 1, 12, 3.
-    /// </summary>
-    [LibraryImport("shlwapi.dll", StringMarshalling = StringMarshalling.Utf16)]
-    private static partial int StrCmpLogicalW(string psz1, string psz2);
-
-    private sealed class NaturalComparer : IComparer<string>
-    {
-        public static readonly NaturalComparer Instance = new();
-        public int Compare(string? x, string? y) => StrCmpLogicalW(x ?? string.Empty, y ?? string.Empty);
-    }
 
     public static IReadOnlyList<string> DiscoverFiles(string selectedFilePath, bool flyLaunchedExternally)
     {
@@ -33,6 +19,13 @@ internal static partial class FileDiscovery
         sw.Stop();
         Logger.Trace($"Discovered {files.Count} files in {sw.ElapsedMilliseconds} ms");
         return files;
+    }
+
+    /// <summary>Whether <paramref name="path"/> has an extension Fly can decode.</summary>
+    public static bool IsSupported(string path)
+    {
+        var extension = Path.GetExtension(path);
+        return !string.IsNullOrEmpty(extension) && CodecDiscovery.SupportedExtensions.Contains(extension);
     }
 
     public static int FindSelectedFileIndex(string selectedFilePath, IReadOnlyList<string> files)
@@ -51,7 +44,7 @@ internal static partial class FileDiscovery
 
     private static IReadOnlyList<string> ListFiles(string selectedFilePath, bool flyLaunchedExternally)
     {
-        
+
         IReadOnlyList<string> files = Array.Empty<string>();
 
         // 1. If fly launched externally, Attempt to get files from the active Explorer window.
@@ -75,10 +68,8 @@ internal static partial class FileDiscovery
 
         foreach (var file in files)
         {
-            // Get the file extension once.
-            var extension = Path.GetExtension(file);
             // Check if the file meets either of the criteria for inclusion.
-            if ((!string.IsNullOrEmpty(extension) && CodecDiscovery.SupportedExtensions.Contains(extension)) ||
+            if (IsSupported(file) ||
                 (string.Equals(file, selectedFilePath, StringComparison.OrdinalIgnoreCase)))
                 filteredFiles.Add(file);
         }
@@ -102,17 +93,8 @@ internal static partial class FileDiscovery
     {
         if (!Directory.Exists(dirPath)) return Array.Empty<string>();
 
-        // Standard constructor with object initializer
-        var options = new EnumerationOptions
-        {
-            RecurseSubdirectories = false,
-            IgnoreInaccessible = true,
-            ReturnSpecialDirectories = false,
-            AttributesToSkip = 0 // Default in .NET is FileAttributes.Hidden | FileAttributes.System
-        };
-
-        // Directory.GetFiles is highly optimized in .NET 6+ to work with these options
-        string[] files = Directory.GetFiles(dirPath, "*", options);
+        // Same options as Folder mode: not recursive, hidden and system files included.
+        string[] files = Directory.GetFiles(dirPath, "*", FolderListing.FileOptions);
 
         // Must match the order Explorer shows, because the other discovery path (SVGIO_FLAG_VIEWORDER)
         // returns Explorer's own view order. Sorting ordinally here made the two paths disagree

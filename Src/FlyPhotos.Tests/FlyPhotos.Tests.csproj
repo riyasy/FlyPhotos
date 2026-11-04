@@ -6,12 +6,18 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- FolderListing's natural-sort P/Invoke uses LibraryImport, whose generated stub is unsafe code. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\FlyPhotos\Core\Model\Enums.cs" Link="Linked\Enums.cs" />
     <Compile Include="..\FlyPhotos\Display\ImageReading\ImageFormat.cs" Link="Linked\ImageFormat.cs" />
     <Compile Include="..\FlyPhotos\Display\ImageReading\DecoderChains.cs" Link="Linked\DecoderChains.cs" />
+    <Compile Include="..\FlyPhotos\Services\FolderListing.cs" Link="Linked\FolderListing.cs" />
+    <Compile Include="..\FlyPhotos\Services\FolderWatcher.cs" Link="Linked\FolderWatcher.cs" />
+    <Compile Include="..\FlyPhotos\Display\State\ListChange.cs" Link="Linked\ListChange.cs" />
+    <Compile Include="..\FlyPhotos\Display\State\KeyWindow.cs" Link="Linked\KeyWindow.cs" />
   </ItemGroup>
 
 </Project>

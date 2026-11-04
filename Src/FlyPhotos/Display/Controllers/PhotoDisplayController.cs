@@ -56,7 +56,8 @@ internal partial class PhotoDisplayController
         _thumbNailController = thumbNailController;
         _photoSessionState = photoSessionState;
 
-        _cache = new PrefetchCache(_photoList.GetPhoto, _d2dCanvas, IsContinuousKeyPress);
+        _cache = new PrefetchCache(_photoList.GetPhoto, _d2dCanvas,
+            () => IsContinuousKeyPress() || InFolderSwitchQuietPeriod());
         _cache.PreviewReady += OnPreviewReady;
         _cache.HqReady += OnHqReady;
         _cache.CacheStatusChanged += status => CacheStatusChanged?.Invoke(status);
@@ -102,8 +103,10 @@ internal partial class PhotoDisplayController
         {
             // Secondary instances only display the single opened image.
             // No folder or Explorer-window discovery is performed.
-            IReadOnlyList<string> files = AppConfig.Volatile.IsSecondaryInstance ?
-                [selectedFilePath] : FileDiscovery.DiscoverFiles(selectedFilePath, _photoSessionState.FlyLaunchedExternally);
+            IReadOnlyList<string> files =
+                AppConfig.Volatile.IsSecondaryInstance ? [selectedFilePath] :
+                IsFolderMode ? ListFolderAndStartWatching(selectedFilePath) :
+                FileDiscovery.DiscoverFiles(selectedFilePath, _photoSessionState.FlyLaunchedExternally);
 
             _photoSessionState.PhotosCount = files.Count;
 
@@ -130,6 +133,9 @@ internal partial class PhotoDisplayController
             if (AppConfig.Volatile.IsSecondaryInstance) return;
 
             _cache.Start();
+            // Last: from here on, Folder mode list changes may run on the UI thread, so this thread must be
+            // done with the list and the cache window (MoveWindow is not safe to run on two threads at once).
+            _listingReady.TrySetResult();
         }
         catch (Exception ex)
         {
@@ -145,14 +151,14 @@ internal partial class PhotoDisplayController
     private void OnPreviewReady(int key)
     {
         if (_photoSessionState.CurrentPhotoKey == key && _photoList.GetPhoto(key) is { } photo)
-            UpgradeImageIfNeeded(photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
+            UpgradeImageIfNeeded(key, photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
         _thumbNailController.RedrawThumbNailsIfNeeded(key);
     }
 
     private void OnHqReady(int key)
     {
         if (_photoSessionState.CurrentPhotoKey == key && _photoList.GetPhoto(key) is { } photo)
-            UpgradeImageIfNeeded(photo, DisplayLevel.Preview, DisplayLevel.Hq);
+            UpgradeImageIfNeeded(key, photo, DisplayLevel.Preview, DisplayLevel.Hq);
     }
 
     private async Task DisplayPhotoAtKey(int key, bool triggerHqCaching)
@@ -169,12 +175,17 @@ internal partial class PhotoDisplayController
         _cache.MoveWindow(_photoSessionState.CurrentPhotoListPosition, _photoList.Keys, signalHqLoading: triggerHqCaching);
     }
 
-    private void UpgradeImageIfNeeded(Photo photo, DisplayLevel fromDisplayState,
+    private void UpgradeImageIfNeeded(int key, Photo photo, DisplayLevel fromDisplayState,
         DisplayLevel toDisplayState)
     {
         if (_photoSessionState.CurrentDisplayLevel == fromDisplayState)
             _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
             {
+                // Checked again on the UI thread, where navigation and list changes run: between the check
+                // above and now the user may have moved on, and the photo may have left the list and been
+                // retired (its bitmaps disposed). Installing it then would draw a disposed bitmap.
+                if (_photoSessionState.CurrentPhotoKey != key || !ReferenceEquals(_photoList.GetPhoto(key), photo))
+                    return;
                 _ = SetSourceAsync(photo, toDisplayState);
             });
     }
@@ -246,8 +257,9 @@ internal partial class PhotoDisplayController
             && _cache.IsHqLoaded(currentKey)
             && _photoList.GetPhoto(currentKey) is { } hqPhoto)
             await SetSourceAsync(hqPhoto, DisplayLevel.Hq);
-        _cache.SignalHqLoading();
+        // Reset before waking: the HQ worker re-checks the burst predicate after every wake-up.
         _keyPressCounter = 0;
+        _cache.SignalHqLoading();
     }
 
     // --- File info ---
@@ -335,13 +347,27 @@ internal partial class PhotoDisplayController
     }
     public async Task<DeleteResult> DeleteCurrentPhoto()
     {
+        // Serialized with Folder mode list changes, which also move the current photo.
+        await _listChangeGate.WaitAsync();
+        try
+        {
+            return await DeleteCurrentPhotoCore();
+        }
+        finally
+        {
+            _listChangeGate.Release();
+        }
+    }
+
+    private async Task<DeleteResult> DeleteCurrentPhotoCore()
+    {
         // --- Step 1: Guard Clauses and State Capture ---
         var keyToDelete = _photoSessionState.CurrentPhotoKey;
         int currentPosition = _photoSessionState.CurrentPhotoListPosition;
-        // Safety check: If the current key isn't in our sorted list, something is wrong.
+        // Safety check: the current photo must have a position in the list.
         if (currentPosition < 0)
         {
-            Logger.Error($"Inconsistent state: Could not find key {keyToDelete} in sorted list during deletion.");
+            Logger.Error($"Inconsistent state: Could not find key {keyToDelete} in the photo list during deletion.");
             return new DeleteResult(false, false, "App - Inconsistent State");
         }
 
@@ -351,32 +377,76 @@ internal partial class PhotoDisplayController
             return new DeleteResult(false, false, "App - Inconsistent State");
         }
 
-        var delResult = await StorageOps.DeleteFileFromDisk(photo.FilePath);
+        var deletedPath = photo.FilePath;
+        var delResult = await StorageOps.DeleteFileFromDisk(deletedPath);
         if (!delResult.DeleteSuccess) return delResult;
 
-        // --- Step 2: Determine the Next Photo to Display ---
-        var currentKeys = _photoList.Keys; // capture snapshot before mutating
-        int nextPosition = (currentPosition >= currentKeys.Count - 1) ? currentPosition - 1 : currentPosition;
+        // The last photo is gone: the window closes the app.
+        // TODO - Cleanup properly. If we call dispose now, the zoom out animation during
+        // app close will crash as the draw call will try to display disposed canvas bitmaps.
+        if (_photoList.Keys.Count <= 1) return new DeleteResult(true, true);
 
-        // --- Step 3: Remove from the collection (drops the dictionary entry and republishes the snapshot) ---
-        var deletedPhoto = _photoList.RemoveAt(currentPosition);
-        _cache.Evict(keyToDelete);
+        // Same path as a Folder mode removal: the next photo is shown, else the previous one.
+        await ApplyListChangeAsync(path => path.Equals(deletedPath, StringComparison.OrdinalIgnoreCase),
+            renamed: null, added: [], order: null, goToFirst: false);
+        return new DeleteResult(true, false);
+    }
 
-        // --- Step 4: Navigate to the New Photo or Handle Empty State ---
-        var updatedKeys = _photoList.Keys;
-        if (updatedKeys.Count > 0)
+    // --- List changes (delete, Folder mode) ---
+
+    // Serializes everything that mutates the list on the UI thread: delete, watcher batches, folder switches.
+    private readonly SemaphoreSlim _listChangeGate = new(1, 1);
+
+    /// <summary>
+    /// UI thread, inside <see cref="_listChangeGate"/>. Applies one change to the list (see
+    /// <see cref="PhotoList.ApplyChanges"/>; <paramref name="added"/> sorted by <paramref name="order"/>) and
+    /// keeps the viewer on the same file: its position is recomputed, and if it was removed the nearest
+    /// surviving neighbour in the old order is shown — the next one, else the previous one.
+    /// </summary>
+    private async Task ApplyListChangeAsync(Predicate<string> isRemoved, IReadOnlyDictionary<string, string>? renamed,
+        IReadOnlyList<string> added, IComparer<string>? order, bool goToFirst)
+    {
+        var oldKeys = _photoList.Keys;
+        int oldPosition = _photoSessionState.CurrentPhotoListPosition;
+        int currentKey = _photoSessionState.CurrentPhotoKey;
+        var currentPath = _photoList.GetPhoto(currentKey)?.FilePath;
+
+        var removed = _photoList.ApplyChanges(isRemoved, renamed, added, order, currentKey);
+        var keys = _photoList.Keys;
+        if (ReferenceEquals(keys, oldKeys)) return; // nothing actually changed
+
+        // Detach removed photos from the cache and the dictionary BEFORE navigating: the window move below
+        // disposes whatever loaded photo falls outside the new window, and the old on-screen photo must not
+        // be among them — the canvas draws it until the queued renderer swap runs.
+        foreach (var (key, _) in removed)
+            _cache.Evict(key);
+        _photoList.Forget(removed);
+
+        // Removed photos are already forgotten, so "still in the list" is exactly "survived".
+        int newPosition = goToFirst ? 0 : ListChange.PositionAfter(oldKeys, oldPosition, keys, currentKey,
+            _photoList.Contains,
+            isReplacement: key => currentPath != null &&
+                                  string.Equals(_photoList.GetPhoto(key)?.FilePath, currentPath, StringComparison.OrdinalIgnoreCase));
+        if (keys[newPosition] == currentKey)
         {
-            await FlyTo(updatedKeys[nextPosition], nextPosition, true);
-            // --- Step 5: Clean Up Resources ---
-            deletedPhoto?.Dispose();
-            return new DeleteResult(true, false);
+            _photoSessionState.SetCurrentPhotoKeyAndListPosition(currentKey, newPosition);
+            _cache.MoveWindow(newPosition, keys, signalHqLoading: true);
+            _thumbNailController.RequestThumbnailRedraw();
+            UpdateFileNameAndDetails();
         }
         else
         {
-            // TODO - Cleanup properly. If we call dispose now, the zoom out animation during
-            // app close will crash as the draw call will try to display disposed canvas bitmaps.
-            return new DeleteResult(true, true);
+            await FlyTo(keys[newPosition], newPosition, triggerHqCaching: true);
         }
+
+        // SetSource only queued the renderer swap; disposing now could free a bitmap the render thread is
+        // still drawing (a native crash). The pump is FIFO, so this runs after the swap; Retire then waits for
+        // any background load still using the photo.
+        if (removed.Count > 0)
+            _canvasController.RunAfterQueuedRenderWork(() =>
+            {
+                foreach (var (_, photo) in removed) photo.Retire();
+            });
     }
 
     // --- Rename ---
@@ -398,12 +468,32 @@ internal partial class PhotoDisplayController
             return new RenameResult(false, "App - Inconsistent State");
         }
 
-        var newPath = Path.Combine(Path.GetDirectoryName(photo.FilePath) ?? "", newFileName);
-        var result = await StorageOps.RenameFileOnDisk(photo.FilePath, newPath);
-        if (result.Success)
+        var oldPath = photo.FilePath;
+        var newPath = Path.Combine(Path.GetDirectoryName(oldPath) ?? "", newFileName);
+        var result = await StorageOps.RenameFileOnDisk(oldPath, newPath);
+        if (!result.Success) return result;
+
+        if (_folderSort == null)
         {
+            // Explorer mode: the list keeps Explorer's order, so the photo stays where it is.
             photo.Rename(newPath);
             UpdateFileNameAndDetails();
+            return result;
+        }
+
+        // Folder mode: the photo moves to its new sorted position, through the same path as an external
+        // rename (the watcher's own report of this rename then finds nothing left to do).
+        await _listChangeGate.WaitAsync();
+        try
+        {
+            _folderSort.Rename(oldPath, newPath);
+            await ApplyListChangeAsync(static _ => false,
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { [oldPath] = newPath },
+                added: [], _folderSort, goToFirst: false);
+        }
+        finally
+        {
+            _listChangeGate.Release();
         }
         return result;
     }
@@ -440,6 +530,7 @@ internal partial class PhotoDisplayController
     {
         _cts.Cancel();
         _firstPhotoLoadedTcs.TrySetCanceled();
+        DisposeFolderMode();
         _cache.Dispose();
         _cts.Dispose();
         Logger.Info("PhotoDisplayController disposed.");

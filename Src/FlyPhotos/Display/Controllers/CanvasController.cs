@@ -284,6 +284,13 @@ internal partial class CanvasController : ICanvasController
     }
 
     /// <summary>
+    /// Runs <paramref name="action"/> on the W2D thread after all work queued before it — in particular every
+    /// renderer swap a preceding <see cref="SetSource"/> queued. Until that swap runs, the old renderer may
+    /// still be drawing the previous photo's bitmap, so disposing a photo goes through here.
+    /// </summary>
+    public void RunAfterQueuedRenderWork(Action action) => _pump.Enqueue(action);
+
+    /// <summary>
     /// Installs a new renderer on the W2D thread. The brush is injected there (W2D-owned), and the
     /// swap + view-state update apply atomically in the same tick — no one-frame mismatch, and Draw
     /// can never see a renderer mid-disposal.

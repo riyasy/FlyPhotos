@@ -310,6 +310,37 @@
                             <ToggleSwitch x:Name="ButtonConfirmBeforeDelete" />
                         </controls:SettingsCard>
 
+                        <controls:SettingsExpander
+                            x:Name="SettingsCardListSource"
+                            x:Uid="SettingsCardListSource"
+                            Margin="0,5,0,0"
+                            Description="{x:Bind ListSourceDescription(ComboListSource.SelectedIndex), Mode=OneWay}"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE8B7;, FontFamily={StaticResource FluentIcons}}">
+                            <ComboBox
+                                x:Name="ComboListSource"
+                                MinWidth="150"
+                                HorizontalAlignment="Right">
+                                <ComboBoxItem x:Uid="ComboListSourceItemExplorer" />
+                                <ComboBoxItem x:Uid="ComboListSourceItemFolder" />
+                            </ComboBox>
+                            <controls:SettingsExpander.Items>
+                                <controls:SettingsCard x:Name="SettingsCardFolderSortBy" x:Uid="SettingsCardFolderSortBy">
+                                    <ComboBox x:Name="ComboFolderSortBy" MinWidth="150">
+                                        <ComboBoxItem x:Uid="ComboFolderSortByItemName" />
+                                        <ComboBoxItem x:Uid="ComboFolderSortByItemDateModified" />
+                                        <ComboBoxItem x:Uid="ComboFolderSortByItemDateCreated" />
+                                        <ComboBoxItem x:Uid="ComboFolderSortByItemSize" />
+                                    </ComboBox>
+                                </controls:SettingsCard>
+                                <controls:SettingsCard x:Name="SettingsCardFolderSortOrder" x:Uid="SettingsCardFolderSortOrder">
+                                    <ComboBox x:Name="ComboFolderSortOrder" MinWidth="150">
+                                        <ComboBoxItem x:Uid="ComboFolderSortOrderItemAscending" />
+                                        <ComboBoxItem x:Uid="ComboFolderSortOrderItemDescending" />
+                                    </ComboBox>
+                                </controls:SettingsCard>
+                            </controls:SettingsExpander.Items>
+                        </controls:SettingsExpander>
+
                         <!--  *****************  -->
 
                         <TextBlock

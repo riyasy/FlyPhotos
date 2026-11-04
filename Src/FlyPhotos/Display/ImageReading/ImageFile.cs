@@ -52,6 +52,9 @@ internal sealed class ImageFile : IDisposable
     /// <summary>The format that picks the decoder chain: the extension's, or the header's after a correction.</summary>
     public ImageFormat Format { get; private set; }
 
+    /// <summary>Whether the image is over the GPU's maximum bitmap size; null until ImageReader has checked.</summary>
+    public bool? Oversized { get; set; }
+
     /// <summary>
     /// The shared stream, rewound to the start, for a reader that decodes the whole file. A network file is
     /// copied into memory first, as <see cref="StorageOps.GetWin2DPerformantStream"/> does.

@@ -73,6 +73,7 @@ public sealed partial class PhotoDisplayWindow
 
     private readonly OpacityFader _opacityFader;
     private readonly InactivityFader _inactivityFader;
+    private readonly InactivityFader _folderNameFader;
     private readonly MouseAutoHider _mouseAutoHider;
     private readonly WindowCaptionButtonFader _captionButtonFader;
     private readonly EdgeNavArrowFader _edgeNavArrowFader;
@@ -194,6 +195,7 @@ public sealed partial class PhotoDisplayWindow
             () => AppConfig.Settings.SwapMouseFwdBack);
         _opacityFader = new OpacityFader([BorderButtonPanel, D2dCanvasThumbNail, BorderTxtFileName], MainLayout, BottomPanel, AppConfig.Settings.AutoFade);
         _inactivityFader = new InactivityFader(BorderTxtZoom);
+        _folderNameFader = new InactivityFader(BorderTxtFolderName, hideDelayMs: 1500);
         _mouseAutoHider = new MouseAutoHider(MainLayout, AppConfig.Settings.AutoHideMouse, TimeSpan.FromSeconds(1));
         _windPlacementManager = new WindowPlacementManager(this, AppConfig.Settings.WindowState);
         _windFullScreenManager = new WindowFullScreenManager(this);
@@ -245,6 +247,8 @@ public sealed partial class PhotoDisplayWindow
             [CommandId.PrevPhoto] = () => _photoController.Fly(NavDirection.Prev),
             [CommandId.FirstPhoto] = () => _photoController.FlyToFirst(),
             [CommandId.LastPhoto] = () => _photoController.FlyToLast(),
+            [CommandId.NextFolder] = () => FlyToSiblingFolderAsync(NavDirection.Next),
+            [CommandId.PrevFolder] = () => FlyToSiblingFolderAsync(NavDirection.Prev),
 
             // Multi-page navigation
             [CommandId.NextPage] = Act(() => _canvasController.ChangePage(NavDirection.Next)),
@@ -355,6 +359,7 @@ public sealed partial class PhotoDisplayWindow
         _photoController.Dispose();
         _opacityFader.Dispose();
         _inactivityFader.Dispose();
+        _folderNameFader.Dispose();
         _mouseAutoHider.Dispose();
         _ctrlDragWindowMover.Dispose();
         DiskCacherWithSqlite.Shutdown();
@@ -1240,6 +1245,14 @@ public sealed partial class PhotoDisplayWindow
             TxtFileName.Text = fileDisplayDetails.DisplayText;
             Title = fileDisplayDetails.FileName;
         });
+    }
+
+    /// <summary>Ctrl+PageUp / Ctrl+PageDown in Folder mode: open the sibling folder and flash its name.</summary>
+    private async Task FlyToSiblingFolderAsync(NavDirection direction)
+    {
+        if (await _photoController.TryOpenSiblingFolderAsync(direction) is not { } folderName) return;
+        TxtFolderName.Text = folderName;
+        _folderNameFader.ReportActivity();
     }
 
     private void CanvasController_OnZoomChanged(int zoomPercent)

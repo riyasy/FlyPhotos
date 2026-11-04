@@ -71,7 +71,7 @@ internal partial class ThumbNailController : IThumbnailController
     // navigation we seed a horizontal offset (delta * boxSize) so it appears to start at the old position,
     // then spring it back to 0 — a damped pixel-space slide stepped each frame in Update.
     private readonly SpringAxis _slideOffset = new();
-    private int _lastRenderedPosition = -1;
+    private int? _lastRenderedKey; // the photo centred by the last ribbon pass; W2D thread only
     private bool _slideAnimating;
 
     // Off-screen is rendered this many pixels wider than the canvas on each side (see
@@ -266,16 +266,11 @@ internal partial class ThumbNailController : IThumbnailController
         var keys = _provider?.Keys;
         if (keys == null || keys.Count == 0) return;
 
-        // Find the POSITION of the current and updated keys.
         int currentPosition = _photoSessionState.CurrentPhotoListPosition;
-        int updatedPosition = keys.BinarySearch(updatedKey);
+        if (currentPosition < 0) return;
 
-        // If either key isn't found (e.g., already deleted), we can't proceed.
-        if (currentPosition < 0 || updatedPosition < 0) return;
-
-        // Check if the updated thumbnail is within the visible POSITIONAL range.
-        if (updatedPosition >= currentPosition - _numOfThumbNailsInOneDirection &&
-            updatedPosition <= currentPosition + _numOfThumbNailsInOneDirection)
+        // Redraw only if the updated photo sits in one of the visible slots.
+        if (KeyWindow.IndexOf(keys, updatedKey, currentPosition, _numOfThumbNailsInOneDirection) >= 0)
         {
             _d2dCanvasThumbNail.DispatcherQueue.TryEnqueue(() =>
             {
@@ -361,7 +356,7 @@ internal partial class ThumbNailController : IThumbnailController
     private void ResetSlide()
     {
         StopSlide();
-        _lastRenderedPosition = -1;
+        _lastRenderedKey = null;
     }
 
     // --- Rendering internals ---
@@ -426,12 +421,21 @@ internal partial class ThumbNailController : IThumbnailController
             }
         }
 
-        // The strip is now centered on currentPosition. If the position changed since the last render,
-        // slide it in from where it used to be. Preview-load redraws leave the position unchanged
-        // (delta == 0) and so don't animate.
-        var delta = _lastRenderedPosition < 0 ? 0 : currentPosition - _lastRenderedPosition;
-        _lastRenderedPosition = currentPosition;
-        BeginSlide(delta);
+        // The strip is now centered on currentPosition. If a different photo is centred than last time,
+        // slide it in from where that photo now sits. Tracking the photo (key) rather than the position means
+        // a list change that only shifts positions (Folder mode inserts/removals) is delta 0 and doesn't
+        // animate, and preview-load redraws don't either.
+        BeginSlide(SlideDelta(keys, currentPosition, _numOfThumbNailsInOneDirection + Constants.ThumbnailSlideMarginBoxes));
+        _lastRenderedKey = keys[currentPosition];
+    }
+
+    // How many positions the strip moved since the last render. Only the rendered slots are searched; a
+    // last photo that is no longer among them (a far jump, or it was removed) counts as a far jump, which snaps.
+    private int SlideDelta(IReadOnlyList<int> keys, int currentPosition, int renderHalfCount)
+    {
+        if (_lastRenderedKey is not { } last || last == keys[currentPosition]) return 0;
+        int lastPosition = KeyWindow.IndexOf(keys, last, currentPosition, renderHalfCount);
+        return lastPosition < 0 ? int.MaxValue : currentPosition - lastPosition;
     }
 
     /// <summary>

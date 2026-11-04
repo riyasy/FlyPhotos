@@ -1234,4 +1234,55 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
   <data name="SettingsCardOtherAppDeskFlip.Description" xml:space="preserve">
     <value>Klapklokwidget voor het Windows-bureaublad</value>
   </data>
+  <data name="SettingsCardListSource.Header" xml:space="preserve">
+    <value>Fotolijst samenstellen uit</value>
+  </data>
+  <data name="ListSourceDescription_Explorer" xml:space="preserve">
+    <value>Toont precies wat u in Windows Verkenner ziet. Uw huidige zoekresultaten, actieve filters en de Windows-sorteervolgorde blijven behouden.</value>
+  </data>
+  <data name="ListSourceDescription_Folder" xml:space="preserve">
+    <value>Laadt alle afbeeldingen in de map volgens de instellingen &apos;Sorteren op&apos; en &apos;Volgorde&apos; hieronder.</value>
+  </data>
+  <data name="ComboListSourceItemExplorer.Content" xml:space="preserve">
+    <value>Verkenner-venster</value>
+  </data>
+  <data name="ComboListSourceItemFolder.Content" xml:space="preserve">
+    <value>Map</value>
+  </data>
+  <data name="SettingsCardFolderSortBy.Header" xml:space="preserve">
+    <value>Sorteren op</value>
+  </data>
+  <data name="ComboFolderSortByItemName.Content" xml:space="preserve">
+    <value>Naam</value>
+  </data>
+  <data name="ComboFolderSortByItemDateModified.Content" xml:space="preserve">
+    <value>Gewijzigd op</value>
+  </data>
+  <data name="ComboFolderSortByItemDateCreated.Content" xml:space="preserve">
+    <value>Gemaakt op</value>
+  </data>
+  <data name="ComboFolderSortByItemSize.Content" xml:space="preserve">
+    <value>Grootte</value>
+  </data>
+  <data name="SettingsCardFolderSortOrder.Header" xml:space="preserve">
+    <value>Volgorde</value>
+  </data>
+  <data name="ComboFolderSortOrderItemAscending.Content" xml:space="preserve">
+    <value>Oplopend</value>
+  </data>
+  <data name="ComboFolderSortOrderItemDescending.Content" xml:space="preserve">
+    <value>Aflopend</value>
+  </data>
+  <data name="ShortcutName_NextFolder" xml:space="preserve">
+    <value>Volgende map</value>
+  </data>
+  <data name="ShortcutName_PrevFolder" xml:space="preserve">
+    <value>Vorige map</value>
+  </data>
+  <data name="ShortcutDesc_NextFolder" xml:space="preserve">
+    <value>Alleen in mapmodus: opent de volgende map in de bovenliggende map</value>
+  </data>
+  <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
+    <value>Alleen in mapmodus: opent de vorige map in de bovenliggende map</value>
+  </data>
 </root>
