@@ -132,7 +132,7 @@ jobs:
       # Step 1 -- vcpkg: heif.dll, dav1d.dll, libde265.dll, libpng16.dll
       # -----------------------------------------------------------------------
       # The overlay ports at Src/build_libheif/ports/ contain the patched
-      # libheif port that adds dav1d support (see how_to_patch_heif.md).
+      # libheif port that adds dav1d support (see Src/build_libheif/readme.md).
       # --overlay-ports tells vcpkg to use those files instead of the built-in
       # port registry -- without this flag vcpkg would build against aom.
       # --overlay-triplets provides the custom arm64-windows-release triplet
@@ -271,6 +271,19 @@ jobs:
             exit 1
           }
           Get-ChildItem "$vcpkgBinDir/*.dll" | Copy-Item -Destination $externalDir -Force
+
+          # heif.dll must import dav1d.dll and libde265.dll directly (not as runtime
+          # plugins) and never aom.dll. A port change that breaks this still builds,
+          # so check the import table (see Src/build_libheif/readme.md).
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $dumpbin = & $vswhere -latest -products * -find "VC\Tools\MSVC\**\bin\**\dumpbin.exe" | Select-Object -First 1
+          if (-not $dumpbin) { Write-Error "dumpbin.exe not found"; exit 1 }
+          $imports = & $dumpbin /nologo /dependents "$externalDir/heif.dll" | Out-String
+          foreach ($dep in "dav1d.dll", "libde265.dll") {
+            if ($imports -notmatch [regex]::Escape($dep)) { Write-Error "heif.dll does not import $dep"; exit 1 }
+          }
+          if ($imports -match 'aom\.dll') { Write-Error "heif.dll imports aom.dll"; exit 1 }
+          Write-Host "heif.dll imports dav1d.dll + libde265.dll"
 
           # Native C++ DLLs (OutDir = Src\<Platform>\Release\)
           Copy-Item "Src/$platform/Release/FlyNativeLib.dll"          -Destination $externalDir -Force

@@ -5,7 +5,8 @@
       "name": "libheif",
       "default-features": false,
       "features": [
-        "dav1d"
+        "dav1d",
+        "libde265"
       ]
     },
     "libpng"

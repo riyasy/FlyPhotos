@@ -1,0 +1,17 @@
+diff --git a/libheif/sequences/track_visual.cc b/libheif/sequences/track_visual.cc
+--- a/libheif/sequences/track_visual.cc
++++ b/libheif/sequences/track_visual.cc
+@@ -382,7 +382,12 @@
+       // consecutive chunks with the same sample description receives them again, which is
+       // harmless (repeated parameter sets / sequence headers), and a decoder that was released
+       // after draining needs them to start again.
+-      const bool is_first_sample = (sample_idx_in_chunk == chunk->first_sample_number());
++      // FlyPhotos: re-sending the av1C sequence header in front of an inter frame at a chunk
++      // boundary is NOT harmless when it differs from the in-band one -- dav1d starts a new
++      // coded video sequence and fails ("Error parsing OBU data"). Only send it at sample 0
++      // and when the chunk switches to another decoder (libheif 1.23.0 behaviour + #1939).
++      const bool is_first_sample = (sample_idx_in_chunk == 0) ||
++                                   (sample_idx_in_chunk == chunk->first_sample_number() && decoder != m_active_decoder);
+
+       // --- Push data into the decoder.
+       Error decodingError = decoder->decode_sequence_frame_from_compressed_data(is_first_sample,
