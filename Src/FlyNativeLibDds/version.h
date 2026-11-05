@@ -9,12 +9,12 @@
 
 #pragma once
 
-#define FLYDDS_VER_MAJOR  1
-#define FLYDDS_VER_MINOR  0
+#define FLYDDS_VER_MAJOR  2
+#define FLYDDS_VER_MINOR  8
 #define FLYDDS_VER_PATCH  0
 #define FLYDDS_VER_BUILD  0
 
-#define FLYDDS_VER_STRING "1.0.0.0"
+#define FLYDDS_VER_STRING "2.8.0.0"
 
 #define FLYDDS_COMPANY    "RYFTools"
 #define FLYDDS_PRODUCT    "FlyPhotos"

@@ -9,12 +9,12 @@
 
 #pragma once
 
-#define FLY_VER_MAJOR 1
-#define FLY_VER_MINOR 0
+#define FLY_VER_MAJOR 2
+#define FLY_VER_MINOR 8
 #define FLY_VER_PATCH 0
 #define FLY_VER_BUILD 0
 
-#define FLY_VER_STRING "1.0.0.0"
+#define FLY_VER_STRING "2.8.0.0"
 
 #define FLY_COMPANY   "RYFTools"
 #define FLY_PRODUCT   "FlyPhotos"
