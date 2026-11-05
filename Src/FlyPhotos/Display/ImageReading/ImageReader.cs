@@ -178,7 +178,7 @@ internal static class ImageReader
     /// shared stream. Must match the <see cref="Run"/> arms that pass <c>file.Path</c>.
     /// </summary>
     private static bool ReadsByPath(DecodeStep step) => step is
-        DecodeStep.HeifEmbedded or DecodeStep.HeifHq or
+        DecodeStep.HeifEmbedded or DecodeStep.HeifHq or DecodeStep.DdsHq or DecodeStep.DdsResized or
         DecodeStep.MagickHq or DecodeStep.MagickRawHq or DecodeStep.MagickResized or DecodeStep.MagickRawEmbedded or
         DecodeStep.PsdEmbedded or DecodeStep.SvgHq or DecodeStep.SvgResized or DecodeStep.Rawler or
         DecodeStep.LargeHeif or DecodeStep.LargeMagick;
@@ -191,6 +191,8 @@ internal static class ImageReader
             DecodeStep.HeifEmbedded => ItemOrNull(NativeHeifReader.GetEmbedded(ctrl, file.Path)),
             DecodeStep.HeifHq => ItemOrNull(NativeHeifReader.GetHq(ctrl, file.Path)),
             DecodeStep.AvifHq => ItemOrNull(await NativeAvifReader.GetHq(ctrl, file)),
+            DecodeStep.DdsHq => ItemOrNull(NativeDdsReader.GetHq(ctrl, file.Path)),
+            DecodeStep.DdsResized => ItemOrNull(NativeDdsReader.GetResized(ctrl, file.Path)),
             DecodeStep.WicEmbedded => ItemOrNull(await WicReader.GetEmbedded(ctrl, file)),
             DecodeStep.WicResized => ItemOrNull(await WicReader.GetResized(ctrl, file)),
             DecodeStep.WicHq => ItemOrNull(await WicReader.GetHq(ctrl, file)),
@@ -231,8 +233,13 @@ internal static class ImageReader
     /// Whether a failed decode was caused by the image being over the GPU's maximum bitmap size rather than
     /// by a broken file. Only failures pay for this size probe.
     /// </summary>
+    /// <remarks>
+    /// Never true for DDS: its reader caps the decode at the GPU limit itself, and the size probe would run
+    /// WIC and ImageMagick on a format only DirectXTex decodes.
+    /// </remarks>
     private static async Task<bool> IsOversized(ICanvasResourceCreatorWithDpi d2dCanvas, ImageFile file) =>
-        file.Oversized ??= await LargeImageReader.IsOversizedAsync(file, d2dCanvas.Device.MaximumBitmapSizeInPixels);
+        file.Oversized ??= file.Format != ImageFormat.Dds &&
+                           await LargeImageReader.IsOversizedAsync(file, d2dCanvas.Device.MaximumBitmapSizeInPixels);
 
     /// <summary>The error screen shown when no decoder could read the image.</summary>
     private static StaticHqDisplayItem HqFailed() => new(_indicators.HqFailed, Origin.ErrorScreen);

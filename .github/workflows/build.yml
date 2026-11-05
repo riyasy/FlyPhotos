@@ -35,8 +35,8 @@ jobs:
       - id: pick
         shell: pwsh
         run: |
-          $x64 = '{"runner":"windows-latest","platform":"x64","rid":"win-x64","vcpkg-triplet":"x64-windows-release","install-root":"vcpkg_installed_x64","rust-target":"x86_64-pc-windows-msvc","publish-profile":"win-x64","toolset":"v145"}'
-          $arm = '{"runner":"windows-11-arm","platform":"ARM64","rid":"win-arm64","vcpkg-triplet":"arm64-windows-release","install-root":"vcpkg_installed_arm64","rust-target":"aarch64-pc-windows-msvc","publish-profile":"win-ARM64","toolset":"v143"}'
+          $x64 = '{"runner":"windows-latest","platform":"x64","rid":"win-x64","vcpkg-triplet":"x64-windows-release","dxtex-triplet":"x64-windows-static-release","install-root":"vcpkg_installed_x64","rust-target":"x86_64-pc-windows-msvc","publish-profile":"win-x64","toolset":"v145"}'
+          $arm = '{"runner":"windows-11-arm","platform":"ARM64","rid":"win-arm64","vcpkg-triplet":"arm64-windows-release","dxtex-triplet":"arm64-windows-static-release","install-root":"vcpkg_installed_arm64","rust-target":"aarch64-pc-windows-msvc","publish-profile":"win-ARM64","toolset":"v143"}'
           $items = switch ("${{ inputs.platform }}") {
             'x64'   { $x64 }
             'ARM64' { $arm }
@@ -109,7 +109,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: vcpkg_cache
-          key: vcpkg-${{ matrix.vcpkg-triplet }}-${{ hashFiles('Src/build_libheif/vcpkg.json', 'Src/build_libheif/vcpkg-configuration.json', 'Src/build_libheif/ports/libheif/**', 'Src/build_libheif/triplets/**') }}
+          key: vcpkg-${{ matrix.vcpkg-triplet }}-${{ hashFiles('Src/build_libheif/vcpkg.json', 'Src/build_libheif/vcpkg-configuration.json', 'Src/build_libheif/ports/libheif/**', 'Src/build_libheif/triplets/**', 'Src/build_directxtex/vcpkg.json', 'Src/build_directxtex/vcpkg-configuration.json', 'Src/build_directxtex/triplets/**') }}
           restore-keys: |
             vcpkg-${{ matrix.vcpkg-triplet }}-
 
@@ -145,8 +145,21 @@ jobs:
             --overlay-ports=ports `
             --overlay-triplets=triplets
 
+      # DirectXTex for FlyNativeLibDds: a separate manifest with all-static triplets (static lib +
+      # static CRT, linked into FlyNativeLibDds.dll), so nothing from it is copied to External.
+      # Same binary cache as above. See Src/build_directxtex/readme.txt.
+      - name: Install vcpkg DirectXTex
+        if: ${{ inputs.native == 'Build fresh' }}
+        working-directory: Src/build_directxtex
+        run: |
+          vcpkg install `
+            --triplet ${{ matrix.dxtex-triplet }} `
+            --x-manifest-root=. `
+            --x-install-root=${{ matrix.install-root }} `
+            --overlay-triplets=triplets
+
       # -----------------------------------------------------------------------
-      # Step 2 -- Native C++: FlyNativeLib.dll, FlyNativeLibHeif.dll
+      # Step 2 -- Native C++: FlyNativeLib.dll, FlyNativeLibHeif.dll, FlyNativeLibDds.dll
       # -----------------------------------------------------------------------
       # FlyContextMenuHelper.exe is deliberately not built or shipped -- an
       # unsigned helper .exe trips antivirus heuristics. The project is still
@@ -177,6 +190,16 @@ jobs:
             /p:Platform=${{ matrix.platform }} `
             /p:PlatformToolset=${{ matrix.toolset }}
 
+      # Links the static DirectXTex.lib installed by "Install vcpkg DirectXTex" above.
+      - name: Build FlyNativeLibDds
+        if: ${{ inputs.native == 'Build fresh' }}
+        working-directory: Src/FlyNativeLibDds
+        run: |
+          msbuild FlyNativeLibDds.vcxproj `
+            /p:Configuration=Release `
+            /p:Platform=${{ matrix.platform }} `
+            /p:PlatformToolset=${{ matrix.toolset }}
+
       # -----------------------------------------------------------------------
       # Step 3 -- Rust: fly_rust_bridge.dll  (RAW decode + SVG render)
       # -----------------------------------------------------------------------
@@ -189,7 +212,7 @@ jobs:
       # Rust bakes the source path of every panic site into the binary, so without
       # this the cargo registry and rustup std source paths (and on a dev machine,
       # the developer's home directory) end up as ~100 strings inside the DLL.
-      # Same block as in Src/03_build_only_rust.ps1 -- keep the two in sync.
+      # Same block as in Src/04_rust_bridge.ps1 -- keep the two in sync.
       # 0x1F is the separator CARGO_ENCODED_RUSTFLAGS expects; it avoids the
       # whitespace-splitting problem that plain RUSTFLAGS has with spaced paths.
       # Changing these flags invalidates the rust-cache entry, so the first run
@@ -241,6 +264,7 @@ jobs:
           # Native C++ DLLs (OutDir = Src\<Platform>\Release\)
           Copy-Item "Src/$platform/Release/FlyNativeLib.dll"          -Destination $externalDir -Force
           Copy-Item "Src/$platform/Release/FlyNativeLibHeif.dll"       -Destination $externalDir -Force
+          Copy-Item "Src/$platform/Release/FlyNativeLibDds.dll"        -Destination $externalDir -Force
 
           # Rust DLL
           Copy-Item "Src/fly_rust_bridge/target/$rustTarget/release/fly_rust_bridge.dll" `
@@ -258,7 +282,7 @@ jobs:
           $externalDir = "Src/FlyPhotos/External/${{ matrix.platform }}"
           $expected = @(
             "heif.dll", "dav1d.dll", "libde265.dll", "libpng16.dll", "z.dll",
-            "FlyNativeLib.dll", "FlyNativeLibHeif.dll",
+            "FlyNativeLib.dll", "FlyNativeLibHeif.dll", "FlyNativeLibDds.dll",
             "fly_rust_bridge.dll"
           )
           $failed = $false

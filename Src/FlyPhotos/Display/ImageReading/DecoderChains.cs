@@ -25,6 +25,7 @@ internal enum Purpose
 internal enum DecodeStep
 {
     HeifEmbedded, HeifHq, AvifHq,
+    DdsHq, DdsResized,
     WicEmbedded, WicResized, WicHq, WicRawHq,
     MagickHq, MagickRawHq, MagickResized, MagickRawEmbedded,
     MagicScalerResized,
@@ -101,6 +102,11 @@ internal static class DecoderChains
                 Add(DecodeStep.MagickResized, codecs.Magick(extension));
                 break;
             case (Purpose.Preview, ImageFormat.Psd): Add(DecodeStep.PsdEmbedded); break;
+            // DDS is DirectXTex only. WIC's codec reads just DXT1-5 (which DirectXTex reads faster), and
+            // ImageMagick swaps red/blue on some layouts (#273) and fails on the files DirectXTex rejects.
+            case (Purpose.Preview, ImageFormat.Dds): Add(DecodeStep.DdsResized); break;
+            // No tiled path: the DDS reader caps its decode at the GPU limit, so a DDS is never oversized.
+            case (Purpose.Large, ImageFormat.Dds): break;
             case (Purpose.Preview, ImageFormat.Svg): Add(DecodeStep.SvgResized); break;
             case (Purpose.Preview, ImageFormat.Gif or ImageFormat.Png or ImageFormat.Bmp or ImageFormat.Webp):
                 Add(DecodeStep.WicResized);
@@ -158,6 +164,7 @@ internal static class DecoderChains
                     Add(DecodeStep.MagickHq, codecs.Magick(extension));
                     break;
                 case ImageFormat.Psd: Add(DecodeStep.MagickHq); break;
+                case ImageFormat.Dds: Add(DecodeStep.DdsHq); break;
                 case ImageFormat.Svg: Add(DecodeStep.SvgHq); break;
                 case ImageFormat.Gif: Add(DecodeStep.Gif); break;
                 case ImageFormat.Webp: Add(DecodeStep.Webp); break;

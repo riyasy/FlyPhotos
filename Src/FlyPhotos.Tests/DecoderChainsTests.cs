@@ -12,9 +12,9 @@ public sealed class DecoderChainsTests
 
     /// <summary>A small stand-in for what CodecDiscovery finds on a real machine.</summary>
     private static readonly CodecSupport Codecs = new(
-        wic: Set(".jpg", ".png", ".gif", ".webp", ".bmp", ".tif", ".heic", ".nef"),
+        wic: Set(".jpg", ".png", ".gif", ".webp", ".bmp", ".tif", ".heic", ".nef", ".dds"),
         wicRaw: Set(".nef"),
-        magick: Set(".jpg", ".png", ".heic", ".avif", ".psd", ".nef", ".tga"),
+        magick: Set(".jpg", ".png", ".heic", ".avif", ".psd", ".nef", ".tga", ".dds"),
         magickRaw: Set(".nef"),
         rawler: Set(".nef"));
 
@@ -80,6 +80,16 @@ public sealed class DecoderChainsTests
         CollectionAssert.AreEqual(new[] { D.LargeHeif, D.LargeWic, D.LargeMagick }, Chain(".heic", Purpose.Large));
         CollectionAssert.AreEqual(new[] { D.LargeWic, D.LargeMagick }, Chain(".jpg", Purpose.Large));
         CollectionAssert.AreEqual(new[] { D.LargeMagick }, Chain(".psd", Purpose.Large));
+    }
+
+    [TestMethod]
+    public void Dds_uses_only_directxtex()
+    {
+        // WIC and Magick both claim .dds in the stand-in codec set; neither is tried.
+        CollectionAssert.AreEqual(new[] { D.DdsHq }, Chain(".dds", Purpose.Hq));
+        CollectionAssert.AreEqual(new[] { D.DdsHq }, Chain(".dds", Purpose.FirstPreview));
+        CollectionAssert.AreEqual(new[] { D.DdsResized }, Chain(".dds", Purpose.Preview));
+        Assert.AreEqual(0, Chain(".dds", Purpose.Large).Count);
     }
 
     [TestMethod]

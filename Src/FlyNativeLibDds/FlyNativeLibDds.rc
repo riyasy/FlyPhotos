@@ -1,0 +1,35 @@
+#include <winver.h>
+#include "version.h"   // this project's own version.h, not Src/build/version.h
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION    FLYDDS_VER_MAJOR,FLYDDS_VER_MINOR,FLYDDS_VER_PATCH,FLYDDS_VER_BUILD
+ PRODUCTVERSION FLYDDS_VER_MAJOR,FLYDDS_VER_MINOR,FLYDDS_VER_PATCH,FLYDDS_VER_BUILD
+ FILEFLAGSMASK  VS_FFI_FILEFLAGSMASK
+#ifdef _DEBUG
+ FILEFLAGS      VS_FF_DEBUG
+#else
+ FILEFLAGS      0x0L
+#endif
+ FILEOS         VOS_NT_WINDOWS32
+ FILETYPE       VFT_DLL
+ FILESUBTYPE    VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName",      FLYDDS_COMPANY
+            VALUE "FileDescription",  "FlyPhotos DDS Decoder"
+            VALUE "FileVersion",      FLYDDS_VER_STRING
+            VALUE "InternalName",     "FlyNativeLibDds"
+            VALUE "LegalCopyright",   FLYDDS_COPYRIGHT
+            VALUE "OriginalFilename", "FlyNativeLibDds.dll"
+            VALUE "ProductName",      FLYDDS_PRODUCT
+            VALUE "ProductVersion",   FLYDDS_VER_STRING
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

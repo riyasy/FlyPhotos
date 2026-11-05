@@ -74,6 +74,8 @@ public sealed class ImageFormatTests
         Assert.AreEqual(ImageFormat.Psd, ImageFormats.Detect("8BPS\0\u0001"u8));
         Assert.AreEqual(ImageFormat.Bmp, ImageFormats.Detect([0x42, 0x4D, 0x36, 0, 0, 0, 0, 0, 0, 0, 0x36, 0, 0, 0]));
         Assert.AreEqual(ImageFormat.Ico, ImageFormats.Detect([0, 0, 1, 0, 2, 0, 16, 16]));
+        Assert.AreEqual(ImageFormat.Dds, ImageFormats.Detect("DDS |\0\0\0"u8));
+        Assert.AreEqual(ImageFormat.Dds, ImageFormats.FromExtension(".DDS"));
     }
 
     [TestMethod]

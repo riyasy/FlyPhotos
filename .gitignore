@@ -23,12 +23,8 @@ win-ARM64.pubxml.user
 /Src/fly_rust_bridge/target
 /Src/fly_rust_bridge/Cargo.lock
 /CreateBackup.ps1
-/Src/00_build_all_and_publish.ps1
-/Src/01_patch_vcpkg_and_build.md
-/Src/01_patch_vcpkg_and_build.ps1
-/Src/02_build_only_native_dlls.ps1
-/Src/03_build_only_rust.ps1
-/Src/04_clear_vcpkg_binary_cache.ps1
+# Local build scripts (00_build_all.ps1, 01_vcpkg_libheif.ps1/.md, 02_..., 99_clear_vcpkg_cache.ps1)
+/Src/[0-9][0-9]_*
 /Src/build_libheif/vcpkg
 
 /Src/FlyPhotos/CLAUDE.md

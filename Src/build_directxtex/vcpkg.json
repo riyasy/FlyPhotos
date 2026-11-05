@@ -1,0 +1,8 @@
+{
+  "dependencies": [
+    {
+      "name": "directxtex",
+      "default-features": false
+    }
+  ]
+}

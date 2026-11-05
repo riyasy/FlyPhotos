@@ -1,4 +1,4 @@
-It should be run using 01_patch_vcpkg_and_build.ps1
+It should be run using 01_vcpkg_libheif.ps1
 Otherwise the default vcpkg install will yield heif.dll which links with aom.dll instead of dav1d.dll
 
 how to update the vcpkg baseline
