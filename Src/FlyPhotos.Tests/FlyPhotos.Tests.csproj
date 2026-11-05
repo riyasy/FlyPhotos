@@ -18,6 +18,19 @@
     <Compile Include="..\FlyPhotos\Services\FolderWatcher.cs" Link="Linked\FolderWatcher.cs" />
     <Compile Include="..\FlyPhotos\Display\State\ListChange.cs" Link="Linked\ListChange.cs" />
     <Compile Include="..\FlyPhotos\Display\State\KeyWindow.cs" Link="Linked\KeyWindow.cs" />
+    <Compile Include="..\FlyPhotos\Infra\Interop\NativeDdsBridge.cs" Link="Linked\NativeDdsBridge.cs" />
+    <Compile Include="..\FlyPhotos\Infra\Interop\NativeHeifBridge.cs" Link="Linked\NativeHeifBridge.cs" />
+    <Compile Include="..\FlyPhotos\Infra\Interop\NativeAvifBridge.cs" Link="Linked\NativeAvifBridge.cs" />
+  </ItemGroup>
+
+  <!-- DdsDecoderTests and HeifDecoderTests call the real decoders, so their committed x64 builds (and
+       FlyNativeLibHeif's vcpkg dependencies) sit next to the test assembly. These tests therefore run in
+       an x64 process only. -->
+  <ItemGroup>
+    <None Include="..\FlyPhotos\External\x64\FlyNativeLibDds.dll;..\FlyPhotos\External\x64\FlyNativeLibHeif.dll;..\FlyPhotos\External\x64\heif.dll;..\FlyPhotos\External\x64\libde265.dll;..\FlyPhotos\External\x64\dav1d.dll;..\FlyPhotos\External\x64\libpng16.dll;..\FlyPhotos\External\x64\z.dll"
+          Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- HEIC/AVIF fixtures; make_fixtures.py next to them regenerates them. -->
+    <None Update="TestData\**\*.heic;TestData\**\*.avif" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
