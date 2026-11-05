@@ -85,6 +85,11 @@ jobs:
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
+        # The default is the 32-bit x86 MSBuild. On the ARM runner that runs under
+        # emulation, and the C++ targets then ignore PreferredToolArchitecture=arm64
+        # and fall back to the 32-bit compiler (Microsoft.Cpp.ToolsetLocation.props).
+        with:
+          msbuild-architecture: ${{ matrix.toolarch }}
 
       # Install the stable Rust toolchain and pre-add the cross-compilation
       # target for this platform. On windows-latest the host IS x86_64 so
