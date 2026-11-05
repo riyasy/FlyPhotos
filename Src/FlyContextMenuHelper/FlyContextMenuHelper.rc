@@ -1,5 +1,5 @@
 #include <winver.h>
-#include "../build/version.h"
+#include "version.h"
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION    FLY_VER_MAJOR,FLY_VER_MINOR,FLY_VER_PATCH,FLY_VER_BUILD

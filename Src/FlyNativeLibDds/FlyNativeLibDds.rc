@@ -1,5 +1,5 @@
 #include <winver.h>
-#include "version.h"   // this project's own version.h, not Src/build/version.h
+#include "version.h"
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION    FLYDDS_VER_MAJOR,FLYDDS_VER_MINOR,FLYDDS_VER_PATCH,FLYDDS_VER_BUILD

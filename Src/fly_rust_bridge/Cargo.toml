@@ -1,13 +1,13 @@
 [package]
 name = "fly_rust_bridge"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]
 
-# build.rs only: stamps the DLL with the VERSIONINFO resource read from Src/build/version.h,
-# so the Rust DLL carries the same publisher and version strings as the C++ binaries.
+# build.rs only: stamps the DLL with a VERSIONINFO resource (version = this file's `version`),
+# so the Rust DLL carries publisher and version strings like the C++ binaries.
 [build-dependencies]
 winresource = "0.1"
 
