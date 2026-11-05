@@ -36,8 +36,8 @@ jobs:
       - id: pick
         shell: pwsh
         run: |
-          $x64 = '{"runner":"windows-latest","platform":"x64","rid":"win-x64","vcpkg-triplet":"x64-windows-release","dxtex-triplet":"x64-windows-static-release","install-root":"vcpkg_installed_x64","rust-target":"x86_64-pc-windows-msvc","publish-profile":"win-x64","toolset":"v145"}'
-          $arm = '{"runner":"windows-11-arm","platform":"ARM64","rid":"win-arm64","vcpkg-triplet":"arm64-windows-release","dxtex-triplet":"arm64-windows-static-release","install-root":"vcpkg_installed_arm64","rust-target":"aarch64-pc-windows-msvc","publish-profile":"win-ARM64","toolset":"v145"}'
+          $x64 = '{"runner":"windows-latest","platform":"x64","rid":"win-x64","vcpkg-triplet":"x64-windows-release","dxtex-triplet":"x64-windows-static-release","install-root":"vcpkg_installed_x64","rust-target":"x86_64-pc-windows-msvc","publish-profile":"win-x64","toolset":"v145","toolarch":"x64"}'
+          $arm = '{"runner":"windows-11-arm","platform":"ARM64","rid":"win-arm64","vcpkg-triplet":"arm64-windows-release","dxtex-triplet":"arm64-windows-static-release","install-root":"vcpkg_installed_arm64","rust-target":"aarch64-pc-windows-msvc","publish-profile":"win-ARM64","toolset":"v145","toolarch":"arm64"}'
           $items = switch ("${{ inputs.platform }}") {
             'x64'   { $x64 }
             'ARM64' { $arm }
@@ -169,6 +169,9 @@ jobs:
       # Visual Studio 2026 and use v145: windows-11-arm moved to the
       # windows-11-vs2026-arm64 image in Oct 2026, which still carries the v143
       # compiler but not v143's ATL, so v143 fails on atlstr.h.
+      # PreferredToolArchitecture (matrix.toolarch) picks a native 64-bit compiler.
+      # Left alone, the ARM runner uses the 32-bit HostX86 cl.exe under emulation,
+      # which runs out of address space on FlyNativeLibHeif's PCH (C3859/C1076).
       # Build order matters: FlyNativeLib has no vcpkg dependency and must be
       # built before FlyNativeLibHeif which links against heif.lib.
       # Output lands in Src/<Platform>/Release/ (not Src/<Project>/<Platform>/Release/).
@@ -180,7 +183,8 @@ jobs:
           msbuild FlyNativeLib.vcxproj `
             /p:Configuration=Release `
             /p:Platform=${{ matrix.platform }} `
-            /p:PlatformToolset=${{ matrix.toolset }}
+            /p:PlatformToolset=${{ matrix.toolset }} `
+            /p:PreferredToolArchitecture=${{ matrix.toolarch }}
 
       - name: Build FlyNativeLibHeif
         if: ${{ inputs.native == 'Build fresh' }}
@@ -189,7 +193,8 @@ jobs:
           msbuild FlyNativeLibHeif.vcxproj `
             /p:Configuration=Release `
             /p:Platform=${{ matrix.platform }} `
-            /p:PlatformToolset=${{ matrix.toolset }}
+            /p:PlatformToolset=${{ matrix.toolset }} `
+            /p:PreferredToolArchitecture=${{ matrix.toolarch }}
 
       # Links the static DirectXTex.lib installed by "Install vcpkg DirectXTex" above.
       - name: Build FlyNativeLibDds
@@ -199,7 +204,8 @@ jobs:
           msbuild FlyNativeLibDds.vcxproj `
             /p:Configuration=Release `
             /p:Platform=${{ matrix.platform }} `
-            /p:PlatformToolset=${{ matrix.toolset }}
+            /p:PlatformToolset=${{ matrix.toolset }} `
+            /p:PreferredToolArchitecture=${{ matrix.toolarch }}
 
       # -----------------------------------------------------------------------
       # Step 3 -- Rust: fly_rust_bridge.dll  (RAW decode + SVG render)
