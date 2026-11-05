@@ -36,7 +36,7 @@ jobs:
         shell: pwsh
         run: |
           $x64 = '{"runner":"windows-latest","platform":"x64","rid":"win-x64","vcpkg-triplet":"x64-windows-release","dxtex-triplet":"x64-windows-static-release","install-root":"vcpkg_installed_x64","rust-target":"x86_64-pc-windows-msvc","publish-profile":"win-x64","toolset":"v145"}'
-          $arm = '{"runner":"windows-11-arm","platform":"ARM64","rid":"win-arm64","vcpkg-triplet":"arm64-windows-release","dxtex-triplet":"arm64-windows-static-release","install-root":"vcpkg_installed_arm64","rust-target":"aarch64-pc-windows-msvc","publish-profile":"win-ARM64","toolset":"v143"}'
+          $arm = '{"runner":"windows-11-arm","platform":"ARM64","rid":"win-arm64","vcpkg-triplet":"arm64-windows-release","dxtex-triplet":"arm64-windows-static-release","install-root":"vcpkg_installed_arm64","rust-target":"aarch64-pc-windows-msvc","publish-profile":"win-ARM64","toolset":"v145"}'
           $items = switch ("${{ inputs.platform }}") {
             'x64'   { $x64 }
             'ARM64' { $arm }
@@ -164,10 +164,10 @@ jobs:
       # FlyContextMenuHelper.exe is deliberately not built or shipped -- an
       # unsigned helper .exe trips antivirus heuristics. The project is still
       # in the repo and can be built by hand for users who ask.
-      # PlatformToolset is per-runner (matrix.toolset): the windows-latest x64
-      # runner is on Visual Studio 2026 (v145), but windows-11-arm is still on
-      # Visual Studio 2022 (newest toolset v143) and has no v145. ATL ships with
-      # both images for their default toolset, so each compiles with its own.
+      # PlatformToolset is per-runner (matrix.toolset). Both runners are now on
+      # Visual Studio 2026 and use v145: windows-11-arm moved to the
+      # windows-11-vs2026-arm64 image in Oct 2026, which still carries the v143
+      # compiler but not v143's ATL, so v143 fails on atlstr.h.
       # Build order matters: FlyNativeLib has no vcpkg dependency and must be
       # built before FlyNativeLibHeif which links against heif.lib.
       # Output lands in Src/<Platform>/Release/ (not Src/<Project>/<Platform>/Release/).
