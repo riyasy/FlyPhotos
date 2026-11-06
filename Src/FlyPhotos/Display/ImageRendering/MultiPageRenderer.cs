@@ -1,10 +1,10 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Graphics.DirectX;
 using Windows.Graphics.Imaging;
 using Windows.Storage.Streams;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
 using Microsoft.Graphics.Canvas;
@@ -122,23 +122,19 @@ internal partial class MultiPageRenderer : IRenderer
             var decoder = await _decoderTask;
 
             var frame = await decoder.GetFrameAsync((uint)_pageOrder[pageIndex]);
-            var pixelData = await frame.GetPixelDataAsync(
+            using var softwareBitmap = await frame.GetSoftwareBitmapAsync(
                 BitmapPixelFormat.Bgra8,
                 BitmapAlphaMode.Premultiplied,
                 new BitmapTransform(),
                 ExifOrientationMode.IgnoreExifOrientation,
                 ColorManagementMode.DoNotColorManage);
-            var pixelBytes = pixelData.DetachPixelData();
 
             // All the heavy decoding is done. Before touching shared state, check if this
             // operation is still the latest, and that the renderer hasn't been disposed.
             if (_isDisposed || operationId != _latestPageLoadId) return null;
 
-            // CreateFromBytes is synchronous and uploads directly to the GPU — no PNG round-trip.
-            // 96f DPI matches the original LoadAsync-from-PNG behaviour (PNG default DPI = 96).
-            var newBitmap = CanvasBitmap.CreateFromBytes(
-                _canvas, pixelBytes, (int)frame.PixelWidth, (int)frame.PixelHeight,
-                DirectXPixelFormat.B8G8R8A8UIntNormalized, 96f);
+            // Uploads the decoded pixels directly to the GPU at 96 DPI, so the page's size in DIPs is its pixel size.
+            var newBitmap = softwareBitmap.ToCanvasBitmap(_canvas);
 
             // Re-check and swap under the lock — another page load or disposal may have raced in
             // during the async pixel extraction, and Draw may be reading _currentBitmap on the W2D thread.

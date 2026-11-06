@@ -5,7 +5,6 @@ using FlyPhotos.Core.Model;
 using Microsoft.Graphics.Canvas;
 using NLog;
 using FlyPhotos.Services;
-using Windows.Graphics.DirectX;
 
 namespace FlyPhotos.Display.ImageReading;
 
@@ -72,7 +71,7 @@ internal static class WebpReader
     /// On failure, returns <c>(false, HqDisplayItem.Empty())</c> and logs the error.
     /// </returns>
     /// <remarks>
-    /// Frame 0 pixels are decoded via <see cref="BitmapFrame.GetPixelDataAsync()"/> on the
+    /// Frame 0 pixels are decoded via <see cref="BitmapFrame.GetSoftwareBitmapAsync()"/> on the
     /// same decoder instance used for the frame-count check — no second decode pass needed.
     /// EXIF orientation is applied so the resulting bitmap is always correctly oriented.
     /// For animated files, the raw file bytes are read for the
@@ -85,24 +84,17 @@ internal static class WebpReader
             var stream = await file.GetStreamAsync();
 
             // One decoder, one stream read.
-            // GetPixelDataAsync extracts frame 0 pixels directly from the decoder we already
-            // have — no second BitmapDecoder or second CanvasBitmap.LoadAsync needed.
+            // Frame 0 is decoded from the decoder we already have, into a SoftwareBitmap that Win2D
+            // uploads directly, with no managed copy of the pixels.
             var decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.WebpDecoderId, stream);
             var frame0 = await decoder.GetFrameAsync(0);
-            var pixelProvider = await frame0.GetPixelDataAsync(
+            using var softwareBitmap = await frame0.GetSoftwareBitmapAsync(
                 BitmapPixelFormat.Bgra8,
                 BitmapAlphaMode.Premultiplied,
                 IdentityTransform,
                 ExifOrientationMode.RespectExifOrientation,
                 ColorManagementMode.ColorManageToSRgb);
-            byte[] pixels = pixelProvider.DetachPixelData(); // DetachPixelData releases the internal buffer
-
-            // OrientedPixelWidth/Height account for any EXIF rotation applied above.
-            var firstFrame = CanvasBitmap.CreateFromBytes(
-                ctrl, pixels,
-                (int)decoder.OrientedPixelWidth,
-                (int)decoder.OrientedPixelHeight,
-                DirectXPixelFormat.B8G8R8A8UIntNormalized);
+            var firstFrame = softwareBitmap.ToCanvasBitmap(ctrl);
 
             if (decoder.FrameCount > 1) // Animated WebP
             {
