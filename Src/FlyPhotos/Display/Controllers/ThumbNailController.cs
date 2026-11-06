@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading;
 using Windows.Foundation;
 using Windows.Graphics.DirectX;
@@ -12,7 +13,7 @@ using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Utils;
 using FlyPhotos.UI.Views;
 using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.Geometry;
+using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
@@ -410,8 +411,9 @@ internal partial class ThumbNailController : IThumbnailController
             (_previousPassBitmaps, _currentPassBitmaps) = (_currentPassBitmaps, _previousPassBitmaps);
             try
             {
+                using var brush = new CanvasImageBrush(sender) { Interpolation = CanvasImageInterpolation.HighQualityCubic };
                 for (var i = -renderHalfCount; i <= renderHalfCount; i++)
-                    DrawThumbnailSlot(dsThumbNail, sender, startX, i, keys, currentPosition);
+                    DrawThumbnailSlot(dsThumbNail, brush, sender, startX, i, keys, currentPosition);
             }
             finally
             {
@@ -502,7 +504,7 @@ internal partial class ThumbNailController : IThumbnailController
         bitmaps.Clear();
     }
 
-    private void DrawThumbnailSlot(CanvasDrawingSession ds, ICanvasResourceCreator creator,
+    private void DrawThumbnailSlot(CanvasDrawingSession ds, CanvasImageBrush brush, ICanvasResourceCreator creator,
         int startX, int slotIndex, IReadOnlyList<int> keys, int currentPosition)
     {
         var thumbnailPosition = currentPosition + slotIndex;
@@ -523,12 +525,12 @@ internal partial class ThumbNailController : IThumbnailController
             Constants.ThumbnailPadding,
             _thumbnailBoxSize - (Constants.ThumbnailPadding * 2),
             _thumbnailBoxSize - (Constants.ThumbnailPadding * 2));
-        var srcRect = new Rect(0, 0, bitmap.SizeInPixels.Width, bitmap.SizeInPixels.Height);
-
-        using var clip = CanvasGeometry.CreateRoundedRectangle(ds, destRect,
-            Constants.ThumbnailCornerRadius, Constants.ThumbnailCornerRadius);
-        using var layer = ds.CreateLayer(1.0f, clip);
-        ds.DrawImage(bitmap, destRect, srcRect, 1f, CanvasImageInterpolation.HighQualityCubic);
+        // Fill the rounded rect with the bitmap mapped onto it: no clip layer, and one resample at any DPI.
+        brush.Image = bitmap;
+        brush.Transform = Matrix3x2.CreateScale((float)(destRect.Width / bitmap.Size.Width),
+                              (float)(destRect.Height / bitmap.Size.Height))
+                          * Matrix3x2.CreateTranslation((float)destRect.X, (float)destRect.Y);
+        ds.FillRoundedRectangle(destRect, Constants.ThumbnailCornerRadius, Constants.ThumbnailCornerRadius, brush);
     }
 
     // --- Threading helpers ---
