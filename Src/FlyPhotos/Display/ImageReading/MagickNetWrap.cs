@@ -19,16 +19,21 @@ internal static class MagickNetWrap
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
-    /// Extracts the larger embedded camera preview JPEG from a RAW image file without performing a full decode.
+    /// A preview from the embedded camera preview JPEG of a RAW file, without a RAW decode. The JPEG is often
+    /// full size (24 MP+), so it is scaled to the preview size while it is decoded.
     /// </summary>
     public static async Task<(bool, PreviewDisplayItem)> GetEmbeddedForRawFile(
         ICanvasResourceCreatorWithDpi resourceCreator, string path)
     {
         try
         {
-            // Ping to read image dimensions and orientation for metadata.
+            // One ping gives the embedded JPEG (see LoadEmbeddedPreviewAsync) and the image size and orientation.
             using var pingImage = new MagickImage();
+            pingImage.Settings.SetDefines(new DngReadDefines { ReadThumbnail = true });
             pingImage.Ping(path);
+
+            var previewData = pingImage.GetProfile("dng:thumbnail")?.ToByteArray();
+            if (previewData == null) return (false, PreviewDisplayItem.Empty());
 
             var verticalOrientation = pingImage.Orientation == Orientation.RightTop ||
                                       pingImage.Orientation == Orientation.LeftBottom ||
@@ -39,10 +44,10 @@ internal static class MagickNetWrap
             var height = verticalOrientation ? pingImage.Width : pingImage.Height;
             var metadata = new ImageMetadata(width, height);
 
-            var (ok, bitmap) = await LoadEmbeddedPreviewAsync(resourceCreator, path);
-            if (!ok || bitmap == null)
-                return (false, PreviewDisplayItem.Empty());
-
+            using var stream = new MemoryStream(previewData).AsRandomAccessStream();
+            var (pixels, w, h, _, _) = await CappedDecode.DecodeAsync(stream);
+            var bitmap = CanvasBitmap.CreateFromBytes(resourceCreator, pixels, (int)w, (int)h,
+                DirectXPixelFormat.B8G8R8A8UIntNormalized);
             return (true, new PreviewDisplayItem(bitmap, Origin.Disk, metadata));
         }
         catch (Exception ex)

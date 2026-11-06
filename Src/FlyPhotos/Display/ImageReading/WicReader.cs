@@ -50,58 +50,15 @@ internal static class WicReader
     /// format WIC can auto-detect.
     /// </summary>
     public static async Task<(bool, PreviewDisplayItem)> GetResized(ICanvasResourceCreatorWithDpi ctrl, ImageFile file,
-        uint maxDimension = 800)
+        uint maxDimension = CappedDecode.PreviewMaxSize)
     {
         try
         {
-            // Auto-detect format — no codec ID needed.
-            var decoder = await BitmapDecoder.CreateAsync(await file.GetPartialReadStreamAsync());
-
-            uint originalWidth = decoder.OrientedPixelWidth;
-            uint originalHeight = decoder.OrientedPixelHeight;
-            var metadata = new ImageMetadata(originalWidth, originalHeight);
-
-            // Maintain aspect ratio, cap longest side at maxDimension.
-            uint scaledWidth, scaledHeight;
-            if (originalWidth <= maxDimension && originalHeight <= maxDimension)
-            {
-                scaledWidth = originalWidth;
-                scaledHeight = originalHeight;
-            }
-            else if (originalWidth >= originalHeight)
-            {
-                scaledWidth = maxDimension;
-                scaledHeight = (uint)Math.Round(originalHeight * (maxDimension / (double)originalWidth));
-            }
-            else
-            {
-                scaledHeight = maxDimension;
-                scaledWidth = (uint)Math.Round(originalWidth * (maxDimension / (double)originalHeight));
-            }
-
-            // WIC applies the resize natively inside GetPixelDataAsync —
-            // single decode pass, no intermediate buffer or separate library needed.
-            var frame0 = await decoder.GetFrameAsync(0);
-            var transform = new BitmapTransform
-            {
-                ScaledWidth = scaledWidth,
-                ScaledHeight = scaledHeight,
-                InterpolationMode = BitmapInterpolationMode.Fant
-            };
-            var pixelProvider = await frame0.GetPixelDataAsync(
-                BitmapPixelFormat.Bgra8,
-                BitmapAlphaMode.Premultiplied,
-                transform,
-                ExifOrientationMode.RespectExifOrientation,
-                ColorManagementMode.ColorManageToSRgb);
-            var pixels = pixelProvider.DetachPixelData();
-
-            var bitmap = CanvasBitmap.CreateFromBytes(
-                ctrl, pixels,
-                (int)scaledWidth, (int)scaledHeight,
+            var (pixels, width, height, fullWidth, fullHeight) =
+                await CappedDecode.DecodeAsync(await file.GetPartialReadStreamAsync(), maxDimension);
+            var bitmap = CanvasBitmap.CreateFromBytes(ctrl, pixels, (int)width, (int)height,
                 DirectXPixelFormat.B8G8R8A8UIntNormalized);
-
-            return (true, new PreviewDisplayItem(bitmap, Origin.Disk, metadata));
+            return (true, new PreviewDisplayItem(bitmap, Origin.Disk, new ImageMetadata(fullWidth, fullHeight)));
         }
         catch (Exception ex)
         {
@@ -243,7 +200,22 @@ internal static class WicReader
             if (Path.GetExtension(file.Path).Equals(".nef", StringComparison.OrdinalIgnoreCase) && IsNikonNefCodec(decoder))
                 rotation = await GetRotationFromMetaDataNikonNefCodec(decoder.BitmapProperties);
 
-            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
+            // A full-size image returned as the thumbnail is scaled down to the preview size; others load as they are.
+            var thumbDecoder = await BitmapDecoder.CreateAsync(preview);
+            bool tooLarge = CappedDecode.IsTooLargeForThumbnail(thumbDecoder.PixelWidth, thumbDecoder.PixelHeight);
+            preview.Seek(0);
+
+            CanvasBitmap canvasBitmap;
+            if (tooLarge)
+            {
+                var (pixels, width, height, _, _) = await CappedDecode.DecodeAsync(preview);
+                canvasBitmap = CanvasBitmap.CreateFromBytes(ctrl, pixels, (int)width, (int)height,
+                    DirectXPixelFormat.B8G8R8A8UIntNormalized);
+            }
+            else
+            {
+                canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
+            }
             return (canvasBitmap, originalWidth, originalHeight, rotation);
         }
         catch (Exception)
