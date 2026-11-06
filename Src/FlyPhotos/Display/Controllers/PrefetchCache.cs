@@ -22,6 +22,10 @@ namespace FlyPhotos.Display.Controllers;
 /// navigation moves and ask it questions with <see cref="IsHqLoaded"/> / <see cref="IsPreviewLoaded"/>;
 /// it announces completions through the ready events. See CONTEXT.md for the vocabulary.
 ///
+/// Load order: the window centre (the photo on screen) gets its HQ decode first. Neighbour HQ decodes
+/// start only once it has loaded (<see cref="NeighbourMustWait"/>), and previews leave a core spare, so
+/// background work doesn't slow the image the user is waiting for. The UI thread never waits on any of it.
+///
 /// The class does not own the photo list: it resolves keys to photos through a delegate handed in at
 /// construction, and is told the key snapshot + centre on every <see cref="MoveWindow"/> call.
 /// </summary>
@@ -41,7 +45,8 @@ internal sealed class PrefetchCache : IDisposable
     }
 
     private readonly CancellationTokenSource _cts = new();
-    private readonly SemaphoreSlim _previewThrottler   = new(Environment.ProcessorCount);
+    // One fewer than the cores, so preview decodes leave some room for the on-screen HQ decode.
+    private readonly SemaphoreSlim _previewThrottler   = new(Math.Max(1, Environment.ProcessorCount - 1));
     private readonly SemaphoreSlim _hqThrottler        = new(Environment.ProcessorCount);
     private readonly SemaphoreSlim _diskCacheThrottler = new(Environment.ProcessorCount);
 
@@ -108,7 +113,7 @@ internal sealed class PrefetchCache : IDisposable
             { IsBackground = true, Name = "PreviewCacheBuilder" };
         previewThread.Start();
         var hqThread = new Thread(() => HqImageCacheBuilderDoWork(_cts.Token))
-            { IsBackground = true, Priority = ThreadPriority.AboveNormal, Name = "HqCacheBuilder" };
+            { IsBackground = true, Name = "HqCacheBuilder" };
         hqThread.Start();
         var diskThread = new Thread(() => PreviewDiskCacherDoWork(_cts.Token))
             { IsBackground = true, Name = "DiskCacheBuilder" };
@@ -233,7 +238,10 @@ internal sealed class PrefetchCache : IDisposable
             {
                 // Re-checked after every wake-up: a signal sent while navigation is still holding HQ back
                 // (a window move during a burst or a folder-switch quiet period) must not start a decode.
-                while (_hqTier.Queue.IsEmpty || _isBursting())
+                // Neighbours also wait while the centre is loading, so they don't compete with the photo on
+                // screen; every finished load wakes this thread. The centre is popped first because the window
+                // sync and the requeue paths push it last, on top of the stack.
+                while (_hqTier.Queue.IsEmpty || _isBursting() || NeighbourMustWait())
                 {
                     WaitHandle.WaitAny([_hqTier.Signal, token.WaitHandle]);
                     token.ThrowIfCancellationRequested();
@@ -243,6 +251,8 @@ internal sealed class PrefetchCache : IDisposable
 
                 _hqThrottler.Wait(token);
 
+                // Marked here, not inside the load, so the next pass already sees the centre as loading.
+                _hqTier.InFlight[item] = 0;
                 _ = Task.Run(() => LoadHqAsync(item), token);
             }
         }
@@ -308,12 +318,12 @@ internal sealed class PrefetchCache : IDisposable
         }
     }
 
+    // The HQ worker marks the key in flight before starting this; every exit below clears it.
     private async Task LoadHqAsync(int key)
     {
         Photo? photo = null;
         try
         {
-            _hqTier.InFlight[key] = 0;
             int gen = _hqGeneration;
             if (_getPhoto(key) is not { } p || !p.TryBeginUse())
             {
@@ -336,13 +346,10 @@ internal sealed class PrefetchCache : IDisposable
             {
                 // Oversized neighbour deferred, or its decode cancelled. MoveWindow re-queues it when it becomes
                 // the centre — unless that already happened while this load was in flight (MoveWindow skips
-                // in-flight keys), so check again now.
+                // in-flight keys), so check again now. Removed before the push: a window move in between then
+                // queues the key itself rather than skipping it as in flight and clearing this push.
                 _hqTier.InFlight.Remove(key, out _);
-                if (IsWindowCentre(key))
-                {
-                    _hqTier.Queue.Push(key);
-                    _hqTier.Signal.Set();
-                }
+                if (IsWindowCentre(key)) _hqTier.Queue.Push(key);
                 return;
             }
             if (DiscardedStaleRawDecode(key, photo, gen)) return;
@@ -350,10 +357,17 @@ internal sealed class PrefetchCache : IDisposable
             _hqTier.InFlight.Remove(key, out _);
             HqReady?.Invoke(key);
         }
+        catch (Exception ex)
+        {
+            // A key left in flight would never reload, and as the centre it would hold back every neighbour.
+            _hqTier.InFlight.Remove(key, out _);
+            Logger.Error(ex, $"HQ load failed for key {key}");
+        }
         finally
         {
             photo?.EndUse();
             _hqThrottler.Release();
+            _hqTier.Signal.Set(); // wakes the HQ worker: a neighbour may be waiting, or a key was requeued
         }
     }
 
@@ -380,11 +394,7 @@ internal sealed class PrefetchCache : IDisposable
 
         photo.DisposeHqOnly();
         _hqTier.InFlight.Remove(key, out _);
-        if (IsInDesiredHqWindow(key))
-        {
-            _hqTier.Queue.Push(key);
-            _hqTier.Signal.Set();
-        }
+        if (IsInDesiredHqWindow(key)) _hqTier.Queue.Push(key); // the caller's finally wakes the worker
         return true;
     }
 
@@ -462,6 +472,21 @@ internal sealed class PrefetchCache : IDisposable
         var keys = _windowKeys;
         int centre = _windowCentre;
         return centre >= 0 && centre < keys.Count && keys[centre] == key;
+    }
+
+    // HQ worker thread: the next queued key is a neighbour and the current centre is still loading.
+    // Never holds the centre itself, and releases as soon as the centre moves (a new key) or its load ends
+    // (every exit of LoadHqAsync clears the in-flight mark and wakes the worker). Neighbour decodes already
+    // running are not stopped. A centre decode that never returns holds neighbours until the user moves on.
+    // Racy by design: the queue or window can change between this peek and the pop, letting at most one
+    // neighbour start early.
+    private bool NeighbourMustWait()
+    {
+        if (!_hqTier.Queue.TryPeek(out var next)) return false;
+        var keys = _windowKeys;
+        int centre = _windowCentre;
+        return centre >= 0 && centre < keys.Count && keys[centre] != next
+               && _hqTier.InFlight.ContainsKey(keys[centre]);
     }
 
     private List<int> FindNeighborKeys(int currentPosition, int cacheSizeOneSide)
