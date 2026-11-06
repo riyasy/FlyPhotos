@@ -23,6 +23,7 @@
     <Compile Include="..\FlyPhotos\Infra\Interop\NativeHeifBridge.cs" Link="Linked\NativeHeifBridge.cs" />
     <Compile Include="..\FlyPhotos\Infra\Interop\NativeAvifBridge.cs" Link="Linked\NativeAvifBridge.cs" />
     <Compile Include="..\FlyPhotos\Display\ImageReading\CappedDecode.cs" Link="Linked\CappedDecode.cs" />
+    <Compile Include="..\FlyPhotos\Display\ImageReading\PsdThumbnail.cs" Link="Linked\PsdThumbnail.cs" />
   </ItemGroup>
 
   <!-- DdsDecoderTests and HeifDecoderTests call the real decoders, so their committed x64 builds (and
