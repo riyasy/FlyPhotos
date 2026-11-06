@@ -143,6 +143,24 @@ public sealed class HeifDecoderTests
         AssertPixel(img.Pixels, 800, 400, 200, Red);
     }
 
+    [TestMethod]
+    public void Embedded_only_returns_the_stored_thumbnail()
+    {
+        var img = NativeHeifWrapper.DecodeThumbnail(Fixture("with_thumbnail.heic"), embeddedOnly: true);
+        Assert.AreEqual((64, 32), (img.Width, img.Height));
+        Assert.AreEqual((256, 128), (img.PrimaryImageWidth, img.PrimaryImageHeight));
+    }
+
+    [TestMethod]
+    [DataRow("large_no_thumbnail.heic")]
+    [DataRow("quadrants.heic")]
+    [DataRow("quadrants.avif")]
+    public void Embedded_only_without_a_thumbnail_returns_null(string file)
+    {
+        Assert.IsNull(NativeHeifWrapper.DecodeThumbnail(Fixture(file), embeddedOnly: true));
+        Assert.AreEqual(HeifError.NoThumbnailFound, NativeHeifBridge.ExtractEmbeddedThumbnail(Fixture(file), out _));
+    }
+
     // ---- Animated AVIF ------------------------------------------------------------------------------------
 
     /// <summary>Owns a pinned copy of the file and an <c>OpenAvifAnimation</c> handle, like AvifAnimator does.</summary>
@@ -289,6 +307,7 @@ public sealed class HeifDecoderTests
         string missing = Path.Combine(Dir, "does_not_exist.heic");
         Assert.AreEqual(HeifError.FileReadError, NativeHeifBridge.ExtractPrimaryImageAndAnimationStatus(missing, out _, out _));
         Assert.AreEqual(HeifError.FileReadError, NativeHeifBridge.ExtractThumbnail(missing, out _));
+        Assert.AreEqual(HeifError.FileReadError, NativeHeifBridge.ExtractEmbeddedThumbnail(missing, out _));
     }
 
     /// <summary>Broken inputs: empty, random bytes, a bare ftyp box, and valid files cut short.</summary>
@@ -316,6 +335,7 @@ public sealed class HeifDecoderTests
             string path = Save(bytes, name + ".heic");
             Assert.AreNotEqual(HeifError.Ok, NativeHeifBridge.ExtractPrimaryImageAndAnimationStatus(path, out _, out _), name);
             Assert.AreNotEqual(HeifError.Ok, NativeHeifBridge.ExtractThumbnail(path, out _), name);
+            Assert.AreNotEqual(HeifError.Ok, NativeHeifBridge.ExtractEmbeddedThumbnail(path, out _), name);
         }
     }
 

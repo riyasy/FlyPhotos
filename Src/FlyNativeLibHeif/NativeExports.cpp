@@ -61,7 +61,21 @@ HeifError ExtractPrimaryImageAndAnimationStatus(const wchar_t* heic_path, PixelB
  * @brief C-API function to extract the thumbnail image into a raw RGBA buffer.
  * This is the C-style wrapper for the thumbnail extraction functionality.
  */
+static HeifError ExtractThumbnailImpl(const wchar_t* heic_path, PixelBuffer* out_buffer, bool embedded_only);
+
 HeifError ExtractThumbnail(const wchar_t* heic_path, PixelBuffer* out_buffer) {
+    return ExtractThumbnailImpl(heic_path, out_buffer, false);
+}
+
+/**
+ * @brief Like ExtractThumbnail, but returns NoThumbnailFound instead of generating one from the primary image.
+ * For the first photo, whose full image is decoded right after: generating would decode it twice.
+ */
+HeifError ExtractEmbeddedThumbnail(const wchar_t* heic_path, PixelBuffer* out_buffer) {
+    return ExtractThumbnailImpl(heic_path, out_buffer, true);
+}
+
+static HeifError ExtractThumbnailImpl(const wchar_t* heic_path, PixelBuffer* out_buffer, bool embedded_only) {
     // Basic input validation.
     if (!heic_path || !out_buffer) { return HeifError::InvalidInput; }
     // Ensure the output buffer is clean before proceeding.
@@ -74,7 +88,7 @@ HeifError ExtractThumbnail(const wchar_t* heic_path, PixelBuffer* out_buffer) {
     const std::string input_file = WStringToString(heic_path);
 
     // Call the C++ method to extract the thumbnail, which allocates memory inside cppBuffer.
-    HeifError result = reader.ExtractThumbnail(input_file, cppBuffer);
+    HeifError result = reader.ExtractThumbnail(input_file, cppBuffer, embedded_only);
 
     // If successful, copy the pointer and dimensions directly. NO memcpy of pixels!
     // This transfers ownership of the heap-allocated pixel buffer to the C# caller.

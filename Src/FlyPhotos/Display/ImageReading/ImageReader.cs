@@ -178,7 +178,7 @@ internal static class ImageReader
     /// shared stream. Must match the <see cref="Run"/> arms that pass <c>file.Path</c>.
     /// </summary>
     private static bool ReadsByPath(DecodeStep step) => step is
-        DecodeStep.HeifEmbedded or DecodeStep.HeifHq or DecodeStep.DdsHq or DecodeStep.DdsResized or
+        DecodeStep.HeifEmbedded or DecodeStep.HeifEmbeddedOnly or DecodeStep.HeifHq or DecodeStep.DdsHq or DecodeStep.DdsResized or
         DecodeStep.MagickHq or DecodeStep.MagickRawHq or DecodeStep.MagickResized or DecodeStep.MagickRawEmbedded or
         DecodeStep.PsdEmbedded or DecodeStep.SvgHq or DecodeStep.SvgResized or DecodeStep.Rawler or
         DecodeStep.LargeHeif or DecodeStep.LargeMagick;
@@ -189,6 +189,7 @@ internal static class ImageReader
         step switch
         {
             DecodeStep.HeifEmbedded => ItemOrNull(NativeHeifReader.GetEmbedded(ctrl, file.Path)),
+            DecodeStep.HeifEmbeddedOnly => ItemOrNull(NativeHeifReader.GetEmbedded(ctrl, file.Path, embeddedOnly: true)),
             DecodeStep.HeifHq => ItemOrNull(NativeHeifReader.GetHq(ctrl, file.Path)),
             DecodeStep.AvifHq => ItemOrNull(await NativeAvifReader.GetHq(ctrl, file)),
             DecodeStep.DdsHq => ItemOrNull(NativeDdsReader.GetHq(ctrl, file.Path)),

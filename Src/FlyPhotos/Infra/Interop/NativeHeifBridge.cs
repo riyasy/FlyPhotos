@@ -131,6 +131,14 @@ internal static partial class NativeHeifBridge
     public static partial HeifError ExtractThumbnail(string heicPath, out PixelBuffer outBuffer);
 
     /// <summary>
+    /// Like <see cref="ExtractThumbnail"/>, but returns <see cref="HeifError.NoThumbnailFound"/> instead of
+    /// generating one from the primary image when the file has no embedded thumbnail.
+    /// </summary>
+    [LibraryImport(DllName, EntryPoint = "ExtractEmbeddedThumbnail", StringMarshalling = StringMarshalling.Utf16)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial HeifError ExtractEmbeddedThumbnail(string heicPath, out PixelBuffer outBuffer);
+
+    /// <summary>
     /// Imports the native `FreePixelBuffer` function from `FlyNativeLibHeif.dll`.
     /// This critical function is responsible for freeing the unmanaged memory allocated by
     /// `ExtractPrimaryImage` or `ExtractThumbnail` to prevent memory leaks.
@@ -260,13 +268,20 @@ public static class NativeHeifWrapper
     /// Handles calling the native DLL, copying data to managed memory, and freeing native resources.
     /// </summary>
     /// <param name="filePath">The full path to the .heic, heif or .hif file.</param>
+    /// <param name="embeddedOnly">
+    /// Only an embedded thumbnail: null when the file has none, instead of a preview scaled from a full decode.
+    /// For a caller that decodes the full image next anyway.
+    /// </param>
     /// <returns>A <see cref="HeifImage"/> object containing the decoded RGBA pixel data and dimensions, or null if no thumbnail data is found or is empty.</returns>
     /// <exception cref="Exception">Thrown if the native DLL returns an error code during decoding,
     /// indicating issues like file not found, decoding errors, or no thumbnail found.</exception>
-    public static HeifImage DecodeThumbnail(string filePath)
+    public static HeifImage DecodeThumbnail(string filePath, bool embeddedOnly = false)
     {
-        HeifError result = NativeHeifBridge.ExtractThumbnail(filePath, out NativeHeifBridge.PixelBuffer buffer);
+        HeifError result = embeddedOnly
+            ? NativeHeifBridge.ExtractEmbeddedThumbnail(filePath, out NativeHeifBridge.PixelBuffer buffer)
+            : NativeHeifBridge.ExtractThumbnail(filePath, out buffer);
 
+        if (embeddedOnly && result == HeifError.NoThumbnailFound) return null;
         if (result != HeifError.Ok)
             throw new Exception($"Native HEIF decoder failed to decode thumbnail. Error: {result}");
 

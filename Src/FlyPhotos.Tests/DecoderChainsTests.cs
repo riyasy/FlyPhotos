@@ -36,9 +36,16 @@ public sealed class DecoderChainsTests
     [TestMethod]
     public void First_photo_uses_embedded_preview_unless_open_exit_zoom()
     {
-        CollectionAssert.AreEqual(new[] { D.HeifEmbedded, D.HeifHq, D.WicHq, D.MagickHq }, Chain(".heic", Purpose.FirstPreview));
+        CollectionAssert.AreEqual(new[] { D.HeifEmbeddedOnly, D.HeifHq, D.WicHq, D.MagickHq }, Chain(".heic", Purpose.FirstPreview));
         CollectionAssert.AreEqual(new[] { D.HeifHq, D.WicHq, D.MagickHq },
             Chain(".heic", Purpose.FirstPreview, Defaults with { SkipEmbedded = true }));
+    }
+
+    [TestMethod]
+    public void First_heif_photo_never_generates_a_preview_but_the_strip_does()
+    {
+        CollectionAssert.AreEqual(new[] { D.HeifEmbeddedOnly, D.AvifHq, D.MagickHq }, Chain(".avif", Purpose.FirstPreview));
+        CollectionAssert.AreEqual(new[] { D.HeifEmbedded, D.MagickResized }, Chain(".heic", Purpose.Preview));
     }
 
     [TestMethod]

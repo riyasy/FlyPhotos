@@ -40,8 +40,9 @@ public:
     HeifReader();
     ~HeifReader();
 
-	/// @brief Extracts the thumbnail into a raw RGBA pixel buffer. If no thumbnail exists, generates one from primary image.
-    HeifError ExtractThumbnail(const std::string& input_filename, PixelBuffer& out_buffer);
+	/// @brief Extracts the thumbnail into a raw RGBA pixel buffer. If no thumbnail exists, generates one from primary image,
+	///        unless embedded_only, which returns NoThumbnailFound instead (the caller decodes the full image anyway).
+    HeifError ExtractThumbnail(const std::string& input_filename, PixelBuffer& out_buffer, bool embedded_only = false);
 
     /// @brief Extracts the primary image into a raw RGBA pixel buffer, and outputs whether the file contains sequence tracks.
     HeifError ExtractPrimaryImage(const std::string& input_filename, PixelBuffer& out_buffer, bool& out_is_animated);

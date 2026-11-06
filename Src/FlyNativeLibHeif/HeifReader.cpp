@@ -18,9 +18,10 @@ HeifReader::~HeifReader() {
 
 /**
  * @brief Extracts the thumbnail and decodes it into a raw RGBA buffer.
- * If no embedded thumbnail is found, it generates one by scaling the primary image.
+ * If no embedded thumbnail is found, it generates one by scaling the primary image, unless embedded_only:
+ * then it returns NoThumbnailFound, so a caller that decodes the full image next doesn't decode it twice.
  */
-HeifError HeifReader::ExtractThumbnail(const std::string& input_filename, PixelBuffer& out_buffer) {
+HeifError HeifReader::ExtractThumbnail(const std::string& input_filename, PixelBuffer& out_buffer, bool embedded_only) {
     // 1. Open the file and create the context.
     std::shared_ptr<heif_context> context(heif_context_alloc(),
         [](heif_context* c) { heif_context_free(c); });
@@ -64,6 +65,10 @@ HeifError HeifReader::ExtractThumbnail(const std::string& input_filename, PixelB
             }
         }
         // If getting the thumbnail failed, we fall through to the generation logic below.
+    }
+
+    if (embedded_only) {
+        return HeifError::NoThumbnailFound;
     }
 
     // --- FALLBACK LOGIC: No embedded thumbnail found, so we generate one. ---

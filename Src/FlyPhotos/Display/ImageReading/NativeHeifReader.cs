@@ -15,14 +15,16 @@ internal static class NativeHeifReader
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
-    /// Gets the embedded thumbnail using the high-performance native HeifDecoder.
+    /// Gets the embedded thumbnail using the high-performance native HeifDecoder. Without one, a preview scaled
+    /// from a full decode, unless <paramref name="embeddedOnly"/>: then it fails.
     /// </summary>
-    public static (bool, PreviewDisplayItem) GetEmbedded(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
+    public static (bool, PreviewDisplayItem) GetEmbedded(ICanvasResourceCreatorWithDpi ctrl, string inputPath,
+        bool embeddedOnly = false)
     {
         try
         {
             // 1. Call our new native decoder to get the thumbnail's pixel data and dimensions.
-            var heifImage = NativeHeifWrapper.DecodeThumbnail(inputPath);
+            var heifImage = NativeHeifWrapper.DecodeThumbnail(inputPath, embeddedOnly);
 
             // 2. Check if a valid thumbnail was returned.
             if (heifImage == null || heifImage.Pixels == null || heifImage.Pixels.Length == 0)

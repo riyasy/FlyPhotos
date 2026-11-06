@@ -41,6 +41,10 @@ extern "C" {
     /// @note The caller MUST call FreePixelBuffer() on the out_buffer to prevent a memory leak.
     __declspec(dllexport) HeifError ExtractThumbnail(const wchar_t* heic_path, PixelBuffer* out_buffer);
 
+    /// @brief Decodes only an embedded thumbnail; NoThumbnailFound when the file has none (nothing is generated).
+    /// @note The caller MUST call FreePixelBuffer() on the out_buffer to prevent a memory leak.
+    __declspec(dllexport) HeifError ExtractEmbeddedThumbnail(const wchar_t* heic_path, PixelBuffer* out_buffer);
+
     /// @brief Frees the native memory allocated within a PixelBuffer struct.
     /// @param buffer Pointer to the PixelBuffer whose internal data buffer needs to be freed.
     __declspec(dllexport) void FreePixelBuffer(PixelBuffer* buffer);

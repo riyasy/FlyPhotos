@@ -24,7 +24,7 @@ internal enum Purpose
 /// </summary>
 internal enum DecodeStep
 {
-    HeifEmbedded, HeifHq, AvifHq,
+    HeifEmbedded, HeifEmbeddedOnly, HeifHq, AvifHq,
     DdsHq, DdsResized,
     WicEmbedded, WicResized, WicHq, WicRawHq,
     MagickHq, MagickRawHq, MagickResized, MagickRawEmbedded,
@@ -143,8 +143,10 @@ internal static class DecoderChains
         {
             switch (format)
             {
+                // Only a stored thumbnail: without one, HeifEmbedded would decode the full image to scale it,
+                // and the full-image step right after decodes it again.
                 case ImageFormat.Heif or ImageFormat.Avif:
-                    Add(DecodeStep.HeifEmbedded);
+                    Add(DecodeStep.HeifEmbeddedOnly);
                     break;
                 case ImageFormat.Jpeg or ImageFormat.Bmp or ImageFormat.Other:
                     Add(DecodeStep.WicEmbedded, codecs.Wic(extension));
