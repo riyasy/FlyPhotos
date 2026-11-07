@@ -99,6 +99,11 @@ internal partial class PhotoDisplayController
 
     private void DoStartupActivities(string selectedFilePath, CancellationToken token)
     {
+        // Open the disk cache before the (possibly slow) listing, so the first photo's cache lookup doesn't pay
+        // the ~50 ms SQLite start-up. Its own try: a failure here mustn't stop the rest of the start-up.
+        try { _ = DiskCacherWithSqlite.Instance; }
+        catch (Exception ex) { Logger.Error(ex); }
+
         try
         {
             // Secondary instances only display the single opened image.
