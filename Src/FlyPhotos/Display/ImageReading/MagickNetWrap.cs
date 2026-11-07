@@ -2,6 +2,8 @@
 
 using System;
 using System.IO;
+using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Graphics.DirectX;
 using FlyPhotos.Core.Model;
@@ -69,7 +71,6 @@ internal static class MagickNetWrap
         {
             using var image = new MagickImage(path);
             image.AutoOrient();
-            image.Depth = 8;
 
             var metadata = new ImageMetadata(image.Width, image.Height);
 
@@ -77,9 +78,8 @@ internal static class MagickNetWrap
             if (image.Width <= maxDimension && image.Height <= maxDimension)
             {
                 // Small image: pixels are already decoded in memory.
-                // No alpha preservation needed — output is cached as JPEG.
-                // Hand the raw BGRA buffer straight to Win2D, no encode/decode round-trip.
-                var pixelBytes = image.ToByteArray(MagickFormat.Bgra);
+                // Hand the premultiplied BGRA buffer straight to Win2D, no encode/decode round-trip.
+                var pixelBytes = PrepareAndExportBgra(image);
                 bitmap = CanvasBitmap.CreateFromBytes(
                     resourceCreator, pixelBytes,
                     (int)image.Width, (int)image.Height,
@@ -137,14 +137,11 @@ internal static class MagickNetWrap
             // --- 1. Decode at full resolution ---
             using var image = new MagickImage(path);
             image.AutoOrient();
-            image.Depth = 8;
-            image.Alpha(AlphaAction.Set);
 
             // --- 2. Premultiply alpha inside Magick, then export raw BGRA pixels.
             // This avoids the two SoftwareBitmap copies that straight→premultiplied
             // conversion would otherwise require (saves ~2× full-res frame in managed memory).
-            image.Alpha(AlphaAction.Associate);
-            var pixelBytes = image.ToByteArray(MagickFormat.Bgra);
+            var pixelBytes = PrepareAndExportBgra(image);
 
             // --- 3. Upload directly to Win2D — no SoftwareBitmap intermediaries needed ---
             var bitmap2 = CanvasBitmap.CreateFromBytes(
@@ -158,6 +155,53 @@ internal static class MagickNetWrap
             Logger.Error(ex);
             return (false, HqDisplayItem.Empty());
         }
+    }
+
+    /// <summary>
+    /// Readies a decoded image for the BGRA export: converts it to sRGB unless it is already sRGB-compatible
+    /// (CMYK and Lab would otherwise export their raw channels as B, G and R; the old <c>MagickFormat.Bgra</c>
+    /// coder did the same conversion), and premultiplies alpha inside Magick when the image has alpha. Returns
+    /// whether it has. An opaque image is deliberately not given an alpha channel (which would grow the pixel
+    /// cache by a third), and no <c>Depth = 8</c> pass is needed: the export scales to 8 bits.
+    /// </summary>
+    internal static bool PrepareForExport(MagickImage image)
+    {
+        if (image.ColorSpace is not (ColorSpace.sRGB or ColorSpace.RGB or ColorSpace.scRGB or ColorSpace.Gray
+            or ColorSpace.LinearGray))
+            image.ColorSpace = ColorSpace.sRGB;
+        if (!image.HasAlpha) return false;
+        image.Alpha(AlphaAction.Associate);
+        return true;
+    }
+
+    /// <summary>Runs <see cref="PrepareForExport"/> (which changes the image) and exports it whole as BGRA8.</summary>
+    private static byte[] PrepareAndExportBgra(MagickImage image)
+    {
+        bool hasAlpha = PrepareForExport(image);
+        using var pixels = image.GetPixelsUnsafe();
+        return ExportBgra(pixels, 0, 0, image.Width, image.Height, hasAlpha)
+               ?? throw new InvalidOperationException("Magick pixel export failed");
+    }
+
+    /// <summary>
+    /// Exports a block of pixels as BGRA8; call <see cref="PrepareForExport"/> once first. Without alpha, the alpha bytes are forced to 255: some files (16/32-bit
+    /// TGAs with attribute bits) carry alpha values that Magick reports as unused but still exports.
+    /// </summary>
+    internal static byte[]? ExportBgra(IUnsafePixelCollection<float> pixels, int x, int y, uint width, uint height,
+        bool hasAlpha)
+    {
+        var bytes = pixels.ToByteArray(x, y, width, height, "BGRA");
+        if (bytes != null && !hasAlpha) SetOpaque(bytes);
+        return bytes;
+    }
+
+    private static void SetOpaque(byte[] bgra)
+    {
+        var px = MemoryMarshal.Cast<byte, uint>(bgra.AsSpan());
+        var vectors = MemoryMarshal.Cast<uint, Vector<uint>>(px);
+        var alpha = new Vector<uint>(0xFF000000);
+        for (int i = 0; i < vectors.Length; i++) vectors[i] |= alpha;
+        for (int i = vectors.Length * Vector<uint>.Count; i < px.Length; i++) px[i] |= 0xFF000000;
     }
 
     /// <summary>

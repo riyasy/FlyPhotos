@@ -121,7 +121,8 @@ internal static class LargeImageReader
 
     /// <summary>
     /// Decodes with Magick.NET, the fallback for formats WIC can't read (PSD and others). Auto-oriented,
-    /// reduced to 8-bit and premultiplied, then pulled out one tile-row strip at a time.
+    /// prepared as in <see cref="MagickNetWrap.PrepareForExport"/> (sRGB, premultiplied when it has alpha), then
+    /// exported as BGRA8 one tile-row strip at a time.
     /// </summary>
     /// <returns>The tiled item from a premultiplied BGRA pyramid, or null when Magick can't export a strip.</returns>
     public static TiledHqDisplayItem? DecodeMagick(ICanvasResourceCreatorWithDpi ctrl, string path, CancellationToken ct)
@@ -129,16 +130,14 @@ internal static class LargeImageReader
         using var image = new MagickImage(path);
         ct.ThrowIfCancellationRequested();
         image.AutoOrient();
-        image.Depth = 8;
-        image.Alpha(AlphaAction.Set);
-        image.Alpha(AlphaAction.Associate); // premultiply, as MagickNetWrap.GetHq does
+        bool hasAlpha = MagickNetWrap.PrepareForExport(image);
         var level0 = new TileLevel((int)image.Width, (int)image.Height);
         using var pixels = image.GetPixelsUnsafe();
         for (var row = 0; row < level0.Rows; row++)
         {
             ct.ThrowIfCancellationRequested();
             var (y0, rows) = level0.StripFor(row);
-            var strip = pixels.ToByteArray(0, y0, (uint)level0.Width, (uint)rows, "BGRA");
+            var strip = MagickNetWrap.ExportBgra(pixels, 0, y0, (uint)level0.Width, (uint)rows, hasAlpha);
             if (strip == null) return null;
             level0.FillTileRow(row, strip, y0);
         }
