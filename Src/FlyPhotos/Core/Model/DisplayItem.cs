@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using FlyPhotos.Display.ImageReading;
 using Microsoft.Graphics.Canvas;
 

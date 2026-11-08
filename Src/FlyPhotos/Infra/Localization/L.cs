@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.Windows.ApplicationModel.Resources;
 
 namespace FlyPhotos.Infra.Localization;

@@ -1,4 +1,4 @@
-﻿using FlyPhotos.Core;
+using FlyPhotos.Core;
 using Microsoft.Windows.Globalization;
 using NLog;
 using System;

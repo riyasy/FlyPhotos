@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using FlyPhotos.Display.State;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
