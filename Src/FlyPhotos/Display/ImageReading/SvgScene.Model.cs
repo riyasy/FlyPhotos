@@ -135,8 +135,10 @@ internal sealed partial class SvgScene
     /// <summary>An embedded raster image, drawn at (0, 0, pixel width, pixel height) in its user space.</summary>
     private sealed class ImageNode : Node
     {
-        /// <summary>Encoded image; released once decoded into <see cref="Bitmap"/>.</summary>
-        public byte[]? Data;
+        /// <summary>Where the encoded image starts in the stream; decoded from there into <see cref="Bitmap"/>.</summary>
+        public int DataPos;
+        /// <summary>The encoded image's length in bytes.</summary>
+        public int DataLength;
         /// <summary>The decoded image (96 DPI, so DIPs equal pixels); null if decoding failed.</summary>
         public CanvasBitmap? Bitmap;
         /// <summary>image-rendering asks for nearest-neighbour (pixelated / crisp-edges / optimizeSpeed).</summary>

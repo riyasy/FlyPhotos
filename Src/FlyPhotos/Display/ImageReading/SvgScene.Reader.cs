@@ -35,8 +35,8 @@ internal sealed partial class SvgScene
         public bool Bool() => U8() != 0;
         /// <summary>A u32 byte length followed by UTF-8 text.</summary>
         public string Str() { var n = (int)U32(); var s = System.Text.Encoding.UTF8.GetString(buf, _pos, n); _pos += n; return s; }
-        /// <summary>A copy of the next <paramref name="n"/> bytes.</summary>
-        public byte[] Bytes(int n) { var b = buf.AsSpan(_pos, n).ToArray(); _pos += n; return b; }
+        /// <summary>Where the next <paramref name="n"/> bytes start in the buffer; skips past them.</summary>
+        public int Skip(int n) { var at = _pos; _pos += n; return at; }
         /// <summary>Two f32s as x, y.</summary>
         public Vector2 Vec2() => new(F32(), F32());
         /// <summary>Three f32s as x, y, z.</summary>
@@ -108,8 +108,8 @@ internal sealed partial class SvgScene
             float w = r.F32(), h = r.F32();
             var root = ReadChildren(r);
 
-            // Decode the embedded images concurrently while the geometries are built, then drop the encoded bytes.
-            decoding = Task.WhenAll(r.Images.Select(img => DecodeImage(rc, img.Data!)));
+            // Decode the embedded images, straight from the stream, concurrently while the geometries are built.
+            decoding = Task.WhenAll(r.Images.Select(img => DecodeImage(rc, stream, img.DataPos, img.DataLength)));
 
             // Building a geometry is one Win2D call per segment, the bulk of loading a big map; paths are
             // independent and Win2D's Direct2D factory is multithreaded, so they are built in parallel.
@@ -127,10 +127,7 @@ internal sealed partial class SvgScene
             var bitmaps = await decoding;
             decoding = null;
             for (var i = 0; i < bitmaps.Length; i++)
-            {
                 if (bitmaps[i] is { } bmp) r.Images[i].Bitmap = r.Track(bmp);
-                r.Images[i].Data = null;
-            }
             return new SvgScene(w, h, root, r.Resources, rc.Device);
         }
         catch
@@ -146,12 +143,15 @@ internal sealed partial class SvgScene
         }
     }
 
-    /// <summary>An embedded image decoded at 96 DPI (DIPs = pixels); null if it can't be decoded.</summary>
-    private static async Task<CanvasBitmap?> DecodeImage(ICanvasResourceCreator rc, byte[] data)
+    /// <summary>
+    /// The embedded image at <paramref name="pos"/> (<paramref name="length"/> encoded bytes) in the stream,
+    /// decoded at 96 DPI (DIPs = pixels); null if it can't be decoded.
+    /// </summary>
+    private static async Task<CanvasBitmap?> DecodeImage(ICanvasResourceCreator rc, byte[] stream, int pos, int length)
     {
         try
         {
-            using var ms = new MemoryStream(data, writable: false);
+            using var ms = new MemoryStream(stream, pos, length, writable: false);
             return await CanvasBitmap.LoadAsync(rc, ms.AsRandomAccessStream(), 96f);
         }
         catch (Exception)
@@ -173,7 +173,8 @@ internal sealed partial class SvgScene
                 case NodeTag.Path: list.Add(ReadPath(r)); break;
                 case NodeTag.Image:
                     var nearest = r.Bool();
-                    var img = new ImageNode { Nearest = nearest, Data = r.Bytes((int)r.U32()) };
+                    var length = (int)r.U32();
+                    var img = new ImageNode { Nearest = nearest, DataPos = r.Skip(length), DataLength = length };
                     r.Images.Add(img);
                     list.Add(img);
                     break;
