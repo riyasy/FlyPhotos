@@ -377,7 +377,7 @@ fn parse_svg_data(svg_data: &[u8]) -> Option<usvg::Tree> {
 }
 
 /// Parses an SVG and serialises it as a draw-command stream for GPU replay (see svg_scene.rs).
-/// Returns a buffer whose first byte is a status: 0 = OK, followed by the stream;
+/// Returns a buffer whose first byte is a status: 0 = OK, followed by the stream (format version first);
 /// 1 = the file uses something the GPU path can't draw yet: followed by width (i32 LE), height (i32 LE),
 /// width*height*4 bytes of resvg's premultiplied RGBA fitted to `max_dimension` (from the same parse, so
 /// the caller needn't read the file again), then a UTF-8 reason to the end.

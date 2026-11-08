@@ -14,6 +14,12 @@ internal sealed partial class SvgScene
     // ── Wire tags ────────────────────────────────────────────────────────────
     // Byte values written by fly_rust_bridge/src/svg_scene.rs; keep every value in sync with its constants.
 
+    /// <summary>
+    /// The stream format this reader understands (svg_scene.rs STREAM_VERSION, the byte after the status). Bump
+    /// both together on any change to the tags or field order; a mismatch falls back to resvg.
+    /// </summary>
+    public const byte StreamVersion = 1;
+
     /// <summary>Node tags in a child list; <see cref="End"/> closes the list.</summary>
     private enum NodeTag : byte { End, Group, Path, Image }
 

@@ -9,6 +9,11 @@ use resvg::usvg::{self, filter, Node};
 // ── Wire tags ────────────────────────────────────────────────────────────────
 // Every value and the field order below must match the enums in SvgScene.Model.cs.
 
+/// Stream format version, written right after the status byte. Bump it with SvgScene.StreamVersion on
+/// any change to the tags or field order, so a DLL and app out of step fall back to resvg instead of
+/// misreading the stream.
+pub const STREAM_VERSION: u8 = 1;
+
 /// Node tags; END closes a child list.
 mod tag {
     pub const END: u8 = 0;
@@ -145,10 +150,12 @@ impl Writer {
     fn rgba(&mut self, c: usvg::Color, opacity: f32) { self.rgb(c); self.f32(opacity); }
 }
 
-/// The stream starts with svg_build_scene's OK status byte (0), so the FFI hands it over without a copy.
+/// The stream starts with svg_build_scene's OK status byte (0), so the FFI hands it over without a copy,
+/// then the format version.
 pub fn write_tree(tree: &usvg::Tree) -> Result<Vec<u8>, String> {
     let mut w = Writer { buf: Vec::with_capacity(64 * 1024) };
     w.u8(0);
+    w.u8(STREAM_VERSION);
     w.f32(tree.size().width());
     w.f32(tree.size().height());
     children(&mut w, tree.root(), false)?;
@@ -576,13 +583,15 @@ mod tests {
         write_tree(&tree)
     }
 
-    /// The stream starts with the OK status and the canvas size, and its root child list ends with END.
+    /// The stream starts with the OK status, the format version and the canvas size, and its root child
+    /// list ends with END.
     #[test]
     fn simple_rect_starts_with_size_and_ends_with_end() {
         let b = build(r#"<svg xmlns="http://www.w3.org/2000/svg" width="10" height="20"><rect width="5" height="5"/></svg>"#).unwrap();
         assert_eq!(b[0], 0); // OK status
-        assert_eq!(f32::from_le_bytes(b[1..5].try_into().unwrap()), 10.0);
-        assert_eq!(f32::from_le_bytes(b[5..9].try_into().unwrap()), 20.0);
+        assert_eq!(b[1], STREAM_VERSION);
+        assert_eq!(f32::from_le_bytes(b[2..6].try_into().unwrap()), 10.0);
+        assert_eq!(f32::from_le_bytes(b[6..10].try_into().unwrap()), 20.0);
         assert_eq!(*b.last().unwrap(), tag::END);
     }
 
@@ -603,12 +612,13 @@ mod tests {
         let page = clip(r#"<path d="M 0,0 H 100 V 100 H 0 Z" transform="scale(1.5)"/>"#);
         // Only the wrapping group remains: tag, transform, opacity, blend, flags, filter count, END.
         assert_eq!(page.len(), no_clip.len() + 1 + 24 + 4 + 1 + 1 + 1 + 1);
-        assert_eq!(page[9], tag::GROUP);
-        let flags = |b: &[u8]| b[9 + 1 + 24 + 4 + 1];
+        const HEADER: usize = 10; // status, version, width, height
+        assert_eq!(page[HEADER], tag::GROUP);
+        let flags = |b: &[u8]| b[HEADER + 1 + 24 + 4 + 1];
         assert_eq!(flags(&page), 0, "no clip expected");
         let cut = clip(r#"<path d="M 0,0 H 20 V 20 H 0 Z" transform="translate(5,0)"/>"#);
         assert_eq!(flags(&cut), group_flag::CLIP_RECT);
-        let rect: Vec<f32> = cut[9 + 1 + 24 + 4 + 1 + 2..][..16].chunks(4).map(|c| f32::from_le_bytes(c.try_into().unwrap())).collect();
+        let rect: Vec<f32> = cut[HEADER + 1 + 24 + 4 + 1 + 2..][..16].chunks(4).map(|c| f32::from_le_bytes(c.try_into().unwrap())).collect();
         assert_eq!(rect, [5.0, 0.0, 20.0, 20.0]);
         for path_clip in [r#"<circle r="100"/>"#, r#"<path d="M 0,0 H 100 V 100 H 100 Z"/>"#] {
             assert_eq!(flags(&clip(path_clip)), group_flag::CLIP, "{path_clip}");

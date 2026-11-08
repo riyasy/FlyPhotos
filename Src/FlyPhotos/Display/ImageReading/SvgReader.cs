@@ -89,7 +89,8 @@ internal static partial class SvgReader
     }
 
     /// <summary>
-    /// Calls svg_build_scene: the draw stream without its status byte, or (status 1) resvg's raster as a
+    /// Calls svg_build_scene: the draw stream without its status and version bytes, or (status 1, or a stream
+    /// version this build can't read) resvg's raster as a
     /// bitmap. Both null on read/parse failure.
     /// </summary>
     private static unsafe (byte[]? Stream, CanvasBitmap? Raster) BuildSceneStream(
@@ -104,7 +105,14 @@ internal static partial class SvgReader
         try
         {
             var data = new ReadOnlySpan<byte>((void*)ptr, len);
-            if (data[0] == 0) return (data[1..].ToArray(), null);
+            if (data[0] == 0)
+            {
+                if (len > 1 && data[1] == SvgScene.StreamVersion) return (data[2..].ToArray(), null);
+                // A fly_rust_bridge.dll out of step with this build: its stream can't be read safely.
+                Logger.Error("SVG scene stream version {Version} from fly_rust_bridge, expected {Expected}; using resvg: {InputPath}",
+                    len > 1 ? data[1] : -1, SvgScene.StreamVersion, inputPath);
+                return (null, RenderSvg(ctrl, inputPath, maxDimension));
+            }
 
             int w = BitConverter.ToInt32(data[1..]), h = BitConverter.ToInt32(data[5..]);
             var pixels = data.Slice(9, w * h * 4);

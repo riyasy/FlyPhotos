@@ -94,7 +94,7 @@ internal sealed partial class SvgScene
     }
 
     /// <summary>
-    /// Builds a scene from svg_build_scene's stream (status byte already stripped), returned as the caller's
+    /// Builds a scene from svg_build_scene's stream (status and version bytes already stripped), returned as the caller's
     /// <see cref="Lease"/> on it, and decodes its embedded
     /// raster images. An image that fails to decode is left out (as resvg does). If the build throws, every
     /// device resource created so far is disposed before the exception goes on.
