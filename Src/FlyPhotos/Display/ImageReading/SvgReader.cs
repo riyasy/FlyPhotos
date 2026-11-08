@@ -74,55 +74,57 @@ internal static partial class SvgReader
     private static async Task<(SvgScene.Lease? Scene, CanvasBitmap? Bitmap)> LoadScene(
         ICanvasResourceCreatorWithDpi ctrl, string inputPath, int maxDimension)
     {
-        var (stream, raster) = BuildSceneStream(ctrl, inputPath, maxDimension);
-        if (stream == null) return (null, raster);
-
-        try
-        {
-            return (await SvgScene.LoadAsync(ctrl, stream), null);
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "SVG scene build failed, using the resvg bitmap: {InputPath}", inputPath);
-            return (null, RenderSvg(ctrl, inputPath, maxDimension));
-        }
-    }
-
-    /// <summary>
-    /// Calls svg_build_scene: the draw stream without its status and version bytes, or (status 1, or a stream
-    /// version this build can't read) resvg's raster as a
-    /// bitmap. Both null on read/parse failure.
-    /// </summary>
-    private static unsafe (byte[]? Stream, CanvasBitmap? Raster) BuildSceneStream(
-        ICanvasResourceCreatorWithDpi ctrl, string inputPath, int maxDimension)
-    {
         nint ptr = NativeRustBridge.svg_build_scene(inputPath, maxDimension, out int len);
         if (ptr == nint.Zero || len <= 0)
         {
             Logger.Warn("SVG could not be read or parsed: {InputPath}", inputPath);
             return (null, null);
         }
+        var built = false;
         try
         {
-            var data = new ReadOnlySpan<byte>((void*)ptr, len);
-            if (data[0] == 0)
-            {
-                if (len > 1 && data[1] == SvgScene.StreamVersion) return (data[2..].ToArray(), null);
-                // A fly_rust_bridge.dll out of step with this build: its stream can't be read safely.
-                Logger.Error("SVG scene stream version {Version} from fly_rust_bridge, expected {Expected}; using resvg: {InputPath}",
-                    len > 1 ? data[1] : -1, SvgScene.StreamVersion, inputPath);
-                return (null, RenderSvg(ctrl, inputPath, maxDimension));
-            }
-
-            int w = BitConverter.ToInt32(data[1..]), h = BitConverter.ToInt32(data[5..]);
-            var pixels = data.Slice(9, w * h * 4);
-            Logger.Info("SVG GPU path not used for {InputPath}: {Reason}", inputPath, Encoding.UTF8.GetString(data[(9 + pixels.Length)..]));
-            return (null, CreateBitmap(ctrl, pixels, w, h, inputPath));
+            if (!IsStream(ctrl, inputPath, maxDimension, ptr, len, out var raster)) return (null, raster);
+            // The scene is read in place from the reply, which is freed only once the load is done.
+            var lease = await SvgScene.LoadAsync(ctrl, ptr + 2, len - 2);
+            built = true;
+            return (lease, null);
+        }
+        catch (Exception ex) when (!built)
+        {
+            Logger.Error(ex, "SVG scene build failed, using the resvg bitmap: {InputPath}", inputPath);
         }
         finally
         {
             NativeRustBridge.free_rust_buffer(ptr, (nuint)(uint)len);
         }
+        return (null, RenderSvg(ctrl, inputPath, maxDimension));
+    }
+
+    /// <summary>
+    /// Reads svg_build_scene's reply at <paramref name="ptr"/>: true when it holds a draw stream this build can
+    /// read (from <c>ptr + 2</c>, after the status and version bytes). Otherwise <paramref name="raster"/> is
+    /// resvg's bitmap: the one in the reply (status 1), or a fresh render when the stream version doesn't match.
+    /// </summary>
+    private static unsafe bool IsStream(ICanvasResourceCreatorWithDpi ctrl, string inputPath, int maxDimension,
+        nint ptr, int len, out CanvasBitmap? raster)
+    {
+        raster = null;
+        var data = new ReadOnlySpan<byte>((void*)ptr, len);
+        if (data[0] == 0)
+        {
+            if (len > 1 && data[1] == SvgScene.StreamVersion) return true;
+            // A fly_rust_bridge.dll out of step with this build: its stream can't be read safely.
+            Logger.Error("SVG scene stream version {Version} from fly_rust_bridge, expected {Expected}; using resvg: {InputPath}",
+                len > 1 ? data[1] : -1, SvgScene.StreamVersion, inputPath);
+            raster = RenderSvg(ctrl, inputPath, maxDimension);
+            return false;
+        }
+
+        int w = BitConverter.ToInt32(data[1..]), h = BitConverter.ToInt32(data[5..]);
+        var pixels = data.Slice(9, w * h * 4);
+        Logger.Info("SVG GPU path not used for {InputPath}: {Reason}", inputPath, Encoding.UTF8.GetString(data[(9 + pixels.Length)..]));
+        raster = CreateBitmap(ctrl, pixels, w, h, inputPath);
+        return false;
     }
 
     /// <summary>The preview bitmap: the scene drawn on the GPU at 800 px, or resvg's if that throws.</summary>

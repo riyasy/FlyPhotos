@@ -17,26 +17,37 @@ namespace FlyPhotos.Display.ImageReading;
 internal sealed partial class SvgScene
 {
     /// <summary>
-    /// A read position in the stream svg_scene.rs writes (little-endian). On its own it reads one path's
-    /// segments (geometry is built in parallel, a cursor per path); <see cref="Reader"/> adds the scene state.
+    /// A read position in the stream svg_scene.rs writes (little-endian), read in place from the native buffer
+    /// at <paramref name="buf"/> (<paramref name="length"/> bytes), which the caller keeps alive. On its own it
+    /// reads one path's segments (geometry is built in parallel, a cursor per path); <see cref="Reader"/> adds
+    /// the scene state. Every read is bounds-checked, so a corrupt stream throws instead of reading past the end.
     /// </summary>
-    private class Cursor(byte[] buf, int pos)
+    private unsafe class Cursor(nint buf, int length, int pos)
     {
         /// <summary>Read position in <c>buf</c>.</summary>
         protected int _pos = pos;
 
+        /// <summary>The next <paramref name="n"/> bytes; moves past them.</summary>
+        private ReadOnlySpan<byte> Take(int n)
+        {
+            if ((uint)n > (uint)(length - _pos)) throw new InvalidDataException("SVG scene stream ends early");
+            var s = new ReadOnlySpan<byte>((byte*)buf + _pos, n);
+            _pos += n;
+            return s;
+        }
+
         /// <summary>One byte.</summary>
-        public byte U8() => buf[_pos++];
+        public byte U8() => Take(1)[0];
         /// <summary>Little-endian u32.</summary>
-        public uint U32() { var v = BinaryPrimitives.ReadUInt32LittleEndian(buf.AsSpan(_pos)); _pos += 4; return v; }
+        public uint U32() => BinaryPrimitives.ReadUInt32LittleEndian(Take(4));
         /// <summary>Little-endian f32.</summary>
-        public float F32() { var v = BinaryPrimitives.ReadSingleLittleEndian(buf.AsSpan(_pos)); _pos += 4; return v; }
+        public float F32() => BinaryPrimitives.ReadSingleLittleEndian(Take(4));
         /// <summary>A byte as a flag (non-zero = true).</summary>
         public bool Bool() => U8() != 0;
         /// <summary>A u32 byte length followed by UTF-8 text.</summary>
-        public string Str() { var n = (int)U32(); var s = System.Text.Encoding.UTF8.GetString(buf, _pos, n); _pos += n; return s; }
+        public string Str() => System.Text.Encoding.UTF8.GetString(Take((int)U32()));
         /// <summary>Where the next <paramref name="n"/> bytes start in the buffer; skips past them.</summary>
-        public int Skip(int n) { var at = _pos; _pos += n; return at; }
+        public int Skip(int n) { var at = _pos; Take(n); return at; }
         /// <summary>Two f32s as x, y.</summary>
         public Vector2 Vec2() => new(F32(), F32());
         /// <summary>Three f32s as x, y, z.</summary>
@@ -59,49 +70,86 @@ internal sealed partial class SvgScene
     }
 
     /// <summary>Reads the whole stream and tracks every device resource it creates.</summary>
-    private sealed class Reader(byte[] buf, ICanvasResourceCreator rc) : Cursor(buf, 0)
+    private sealed class Reader(nint buf, int length, ICanvasResourceCreator rc) : Cursor(buf, length, 0)
     {
         /// <summary>The device the scene's resources are created on.</summary>
         public readonly ICanvasResourceCreator Rc = rc;
         /// <summary>Every device resource created while reading; becomes the scene's resource list.</summary>
         public readonly List<IDisposable> Resources = [];
-        /// <summary>Image nodes, decoded after the whole stream is read.</summary>
-        public readonly List<ImageNode> Images = [];
-        /// <summary>Paths whose geometry is still to be built, with the stream position of their segments.</summary>
-        public readonly List<(PathNode Node, int Pos, bool EvenOdd)> PendingGeometry = [];
+        /// <summary>The distinct embedded images by their index in the stream, decoded after the whole stream is read.</summary>
+        public readonly List<ImageData> Images = [];
+        /// <summary>The distinct geometries by their index in the stream, built after the whole stream is read.</summary>
+        public readonly List<GeometryDef> Geometries = [];
+        /// <summary>Every path with the geometry it gets once that is built.</summary>
+        public readonly List<(PathNode Node, GeometryDef Geometry)> Paths = [];
+        /// <summary>The clip paths read so far, by their index in the stream.</summary>
+        public readonly List<ClipDef> Clips = [];
         /// <summary>One paint per solid colour: maps reuse a few colours across tens of thousands of paths.</summary>
         public readonly Dictionary<Color, Paint> SolidPaints = [];
         /// <summary>One stroke style per distinct cap, join, miter limit and dash pattern (in stroke widths).</summary>
-        public readonly Dictionary<(CanvasCapStyle, CanvasLineJoin, float, string), CanvasStrokeStyle> StrokeStyles = [];
+        public readonly Dictionary<StrokeKey, CanvasStrokeStyle> StrokeStyles = [];
+        /// <summary>The patterns read so far, by their index in the stream.</summary>
+        public readonly List<PatternDef> Patterns = [];
 
         /// <summary>
-        /// Notes where <paramref name="node"/>'s segments start and skips past them; <see cref="LoadAsync"/>
-        /// builds the geometry later, in parallel with the other paths'.
+        /// Reads <paramref name="node"/>'s geometry reference; on its first use notes where the segments start
+        /// and skips past them. <see cref="LoadAsync"/> builds each distinct geometry later, in parallel.
         /// </summary>
         public void DeferGeometry(PathNode node, bool evenOdd)
         {
-            PendingGeometry.Add((node, _pos, evenOdd));
-            var n = U32();
-            for (var i = 0; i < n; i++)
+            var geometry = Shared(Geometries, () =>
             {
-                var points = (PathVerb)U8() switch { PathVerb.Close => 0, PathVerb.Quad => 2, PathVerb.Cubic => 3, _ => 1 };
-                _pos += points * 8;
-            }
+                var def = new GeometryDef(_pos, evenOdd);
+                var n = U32();
+                for (var i = 0; i < n; i++)
+                {
+                    var points = (PathVerb)U8() switch { PathVerb.Close => 0, PathVerb.Quad => 2, PathVerb.Cubic => 3, _ => 1 };
+                    Skip(points * 8);
+                }
+                return def;
+            });
+            Paths.Add((node, geometry));
+        }
+
+        /// <summary>
+        /// A block shared by index (patterns, clip paths, geometries, images): its index and a first-use byte. On
+        /// first use <paramref name="create"/> reads it and it is listed, then <paramref name="content"/> reads
+        /// the rest: content may hold more blocks of the same kind, numbered after this one (as svg_scene.rs does).
+        /// </summary>
+        public T Shared<T>(List<T> table, Func<T> create, Action<T>? content = null)
+        {
+            var index = (int)U32();
+            if (!Bool())
+                return (uint)index < (uint)table.Count ? table[index] : throw new InvalidDataException("Bad SVG shared index");
+            if (index != table.Count) throw new InvalidDataException("Bad SVG shared index");
+            var item = create();
+            table.Add(item);
+            content?.Invoke(item);
+            return item;
         }
 
         /// <summary>Adds a device resource to the scene's list (disposed with the scene) and returns it.</summary>
         public T Track<T>(T r) where T : IDisposable { Resources.Add(r); return r; }
     }
 
-    /// <summary>
-    /// Builds a scene from svg_build_scene's stream (status and version bytes already stripped), returned as the caller's
-    /// <see cref="Lease"/> on it, and decodes its embedded
-    /// raster images. An image that fails to decode is left out (as resvg does). If the build throws, every
-    /// device resource created so far is disposed before the exception goes on.
-    /// </summary>
-    public static async Task<Lease> LoadAsync(ICanvasResourceCreator rc, byte[] stream)
+    /// <summary>A stroke style's settings (dashes in stroke widths; none = solid), compared by value.</summary>
+    private readonly record struct StrokeKey(CanvasCapStyle Cap, CanvasLineJoin Join, float Miter, float[] Dashes, float DashOffset)
     {
-        var r = new Reader(stream, rc);
+        public bool Equals(StrokeKey o) => Cap == o.Cap && Join == o.Join && Miter.Equals(o.Miter)
+            && DashOffset.Equals(o.DashOffset) && Dashes.AsSpan().SequenceEqual(o.Dashes);
+        public override int GetHashCode() => HashCode.Combine(Cap, Join, Miter, DashOffset, Dashes.Length);
+    }
+
+    /// <summary>
+    /// Builds a scene from svg_build_scene's stream (status and version bytes already stripped), read in place
+    /// from native memory at <paramref name="stream"/> (<paramref name="length"/> bytes) that the caller frees
+    /// only after the returned task completes. Returns the caller's <see cref="Lease"/> on the scene, and
+    /// decodes its embedded raster images. An image that fails to decode is left out (as resvg does). If the
+    /// build throws, every device resource created so far is disposed before the exception goes on.
+    /// </summary>
+    public static async Task<Lease> LoadAsync(ICanvasResourceCreator rc, nint stream, int length)
+    {
+        var r = new Reader(stream, length, rc);
         Task<CanvasBitmap?[]>? decoding = null;
         var geometryTracked = false;
         try
@@ -112,18 +160,19 @@ internal sealed partial class SvgScene
             // Decode the embedded images, straight from the stream, concurrently while the geometries are built.
             decoding = Task.WhenAll(r.Images.Select(img => DecodeImage(rc, stream, img.DataPos, img.DataLength)));
 
-            // Building a geometry is one Win2D call per segment, the bulk of loading a big map; paths are
+            // Building a geometry is one Win2D call per segment, the bulk of loading a big map; geometries are
             // independent and Win2D's Direct2D factory is multithreaded, so they are built in parallel.
-            var pending = r.PendingGeometry;
-            Parallel.For(0, pending.Count, i =>
-            {
-                var (node, pos, evenOdd) = pending[i];
-                node.Geometry = ReadGeometry(new Cursor(stream, pos), rc, evenOdd);
-                // Here, not on first draw: painters on two threads (renderer, clipboard) may share the scene.
-                node.Bounds = UserBounds(node);
-            });
-            foreach (var p in pending) r.Track(p.Node.Geometry);
+            var geometries = r.Geometries;
+            Parallel.For(0, geometries.Count, i =>
+                geometries[i].Geometry = ReadGeometry(new Cursor(stream, length, geometries[i].Pos), rc, geometries[i].EvenOdd));
+            foreach (var g in geometries) r.Track(g.Geometry!);
             geometryTracked = true;
+            // Here, not on first draw: painters on two threads (renderer, clipboard) may share the scene.
+            Parallel.ForEach(r.Paths, p =>
+            {
+                p.Node.Geometry = p.Geometry.Geometry!;
+                p.Node.Bounds = UserBounds(p.Node);
+            });
 
             var bitmaps = await decoding;
             decoding = null;
@@ -135,7 +184,7 @@ internal sealed partial class SvgScene
         {
             // Geometries are tracked only once all are built, so those built before a failure are loose.
             if (!geometryTracked)
-                foreach (var p in r.PendingGeometry) p.Node.Geometry?.Dispose();
+                foreach (var g in r.Geometries) g.Geometry?.Dispose();
             foreach (var res in r.Resources) res.Dispose();
             // DecodeImage doesn't throw, so this only waits for the decodes still running.
             if (decoding != null)
@@ -148,11 +197,11 @@ internal sealed partial class SvgScene
     /// The embedded image at <paramref name="pos"/> (<paramref name="length"/> encoded bytes) in the stream,
     /// decoded at 96 DPI (DIPs = pixels); null if it can't be decoded.
     /// </summary>
-    private static async Task<CanvasBitmap?> DecodeImage(ICanvasResourceCreator rc, byte[] stream, int pos, int length)
+    private static async Task<CanvasBitmap?> DecodeImage(ICanvasResourceCreator rc, nint stream, int pos, int length)
     {
         try
         {
-            using var ms = new MemoryStream(stream, pos, length, writable: false);
+            using var ms = NativeStream(stream + pos, length);
             return await CanvasBitmap.LoadAsync(rc, ms.AsRandomAccessStream(), 96f);
         }
         catch (Exception)
@@ -160,6 +209,9 @@ internal sealed partial class SvgScene
             return null;
         }
     }
+
+    /// <summary>A read-only stream over <paramref name="length"/> bytes of native memory at <paramref name="at"/>.</summary>
+    private static unsafe UnmanagedMemoryStream NativeStream(nint at, int length) => new((byte*)at, length);
 
     /// <summary>Reads nodes until <see cref="NodeTag.End"/>.</summary>
     private static Node[] ReadChildren(Reader r)
@@ -174,10 +226,12 @@ internal sealed partial class SvgScene
                 case NodeTag.Path: list.Add(ReadPath(r)); break;
                 case NodeTag.Image:
                     var nearest = r.Bool();
-                    var length = (int)r.U32();
-                    var img = new ImageNode { Nearest = nearest, DataPos = r.Skip(length), DataLength = length };
-                    r.Images.Add(img);
-                    list.Add(img);
+                    var data = r.Shared(r.Images, () =>
+                    {
+                        var length = (int)r.U32();
+                        return new ImageData { DataPos = r.Skip(length), DataLength = length };
+                    });
+                    list.Add(new ImageNode { Nearest = nearest, Data = data });
                     break;
                 default: throw new InvalidDataException("Bad SVG scene node tag");
             }
@@ -203,14 +257,13 @@ internal sealed partial class SvgScene
         return g;
     }
 
-    /// <summary>A clip path: transform, optional nested clip, children.</summary>
-    private static ClipDef ReadClip(Reader r)
-    {
-        var c = new ClipDef { Transform = r.Matrix() };
-        if (r.Bool()) c.Nested = ReadClip(r);
-        c.Children = ReadChildren(r);
-        return c;
-    }
+    /// <summary>A clip path, shared by index: on first use its transform, optional nested clip, children.</summary>
+    private static ClipDef ReadClip(Reader r) =>
+        r.Shared(r.Clips, () => new ClipDef { Transform = r.Matrix() }, c =>
+        {
+            if (r.Bool()) c.Nested = ReadClip(r);
+            c.Children = ReadChildren(r);
+        });
 
     /// <summary>A mask: region, alpha flag, optional nested mask, children.</summary>
     private static MaskDef ReadMask(Reader r)
@@ -256,7 +309,7 @@ internal sealed partial class SvgScene
                 for (var i = 0; i < dashes.Length; i++) dashes[i] /= strokeWidth;
                 dashOffset /= strokeWidth;
             }
-            var key = (cap, join, miter, dashed ? $"{string.Join(',', dashes)}@{dashOffset}" : "");
+            var key = dashed ? new StrokeKey(cap, join, miter, dashes, dashOffset) : new StrokeKey(cap, join, miter, [], 0);
             if (!r.StrokeStyles.TryGetValue(key, out style))
             {
                 style = r.Track(new CanvasStrokeStyle
@@ -369,9 +422,10 @@ internal sealed partial class SvgScene
             }
             case PaintTag.Pattern:
             {
-                var p = new PatternDef { Rect = r.Rect(), Transform = r.Matrix() };
-                p.Children = ReadChildren(r);
-                return new Paint { Pattern = p, Opacity = r.F32() };
+                // Shared by index; on first use the tile rect, patternTransform and content.
+                var pattern = r.Shared(r.Patterns, () => new PatternDef { Rect = r.Rect(), Transform = r.Matrix() },
+                    p => p.Children = ReadChildren(r));
+                return new Paint { Pattern = pattern, Opacity = r.F32() };
             }
             default: throw new InvalidDataException("Bad SVG paint tag");
         }

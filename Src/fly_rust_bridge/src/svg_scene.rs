@@ -5,6 +5,7 @@
 // Anything the C# side can't draw yet returns Err(reason) and the caller falls back to resvg.
 
 use resvg::usvg::{self, filter, Node};
+use std::collections::HashMap;
 
 // ── Wire tags ────────────────────────────────────────────────────────────────
 // Every value and the field order below must match the enums in SvgScene.Model.cs.
@@ -12,7 +13,7 @@ use resvg::usvg::{self, filter, Node};
 /// Stream format version, written right after the status byte. Bump it with SvgScene.StreamVersion on
 /// any change to the tags or field order, so a DLL and app out of step fall back to resvg instead of
 /// misreading the stream.
-pub const STREAM_VERSION: u8 = 1;
+pub const STREAM_VERSION: u8 = 2;
 
 /// Node tags; END closes a child list.
 mod tag {
@@ -124,6 +125,24 @@ mod light_tag { pub const DISTANT: u8 = 0; pub const POINT: u8 = 1; pub const SP
 struct Writer {
     /// The stream being built; handed to C# as-is.
     buf: Vec<u8>,
+    /// Each pattern written so far (usvg shares one Arc between its users) and its index in the stream.
+    patterns: HashMap<*const usvg::Pattern, u32>,
+    /// Each clip path written so far (shared like patterns) and its index in the stream.
+    clips: HashMap<*const usvg::ClipPath, u32>,
+    /// Path geometries written so far.
+    geometries: Shared,
+    /// Encoded raster images written so far.
+    images: Shared,
+}
+
+/// The blocks of one kind written so far, so a block whose bytes repeat an earlier one is written once and
+/// referred to by index. usvg converts every `<use>` instance anew, so its copies share no memory to key on.
+#[derive(Default)]
+struct Shared {
+    /// How many distinct blocks have been written (the next block's index).
+    count: u32,
+    /// A hash of each compared block's bytes, with its index and byte range in the stream.
+    seen: HashMap<u64, (u32, std::ops::Range<usize>)>,
 }
 
 /// Ok, or the reason the tree can't go down the GPU path (the caller then falls back to resvg).
@@ -148,12 +167,55 @@ impl Writer {
     fn rgb(&mut self, c: usvg::Color) { self.u8(c.red); self.u8(c.green); self.u8(c.blue); }
     /// RGB followed by an f32 opacity — every colour that has an opacity is written this way.
     fn rgba(&mut self, c: usvg::Color, opacity: f32) { self.rgb(c); self.f32(opacity); }
+
+    /// A block shared through `table`: its index, a first-use byte, then (on first use) what `body` writes.
+    /// When `compare` is set and an earlier block (with the same `salt`) had the same bytes, the new bytes are
+    /// removed again and the earlier block's index is written with first-use 0.
+    fn shared(&mut self, table: fn(&mut Writer) -> &mut Shared, salt: u8, compare: bool, body: impl FnOnce(&mut Writer)) {
+        let at = self.buf.len();
+        self.u32(0);
+        self.u8(1);
+        body(self);
+        let block = at + 5..self.buf.len();
+        let mut key = None;
+        if compare {
+            use std::hash::{Hash, Hasher};
+            let mut h = std::collections::hash_map::DefaultHasher::new();
+            salt.hash(&mut h);
+            self.buf[block.clone()].hash(&mut h);
+            let k = h.finish();
+            if let Some((index, earlier)) = table(self).seen.get(&k).cloned() {
+                if self.buf[earlier] == self.buf[block.clone()] {
+                    self.buf.truncate(at);
+                    self.u32(index);
+                    self.u8(0);
+                    return;
+                }
+            }
+            key = Some(k);
+        }
+        let t = table(self);
+        let index = t.count;
+        t.count += 1;
+        if let Some(k) = key { t.seen.entry(k).or_insert((index, block)); }
+        self.buf[at..at + 4].copy_from_slice(&index.to_le_bytes());
+    }
 }
 
 /// The stream starts with svg_build_scene's OK status byte (0), so the FFI hands it over without a copy,
-/// then the format version.
+/// then the format version. A filter primitive the C# side can't draw fails it before anything is written
+/// (the same check in `primitive` stays for any filter `tree.filters()` doesn't list).
 pub fn write_tree(tree: &usvg::Tree) -> Result<Vec<u8>, String> {
-    let mut w = Writer { buf: Vec::with_capacity(64 * 1024) };
+    if let Some(name) = tree.filters().iter().flat_map(|f| f.primitives()).find_map(|p| unsupported(p.kind())) {
+        return Err(format!("filter primitive {name}"));
+    }
+    let mut w = Writer {
+        buf: Vec::with_capacity(64 * 1024),
+        patterns: Default::default(),
+        clips: Default::default(),
+        geometries: Default::default(),
+        images: Default::default(),
+    };
     w.u8(0);
     w.u8(STREAM_VERSION);
     w.f32(tree.size().width());
@@ -274,9 +336,16 @@ fn rect_of(d: &usvg::tiny_skia_path::Path) -> Option<usvg::Rect> {
     Some(b)
 }
 
-/// A clip path block: its transform, a has-nested byte (+ the nested clip path, which clips this one),
-/// then its children written in clip mode.
+/// A clip path block: its index and a first-use byte; on first use its transform, a has-nested byte (+ the
+/// nested clip path, which clips this one), then its children written in clip mode. Later uses just refer to
+/// it (usvg shares a userSpaceOnUse clip between the elements that use it; plots clip every artist to one
+/// axes outline). Indices are numbered as for patterns: taken before the content, which may hold more clips.
 fn clip(w: &mut Writer, c: &usvg::ClipPath) -> WriteResult {
+    let next = w.clips.len() as u32;
+    let index = *w.clips.entry(std::ptr::from_ref(c)).or_insert(next);
+    w.u32(index);
+    w.u8((index == next) as u8);
+    if index != next { return Ok(()); }
     w.ts(c.transform());
     w.u8(c.clip_path().is_some() as u8);
     if let Some(n) = c.clip_path() { clip(w, n)?; }
@@ -293,7 +362,7 @@ fn write_mask(w: &mut Writer, m: &usvg::Mask) -> WriteResult {
     children(w, m.root(), false)
 }
 
-/// PATH: flags, segments, then the fill (paint + opacity) and the stroke (paint + opacity, width, cap,
+/// PATH: flags, geometry (see `path_data`), then the fill (paint + opacity) and the stroke (paint + opacity, width, cap,
 /// join, miter limit, dash array, dash offset) as the flags say. Invisible or unpainted paths are skipped.
 /// In clip mode the fill is opaque black and the stroke is dropped. `opacity` multiplies both paints'
 /// opacities (a folded group opacity; 1 otherwise).
@@ -308,9 +377,10 @@ fn path(w: &mut Writer, p: &usvg::Path, clip_mode: bool, opacity: f32) -> WriteR
     if stroke.is_some() { flags |= path_flag::STROKE; }
     if p.paint_order() == usvg::PaintOrder::StrokeAndFill { flags |= path_flag::STROKE_FIRST; }
     if p.rendering_mode().use_shape_antialiasing() { flags |= path_flag::ANTIALIAS; }
-    if fill.is_some_and(|f| f.rule() == usvg::FillRule::EvenOdd) { flags |= path_flag::EVEN_ODD; }
+    let even_odd = fill.is_some_and(|f| f.rule() == usvg::FillRule::EvenOdd);
+    if even_odd { flags |= path_flag::EVEN_ODD; }
     w.u8(flags);
-    path_data(w, p.data());
+    path_data(w, p.data(), even_odd);
     if let Some(f) = fill {
         if clip_mode {
             w.u8(paint_tag::SOLID); w.rgba(usvg::Color::black(), 1.0);
@@ -338,22 +408,33 @@ fn path(w: &mut Writer, p: &usvg::Path, clip_mode: bool, opacity: f32) -> WriteR
     Ok(())
 }
 
-/// The segment count, then each segment as a verb tag and its points.
-fn path_data(w: &mut Writer, d: &usvg::tiny_skia_path::Path) {
+/// Paths up to this many segments are compared with the ones written before (markers, symbols, icons);
+/// longer ones are rarely repeated and aren't hashed.
+const SHARED_PATH_MAX_SEGMENTS: usize = 64;
+
+/// The geometry's index and a first-use byte; on first use, the segment count and each segment as a verb
+/// tag and its points. A geometry repeats when shapes come from one `<use>`d symbol (a plot's markers), and
+/// the C# side builds each distinct geometry once. The fill rule is part of the geometry.
+fn path_data(w: &mut Writer, d: &usvg::tiny_skia_path::Path, even_odd: bool) {
     use usvg::tiny_skia_path::PathSegment as S;
-    w.u32(d.segments().count() as u32);
-    for s in d.segments() {
-        match s {
-            S::MoveTo(p) => { w.u8(verb::MOVE); w.floats(&[p.x, p.y]); }
-            S::LineTo(p) => { w.u8(verb::LINE); w.floats(&[p.x, p.y]); }
-            S::QuadTo(a, b) => { w.u8(verb::QUAD); w.floats(&[a.x, a.y, b.x, b.y]); }
-            S::CubicTo(a, b, c) => { w.u8(verb::CUBIC); w.floats(&[a.x, a.y, b.x, b.y, c.x, c.y]); }
-            S::Close => w.u8(verb::CLOSE),
+    w.shared(|w| &mut w.geometries, even_odd as u8, d.len() <= SHARED_PATH_MAX_SEGMENTS, |w| {
+        w.u32(d.len() as u32); // one segment per verb
+        for s in d.segments() {
+            match s {
+                S::MoveTo(p) => { w.u8(verb::MOVE); w.floats(&[p.x, p.y]); }
+                S::LineTo(p) => { w.u8(verb::LINE); w.floats(&[p.x, p.y]); }
+                S::QuadTo(a, b) => { w.u8(verb::QUAD); w.floats(&[a.x, a.y, b.x, b.y]); }
+                S::CubicTo(a, b, c) => { w.u8(verb::CUBIC); w.floats(&[a.x, a.y, b.x, b.y, c.x, c.y]); }
+                S::Close => w.u8(verb::CLOSE),
+            }
         }
-    }
+    });
 }
 
-/// A paint, without its opacity (the caller writes that after it).
+/// A paint, without its opacity (the caller writes that after it). A pattern is its index and a
+/// first-use byte; on first use its rect, transform and content follow, later uses just refer to it, so
+/// shapes sharing a pattern share one tile on the C# side. Indices count up from 0 in the order patterns
+/// are first written (a pattern's index is taken before its content, which may hold other patterns).
 fn paint(w: &mut Writer, p: &usvg::Paint) -> WriteResult {
     match p {
         usvg::Paint::Color(c) => { w.u8(paint_tag::SOLID); w.rgb(*c); }
@@ -369,9 +450,15 @@ fn paint(w: &mut Writer, p: &usvg::Paint) -> WriteResult {
         }
         usvg::Paint::Pattern(p) => {
             w.u8(paint_tag::PATTERN);
-            w.rect(p.rect());
-            w.ts(p.transform());
-            children(w, p.root(), false)?;
+            let next = w.patterns.len() as u32;
+            let index = *w.patterns.entry(std::sync::Arc::as_ptr(p)).or_insert(next);
+            w.u32(index);
+            w.u8((index == next) as u8);
+            if index == next {
+                w.rect(p.rect());
+                w.ts(p.transform());
+                children(w, p.root(), false)?;
+            }
         }
     }
     Ok(())
@@ -393,8 +480,10 @@ fn gradient_base(w: &mut Writer, g: &usvg::BaseGradient) {
     }
 }
 
-/// IMAGE: a nearest-neighbour byte (image-rendering pixelated / crisp-edges / optimizeSpeed) and the
-/// encoded raster bytes, which C# decodes with WIC. A nested SVG image is written as a plain group instead.
+/// IMAGE: a nearest-neighbour byte (image-rendering pixelated / crisp-edges / optimizeSpeed), the image's
+/// index and a first-use byte, and on first use the encoded raster bytes (u32 length first), which C#
+/// decodes with WIC. An image whose bytes repeat an earlier one (a Figma image fill in several patterns, a
+/// `<use>`d image) refers to it, so it is decoded once. A nested SVG image is written as a plain group instead.
 /// usvg puts the image's placement into the parent group's transform, so it draws at (0, 0, width, height).
 fn image(w: &mut Writer, i: &usvg::Image) -> WriteResult {
     if !i.is_visible() { return Ok(()); }
@@ -413,8 +502,10 @@ fn image(w: &mut Writer, i: &usvg::Image) -> WriteResult {
     w.u8(tag::IMAGE);
     w.u8(matches!(i.rendering_mode(),
         usvg::ImageRendering::OptimizeSpeed | usvg::ImageRendering::CrispEdges | usvg::ImageRendering::Pixelated) as u8);
-    w.u32(data.len() as u32);
-    w.buf.extend_from_slice(data);
+    w.shared(|w| &mut w.images, 0, true, |w| {
+        w.u32(data.len() as u32);
+        w.buf.extend_from_slice(data);
+    });
     Ok(())
 }
 
@@ -500,17 +591,18 @@ fn primitive(w: &mut Writer, k: &filter::Kind) -> WriteResult {
             w.rgb(l.lighting_color());
             light(w, l.light_source());
         }
-        other => return Err(format!("filter primitive {}", kind_name(other))),
+        other => return Err(format!("filter primitive {}", unsupported(other).unwrap_or("unknown"))),
     }
     Ok(())
 }
 
-/// The SVG element name of an unsupported primitive, for the fallback reason in the log.
-fn kind_name(k: &filter::Kind) -> &'static str {
+/// The SVG element name of a primitive the C# side can't draw (for the fallback reason in the log); None
+/// for the ones it can.
+fn unsupported(k: &filter::Kind) -> Option<&'static str> {
     use filter::Kind as K;
     match k {
-        K::ConvolveMatrix(_) => "feConvolveMatrix", K::DisplacementMap(_) => "feDisplacementMap",
-        K::Image(_) => "feImage", K::Tile(_) => "feTile", _ => "unknown",
+        K::ConvolveMatrix(_) => Some("feConvolveMatrix"), K::DisplacementMap(_) => Some("feDisplacementMap"),
+        K::Image(_) => Some("feImage"), K::Tile(_) => Some("feTile"), _ => None,
     }
 }
 
@@ -622,6 +714,40 @@ mod tests {
         assert_eq!(rect, [5.0, 0.0, 20.0, 20.0]);
         for path_clip in [r#"<circle r="100"/>"#, r#"<path d="M 0,0 H 100 V 100 H 100 Z"/>"#] {
             assert_eq!(flags(&clip(path_clip)), group_flag::CLIP, "{path_clip}");
+        }
+    }
+
+    /// A pattern used by several shapes is written once; later uses refer to it by index.
+    #[test]
+    fn shared_pattern_is_written_once() {
+        let svg = |uses: usize| build(&format!(
+            r#"<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><pattern id="p" patternUnits="userSpaceOnUse" width="4" height="4"><circle cx="2" cy="2" r="1"/></pattern>{}</svg>"#,
+            r#"<rect width="5" height="5" fill="url(#p)"/>"#.repeat(uses))).unwrap();
+        let (one, two, three) = (svg(1).len(), svg(2).len(), svg(3).len());
+        let reuse = three - two; // a rect that refers to the pattern
+        assert_eq!(two - one, reuse, "the second use must not repeat the pattern");
+        assert!(one - reuse > 40, "the first use carries the pattern (rect, transform, content)");
+    }
+
+    /// Repeats of a `<use>`d marker, a clip path and an embedded image each cost the same few bytes as the
+    /// one before: only the first copy carries the content.
+    #[test]
+    fn repeated_geometry_clips_and_images_are_written_once() {
+        const PNG: &str = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+        let svg = |uses: usize, item: &str| build(&format!(
+            r#"<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" height="100"><defs>
+            <path id="m" d="M0 -3 C2 -3 3 -2 3 0 C3 2 2 3 0 3 C-2 3 -3 2 -3 0 C-3 -2 -2 -3 0 -3 Z"/>
+            <clipPath id="c"><circle cx="50" cy="50" r="40"/></clipPath>
+            <image id="i" width="5" height="5" xlink:href="data:image/png;base64,{PNG}"/></defs>{}</svg>"#,
+            item.repeat(uses))).unwrap().len();
+        for item in [
+            r##"<use xlink:href="#m" x="10" y="10"/>"##,
+            r##"<rect width="80" height="30" clip-path="url(#c)"/>"##,
+            r##"<use xlink:href="#i" x="10" y="10"/>"##,
+        ] {
+            let (one, two, three) = (svg(1, item), svg(2, item), svg(3, item));
+            assert_eq!(two - one, three - two, "the second copy must not repeat the content: {item}");
+            assert!(one - (three - two) > 20, "the first copy carries the content: {item}");
         }
     }
 

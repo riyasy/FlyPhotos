@@ -18,7 +18,7 @@ internal sealed partial class SvgScene
     /// The stream format this reader understands (svg_scene.rs STREAM_VERSION, the byte after the status). Bump
     /// both together on any change to the tags or field order; a mismatch falls back to resvg.
     /// </summary>
-    public const byte StreamVersion = 1;
+    public const byte StreamVersion = 2;
 
     /// <summary>Node tags in a child list; <see cref="End"/> closes the list.</summary>
     private enum NodeTag : byte { End, Group, Path, Image }
@@ -125,8 +125,8 @@ internal sealed partial class SvgScene
     private sealed class PathNode : Node
     {
         /// <summary>
-        /// The outline, built once; its fill rule is the path's fill-rule. Set after the whole stream is read,
-        /// when all paths' geometries are built in parallel.
+        /// The outline, built once and shared by the paths with the same segments and fill rule (a plot's
+        /// markers). Set after the whole stream is read, when all geometries are built in parallel.
         /// </summary>
         public CanvasGeometry Geometry = null!;
         /// <summary>Bounds of the fill and stroke in the parent's user space, for the painter's culling; set with <see cref="Geometry"/>.</summary>
@@ -148,14 +148,32 @@ internal sealed partial class SvgScene
     /// <summary>An embedded raster image, drawn at (0, 0, pixel width, pixel height) in its user space.</summary>
     private sealed class ImageNode : Node
     {
+        /// <summary>The image, shared by every node that shows the same encoded bytes.</summary>
+        public ImageData Data = null!;
+        /// <summary>image-rendering asks for nearest-neighbour (pixelated / crisp-edges / optimizeSpeed).</summary>
+        public bool Nearest;
+    }
+
+    /// <summary>One distinct embedded image: where its encoded bytes are in the stream, and the decoded bitmap.</summary>
+    private sealed class ImageData
+    {
         /// <summary>Where the encoded image starts in the stream; decoded from there into <see cref="Bitmap"/>.</summary>
         public int DataPos;
         /// <summary>The encoded image's length in bytes.</summary>
         public int DataLength;
         /// <summary>The decoded image (96 DPI, so DIPs equal pixels); null if decoding failed.</summary>
         public CanvasBitmap? Bitmap;
-        /// <summary>image-rendering asks for nearest-neighbour (pixelated / crisp-edges / optimizeSpeed).</summary>
-        public bool Nearest;
+    }
+
+    /// <summary>One distinct path geometry: where its segments are in the stream, its fill rule, and the built geometry.</summary>
+    private sealed class GeometryDef(int pos, bool evenOdd)
+    {
+        /// <summary>Where the segment count starts in the stream.</summary>
+        public readonly int Pos = pos;
+        /// <summary>The fill rule is evenodd (otherwise nonzero).</summary>
+        public readonly bool EvenOdd = evenOdd;
+        /// <summary>Built after the whole stream is read, in parallel with the others.</summary>
+        public CanvasGeometry? Geometry;
     }
 
     /// <summary>A brush built once, or a pattern whose tile is recorded at the drawing scale.</summary>
@@ -169,7 +187,10 @@ internal sealed partial class SvgScene
         public float Opacity = 1f;
     }
 
-    /// <summary>A pattern tile: its rectangle, patternTransform and content (content in tile space).</summary>
+    /// <summary>
+    /// A pattern tile: its rectangle, patternTransform and content (content in tile space). One per pattern in
+    /// the file, shared by every paint that uses it.
+    /// </summary>
     private sealed class PatternDef
     {
         /// <summary>The tile rectangle in pattern space.</summary>
@@ -180,7 +201,7 @@ internal sealed partial class SvgScene
         public Node[] Children = [];
     }
 
-    /// <summary>A clipPath. Its children are opaque black fills; the coverage is the clip.</summary>
+    /// <summary>A clipPath. Its children are opaque black fills; the coverage is the clip. One per clip path, shared by every group that uses it.</summary>
     private sealed class ClipDef
     {
         /// <summary>The clipPath's own transform, applied on top of the clipped group's.</summary>

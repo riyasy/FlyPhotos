@@ -25,6 +25,12 @@ internal sealed partial class SvgScene
         /// <summary>Adds an effect, list or brush to <see cref="Transients"/> and returns it.</summary>
         private T Keep<T>(T t) where T : IDisposable { Transients.Add(t); return t; }
 
+        /// <summary>
+        /// The pattern brushes made this step, one per pattern, tile scale and opacity, so shapes sharing a
+        /// pattern share its tile. They are transients too, gone with the step.
+        /// </summary>
+        private readonly Dictionary<(PatternDef, float Scale, float Opacity), CanvasImageBrush> _patternBrushes = [];
+
         /// <summary><paramref name="img"/> transformed by <paramref name="m"/> (a Transform2DEffect).</summary>
         private ICanvasImage Xform(ICanvasImage img, Matrix3x2 m) => Keep(new Transform2DEffect { Source = img, TransformMatrix = m });
 
@@ -122,7 +128,7 @@ internal sealed partial class SvgScene
                     if (p.StrokeFirst) { StrokePath(ds, p); FillPath(ds, p); }
                     else { FillPath(ds, p); StrokePath(ds, p); }
                     break;
-                case ImageNode { Bitmap: { } bmp } img:
+                case ImageNode { Data.Bitmap: { } bmp } img:
                     var size = bmp.SizeInPixels;
                     ds.DrawImage(bmp, new Rect(0, 0, size.Width, size.Height), bmp.Bounds, 1f,
                         img.Nearest ? CanvasImageInterpolation.NearestNeighbor : imageQuality);
@@ -172,8 +178,8 @@ internal sealed partial class SvgScene
         }
 
         /// <summary>
-        /// The brush for <paramref name="paint"/>: its prebuilt brush, or for a pattern a new image brush whose
-        /// tile is recorded at the scale of <paramref name="t"/> (the session's current transform).
+        /// The brush for <paramref name="paint"/>: its prebuilt brush, or for a pattern an image brush whose tile
+        /// is recorded at the scale of <paramref name="t"/> (the session's current transform), made once per step.
         /// </summary>
         private ICanvasBrush BrushFor(Paint paint, Matrix3x2 t)
         {
@@ -181,8 +187,10 @@ internal sealed partial class SvgScene
             // Pattern: record one tile at the current scale so it stays sharp, then tile it with an image brush.
             var pat = paint.Pattern!;
             var s = MathF.Max(MathF.Sqrt(MathF.Abs(t.GetDeterminant())), 1e-6f);
+            var key = (pat, s, paint.Opacity);
+            if (_patternBrushes.TryGetValue(key, out var made)) return made;
             var tile = Record(pat.Children, Matrix3x2.CreateScale(s));
-            return Keep(new CanvasImageBrush(rc, tile)
+            return _patternBrushes[key] = Keep(new CanvasImageBrush(rc, tile)
             {
                 SourceRectangle = new Rect(0, 0, pat.Rect.Width * s, pat.Rect.Height * s),
                 ExtendX = CanvasEdgeBehavior.Wrap, ExtendY = CanvasEdgeBehavior.Wrap,

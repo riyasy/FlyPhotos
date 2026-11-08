@@ -21,8 +21,8 @@ mod svg_scene;
 // on the C# side. The rawler functions return opaque pixels (straight == premultiplied);
 // resvg_render_svg returns premultiplied alpha, which CanvasBitmap.CreateFromBytes expects.
 
-// Font database is initialised once on first SVG render and reused for all
-// subsequent calls. Loading system fonts on Windows can take tens to hundreds of
+// Font database is initialised once, by the first SVG that has text (see parse_svg_data), and reused
+// for all subsequent calls. Loading system fonts on Windows can take tens to hundreds of
 // milliseconds, making per-call initialisation unacceptable.
 static FONT_DB: LazyLock<Arc<fontdb::Database>> = LazyLock::new(|| {
     let mut db = fontdb::Database::new();
@@ -331,7 +331,7 @@ pub extern "C" fn resvg_render_svg(
 ) -> *mut u8 {
     let result = catch_unwind(|| {
         let tree = parse_svg(ptr_to_str(path_ptr)?)?;
-        let (rw, rh, pixels) = render_tree(&tree, max_dimension)?;
+        let (rw, rh, pixels) = render_tree(&tree, max_dimension, 0, 0)?;
         unsafe {
             safe_write_int(width, rw as c_int);
             safe_write_int(height, rh as c_int);
@@ -345,15 +345,20 @@ pub extern "C" fn resvg_render_svg(
 /// Renders `tree` with resvg, the longer axis fitted to `max_dimension` (aspect preserved). Returns the
 /// pixel size and tiny_skia's premultiplied RGBA, kept as-is: CanvasBitmap.CreateFromBytes assumes
 /// premultiplied alpha (unpremultiplying made anti-aliased edges too bright). None for a zero-area result.
-fn render_tree(tree: &usvg::Tree, max_dimension: c_int) -> Option<(u32, u32, Vec<u8>)> {
+/// The pixels start `prefix` bytes into the buffer (zeroed, for the caller's header), and `reserve` more
+/// bytes of capacity are left for the caller to append, so no full-size copy is ever made.
+fn render_tree(tree: &usvg::Tree, max_dimension: c_int, prefix: usize, reserve: usize) -> Option<(u32, u32, Vec<u8>)> {
     let (sw, sh) = (tree.size().width(), tree.size().height());
     let m = max_dimension as f32;
     let (w, h) = if sw >= sh { (m, m * (sh / sw)) } else { (m * (sw / sh), m) };
     let (rw, rh) = (w.round() as u32, h.round() as u32);
     if rw == 0 || rh == 0 { return None; }
-    let mut pixmap = tiny_skia::Pixmap::new(rw, rh)?;
-    resvg::render(tree, tiny_skia::Transform::from_scale(rw as f32 / sw, rh as f32 / sh), &mut pixmap.as_mut());
-    Some((rw, rh, pixmap.take()))
+    let n = (rw as usize).checked_mul(rh as usize)?.checked_mul(4)?;
+    let mut buf = Vec::with_capacity(prefix + n + reserve);
+    buf.resize(prefix + n, 0);
+    let mut pixmap = tiny_skia::PixmapMut::from_bytes(&mut buf[prefix..], rw, rh)?;
+    resvg::render(tree, tiny_skia::Transform::from_scale(rw as f32 / sw, rh as f32 / sh), &mut pixmap);
+    Some((rw, rh, buf))
 }
 
 /// Parses an SVG with the shared font database (loaded once on first call via LazyLock —
@@ -363,13 +368,27 @@ fn parse_svg(path: &str) -> Option<usvg::Tree> {
 }
 
 /// Parses SVG bytes the way both the GPU path and the resvg fallback need them: the Chrome-matching
-/// textual fixups (`preprocess`), the shared font database with its Windows substitutes, and browser
+/// textual fixups (`preprocess`), the shared font database (loaded on first use) with its Windows substitutes, and browser
 /// defaults for text with no font set (Times New Roman, 16 px). None if usvg can't parse the file.
 fn parse_svg_data(svg_data: &[u8]) -> Option<usvg::Tree> {
     let fixed = preprocess(svg_data);
     let svg_data = fixed.as_deref().map(str::as_bytes).unwrap_or(svg_data);
     let mut options = usvg::Options::default();
-    options.fontdb = FONT_DB.clone();
+    // The system fonts are loaded only when a file has text: usvg starts from an empty database, and the
+    // first font lookup swaps in the shared one. A file without text never waits for the font load.
+    static NO_FONTS: LazyLock<Arc<fontdb::Database>> = LazyLock::new(|| Arc::new(fontdb::Database::new()));
+    options.fontdb = NO_FONTS.clone();
+    let (select, fallback) = (usvg::FontResolver::default_font_selector(), usvg::FontResolver::default_fallback_selector());
+    options.font_resolver = usvg::FontResolver {
+        select_font: Box::new(move |font, db| {
+            if db.is_empty() { *db = FONT_DB.clone(); }
+            select(font, db)
+        }),
+        select_fallback: Box::new(move |c, used, db| {
+            if db.is_empty() { *db = FONT_DB.clone(); }
+            fallback(c, used, db)
+        }),
+    };
     // Browsers render text with no font-family in Times New Roman; match them.
     options.font_family = "Times New Roman".to_string();
     options.font_size = 16.0;
@@ -390,16 +409,18 @@ pub extern "C" fn svg_build_scene(path_ptr: *const c_char, max_dimension: c_int,
         let out = match svg_scene::write_tree(&tree) {
             Ok(s) => s, // already starts with the OK status byte
             Err(reason) => {
-                let (w, h, pixels) = render_tree(&tree, max_dimension)?;
-                let mut s = Vec::with_capacity(9 + pixels.len() + reason.len());
-                s.push(1u8);
-                s.extend_from_slice(&(w as i32).to_le_bytes());
-                s.extend_from_slice(&(h as i32).to_le_bytes());
-                s.extend_from_slice(&pixels);
+                // Rendered straight into the reply, after its 9-byte header.
+                let (w, h, mut s) = render_tree(&tree, max_dimension, 9, reason.len())?;
+                s[0] = 1;
+                s[1..5].copy_from_slice(&(w as i32).to_le_bytes());
+                s[5..9].copy_from_slice(&(h as i32).to_le_bytes());
                 s.extend_from_slice(reason.as_bytes());
                 s
             }
         };
+        // The length goes over as an i32 and comes back to free_rust_buffer: one that doesn't fit would
+        // free with the wrong size (heap corruption), so such a reply is dropped here instead.
+        if out.len() > c_int::MAX as usize { return None; }
         unsafe { safe_write_int(len, out.len() as c_int); }
         Some(Box::into_raw(out.into_boxed_slice()) as *mut u8)
     });
@@ -563,5 +584,27 @@ mod tests {
     fn pattern_href_to_id_with_spaces_resolves() {
         let tree = parse_svg_data(SPACED_ID.as_bytes()).unwrap();
         assert!(first_path_has_pattern(&tree), "pattern fill was dropped");
+    }
+
+    /// A file the GPU path can't draw comes back as status 1, the raster size, the pixels (rendered in
+    /// place after the header) and the reason, in one buffer of exactly that length.
+    #[test]
+    fn fallback_reply_is_header_pixels_then_reason() {
+        let path = std::env::temp_dir().join("fly_rust_bridge_fallback_test.svg");
+        std::fs::write(&path, r#"<svg xmlns="http://www.w3.org/2000/svg" width="20" height="10"><filter id="f"><feTile/></filter><rect width="20" height="10" fill="red"/><rect x="15" y="5" width="5" height="5" filter="url(#f)"/></svg>"#).unwrap();
+        let c_path = std::ffi::CString::new(path.to_str().unwrap()).unwrap();
+        let mut len = 0;
+        let ptr = svg_build_scene(c_path.as_ptr(), 40, &mut len);
+        assert!(!ptr.is_null());
+        let b = unsafe { slice::from_raw_parts(ptr, len as usize) }.to_vec();
+        free_rust_buffer(ptr, len as usize);
+        let _ = std::fs::remove_file(&path);
+
+        assert_eq!(b[0], 1);
+        let (w, h) = (i32::from_le_bytes(b[1..5].try_into().unwrap()), i32::from_le_bytes(b[5..9].try_into().unwrap()));
+        assert_eq!((w, h), (40, 20));
+        let reason = std::str::from_utf8(&b[9 + (w * h * 4) as usize..]).unwrap();
+        assert!(reason.contains("feTile"), "{reason}");
+        assert_eq!(&b[9..13], &[255, 0, 0, 255], "the red rect's first pixel, premultiplied RGBA");
     }
 }
