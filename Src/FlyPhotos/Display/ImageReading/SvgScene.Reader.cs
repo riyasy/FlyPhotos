@@ -198,6 +198,8 @@ internal sealed partial class SvgScene
         for (var i = 0; i < filterCount; i++) g.Filters[i] = ReadFilter(r);
         g.Children = ReadChildren(r);
         g.HasBlend = ComputeHasBlend(g.Children);
+        g.StepThrough = IsStepThrough(g);
+        if (g.StepThrough) g.Items = FlattenItems(g.Children);
         return g;
     }
 

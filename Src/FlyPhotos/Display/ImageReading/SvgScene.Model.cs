@@ -104,7 +104,14 @@ internal sealed partial class SvgScene
         public bool IsPassThrough => !NeedsLayerImage && ClipRect == null && !Isolate && Opacity >= 1f && Blend == SvgBlendMode.Normal;
         /// <summary>A blended group sits in this subtree without an isolating group in between.</summary>
         public bool HasBlend;
+        /// <summary>A painter steps through this group into a bitmap of its own (see <see cref="IsStepThrough"/>).</summary>
+        public bool StepThrough;
+        /// <summary>The children as painter items, when <see cref="StepThrough"/> (null if they are drawn whole).</summary>
+        public Item[]? Items;
     }
+
+    /// <summary>A node a <see cref="Painter"/> draws, with its parent transform relative to the painter's nodes.</summary>
+    private readonly record struct Item(Node Node, Matrix3x2 Parent);
 
     /// <summary>Whether a blended group is reachable from <paramref name="nodes"/> through pass-through groups only.</summary>
     private static bool ComputeHasBlend(Node[] nodes)

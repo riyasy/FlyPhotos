@@ -10,24 +10,67 @@ namespace FlyPhotos.Display.ImageReading;
 
 internal sealed partial class SvgScene
 {
+    /// <summary>A group with at least this many nodes under it is stepped through rather than drawn in one item.</summary>
+    private const int StepGroupMinNodes = 256;
+
+    /// <summary>
+    /// What a <see cref="Painter"/> steps through for <paramref name="nodes"/>: the nodes with pass-through groups
+    /// opened up, each with its transform relative to <paramref name="nodes"/>' space, in document order. Null when
+    /// the nodes have a mix-blend-mode: blending needs them all in one drawing session, so they are drawn whole.
+    /// Built once at load, as the scene doesn't change.
+    /// </summary>
+    private static Item[]? FlattenItems(Node[] nodes)
+    {
+        if (ComputeHasBlend(nodes)) return null;
+        var items = new List<Item>();
+        Add(nodes, Matrix3x2.Identity);
+        return [.. items];
+
+        void Add(Node[] list, Matrix3x2 parent)
+        {
+            foreach (var n in list)
+                if (n is GroupNode { IsPassThrough: true } g) Add(g.Children, g.Transform * parent);
+                else items.Add(new Item(n, parent));
+        }
+    }
+
+    /// <summary>
+    /// Whether a painter steps through <paramref name="g"/> into a bitmap of its own instead of drawing it as one
+    /// item: it has a layer (opacity, a clip, a mask or isolation), no filter or blend (they need the whole source
+    /// in one session), and at least <see cref="StepGroupMinNodes"/> nodes under it.
+    /// </summary>
+    private static bool IsStepThrough(GroupNode g) =>
+        !g.IsPassThrough && g.Filters.Length == 0 && g.Blend == SvgBlendMode.Normal
+        && CountNodes(g.Children, StepGroupMinNodes) >= StepGroupMinNodes;
+
+    /// <summary>The nodes in <paramref name="nodes"/> and under them, counting no further than about <paramref name="limit"/>.</summary>
+    private static int CountNodes(Node[] nodes, int limit)
+    {
+        var count = 0;
+        foreach (var n in nodes)
+        {
+            count++;
+            if (n is GroupNode g) count += CountNodes(g.Children, limit - count);
+            if (count >= limit) break;
+        }
+        return count;
+    }
+
     /// <summary>
     /// Draws a scene into a bitmap, the only way the scene is drawn: <see cref="Finish"/> in one go (previews,
     /// clipboard), or <see cref="Step"/> a batch of items at a time so a slow scene (a big map can have thousands
     /// of ~1,000-point paths, seconds of tessellation) can be spread over frames. SVG user units map to the
     /// bitmap's pixels by userToPx; vectors and effects (clips, masks, filters, blends) are rasterised at that
-    /// scale, and the root viewport clips like Chrome's overflow:hidden. Items are the root's nodes with
-    /// pass-through groups opened up, so they keep their order and transforms; paths wholly outside the bitmap
-    /// are skipped. A big group with opacity, a clip, a mask or isolation is stepped through too, into a bitmap
-    /// of its own that is composited with those effects when done (filters need the whole source at once, so a
-    /// filtered group is one item). A node list with mix-blend-mode is drawn in one step, as blending needs
-    /// everything before it in the same drawing session. The caller owns the target; dispose the painter if it
-    /// is dropped before it is done.
+    /// scale, and the root viewport clips like Chrome's overflow:hidden. Items (built at load) are the root's
+    /// nodes with pass-through groups opened up, so they keep their order and transforms; paths wholly outside
+    /// the bitmap are skipped. A big group with opacity, a clip, a mask or isolation is stepped through too, into
+    /// a bitmap of its own that is composited with those effects when done (filters need the whole source at
+    /// once, so a filtered group is one item). A node list with mix-blend-mode is drawn in one step, as blending
+    /// needs everything before it in the same drawing session. The caller owns the target; dispose the painter if
+    /// it is dropped before it is done.
     /// </summary>
     public sealed class Painter : IDisposable
     {
-        /// <summary>A group with at least this many nodes under it is stepped through rather than drawn in one item.</summary>
-        private const int StepGroupMinNodes = 256;
-
         private readonly SvgScene _scene;
         private readonly ICanvasResourceCreator _rc;
         private readonly CanvasRenderTarget _target;
@@ -37,9 +80,8 @@ internal sealed partial class SvgScene
         private readonly Node[] _nodes;
         /// <summary>The root viewport, in user units; null for a group (its parent painter clips).</summary>
         private readonly Rect? _viewport;
-        private readonly List<(Node Node, Matrix3x2 Parent)> _items = [];
-        /// <summary>Draw all of <see cref="_nodes"/> in one step (they have a blend).</summary>
-        private readonly bool _whole;
+        /// <summary><see cref="_nodes"/> as items (built at load); null = draw them whole, in one step (they have a blend).</summary>
+        private readonly Item[]? _items;
         private int _next;
         private bool _started;
         /// <summary>Items drawn per step; adapted so a step takes about the budget.</summary>
@@ -47,15 +89,16 @@ internal sealed partial class SvgScene
         /// <summary>The big group at <c>_items[_next]</c>, being drawn into its own bitmap (its target).</summary>
         private Painter? _group;
 
-        private bool Done => _started && _next >= _items.Count;
+        private bool Done => _started && _next >= (_items?.Length ?? 0);
 
         /// <param name="target">A bitmap on the scene's <see cref="SvgScene.Device"/>.</param>
         internal Painter(SvgScene scene, CanvasRenderTarget target, Matrix3x2 userToPx, CanvasImageInterpolation quality)
             // usvg has already folded the viewBox into the root, so the viewport is 0,0 → Width×Height.
-            : this(scene, scene.Device, target, userToPx, quality, scene._root, new Rect(0, 0, scene.Width, scene.Height)) { }
+            : this(scene, scene.Device, target, userToPx, quality, scene._root, scene._rootItems,
+                new Rect(0, 0, scene.Width, scene.Height)) { }
 
         private Painter(SvgScene scene, ICanvasResourceCreator rc, CanvasRenderTarget target, Matrix3x2 userToPx,
-            CanvasImageInterpolation quality, Node[] nodes, Rect? viewport)
+            CanvasImageInterpolation quality, Node[] nodes, Item[]? items, Rect? viewport)
         {
             _scene = scene;
             _rc = rc;
@@ -63,16 +106,8 @@ internal sealed partial class SvgScene
             _userToPx = userToPx;
             _quality = quality;
             _nodes = nodes;
+            _items = items;
             _viewport = viewport;
-            _whole = ComputeHasBlend(nodes);
-            if (!_whole) Flatten(nodes, userToPx);
-        }
-
-        private void Flatten(Node[] nodes, Matrix3x2 parent)
-        {
-            foreach (var n in nodes)
-                if (n is GroupNode { IsPassThrough: true } g) Flatten(g.Children, g.Transform * parent);
-                else _items.Add((n, parent));
         }
 
         /// <summary>Draws everything left in one go.</summary>
@@ -97,20 +132,21 @@ internal sealed partial class SvgScene
                 ds.Transform = _userToPx;
                 using (_viewport is { } vp ? ds.CreateLayer(1f, vp) : null)
                 {
-                    if (_whole) drawer.DrawNodes(ds, _nodes);
+                    if (_items == null) drawer.DrawNodes(ds, _nodes);
                     else
                         // The time check also bounds a run of culled paths, which the batch doesn't count. It
                         // applies only after the first item, so every step makes progress however slow it is
                         // (starting a big group counts: its own steps then make progress).
-                        for (var start = _next; _next < _items.Count && drawn < _batch
+                        for (var start = _next; _next < _items.Length && drawn < _batch
                              && (_next == start || sw.Elapsed.TotalMilliseconds < budgetMs);)
                         {
-                            var (n, parent) = _items[_next];
+                            var (n, itemParent) = _items[_next];
+                            var parent = itemParent * _userToPx;
                             if (n is PathNode p && !Visible(p, parent, size.Width, size.Height)) { _next++; continue; }
-                            if (n is GroupNode g && SteppedThrough(g))
+                            if (n is GroupNode { StepThrough: true } g)
                             {
                                 var bmp = new CanvasRenderTarget(_rc, size.Width, size.Height, 96f);
-                                _group = new Painter(_scene, _rc, bmp, g.Transform * parent, _quality, g.Children, null);
+                                _group = new Painter(_scene, _rc, bmp, g.Transform * parent, _quality, g.Children, g.Items, null);
                                 break;
                             }
                             _next++;
@@ -136,7 +172,8 @@ internal sealed partial class SvgScene
         private bool StepGroup(double budgetMs)
         {
             if (!_group!.Step(budgetMs)) return false;
-            var (n, parent) = _items[_next];
+            var (n, itemParent) = _items![_next];
+            var parent = itemParent * _userToPx;
             var g = (GroupNode)n;
             var drawer = new NodeDrawer(_rc, _quality);
             try
@@ -157,26 +194,6 @@ internal sealed partial class SvgScene
                 _next++;
             }
             return Done;
-        }
-
-        /// <summary>
-        /// Whether <paramref name="g"/> (not pass-through: it has opacity, a clip, a mask or isolation) is big
-        /// enough to step through, and has no filter or blend, which need it whole.
-        /// </summary>
-        private static bool SteppedThrough(GroupNode g) =>
-            g.Filters.Length == 0 && g.Blend == SvgBlendMode.Normal && CountNodes(g.Children, StepGroupMinNodes) >= StepGroupMinNodes;
-
-        /// <summary>The nodes in <paramref name="nodes"/> and under them, counting no further than about <paramref name="limit"/>.</summary>
-        private static int CountNodes(Node[] nodes, int limit)
-        {
-            var count = 0;
-            foreach (var n in nodes)
-            {
-                count++;
-                if (n is GroupNode g) count += CountNodes(g.Children, limit - count);
-                if (count >= limit) break;
-            }
-            return count;
         }
 
         /// <summary>Drops the big group's painter and its bitmap.</summary>

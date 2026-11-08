@@ -30,6 +30,8 @@ internal sealed partial class SvgScene
 
     /// <summary>The root's children: the drawing, in document order.</summary>
     private readonly Node[] _root;
+    /// <summary>The root's children as painter items (see <see cref="FlattenItems"/>); null = drawn whole.</summary>
+    private readonly Item[]? _rootItems;
     /// <summary>Device resources built from the stream (geometries, brushes, stroke styles, bitmaps).</summary>
     private readonly List<IDisposable> _resources;
 
@@ -42,6 +44,7 @@ internal sealed partial class SvgScene
         Width = width;
         Height = height;
         _root = root;
+        _rootItems = FlattenItems(root);
         _resources = resources;
         Device = device;
     }
