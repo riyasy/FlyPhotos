@@ -1,6 +1,5 @@
 #nullable enable
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using Windows.Foundation;
@@ -22,15 +21,24 @@ internal sealed partial class SvgScene
     private static Item[]? FlattenItems(Node[] nodes)
     {
         if (ComputeHasBlend(nodes)) return null;
-        var items = new List<Item>();
+        var items = new Item[Count(nodes)];
+        var next = 0;
         Add(nodes, Matrix3x2.Identity);
-        return [.. items];
+        return items;
+
+        static int Count(Node[] list)
+        {
+            var count = 0;
+            foreach (var n in list)
+                count += n is GroupNode { IsPassThrough: true } g ? Count(g.Children) : 1;
+            return count;
+        }
 
         void Add(Node[] list, Matrix3x2 parent)
         {
             foreach (var n in list)
                 if (n is GroupNode { IsPassThrough: true } g) Add(g.Children, g.Transform * parent);
-                else items.Add(new Item(n, parent));
+                else items[next++] = new Item(n, parent);
         }
     }
 
