@@ -109,18 +109,28 @@ internal partial class SvgVectorRenderer(CanvasAnimatedControl canvas, SvgHqDisp
             session.FillRectangle(viewState.ImageRect, _checkeredBrush);
         }
 
-        var now = Stopwatch.GetTimestamp();
-        if (viewState.Mat != _lastMat) { _lastMat = viewState.Mat; _lastChange = now; }
-
         // ImageRect is in the HQ image's pixels; k converts SVG user units to those.
         var k = (float)(viewState.ImageRect.Width / item.Scene.Width);
-        var target = k * viewState.Scale;
         var viewport = Viewport(session);
         var visible = TransformRect(viewport, viewState.MatInv);
         visible.Intersect(viewState.ImageRect);
-        var frame = new Frame(session.Device, viewState, viewport, k, target, quality);
+        var frame = new Frame(session.Device, viewState, viewport, k, k * viewState.Scale, quality);
 
-        var fresh = Matches(_detail, visible, target, quality, isAnimating);
+        var fresh = AdvancePainting(frame, visible, isAnimating);
+        DrawSnapshots(session, quality, fresh);
+    }
+
+    /// <summary>
+    /// This frame's share of vector drawing: a step of the base if one is pending (it goes first), else, when the
+    /// detail doesn't match the view and the view has settled (or there is no detail yet), a step of the next
+    /// detail, promoting it when done. Returns whether the detail matches the view (is fresh) after that.
+    /// </summary>
+    private bool AdvancePainting(in Frame f, Rect visible, bool isAnimating)
+    {
+        var now = Stopwatch.GetTimestamp();
+        if (f.View.Mat != _lastMat) { _lastMat = f.View.Mat; _lastChange = now; }
+
+        var fresh = Matches(_detail, visible, f.Target, f.Quality, isAnimating);
         if (_basePending != null)
         {
             // The base goes first: without it a zoom out or a pan past the detail shows nothing around it.
@@ -139,18 +149,26 @@ internal partial class SvgVectorRenderer(CanvasAnimatedControl canvas, SvgHqDisp
             {
                 // The first detail is finished even if the view moves meanwhile (the open zoom), as there is
                 // nothing else to show; a later one restarts when it no longer matches the view.
-                if (_detail == null ? _pending == null : !Matches(_pending?.Snap, visible, target, quality, false))
-                    StartPending(frame);
+                if (_detail == null ? _pending == null : !Matches(_pending?.Snap, visible, f.Target, f.Quality, false))
+                    StartPending(f);
                 if (StepFor(_pending.Painter, _detail == null ? FirstFrameBudgetMs : StepBudgetMs))
                 {
-                    Promote(frame);
+                    Promote(f);
                     fresh = true;
                 }
                 else invalidate();
             }
             else if (!isAnimating) WakeAfter(SettleMs - (int)waited);
         }
+        return fresh;
+    }
 
+    /// <summary>
+    /// Draws the bitmaps there are: the detail (or the part-drawn first one), and, while it isn't
+    /// <paramref name="fresh"/>, the base around it. The session's transform maps HQ image pixels to the screen.
+    /// </summary>
+    private void DrawSnapshots(CanvasDrawingSession session, CanvasImageInterpolation quality, bool fresh)
+    {
         var shown = _detail ?? _pending.Snap; // the first detail, part drawn
         var saved = session.Transform;
         session.Antialiasing = CanvasAntialiasing.Aliased; // bitmap edges; the pieces below must meet without seams
