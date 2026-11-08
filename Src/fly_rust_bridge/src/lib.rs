@@ -361,19 +361,22 @@ fn render_tree(tree: &usvg::Tree, max_dimension: c_int, prefix: usize, reserve: 
     Some((rw, rh, buf))
 }
 
-/// Parses an SVG with the shared font database (loaded once on first call via LazyLock —
-/// avoids a multi-hundred-ms hit per file).
+/// Parses an SVG file (see `parse_svg_data`); images it links by relative path load from its folder.
 fn parse_svg(path: &str) -> Option<usvg::Tree> {
-    parse_svg_data(&std::fs::read(path).ok()?)
+    let path = std::path::Path::new(path);
+    parse_svg_data(&std::fs::read(path).ok()?, path.parent().map(|p| p.to_path_buf()))
 }
 
 /// Parses SVG bytes the way both the GPU path and the resvg fallback need them: the Chrome-matching
 /// textual fixups (`preprocess`), the shared font database (loaded on first use) with its Windows substitutes, and browser
-/// defaults for text with no font set (Times New Roman, 16 px). None if usvg can't parse the file.
-fn parse_svg_data(svg_data: &[u8]) -> Option<usvg::Tree> {
+/// defaults for text with no font set (Times New Roman, 16 px). Relative image links resolve against
+/// `resources_dir` (the SVG's folder; without one, usvg would use the process's working directory).
+/// None if usvg can't parse the file.
+fn parse_svg_data(svg_data: &[u8], resources_dir: Option<std::path::PathBuf>) -> Option<usvg::Tree> {
     let fixed = preprocess(svg_data);
     let svg_data = fixed.as_deref().map(str::as_bytes).unwrap_or(svg_data);
     let mut options = usvg::Options::default();
+    options.resources_dir = resources_dir;
     // The system fonts are loaded only when a file has text: usvg starts from an empty database, and the
     // first font lookup swaps in the shared one. A file without text never waits for the font load.
     static NO_FONTS: LazyLock<Arc<fontdb::Database>> = LazyLock::new(|| Arc::new(fontdb::Database::new()));
@@ -570,7 +573,7 @@ mod tests {
     fn root_xml_space_does_not_preserve_text_indentation() {
         // Chrome ignores xml:space on <svg>: the padded text starts at x, like unpadded text.
         let first_glyph_x = |svg: &str| {
-            let tree = parse_svg_data(svg.as_bytes()).unwrap();
+            let tree = parse_svg_data(svg.as_bytes(), None).unwrap();
             tree.root().abs_bounding_box().x()
         };
         let padded = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="50" xml:space="preserve"><text x="10" y="30" font-family="Arial">
@@ -582,8 +585,35 @@ mod tests {
     /// A pattern that hrefs an id with spaces still paints (inkscape_about10's hair textures).
     #[test]
     fn pattern_href_to_id_with_spaces_resolves() {
-        let tree = parse_svg_data(SPACED_ID.as_bytes()).unwrap();
+        let tree = parse_svg_data(SPACED_ID.as_bytes(), None).unwrap();
         assert!(first_path_has_pattern(&tree), "pattern fill was dropped");
+    }
+
+    /// An image linked by a relative path loads from the SVG's folder, not the working directory (the
+    /// test's is the crate folder): directly, from a subfolder, and from the parent folder.
+    #[test]
+    fn relative_image_links_resolve_against_the_svg_folder() {
+        let dir = std::env::temp_dir().join("fly_rust_bridge_relative_images").join("svgs");
+        std::fs::create_dir_all(dir.join("sub")).unwrap();
+        let image = r#"<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4" fill="red"/></svg>"#;
+        for p in [dir.join("a.svg"), dir.join("sub").join("b.svg"), dir.join("..").join("c.svg")] {
+            std::fs::write(p, image).unwrap();
+        }
+        let path = dir.join("main.svg");
+        std::fs::write(&path, r#"<svg xmlns="http://www.w3.org/2000/svg" width="12" height="4"><image href="a.svg" width="4" height="4"/><image href="sub/b.svg" x="4" width="4" height="4"/><image href="../c.svg" x="8" width="4" height="4"/></svg>"#).unwrap();
+
+        fn images(g: &usvg::Group) -> usize {
+            g.children().iter().map(|n| match n {
+                usvg::Node::Image(_) => 1,
+                usvg::Node::Group(g) => images(g),
+                _ => 0,
+            }).sum()
+        }
+        let found = images(parse_svg(path.to_str().unwrap()).unwrap().root());
+        // Control: without the folder, they resolve against the working directory and are dropped.
+        let control = images(parse_svg_data(&std::fs::read(&path).unwrap(), None).unwrap().root());
+        let _ = std::fs::remove_dir_all(dir.parent().unwrap());
+        assert_eq!((found, control), (3, 0), "usvg drops an image it can't load");
     }
 
     /// A file the GPU path can't draw comes back as status 1, the raster size, the pixels (rendered in
