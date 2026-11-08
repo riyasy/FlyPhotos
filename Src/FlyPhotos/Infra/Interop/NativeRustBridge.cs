@@ -26,6 +26,15 @@ internal static partial class NativeRustBridge
     [LibraryImport(DllName, StringMarshalling = StringMarshalling.Utf8)]
     internal static partial nint resvg_render_svg(string path, int maxDimension, out int width, out int height);
 
+    /// <summary>
+    /// Parses an SVG into the draw stream SvgScene replays. First byte: 0 = OK + stream; 1 = unsupported, then
+    /// width and height (i32), resvg's premultiplied RGBA fitted to <paramref name="maxDimension"/>, and a UTF-8
+    /// reason. Null on read/parse failure. Free with <see cref="free_rust_buffer"/>(ptr, len).
+    /// </summary>
+    [LibraryImport(DllName, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial nint svg_build_scene(string path, int maxDimension, out int len);
+
     // ── Memory management ─────────────────────────────────────────────────────
 
     /// <summary>
