@@ -70,9 +70,9 @@ internal sealed partial class SvgScene
     /// of ~1,000-point paths, seconds of tessellation) can be spread over frames. SVG user units map to the
     /// bitmap's pixels by userToPx; vectors and effects (clips, masks, filters, blends) are rasterised at that
     /// scale, and the root viewport clips like Chrome's overflow:hidden. Items (built at load) are the root's
-    /// nodes with pass-through groups opened up, so they keep their order and transforms; paths wholly outside
+    /// nodes with pass-through groups opened up, so they keep their order and transforms; items wholly outside
     /// the bitmap are skipped. A big group with opacity, a clip, a mask or isolation is stepped through too, into
-    /// a bitmap of its own that is composited with those effects when done (filters need the whole source at
+    /// a bitmap of its own (just big enough for the group's visible part) that is composited with those effects when done (filters need the whole source at
     /// once, so a filtered group is one item). A node list with mix-blend-mode is drawn in one step, as blending
     /// needs everything before it in the same drawing session. The caller owns the target; dispose the painter if
     /// it is dropped before it is done.
@@ -96,6 +96,8 @@ internal sealed partial class SvgScene
         private int _batch = 32;
         /// <summary>The big group at <c>_items[_next]</c>, being drawn into its own bitmap (its target).</summary>
         private Painter? _group;
+        /// <summary>Where <see cref="_group"/>'s bitmap sits in this target, in whole pixels.</summary>
+        private Vector2 _groupOffset;
 
         private bool Done => _started && _next >= (_items?.Length ?? 0);
 
@@ -150,11 +152,17 @@ internal sealed partial class SvgScene
                         {
                             var (n, itemParent) = _items[_next];
                             var parent = itemParent * _userToPx;
-                            if (n is PathNode p && !Visible(p, parent, size.Width, size.Height)) { _next++; continue; }
+                            if (!Visible(n, parent, size.Width, size.Height)) { _next++; continue; }
                             if (n is GroupNode { StepThrough: true } g)
                             {
-                                var bmp = new CanvasRenderTarget(_rc, size.Width, size.Height, 96f);
-                                _group = new Painter(_scene, _rc, bmp, g.Transform * parent, _quality, g.Children, g.Items, null);
+                                // A bitmap just big enough for the visible part of the group.
+                                var px = TransformRect(g.Bounds, parent);
+                                double x0 = Math.Max(0, Math.Floor(px.Left)), y0 = Math.Max(0, Math.Floor(px.Top));
+                                double x1 = Math.Min(size.Width, Math.Ceiling(px.Right)), y1 = Math.Min(size.Height, Math.Ceiling(px.Bottom));
+                                var bmp = new CanvasRenderTarget(_rc, (float)Math.Max(1, x1 - x0), (float)Math.Max(1, y1 - y0), 96f);
+                                _groupOffset = new Vector2((float)x0, (float)y0);
+                                _group = new Painter(_scene, _rc, bmp, g.Transform * parent * Matrix3x2.CreateTranslation(-_groupOffset),
+                                    _quality, g.Children, g.Items, null);
                                 break;
                             }
                             _next++;
@@ -190,9 +198,11 @@ internal sealed partial class SvgScene
                 ds.Transform = _userToPx;
                 using (_viewport is { } vp ? ds.CreateLayer(1f, vp) : null)
                 {
-                    // The group's bitmap is in this target's pixels, and its effects map into them by t.
-                    ds.Transform = Matrix3x2.Identity;
-                    ds.DrawImage(drawer.GroupEffects(g, _group._target, g.Transform * parent));
+                    // The group's bitmap is in this target's pixels from its offset, and its effects map into them
+                    // by t; drawn at that whole-pixel offset, so nothing is resampled.
+                    ds.Transform = Matrix3x2.CreateTranslation(_groupOffset);
+                    ds.DrawImage(drawer.GroupEffects(g, _group._target,
+                        g.Transform * parent * Matrix3x2.CreateTranslation(-_groupOffset)));
                 }
             }
             finally
@@ -216,10 +226,11 @@ internal sealed partial class SvgScene
         /// <summary>Releases a big group's bitmap if the painter is dropped mid-group.</summary>
         public void Dispose() => EndGroup();
 
-        /// <summary>Whether the path's fill or stroke reaches into the w×h bitmap under <paramref name="parent"/>.</summary>
-        private static bool Visible(PathNode p, Matrix3x2 parent, uint w, uint h)
+        /// <summary>Whether what the node paints reaches into the w×h bitmap under <paramref name="parent"/>.</summary>
+        private static bool Visible(Node n, Matrix3x2 parent, uint w, uint h)
         {
-            var r = TransformRect(p.Bounds, parent);
+            if (n.Bounds.IsEmpty) return false;
+            var r = TransformRect(n.Bounds, parent);
             return r.Right >= 0 && r.Bottom >= 0 && r.Left <= w && r.Top <= h;
         }
     }

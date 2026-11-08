@@ -75,7 +75,15 @@ internal sealed partial class SvgScene
     // ── Scene model ──────────────────────────────────────────────────────────
 
     /// <summary>A drawable node: <see cref="GroupNode"/>, <see cref="PathNode"/> or <see cref="ImageNode"/>.</summary>
-    private abstract class Node;
+    private abstract class Node
+    {
+        /// <summary>
+        /// What the node can paint, in its parent's user space (fill and stroke, a group's clip and filter
+        /// region), for the painter's culling; Rect.Empty when nothing. Set at load for the drawing's nodes only,
+        /// not for those in patterns, clip paths and masks.
+        /// </summary>
+        public Rect Bounds;
+    }
 
     /// <summary>A group (also a flattened text element or a nested SVG image).</summary>
     private sealed class GroupNode : Node
@@ -98,10 +106,19 @@ internal sealed partial class SvgScene
         public Node[] Children = [];
         /// <summary>CSS <c>isolation: isolate</c>: a backdrop boundary for mix-blend-mode on its own.</summary>
         public bool Isolate;
-        /// <summary>Has a clip, mask or filter, so it is drawn as an effect image rather than straight into the list.</summary>
-        public bool NeedsLayerImage => Clip != null || Mask != null || Filters.Length > 0;
+        /// <summary>
+        /// Has a mask, a filter or a clip path that isn't one shape, so it is drawn as an effect image rather than
+        /// straight into the list (a one-shape clip is a geometry layer, see <see cref="ClipDef.Geometry"/>).
+        /// </summary>
+        public bool NeedsLayerImage => Clip is { IsGeometric: false } || Mask != null || Filters.Length > 0;
         /// <summary>Draws straight into its parent's backdrop: no layer of its own.</summary>
-        public bool IsPassThrough => !NeedsLayerImage && ClipRect == null && !Isolate && Opacity >= 1f && Blend == SvgBlendMode.Normal;
+        public bool IsPassThrough => !NeedsLayerImage && Clip == null && ClipRect == null && !Isolate && Opacity >= 1f
+            && Blend == SvgBlendMode.Normal;
+        /// <summary>
+        /// What the group can paint in its own user space (<see cref="Node.Bounds"/> before its transform), the
+        /// size of its clip layers; null where bounds aren't computed (inside patterns, clip paths, masks).
+        /// </summary>
+        public Rect? LayerBounds;
         /// <summary>A blended group sits in this subtree without an isolating group in between.</summary>
         public bool HasBlend;
         /// <summary>A painter steps through this group into a bitmap of its own (see <see cref="IsStepThrough"/>).</summary>
@@ -129,8 +146,6 @@ internal sealed partial class SvgScene
         /// markers). Set after the whole stream is read, when all geometries are built in parallel.
         /// </summary>
         public CanvasGeometry Geometry = null!;
-        /// <summary>Bounds of the fill and stroke in the parent's user space, for the painter's culling; set with <see cref="Geometry"/>.</summary>
-        public Rect Bounds;
         /// <summary>Fill paint (opacity baked in), or null for no fill.</summary>
         public Paint? Fill;
         /// <summary>Stroke paint (opacity baked in), or null for no stroke.</summary>
@@ -210,6 +225,15 @@ internal sealed partial class SvgScene
         public ClipDef? Nested;
         /// <summary>The clip shapes.</summary>
         public Node[] Children = [];
+        /// <summary>
+        /// When the clip is one filled path (through plain groups), its outline in the clipped group's user space,
+        /// set at load: drawn as a geometry layer, far cheaper than the mask effect the general case needs.
+        /// </summary>
+        public CanvasGeometry? Geometry;
+        /// <summary>The bounds of <see cref="Geometry"/>, for culling the groups it clips.</summary>
+        public Rect GeometryBounds;
+        /// <summary>This clip and every nested one are a geometry each, so the group clips with layers.</summary>
+        public bool IsGeometric => Geometry != null && (Nested?.IsGeometric ?? true);
     }
 
     /// <summary>A mask: its region, luminance or alpha type, and content.</summary>

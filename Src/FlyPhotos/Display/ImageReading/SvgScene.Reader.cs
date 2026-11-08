@@ -178,6 +178,14 @@ internal sealed partial class SvgScene
             decoding = null;
             for (var i = 0; i < bitmaps.Length; i++)
                 if (bitmaps[i] is { } bmp) r.Images[i].Bitmap = r.Track(bmp);
+
+            foreach (var clip in r.Clips)
+                if (ClipGeometry(clip) is { } cg)
+                {
+                    clip.Geometry = r.Track(cg);
+                    clip.GeometryBounds = cg.ComputeBounds();
+                }
+            UnionBounds(root); // needs the path, image and clip bounds
             return new Lease(new SvgScene(w, h, root, r.Resources, rc.Device));
         }
         catch

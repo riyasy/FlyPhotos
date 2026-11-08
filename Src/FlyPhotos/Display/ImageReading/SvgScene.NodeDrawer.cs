@@ -116,8 +116,8 @@ internal sealed partial class SvgScene
 
         /// <summary>
         /// Draws one node under the session's current transform: a path (fill and stroke in paint order), an
-        /// image, or a group (straight in, in an opacity layer, or as an effect image when it has a clip, mask
-        /// or filter).
+        /// image, or a group (straight in, in clip and opacity layers, or as an effect image when it has a mask,
+        /// a filter or a clip path of several shapes).
         /// </summary>
         public void DrawNode(CanvasDrawingSession ds, Node node)
         {
@@ -149,18 +149,47 @@ internal sealed partial class SvgScene
                     else
                     {
                         ds.Transform = t;
-                        // A rectangle clip is a Direct2D layer (an axis-aligned clip when it can be), far cheaper
-                        // than the mask effect a clip path needs.
-                        if (g.ClipRect is { } clipRect)
-                            using (ds.CreateLayer(g.Opacity, clipRect)) DrawNodes(ds, g.Children);
-                        else if (g.Opacity < 1f)
-                            using (ds.CreateLayer(g.Opacity)) DrawNodes(ds, g.Children);
-                        else
-                            DrawNodes(ds, g.Children);
+                        DrawInLayers(ds, g, g.Clip);
                     }
                     ds.Transform = saved;
                     break;
             }
+        }
+
+        /// <summary>
+        /// Draws the group's children inside a geometry layer per clip path (<paramref name="clip"/> and the clips
+        /// nested in it), then its rectangle clip and opacity. Layers are far cheaper than the mask effect a clip
+        /// path of several shapes needs. A rectangle clip is an axis-aligned clip when it can be.
+        /// </summary>
+        private void DrawInLayers(CanvasDrawingSession ds, GroupNode g, ClipDef? clip)
+        {
+            if (clip != null)
+            {
+                // The layer's edge is anti-aliased like the mask was, whatever the last path drawn asked for.
+                ds.Antialiasing = CanvasAntialiasing.Antialiased;
+                // Bounded to what the group paints (padded 2 px for the anti-aliased edge): a layer is otherwise
+                // the whole target, which costs more than the mask effect for many small clipped shapes.
+                var bounds = LayerBoundsPadded(g, ds.Transform);
+                using (bounds is { } b
+                           ? ds.CreateLayer(1f, null, b, clip.Geometry!, Matrix3x2.Identity, CanvasLayerOptions.None)
+                           : ds.CreateLayer(1f, clip.Geometry!))
+                    DrawInLayers(ds, g, clip.Nested);
+            }
+            else if (g.ClipRect is { } clipRect)
+                using (ds.CreateLayer(g.Opacity, clipRect)) DrawNodes(ds, g.Children);
+            else if (g.Opacity < 1f)
+                using (ds.CreateLayer(g.Opacity)) DrawNodes(ds, g.Children);
+            else
+                DrawNodes(ds, g.Children);
+        }
+
+        /// <summary>The group's <see cref="GroupNode.LayerBounds"/> padded by 2 pixels under <paramref name="t"/>; null if unknown.</summary>
+        private static Rect? LayerBoundsPadded(GroupNode g, Matrix3x2 t)
+        {
+            if (g.LayerBounds is not { } r) return null;
+            if (r.IsEmpty) return new Rect(); // paints nothing
+            var pad = 2 / MathF.Max(MathF.Sqrt(MathF.Abs(t.GetDeterminant())), 1e-6f);
+            return new Rect(r.X - pad, r.Y - pad, r.Width + 2 * pad, r.Height + 2 * pad);
         }
 
         /// <summary>Fills the path's geometry with its fill paint, if it has one.</summary>

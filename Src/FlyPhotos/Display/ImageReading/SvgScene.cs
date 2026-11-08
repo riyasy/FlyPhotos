@@ -6,6 +6,7 @@ using System.Threading;
 using Windows.Foundation;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Effects;
+using Microsoft.Graphics.Canvas.Geometry;
 
 namespace FlyPhotos.Display.ImageReading;
 
@@ -133,6 +134,61 @@ internal sealed partial class SvgScene
         if (p.Stroke == null || p.StrokeWidth <= 0 || r.IsEmpty) return r;
         var pad = p.StrokeWidth / 2 * Math.Max(p.StrokeStyle?.MiterLimit ?? 10f, 1.5f);
         return new Rect(r.X - pad, r.Y - pad, r.Width + 2 * pad, r.Height + 2 * pad);
+    }
+
+    /// <summary>
+    /// The clip path as one geometry in the clipped group's user space, when it is a single filled, anti-aliased
+    /// path, alone or inside groups that only transform it; null otherwise (it is drawn as a mask then). Paths
+    /// inside a clip path are only ever filled, so their outline is the clip.
+    /// </summary>
+    private static CanvasGeometry? ClipGeometry(ClipDef clip)
+    {
+        if (clip.Children is not [var node]) return null;
+        var m = Matrix3x2.Identity;
+        while (node is GroupNode { Clip: null, ClipRect: null, Mask: null, Filters.Length: 0, Opacity: >= 1f,
+                   Blend: SvgBlendMode.Normal, Children: [var only] } g)
+        {
+            m = g.Transform * m;
+            node = only;
+        }
+        return node is PathNode { Fill: not null, Antialias: true } p ? p.Geometry.Transform(m * clip.Transform) : null;
+    }
+
+    /// <summary>
+    /// Sets the <see cref="Node.Bounds"/> of the images and groups in <paramref name="nodes"/> and under them
+    /// (paths have theirs) and returns their union, in the nodes' parent's user space; Rect.Empty for none.
+    /// </summary>
+    private static Rect UnionBounds(Node[] nodes)
+    {
+        var union = Rect.Empty;
+        foreach (var n in nodes)
+        {
+            if (n is GroupNode g) g.Bounds = GroupBounds(g);
+            else if (n is ImageNode img)
+                img.Bounds = img.Data.Bitmap is { } b ? new Rect(0, 0, b.SizeInPixels.Width, b.SizeInPixels.Height) : Rect.Empty;
+            if (!n.Bounds.IsEmpty) union.Union(n.Bounds);
+        }
+        return union;
+    }
+
+    /// <summary>
+    /// What a group can paint, in its parent's user space: its children, or for a filtered group its filter
+    /// regions, cut to its clips and mask region.
+    /// </summary>
+    private static Rect GroupBounds(GroupNode g)
+    {
+        var r = UnionBounds(g.Children);
+        if (g.Filters.Length > 0)
+        {
+            // A filter can paint anywhere in its region (a flood), and only there.
+            r = Rect.Empty;
+            foreach (var f in g.Filters) r.Union(f.Region);
+        }
+        if (g.ClipRect is { } clipRect) r.Intersect(clipRect);
+        for (var c = g.Clip; c?.Geometry != null; c = c.Nested) r.Intersect(c.GeometryBounds);
+        if (g.Mask != null) r.Intersect(g.Mask.Rect);
+        g.LayerBounds = r;
+        return r.IsEmpty ? Rect.Empty : TransformRect(r, g.Transform);
     }
 
     /// <summary>SVG's 4×5 row-major colour matrix (out = M·[r g b a 1]) as Direct2D's row-vector 5×4.</summary>
