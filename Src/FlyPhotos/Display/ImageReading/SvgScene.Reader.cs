@@ -94,11 +94,12 @@ internal sealed partial class SvgScene
     }
 
     /// <summary>
-    /// Builds a scene from svg_build_scene's stream (status byte already stripped) and decodes its embedded
+    /// Builds a scene from svg_build_scene's stream (status byte already stripped), returned as the caller's
+    /// <see cref="Lease"/> on it, and decodes its embedded
     /// raster images. An image that fails to decode is left out (as resvg does). If the build throws, every
     /// device resource created so far is disposed before the exception goes on.
     /// </summary>
-    public static async Task<SvgScene> LoadAsync(ICanvasResourceCreator rc, byte[] stream)
+    public static async Task<Lease> LoadAsync(ICanvasResourceCreator rc, byte[] stream)
     {
         var r = new Reader(stream, rc);
         Task<CanvasBitmap?[]>? decoding = null;
@@ -128,7 +129,7 @@ internal sealed partial class SvgScene
             decoding = null;
             for (var i = 0; i < bitmaps.Length; i++)
                 if (bitmaps[i] is { } bmp) r.Images[i].Bitmap = r.Track(bmp);
-            return new SvgScene(w, h, root, r.Resources, rc.Device);
+            return new Lease(new SvgScene(w, h, root, r.Resources, rc.Device));
         }
         catch
         {

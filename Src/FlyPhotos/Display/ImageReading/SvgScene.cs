@@ -19,8 +19,9 @@ namespace FlyPhotos.Display.ImageReading;
 /// <remarks>
 /// Split across partial files: this one is the public surface; SvgScene.Model.cs the wire tags and scene
 /// model, SvgScene.Reader.cs the stream parser, SvgScene.NodeDrawer.cs drawing, SvgScene.Filters.cs filters.
+/// The scene is owned through <see cref="Lease"/>s only; the device resources go with the last one.
 /// </remarks>
-internal sealed partial class SvgScene : IDisposable
+internal sealed partial class SvgScene
 {
     /// <summary>The SVG's width in user units (usvg's resolved canvas size).</summary>
     public float Width { get; }
@@ -46,22 +47,29 @@ internal sealed partial class SvgScene : IDisposable
     }
 
     /// <summary>
-    /// Owners of the scene: whoever loaded it (passed on to the display item as a <see cref="Lease"/>), plus each
-    /// renderer or rasterize call using it (see <see cref="TryAcquire"/>). The HQ cache disposes its item on the
-    /// UI thread when the photo leaves the window, while the renderer may still be drawing it on the W2D thread
-    /// until the next photo is installed.
+    /// The number of live <see cref="Lease"/>s: the loader's (handed on to the display item), plus each renderer
+    /// or rasterize call using the scene (see <see cref="TryAcquire"/>). The HQ cache disposes its item on the UI
+    /// thread when the photo leaves the window, while the renderer may still be drawing it on the W2D thread until
+    /// the next photo is installed.
     /// </summary>
     private int _owners = 1;
 
-    /// <summary>One owner's hold on the scene; disposing it drops that ownership, once however often it is called.</summary>
+    /// <summary>
+    /// One owner's hold on the scene. Disposing it drops that ownership, once however often it is called; the last
+    /// one releases the device resources. No <see cref="Painter"/> may be stepped after its owner lets go: it draws
+    /// with those geometries, brushes and bitmaps.
+    /// </summary>
     public sealed class Lease : IDisposable
     {
-        private SvgScene? _scene;
+        private SvgScene? _held;
 
-        /// <summary>Takes over an ownership already counted: the loader's, for the display item.</summary>
-        internal Lease(SvgScene scene) => _scene = scene;
+        /// <summary>The scene this lease holds (still set after Dispose; don't draw it then).</summary>
+        public SvgScene Scene { get; }
 
-        public void Dispose() => Interlocked.Exchange(ref _scene, null)?.Dispose();
+        /// <summary>Takes an ownership already counted in <see cref="_owners"/>.</summary>
+        internal Lease(SvgScene scene) => _held = Scene = scene;
+
+        public void Dispose() => Interlocked.Exchange(ref _held, null)?.Release();
     }
 
     /// <summary>Adds an owner, so the scene outlives the display item's Dispose; null if it is already released.</summary>
@@ -72,16 +80,43 @@ internal sealed partial class SvgScene : IDisposable
         return null;
     }
 
-    /// <summary>
-    /// Drops one owner (the loader's, unless a <see cref="Lease"/> took it over); the last one releases the
-    /// device resources. No <see cref="Painter"/> may be stepped after its owner lets go: it draws with these
-    /// geometries, brushes and bitmaps.
-    /// </summary>
-    public void Dispose()
+    /// <summary>Drops one owner; the last one releases the device resources.</summary>
+    private void Release()
     {
         if (Interlocked.Decrement(ref _owners) != 0) return;
         foreach (var r in _resources) r.Dispose();
         _resources.Clear();
+    }
+
+    /// <summary>
+    /// The pixel size of the scene fitted to <paramref name="maxDimension"/> on its longer side, and the scale
+    /// (pixels per user unit) that fits it.
+    /// </summary>
+    public (int Width, int Height, float Scale) FitTo(int maxDimension)
+    {
+        var scale = maxDimension / Math.Max(Width, Height);
+        return (Math.Max(1, (int)Math.Round(Width * scale)), Math.Max(1, (int)Math.Round(Height * scale)), scale);
+    }
+
+    /// <summary>
+    /// Draws the whole scene, in one go, into a new bitmap fitted to <paramref name="maxDimension"/> (owned by the
+    /// caller), resampling embedded images with <paramref name="imageQuality"/>. The caller must hold a lease.
+    /// </summary>
+    public CanvasRenderTarget Rasterize(int maxDimension, CanvasImageInterpolation imageQuality)
+    {
+        var (w, h, scale) = FitTo(maxDimension);
+        var rt = new CanvasRenderTarget(Device, w, h, 96f);
+        try
+        {
+            using var painter = new Painter(this, rt, Matrix3x2.CreateScale(scale), imageQuality);
+            painter.Finish();
+            return rt;
+        }
+        catch
+        {
+            rt.Dispose();
+            throw;
+        }
     }
 
     /// <summary>

@@ -41,7 +41,7 @@ internal static class PhotoClipboard
             dataPackage.SetStorageItems((List<IStorageItem>)[sourceFile]);
 
             // 2. IN-MEMORY BITMAP (for paste-as-image targets). A GPU SVG has no bitmap; draw one just for this.
-            var svgBitmap = level == DisplayLevel.Hq && photo.Hq is SvgHqDisplayItem svg ? svg.Rasterize() : null;
+            var svgBitmap = level == DisplayLevel.Hq && photo.Hq is SvgHqDisplayItem svg ? TryRasterize(svg) : null;
             try
             {
                 var canvasBitmap = svgBitmap ?? level switch
@@ -67,6 +67,20 @@ internal static class PhotoClipboard
         catch (Exception ex)
         {
             Logger.Error(ex, "Failed to copy file to clipboard.");
+        }
+    }
+
+    /// <summary>The SVG drawn into a bitmap for the clipboard; null if that fails, so the file reference is still copied.</summary>
+    private static CanvasBitmap? TryRasterize(SvgHqDisplayItem svg)
+    {
+        try
+        {
+            return svg.Rasterize();
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "SVG GPU rasterize for the clipboard failed");
+            return null;
         }
     }
 

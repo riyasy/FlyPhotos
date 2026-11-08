@@ -1,6 +1,5 @@
 ﻿#nullable enable
 using System;
-using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Graphics.DirectX;
@@ -28,9 +27,9 @@ internal static partial class ResvgWrap
     /// </summary>
     public static async Task<(bool, PreviewDisplayItem)> GetResized(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
-        var (scene, bmp) = await LoadScene(ctrl, inputPath, PreviewMaxDimension);
-        if (scene != null)
-            using (scene) bmp = Rasterize(scene, PreviewMaxDimension) ?? RenderSvg(ctrl, inputPath, PreviewMaxDimension);
+        var (lease, bmp) = await LoadScene(ctrl, inputPath, PreviewMaxDimension);
+        if (lease != null)
+            using (lease) bmp = RasterizeOrRender(ctrl, lease.Scene, inputPath);
         if (bmp == null) return (false, PreviewDisplayItem.Empty());
         var (width, height) = ((int)bmp.SizeInPixels.Width, (int)bmp.SizeInPixels.Height);
 
@@ -52,23 +51,23 @@ internal static partial class ResvgWrap
     public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         // GPU path: the scene is kept and drawn as vectors by the renderer; nothing is drawn here.
-        var (scene, bmp) = await LoadScene(ctrl, inputPath, HqMaxDimension);
-        if (scene != null)
+        var (lease, bmp) = await LoadScene(ctrl, inputPath, HqMaxDimension);
+        if (lease != null)
         {
-            var (w, h, _) = RasterSize(scene, HqMaxDimension);
-            return (true, new SvgHqDisplayItem(Origin.Disk, scene, w, h));
+            var (w, h, _) = lease.Scene.FitTo(HqMaxDimension);
+            return (true, new SvgHqDisplayItem(Origin.Disk, lease, w, h));
         }
         if (bmp == null) return (false, HqDisplayItem.Empty());
         return (true, new StaticHqDisplayItem(bmp, Origin.Disk));
     }
 
     /// <summary>
-    /// Reads and parses the SVG once. Returns a GPU scene, or, when the file uses something the GPU path can't
-    /// draw yet, resvg's raster fitted to <paramref name="maxDimension"/> from the same parse. If building the
-    /// scene throws, resvg renders the file instead (a second read, but rare). Both null if the file can't be
-    /// read or parsed (resvg would fail on the same parse).
+    /// Reads and parses the SVG once. Returns a lease on a GPU scene (owned by the caller), or, when the file uses
+    /// something the GPU path can't draw yet, resvg's raster fitted to <paramref name="maxDimension"/> from the
+    /// same parse. If building the scene throws, resvg renders the file instead (a second read, but rare). Both
+    /// null if the file can't be read or parsed (resvg would fail on the same parse).
     /// </summary>
-    private static async Task<(SvgScene? Scene, CanvasBitmap? Bitmap)> LoadScene(
+    private static async Task<(SvgScene.Lease? Scene, CanvasBitmap? Bitmap)> LoadScene(
         ICanvasResourceCreatorWithDpi ctrl, string inputPath, int maxDimension)
     {
         var (stream, raster) = BuildSceneStream(ctrl, inputPath, maxDimension);
@@ -114,34 +113,17 @@ internal static partial class ResvgWrap
         }
     }
 
-    /// <summary>
-    /// The pixel size of <paramref name="scene"/> fitted to <paramref name="maxDimension"/> on its longer side,
-    /// and the scale (pixels per user unit) that fits it.
-    /// </summary>
-    private static (int Width, int Height, float Scale) RasterSize(SvgScene scene, int maxDimension)
+    /// <summary>The preview bitmap: the scene drawn on the GPU at 800 px, or resvg's if that throws.</summary>
+    private static CanvasBitmap? RasterizeOrRender(ICanvasResourceCreatorWithDpi ctrl, SvgScene scene, string inputPath)
     {
-        var scale = maxDimension / Math.Max(scene.Width, scene.Height);
-        return (Math.Max(1, (int)Math.Round(scene.Width * scale)), Math.Max(1, (int)Math.Round(scene.Height * scale)), scale);
-    }
-
-    /// <summary>Draws <paramref name="scene"/> on the GPU into a bitmap whose longer side is <paramref name="maxDimension"/>.</summary>
-    public static CanvasBitmap? Rasterize(SvgScene scene, int maxDimension)
-    {
-        CanvasRenderTarget? rt = null;
         try
         {
-            var (w, h, scale) = RasterSize(scene, maxDimension);
-            rt = new CanvasRenderTarget(scene.Device, w, h, 96f);
-            using var painter = new SvgScene.Painter(scene, rt,Matrix3x2.CreateScale(scale),
-                AppConfig.Settings.ImageScalingQuality.ToCanvasInterpolation(false));
-            painter.Finish();
-            return rt;
+            return scene.Rasterize(PreviewMaxDimension, AppConfig.Settings.ImageScalingQuality.ToCanvasInterpolation(false));
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "SVG GPU rasterize failed");
-            rt?.Dispose();
-            return null;
+            Logger.Error(ex, "SVG GPU rasterize failed, using the resvg bitmap: {InputPath}", inputPath);
+            return RenderSvg(ctrl, inputPath, PreviewMaxDimension);
         }
     }
 
