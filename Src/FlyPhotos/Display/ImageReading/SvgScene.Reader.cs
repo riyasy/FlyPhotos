@@ -17,24 +17,13 @@ namespace FlyPhotos.Display.ImageReading;
 internal sealed partial class SvgScene
 {
     /// <summary>
-    /// Reads the stream svg_scene.rs writes (little-endian) and tracks every device resource it creates.
+    /// A read position in the stream svg_scene.rs writes (little-endian). On its own it reads one path's
+    /// segments (geometry is built in parallel, a cursor per path); <see cref="Reader"/> adds the scene state.
     /// </summary>
-    private sealed class Reader(byte[] buf, ICanvasResourceCreator rc, int pos = 0)
+    private class Cursor(byte[] buf, int pos)
     {
         /// <summary>Read position in <c>buf</c>.</summary>
-        private int _pos = pos;
-        /// <summary>The device the scene's resources are created on.</summary>
-        public readonly ICanvasResourceCreator Rc = rc;
-        /// <summary>Every device resource created while reading; becomes the scene's resource list.</summary>
-        public readonly List<IDisposable> Resources = [];
-        /// <summary>Image nodes, decoded after the whole stream is read.</summary>
-        public readonly List<ImageNode> Images = [];
-        /// <summary>Paths whose geometry is still to be built, with the stream position of their segments.</summary>
-        public readonly List<(PathNode Node, int Pos, bool EvenOdd)> PendingGeometry = [];
-        /// <summary>One paint per solid colour: maps reuse a few colours across tens of thousands of paths.</summary>
-        public readonly Dictionary<Color, Paint> SolidPaints = [];
-        /// <summary>One stroke style per distinct cap, join, miter limit and dash pattern (in stroke widths).</summary>
-        public readonly Dictionary<(CanvasCapStyle, CanvasLineJoin, float, string), CanvasStrokeStyle> StrokeStyles = [];
+        protected int _pos = pos;
 
         /// <summary>One byte.</summary>
         public byte U8() => buf[_pos++];
@@ -67,6 +56,23 @@ internal sealed partial class SvgScene
         }
         /// <summary><paramref name="n"/> f32s.</summary>
         public float[] Floats(int n) { var a = new float[n]; for (var i = 0; i < n; i++) a[i] = F32(); return a; }
+    }
+
+    /// <summary>Reads the whole stream and tracks every device resource it creates.</summary>
+    private sealed class Reader(byte[] buf, ICanvasResourceCreator rc) : Cursor(buf, 0)
+    {
+        /// <summary>The device the scene's resources are created on.</summary>
+        public readonly ICanvasResourceCreator Rc = rc;
+        /// <summary>Every device resource created while reading; becomes the scene's resource list.</summary>
+        public readonly List<IDisposable> Resources = [];
+        /// <summary>Image nodes, decoded after the whole stream is read.</summary>
+        public readonly List<ImageNode> Images = [];
+        /// <summary>Paths whose geometry is still to be built, with the stream position of their segments.</summary>
+        public readonly List<(PathNode Node, int Pos, bool EvenOdd)> PendingGeometry = [];
+        /// <summary>One paint per solid colour: maps reuse a few colours across tens of thousands of paths.</summary>
+        public readonly Dictionary<Color, Paint> SolidPaints = [];
+        /// <summary>One stroke style per distinct cap, join, miter limit and dash pattern (in stroke widths).</summary>
+        public readonly Dictionary<(CanvasCapStyle, CanvasLineJoin, float, string), CanvasStrokeStyle> StrokeStyles = [];
 
         /// <summary>
         /// Notes where <paramref name="node"/>'s segments start and skips past them; <see cref="LoadAsync"/>
@@ -110,7 +116,7 @@ internal sealed partial class SvgScene
         Parallel.For(0, pending.Count, i =>
         {
             var (node, pos, evenOdd) = pending[i];
-            node.Geometry = ReadGeometry(new Reader(stream, rc, pos), evenOdd);
+            node.Geometry = ReadGeometry(new Cursor(stream, pos), rc, evenOdd);
             // Here, not on first draw: painters on two threads (renderer, clipboard) may share the scene.
             node.Bounds = UserBounds(node);
         });
@@ -240,9 +246,9 @@ internal sealed partial class SvgScene
     }
 
     /// <summary>Reads a path's segments straight into a geometry.</summary>
-    private static CanvasGeometry ReadGeometry(Reader r, bool evenOdd)
+    private static CanvasGeometry ReadGeometry(Cursor r, ICanvasResourceCreator rc, bool evenOdd)
     {
-        using var pb = new CanvasPathBuilder(r.Rc);
+        using var pb = new CanvasPathBuilder(rc);
         pb.SetFilledRegionDetermination(evenOdd ? CanvasFilledRegionDetermination.Alternate : CanvasFilledRegionDetermination.Winding);
         var open = false;
         Vector2 start = default, last = default;
