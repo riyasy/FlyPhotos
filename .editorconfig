@@ -1,0 +1,17 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+
+# Windows PowerShell 5.1 reads BOM-less scripts as ANSI, breaking any non-ASCII text.
+[*.ps1]
+charset = utf-8-bom
+
+# Localized resources stay UTF-8 with BOM.
+[*.resw]
+charset = utf-8-bom
+
+# git apply / vcpkg patch need LF.
+[*.{diff,patch}]
+end_of_line = lf

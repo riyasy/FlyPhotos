@@ -1,3 +1,6 @@
+# Store text files with LF in the repo regardless of each clone's core.autocrlf.
+* text=auto
+
 # Patch and diff files must use LF line endings.
 # git apply / vcpkg's patch tool both require LF -- CRLF causes "corrupt patch" errors.
 *.diff  text eol=lf

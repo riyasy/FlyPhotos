@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using Windows.Foundation;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Size = FlyPhotos.Core.Model.Size;

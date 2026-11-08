@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Utils;

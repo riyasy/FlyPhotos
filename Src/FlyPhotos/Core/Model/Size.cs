@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 namespace FlyPhotos.Core.Model;
 
 internal class Size(double w, double h)
