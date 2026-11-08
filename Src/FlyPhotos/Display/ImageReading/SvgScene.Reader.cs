@@ -95,40 +95,69 @@ internal sealed partial class SvgScene
 
     /// <summary>
     /// Builds a scene from svg_build_scene's stream (status byte already stripped) and decodes its embedded
-    /// raster images.
+    /// raster images. An image that fails to decode is left out (as resvg does). If the build throws, every
+    /// device resource created so far is disposed before the exception goes on.
     /// </summary>
     public static async Task<SvgScene> LoadAsync(ICanvasResourceCreator rc, byte[] stream)
     {
         var r = new Reader(stream, rc);
-        float w = r.F32(), h = r.F32();
-        var root = ReadChildren(r);
-
-        // Decode the embedded images concurrently while the geometries are built, then drop the encoded bytes.
-        var decoding = Task.WhenAll(r.Images.Select(async img =>
+        Task<CanvasBitmap?[]>? decoding = null;
+        var geometryTracked = false;
+        try
         {
-            using var ms = new MemoryStream(img.Data!, writable: false);
-            return await CanvasBitmap.LoadAsync(rc, ms.AsRandomAccessStream(), 96f);
-        }));
+            float w = r.F32(), h = r.F32();
+            var root = ReadChildren(r);
 
-        // Building a geometry is one Win2D call per segment, the bulk of loading a big map; paths are
-        // independent and Win2D's Direct2D factory is multithreaded, so they are built in parallel.
-        var pending = r.PendingGeometry;
-        Parallel.For(0, pending.Count, i =>
-        {
-            var (node, pos, evenOdd) = pending[i];
-            node.Geometry = ReadGeometry(new Cursor(stream, pos), rc, evenOdd);
-            // Here, not on first draw: painters on two threads (renderer, clipboard) may share the scene.
-            node.Bounds = UserBounds(node);
-        });
-        foreach (var p in pending) r.Track(p.Node.Geometry);
+            // Decode the embedded images concurrently while the geometries are built, then drop the encoded bytes.
+            decoding = Task.WhenAll(r.Images.Select(img => DecodeImage(rc, img.Data!)));
 
-        var bitmaps = await decoding;
-        for (var i = 0; i < bitmaps.Length; i++)
-        {
-            r.Images[i].Bitmap = r.Track(bitmaps[i]);
-            r.Images[i].Data = null;
+            // Building a geometry is one Win2D call per segment, the bulk of loading a big map; paths are
+            // independent and Win2D's Direct2D factory is multithreaded, so they are built in parallel.
+            var pending = r.PendingGeometry;
+            Parallel.For(0, pending.Count, i =>
+            {
+                var (node, pos, evenOdd) = pending[i];
+                node.Geometry = ReadGeometry(new Cursor(stream, pos), rc, evenOdd);
+                // Here, not on first draw: painters on two threads (renderer, clipboard) may share the scene.
+                node.Bounds = UserBounds(node);
+            });
+            foreach (var p in pending) r.Track(p.Node.Geometry);
+            geometryTracked = true;
+
+            var bitmaps = await decoding;
+            decoding = null;
+            for (var i = 0; i < bitmaps.Length; i++)
+            {
+                if (bitmaps[i] is { } bmp) r.Images[i].Bitmap = r.Track(bmp);
+                r.Images[i].Data = null;
+            }
+            return new SvgScene(w, h, root, r.Resources, rc.Device);
         }
-        return new SvgScene(w, h, root, r.Resources, rc.Device);
+        catch
+        {
+            // Geometries are tracked only once all are built, so those built before a failure are loose.
+            if (!geometryTracked)
+                foreach (var p in r.PendingGeometry) p.Node.Geometry?.Dispose();
+            foreach (var res in r.Resources) res.Dispose();
+            // DecodeImage doesn't throw, so this only waits for the decodes still running.
+            if (decoding != null)
+                foreach (var bmp in await decoding) bmp?.Dispose();
+            throw;
+        }
+    }
+
+    /// <summary>An embedded image decoded at 96 DPI (DIPs = pixels); null if it can't be decoded.</summary>
+    private static async Task<CanvasBitmap?> DecodeImage(ICanvasResourceCreator rc, byte[] data)
+    {
+        try
+        {
+            using var ms = new MemoryStream(data, writable: false);
+            return await CanvasBitmap.LoadAsync(rc, ms.AsRandomAccessStream(), 96f);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 
     /// <summary>Reads nodes until <see cref="NodeTag.End"/>.</summary>
