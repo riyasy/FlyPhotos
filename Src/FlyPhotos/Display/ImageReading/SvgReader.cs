@@ -12,7 +12,11 @@ using NLog;
 
 namespace FlyPhotos.Display.ImageReading;
 
-internal static partial class ResvgWrap
+/// <summary>
+/// Reads SVGs for the decoder chain: a GPU scene (<see cref="SvgScene"/>, drawn as vectors) when the file can
+/// be drawn that way, otherwise resvg's CPU raster from the same parse (both from fly_rust_bridge).
+/// </summary>
+internal static partial class SvgReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

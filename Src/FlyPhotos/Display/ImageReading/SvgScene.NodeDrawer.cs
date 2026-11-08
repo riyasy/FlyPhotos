@@ -58,7 +58,7 @@ internal sealed partial class SvgScene
             // is blended onto what came before. Every piece is recorded in this session's space, then drawn
             // untransformed.
             var items = new List<(Node Node, Matrix3x2 Parent)>();
-            Flatten(nodes, ds.Transform, items);
+            FlattenBackdrop(nodes, ds.Transform, items);
             var t = ds.Transform;
             ICanvasImage? backdrop = null;
             var run = new List<(Node, Matrix3x2)>();
@@ -82,13 +82,14 @@ internal sealed partial class SvgScene
 
         /// <summary>
         /// Appends <paramref name="nodes"/> to <paramref name="items"/> with their parent transform, opening up
-        /// pass-through groups that contain a blend so their children share the enclosing backdrop.
+        /// pass-through groups that contain a blend so their children share the enclosing backdrop. (Unlike the
+        /// painter's flattening, which opens every pass-through group.)
         /// </summary>
-        private static void Flatten(Node[] nodes, Matrix3x2 parent, List<(Node, Matrix3x2)> items)
+        private static void FlattenBackdrop(Node[] nodes, Matrix3x2 parent, List<(Node, Matrix3x2)> items)
         {
             foreach (var n in nodes)
             {
-                if (n is GroupNode { IsPassThrough: true, HasBlend: true } g) Flatten(g.Children, g.Transform * parent, items);
+                if (n is GroupNode { IsPassThrough: true, HasBlend: true } g) FlattenBackdrop(g.Children, g.Transform * parent, items);
                 else items.Add((n, parent));
             }
         }
