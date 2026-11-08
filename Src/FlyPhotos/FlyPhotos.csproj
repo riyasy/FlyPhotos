@@ -39,6 +39,13 @@
 
 	</PropertyGroup>
 
+	<!-- NativeAOT links with MSVC link.exe, which stamps the build time into the PE header
+	     and debug directory. /Brepro replaces those with a content hash, so FlyPhotos.exe is
+	     byte-identical across builds of the same code. -->
+	<ItemGroup>
+		<LinkerArg Include="/Brepro" />
+	</ItemGroup>
+
 	<Target Name="CopyYourFolderAfterPublish" AfterTargets="Publish">
 		<Exec Command="XCOPY $(ProjectDir)Assets\*.* $(PublishDir)\Assets\ /S /Y" />
 	</Target>
