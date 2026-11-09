@@ -222,6 +222,11 @@ internal sealed class PrefetchCache : IDisposable
 
                 if (!_previewTier.Queue.TryPop(out var item)) continue;
 
+                // Claimed before the wait for a slot: a window move during the wait would otherwise see the key
+                // neither queued nor in flight, queue it again, and two loads would race for the same photo.
+                // Every exit of the load releases the claim. A key already claimed is being loaded; skip it.
+                if (!_previewTier.InFlight.TryAdd(item, 0)) continue;
+
                 _previewThrottler.Wait(token);
 
                 _ = Task.Run(() => LoadPreviewAsync(item), token);
@@ -249,10 +254,13 @@ internal sealed class PrefetchCache : IDisposable
 
                 if (!_hqTier.Queue.TryPop(out var item)) continue;
 
+                // Claimed here, before the wait for a slot, not inside the load: a window move during the wait
+                // must not queue the key again (two loads would race for the same photo), and the next pass
+                // already sees the centre as loading. A key already claimed is being loaded; skip it.
+                if (!_hqTier.InFlight.TryAdd(item, 0)) continue;
+
                 _hqThrottler.Wait(token);
 
-                // Marked here, not inside the load, so the next pass already sees the centre as loading.
-                _hqTier.InFlight[item] = 0;
                 _ = Task.Run(() => LoadHqAsync(item), token);
             }
         }
@@ -291,12 +299,12 @@ internal sealed class PrefetchCache : IDisposable
     // Every loader holds a use on its photo (Photo.TryBeginUse) for as long as it touches the photo's bitmaps,
     // so a photo that leaves the list mid-load is disposed by whichever of the owner and the load finishes last.
 
+    // The preview worker marks the key in flight before starting this; every exit below clears it.
     private async Task LoadPreviewAsync(int key)
     {
         Photo? photo = null;
         try
         {
-            _previewTier.InFlight[key] = 0;
             if (_getPhoto(key) is not { } p || !p.TryBeginUse())
             {
                 _previewTier.InFlight.Remove(key, out _);
@@ -310,6 +318,13 @@ internal sealed class PrefetchCache : IDisposable
             if (photo.Preview?.Origin == Origin.Disk) _diskCacheQueue.Push(key);
             PreviewReady?.Invoke(key);
             FireProgress();
+        }
+        catch (Exception ex)
+        {
+            // A key left in flight would never reload. Released here, not in finally: an exit above may have
+            // released it already and the worker claimed it again for a new load, whose claim must survive.
+            _previewTier.InFlight.Remove(key, out _);
+            Logger.Error(ex, $"Preview load failed for key {key}");
         }
         finally
         {
