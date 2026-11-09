@@ -183,16 +183,17 @@ internal partial class PhotoDisplayController
     private void UpgradeImageIfNeeded(int key, Photo photo, DisplayLevel fromDisplayState,
         DisplayLevel toDisplayState)
     {
-        if (_photoSessionState.CurrentDisplayLevel == fromDisplayState)
-            _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
-            {
-                // Checked again on the UI thread, where navigation and list changes run: between the check
-                // above and now the user may have moved on, and the photo may have left the list and been
-                // retired (its bitmaps disposed). Installing it then would draw a disposed bitmap.
-                if (_photoSessionState.CurrentPhotoKey != key || !ReferenceEquals(_photoList.GetPhoto(key), photo))
-                    return;
-                _ = SetSourceAsync(photo, toDisplayState);
-            });
+        _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
+        {
+            // Checked on the UI thread, where navigation, list changes and the display level are written:
+            // since the load finished the user may have moved on, the photo may have left the list and been
+            // retired (its bitmaps disposed), or the photo may already show a better level (navigating back
+            // installs HQ directly), which this upgrade must not step down.
+            if (_photoSessionState.CurrentPhotoKey != key || !ReferenceEquals(_photoList.GetPhoto(key), photo) ||
+                _photoSessionState.CurrentDisplayLevel != fromDisplayState)
+                return;
+            _ = SetSourceAsync(photo, toDisplayState);
+        });
     }
 
     private async Task SetSourceAsync(Photo photo, DisplayLevel displayLevel)
