@@ -61,6 +61,7 @@ internal partial class PhotoDisplayController
         _cache.PreviewReady += OnPreviewReady;
         _cache.HqReady += OnHqReady;
         _cache.CacheStatusChanged += status => CacheStatusChanged?.Invoke(status);
+        _cache.RunAfterQueuedRenderWork = _canvasController.RunAfterQueuedRenderWork;
 
         _thumbNailController.SetPhotoProvider(_photoList);
         _thumbNailController.SetPreviewLoadedProbe(_cache.IsPreviewLoaded);

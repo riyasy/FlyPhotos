@@ -93,6 +93,13 @@ internal sealed class PrefetchCache : IDisposable
     /// <summary>Fired with the formatted "left/total &lt; Cache &gt; right/total" status string.</summary>
     public event Action<string>? CacheStatusChanged;
 
+    /// <summary>
+    /// Runs an action once the canvas has applied the renderer swaps already queued. A photo leaving the window
+    /// may still be on screen until then (SetSource only queues its swap), so its bitmaps are disposed through
+    /// this. Wired by the controller; when unset they are disposed at once.
+    /// </summary>
+    public Action<Action>? RunAfterQueuedRenderWork { get; set; }
+
     public PrefetchCache(Func<int, Photo?> getPhoto,
                          ICanvasResourceCreatorWithDpi device,
                          Func<bool> isBursting)
@@ -156,8 +163,8 @@ internal sealed class PrefetchCache : IDisposable
 
         var desiredHqKeys      = FindNeighborKeys(centrePosition, AppConfig.Settings.CacheSizeOneSideHqImages);
         var desiredPreviewKeys = FindNeighborKeys(centrePosition, AppConfig.Settings.CacheSizeOneSidePreviews);
-        SyncCacheTier(desiredHqKeys,      _hqTier,      p => p.DisposeHqOnly());
-        SyncCacheTier(desiredPreviewKeys, _previewTier, p => p.DisposePreviewOnly());
+        SyncCacheTier(desiredHqKeys,      _hqTier,      p => DisposeAfterQueuedRenderWork(p.DetachHq()));
+        SyncCacheTier(desiredPreviewKeys, _previewTier, p => DisposeAfterQueuedRenderWork(p.DetachPreview()));
 
         FireProgress();
         _previewTier.Signal.Set();
@@ -192,7 +199,8 @@ internal sealed class PrefetchCache : IDisposable
         foreach (int key in _hqTier.Done.Keys)
             if (_getPhoto(key) is { IsRaw: true } photo)
             {
-                photo.DisposeHqOnly();
+                // The controller has queued the on-screen photo's step-down; dispose after it.
+                DisposeAfterQueuedRenderWork(photo.DetachHq());
                 _hqTier.Done.TryRemove(key, out _);
             }
 
@@ -438,6 +446,14 @@ internal sealed class PrefetchCache : IDisposable
     // -------------------------------------------------------------------------
     // Window maintenance
     // -------------------------------------------------------------------------
+
+    // Disposes the item it is given, never "the photo's current item": the photo may reload before this runs.
+    private void DisposeAfterQueuedRenderWork(DisplayItem? item)
+    {
+        if (item == null) return;
+        if (RunAfterQueuedRenderWork is { } run) run(item.Dispose);
+        else item.Dispose();
+    }
 
     private void SyncCacheTier(List<int> desiredKeys, PhotoCacheTier tier, Action<Photo> disposeAction)
     {
