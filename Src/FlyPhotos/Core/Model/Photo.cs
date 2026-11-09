@@ -197,6 +197,8 @@ internal partial class Photo : IDisposable
     {
         if (Hq is TiledHqDisplayItem tiled)
             return (tiled.Pyramid.FullWidth, tiled.Pyramid.FullHeight);
+        if (Hq is SvgHqDisplayItem svg)
+            return (svg.Width, svg.Height);
         if (Hq?.Bitmap != null)
         {
             return (Hq.Bitmap.SizeInPixels.Width, Hq.Bitmap.SizeInPixels.Height);

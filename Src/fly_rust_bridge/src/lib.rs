@@ -11,6 +11,8 @@ use std::sync::{Arc, LazyLock};
 use resvg::{usvg, tiny_skia};
 use usvg::fontdb;
 
+mod svg_scene;
+
 // FFI bridge to C# (via P/Invoke). All exported functions share the same memory
 // contract: Rust allocates via Box<[u8]>, caller frees via free_rust_buffer.
 // Panics are caught at the boundary and returned as null rather than unwinding into C#.
@@ -19,14 +21,32 @@ use usvg::fontdb;
 // on the C# side. The rawler functions return opaque pixels (straight == premultiplied);
 // resvg_render_svg returns premultiplied alpha, which CanvasBitmap.CreateFromBytes expects.
 
-// Font database is initialised once on first SVG render and reused for all
-// subsequent calls. Loading system fonts on Windows can take tens to hundreds of
+// Font database is initialised once, by the first SVG that has text (see parse_svg_data), and reused
+// for all subsequent calls. Loading system fonts on Windows can take tens to hundreds of
 // milliseconds, making per-call initialisation unacceptable.
 static FONT_DB: LazyLock<Arc<fontdb::Database>> = LazyLock::new(|| {
     let mut db = fontdb::Database::new();
     db.load_system_fonts();
+    add_font_substitutes(&mut db);
     Arc::new(db)
 });
+
+/// Windows' FontSubstitutes (HKLM\...\Windows NT\CurrentVersion\FontSubstitutes) that matter for SVG:
+/// Chrome honours them, so "Helvetica" draws in Arial there, while fontdb alone falls through to the
+/// serif default. Registers each target face again under the alias name, so every lookup sees it.
+fn add_font_substitutes(db: &mut fontdb::Database) {
+    let aliases: Vec<fontdb::FaceInfo> = db.faces().filter_map(|f| {
+        let alias = match f.families.first()?.0.as_str() {
+            "Arial" => "Helvetica",
+            "Times New Roman" => "Times",
+            _ => return None,
+        };
+        let mut face = f.clone();
+        face.families = vec![(alias.to_string(), fontdb::Language::English_UnitedStates)];
+        Some(face)
+    }).collect();
+    for face in aliases { db.push_face_info(face); }
+}
 
 /// Borrows a C string as a &str for the duration of the calling scope.
 /// SAFETY: Caller must ensure `ptr` remains valid for 'a. Lifetime is unconstrained
@@ -310,70 +330,311 @@ pub extern "C" fn resvg_render_svg(
     height: *mut c_int,
 ) -> *mut u8 {
     let result = catch_unwind(|| {
-        let process = || -> Option<*mut u8> {
-            // 1. Decode the path — reuses the same helper as the rawler functions.
-            let path = ptr_to_str(path_ptr)?;
-
-            let svg_data = std::fs::read(path).ok()?;
-
-            // 2. Configure usvg with the global font database (initialised once on
-            //    first call via LazyLock — avoids a multi-hundred-ms hit per render).
-            let mut options = usvg::Options::default();
-            options.fontdb = FONT_DB.clone();
-            options.font_family = "Arial".to_string();
-
-            // 3. Parse the SVG into a usvg::Tree.
-            let tree = usvg::Tree::from_data(&svg_data, &options).ok()?;
-
-            let svg_width = tree.size().width();
-            let svg_height = tree.size().height();
-
-            // 4. Aspect-ratio-preserving scale: fit the longer axis to max_dimension.
-            let (w, h) = if svg_width >= svg_height {
-                (max_dimension as f32, max_dimension as f32 * (svg_height / svg_width))
-            } else {
-                (max_dimension as f32 * (svg_width / svg_height), max_dimension as f32)
-            };
-
-            let (rw, rh) = (w.round() as u32, h.round() as u32);
-
-            // Guard: a zero-area pixmap would produce an empty but non-null buffer
-            // that the caller cannot usefully free via free_rust_buffer(ptr, 0).
-            if rw == 0 || rh == 0 {
-                return None;
-            }
-
-            // 5. Allocate the pixel buffer.
-            let mut pixmap = tiny_skia::Pixmap::new(rw, rh)?;
-
-            // 6. Render. resvg::render fills pixmap in-place with premultiplied RGBA.
-            resvg::render(
-                &tree,
-                tiny_skia::Transform::from_scale(
-                    rw as f32 / svg_width,
-                    rh as f32 / svg_height,
-                ),
-                &mut pixmap.as_mut(),
-            );
-
-            // 7. Keep tiny_skia's premultiplied RGBA as-is: CanvasBitmap.CreateFromBytes
-            //    on the C# side assumes premultiplied alpha by default. Unpremultiplying
-            //    here made every semi-transparent (anti-aliased) edge pixel too bright.
-            let pixels = pixmap.take();
-
-            // 8. Write out-params through safe_write_int to guard against null pointers.
-            unsafe {
-                safe_write_int(width, rw as c_int);
-                safe_write_int(height, rh as c_int);
-            }
-
-            // 9. Transfer ownership to the caller using the same Box<[u8]> contract
-            //    as every other function in this file so free_rust_buffer works correctly.
-            Some(Box::into_raw(pixels.into_boxed_slice()) as *mut u8)
-        };
-
-        process().unwrap_or(std::ptr::null_mut())
+        let tree = parse_svg(ptr_to_str(path_ptr)?)?;
+        let (rw, rh, pixels) = render_tree(&tree, max_dimension, 0, 0)?;
+        unsafe {
+            safe_write_int(width, rw as c_int);
+            safe_write_int(height, rh as c_int);
+        }
+        // Same Box<[u8]> contract as every other function here, so free_rust_buffer works.
+        Some(Box::into_raw(pixels.into_boxed_slice()) as *mut u8)
     });
+    result.ok().flatten().unwrap_or(std::ptr::null_mut())
+}
 
-    result.unwrap_or(std::ptr::null_mut())
+/// Renders `tree` with resvg, the longer axis fitted to `max_dimension` (aspect preserved). Returns the
+/// pixel size and tiny_skia's premultiplied RGBA, kept as-is: CanvasBitmap.CreateFromBytes assumes
+/// premultiplied alpha (unpremultiplying made anti-aliased edges too bright). None for a zero-area result.
+/// The pixels start `prefix` bytes into the buffer (zeroed, for the caller's header), and `reserve` more
+/// bytes of capacity are left for the caller to append, so no full-size copy is ever made.
+fn render_tree(tree: &usvg::Tree, max_dimension: c_int, prefix: usize, reserve: usize) -> Option<(u32, u32, Vec<u8>)> {
+    let (sw, sh) = (tree.size().width(), tree.size().height());
+    let m = max_dimension as f32;
+    let (w, h) = if sw >= sh { (m, m * (sh / sw)) } else { (m * (sw / sh), m) };
+    let (rw, rh) = (w.round() as u32, h.round() as u32);
+    if rw == 0 || rh == 0 { return None; }
+    let n = (rw as usize).checked_mul(rh as usize)?.checked_mul(4)?;
+    let mut buf = Vec::with_capacity(prefix + n + reserve);
+    buf.resize(prefix + n, 0);
+    let mut pixmap = tiny_skia::PixmapMut::from_bytes(&mut buf[prefix..], rw, rh)?;
+    resvg::render(tree, tiny_skia::Transform::from_scale(rw as f32 / sw, rh as f32 / sh), &mut pixmap);
+    Some((rw, rh, buf))
+}
+
+/// Parses an SVG file (see `parse_svg_data`); images it links by relative path load from its folder.
+fn parse_svg(path: &str) -> Option<usvg::Tree> {
+    let path = std::path::Path::new(path);
+    parse_svg_data(&std::fs::read(path).ok()?, path.parent().map(|p| p.to_path_buf()))
+}
+
+/// Parses SVG bytes the way both the GPU path and the resvg fallback need them: the Chrome-matching
+/// textual fixups (`preprocess`), the shared font database (loaded on first use) with its Windows substitutes, and browser
+/// defaults for text with no font set (Times New Roman, 16 px). Relative image links resolve against
+/// `resources_dir` (the SVG's folder; without one, usvg would use the process's working directory).
+/// None if usvg can't parse the file.
+fn parse_svg_data(svg_data: &[u8], resources_dir: Option<std::path::PathBuf>) -> Option<usvg::Tree> {
+    let fixed = preprocess(svg_data);
+    let svg_data = fixed.as_deref().map(str::as_bytes).unwrap_or(svg_data);
+    let mut options = usvg::Options::default();
+    options.resources_dir = resources_dir;
+    // The system fonts are loaded only when a file has text: usvg starts from an empty database, and the
+    // first font lookup swaps in the shared one. A file without text never waits for the font load.
+    static NO_FONTS: LazyLock<Arc<fontdb::Database>> = LazyLock::new(|| Arc::new(fontdb::Database::new()));
+    options.fontdb = NO_FONTS.clone();
+    let (select, fallback) = (usvg::FontResolver::default_font_selector(), usvg::FontResolver::default_fallback_selector());
+    options.font_resolver = usvg::FontResolver {
+        select_font: Box::new(move |font, db| {
+            if db.is_empty() { *db = FONT_DB.clone(); }
+            select(font, db)
+        }),
+        select_fallback: Box::new(move |c, used, db| {
+            if db.is_empty() { *db = FONT_DB.clone(); }
+            fallback(c, used, db)
+        }),
+    };
+    // Browsers render text with no font-family in Times New Roman; match them.
+    options.font_family = "Times New Roman".to_string();
+    options.font_size = 16.0;
+    usvg::Tree::from_data(svg_data, &options).ok()
+}
+
+/// Parses an SVG and serialises it as a draw-command stream for GPU replay (see svg_scene.rs).
+/// Returns a buffer whose first byte is a status: 0 = OK, followed by the stream (format version first);
+/// 1 = the file uses something the GPU path can't draw yet: followed by width (i32 LE), height (i32 LE),
+/// width*height*4 bytes of resvg's premultiplied RGBA fitted to `max_dimension` (from the same parse, so
+/// the caller needn't read the file again), then a UTF-8 reason to the end.
+/// Returns null if the file can't be read or parsed. The length is written to `len`.
+/// On non-null return, caller MUST free with `free_rust_buffer(ptr, len)`.
+#[unsafe(no_mangle)]
+pub extern "C" fn svg_build_scene(path_ptr: *const c_char, max_dimension: c_int, len: *mut c_int) -> *mut u8 {
+    let result = catch_unwind(|| {
+        let tree = parse_svg(ptr_to_str(path_ptr)?)?;
+        let out = match svg_scene::write_tree(&tree) {
+            Ok(s) => s, // already starts with the OK status byte
+            Err(reason) => {
+                // Rendered straight into the reply, after its 9-byte header.
+                let (w, h, mut s) = render_tree(&tree, max_dimension, 9, reason.len())?;
+                s[0] = 1;
+                s[1..5].copy_from_slice(&(w as i32).to_le_bytes());
+                s[5..9].copy_from_slice(&(h as i32).to_le_bytes());
+                s.extend_from_slice(reason.as_bytes());
+                s
+            }
+        };
+        // The length goes over as an i32 and comes back to free_rust_buffer: one that doesn't fit would
+        // free with the wrong size (heap corruption), so such a reply is dropped here instead.
+        if out.len() > c_int::MAX as usize { return None; }
+        unsafe { safe_write_int(len, out.len() as c_int); }
+        Some(Box::into_raw(out.into_boxed_slice()) as *mut u8)
+    });
+    result.ok().flatten().unwrap_or(std::ptr::null_mut())
+}
+
+/// Textual fixes applied before usvg parses the file, so usvg matches Chrome. Returns None when nothing
+/// needs changing (or the file isn't UTF-8 text — svgz is gzip and is left alone).
+fn preprocess(data: &[u8]) -> Option<String> {
+    let text = std::str::from_utf8(data).ok()?;
+    let ids_fixed = fix_spaced_ids(text);
+    let current = ids_fixed.as_deref().unwrap_or(text);
+    strip_non_text_xml_space(current).or(ids_fixed)
+}
+
+/// Chrome (Blink) honours `xml:space` only on text content elements (`<text>`, `<tspan>`, `<textPath>`,
+/// where it becomes CSS `white-space` and carries into their children); on `<svg>`, `<g>` and everything
+/// else it is ignored. usvg inherits it from any ancestor, so a file with `xml:space="preserve"` on the root
+/// (Illustrator, Batik) turns the source indentation inside every `<text>` into real spaces and scatters
+/// the text (`batik_mathMetal`). Removes the attribute from every element that isn't a text element.
+/// Returns None when nothing was removed. The scan only starts when "xml:space" occurs in the file.
+fn strip_non_text_xml_space(text: &str) -> Option<String> {
+    const ATTR: &str = "xml:space";
+    if !text.contains(ATTR) { return None; }
+    let mut out = String::with_capacity(text.len());
+    let mut copied = 0;
+    let mut search = 0;
+    while let Some(rel) = text[search..].find(ATTR) {
+        let at = search + rel;
+        search = at + ATTR.len();
+        // The tag the attribute sits in: the nearest '<' before it, with no '>' in between.
+        let Some(lt) = text[..at].rfind('<') else { continue };
+        if text[lt..at].contains('>') { continue; }
+        let name = text[lt + 1..].split(|c: char| c.is_whitespace() || c == '>' || c == '/').next().unwrap_or("");
+        let local = name.rsplit(':').next().unwrap_or(name);
+        if matches!(local, "text" | "tspan" | "textPath") { continue; }
+        // The attribute's extent: xml:space = "…" or '…'.
+        let after_name = &text[search..];
+        let Some(value) = after_name.trim_start().strip_prefix('=').map(str::trim_start) else { continue };
+        let Some(quote) = value.chars().next().filter(|q| *q == '"' || *q == '\'') else { continue };
+        let Some(close) = value[1..].find(quote) else { continue };
+        let end = search + (after_name.len() - value.len()) + 1 + close + 1;
+        // Drop the whitespace in front of the attribute too, but never past the tag name.
+        let start = text[..at].trim_end().len().max(lt + 1 + name.len());
+        out.push_str(&text[copied..start]);
+        copied = end;
+        search = end;
+    }
+    if copied == 0 { return None; }
+    out.push_str(&text[copied..]);
+    Some(out)
+}
+
+/// Inkscape names its stock patterns with spaces (id="lines 36") and references them as
+/// xlink:href="#lines 36". Browsers resolve that; usvg drops the reference, so the pattern
+/// paints nothing. Rewrites such ids and every `#id` reference to them with underscores.
+/// Returns None when nothing needs fixing.
+///
+/// Root cause is svgtypes' IRI parser, which stops at the first space (funciri.rs `parse_iri`); this
+/// textual workaround should go once that is fixed upstream. Its ceiling: it ignores XML structure (a
+/// matching string in text content is rewritten too), only finds ` id=` after a space, and doesn't handle
+/// an existing id that already uses the underscore form.
+fn fix_spaced_ids(text: &str) -> Option<String> {
+    let mut ids = std::collections::HashSet::new();
+    for quote in ['"', '\''] {
+        let open = format!(" id={quote}");
+        let mut rest = text;
+        while let Some(i) = rest.find(&open) {
+            rest = &rest[i + open.len()..];
+            let end = rest.find(quote)?;
+            let id = &rest[..end];
+            if id.contains(char::is_whitespace) { ids.insert(id); }
+            rest = &rest[end..];
+        }
+    }
+    if ids.is_empty() { return None; }
+
+    // Every id or reference that names a spaced id, as the byte range of the name. One scan per
+    // pattern, then one copy: rewriting the whole file per id was quadratic (1 s on a world map).
+    let mut spans = std::collections::BTreeMap::new();
+    for (pre, post) in [
+        ("id=\"", "\""), ("id='", "'"), ("\"#", "\""), ("'#", "'"),
+        ("url(#", ")"), ("url('#", "')"), ("url(\"#", "\")"), ("url(&quot;#", "&quot;)"),
+    ] {
+        for (i, _) in text.match_indices(pre) {
+            let start = i + pre.len();
+            if let Some(len) = text[start..].find(post) {
+                if ids.contains(&text[start..start + len]) { spans.insert(start, start + len); }
+            }
+        }
+    }
+    let mut out = String::with_capacity(text.len());
+    let mut copied = 0;
+    for (start, end) in spans {
+        if start < copied { continue; }
+        out.push_str(&text[copied..start]);
+        out.push_str(&text[start..end].replace(char::is_whitespace, "_"));
+        copied = end;
+    }
+    out.push_str(&text[copied..]);
+    Some(out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Inkscape's stock patterns have ids with spaces ("lines 36") that other patterns href.
+    const SPACED_ID: &str = r##"<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20">
+        <defs>
+          <pattern id="lines 36" patternUnits="userSpaceOnUse" width="4" height="4"><rect width="2" height="4"/></pattern>
+          <pattern id="p" xlink:href="#lines 36"/>
+        </defs>
+        <rect width="20" height="20" fill="url(#p)"/>
+    </svg>"##;
+
+    /// Whether any top-level path in `tree` is filled with a pattern (i.e. the pattern reference resolved).
+    fn first_path_has_pattern(tree: &usvg::Tree) -> bool {
+        tree.root().children().iter().any(|n| matches!(n, usvg::Node::Path(p)
+            if matches!(p.fill().map(|f| f.paint()), Some(usvg::Paint::Pattern(_)))))
+    }
+
+    /// "Helvetica" and "Times" resolve to the same faces as Arial and Times New Roman (Windows'
+    /// FontSubstitutes); an unrelated missing family still resolves to nothing.
+    #[test]
+    fn helvetica_is_substituted_like_windows() {
+        let query = |name| FONT_DB.query(&fontdb::Query { families: &[fontdb::Family::Name(name)], ..Default::default() })
+            .and_then(|id| FONT_DB.face(id).map(|f| f.post_script_name.clone()));
+        assert_eq!(query("Helvetica"), query("Arial"));
+        assert_eq!(query("Times"), query("Times New Roman"));
+        assert!(query("Helvetica Neue").is_none());
+    }
+
+    /// xml:space is removed from <svg> and <g> (either quote style) but kept on <text>, <tspan> and a
+    /// prefixed <svg:textPath>; a file with only text-level xml:space is left alone.
+    #[test]
+    fn xml_space_is_kept_only_on_text_elements() {
+        let src = r#"<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve"><g xml:space='preserve' id="g"><text xml:space="preserve">a<tspan xml:space="default">b</tspan></text><svg:textPath xml:space="preserve"/></g></svg>"#;
+        let out = strip_non_text_xml_space(src).unwrap();
+        assert_eq!(out, r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="g"><text xml:space="preserve">a<tspan xml:space="default">b</tspan></text><svg:textPath xml:space="preserve"/></g></svg>"#);
+        assert!(strip_non_text_xml_space(r#"<svg><text xml:space="preserve">a</text></svg>"#).is_none());
+    }
+
+    /// End to end through parse_svg_data: a root xml:space="preserve" no longer turns the text's
+    /// indentation into leading spaces (batik_mathMetal).
+    #[test]
+    fn root_xml_space_does_not_preserve_text_indentation() {
+        // Chrome ignores xml:space on <svg>: the padded text starts at x, like unpadded text.
+        let first_glyph_x = |svg: &str| {
+            let tree = parse_svg_data(svg.as_bytes(), None).unwrap();
+            tree.root().abs_bounding_box().x()
+        };
+        let padded = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="50" xml:space="preserve"><text x="10" y="30" font-family="Arial">
+            Ab</text></svg>"#;
+        let plain = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="50"><text x="10" y="30" font-family="Arial">Ab</text></svg>"#;
+        assert!((first_glyph_x(padded) - first_glyph_x(plain)).abs() < 0.01);
+    }
+
+    /// A pattern that hrefs an id with spaces still paints (inkscape_about10's hair textures).
+    #[test]
+    fn pattern_href_to_id_with_spaces_resolves() {
+        let tree = parse_svg_data(SPACED_ID.as_bytes(), None).unwrap();
+        assert!(first_path_has_pattern(&tree), "pattern fill was dropped");
+    }
+
+    /// An image linked by a relative path loads from the SVG's folder, not the working directory (the
+    /// test's is the crate folder): directly, from a subfolder, and from the parent folder.
+    #[test]
+    fn relative_image_links_resolve_against_the_svg_folder() {
+        let dir = std::env::temp_dir().join("fly_rust_bridge_relative_images").join("svgs");
+        std::fs::create_dir_all(dir.join("sub")).unwrap();
+        let image = r#"<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4" fill="red"/></svg>"#;
+        for p in [dir.join("a.svg"), dir.join("sub").join("b.svg"), dir.join("..").join("c.svg")] {
+            std::fs::write(p, image).unwrap();
+        }
+        let path = dir.join("main.svg");
+        std::fs::write(&path, r#"<svg xmlns="http://www.w3.org/2000/svg" width="12" height="4"><image href="a.svg" width="4" height="4"/><image href="sub/b.svg" x="4" width="4" height="4"/><image href="../c.svg" x="8" width="4" height="4"/></svg>"#).unwrap();
+
+        fn images(g: &usvg::Group) -> usize {
+            g.children().iter().map(|n| match n {
+                usvg::Node::Image(_) => 1,
+                usvg::Node::Group(g) => images(g),
+                _ => 0,
+            }).sum()
+        }
+        let found = images(parse_svg(path.to_str().unwrap()).unwrap().root());
+        // Control: without the folder, they resolve against the working directory and are dropped.
+        let control = images(parse_svg_data(&std::fs::read(&path).unwrap(), None).unwrap().root());
+        let _ = std::fs::remove_dir_all(dir.parent().unwrap());
+        assert_eq!((found, control), (3, 0), "usvg drops an image it can't load");
+    }
+
+    /// A file the GPU path can't draw comes back as status 1, the raster size, the pixels (rendered in
+    /// place after the header) and the reason, in one buffer of exactly that length.
+    #[test]
+    fn fallback_reply_is_header_pixels_then_reason() {
+        let path = std::env::temp_dir().join("fly_rust_bridge_fallback_test.svg");
+        std::fs::write(&path, r#"<svg xmlns="http://www.w3.org/2000/svg" width="20" height="10"><filter id="f"><feTile/></filter><rect width="20" height="10" fill="red"/><rect x="15" y="5" width="5" height="5" filter="url(#f)"/></svg>"#).unwrap();
+        let c_path = std::ffi::CString::new(path.to_str().unwrap()).unwrap();
+        let mut len = 0;
+        let ptr = svg_build_scene(c_path.as_ptr(), 40, &mut len);
+        assert!(!ptr.is_null());
+        let b = unsafe { slice::from_raw_parts(ptr, len as usize) }.to_vec();
+        free_rust_buffer(ptr, len as usize);
+        let _ = std::fs::remove_file(&path);
+
+        assert_eq!(b[0], 1);
+        let (w, h) = (i32::from_le_bytes(b[1..5].try_into().unwrap()), i32::from_le_bytes(b[5..9].try_into().unwrap()));
+        assert_eq!((w, h), (40, 20));
+        let reason = std::str::from_utf8(&b[9 + (w * h * 4) as usize..]).unwrap();
+        assert!(reason.contains("feTile"), "{reason}");
+        assert_eq!(&b[9..13], &[255, 0, 0, 255], "the red rect's first pixel, premultiplied RGBA");
+    }
 }

@@ -1,5 +1,7 @@
 using System;
 using FlyPhotos.Display.ImageReading;
+using FlyPhotos.Infra.Configuration;
+using FlyPhotos.Infra.Utils;
 using Microsoft.Graphics.Canvas;
 
 namespace FlyPhotos.Core.Model;
@@ -15,7 +17,11 @@ internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, 
     public bool IsErrorOrUndefined() => 
         Origin == Origin.ErrorScreen || Origin == Origin.Undefined;
 
-    public void Dispose()
+    /// <summary>
+    /// Disposes the bitmap (except the shared error-screen ones). Virtual so items that own more, such as
+    /// <see cref="SvgHqDisplayItem"/>'s scene, can release it too.
+    /// </summary>
+    public virtual void Dispose()
     {
         // We don't dispose bitmaps coming from the error screen as they are reused.
         if (!IsErrorOrUndefined()) 
@@ -55,6 +61,39 @@ internal sealed partial class TiledHqDisplayItem(CanvasBitmap overview, Origin o
     : HqDisplayItem(overview, origin, 0)
 {
     public TilePyramid Pyramid { get; } = pyramid;
+}
+
+/// <summary>
+/// An SVG drawn as vectors on the GPU at any zoom by SvgVectorRenderer. Has no <see cref="DisplayItem.Bitmap"/>:
+/// drawing one up front would cost a full extra draw of the scene, so <see cref="Rasterize"/> makes one only
+/// when pixels are needed (copy to clipboard).
+/// </summary>
+/// <param name="lease">The loader's lease on the GPU scene; this item owns it from now on.</param>
+/// <param name="width">The size the photo reports (<see cref="Photo.GetActualSize"/>): the scene fitted to
+/// 2000 px on the longer side, as the resvg raster was.</param>
+internal sealed partial class SvgHqDisplayItem(Origin origin, SvgScene.Lease lease, int width, int height)
+    : HqDisplayItem(null, origin, 0)
+{
+    /// <summary>The GPU scene the renderer draws.</summary>
+    public SvgScene Scene => lease.Scene;
+    /// <summary>The reported width in pixels.</summary>
+    public int Width { get; } = width;
+    /// <summary>The reported height in pixels.</summary>
+    public int Height { get; } = height;
+
+    /// <summary>
+    /// A new bitmap of the scene at <see cref="Width"/>×<see cref="Height"/>, owned by the caller; null once the
+    /// scene has been released (this item disposed and no renderer still drawing it). Throws if drawing fails.
+    /// </summary>
+    public CanvasBitmap Rasterize()
+    {
+        using var hold = Scene.TryAcquire();
+        return hold == null ? null
+            : Scene.Rasterize(Math.Max(Width, Height), AppConfig.Settings.ImageScalingQuality.ToCanvasInterpolation(false));
+    }
+
+    /// <summary>Drops this item's ownership of the scene; a renderer still drawing it keeps it alive.</summary>
+    public override void Dispose() => lease.Dispose();
 }
 
 internal sealed partial class MultiPageHqDisplayItem(CanvasBitmap firstFrame, Origin origin, byte[] fileAsByteArray,

@@ -40,17 +40,25 @@ internal static class PhotoClipboard
             var sourceFile = await StorageOps.GetStorageFileOrVirtualFile(filePath);
             dataPackage.SetStorageItems((List<IStorageItem>)[sourceFile]);
 
-            // 2. IN-MEMORY BITMAP (for paste-as-image targets)
-            var canvasBitmap = level switch
+            // 2. IN-MEMORY BITMAP (for paste-as-image targets). A GPU SVG has no bitmap; draw one just for this.
+            var svgBitmap = level == DisplayLevel.Hq && photo.Hq is SvgHqDisplayItem svg ? TryRasterize(svg) : null;
+            try
             {
-                DisplayLevel.Hq => photo.Hq?.Bitmap,
-                DisplayLevel.Preview => photo.Preview?.Bitmap,
-                _ => null
-            };
-            if (canvasBitmap != null)
+                var canvasBitmap = svgBitmap ?? level switch
+                {
+                    DisplayLevel.Hq => photo.Hq?.Bitmap,
+                    DisplayLevel.Preview => photo.Preview?.Bitmap,
+                    _ => null
+                };
+                if (canvasBitmap != null)
+                {
+                    var streamReference = await GetCanvasBitmapAsAccessStream(canvasBitmap);
+                    dataPackage.SetBitmap(streamReference);
+                }
+            }
+            finally
             {
-                var streamReference = await GetCanvasBitmapAsAccessStream(canvasBitmap);
-                dataPackage.SetBitmap(streamReference);
+                svgBitmap?.Dispose();
             }
 
             // 3. Set Everything to Clipboard
@@ -59,6 +67,20 @@ internal static class PhotoClipboard
         catch (Exception ex)
         {
             Logger.Error(ex, "Failed to copy file to clipboard.");
+        }
+    }
+
+    /// <summary>The SVG drawn into a bitmap for the clipboard; null if that fails, so the file reference is still copied.</summary>
+    private static CanvasBitmap? TryRasterize(SvgHqDisplayItem svg)
+    {
+        try
+        {
+            return svg.Rasterize();
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "SVG GPU rasterize for the clipboard failed");
+            return null;
         }
     }
 

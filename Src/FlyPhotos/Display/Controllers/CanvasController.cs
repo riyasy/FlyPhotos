@@ -176,6 +176,9 @@ internal partial class CanvasController : ICanvasController
             case TiledHqDisplayItem tiledDispItem:
                 HandleHqTiledDisplayItem(photo, tiledDispItem, ctx);
                 break;
+            case SvgHqDisplayItem svgDispItem:
+                HandleHqSvgDisplayItem(photo, svgDispItem, ctx);
+                break;
             case HqDisplayItem hqDispItem:
                 HandleHqStaticDisplayItem(photo, hqDispItem, ctx);
                 break;
@@ -254,6 +257,14 @@ internal partial class CanvasController : ICanvasController
             new TiledImageRenderer(_d2dCanvas, tiledDispItem,
                 photo.SupportsTransparency, RequestInvalidate),
             _imageSize, tiledDispItem.Rotation, ctx, forceThumbNailRedraw: true);
+    }
+
+    /// <summary>Installs the vector renderer for an SVG drawn on the GPU (sharp at any zoom).</summary>
+    private void HandleHqSvgDisplayItem(Photo photo, SvgHqDisplayItem svgDispItem, PhotoInstallContext ctx)
+    {
+        InstallRenderer(
+            new SvgVectorRenderer(_d2dCanvas, svgDispItem, photo.SupportsTransparency, RequestInvalidate),
+            _imageSize, svgDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
     private void HandlePreviewDisplayItem(Photo photo, PreviewDisplayItem previewDispItem, PhotoInstallContext ctx)
