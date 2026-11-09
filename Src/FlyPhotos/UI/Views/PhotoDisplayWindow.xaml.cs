@@ -159,6 +159,7 @@ public sealed partial class PhotoDisplayWindow
 
         AppWindow.Closing += PhotoDisplayWindow_Closing;
         Closed += PhotoDisplayWindow_Closed;
+        Activated += PhotoDisplayWindow_Activated;
 
         D2dCanvas.CreateResources += D2dCanvas_CreateResources;
         D2dCanvas.PointerPressed += D2dCanvas_PointerPressed;
@@ -321,6 +322,7 @@ public sealed partial class PhotoDisplayWindow
         _edgeNavArrowFader.Enabled = false;
 
         AppWindow.Closing -= PhotoDisplayWindow_Closing;
+        Activated -= PhotoDisplayWindow_Activated;
 
         _photoController.FirstPhotoLoaded -= OnFirstPhotoLoaded;
         _photoController.CacheStatusChanged -= PhotoController_CacheStatusChanged;
@@ -543,6 +545,18 @@ public sealed partial class PhotoDisplayWindow
         if (e.Key != _burstKey) return;
         _burstKey = VirtualKey.None;
         await _photoController.Brake();
+    }
+
+    /// <summary>
+    /// A burst key released after the window lost focus sends its KeyUp to another window, so the burst
+    /// would never end: HQ stays parked and Delete/Rename stay refused. End it when focus leaves instead.
+    /// </summary>
+    private async void PhotoDisplayWindow_Activated(object sender, WindowActivatedEventArgs args)
+    {
+        if (args.WindowActivationState != WindowActivationState.Deactivated || _burstKey == VirtualKey.None) return;
+        _burstKey = VirtualKey.None;
+        try { await _photoController.Brake(); }
+        catch (Exception ex) { Logger.Error(ex); }
     }
 
     #endregion
