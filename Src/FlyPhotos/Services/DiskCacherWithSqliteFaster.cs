@@ -440,17 +440,18 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
                 cmd.CommandText = "DELETE FROM images";
                 await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
                 _rowCount = 0;
+
+                // VACUUM must run outside a transaction, which the gate is not: it only serializes use of the
+                // shared connection, and VACUUM needs that as much as any command. It rewrites the whole file
+                // to reclaim the space freed by DELETE; cache reads wait for it.
+                await using var vacuumCmd = _conn.CreateCommand();
+                vacuumCmd.CommandText = "VACUUM";
+                await vacuumCmd.ExecuteNonQueryAsync().ConfigureAwait(false);
             }
             finally
             {
                 _gate.Release();
             }
-
-            // VACUUM must run outside any transaction (and therefore outside the gate).
-            // It rewrites the entire database file, reclaiming the space freed by DELETE.
-            await using var vacuumCmd = _conn.CreateCommand();
-            vacuumCmd.CommandText = "VACUUM";
-            await vacuumCmd.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
         catch (Exception ex)
         {
