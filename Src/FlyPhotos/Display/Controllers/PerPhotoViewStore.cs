@@ -81,4 +81,11 @@ internal sealed class PerPhotoViewStore
 
     /// <summary>Drops any remembered view for <paramref name="photoPath"/> (e.g. it returned to default).</summary>
     public void Remove(string photoPath) => _cache.Remove(photoPath);
+
+    /// <summary>Moves any remembered view from <paramref name="oldPath"/> to <paramref name="newPath"/> (the photo was renamed).</summary>
+    public void Rename(string oldPath, string newPath)
+    {
+        if (_cache.Remove(oldPath, out var state))
+            _cache[newPath] = state;
+    }
 }

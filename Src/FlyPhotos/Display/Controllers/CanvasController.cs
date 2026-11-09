@@ -310,6 +310,18 @@ internal partial class CanvasController : ICanvasController
     public void RunAfterQueuedRenderWork(Action action) => _pump.Enqueue(action);
 
     /// <summary>
+    /// UI thread. A photo was renamed (<see cref="Photo.Rename"/>). The canvas knows photos by path, so it follows
+    /// the new one: otherwise the next SetSource for the photo on screen is taken as a new photo (resetting the
+    /// view), and its remembered view is saved under the old path and never found again. The store is re-keyed on
+    /// the W2D thread, after any queued install that saves a view under the old path.
+    /// </summary>
+    public void OnPhotoRenamed(string oldPath, string newPath)
+    {
+        if (_currentPhotoPath == oldPath) _currentPhotoPath = newPath;
+        _pump.Enqueue(() => _canvasViewManager.RenamePhoto(oldPath, newPath));
+    }
+
+    /// <summary>
     /// Installs a new renderer on the W2D thread. The brush is injected there (W2D-owned), and the
     /// swap + view-state update apply atomically in the same tick — no one-frame mismatch, and Draw
     /// can never see a renderer mid-disposal.
