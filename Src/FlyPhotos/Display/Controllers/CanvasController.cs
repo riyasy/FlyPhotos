@@ -32,7 +32,8 @@ namespace FlyPhotos.Display.Controllers;
 /// or inside Update/Draw itself. The UI thread never touches them directly — it posts work via
 /// <see cref="_pump"/>. There is therefore no lock on the render hot path.
 ///
-/// All public methods must be called on the UI (DispatcherQueue) thread.
+/// All public methods must be called on the UI (DispatcherQueue) thread, except
+/// <see cref="RunAfterQueuedRenderWork"/>, which only enqueues and is safe from any thread.
 /// </summary>
 internal partial class CanvasController : ICanvasController
 {
@@ -128,6 +129,13 @@ internal partial class CanvasController : ICanvasController
     /// from rapid photo switching and decides whether to reset the view (pan/zoom) or preserve it
     /// based on user settings and context.
     /// </summary>
+    /// <remarks>
+    /// Every path with an item to show (the placeholder level always has one) queues its
+    /// <see cref="InstallRenderer"/> before the first await (the animated path installs
+    /// its static first frame first). Callers rely on that: the cache disposes the bitmaps of photos leaving the
+    /// window through <see cref="RunAfterQueuedRenderWork"/> right after this returns, and the FIFO pump only
+    /// keeps that safe if the swap away from the old photo is already queued. Don't await before installing.
+    /// </remarks>
     /// <param name="photo">The Photo object containing image data and metadata.</param>
     /// <param name="displayLevel">The quality level to display (e.g., PlaceHolder, Preview, Hq).</param>
     public async Task SetSource(Photo photo, DisplayLevel displayLevel)
@@ -318,6 +326,9 @@ internal partial class CanvasController : ICanvasController
     public void OnPhotoRenamed(string oldPath, string newPath)
     {
         if (_currentPhotoPath == oldPath) _currentPhotoPath = newPath;
+        // The status bar shows the page position only while its path matches the photo's.
+        if (_photoSessionState.CurrentPage is { } page && page.Path == oldPath)
+            _photoSessionState.CurrentPage = page with { Path = newPath };
         _pump.Enqueue(() => _canvasViewManager.RenamePhoto(oldPath, newPath));
     }
 
