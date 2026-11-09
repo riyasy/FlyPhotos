@@ -211,23 +211,31 @@ internal partial class CanvasController : ICanvasController
             };
 
             // RACE CONDITION CHECK: If another SetSource call has started while we were creating the
-            // animator, this operation is now obsolete. We should discard the result and clean up.
-            if (currentOperationId == _latestSetSourceOperationId)
+            // animator or decoding its first frame, this operation is now obsolete. Discard the animator.
+            try
             {
-                await newAnimator.UpdateAsync(TimeSpan.Zero);
-                // Swap in the animated renderer without re-resetting the view — the static first
-                // frame already placed it (AsFollowUp clears the view-reset flags).
-                InstallRenderer(
-                    new AnimatedImageRenderer(_d2dCanvas, newAnimator, photo.SupportsTransparency, RequestInvalidate),
-                    _imageSize, animDispItem.Rotation, ctx.AsFollowUp(), forceThumbNailRedraw: false);
-                // Keep the control running while the animated image is active.
-                RequestInvalidate();
+                if (currentOperationId == _latestSetSourceOperationId)
+                    await newAnimator.UpdateAsync(TimeSpan.Zero);
             }
-            else
+            catch
             {
-                // This operation was superseded; dispose the newly created animator to prevent leaks.
                 newAnimator.Dispose();
+                throw;
             }
+            // Checked again after the first-frame decode: GIF, WebP and APNG yield there, and a newer
+            // photo installed meanwhile must not be replaced by this animation.
+            if (currentOperationId != _latestSetSourceOperationId)
+            {
+                newAnimator.Dispose();
+                return;
+            }
+            // Swap in the animated renderer without re-resetting the view — the static first
+            // frame already placed it (AsFollowUp clears the view-reset flags).
+            InstallRenderer(
+                new AnimatedImageRenderer(_d2dCanvas, newAnimator, photo.SupportsTransparency, RequestInvalidate),
+                _imageSize, animDispItem.Rotation, ctx.AsFollowUp(), forceThumbNailRedraw: false);
+            // Keep the control running while the animated image is active.
+            RequestInvalidate();
         }
         catch (Exception ex)
         {
