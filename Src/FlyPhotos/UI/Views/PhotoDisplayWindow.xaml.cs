@@ -543,8 +543,14 @@ public sealed partial class PhotoDisplayWindow
     private async void HandleKeyUp(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key != _burstKey) return;
+        await EndBurstAsync();
+    }
+
+    private async Task EndBurstAsync()
+    {
         _burstKey = VirtualKey.None;
-        await _photoController.Brake();
+        try { await _photoController.Brake(); }
+        catch (Exception ex) { Logger.Error(ex); }
     }
 
     /// <summary>
@@ -554,9 +560,7 @@ public sealed partial class PhotoDisplayWindow
     private async void PhotoDisplayWindow_Activated(object sender, WindowActivatedEventArgs args)
     {
         if (args.WindowActivationState != WindowActivationState.Deactivated || _burstKey == VirtualKey.None) return;
-        _burstKey = VirtualKey.None;
-        try { await _photoController.Brake(); }
-        catch (Exception ex) { Logger.Error(ex); }
+        await EndBurstAsync();
     }
 
     #endregion

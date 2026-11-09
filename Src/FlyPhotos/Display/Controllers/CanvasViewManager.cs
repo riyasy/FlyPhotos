@@ -505,11 +505,6 @@ internal class CanvasViewManager : IAnimationHost
         ViewChanged?.Invoke();
     }
 
-    /// <summary>
-    /// Saves the current view for <paramref name="photoPath"/> if "RememberPerPhoto" is enabled and the
-    /// user has actually modified the view (panned, zoomed, or rotated). Pan is stored normalized to the
-    /// canvas size and rotation relative to the EXIF baseline — see <see cref="PerPhotoViewStore"/>.
-    /// </summary>
     /// <summary>W2D thread. A photo was renamed: its remembered view, and the path of the one on screen, follow it.</summary>
     public void RenamePhoto(string oldPath, string newPath)
     {
@@ -517,6 +512,11 @@ internal class CanvasViewManager : IAnimationHost
         if (_photoPath == oldPath) _photoPath = newPath;
     }
 
+    /// <summary>
+    /// Saves the current view for <paramref name="photoPath"/> if "RememberPerPhoto" is enabled and the
+    /// user has actually modified the view (panned, zoomed, or rotated). Pan is stored normalized to the
+    /// canvas size and rotation relative to the EXIF baseline — see <see cref="PerPhotoViewStore"/>.
+    /// </summary>
     public void CacheCurrentViewState(string photoPath, Size canvasSize)
     {
         if (AppConfig.Settings.PanZoomBehaviourOnNavigation != PanZoomBehaviourOnNavigation.RememberPerPhoto

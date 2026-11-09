@@ -212,22 +212,22 @@ internal partial class CanvasController : ICanvasController
 
             // RACE CONDITION CHECK: If another SetSource call has started while we were creating the
             // animator or decoding its first frame, this operation is now obsolete. Discard the animator.
+            // Checked again after the first-frame decode: GIF, WebP and APNG yield there, and a newer
+            // photo installed meanwhile must not be replaced by this animation.
             try
             {
                 if (currentOperationId == _latestSetSourceOperationId)
                     await newAnimator.UpdateAsync(TimeSpan.Zero);
+                if (currentOperationId != _latestSetSourceOperationId)
+                {
+                    newAnimator.Dispose();
+                    return;
+                }
             }
             catch
             {
                 newAnimator.Dispose();
                 throw;
-            }
-            // Checked again after the first-frame decode: GIF, WebP and APNG yield there, and a newer
-            // photo installed meanwhile must not be replaced by this animation.
-            if (currentOperationId != _latestSetSourceOperationId)
-            {
-                newAnimator.Dispose();
-                return;
             }
             // Swap in the animated renderer without re-resetting the view — the static first
             // frame already placed it (AsFollowUp clears the view-reset flags).

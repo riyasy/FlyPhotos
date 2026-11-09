@@ -286,18 +286,9 @@ internal partial class Photo : IDisposable
         Thumbnail = null;
     }
 
-    public void DisposeHqOnly()
-    {
-        Hq?.Dispose();
-        Hq = null;
-    }
+    public void DisposeHqOnly() => DetachHq()?.Dispose();
 
-    public void DisposePreviewOnly()
-    {
-        Preview?.Dispose();
-        Preview = null;
-        Thumbnail = null; // its GPU copy is released by ThumbNailController on the W2D thread
-    }
+    public void DisposePreviewOnly() => DetachPreview()?.Dispose();
 
     /// <summary>
     /// Unloads the HQ item without disposing it and returns it, for a caller that disposes it once the canvas
@@ -310,7 +301,7 @@ internal partial class Photo : IDisposable
         return hq;
     }
 
-    /// <summary>Same as <see cref="DetachHq"/> for the preview; the thumbnail is dropped as in <see cref="DisposePreviewOnly"/>.</summary>
+    /// <summary>Same as <see cref="DetachHq"/> for the preview; the thumbnail is dropped with it.</summary>
     public PreviewDisplayItem? DetachPreview()
     {
         var preview = Preview;

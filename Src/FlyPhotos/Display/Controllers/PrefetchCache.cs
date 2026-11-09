@@ -58,6 +58,9 @@ internal sealed class PrefetchCache : IDisposable
     // Reused across SyncCacheTier calls — only touched on the UI/STA thread (inside MoveWindow).
     private readonly HashSet<int> _syncKeysToKeep = new();
 
+    // Items detached by the current window move, disposed together by FlushRetiring. UI/STA thread only.
+    private readonly List<DisplayItem> _retiring = new();
+
     // Bumped (on the UI/STA thread) whenever RAW decode settings change so any RAW HQ decode that was
     // already in flight is discarded on completion instead of committing a stale bitmap.
     private volatile int _hqGeneration;
@@ -163,8 +166,9 @@ internal sealed class PrefetchCache : IDisposable
 
         var desiredHqKeys      = FindNeighborKeys(centrePosition, AppConfig.Settings.CacheSizeOneSideHqImages);
         var desiredPreviewKeys = FindNeighborKeys(centrePosition, AppConfig.Settings.CacheSizeOneSidePreviews);
-        SyncCacheTier(desiredHqKeys,      _hqTier,      p => DisposeAfterQueuedRenderWork(p.DetachHq()));
-        SyncCacheTier(desiredPreviewKeys, _previewTier, p => DisposeAfterQueuedRenderWork(p.DetachPreview()));
+        SyncCacheTier(desiredHqKeys,      _hqTier,      static p => p.DetachHq());
+        SyncCacheTier(desiredPreviewKeys, _previewTier, static p => p.DetachPreview());
+        FlushRetiring();
 
         FireProgress();
         _previewTier.Signal.Set();
@@ -199,13 +203,14 @@ internal sealed class PrefetchCache : IDisposable
         foreach (int key in _hqTier.Done.Keys)
             if (_getPhoto(key) is { IsRaw: true } photo)
             {
-                // The controller has queued the on-screen photo's step-down; dispose after it.
-                DisposeAfterQueuedRenderWork(photo.DetachHq());
+                // The controller has queued the on-screen photo's step-down; disposed after it.
+                if (photo.DetachHq() is { } hq) _retiring.Add(hq);
                 _hqTier.Done.TryRemove(key, out _);
             }
 
         // Reuse the window sync to requeue the in-window keys we just dropped.
         MoveWindow(_windowCentre, _windowKeys, signalHqLoading: true);
+        FlushRetiring(); // MoveWindow flushes too, unless it returned early
     }
 
     // -------------------------------------------------------------------------
@@ -415,7 +420,7 @@ internal sealed class PrefetchCache : IDisposable
     {
         if (gen == _hqGeneration || !photo.IsRaw) return false;
 
-        photo.DisposeHqOnly();
+        if (photo.DetachHq() is { } hq) DisposeAfterQueuedRenderWork([hq]);
         _hqTier.InFlight.Remove(key, out _);
         if (IsInDesiredHqWindow(key)) _hqTier.Queue.Push(key); // the caller's finally wakes the worker
         return true;
@@ -447,15 +452,29 @@ internal sealed class PrefetchCache : IDisposable
     // Window maintenance
     // -------------------------------------------------------------------------
 
-    // Disposes the item it is given, never "the photo's current item": the photo may reload before this runs.
-    private void DisposeAfterQueuedRenderWork(DisplayItem? item)
+    // Disposes the items it is given, never "the photo's current item": the photo may reload before this runs.
+    // One pump job for the batch, so a far jump that drops hundreds of previews wakes the canvas once.
+    private void DisposeAfterQueuedRenderWork(DisplayItem[] items)
     {
-        if (item == null) return;
-        if (RunAfterQueuedRenderWork is { } run) run(item.Dispose);
-        else item.Dispose();
+        if (RunAfterQueuedRenderWork is { } run) run(() => DisposeAll(items));
+        else DisposeAll(items);
+
+        static void DisposeAll(DisplayItem[] items)
+        {
+            foreach (var item in items) item.Dispose();
+        }
     }
 
-    private void SyncCacheTier(List<int> desiredKeys, PhotoCacheTier tier, Action<Photo> disposeAction)
+    // UI/STA thread: disposes what this window move detached, after the renderer swap it follows.
+    private void FlushRetiring()
+    {
+        if (_retiring.Count == 0) return;
+        var items = _retiring.ToArray();
+        _retiring.Clear();
+        DisposeAfterQueuedRenderWork(items);
+    }
+
+    private void SyncCacheTier(List<int> desiredKeys, PhotoCacheTier tier, Func<Photo, DisplayItem?> detach)
     {
         _syncKeysToKeep.Clear();
         _syncKeysToKeep.UnionWith(desiredKeys);
@@ -463,8 +482,8 @@ internal sealed class PrefetchCache : IDisposable
         foreach (int key in tier.Done.Keys)
             if (!_syncKeysToKeep.Contains(key))
             {
-                if (_getPhoto(key) is { } photo)
-                    disposeAction(photo);
+                if (_getPhoto(key) is { } photo && detach(photo) is { } item)
+                    _retiring.Add(item);
                 tier.Done.TryRemove(key, out _);
             }
 

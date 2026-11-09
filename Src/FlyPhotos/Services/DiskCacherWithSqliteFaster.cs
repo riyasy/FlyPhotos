@@ -386,7 +386,10 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
                 // The counter overcounts (an upsert that replaces a row still adds one, see below), so it is
                 // corrected from the table before it decides to evict. Runs only when the counter reaches the cap.
                 if (_rowCount >= MaxItemCount)
-                    _rowCount = Convert.ToInt32(await _cmdCount.ExecuteScalarAsync().ConfigureAwait(false));
+                {
+                    _rowCount = -1;
+                    await EnsureRowCountLoadedAsync().ConfigureAwait(false);
+                }
 
                 if (_rowCount >= MaxItemCount)
                 {

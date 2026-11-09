@@ -72,10 +72,11 @@ internal sealed class PhotoList : IPhotoProvider
     /// empty the list). New photos enter the dictionary before the new snapshot is published. Removed photos
     /// stay in the dictionary until the caller calls <see cref="Forget"/>, so it can still decide where to
     /// navigate. Returns the removed (key, photo) pairs. Call from the one thread that mutates the list.
+    /// <paramref name="onRenamed"/> gets each applied rename as (the photo's exact old path, its new path).
     /// </summary>
     public List<(int Key, Photo Photo)> ApplyChanges(Predicate<string> isRemoved,
         IReadOnlyDictionary<string, string>? renamed, IReadOnlyList<string> addedSorted,
-        IComparer<string>? order, int keepKey)
+        IComparer<string>? order, int keepKey, Action<string, string>? onRenamed = null)
     {
         var result = ListChange.Apply(_keys, key => _photos[key].FilePath, isRemoved, renamed, addedSorted, order,
             create: path =>
@@ -84,7 +85,13 @@ internal sealed class PhotoList : IPhotoProvider
                 _photos[key] = new Photo(path);
                 return key;
             },
-            rename: (key, path) => _photos[key].Rename(path),
+            rename: (key, path) =>
+            {
+                var photo = _photos[key];
+                var oldPath = photo.FilePath;
+                photo.Rename(path);
+                onRenamed?.Invoke(oldPath, path);
+            },
             isKeep: key => key == keepKey);
 
         if (result.Changed) _keys = result.Items; // publish atomically

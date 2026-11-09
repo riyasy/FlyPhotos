@@ -418,22 +418,11 @@ internal partial class PhotoDisplayController
         int currentKey = _photoSessionState.CurrentPhotoKey;
         var currentPath = _photoList.GetPhoto(currentKey)?.FilePath;
 
-        // The photos' exact current paths, not the batch's: the batch matches paths case-insensitively.
-        List<(string OldPath, string NewPath)>? renamedPaths = null;
-        if (renamed is { Count: > 0 })
-            foreach (var key in oldKeys)
-                if (_photoList.GetPhoto(key)?.FilePath is { } path && !isRemoved(path) &&
-                    renamed.TryGetValue(path, out var newPath))
-                    (renamedPaths ??= []).Add((path, newPath));
-
-        var removed = _photoList.ApplyChanges(isRemoved, renamed, added, order, currentKey);
+        // Renamed photos keep their key; the canvas knows them by path, so it has to follow.
+        var removed = _photoList.ApplyChanges(isRemoved, renamed, added, order, currentKey,
+            onRenamed: _canvasController.OnPhotoRenamed);
         var keys = _photoList.Keys;
         if (ReferenceEquals(keys, oldKeys)) return; // nothing actually changed
-
-        // Renamed photos keep their key; the canvas knows them by path, so it has to follow.
-        if (renamedPaths != null)
-            foreach (var (oldPath, newPath) in renamedPaths)
-                _canvasController.OnPhotoRenamed(oldPath, newPath);
 
         // Detach removed photos from the cache and the dictionary BEFORE navigating: the window move below
         // disposes whatever loaded photo falls outside the new window, and the old on-screen photo must not
