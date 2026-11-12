@@ -70,7 +70,7 @@ public sealed class HeifFirstOpenBenchTests
         }
     }
 
-    /// <summary>FLY_HEIF_BENCH_MODE=before times the old first-photo step (HeifEmbedded, which generates a preview).</summary>
+    /// <summary>FLY_HEIF_BENCH_MODE=before times the old first-photo step (now HeifResized, which generates a preview).</summary>
     private static readonly bool Before = Environment.GetEnvironmentVariable("FLY_HEIF_BENCH_MODE") == "before";
 
     /// <summary>What the first photo's embedded step decodes; null when it yields nothing.</summary>

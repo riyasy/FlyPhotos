@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using FlyPhotos.Core.Model;
 
@@ -11,6 +12,13 @@ internal enum Purpose
     FirstPreview,
     /// <summary>A small preview for the thumbnail strip and the preview cache.</summary>
     Preview,
+    /// <summary>
+    /// The start of the <see cref="Preview"/> chain: only the steps that never decode the full image
+    /// (see <see cref="DecoderChains.IsHeavy"/>). Background loading tries these first, at full parallelism.
+    /// </summary>
+    PreviewLight,
+    /// <summary>The rest of the <see cref="Preview"/> chain after <see cref="PreviewLight"/>: the full-image decodes.</summary>
+    PreviewHeavy,
     /// <summary>The full image.</summary>
     Hq,
     /// <summary>The full image when it is larger than the GPU's maximum bitmap size: decoded into tiles.</summary>
@@ -24,7 +32,7 @@ internal enum Purpose
 /// </summary>
 internal enum DecodeStep
 {
-    HeifEmbedded, HeifEmbeddedOnly, HeifHq, AvifHq,
+    HeifEmbeddedOnly, HeifResized, HeifHq, AvifHq,
     DdsHq, DdsResized,
     WicEmbedded, WicResized, WicHq, WicRawHq,
     MagickHq, MagickRawHq, MagickResized, MagickRawEmbedded,
@@ -77,11 +85,45 @@ internal sealed class CodecSupport(
 /// </summary>
 internal static class DecoderChains
 {
+    /// <summary>
+    /// Whether a preview step decodes the full image to make a small one: hundreds of MB per decode, and no
+    /// codec limits itself when run in parallel (#276). Background loading runs these in a lane of their own
+    /// with few slots; everything else scales with the cores.
+    /// </summary>
+    /// <remarks>
+    /// Left light although large files cost more: <c>WicResized</c> for WebP (100 MB at 24 MP) and interlaced
+    /// PNG (39 MB), and <c>DdsResized</c> without mipmaps (106 MB). Typical files of those formats are small,
+    /// and their folders would lose parallelism for nothing.
+    /// </remarks>
+    public static bool IsHeavy(DecodeStep step, ImageFormat format, string extension) => step switch
+    {
+        // ImageMagick always decodes the whole image, as float pixels (326-631 MB at 24 MP).
+        DecodeStep.MagickResized => true,
+        // libheif decodes the primary image, then scales it (210-387 MB).
+        DecodeStep.HeifResized => true,
+        // Only JPEG decodes at reduced size. JXL and the long tail decode fully first (129 MB for a 29 MP JXL).
+        DecodeStep.MagicScalerResized => format != ImageFormat.Jpeg,
+        // The DNG codec returns the full-size image as the thumbnail of an iPhone ProRAW (297 MB at 48 MP).
+        DecodeStep.WicEmbedded => extension.Equals(".dng", StringComparison.OrdinalIgnoreCase),
+        _ => false
+    };
+
     /// <summary>The decoders to try, in order, for a file of <paramref name="format"/> and the given purpose.</summary>
     /// <param name="extension">Used only by the codec-support checks of the generic chain.</param>
     public static List<DecodeStep> For(ImageFormat format, string extension, Purpose purpose, ReadOptions options,
         CodecSupport codecs)
     {
+        // The preview chain split at its first heavy step: the light part, then the heavy rest.
+        if (purpose is Purpose.PreviewLight or Purpose.PreviewHeavy)
+        {
+            var preview = For(format, extension, Purpose.Preview, options, codecs);
+            int firstHeavy = preview.FindIndex(step => IsHeavy(step, format, extension));
+            if (firstHeavy < 0) firstHeavy = preview.Count;
+            return purpose == Purpose.PreviewLight
+                ? preview.GetRange(0, firstHeavy)
+                : preview.GetRange(firstHeavy, preview.Count - firstHeavy);
+        }
+
         var chain = new List<DecodeStep>(4);
 
         switch (purpose, format)
@@ -97,8 +139,10 @@ internal static class DecoderChains
                 AddFullImage();
                 break;
 
+            // The stored thumbnail is its own step, so it never waits with the full decodes that follow.
             case (Purpose.Preview, ImageFormat.Heif or ImageFormat.Avif):
-                Add(DecodeStep.HeifEmbedded);
+                Add(DecodeStep.HeifEmbeddedOnly);
+                Add(DecodeStep.HeifResized);
                 Add(DecodeStep.MagickResized, codecs.Magick(extension));
                 break;
             case (Purpose.Preview, ImageFormat.Psd): Add(DecodeStep.PsdEmbedded); break;
@@ -143,7 +187,7 @@ internal static class DecoderChains
         {
             switch (format)
             {
-                // Only a stored thumbnail: without one, HeifEmbedded would decode the full image to scale it,
+                // Only a stored thumbnail: without one, HeifResized would decode the full image to scale it,
                 // and the full-image step right after decodes it again.
                 case ImageFormat.Heif or ImageFormat.Avif:
                     Add(DecodeStep.HeifEmbeddedOnly);

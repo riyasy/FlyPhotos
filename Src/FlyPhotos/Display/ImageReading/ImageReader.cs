@@ -59,14 +59,26 @@ internal static class ImageReader
     /// Loads a low-resolution preview of an image suitable for the thumbnail ribbon or preview: the disk
     /// cache, else an embedded preview (EXIF thumbnail, embedded JPEG), else a resized decode.
     /// </summary>
-    public static async Task<PreviewDisplayItem> GetPreview(ICanvasResourceCreatorWithDpi d2dCanvas, string path)
+    /// <param name="purpose">
+    /// <see cref="Purpose.Preview"/>: the whole chain. Background loading splits it in two passes:
+    /// <see cref="Purpose.PreviewLight"/>, then <see cref="Purpose.PreviewHeavy"/> where few run at once.
+    /// </param>
+    /// <returns>
+    /// The preview, or the error screen when nothing could read the file. Null only for the light pass when
+    /// it found nothing but heavy steps remain: the caller runs the heavy pass next.
+    /// </returns>
+    public static async Task<PreviewDisplayItem?> GetPreview(ICanvasResourceCreatorWithDpi d2dCanvas, string path,
+        Purpose purpose = Purpose.Preview)
     {
         if (!File.Exists(path)) return new PreviewDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen);
         if (await FromDiskCache(d2dCanvas, path) is { } cached) return cached;
 
         using var file = new ImageFile(path);
-        return await Decode(d2dCanvas, file, Purpose.Preview) as PreviewDisplayItem ??
-               new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
+        if (await Decode(d2dCanvas, file, purpose) is PreviewDisplayItem item) return item;
+
+        // Asked after Decode, so a mislabelled file is judged by the format its header showed.
+        if (purpose == Purpose.PreviewLight && ChainFor(file, Purpose.PreviewHeavy).Count > 0) return null;
+        return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
     }
 
     /// <summary>
@@ -178,7 +190,7 @@ internal static class ImageReader
     /// shared stream. Must match the <see cref="Run"/> arms that pass <c>file.Path</c>.
     /// </summary>
     private static bool ReadsByPath(DecodeStep step) => step is
-        DecodeStep.HeifEmbedded or DecodeStep.HeifEmbeddedOnly or DecodeStep.HeifHq or DecodeStep.DdsHq or DecodeStep.DdsResized or
+        DecodeStep.HeifEmbeddedOnly or DecodeStep.HeifResized or DecodeStep.HeifHq or DecodeStep.DdsHq or DecodeStep.DdsResized or
         DecodeStep.MagickHq or DecodeStep.MagickRawHq or DecodeStep.MagickResized or DecodeStep.MagickRawEmbedded or
         DecodeStep.PsdEmbedded or DecodeStep.SvgHq or DecodeStep.SvgResized or DecodeStep.Rawler or
         DecodeStep.LargeHeif or DecodeStep.LargeMagick;
@@ -188,8 +200,8 @@ internal static class ImageReader
         CancellationToken ct = default) =>
         step switch
         {
-            DecodeStep.HeifEmbedded => ItemOrNull(NativeHeifReader.GetEmbedded(ctrl, file.Path)),
             DecodeStep.HeifEmbeddedOnly => ItemOrNull(NativeHeifReader.GetEmbedded(ctrl, file.Path, embeddedOnly: true)),
+            DecodeStep.HeifResized => ItemOrNull(NativeHeifReader.GetEmbedded(ctrl, file.Path)),
             DecodeStep.HeifHq => ItemOrNull(NativeHeifReader.GetHq(ctrl, file.Path)),
             DecodeStep.AvifHq => ItemOrNull(await NativeAvifReader.GetHq(ctrl, file)),
             DecodeStep.DdsHq => ItemOrNull(NativeDdsReader.GetHq(ctrl, file.Path)),

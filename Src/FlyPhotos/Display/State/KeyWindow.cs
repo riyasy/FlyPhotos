@@ -22,4 +22,23 @@ internal static class KeyWindow
             if (keys[pos] == key) return pos;
         return -1;
     }
+
+    /// <summary>
+    /// The key nearest to <paramref name="centre"/>, within <paramref name="half"/>, that <paramref name="wanted"/>
+    /// accepts; null when none does. At equal distance the one before the centre wins, the order the window
+    /// sync queues keys in.
+    /// </summary>
+    public static int? Nearest(IReadOnlyList<int> keys, int centre, int half, Func<int, bool> wanted)
+    {
+        if (centre < 0 || centre >= keys.Count) return null;
+        if (wanted(keys[centre])) return keys[centre];
+        for (int d = 1; d <= half; d++)
+        {
+            int before = centre - d, after = centre + d;
+            if (before < 0 && after >= keys.Count) break;
+            if (before >= 0 && wanted(keys[before])) return keys[before];
+            if (after < keys.Count && wanted(keys[after])) return keys[after];
+        }
+        return null;
+    }
 }

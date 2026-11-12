@@ -171,15 +171,24 @@ internal partial class Photo : IDisposable
     private bool IsKnownOversized(int maxSize) => _probedOversized ||
         Preview?.Metadata is { FullWidth: > 0, FullHeight: > 0 } m && (m.FullWidth > maxSize || m.FullHeight > maxSize);
 
-    public async Task LoadPreview(ICanvasResourceCreatorWithDpi device)
+    /// <summary>Loads the preview unless one is already there.</summary>
+    /// <param name="purpose">The preview pass to run; see <see cref="ImageReader.GetPreview"/>.</param>
+    /// <returns>
+    /// False when the light pass found nothing and the preview needs a full-image decode: nothing was loaded,
+    /// and the caller runs the heavy pass.
+    /// </returns>
+    public async Task<bool> LoadPreview(ICanvasResourceCreatorWithDpi device, Purpose purpose = Purpose.Preview)
     {
         if (Preview == null || Preview.Origin == Origin.ErrorScreen ||
             Preview.Origin == Origin.Undefined)
         {
-            Preview = await ImageReader.GetPreview(device, FilePath);
-            if (Thumbnail == null && Preview != null && !Preview.IsErrorOrUndefined())
+            var preview = await ImageReader.GetPreview(device, FilePath, purpose);
+            if (preview == null) return false;
+            Preview = preview;
+            if (Thumbnail == null && !Preview.IsErrorOrUndefined())
                 GenerateThumbnail(device, Preview);
         }
+        return true;
     }
 
     public DisplayItem? GetDisplayItemBasedOn(DisplayLevel displayLevel)

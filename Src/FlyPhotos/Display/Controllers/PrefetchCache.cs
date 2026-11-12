@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Services;
@@ -16,7 +17,8 @@ namespace FlyPhotos.Display.Controllers;
 /// <summary>
 /// Owns all background photo loading: the preview, HQ and disk <b>tiers</b> (each a worker thread
 /// with its own queue, in-flight set and completed-keys set), throttling, the sliding <b>window</b>
-/// of neighbours kept loaded around the <b>window centre</b>, and disk write-back.
+/// of neighbours kept loaded around the <b>window centre</b>, and disk write-back. Previews that need a
+/// full-image decode load in a <b>heavy lane</b> of the preview tier, with few slots (#276).
 ///
 /// Nothing outside this class ever sees a tier. Callers drive it with <see cref="MoveWindow"/> when
 /// navigation moves and ask it questions with <see cref="IsHqLoaded"/> / <see cref="IsPreviewLoaded"/>;
@@ -54,6 +56,23 @@ internal sealed class PrefetchCache : IDisposable
     private readonly PhotoCacheTier       _hqTier          = new();
     private readonly ConcurrentStack<int> _diskCacheQueue  = new();
     private readonly ManualResetEvent     _diskCacheSignal = new(false);
+
+    // The heavy lane: previews that need a full-image decode (hundreds of MB each, #276). A preview load
+    // first tries only its light steps; when those find nothing, the key is marked heavy and queued here,
+    // where few run at once whatever the core count. A heavy load holds a preview slot as well as a heavy
+    // one, so the preview tier as a whole still never runs more than _previewThrottler allows (a core stays
+    // free for the on-screen HQ decode). Claims and completions are recorded in _previewTier: to the rest
+    // of the class a heavy preview is just a preview.
+    private const int MaxHeavyPreviewDecodes = 4;
+    private readonly SemaphoreSlim _heavyPreviewThrottler = new(MaxHeavyPreviewDecodes);
+    // Not a stack like the other queues: keys arrive here in the order their light attempts end, nearest first,
+    // so a stack would load the far end of the window first. The worker picks the pending key nearest the centre.
+    private readonly ConcurrentDictionary<int, byte> _heavyPreviewPending = new();
+    private readonly AutoResetEvent                  _heavyPreviewSignal = new(false);
+    // Keys whose light attempt found nothing and whose preview hasn't loaded since: a window move queues them
+    // straight to the heavy lane. Cleared when the preview loads, so a key that comes back into the window
+    // later tries the light pass again, which finds its thumbnail in the disk cache at full parallelism.
+    private readonly ConcurrentDictionary<int, byte> _heavyKeys          = new();
 
     // Reused across SyncCacheTier calls — only touched on the UI/STA thread (inside MoveWindow).
     private readonly HashSet<int> _syncKeysToKeep = new();
@@ -116,12 +135,15 @@ internal sealed class PrefetchCache : IDisposable
     // Public API — the only door in
     // -------------------------------------------------------------------------
 
-    /// <summary>Spawns the three worker threads. Not called for secondary instances.</summary>
+    /// <summary>Spawns the four worker threads. Not called for secondary instances.</summary>
     public void Start()
     {
         var previewThread = new Thread(() => PreviewCacheBuilderDoWork(_cts.Token))
             { IsBackground = true, Name = "PreviewCacheBuilder" };
         previewThread.Start();
+        var heavyPreviewThread = new Thread(() => HeavyPreviewBuilderDoWork(_cts.Token))
+            { IsBackground = true, Name = "HeavyPreviewBuilder" };
+        heavyPreviewThread.Start();
         var hqThread = new Thread(() => HqImageCacheBuilderDoWork(_cts.Token))
             { IsBackground = true, Name = "HqCacheBuilder" };
         hqThread.Start();
@@ -145,6 +167,7 @@ internal sealed class PrefetchCache : IDisposable
         {
             _hqTier.Done.Clear();
             _previewTier.Done.Clear();
+            _heavyKeys.Clear();
             FireProgress();
             return;
         }
@@ -172,6 +195,7 @@ internal sealed class PrefetchCache : IDisposable
 
         FireProgress();
         _previewTier.Signal.Set();
+        _heavyPreviewSignal.Set();
         if (signalHqLoading) _hqTier.Signal.Set();
     }
 
@@ -186,6 +210,7 @@ internal sealed class PrefetchCache : IDisposable
     {
         _hqTier.Done.TryRemove(key, out _);
         _previewTier.Done.TryRemove(key, out _);
+        _heavyKeys.TryRemove(key, out _);
     }
 
     public bool IsHqLoaded(int key)      => _hqTier.Done.ContainsKey(key);
@@ -246,6 +271,68 @@ internal sealed class PrefetchCache : IDisposable
             }
         }
         catch (OperationCanceledException) { } // Expected on shutdown.
+    }
+
+    // The preview loop for the heavy lane: its own pending set and slots, and no hand-off to the disk-cache
+    // thread (a heavy load wakes that thread itself when it finishes).
+    private void HeavyPreviewBuilderDoWork(CancellationToken token)
+    {
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                if (_heavyPreviewPending.IsEmpty)
+                {
+                    WaitHandle.WaitAny([_heavyPreviewSignal, token.WaitHandle]);
+                    continue;
+                }
+
+                // Slots first, pick second (unlike the preview loop): a heavy decode holds its slots for a second
+                // or more, and picking only once they are free means the pick is nearest the centre as it is now,
+                // not where it was before the user moved on. Heavy slot before preview slot, never the other way
+                // round, and the light lane never waits for a heavy slot, so the two waits can't deadlock.
+                _heavyPreviewThrottler.Wait(token);
+                _previewThrottler.Wait(token);
+
+                // None in the window: everything pending was left behind by a window move. The next move drops it.
+                if (NextHeavyPreview() is not { } item)
+                {
+                    ReleaseHeavySlots();
+                    WaitHandle.WaitAny([_heavyPreviewSignal, token.WaitHandle]);
+                    continue;
+                }
+
+                // Claimed in the preview tier, so the key can't load in both lanes at once. Taken out of the
+                // pending set before the claim; when the claim fails the key is already loading in some lane.
+                if (!_heavyPreviewPending.TryRemove(item, out _) || !_previewTier.InFlight.TryAdd(item, 0))
+                {
+                    ReleaseHeavySlots();
+                    continue;
+                }
+
+                _ = Task.Run(() => LoadPreviewAsync(item, heavy: true), token);
+            }
+        }
+        // Expected on shutdown. Disposed too: Dispose may free the throttler between this thread's Wait and
+        // Release, and an exception escaping a thread would end the process.
+        catch (Exception ex) when (ex is OperationCanceledException or ObjectDisposedException) { }
+    }
+
+    // A heavy load holds both slots; see _heavyPreviewThrottler.
+    private void ReleaseHeavySlots()
+    {
+        _previewThrottler.Release();
+        _heavyPreviewThrottler.Release();
+    }
+
+    // Heavy-lane worker thread: the pending key nearest the window centre, or null. Same snapshot discipline as
+    // IsInDesiredHqWindow. Scans at most the preview window; pending keys outside it are never picked (the next
+    // window sync drops them).
+    private int? NextHeavyPreview()
+    {
+        if (_heavyPreviewPending.IsEmpty) return null;
+        return KeyWindow.Nearest(_windowKeys, _windowCentre, AppConfig.Settings.CacheSizeOneSidePreviews,
+            _heavyPreviewPending.ContainsKey);
     }
 
     private void HqImageCacheBuilderDoWork(CancellationToken token)
@@ -312,8 +399,9 @@ internal sealed class PrefetchCache : IDisposable
     // Every loader holds a use on its photo (Photo.TryBeginUse) for as long as it touches the photo's bitmaps,
     // so a photo that leaves the list mid-load is disposed by whichever of the owner and the load finishes last.
 
-    // The preview worker marks the key in flight before starting this; every exit below clears it.
-    private async Task LoadPreviewAsync(int key)
+    // The preview worker (or, with heavy set, the heavy-lane worker) marks the key in flight before starting
+    // this; every exit below clears it.
+    private async Task LoadPreviewAsync(int key, bool heavy = false)
     {
         Photo? photo = null;
         try
@@ -324,11 +412,37 @@ internal sealed class PrefetchCache : IDisposable
                 return;
             }
             photo = p;
-            await photo.LoadPreview(_device);
+            // Two passes: the light steps here at full parallelism, and only on their failure the heavy steps in
+            // the heavy lane. The heavy pass doesn't repeat the light steps, so it starts its full decode on this
+            // thread-pool thread rather than on the callback thread of a failed WIC thumbnail lookup.
+            bool loaded = await photo.LoadPreview(_device, heavy ? Purpose.PreviewHeavy : Purpose.PreviewLight);
             if (DiscardIfRemoved(key, photo, _previewTier)) return;
+            if (!loaded)
+            {
+                // Only a full-image decode can make this preview: hand the key to the heavy lane. Marked
+                // heavy before the claim is released, so a window move in between queues it to the heavy lane
+                // too, never back to the light queue. Out of the window by now: not queued; the mark sends it
+                // to the heavy lane if it comes back.
+                _heavyKeys[key] = 0;
+                _previewTier.InFlight.Remove(key, out _);
+                if (IsInPreviewWindow(key))
+                {
+                    _heavyPreviewPending[key] = 0;
+                    _heavyPreviewSignal.Set();
+                }
+                return;
+            }
             _previewTier.Done[key] = 0;
+            _heavyKeys.TryRemove(key, out _);
             _previewTier.InFlight.Remove(key, out _);
-            if (photo.Preview?.Origin == Origin.Disk) _diskCacheQueue.Push(key);
+            if (photo.Preview?.Origin == Origin.Disk)
+            {
+                _diskCacheQueue.Push(key);
+                // The disk-cache thread is woken when the preview queue drains. The heavy lane runs on after that,
+                // so its previews would stay unsaved until the next navigation; wake it, but only once the light
+                // queue is empty too, so disk writes still don't compete with light loads.
+                if (heavy && _previewTier.Queue.IsEmpty) _diskCacheSignal.Set();
+            }
             PreviewReady?.Invoke(key);
             FireProgress();
         }
@@ -342,7 +456,8 @@ internal sealed class PrefetchCache : IDisposable
         finally
         {
             photo?.EndUse();
-            _previewThrottler.Release();
+            if (heavy) ReleaseHeavySlots();
+            else _previewThrottler.Release();
         }
     }
 
@@ -487,10 +602,25 @@ internal sealed class PrefetchCache : IDisposable
                 tier.Done.TryRemove(key, out _);
             }
 
+        // Previews have two queues: keys already found to need a full-image decode go to the heavy lane.
+        bool previews = ReferenceEquals(tier, _previewTier);
         tier.Queue.Clear();
+        if (previews) _heavyPreviewPending.Clear();
         foreach (int key in desiredKeys)
             if (!tier.Done.ContainsKey(key) && !tier.InFlight.ContainsKey(key))
-                tier.Queue.Push(key);
+            {
+                if (previews && _heavyKeys.ContainsKey(key)) _heavyPreviewPending[key] = 0;
+                else tier.Queue.Push(key);
+            }
+    }
+
+    // Same snapshot discipline as IsInDesiredHqWindow — called from a ThreadPool thread.
+    private bool IsInPreviewWindow(int key)
+    {
+        var keys = _windowKeys;
+        int centre = _windowCentre;
+        if (centre < 0 || centre >= keys.Count) return false;
+        return KeyWindow.IndexOf(keys, key, centre, AppConfig.Settings.CacheSizeOneSidePreviews) >= 0;
     }
 
     // Membership test for the HQ window. Called from a ThreadPool thread (the stale-RAW-decode discard
@@ -586,11 +716,14 @@ internal sealed class PrefetchCache : IDisposable
         _cts.Cancel();
         _centreCts.Cancel();
         _previewTier.Signal.Set();
+        _heavyPreviewSignal.Set();
         _hqTier.Signal.Set();
         _diskCacheSignal.Set();
 
         _cts.Dispose();
         _previewThrottler.Dispose();
+        _heavyPreviewThrottler.Dispose();
+        _heavyPreviewSignal.Dispose();
         _hqThrottler.Dispose();
         _diskCacheThrottler.Dispose();
 
