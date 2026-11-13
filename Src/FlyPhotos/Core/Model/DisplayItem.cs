@@ -8,25 +8,46 @@ namespace FlyPhotos.Core.Model;
 
 internal record ImageMetadata(double FullWidth, double FullHeight);
 
-internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, int rotation) : IDisposable
+/// <summary>
+/// A decoded image of a photo. Its lifetime is counted in <b>leases</b>: the creator holds the first one (handed
+/// on to the photo's slot when stored), and anyone else that uses the bitmap outside the slot — the canvas while
+/// it is on screen, a clipboard copy, a disk-cache write — takes its own with <see cref="TryAcquire"/>. The last
+/// <see cref="Release"/> frees it, so it is never disposed while something still draws or reads it.
+/// Error and placeholder items share bitmaps across photos; they are never freed and their leases are free.
+/// </summary>
+internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, int rotation)
 {
     public CanvasBitmap Bitmap { get; } = bitmap;
     public Origin Origin { get; } = origin;
     public int Rotation { get; } = rotation;
 
-    public bool IsErrorOrUndefined() => 
-        Origin == Origin.ErrorScreen || Origin == Origin.Undefined;
+    private LeaseCount _leases = new();
 
     /// <summary>
-    /// Disposes the bitmap (except the shared error-screen ones). Virtual so items that own more, such as
-    /// <see cref="SvgHqDisplayItem"/>'s scene, can release it too.
+    /// Where an item goes when its last lease ends. The canvas routes it to its render thread, so bitmaps are
+    /// freed there as they are today; unset (no canvas, or it is gone), the item is freed at once.
     /// </summary>
-    public virtual void Dispose()
+    public static Action<DisplayItem> FreeSink { get; set; }
+
+    public bool IsErrorOrUndefined() =>
+        Origin == Origin.ErrorScreen || Origin == Origin.Undefined;
+
+    /// <summary>Takes a lease. False once the item has been freed: the caller must not touch it.</summary>
+    public bool TryAcquire() => IsErrorOrUndefined() || _leases.TryAcquire();
+
+    /// <summary>Ends a lease; the last one frees the item.</summary>
+    public void Release()
     {
-        // We don't dispose bitmaps coming from the error screen as they are reused.
-        if (!IsErrorOrUndefined()) 
-            Bitmap?.Dispose();
+        if (IsErrorOrUndefined() || !_leases.Release()) return;
+        if (FreeSink is { } sink) sink(this);
+        else Free();
     }
+
+    /// <summary>
+    /// Frees the bitmap. Only the lease count calls this (directly or through <see cref="FreeSink"/>). Virtual so
+    /// items that own more, such as <see cref="SvgHqDisplayItem"/>'s scene, can release it too.
+    /// </summary>
+    public virtual void Free() => Bitmap?.Dispose();
 }
 
 internal sealed partial class PreviewDisplayItem(CanvasBitmap bitmap, Origin origin, ImageMetadata metadata = null, int rotation = 0) : DisplayItem(bitmap, origin, rotation)
@@ -93,7 +114,7 @@ internal sealed partial class SvgHqDisplayItem(Origin origin, SvgScene.Lease lea
     }
 
     /// <summary>Drops this item's ownership of the scene; a renderer still drawing it keeps it alive.</summary>
-    public override void Dispose() => lease.Dispose();
+    public override void Free() => lease.Dispose();
 }
 
 internal sealed partial class MultiPageHqDisplayItem(CanvasBitmap firstFrame, Origin origin, byte[] fileAsByteArray,

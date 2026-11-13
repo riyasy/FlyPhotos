@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
@@ -32,8 +33,8 @@ namespace FlyPhotos.Display.Controllers;
 /// or inside Update/Draw itself. The UI thread never touches them directly — it posts work via
 /// <see cref="_pump"/>. There is therefore no lock on the render hot path.
 ///
-/// All public methods must be called on the UI (DispatcherQueue) thread, except
-/// <see cref="RunAfterQueuedRenderWork"/>, which only enqueues and is safe from any thread.
+/// All public methods must be called on the UI (DispatcherQueue) thread. The canvas holds a lease on the item it
+/// draws (see <see cref="DisplayItem"/>), so a photo's bitmap is never freed while on screen.
 /// </summary>
 internal partial class CanvasController : ICanvasController
 {
@@ -46,7 +47,6 @@ internal partial class CanvasController : ICanvasController
     public event Action OnPageChanged;
 
     private readonly IThumbnailController _thumbNailController;
-    private readonly PhotoSessionState _photoSessionState;
     private readonly CanvasAnimatedControl _d2dCanvas;
 
     // The single UI -> W2D handoff. Drained at the top of every Update on the W2D thread.
@@ -54,6 +54,14 @@ internal partial class CanvasController : ICanvasController
 
     // W2D-owned: swapped/read only on the W2D thread (install action + Draw).
     private IRenderer _currentRenderer;
+
+    // W2D-owned: the lease on the item _currentRenderer draws (null when it draws nothing of a photo's, e.g. an
+    // animator). Released after that renderer is disposed, so a photo's bitmap is never freed while on screen.
+    private DisplayItem _currentItem;
+
+    // Items whose last lease ended, freed together on the W2D thread (see DisplayItem.FreeSink).
+    private readonly ConcurrentQueue<DisplayItem> _toFree = new();
+    private int _freeQueued;
 
     // W2D-owned: created lazily in the install action, disposed on device loss in CreateResources.
     private CanvasImageBrush _checkeredBrush;
@@ -93,15 +101,22 @@ internal partial class CanvasController : ICanvasController
     private int _pendingZoomPercent;
     private int _lastDispatchedZoomPercent = -1;
 
+    private volatile MultiPagePosition _currentPage;
+
+    /// <summary>
+    /// The page on screen of a multi-page photo (multi-page TIFF, multi-frame ICO), or null. Written on the UI
+    /// thread; read anywhere (the filename bar). A volatile reference publishes the whole value at once.
+    /// </summary>
+    public MultiPagePosition CurrentPage { get => _currentPage; private set => _currentPage = value; }
+
     // --- Initialization ---
 
-    public CanvasController(CanvasAnimatedControl d2dCanvas, IThumbnailController thumbNailController,
-        PhotoSessionState photoSessionState)
+    public CanvasController(CanvasAnimatedControl d2dCanvas, IThumbnailController thumbNailController)
     {
         _d2dCanvas = d2dCanvas;
         _thumbNailController = thumbNailController;
-        _photoSessionState = photoSessionState;
         _pump = new W2dActionPump(_d2dCanvas);
+        DisplayItem.FreeSink = QueueFree;
 
         _d2dCanvas.CreateResources += D2dCanvas_CreateResources;
         _d2dCanvas.Update += D2dCanvas_Update;
@@ -132,13 +147,13 @@ internal partial class CanvasController : ICanvasController
     /// <remarks>
     /// Every path with an item to show (the placeholder level always has one) queues its
     /// <see cref="InstallRenderer"/> before the first await (the animated path installs
-    /// its static first frame first). Callers rely on that: the cache disposes the bitmaps of photos leaving the
-    /// window through <see cref="RunAfterQueuedRenderWork"/> right after this returns, and the FIFO pump only
-    /// keeps that safe if the swap away from the old photo is already queued. Don't await before installing.
+    /// its static first frame first), so installs reach the W2D thread in call order. The item is leased here and
+    /// the lease travels with the install, so the cache may release a photo's items as soon as this returns.
     /// </remarks>
     /// <param name="photo">The Photo object containing image data and metadata.</param>
+    /// <param name="displayItem">The photo's item for that level (null: nothing to show).</param>
     /// <param name="displayLevel">The quality level to display (e.g., PlaceHolder, Preview, Hq).</param>
-    public async Task SetSource(Photo photo, DisplayLevel displayLevel)
+    public async Task SetSource(Photo photo, DisplayItem displayItem, DisplayLevel displayLevel)
     {
         // Read the canvas size on the (UI) calling thread; the install action runs on the W2D thread.
         var canvasSize = _d2dCanvas.GetSize();
@@ -156,15 +171,14 @@ internal partial class CanvasController : ICanvasController
 
         var isUpgradeFromPlaceholder = !_realImageDisplayedForCurrentPhoto && displayLevel > DisplayLevel.PlaceHolder;
 
-        _photoSessionState.CurrentDisplayLevel = displayLevel;
-        var displayItem = photo.GetDisplayItemBasedOn(displayLevel);
 
-        var size = photo.GetActualSize();
+        var size = photo.Images.GetActualSize();
         _imageSize = new Size(size.Item1, size.Item2);
 
         Debug.WriteLine($"Displaying {photo.FilePath} at level {displayLevel} with size {_imageSize.Width}x{_imageSize.Height}");
 
-        if (displayItem == null) return;
+        // The lease is handed to the install below and held for as long as the renderer is on screen.
+        if (displayItem == null || !displayItem.TryAcquire()) return;
 
         if (displayLevel > DisplayLevel.PlaceHolder)
             _realImageDisplayedForCurrentPhoto = true;
@@ -205,7 +219,7 @@ internal partial class CanvasController : ICanvasController
             InstallRenderer(
                 new StaticImageRenderer(_d2dCanvas, animDispItem.Bitmap,
                     photo.SupportsTransparency, RequestInvalidate, generateMipChain: false),
-                _imageSize, animDispItem.Rotation, ctx, forceThumbNailRedraw: true);
+                _imageSize, animDispItem.Rotation, ctx, forceThumbNailRedraw: true, animDispItem);
 
             // Asynchronously create the appropriate animator (GIF, WebP, APNG, or AVIF).
             var bytes = animDispItem.FileAsByteArray;
@@ -241,7 +255,8 @@ internal partial class CanvasController : ICanvasController
             // frame already placed it (AsFollowUp clears the view-reset flags).
             InstallRenderer(
                 new AnimatedImageRenderer(_d2dCanvas, newAnimator, photo.SupportsTransparency, RequestInvalidate),
-                _imageSize, animDispItem.Rotation, ctx.AsFollowUp(), forceThumbNailRedraw: false);
+                _imageSize, animDispItem.Rotation, ctx.AsFollowUp(), forceThumbNailRedraw: false,
+                item: null); // the animator draws its own frames, not the item's bitmap
             // Keep the control running while the animated image is active.
             RequestInvalidate();
         }
@@ -256,7 +271,7 @@ internal partial class CanvasController : ICanvasController
         InstallRenderer(
             new StaticImageRenderer(_d2dCanvas, hqDispItem.Bitmap,
                 photo.SupportsTransparency, RequestInvalidate),
-            _imageSize, hqDispItem.Rotation, ctx, forceThumbNailRedraw: true);
+            _imageSize, hqDispItem.Rotation, ctx, forceThumbNailRedraw: true, hqDispItem);
     }
 
     private void HandleHqMultiPageDisplayItem(Photo photo, MultiPageHqDisplayItem multiDispItem, PhotoInstallContext ctx)
@@ -264,7 +279,7 @@ internal partial class CanvasController : ICanvasController
         InstallRenderer(
             new MultiPageRenderer(_d2dCanvas, multiDispItem.FileAsByteArray, 0,
                 photo.SupportsTransparency, RequestInvalidate, multiDispItem.PageOrder),
-            _imageSize, multiDispItem.Rotation, ctx, forceThumbNailRedraw: true);
+            _imageSize, multiDispItem.Rotation, ctx, forceThumbNailRedraw: true, multiDispItem);
     }
 
     private void HandleHqTiledDisplayItem(Photo photo, TiledHqDisplayItem tiledDispItem, PhotoInstallContext ctx)
@@ -272,7 +287,7 @@ internal partial class CanvasController : ICanvasController
         InstallRenderer(
             new TiledImageRenderer(_d2dCanvas, tiledDispItem,
                 photo.SupportsTransparency, RequestInvalidate),
-            _imageSize, tiledDispItem.Rotation, ctx, forceThumbNailRedraw: true);
+            _imageSize, tiledDispItem.Rotation, ctx, forceThumbNailRedraw: true, tiledDispItem);
     }
 
     /// <summary>Installs the vector renderer for an SVG drawn on the GPU (sharp at any zoom).</summary>
@@ -280,7 +295,7 @@ internal partial class CanvasController : ICanvasController
     {
         InstallRenderer(
             new SvgVectorRenderer(_d2dCanvas, svgDispItem, photo.SupportsTransparency, RequestInvalidate),
-            _imageSize, svgDispItem.Rotation, ctx, forceThumbNailRedraw: true);
+            _imageSize, svgDispItem.Rotation, ctx, forceThumbNailRedraw: true, svgDispItem);
     }
 
     private void HandlePreviewDisplayItem(Photo photo, PreviewDisplayItem previewDispItem, PhotoInstallContext ctx)
@@ -294,7 +309,8 @@ internal partial class CanvasController : ICanvasController
         InstallRenderer(
             new StaticImageRenderer(_d2dCanvas, previewDispItem.Bitmap,
                 photo.SupportsTransparency, RequestInvalidate, generateMipChain: false),
-            new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, ctx, forceThumbNailRedraw: true);
+            new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, ctx, forceThumbNailRedraw: true,
+            previewDispItem);
     }
 
     /// <summary>
@@ -311,11 +327,21 @@ internal partial class CanvasController : ICanvasController
     }
 
     /// <summary>
-    /// Runs <paramref name="action"/> on the W2D thread after all work queued before it — in particular every
-    /// renderer swap a preceding <see cref="SetSource"/> queued. Until that swap runs, the old renderer may
-    /// still be drawing the previous photo's bitmap, so disposing a photo goes through here.
+    /// <see cref="DisplayItem.FreeSink"/>: frees items whose last lease ended on the W2D thread, as bitmaps always
+    /// were, so freeing never contends with a draw for the device. One pump job per batch, so a far jump that drops
+    /// hundreds of previews wakes the canvas once. Any thread.
     /// </summary>
-    public void RunAfterQueuedRenderWork(Action action) => _pump.Enqueue(action);
+    private void QueueFree(DisplayItem item)
+    {
+        _toFree.Enqueue(item);
+        if (Interlocked.Exchange(ref _freeQueued, 1) == 0) _pump.Enqueue(FreeQueued);
+    }
+
+    private void FreeQueued()
+    {
+        Volatile.Write(ref _freeQueued, 0);
+        while (_toFree.TryDequeue(out var item)) item.Free();
+    }
 
     /// <summary>
     /// UI thread. A photo was renamed (<see cref="Photo.Rename"/>). The canvas knows photos by path, so it follows
@@ -327,8 +353,8 @@ internal partial class CanvasController : ICanvasController
     {
         if (_currentPhotoPath == oldPath) _currentPhotoPath = newPath;
         // The status bar shows the page position only while its path matches the photo's.
-        if (_photoSessionState.CurrentPage is { } page && page.Path == oldPath)
-            _photoSessionState.CurrentPage = page with { Path = newPath };
+        if (CurrentPage is { } page && page.Path == oldPath)
+            CurrentPage = page with { Path = newPath };
         _pump.Enqueue(() => _canvasViewManager.RenamePhoto(oldPath, newPath));
     }
 
@@ -337,8 +363,9 @@ internal partial class CanvasController : ICanvasController
     /// swap + view-state update apply atomically in the same tick — no one-frame mismatch, and Draw
     /// can never see a renderer mid-disposal.
     /// </summary>
+    /// <param name="item">The item the renderer draws, with a lease taken for it; owned by the canvas from here.</param>
     private void InstallRenderer(IRenderer newRenderer, Size imageSize,
-        int imageRotation, PhotoInstallContext ctx, bool forceThumbNailRedraw)
+        int imageRotation, PhotoInstallContext ctx, bool forceThumbNailRedraw, DisplayItem item)
     {
         // InstallRenderer is always called on the UI thread, so we can fire the event directly here
         // without a DispatcherQueue.TryEnqueue. Only notify when the multipage state actually changes
@@ -352,7 +379,7 @@ internal partial class CanvasController : ICanvasController
 
         // Publish (or clear) the page label for the filename bar. Unlike the event above this must be
         // written on every install, since the path and page count change from photo to photo.
-        _photoSessionState.CurrentPage = newRenderer is MultiPageRenderer multiPage
+        CurrentPage = newRenderer is MultiPageRenderer multiPage
             ? new MultiPagePosition(ctx.PhotoPath, 0, multiPage.PageCount,
                 (int)imageSize.Width, (int)imageSize.Height)
             : null;
@@ -368,12 +395,15 @@ internal partial class CanvasController : ICanvasController
                 _canvasViewManager.CacheCurrentViewState(ctx.PreviousPhotoPath, ctx.CanvasSize);
 
             var oldRenderer = _currentRenderer;
+            var oldItem = _currentItem;
             _currentRenderer = newRenderer;
+            _currentItem = item;
 
             if (oldRenderer is AnimatedImageRenderer)
                 _ = Task.Run(oldRenderer.Dispose); // drain in-flight UpdateFrameAsync off the W2D thread
             else
                 oldRenderer?.Dispose();
+            oldItem?.Release(); // an animated renderer draws its own frames, so its item (if any) can go now
 
             _canvasViewManager.SetScaleAndPosition(ctx.PhotoPath, imageSize, imageRotation,
                 ctx.CanvasSize, ctx.IsFirstPhotoEver, ctx.IsNewPhoto, ctx.IsUpgradeFromPlaceholder);
@@ -528,7 +558,7 @@ internal partial class CanvasController : ICanvasController
                 if (_currentPhotoPath != photoPath) return;
 
                 _imageSize = pageSize;
-                _photoSessionState.CurrentPage = new MultiPagePosition(photoPath, pageIndex, pageCount,
+                CurrentPage = new MultiPagePosition(photoPath, pageIndex, pageCount,
                     (int)pageSize.Width, (int)pageSize.Height);
                 OnPageChanged?.Invoke();
             });
@@ -775,6 +805,11 @@ internal partial class CanvasController : ICanvasController
             _canvasViewManager?.Dispose();
             _currentRenderer?.Dispose();
             _currentRenderer = null;
+            _currentItem?.Release();
+            _currentItem = null;
+            // The W2D loop is gone: free what is queued, and anything released from now on, at once.
+            DisplayItem.FreeSink = null;
+            while (_toFree.TryDequeue(out var item)) item.Free();
             _checkeredBrush?.Dispose();
             _checkeredBrush = null;
         }

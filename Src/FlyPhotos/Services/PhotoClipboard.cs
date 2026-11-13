@@ -41,15 +41,13 @@ internal static class PhotoClipboard
             dataPackage.SetStorageItems((List<IStorageItem>)[sourceFile]);
 
             // 2. IN-MEMORY BITMAP (for paste-as-image targets). A GPU SVG has no bitmap; draw one just for this.
-            var svgBitmap = level == DisplayLevel.Hq && photo.Hq is SvgHqDisplayItem svg ? TryRasterize(svg) : null;
+            // Leased for the copy: the cache may release the item meanwhile (window move, RAW setting change).
+            DisplayItem? item = level switch { DisplayLevel.Hq => photo.Images.Hq, DisplayLevel.Preview => photo.Images.Preview, _ => null };
+            if (item != null && !item.TryAcquire()) item = null;
+            var svgBitmap = item is SvgHqDisplayItem svg ? TryRasterize(svg) : null;
             try
             {
-                var canvasBitmap = svgBitmap ?? level switch
-                {
-                    DisplayLevel.Hq => photo.Hq?.Bitmap,
-                    DisplayLevel.Preview => photo.Preview?.Bitmap,
-                    _ => null
-                };
+                var canvasBitmap = svgBitmap ?? item?.Bitmap;
                 if (canvasBitmap != null)
                 {
                     var streamReference = await GetCanvasBitmapAsAccessStream(canvasBitmap);
@@ -59,6 +57,7 @@ internal static class PhotoClipboard
             finally
             {
                 svgBitmap?.Dispose();
+                item?.Release();
             }
 
             // 3. Set Everything to Clipboard

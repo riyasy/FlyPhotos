@@ -20,10 +20,10 @@ namespace FlyPhotos.Display.State;
 ///   <item>the key list is a <b>volatile copy-on-write snapshot</b> — readers capture the reference
 ///     and iterate without a lock; mutation publishes a new list, never edits in place.</item>
 /// </list>
-/// Position is intentionally NOT owned here — it stays in <c>PhotoSessionState</c>.
+/// Position is not owned here: see <see cref="NavState"/>.
 /// </para>
 /// </summary>
-internal sealed class PhotoList : IPhotoProvider
+internal sealed class PhotoList
 {
     private readonly ConcurrentDictionary<int, Photo> _photos = new();
     private volatile IReadOnlyList<int> _keys = Array.Empty<int>();
@@ -59,6 +59,28 @@ internal sealed class PhotoList : IPhotoProvider
             _photos[i] = new Photo(files[i]);
         }
         _nextKey = files.Count;
+        _keys = keys; // publish the fully populated list atomically
+    }
+
+    /// <summary>
+    /// Replaces the startup list (the opened photo alone) with the full listing. The photo at
+    /// <paramref name="keepKey"/> — already loading or on screen — takes <paramref name="keepPosition"/> and keeps
+    /// its key; every other file gets a new photo. Call once, from the thread that built the startup list.
+    /// </summary>
+    public void ReplaceWithListing(IReadOnlyList<string> files, int keepPosition, int keepKey)
+    {
+        var keys = new List<int>(files.Count);
+        for (int i = 0; i < files.Count; i++)
+        {
+            if (i == keepPosition)
+            {
+                keys.Add(keepKey);
+                continue;
+            }
+            int key = _nextKey++;
+            _photos[key] = new Photo(files[i]);
+            keys.Add(key);
+        }
         _keys = keys; // publish the fully populated list atomically
     }
 

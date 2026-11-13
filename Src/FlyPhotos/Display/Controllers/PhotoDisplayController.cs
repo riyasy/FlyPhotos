@@ -15,7 +15,7 @@ using NLog;
 
 namespace FlyPhotos.Display.Controllers;
 
-internal partial class PhotoDisplayController
+internal partial class PhotoDisplayController : IPhotoProvider
 {
     public event Action<string>? CacheStatusChanged;
     public event Action<FileDisplayDetails>? FileNameOrDetailsChanged;
@@ -26,7 +26,9 @@ internal partial class PhotoDisplayController
     private readonly CancellationTokenSource _cts = new();
     private readonly TaskCompletionSource<bool> _firstPhotoLoadedTcs = new();
 
-    private volatile int _keyPressCounter;
+    // UI thread: presses since the last Brake, and whether that made a burst that holds HQ loading.
+    private int _keyPressCounter;
+    private bool _holdingHq;
     private const int ContinuousPressThreshold = 1;
 
     // The photo collection: Photo objects + the sorted-key snapshot. Its concurrency model (a
@@ -38,36 +40,45 @@ internal partial class PhotoDisplayController
     // MoveWindow and listens to its ready events.
     private readonly PrefetchCache _cache;
 
-    private Photo _firstPhoto;
+    // False while the list holds only the opened photo (the listing is still running): the filename bar shows no
+    // position yet, and delete/rename wait.
     private volatile bool _initialFileListingCompleted = false;
 
     private readonly CanvasAnimatedControl _d2dCanvas;
     private readonly ICanvasController _canvasController;
     private readonly IThumbnailController _thumbNailController;
-    private readonly PhotoSessionState _photoSessionState;
+    private readonly string _firstPhotoPath;
+    private readonly bool _launchedExternally;
+
+    // Where the viewer is (key snapshot + position), one reference so the thumbnail strip never sees a position
+    // from another list. Written on the startup thread until the listing is published, then on the UI thread.
+    private volatile NavState _nav = NavState.None;
+
+    // The level the canvas was last asked to show. Same threads as _nav.
+    private DisplayLevel _displayLevel;
 
     // --- Initialization ---
 
     public PhotoDisplayController(CanvasAnimatedControl d2dCanvas, ICanvasController canvasController, IThumbnailController thumbNailController,
-        PhotoSessionState photoSessionState)
+        string firstPhotoPath, bool launchedExternally)
     {
         _d2dCanvas = d2dCanvas;
         _canvasController = canvasController;
         _thumbNailController = thumbNailController;
-        _photoSessionState = photoSessionState;
+        _firstPhotoPath = firstPhotoPath;
+        _launchedExternally = launchedExternally;
 
-        _cache = new PrefetchCache(_photoList.GetPhoto, _d2dCanvas,
-            () => IsContinuousKeyPress() || InFolderSwitchQuietPeriod());
-        _cache.PreviewReady += OnPreviewReady;
-        _cache.HqReady += OnHqReady;
+        _cache = new PrefetchCache(_photoList.GetPhoto, _d2dCanvas);
+        _cache.Loaded += OnLoaded;
         _cache.CacheStatusChanged += status => CacheStatusChanged?.Invoke(status);
-        _cache.RunAfterQueuedRenderWork = _canvasController.RunAfterQueuedRenderWork;
 
-        _thumbNailController.SetPhotoProvider(_photoList);
-        _thumbNailController.SetPreviewLoadedProbe(_cache.IsPreviewLoaded);
-        _firstPhoto = Photo.Empty();
+        _thumbNailController.SetPhotoProvider(this);
 
-        var thread = new Thread(() => { DoStartupActivities(_photoSessionState.FirstPhotoPath, _cts.Token); });
+        // The opened photo alone, until the listing replaces it with the whole folder/Explorer view around it.
+        _photoList.Initialize([firstPhotoPath]);
+        _nav = new NavState(_photoList.Keys, 0);
+
+        var thread = new Thread(() => { DoStartupActivities(_firstPhotoPath, _cts.Token); });
         thread.SetApartmentState(ApartmentState.STA); // This is needed for COM interaction.
         thread.Start();
     }
@@ -76,8 +87,8 @@ internal partial class PhotoDisplayController
     {
         ImageReader.Initialize(_d2dCanvas);
 
-        _firstPhoto = new Photo(_photoSessionState.FirstPhotoPath);
-        bool continueLoadingHq = await _firstPhoto.LoadPreviewFirstPhoto(_d2dCanvas);
+        var firstPhoto = _photoList[_nav.Key];
+        bool continueLoadingHq = await PhotoLoader.LoadFirstPreview(firstPhoto, _d2dCanvas);
 
         // The open-zoom animation begins on the FIRST SetSource below. Arm the completion wait now
         // so the W2D subscribe is enqueued (FIFO) before that SetSource installs/starts the animation.
@@ -87,11 +98,11 @@ internal partial class PhotoDisplayController
 
         if (continueLoadingHq)
         {
-            await SetSourceAsync(_firstPhoto, DisplayLevel.Preview);
-            await _firstPhoto.LoadHqFirstPhoto(_d2dCanvas);
+            await SetSourceAsync(firstPhoto, DisplayLevel.Preview);
+            await Task.Run(() => PhotoLoader.LoadHq(firstPhoto, _d2dCanvas));
         }
 
-        await SetSourceAsync(_firstPhoto, DisplayLevel.Hq);
+        await SetSourceAsync(firstPhoto, DisplayLevel.Hq);
 
         // Wait for the actual animation to finish rather than a fixed delay; already-complete is a no-op.
         await openZoomAnimation;
@@ -112,25 +123,18 @@ internal partial class PhotoDisplayController
             IReadOnlyList<string> files =
                 AppConfig.Volatile.IsSecondaryInstance ? [selectedFilePath] :
                 IsFolderMode ? ListFolderAndStartWatching(selectedFilePath) :
-                FileDiscovery.DiscoverFiles(selectedFilePath, _photoSessionState.FlyLaunchedExternally);
+                FileDiscovery.DiscoverFiles(selectedFilePath, _launchedExternally);
 
-            _photoSessionState.PhotosCount = files.Count;
-
-            _photoList.Initialize(files);
-
+            // The opened photo gets the whole machine until it is on screen.
             _firstPhotoLoadedTcs.Task.Wait(token);
 
-            var currentDisplayIndex = FileDiscovery.FindSelectedFileIndex(selectedFilePath, files);
-            // In the starting Keys and Index will be same as the keys are continous.
-            _photoSessionState.SetCurrentPhotoKeyAndListPosition(currentDisplayIndex, currentDisplayIndex);
-
-            _photoList.Set(_photoSessionState.CurrentPhotoKey, _firstPhoto);
-            _cache.SeedHqLoaded(_photoSessionState.CurrentPhotoKey);
-            _firstPhoto = Photo.Empty(); // release redundant field reference; _photoList owns it now
+            // The opened photo keeps its key (and what it has loaded) at its place in the listing.
+            var firstKey = _nav.Key;
+            var position = FileDiscovery.FindSelectedFileIndex(selectedFilePath, files);
+            _photoList.ReplaceWithListing(files, position, firstKey);
+            _nav = new NavState(_photoList.Keys, position);
 
             _initialFileListingCompleted = true;
-
-            _cache.MoveWindow(_photoSessionState.CurrentPhotoListPosition, _photoList.Keys, signalHqLoading: true);
             UpdateFileNameAndDetails();
 
             FirstPhotoLoaded?.Invoke();
@@ -138,9 +142,9 @@ internal partial class PhotoDisplayController
             // Secondary instances skip all background caching threads.
             if (AppConfig.Volatile.IsSecondaryInstance) return;
 
-            _cache.Start();
+            _cache.Start(_nav);
             // Last: from here on, Folder mode list changes may run on the UI thread, so this thread must be
-            // done with the list and the cache window (MoveWindow is not safe to run on two threads at once).
+            // done with the list.
             _listingReady.TrySetResult();
         }
         catch (Exception ex)
@@ -151,55 +155,58 @@ internal partial class PhotoDisplayController
 
     // --- Cache events & display upgrade ---
 
-    // The cache fires these on a ThreadPool thread when a load completes. The controller decides
-    // whether the freshly-loaded key is the one on screen and upgrades the display if so. This is the
-    // single place that used to be UpgradeImageIfNeeded + the thumbnail redraw inside the loader.
-    private void OnPreviewReady(int key)
+    // 1 while a RefreshCurrent is queued on the UI thread, so a burst of loads queues one refresh.
+    private int _refreshQueued;
+
+    // UI thread: the item last handed to the canvas, to tell a reload (same level, new item) from a repeat.
+    private DisplayItem? _shownItem;
+
+    // Loader thread: an image was stored for a key. The strip redraws that slot; whether the screen changes is
+    // decided on the UI thread, which alone knows what is on screen. Never compared with the loader's own centre:
+    // the loader may not have seen the latest navigation yet.
+    private void OnLoaded(int key)
     {
-        if (_photoSessionState.CurrentPhotoKey == key && _photoList.GetPhoto(key) is { } photo)
-            UpgradeImageIfNeeded(key, photo, DisplayLevel.PlaceHolder, DisplayLevel.Preview);
         _thumbNailController.RedrawThumbNailsIfNeeded(key);
+        if (Interlocked.Exchange(ref _refreshQueued, 1) == 0)
+            _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
+            {
+                Volatile.Write(ref _refreshQueued, 0);
+                RefreshCurrent();
+            });
     }
 
-    private void OnHqReady(int key)
+    /// <summary>
+    /// UI thread. Shows the best image the photo on screen now has, if it is a higher level than the one shown, or
+    /// the same level reloaded (a RAW setting change). Never steps down.
+    /// </summary>
+    private void RefreshCurrent()
     {
-        if (_photoSessionState.CurrentPhotoKey == key && _photoList.GetPhoto(key) is { } photo)
-            UpgradeImageIfNeeded(key, photo, DisplayLevel.Preview, DisplayLevel.Hq);
+        if (_photoList.GetPhoto(_nav.Key) is not { } photo) return;
+        var level = BestLevel(photo);
+        if (level == DisplayLevel.PlaceHolder || level < _displayLevel) return;
+        if (level == _displayLevel && ReferenceEquals(photo.Images.Get(level), _shownItem)) return;
+        _ = SetSourceAsync(photo, level);
     }
 
-    private async Task DisplayPhotoAtKey(int key, bool triggerHqCaching)
+    private static DisplayLevel BestLevel(Photo photo) =>
+        photo.Images.Hq != null ? DisplayLevel.Hq :
+        photo.Images.Preview != null ? DisplayLevel.Preview : DisplayLevel.PlaceHolder;
+
+    // UI thread. Shows the photo on screen at the best level it has, and re-centres the cache on it — posted first,
+    // so prefetching never waits for a slow install (an animation's first frames).
+    private async Task DisplayCurrent()
     {
-        if (_photoList.GetPhoto(key) is not { } photo) return;
-
-        if (_cache.IsHqLoaded(key))
-            await SetSourceAsync(photo, DisplayLevel.Hq);
-        else if (_cache.IsPreviewLoaded(key))
-            await SetSourceAsync(photo, DisplayLevel.Preview);
-        else
-            await SetSourceAsync(photo, DisplayLevel.PlaceHolder);
-
-        _cache.MoveWindow(_photoSessionState.CurrentPhotoListPosition, _photoList.Keys, signalHqLoading: triggerHqCaching);
-    }
-
-    private void UpgradeImageIfNeeded(int key, Photo photo, DisplayLevel fromDisplayState,
-        DisplayLevel toDisplayState)
-    {
-        _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
-        {
-            // Checked on the UI thread, where navigation, list changes and the display level are written:
-            // since the load finished the user may have moved on, the photo may have left the list and been
-            // retired (its bitmaps disposed), or the photo may already show a better level (navigating back
-            // installs HQ directly), which this upgrade must not step down.
-            if (_photoSessionState.CurrentPhotoKey != key || !ReferenceEquals(_photoList.GetPhoto(key), photo) ||
-                _photoSessionState.CurrentDisplayLevel != fromDisplayState)
-                return;
-            _ = SetSourceAsync(photo, toDisplayState);
-        });
+        if (_photoList.GetPhoto(_nav.Key) is not { } photo) return;
+        _cache.MoveWindow(_nav);
+        await SetSourceAsync(photo, BestLevel(photo));
     }
 
     private async Task SetSourceAsync(Photo photo, DisplayLevel displayLevel)
     {
-        await _canvasController.SetSource(photo, displayLevel);
+        var item = photo.Images.Get(displayLevel);
+        _displayLevel = displayLevel;
+        _shownItem = item;
+        await _canvasController.SetSource(photo, item, displayLevel);
         UpdateFileNameAndDetails();
     }
 
@@ -209,10 +216,14 @@ internal partial class PhotoDisplayController
     {
         var keys = _photoList.Keys;
         if (keys.Count <= 1) return;
-        // A list that can't be navigated must never open a burst: the HQ worker parks on
-        // IsContinuousKeyPress, and only a Brake() would unwind it.
-        Interlocked.Increment(ref _keyPressCounter);
-        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
+        // A list that can't be navigated must never open a burst: HQ stays held until a Brake().
+        _keyPressCounter++;
+        if (IsContinuousKeyPress() && !_holdingHq)
+        {
+            _holdingHq = true;
+            _cache.HoldHq(true);
+        }
+        int currentPosition = _nav.Position;
         if (currentPosition < 0) return; // TODO Should not happen if state is consistent
         int newPosition = currentPosition + (direction == NavDirection.Next ? 1 : -1);
         if (newPosition < 0 || newPosition >= keys.Count)
@@ -221,52 +232,52 @@ internal partial class PhotoDisplayController
             return;
         }
         int newKey = keys[newPosition];
-        await FlyTo(newKey, newPosition, false);
+        await FlyTo(newKey, newPosition);
     }
 
     public async Task FlyToFirst()
     {
         var keys = _photoList.Keys;
         if (keys.Count <= 1) return;
-        if (_photoSessionState.CurrentPhotoListPosition == 0) _thumbNailController.BounceAtEdge(NavDirection.Prev);
-        await FlyTo(keys[0], 0, true);
+        if (_nav.Position == 0) _thumbNailController.BounceAtEdge(NavDirection.Prev);
+        await FlyTo(keys[0], 0);
     }
 
     public async Task FlyToLast()
     {
         var keys = _photoList.Keys;
         if (keys.Count <= 1) return;
-        if (_photoSessionState.CurrentPhotoListPosition == keys.Count - 1) _thumbNailController.BounceAtEdge(NavDirection.Next);
-        await FlyTo(keys[^1], keys.Count - 1, true);
+        if (_nav.Position == keys.Count - 1) _thumbNailController.BounceAtEdge(NavDirection.Next);
+        await FlyTo(keys[^1], keys.Count - 1);
     }
 
     public async Task FlyBy(int shiftBy)
     {
         var keys = _photoList.Keys;
         if (keys.Count <= 1) return;
-        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
+        int currentPosition = _nav.Position;
         if (currentPosition < 0) return;
         int newPosition = Math.Clamp(currentPosition + shiftBy, 0, keys.Count - 1);
-        await FlyTo(keys[newPosition], newPosition, true);
+        await FlyTo(keys[newPosition], newPosition);
     }
 
-    private async Task FlyTo(int toKey, int toPosition, bool triggerHqCaching)
+    private async Task FlyTo(int toKey, int toPosition)
     {
         if (!_photoList.Contains(toKey)) return;
-        _photoSessionState.SetCurrentPhotoKeyAndListPosition(toKey, toPosition);
-        await DisplayPhotoAtKey(_photoSessionState.CurrentPhotoKey, triggerHqCaching);
+        _nav = new NavState(_photoList.Keys, toPosition);
+        await DisplayCurrent();
     }
 
     public async Task Brake()
     {
-        var currentKey = _photoSessionState.CurrentPhotoKey;
-        if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq
-            && _cache.IsHqLoaded(currentKey)
-            && _photoList.GetPhoto(currentKey) is { } hqPhoto)
-            await SetSourceAsync(hqPhoto, DisplayLevel.Hq);
-        // Reset before waking: the HQ worker re-checks the burst predicate after every wake-up.
         _keyPressCounter = 0;
-        _cache.SignalHqLoading();
+        if (_holdingHq)
+        {
+            _holdingHq = false;
+            _cache.HoldHq(false);
+        }
+        if (_displayLevel != DisplayLevel.Hq && _photoList.GetPhoto(_nav.Key) is { Images.Hq: not null } photo)
+            await SetSourceAsync(photo, DisplayLevel.Hq);
     }
 
     // --- File info ---
@@ -276,8 +287,8 @@ internal partial class PhotoDisplayController
         try
         {
             var initialFileListingCompleted = _initialFileListingCompleted;
-            var currentKey = _photoSessionState.CurrentPhotoKey;
-            var photo = initialFileListingCompleted ? _photoList.GetPhoto(currentKey) : _firstPhoto;
+            var currentKey = _nav.Key;
+            var photo = _photoList.GetPhoto(currentKey);
 
             if (photo == null) return;
 
@@ -287,28 +298,28 @@ internal partial class PhotoDisplayController
 
             if (initialFileListingCompleted)
             {
-                var currentPosition = _photoSessionState.CurrentPhotoListPosition;
+                var currentPosition = _nav.Position;
                 if (currentPosition < 0) return;
                 var totalFileCount = _photoList.Keys.Count;
                 positionText = $"[{currentPosition + 1}/{totalFileCount}]";
             }
 
             var showDimension = AppConfig.Settings.ShowImageDimensions &&
-                                _photoSessionState.CurrentDisplayLevel != DisplayLevel.PlaceHolder &&
+                                _displayLevel != DisplayLevel.PlaceHolder &&
                                 !photo.IsVector &&
-                                !photo.IsErrorScreen(_photoSessionState.CurrentDisplayLevel);
+                                !photo.Images.IsErrorScreen(_displayLevel);
 
             if (showDimension)
             {
                 // A multi-page photo reports the page on screen, not the whole file - ICO frames each
                 // have their own size, so the file's "actual size" would be wrong on every page but the first.
-                if (_photoSessionState.CurrentPage is { } page && page.Path == photo.FilePath)
+                if (_canvasController.CurrentPage is { } page && page.Path == photo.FilePath)
                 {
                     dimensionText = $"({page.Width} x {page.Height} - {page.Index + 1}/{page.Count})";
                 }
                 else
                 {
-                    var (w, h) = photo.GetActualSize();
+                    var (w, h) = photo.Images.GetActualSize();
                     dimensionText = $"({w} x {h})";
                 }
             }
@@ -324,32 +335,17 @@ internal partial class PhotoDisplayController
     // --- RAW decode settings changed ---
 
     // Drops cached RAW HQ bitmaps so the new decoder settings take effect, and re-decodes them.
-    // Called from the UI thread when a RAW decode setting (DecodeRawData / decoder priority) changes.
-    public async Task InvalidateRawHqCache()
-    {
-        var currentKey = _photoSessionState.CurrentPhotoKey;
-        var currentPhoto = _photoList.GetPhoto(currentKey);
-
-        // If a RAW HQ bitmap we're about to dispose is on screen, step the display down first so the
-        // renderer isn't holding a disposed CanvasBitmap. OnHqReady upgrades it back once re-decoded.
-        if (currentPhoto is { IsRaw: true } &&
-            _photoSessionState.CurrentDisplayLevel == DisplayLevel.Hq)
-        {
-            var level = _cache.IsPreviewLoaded(currentKey)
-                ? DisplayLevel.Preview : DisplayLevel.PlaceHolder;
-            await SetSourceAsync(currentPhoto, level);
-        }
-
-        _cache.InvalidateHqForRawFiles();
-    }
+    // Called from the UI thread when a RAW decode setting (DecodeRawData / decoder priority) changes. A RAW HQ on
+    // screen stays (the canvas holds its own lease) until the re-decoded one replaces it (RefreshCurrent).
+    public void InvalidateRawHqCache() => _cache.InvalidateHqForRawFiles();
 
     // --- Deletion ---
 
     public bool CanDeleteCurrentPhoto()
     {
-        if (_photoList.Keys.Count == 0) return false;
+        if (!_initialFileListingCompleted) return false; // the list is still just the opened photo
         if (IsContinuousKeyPress()) return false;
-        if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq) return false;
+        if (_displayLevel != DisplayLevel.Hq) return false;
         return true;
     }
     public async Task<DeleteResult> DeleteCurrentPhoto()
@@ -369,8 +365,8 @@ internal partial class PhotoDisplayController
     private async Task<DeleteResult> DeleteCurrentPhotoCore()
     {
         // --- Step 1: Guard Clauses and State Capture ---
-        var keyToDelete = _photoSessionState.CurrentPhotoKey;
-        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
+        var keyToDelete = _nav.Key;
+        int currentPosition = _nav.Position;
         // Safety check: the current photo must have a position in the list.
         if (currentPosition < 0)
         {
@@ -394,8 +390,8 @@ internal partial class PhotoDisplayController
         if (_photoList.Keys.Count <= 1) return new DeleteResult(true, true);
 
         // Same path as a Folder mode removal: the next photo is shown, else the previous one.
-        await ApplyListChangeAsync(path => path.Equals(deletedPath, StringComparison.OrdinalIgnoreCase),
-            renamed: null, added: [], order: null, goToFirst: false);
+        await ApplyListChangeAsync(new ListChangeBatch(
+            path => path.Equals(deletedPath, StringComparison.OrdinalIgnoreCase), null, [], null), goToFirst: false);
         return new DeleteResult(true, false);
     }
 
@@ -406,29 +402,27 @@ internal partial class PhotoDisplayController
 
     /// <summary>
     /// UI thread, inside <see cref="_listChangeGate"/>. Applies one change to the list (see
-    /// <see cref="PhotoList.ApplyChanges"/>; <paramref name="added"/> sorted by <paramref name="order"/>) and
+    /// <see cref="PhotoList.ApplyChanges"/>) and
     /// keeps the viewer on the same file: its position is recomputed, and if it was removed the nearest
     /// surviving neighbour in the old order is shown — the next one, else the previous one.
     /// </summary>
-    private async Task ApplyListChangeAsync(Predicate<string> isRemoved, IReadOnlyDictionary<string, string>? renamed,
-        IReadOnlyList<string> added, IComparer<string>? order, bool goToFirst)
+    private async Task ApplyListChangeAsync(ListChangeBatch batch, bool goToFirst)
     {
         var oldKeys = _photoList.Keys;
-        int oldPosition = _photoSessionState.CurrentPhotoListPosition;
-        int currentKey = _photoSessionState.CurrentPhotoKey;
+        int oldPosition = _nav.Position;
+        int currentKey = _nav.Key;
         var currentPath = _photoList.GetPhoto(currentKey)?.FilePath;
 
         // Renamed photos keep their key; the canvas knows them by path, so it has to follow.
-        var removed = _photoList.ApplyChanges(isRemoved, renamed, added, order, currentKey,
+        var removed = _photoList.ApplyChanges(batch.IsRemoved, batch.Renamed, batch.Added, batch.Order, currentKey,
             onRenamed: _canvasController.OnPhotoRenamed);
         var keys = _photoList.Keys;
         if (ReferenceEquals(keys, oldKeys)) return; // nothing actually changed
 
         // Detach removed photos from the cache and the dictionary BEFORE navigating: the window move below
-        // disposes whatever loaded photo falls outside the new window, and the old on-screen photo must not
-        // be among them — the canvas draws it until the queued renderer swap runs.
-        foreach (var (key, _) in removed)
-            _cache.Evict(key);
+        // releases whatever loaded photo falls outside the new window, and removed photos are released by
+        // Retire instead (once, not twice).
+        _cache.Forget(removed.ConvertAll(r => r.Key));
         _photoList.Forget(removed);
 
         // Removed photos are already forgotten, so "still in the list" is exactly "survived".
@@ -438,39 +432,34 @@ internal partial class PhotoDisplayController
                                   string.Equals(_photoList.GetPhoto(key)?.FilePath, currentPath, StringComparison.OrdinalIgnoreCase));
         if (keys[newPosition] == currentKey)
         {
-            _photoSessionState.SetCurrentPhotoKeyAndListPosition(currentKey, newPosition);
-            _cache.MoveWindow(newPosition, keys, signalHqLoading: true);
+            _nav = new NavState(keys, newPosition);
+            _cache.MoveWindow(_nav);
             _thumbNailController.RequestThumbnailRedraw();
             UpdateFileNameAndDetails();
         }
         else
         {
-            await FlyTo(keys[newPosition], newPosition, triggerHqCaching: true);
+            await FlyTo(keys[newPosition], newPosition);
         }
 
-        // SetSource only queued the renderer swap; disposing now could free a bitmap the render thread is
-        // still drawing (a native crash). The pump is FIFO, so this runs after the swap; Retire then waits for
-        // any background load still using the photo.
-        if (removed.Count > 0)
-            _canvasController.RunAfterQueuedRenderWork(() =>
-            {
-                foreach (var (_, photo) in removed) photo.Retire();
-            });
+        // The canvas holds its own lease on whatever it still draws, and a load still running for a removed photo
+        // releases what it brings, so retiring at once is safe.
+        foreach (var (_, photo) in removed) photo.Images.Retire();
     }
 
     // --- Rename ---
 
     public bool CanRenameCurrentPhoto()
     {
-        if (_photoList.Keys.Count == 0) return false;
+        if (!_initialFileListingCompleted) return false; // the list is still just the opened photo
         if (IsContinuousKeyPress()) return false;
-        if (_photoSessionState.CurrentDisplayLevel != DisplayLevel.Hq) return false;
+        if (_displayLevel != DisplayLevel.Hq) return false;
         return true;
     }
 
     public async Task<RenameResult> RenameCurrentPhoto(string newFileName)
     {
-        var currentKey = _photoSessionState.CurrentPhotoKey;
+        var currentKey = _nav.Key;
         if (_photoList.GetPhoto(currentKey) is not { } photo)
         {
             Logger.Error($"RenameCurrentPhoto failed: Key {currentKey} not found in the collection.");
@@ -482,7 +471,7 @@ internal partial class PhotoDisplayController
         var result = await StorageOps.RenameFileOnDisk(oldPath, newPath);
         if (!result.Success) return result;
 
-        if (_folderSort == null)
+        if (_folder == null)
         {
             // Explorer mode: the list keeps Explorer's order, so the photo stays where it is.
             photo.Rename(newPath);
@@ -496,10 +485,7 @@ internal partial class PhotoDisplayController
         await _listChangeGate.WaitAsync();
         try
         {
-            _folderSort.Rename(oldPath, newPath);
-            await ApplyListChangeAsync(static _ => false,
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { [oldPath] = newPath },
-                added: [], _folderSort, goToFirst: false);
+            await ApplyListChangeAsync(_folder.Rename(oldPath, newPath), goToFirst: false);
         }
         finally
         {
@@ -512,9 +498,9 @@ internal partial class PhotoDisplayController
 
     public Task CopyFileToClipboardAsync()
     {
-        if (_photoList.GetPhoto(_photoSessionState.CurrentPhotoKey) is not { } photo)
+        if (_photoList.GetPhoto(_nav.Key) is not { } photo)
             return Task.CompletedTask;
-        return PhotoClipboard.CopyToClipboardAsync(photo, _photoSessionState.CurrentDisplayLevel);
+        return PhotoClipboard.CopyToClipboardAsync(photo, _displayLevel);
     }
 
     // --- Queries ---
@@ -523,16 +509,14 @@ internal partial class PhotoDisplayController
 
     public bool IsSinglePhoto() => _photoList.Count <= 1;
 
-    // Before the initial file listing completes, CurrentPhotoKey is still its default (0), which
-    // does not necessarily correspond to the first photo's real position in the sorted list (e.g.
-    // it isn't 0 whenever the opened file isn't alphabetically first). Mirror the same fallback
-    // UpdateFileNameAndDetails uses so callers see the actual on-screen file during that window.
-    public string GetFullPathCurrentFile() =>
-        _initialFileListingCompleted ? _photoList[_photoSessionState.CurrentPhotoKey].FilePath : _firstPhoto.FilePath;
+    public string GetFullPathCurrentFile() => _photoList[_nav.Key].FilePath;
 
     /// <summary>Whether the on-screen photo is a RAW file. Lock-free read; safe to call cross-thread.</summary>
+    NavState IPhotoProvider.Nav => _nav;
+    Photo? IPhotoProvider.GetPhoto(int key) => _photoList.GetPhoto(key);
+
     public bool CurrentPhotoIsRaw =>
-        _photoList.GetPhoto(_photoSessionState.CurrentPhotoKey) is { IsRaw: true };
+        _photoList.GetPhoto(_nav.Key) is { IsRaw: true };
 
     // --- Cleanup ---
 

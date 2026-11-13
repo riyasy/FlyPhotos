@@ -38,9 +38,7 @@ internal partial class ThumbNailController : IThumbnailController
     public event Action<int> ThumbnailClicked;
 
     private readonly CanvasAnimatedControl _d2dCanvasThumbNail;
-    private readonly PhotoSessionState _photoSessionState;
     private IPhotoProvider _provider;
-    private Func<int, bool> _isPreviewLoaded;
 
     private int _numOfThumbNailsInOneDirection = 20;
     private int _thumbnailBoxSize = AppConfig.Settings.ThumbnailSize;
@@ -81,10 +79,9 @@ internal partial class ThumbNailController : IThumbnailController
 
     // --- Initialization ---
 
-    public ThumbNailController(CanvasAnimatedControl d2dCanvasThumbNail, PhotoSessionState photoSessionState)
+    public ThumbNailController(CanvasAnimatedControl d2dCanvasThumbNail)
     {
         _d2dCanvasThumbNail = d2dCanvasThumbNail;
-        _photoSessionState = photoSessionState;
         _pump = new W2dActionPump(_d2dCanvasThumbNail);
         _d2dCanvasThumbNail.CreateResources += D2dCanvasThumbNail_CreateResources;
         _d2dCanvasThumbNail.Update += D2dCanvasThumbNail_Update;
@@ -98,7 +95,6 @@ internal partial class ThumbNailController : IThumbnailController
 
     public void SetPhotoProvider(IPhotoProvider provider) => _provider = provider;
 
-    public void SetPreviewLoadedProbe(Func<int, bool> isPreviewLoaded) => _isPreviewLoaded = isPreviewLoaded;
 
     // --- Canvas event handlers ---
 
@@ -191,7 +187,8 @@ internal partial class ThumbNailController : IThumbnailController
         if (e.GetCurrentPoint(_d2dCanvasThumbNail).Properties.PointerUpdateKind
             is not Microsoft.UI.Input.PointerUpdateKind.LeftButtonPressed) return;
 
-        var keys = _provider?.Keys;
+        var nav = _provider?.Nav;
+        var keys = nav?.Keys;
         if (keys == null || keys.Count <= 1) return;
 
         var pos = e.GetCurrentPoint(_d2dCanvasThumbNail).Position;
@@ -204,7 +201,7 @@ internal partial class ThumbNailController : IThumbnailController
         if (offset == 0) return; // No navigation needed if the center thumbnail is clicked.
 
         // 2. Find the POSITION of the current key.
-        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
+        int currentPosition = nav.Position;
         if (currentPosition < 0) return;
 
         // 3. Calculate the new target POSITION.
@@ -264,10 +261,11 @@ internal partial class ThumbNailController : IThumbnailController
     {
         // Capture the snapshot once — this method is called from a ThreadPool continuation and the
         // list may be swapped by DeleteCurrentPhoto on the UI thread at any moment.
-        var keys = _provider?.Keys;
+        var nav = _provider?.Nav;
+        var keys = nav?.Keys;
         if (keys == null || keys.Count == 0) return;
 
-        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
+        int currentPosition = nav.Position;
         if (currentPosition < 0) return;
 
         // Redraw only if the updated photo sits in one of the visible slots.
@@ -369,7 +367,8 @@ internal partial class ThumbNailController : IThumbnailController
     private void BuildRibbon(ICanvasAnimatedControl sender)
     {
         // Capture the key snapshot once — lock-free per the PhotoList contract.
-        var keys = _provider?.Keys;
+        var nav = _provider?.Nav;
+        var keys = nav?.Keys;
         if (keys == null || keys.Count < 1 || !_canDrawThumbnails || !AppConfig.Settings.ShowThumbnails)
         {
             ReleaseDeviceResources();
@@ -378,7 +377,7 @@ internal partial class ThumbNailController : IThumbnailController
 
         // Find the position of the currently displayed photo. Guard BEFORE (re)creating the offscreen, so
         // an invalid position can never leave a freshly allocated, uncleared render target for Draw to blit.
-        int currentPosition = _photoSessionState.CurrentPhotoListPosition;
+        int currentPosition = nav.Position;
         if (currentPosition < 0) return; // Can't draw if the current photo is invalid.
 
         var canvasWidth = (float)sender.Size.Width;
@@ -456,7 +455,7 @@ internal partial class ThumbNailController : IThumbnailController
     private CanvasBitmap GetOrCreateLoadingIndicatorBitmap(ICanvasResourceCreator resourceCreator)
     {
         if (_loadingIndicatorBitmap != null) return _loadingIndicatorBitmap;
-        var src = Photo.GetLoadingIndicator().Bitmap;
+        var src = FlyPhotos.Display.ImageReading.ImageReader.GetLoadingIndicator().Bitmap;
         if (src == null) return null;
         var pixels = src.GetPixelBytes();
         _loadingIndicatorBitmap = CanvasBitmap.CreateFromBytes(resourceCreator,
@@ -511,9 +510,9 @@ internal partial class ThumbNailController : IThumbnailController
         if (thumbnailPosition < 0 || thumbnailPosition >= keys.Count) return;
 
         var key = keys[thumbnailPosition];
-        var photo = _isPreviewLoaded?.Invoke(key) == true ? _provider?.GetPhoto(key) : null;
+        var photo = _provider?.GetPhoto(key);
         // Read once: the UI thread may null Photo.Thumbnail (preview eviction) at any moment.
-        var thumbnail = photo?.Thumbnail;
+        var thumbnail = photo?.Images.Thumbnail;
 
         var bitmap = (thumbnail != null ? TakeOrCreateThumbnailBitmap(thumbnail, creator) : null)
                      ?? GetOrCreateLoadingIndicatorBitmap(creator);
@@ -575,6 +574,5 @@ internal partial class ThumbNailController : IThumbnailController
         ReleaseDeviceResources();
         ThumbnailClicked = null;
         _provider = null;
-        _isPreviewLoaded = null;
     }
 }

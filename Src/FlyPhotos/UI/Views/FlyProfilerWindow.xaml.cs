@@ -206,12 +206,12 @@ public sealed partial class FlyProfilerWindow : Window
                     var functionMap = new Dictionary<string, Func<Task<bool>>>()
                     {
                         // Readers outside the chains, kept for comparison runs.
-                        { "GifReader.GetFirstFrameFullSize", async () => { var (ok, item) = await GifReader.GetFirstFrameFullSize(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "PngReader.GetFirstFrameFullSize", async () => { var (ok, item) = await PngReader.GetFirstFrameFullSize(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        //{ "SvgSkiaWrap.GetResized", async () => { var (ok, item) = SvgSkiaWrap.GetResized(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        //{ "SvgSkiaWrap.GetHq", async () => { var (ok, item) = SvgSkiaWrap.GetHq(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "TiffReader.GetFirstFrameFullSize", async () => { var (ok, item) = await TiffReader.GetFirstFrameFullSize(TestCanvas, imagePath); if (ok) item?.Dispose(); return ok; } },
-                        { "RawlerWrapper.GetEmbeddedPreview", async () => { var (ok, item) = RawlerWrapper.GetEmbeddedPreview(TestCanvas, imagePath); if (ok) item?.Dispose(); await Task.CompletedTask; return ok; } },
+                        { "GifReader.GetFirstFrameFullSize", async () => { var (ok, item) = await GifReader.GetFirstFrameFullSize(TestCanvas, imagePath); if (ok) item?.Release(); return ok; } },
+                        { "PngReader.GetFirstFrameFullSize", async () => { var (ok, item) = await PngReader.GetFirstFrameFullSize(TestCanvas, imagePath); if (ok) item?.Release(); return ok; } },
+                        //{ "SvgSkiaWrap.GetResized", async () => { var (ok, item) = SvgSkiaWrap.GetResized(TestCanvas, imagePath); if (ok) item?.Release(); return ok; } },
+                        //{ "SvgSkiaWrap.GetHq", async () => { var (ok, item) = SvgSkiaWrap.GetHq(TestCanvas, imagePath); if (ok) item?.Release(); return ok; } },
+                        { "TiffReader.GetFirstFrameFullSize", async () => { var (ok, item) = await TiffReader.GetFirstFrameFullSize(TestCanvas, imagePath); if (ok) item?.Release(); return ok; } },
+                        { "RawlerWrapper.GetEmbeddedPreview", async () => { var (ok, item) = RawlerWrapper.GetEmbeddedPreview(TestCanvas, imagePath); if (ok) item?.Release(); await Task.CompletedTask; return ok; } },
                     };
                     foreach (var step in Enum.GetValues<DecodeStep>())
                         functionMap[step.ToString()] = () => ProfilingImageReader.RunOne(TestCanvas, imagePath, step);

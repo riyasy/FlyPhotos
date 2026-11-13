@@ -125,10 +125,9 @@ public sealed partial class PhotoDisplayWindow
 
         DispatcherQueue.EnsureSystemDispatcherQueue();
 
-        var photoSessionState = new PhotoSessionState { FirstPhotoPath = firstPhotoPath, FlyLaunchedExternally = extLaunch };
-        _thumbNailController = new ThumbNailController(D2dCanvasThumbNail, photoSessionState);
-        _canvasController = new CanvasController(D2dCanvas, _thumbNailController, photoSessionState);
-        _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, photoSessionState);
+        _thumbNailController = new ThumbNailController(D2dCanvasThumbNail);
+        _canvasController = new CanvasController(D2dCanvas, _thumbNailController);
+        _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, firstPhotoPath, extLaunch);
         _photoController.CacheStatusChanged += PhotoController_CacheStatusChanged;
         _photoController.FileNameOrDetailsChanged += PhotoController_FileNameOrDetailsChanged;
         _photoController.FirstPhotoLoaded += OnFirstPhotoLoaded;
@@ -1197,7 +1196,7 @@ public sealed partial class PhotoDisplayWindow
                 _canvasController.HandleImageScalingQualityChange();
                 break;
             case Setting.RawDecodingChange:
-                _ = _photoController.InvalidateRawHqCache();
+                _photoController.InvalidateRawHqCache();
                 break;
             case Setting.Theme:
                 _windAppearanceManager.SetWindowTheme(AppConfig.Settings.Theme);

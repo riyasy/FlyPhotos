@@ -29,7 +29,7 @@ internal static class ProfilingImageReader
     {
         using var file = new ImageFile(path);
         var item = await ImageReader.Run(step, d, file);
-        item?.Dispose();
+        item?.Release();
         return item != null;
     }
 
@@ -56,7 +56,7 @@ internal static class ProfilingImageReader
 
         // Done while the item is still alive, after the file's own stream is closed.
         bool? locked = checkLock && item != null ? IsFileLocked(path) : null;
-        item?.Dispose();
+        item?.Release();
         return new ProbeResult(item != null, sw.ElapsedMilliseconds, lastReader, attempts > 1, locked);
     }
 
