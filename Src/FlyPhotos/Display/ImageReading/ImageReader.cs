@@ -262,4 +262,7 @@ internal static class ImageReader
 
     /// <summary>The error screen shown when no decoder could read the image.</summary>
     private static StaticHqDisplayItem HqFailed() => new(_indicators.HqFailed, Origin.ErrorScreen);
+
+    /// <summary>The "invalid file" error screen, as an HQ item (shared bitmap, never freed).</summary>
+    public static HqDisplayItem GetHqFailedIndicator() => HqFailed();
 }

@@ -152,6 +152,9 @@ internal sealed class PrefetchCache : IDisposable
     });
 
 
+    /// <summary>A planning setting (a window size) changed: plan again now. The planner reads it from the settings.</summary>
+    public void Replan() => Post(static () => { });
+
     private void Post(Action message)
     {
         _inbox.Enqueue(message);
@@ -165,19 +168,15 @@ internal sealed class PrefetchCache : IDisposable
 
     private void Run()
     {
-        try
+        var handles = new WaitHandle[] { _wake, _stop.Token.WaitHandle };
+        while (!_stop.IsCancellationRequested)
         {
-            var handles = new WaitHandle[] { _wake, _stop.Token.WaitHandle };
-            while (!_stop.IsCancellationRequested)
-            {
-                Step();
-                long wait = _holdHqUntil - Environment.TickCount64;
-                WaitHandle.WaitAny(handles, wait > 0 ? (int)wait + 1 : Timeout.Infinite);
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Prefetch loader stopped");
+            // One bad step must not stop loading for the rest of the session: log it and plan again next wake-up.
+            try { Step(); }
+            catch (Exception ex) { Logger.Error(ex, "Prefetch step failed"); }
+            long wait = _holdHqUntil - Environment.TickCount64;
+            try { WaitHandle.WaitAny(handles, wait > 0 ? (int)wait + 1 : Timeout.Infinite); }
+            catch (ObjectDisposedException) { return; } // shutting down
         }
     }
 

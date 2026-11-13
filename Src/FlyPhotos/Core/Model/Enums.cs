@@ -92,7 +92,8 @@ public enum Setting
     ImageScalingQualityChange,
     RawDecodingChange,
     KeyBindingsChanged,
-    EdgeNavArrowsShowHide
+    EdgeNavArrowsShowHide,
+    CacheSizeChange
 }
 
 public enum ScrollDirection

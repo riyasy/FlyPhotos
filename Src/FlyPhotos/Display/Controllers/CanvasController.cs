@@ -147,11 +147,11 @@ internal partial class CanvasController : ICanvasController
     /// <remarks>
     /// Every path with an item to show (the placeholder level always has one) queues its
     /// <see cref="InstallRenderer"/> before the first await (the animated path installs
-    /// its static first frame first), so installs reach the W2D thread in call order. The item is leased here and
-    /// the lease travels with the install, so the cache may release a photo's items as soon as this returns.
+    /// its static first frame first), so installs reach the W2D thread in call order. The caller's lease on the
+    /// item travels with the install, so the cache may release a photo's items at any time.
     /// </remarks>
     /// <param name="photo">The Photo object containing image data and metadata.</param>
-    /// <param name="displayItem">The photo's item for that level (null: nothing to show).</param>
+    /// <param name="displayItem">The photo's item for that level, leased by the caller; the canvas owns the lease from here.</param>
     /// <param name="displayLevel">The quality level to display (e.g., PlaceHolder, Preview, Hq).</param>
     public async Task SetSource(Photo photo, DisplayItem displayItem, DisplayLevel displayLevel)
     {
@@ -177,50 +177,61 @@ internal partial class CanvasController : ICanvasController
 
         Debug.WriteLine($"Displaying {photo.FilePath} at level {displayLevel} with size {_imageSize.Width}x{_imageSize.Height}");
 
-        // The lease is handed to the install below and held for as long as the renderer is on screen.
-        if (displayItem == null || !displayItem.TryAcquire()) return;
-
-        if (displayLevel > DisplayLevel.PlaceHolder)
-            _realImageDisplayedForCurrentPhoto = true;
+        // The caller's lease on the item travels with the install and is held while the renderer is on screen.
+        if (displayItem == null) return;
 
         var ctx = new PhotoInstallContext(_currentPhotoPath, previousPhotoPath, canvasSize,
             isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, displayItem);
 
         // Handle the specific type of display item (Animated, HQ Static, Preview, MultiPage, Tiled)
-        switch (displayItem)
+        try
         {
-            case AnimatedHqDisplayItem animDispItem:
-                await HandleHqAnimatedDisplayItemAsync(currentOperationId, photo, animDispItem, ctx);
-                break;
-            case MultiPageHqDisplayItem multiDispItem:
-                HandleHqMultiPageDisplayItem(photo, multiDispItem, ctx);
-                break;
-            case TiledHqDisplayItem tiledDispItem:
-                HandleHqTiledDisplayItem(photo, tiledDispItem, ctx);
-                break;
-            case SvgHqDisplayItem svgDispItem:
-                HandleHqSvgDisplayItem(photo, svgDispItem, ctx);
-                break;
-            case HqDisplayItem hqDispItem:
-                HandleHqStaticDisplayItem(photo, hqDispItem, ctx);
-                break;
-            case PreviewDisplayItem previewDispItem:
-                HandlePreviewDisplayItem(photo, previewDispItem, ctx);
-                break;
+            switch (displayItem)
+            {
+                case AnimatedHqDisplayItem animDispItem:
+                    await HandleHqAnimatedDisplayItemAsync(currentOperationId, photo, animDispItem, ctx);
+                    break;
+                case MultiPageHqDisplayItem multiDispItem:
+                    HandleHqMultiPageDisplayItem(photo, multiDispItem, ctx);
+                    break;
+                case TiledHqDisplayItem tiledDispItem:
+                    HandleHqTiledDisplayItem(photo, tiledDispItem, ctx);
+                    break;
+                case SvgHqDisplayItem svgDispItem:
+                    HandleHqSvgDisplayItem(photo, svgDispItem, ctx);
+                    break;
+                case HqDisplayItem hqDispItem:
+                    HandleHqStaticDisplayItem(photo, hqDispItem, ctx);
+                    break;
+                case PreviewDisplayItem previewDispItem:
+                    HandlePreviewDisplayItem(photo, previewDispItem, ctx);
+                    break;
+            }
         }
+        catch
+        {
+            // Throwing means nothing was installed (the install hands the lease over as its last step), so the
+            // lease is still ours to end. The caller decides what to show instead.
+            displayItem.Release();
+            throw;
+        }
+
+        if (displayLevel > DisplayLevel.PlaceHolder)
+            _realImageDisplayedForCurrentPhoto = true;
     }
 
     private async Task HandleHqAnimatedDisplayItemAsync(int currentOperationId, Photo photo,
         AnimatedHqDisplayItem animDispItem, PhotoInstallContext ctx)
     {
+        // For animated images, first display the static first frame immediately for responsiveness. Outside the
+        // try: if this fails, nothing is installed and SetSource must hear about it.
+        InstallRenderer(
+            new StaticImageRenderer(_d2dCanvas, animDispItem.Bitmap,
+                photo.SupportsTransparency, RequestInvalidate, generateMipChain: false),
+            _imageSize, animDispItem.Rotation, ctx, forceThumbNailRedraw: true);
+
         try
         {
-            // For animated images, first display the static first frame immediately for responsiveness.
-            InstallRenderer(
-                new StaticImageRenderer(_d2dCanvas, animDispItem.Bitmap,
-                    photo.SupportsTransparency, RequestInvalidate, generateMipChain: false),
-                _imageSize, animDispItem.Rotation, ctx, forceThumbNailRedraw: true);
-
             // Asynchronously create the appropriate animator (GIF, WebP, APNG, or AVIF).
             var bytes = animDispItem.FileAsByteArray;
             IAnimator newAnimator = animDispItem.Format switch

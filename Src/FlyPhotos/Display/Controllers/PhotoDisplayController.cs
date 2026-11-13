@@ -50,10 +50,10 @@ internal partial class PhotoDisplayController : IPhotoProvider
     private readonly bool _launchedExternally;
 
     // Where the viewer is (key snapshot + position), one reference so the thumbnail strip never sees a position
-    // from another list. Written on the startup thread until the listing is published, then on the UI thread.
+    // from another list. Written on the UI thread only.
     private volatile NavState _nav = NavState.None;
 
-    // The level the canvas was last asked to show. Same threads as _nav.
+    // The level the canvas was last asked to show. UI thread.
     private DisplayLevel _displayLevel;
 
     // --- Initialization ---
@@ -85,8 +85,26 @@ internal partial class PhotoDisplayController : IPhotoProvider
     public async Task LoadFirstPhoto()
     {
         ImageReader.Initialize(_d2dCanvas);
-
         var firstPhoto = _photoList[_nav.Key];
+        try
+        {
+            await LoadAndShowFirstPhoto(firstPhoto);
+        }
+        catch (Exception ex)
+        {
+            // Show the error screen rather than nothing, and let the listing go on so the user can move away.
+            Logger.Error(ex, $"Loading the first photo failed: {firstPhoto.FilePath}");
+            if (firstPhoto.Images.Hq == null) firstPhoto.Images.TryAttachHq(ImageReader.GetHqFailedIndicator());
+            await SetSourceAsync(firstPhoto, DisplayLevel.Hq);
+        }
+        finally
+        {
+            _firstPhotoLoadedTcs.TrySetResult(true);
+        }
+    }
+
+    private async Task LoadAndShowFirstPhoto(Photo firstPhoto)
+    {
         bool continueLoadingHq = await PhotoLoader.LoadFirstPreview(firstPhoto, _d2dCanvas);
 
         // The open-zoom animation begins on the FIRST SetSource below. Arm the completion wait now
@@ -106,7 +124,6 @@ internal partial class PhotoDisplayController : IPhotoProvider
 
         // Wait for the actual animation to finish rather than a fixed delay; already-complete is a no-op.
         await openZoomAnimation;
-        _firstPhotoLoadedTcs.SetResult(true);
     }
 
     private void DoStartupActivities(string selectedFilePath, CancellationToken token)
@@ -116,41 +133,60 @@ internal partial class PhotoDisplayController : IPhotoProvider
         try { _ = DiskCacherWithSqlite.Instance; }
         catch (Exception ex) { Logger.Error(ex); }
 
+        // Every way through ends in PublishListing, which starts navigation and loading: a listing that fails
+        // leaves the opened photo alone in the list, never a viewer stuck before it.
+        IReadOnlyList<string> files;
         try
         {
             // Secondary instances only display the single opened image.
             // No folder or Explorer-window discovery is performed.
-            IReadOnlyList<string> files =
+            files =
                 AppConfig.Volatile.IsSecondaryInstance ? [selectedFilePath] :
                 IsFolderMode ? ListFolderAndStartWatching(selectedFilePath) :
                 FileDiscovery.DiscoverFiles(selectedFilePath, _launchedExternally);
-
-            // The opened photo gets the whole machine until it is on screen.
-            _firstPhotoLoadedTcs.Task.Wait(token);
-
-            // The opened photo keeps its key (and what it has loaded) at its place in the listing.
-            var firstKey = _nav.Key;
-            var position = FileDiscovery.FindSelectedFileIndex(selectedFilePath, files);
-            _photoList.ReplaceWithListing(files, position, firstKey);
-            _nav = new NavState(_photoList.Keys, position);
-
-            _initialFileListingCompleted = true;
-            UpdateFileNameAndDetails();
-
-            FirstPhotoLoaded?.Invoke();
-
-            // Secondary instances skip all background caching threads.
-            if (AppConfig.Volatile.IsSecondaryInstance) return;
-
-            _cache.Start(_nav);
-            // Last: from here on, Folder mode list changes may run on the UI thread, so this thread must be
-            // done with the list.
-            _listingReady.TrySetResult();
         }
         catch (Exception ex)
         {
-            Logger.Error(ex);
+            Logger.Error(ex, "Listing failed; showing the opened photo alone");
+            files = [selectedFilePath];
         }
+
+        // The opened photo gets the whole machine until it is on screen.
+        try { _firstPhotoLoadedTcs.Task.Wait(token); }
+        catch (Exception) { return; } // the window is closing
+
+        // The opened photo keeps its key (and what it has loaded) at its place in the listing. The photos are
+        // made here, off the UI thread; the UI thread publishes them, since it alone moves the viewer.
+        IReadOnlyList<int> keys;
+        int position;
+        try
+        {
+            position = FileDiscovery.FindSelectedFileIndex(selectedFilePath, files);
+            keys = _photoList.PrepareListing(files, position, _nav.Key);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Building the listing failed; showing the opened photo alone");
+            keys = _photoList.Keys; // still the startup list: the opened photo alone
+            position = 0;
+        }
+        _d2dCanvas.DispatcherQueue.TryEnqueue(() => PublishListing(keys, position));
+    }
+
+    // UI thread. Swaps the startup list for the full listing; navigation, delete and rename start working here.
+    private void PublishListing(IReadOnlyList<int> keys, int position)
+    {
+        if (_cts.IsCancellationRequested) return;
+        _photoList.Publish(keys);
+        _nav = new NavState(keys, position);
+        _initialFileListingCompleted = true;
+        UpdateFileNameAndDetails();
+        FirstPhotoLoaded?.Invoke();
+
+        // Secondary instances skip all background caching.
+        if (AppConfig.Volatile.IsSecondaryInstance) return;
+        _cache.Start(_nav);
+        _listingReady.TrySetResult(); // Folder mode's watcher batches may now apply
     }
 
     // --- Cache events & display upgrade ---
@@ -201,13 +237,35 @@ internal partial class PhotoDisplayController : IPhotoProvider
         await SetSourceAsync(photo, BestLevel(photo));
     }
 
+    // UI thread. Shows the photo at displayLevel, or the next level down when that item was released meanwhile (the
+    // loader may unload it at any moment): the placeholder is always there, so something is always shown. The lease
+    // taken here passes to the canvas, which holds it while the item is on screen.
     private async Task SetSourceAsync(Photo photo, DisplayLevel displayLevel)
     {
-        var item = photo.Images.Get(displayLevel);
+        var item = LeaseAtOrBelow(photo, ref displayLevel);
         _displayLevel = displayLevel;
         _shownItem = item;
-        await _canvasController.SetSource(photo, item, displayLevel);
+        try
+        {
+            await _canvasController.SetSource(photo, item, displayLevel);
+        }
+        catch (Exception ex) when (displayLevel > DisplayLevel.PlaceHolder)
+        {
+            // The canvas could not draw the item (it released the lease). Show the placeholder rather than leave the
+            // previous photo up. _shownItem keeps the failed item, so RefreshCurrent doesn't retry it on every load;
+            // a newer item, or coming back to the photo, tries again.
+            Logger.Error(ex, $"Showing {photo.FilePath} at {displayLevel} failed");
+            await _canvasController.SetSource(photo, ImageReader.GetLoadingIndicator(), DisplayLevel.PlaceHolder);
+        }
         UpdateFileNameAndDetails();
+    }
+
+    private static DisplayItem LeaseAtOrBelow(Photo photo, ref DisplayLevel level)
+    {
+        for (; level > DisplayLevel.PlaceHolder; level--)
+            if (photo.Images.Get(level) is { } item && item.TryAcquire())
+                return item;
+        return ImageReader.GetLoadingIndicator(); // shared, never freed: needs no lease
     }
 
     // --- Navigation ---
@@ -329,6 +387,9 @@ internal partial class PhotoDisplayController : IPhotoProvider
     // Called from the UI thread when a RAW decode setting (DecodeRawData / decoder priority) changes. A RAW HQ on
     // screen stays (the canvas holds its own lease) until the re-decoded one replaces it (RefreshCurrent).
     public void InvalidateRawHqCache() => _cache.InvalidateHqForRawFiles();
+
+    // UI thread: a cache window size changed; the cache re-plans now rather than at the next navigation.
+    public void CacheSizeChanged() => _cache.Replan();
 
     // --- Deletion ---
 

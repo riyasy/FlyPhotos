@@ -109,23 +109,7 @@ internal sealed class PhotoImages
     public bool IsErrorScreen(DisplayLevel level) => Get(level) is not { } item || item.IsErrorOrUndefined();
 
     /// <summary>The size to lay the photo out at: the best loaded item's full size.</summary>
-    public (double, double) GetActualSize()
-    {
-        var hq = _hq;
-        if (hq is TiledHqDisplayItem tiled)
-            return (tiled.Pyramid.FullWidth, tiled.Pyramid.FullHeight);
-        if (hq is SvgHqDisplayItem svg)
-            return (svg.Width, svg.Height);
-        if (hq?.Bitmap != null)
-            return (hq.Bitmap.SizeInPixels.Width, hq.Bitmap.SizeInPixels.Height);
-        if (_preview is { } preview)
-        {
-            if (preview.Metadata is { FullWidth: not 0, FullHeight: not 0 } m)
-                return (m.FullWidth, m.FullHeight);
-            return (preview.Bitmap.SizeInPixels.Width, preview.Bitmap.SizeInPixels.Height);
-        }
-        return (100, 100);
-    }
+    public (double, double) GetActualSize() => SizeOf(_hq) ?? SizeOf(_preview) ?? (100, 100);
 
     /// <summary>
     /// The photo's real pixel size — what the disk cache stores. <see cref="GetActualSize"/> sizes whatever is on
@@ -133,11 +117,28 @@ internal sealed class PhotoImages
     /// </summary>
     public (double, double) GetSourcePixelSize()
     {
-        var preview = _preview;
-        if (_hq is not { } hq || !hq.IsErrorOrUndefined() || preview?.Bitmap == null)
-            return GetActualSize();
-        if (preview.Metadata is { FullWidth: > 0, FullHeight: > 0 } m)
-            return (m.FullWidth, m.FullHeight);
-        return (preview.Bitmap.SizeInPixels.Width, preview.Bitmap.SizeInPixels.Height);
+        bool hqFailed = _hq is { } hq && hq.IsErrorOrUndefined();
+        return (hqFailed ? SizeOf(_preview) : null) ?? GetActualSize();
+    }
+
+    // An item's full size, read under a lease: the loader may release the item at any moment.
+    private static (double, double)? SizeOf(DisplayItem? item)
+    {
+        if (item == null || !item.TryAcquire()) return null;
+        try
+        {
+            return item switch
+            {
+                TiledHqDisplayItem tiled => (tiled.Pyramid.FullWidth, tiled.Pyramid.FullHeight),
+                SvgHqDisplayItem svg => (svg.Width, svg.Height),
+                PreviewDisplayItem { Metadata: { FullWidth: > 0, FullHeight: > 0 } m } => (m.FullWidth, m.FullHeight),
+                { Bitmap: { } bitmap } => (bitmap.SizeInPixels.Width, bitmap.SizeInPixels.Height),
+                _ => null
+            };
+        }
+        finally
+        {
+            item.Release();
+        }
     }
 }

@@ -63,11 +63,12 @@ internal sealed class PhotoList
     }
 
     /// <summary>
-    /// Replaces the startup list (the opened photo alone) with the full listing. The photo at
-    /// <paramref name="keepKey"/> — already loading or on screen — takes <paramref name="keepPosition"/> and keeps
-    /// its key; every other file gets a new photo. Call once, from the thread that built the startup list.
+    /// Builds the full listing to replace the startup list (the opened photo alone), without publishing it: the
+    /// photo at <paramref name="keepKey"/> — already loading or on screen — takes <paramref name="keepPosition"/>
+    /// and keeps its key; every other file gets a new photo, added under a key no snapshot holds yet. Returns the
+    /// key list for <see cref="Publish"/>. Call once, before any other change to the list.
     /// </summary>
-    public void ReplaceWithListing(IReadOnlyList<string> files, int keepPosition, int keepKey)
+    public IReadOnlyList<int> PrepareListing(IReadOnlyList<string> files, int keepPosition, int keepKey)
     {
         var keys = new List<int>(files.Count);
         for (int i = 0; i < files.Count; i++)
@@ -81,8 +82,11 @@ internal sealed class PhotoList
             _photos[key] = new Photo(files[i]);
             keys.Add(key);
         }
-        _keys = keys; // publish the fully populated list atomically
+        return keys;
     }
+
+    /// <summary>Publishes a key list from <see cref="PrepareListing"/>, atomically. The thread that owns the list.</summary>
+    public void Publish(IReadOnlyList<int> keys) => _keys = keys;
 
     // Keys are never reused, so a cache entry or in-flight load for a removed key can never be
     // mistaken for a newer photo. Only the thread that mutates the list touches this.

@@ -1198,6 +1198,9 @@ public sealed partial class PhotoDisplayWindow
             case Setting.RawDecodingChange:
                 _photoController.InvalidateRawHqCache();
                 break;
+            case Setting.CacheSizeChange:
+                _photoController.CacheSizeChanged();
+                break;
             case Setting.Theme:
                 _windAppearanceManager.SetWindowTheme(AppConfig.Settings.Theme);
                 break;
