@@ -21,7 +21,7 @@ internal enum LoadKind
 /// <param name="TiledHq">The HQ is a tiled large image (gigabytes of CPU tiles).</param>
 /// <param name="NeedsHeavy">Its light preview pass found nothing: only the heavy lane can make its preview.</param>
 /// <param name="NeedsDiskWrite">Its preview was decoded from the file and is not in the disk cache yet.</param>
-/// <param name="PreviewParked">A preview load failed; not retried until the window centre moves.</param>
+/// <param name="PreviewParked">A preview load failed; not retried until the photo is the window centre.</param>
 /// <param name="HqParked">An HQ load failed or was deferred (too large for a neighbour); as above.</param>
 internal readonly record struct SlotState(bool HasPreview, bool HasHq, bool TiledHq = false, bool NeedsHeavy = false,
     bool NeedsDiskWrite = false, bool PreviewParked = false, bool HqParked = false);
@@ -41,7 +41,7 @@ internal readonly record struct JobLimits(int Previews, int Heavy, int Hq, int D
 }
 
 /// <summary>
-/// The planner's decisions for one round. Reused across rounds (the planner runs after every batch of loader
+/// The planner's decisions for one round. Reused across rounds (the planner runs after every batch of cache
 /// messages, hundreds of times a second while a window fills): <see cref="PrefetchPlanner.Make"/> clears it.
 /// </summary>
 internal sealed class PrefetchPlan
@@ -89,11 +89,12 @@ internal sealed class PrefetchPlan
 /// </summary>
 internal static class PrefetchPlanner
 {
-    public static void Make(PrefetchPlan plan, IReadOnlyList<int> keys, int centre, HashSet<int> loaded,
+    public static void Make(PrefetchPlan plan, NavState nav, HashSet<int> loaded,
         Func<int, SlotState> slotOf, IReadOnlyList<RunningJob> running, bool holdHq,
         int previewHalf, int hqHalf, JobLimits limits)
     {
         plan.Clear();
+        var (keys, centre) = nav;
         if (centre < 0 || centre >= keys.Count) return;
         int centreKey = keys[centre];
         var (lo, hi) = KeyWindow.Range(keys.Count, centre, Math.Max(previewHalf, hqHalf));
@@ -142,9 +143,10 @@ internal static class PrefetchPlanner
                 centreLoading = true;
             }
             if (!centreLoading)
-                for (int rank = 1; rank <= 2 * hqHalf && hqs < limits.Hq; rank++)
+                foreach (int pos in KeyWindow.NearestFirst(keys.Count, centre, hqHalf))
                 {
-                    if (KeyWindow.NthNearest(keys.Count, centre, rank) is not (var pos and >= 0)) continue;
+                    if (hqs >= limits.Hq) break;
+                    if (pos == centre) continue;
                     int key = keys[pos];
                     if (plan.Busy.Contains((key, LoadKind.Hq))) continue;
                     var slot = slotOf(key);
@@ -156,9 +158,8 @@ internal static class PrefetchPlanner
 
         // --- Previews (light and heavy lanes, one budget); also counts the cached ones and finds disk writes ---
         bool lightWaiting = false;
-        for (int rank = 0; rank <= 2 * previewHalf; rank++)
+        foreach (int pos in KeyWindow.NearestFirst(keys.Count, centre, previewHalf))
         {
-            if (KeyWindow.NthNearest(keys.Count, centre, rank) is not (var pos and >= 0)) continue;
             int key = keys[pos];
             var slot = slotOf(key);
             if (slot.HasPreview)

@@ -32,14 +32,6 @@ internal partial class PhotoDisplayController
 
     private static bool IsFolderMode => AppConfig.Settings.ListSource == ListSource.Folder;
 
-    // Startup thread.
-    private System.Collections.Generic.IReadOnlyList<string> ListFolderAndStartWatching(string selectedFilePath)
-    {
-        _folder = new FolderSource();
-        _folder.Changed += Watcher_Changed;
-        return _folder.ListAndWatch(selectedFilePath);
-    }
-
     // ThreadPool thread.
     private async void Watcher_Changed(FolderWatcher watcher, FolderChanges changes)
     {

@@ -79,8 +79,12 @@ internal static class ImageReader
 
         // Asked after Decode, so a mislabelled file is judged by the format its header showed.
         if (purpose == Purpose.PreviewLight && ChainFor(file, Purpose.PreviewHeavy).Count > 0) return null;
-        return new PreviewDisplayItem(_indicators.PreviewFailed, Origin.ErrorScreen);
+        return GetPreviewFailedIndicator();
     }
+
+    /// <summary>The error preview shown when no decoder could make a preview (shared bitmap, never freed).</summary>
+    public static PreviewDisplayItem GetPreviewFailedIndicator() =>
+        new(_indicators.PreviewFailed, Origin.ErrorScreen);
 
     /// <summary>
     /// Loads the full high-quality image for display in the main viewer. Images over the GPU's maximum bitmap

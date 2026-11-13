@@ -130,29 +130,4 @@ internal sealed class PhotoList
         foreach (var (key, _) in removed)
             _photos.TryRemove(key, out _);
     }
-
-    /// <summary>Replaces (or adds) the photo at <paramref name="key"/> without touching the snapshot.</summary>
-    public void Set(int key, Photo photo) => _photos[key] = photo;
-
-    /// <summary>
-    /// Removes the photo at <paramref name="position"/> in the key snapshot: drops it from the
-    /// dictionary and publishes a new snapshot with that position removed. Returns the removed photo
-    /// (the caller owns disposal), or null if <paramref name="position"/> is out of range.
-    /// <para>
-    /// ThreadPool readers that captured the old snapshot continue to see a consistent (stale) list and
-    /// pick up the new one on their next read of <see cref="Keys"/> — the same copy-on-write contract
-    /// the controller relied on.
-    /// </para>
-    /// </summary>
-    public Photo? RemoveAt(int position)
-    {
-        var current = _keys;
-        if (position < 0 || position >= current.Count) return null;
-        int key = current[position];
-        _photos.TryRemove(key, out var removed);
-        var updated = new List<int>(current);
-        updated.RemoveAt(position);
-        _keys = updated; // publish atomically
-        return removed;
-    }
 }

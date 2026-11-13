@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Threading;
 using Windows.Foundation;
+using FlyPhotos.Core.Model;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Effects;
 using Microsoft.Graphics.Canvas.Geometry;
@@ -51,12 +52,11 @@ internal sealed partial class SvgScene
     }
 
     /// <summary>
-    /// The number of live <see cref="Lease"/>s: the loader's (handed on to the display item), plus each renderer
-    /// or rasterize call using the scene (see <see cref="TryAcquire"/>). The HQ cache disposes its item on the UI
-    /// thread when the photo leaves the window, while the renderer may still be drawing it on the W2D thread until
-    /// the next photo is installed.
+    /// The live <see cref="Lease"/>s: the SVG reader's (handed on to the display item), plus each renderer or
+    /// rasterize call using the scene (see <see cref="TryAcquire"/>). The display item's own leases cover the item;
+    /// these cover the GPU resources, so a renderer still drawing keeps them even after the item is freed.
     /// </summary>
-    private int _owners = 1;
+    private LeaseCount _owners = new();
 
     /// <summary>
     /// One owner's hold on the scene. Disposing it drops that ownership, once however often it is called; the last
@@ -77,17 +77,12 @@ internal sealed partial class SvgScene
     }
 
     /// <summary>Adds an owner, so the scene outlives the display item's Dispose; null if it is already released.</summary>
-    public Lease? TryAcquire()
-    {
-        for (var n = Volatile.Read(ref _owners); n > 0; n = Volatile.Read(ref _owners))
-            if (Interlocked.CompareExchange(ref _owners, n + 1, n) == n) return new Lease(this);
-        return null;
-    }
+    public Lease? TryAcquire() => _owners.TryAcquire() ? new Lease(this) : null;
 
     /// <summary>Drops one owner; the last one releases the device resources.</summary>
     private void Release()
     {
-        if (Interlocked.Decrement(ref _owners) != 0) return;
+        if (!_owners.Release()) return;
         foreach (var r in _resources) r.Dispose();
         _resources.Clear();
     }

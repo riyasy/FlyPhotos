@@ -8,7 +8,7 @@ namespace FlyPhotos.Core.Model;
 
 /// <summary>
 /// One photo in the list: its file and what its format implies, plus its decoded <see cref="Images"/>.
-/// Decoding lives in <c>PhotoLoader</c>.
+/// Decoding lives in <c>PhotoDecoder</c>.
 /// </summary>
 internal sealed class Photo
 {
@@ -34,9 +34,6 @@ internal sealed class Photo
     // Extension is never changed by a rename (the UI keeps it fixed, and the folder watcher reports an
     // extension change as remove + add), so the format-derived flags above stay valid.
     public void Rename(string newFilePath) => FilePath = newFilePath;
-
-    private static readonly Photo _empty = new(string.Empty);
-    public static Photo Empty() => _empty;
 
     private static readonly HashSet<string> FormatsSupportingTransparency =
         new(StringComparer.OrdinalIgnoreCase)

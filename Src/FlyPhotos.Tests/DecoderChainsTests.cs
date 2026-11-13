@@ -53,23 +53,12 @@ public sealed class DecoderChainsTests
     // heavy lane (#276).
 
     [TestMethod]
-    public void Heavy_lane_picks_the_pending_key_nearest_the_centre()
+    public void Window_positions_come_nearest_first_with_the_one_before_winning_a_tie()
     {
-        // Keys are not positions: position 0..5 holds these keys.
-        int[] keys = [50, 51, 52, 53, 54, 55];
-
-        // First photo on screen, keys pending in the order their light attempts ended (near to far): nearest wins.
-        var pending = new HashSet<int> { 51, 53, 55 };
-        Assert.AreEqual(51, KeyWindow.Nearest(keys, 0, 300, pending.Contains));
-
-        // Centre in the middle: equal distance goes to the one before the centre.
-        Assert.AreEqual(52, KeyWindow.Nearest(keys, 3, 300, new HashSet<int> { 52, 54 }.Contains));
-        Assert.AreEqual(53, KeyWindow.Nearest(keys, 3, 300, new HashSet<int> { 53, 52 }.Contains));
-
-        // Outside the window half, or nothing pending: none.
-        Assert.IsNull(KeyWindow.Nearest(keys, 0, 2, new HashSet<int> { 55 }.Contains));
-        Assert.IsNull(KeyWindow.Nearest(keys, 0, 300, _ => false));
-        Assert.IsNull(KeyWindow.Nearest(keys, -1, 300, _ => true));
+        CollectionAssert.AreEqual(new[] { 3, 2, 4, 1, 5, 0 }, KeyWindow.NearestFirst(6, 3, 300).ToList());
+        CollectionAssert.AreEqual(new[] { 0, 1, 2 }, KeyWindow.NearestFirst(6, 0, 2).ToList(), "clamped at the start");
+        CollectionAssert.AreEqual(new[] { 5, 4 }, KeyWindow.NearestFirst(6, 5, 1).ToList(), "clamped at the end");
+        Assert.AreEqual(0, KeyWindow.NearestFirst(6, -1, 300).Count(), "no centre");
     }
 
     [TestMethod]

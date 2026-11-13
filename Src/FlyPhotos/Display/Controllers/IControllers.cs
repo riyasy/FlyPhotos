@@ -18,6 +18,7 @@ internal interface IThumbnailController : IDisposable
 {
     void RequestThumbnailRedraw();
     void RedrawThumbNailsIfNeeded(int key);
-    void SetPhotoProvider(IPhotoProvider provider);
+    /// <summary>Where the strip reads photos and the viewer's position from; both are read on the W2D thread.</summary>
+    void SetPhotoSource(Func<int, Photo?> getPhoto, Func<NavState> getNav);
     void BounceAtEdge(NavDirection direction);
 }

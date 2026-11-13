@@ -1,4 +1,5 @@
 using FlyPhotos.Display.Controllers;
+using FlyPhotos.Display.State;
 
 namespace FlyPhotos.Tests;
 
@@ -19,7 +20,7 @@ public sealed class PrefetchPlannerTests
     private PrefetchPlan Plan(int centre, bool holdHq = false, int previewHalf = 3, int hqHalf = 1, JobLimits? limits = null)
     {
         var plan = new PrefetchPlan();
-        PrefetchPlanner.Make(plan, Keys, centre, _loaded, k => _slots.GetValueOrDefault(k), _running, holdHq,
+        PrefetchPlanner.Make(plan, new NavState(Keys, centre), _loaded, k => _slots.GetValueOrDefault(k), _running, holdHq,
             previewHalf, hqHalf, limits ?? Wide);
         return plan;
     }

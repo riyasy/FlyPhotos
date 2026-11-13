@@ -26,6 +26,14 @@ internal sealed class PhotoImages
     /// <summary>An earlier HQ load found the image larger than the GPU's maximum bitmap size.</summary>
     public bool KnownOversized { get; set; }
 
+    /// <summary>
+    /// Whether the image is known to exceed the GPU's maximum bitmap size (<paramref name="maxSize"/>), so the HQ
+    /// load can go straight to the tiled reader and skip the normal decoders, which would fail. Known when an
+    /// earlier load found it oversized, or when the preview metadata gives the full size.
+    /// </summary>
+    public bool IsKnownOversized(int maxSize) => KnownOversized ||
+        _preview?.Metadata is { FullWidth: > 0, FullHeight: > 0 } m && (m.FullWidth > maxSize || m.FullHeight > maxSize);
+
     /// <summary>Stores a loaded HQ, taking over its lease. False (the item released) once retired.</summary>
     public bool TryAttachHq(HqDisplayItem hq)
     {
@@ -80,7 +88,6 @@ internal sealed class PhotoImages
         }
     }
 
-
     /// <summary>The photo has left the list for good: releases its items. Idempotent.</summary>
     public void Retire()
     {
@@ -115,13 +122,10 @@ internal sealed class PhotoImages
     /// The photo's real pixel size — what the disk cache stores. <see cref="GetActualSize"/> sizes whatever is on
     /// screen, which is the error icon when HQ failed; this skips that and falls back to the preview.
     /// </summary>
-    public (double, double) GetSourcePixelSize()
-    {
-        bool hqFailed = _hq is { } hq && hq.IsErrorOrUndefined();
-        return (hqFailed ? SizeOf(_preview) : null) ?? GetActualSize();
-    }
+    public (double, double) GetSourcePixelSize() =>
+        SizeOf(_hq is { } hq && hq.IsErrorOrUndefined() ? null : _hq) ?? SizeOf(_preview) ?? (100, 100);
 
-    // An item's full size, read under a lease: the loader may release the item at any moment.
+    // An item's full size, read under a lease: the prefetch cache may release the item at any moment.
     private static (double, double)? SizeOf(DisplayItem? item)
     {
         if (item == null || !item.TryAcquire()) return null;

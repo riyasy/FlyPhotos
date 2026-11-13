@@ -19,10 +19,10 @@ namespace FlyPhotos.Display.Controllers;
 /// (previews for many, HQ for a few), unloads what leaves it, and writes fresh previews to the disk cache.
 /// See CONTEXT.md for the vocabulary.
 /// <para>
-/// Threading: one dedicated <b>loader thread</b> owns every bit of loading state (the window, running jobs, load
+/// Threading: one dedicated <b>prefetch thread</b> owns every bit of loading state (the window, running jobs, load
 /// hints) and is the only writer of the photos' <see cref="PhotoImages"/> slots once started. Other threads talk to
 /// it only through its inbox: the UI posts window moves and settings, and decodes running on the thread pool post
-/// their results. After each batch of messages the loader asks <see cref="PrefetchPlanner"/> what to do and does it.
+/// their results. After each batch of messages the prefetch thread asks <see cref="PrefetchPlanner"/> what to do and does it.
 /// The UI thread never waits on any of this, and loading never waits on the UI thread.
 /// </para>
 /// <para>
@@ -36,12 +36,12 @@ internal sealed class PrefetchCache : IDisposable
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
-    /// Fired on the loader thread when a preview or HQ was stored for a key. The photo may or may not be on
+    /// Fired on the prefetch thread when a preview or HQ was stored for a key. The photo may or may not be on
     /// screen — the controller checks. Not fired for the first photo (the controller loads that itself).
     /// </summary>
     public event Action<int>? Loaded;
 
-    /// <summary>Fired on the loader thread with the formatted "left/total &lt; Cache &gt; right/total" status.</summary>
+    /// <summary>Fired on the prefetch thread with the formatted "left/total &lt; Cache &gt; right/total" status.</summary>
     public event Action<string>? CacheStatusChanged;
 
     private readonly Func<int, Photo?> _getPhoto;
@@ -53,7 +53,7 @@ internal sealed class PrefetchCache : IDisposable
     private readonly CancellationTokenSource _stop = new();
     private Thread? _thread;
 
-    // --- Loader-thread state ---
+    // --- Prefetch-thread state ---
     private sealed class Job(RunningJob spec, Photo photo)
     {
         public readonly RunningJob Spec = spec;
@@ -83,10 +83,10 @@ internal sealed class PrefetchCache : IDisposable
     private readonly HashSet<int> _loaded = [];        // keys this cache has stored images for
     private readonly HashSet<int> _needsHeavy = [];    // light preview pass found nothing (until the preview loads)
     private readonly HashSet<int> _needsDiskWrite = []; // preview decoded from the file, not yet in the disk cache
-    private readonly HashSet<(int, LoadKind)> _parked = []; // failed or deferred; retried when the centre moves
+    private readonly HashSet<(int Key, LoadKind Kind)> _parked = []; // failed or deferred; retried once it is the centre
     private readonly PrefetchPlan _plan = new();
     private readonly JobLimits _limits = JobLimits.ForCores(Environment.ProcessorCount);
-    private (int, int, int, int) _lastStatus = (-1, -1, -1, -1);
+    private (int CachedBefore, int Before, int CachedAfter, int After) _lastStatus = (-1, -1, -1, -1);
 
     public PrefetchCache(Func<int, Photo?> getPhoto, ICanvasResourceCreatorWithDpi device)
     {
@@ -95,27 +95,32 @@ internal sealed class PrefetchCache : IDisposable
     }
 
     // -------------------------------------------------------------------------
-    // Public API — any thread; every call only posts to the loader thread
+    // Public API — any thread; every call only posts to the prefetch thread
     // -------------------------------------------------------------------------
 
-    /// <summary>Starts the loader thread around <paramref name="nav"/>. Not called for secondary instances.</summary>
+    /// <summary>Starts the prefetch thread around <paramref name="nav"/>. Not called for secondary instances.</summary>
     public void Start(NavState nav)
     {
         MoveWindow(nav);
         Post(() => _loaded.Add(nav.Key)); // the photo on screen was loaded by the controller (the first photo)
-        _thread = new Thread(Run) { IsBackground = true, Name = "PrefetchLoader" };
+        _thread = new Thread(Run) { IsBackground = true, Name = "PrefetchCache" };
         _thread.Start();
     }
 
     /// <summary>The viewer moved (navigation, or a list change): re-centre the window on <paramref name="nav"/>.</summary>
     public void MoveWindow(NavState nav) => Post(() =>
     {
-        if (nav.Key != _nav.Key) _parked.Clear(); // a new centre gets another try at everything
+        // The photo now on screen gets another try. Only it: a file that keeps failing is not decoded again on
+        // every key press while it stays in the window.
+        _parked.RemoveWhere(p => p.Key == nav.Key);
         _nav = nav;
     });
 
-    /// <summary>Holds HQ loading (a burst) or lets it go (the burst ended). Previews keep loading either way.</summary>
-    public void HoldHq(bool hold) => Post(() => _holdHq = hold);
+    /// <summary>Holds HQ loading for a burst, until <see cref="ResumeHq"/>. Previews keep loading.</summary>
+    public void HoldHq() => Post(() => _holdHq = true);
+
+    /// <summary>The burst ended: HQ loading goes on.</summary>
+    public void ResumeHq() => Post(() => _holdHq = false);
 
     /// <summary>Holds HQ loading for <paramref name="ms"/> from now (skipping through folders).</summary>
     public void HoldHqFor(int ms)
@@ -132,6 +137,7 @@ internal sealed class PrefetchCache : IDisposable
             _loaded.Remove(key);
             _needsHeavy.Remove(key);
             _needsDiskWrite.Remove(key);
+            foreach (var kind in Enum.GetValues<LoadKind>()) _parked.Remove((key, kind));
         }
     });
 
@@ -148,9 +154,8 @@ internal sealed class PrefetchCache : IDisposable
         foreach (var job in _running)
             if (job.Spec.Kind == LoadKind.Hq && job.Photo.IsRaw)
                 Abandon(job);
-        _parked.RemoveWhere(p => p.Item2 == LoadKind.Hq);
+        _parked.RemoveWhere(p => p.Kind == LoadKind.Hq);
     });
-
 
     /// <summary>A planning setting (a window size) changed: plan again now. The planner reads it from the settings.</summary>
     public void Replan() => Post(static () => { });
@@ -163,7 +168,7 @@ internal sealed class PrefetchCache : IDisposable
     }
 
     // -------------------------------------------------------------------------
-    // The loader thread
+    // The prefetch thread
     // -------------------------------------------------------------------------
 
     private void Run()
@@ -194,7 +199,7 @@ internal sealed class PrefetchCache : IDisposable
         foreach (var job in _running) _runningSpecs.Add(job.Spec);
         bool holdHq = _holdHq || Environment.TickCount64 < _holdHqUntil;
         var settings = AppConfig.Settings;
-        PrefetchPlanner.Make(_plan, _nav.Keys, _nav.Position, _loaded, SlotOf, _runningSpecs, holdHq,
+        PrefetchPlanner.Make(_plan, _nav, _loaded, SlotOf, _runningSpecs, holdHq,
             settings.CacheSizeOneSidePreviews, settings.CacheSizeOneSideHqImages, _limits);
 
         foreach (int i in _plan.Cancel) Abandon(_running[i]);
@@ -236,7 +241,7 @@ internal sealed class PrefetchCache : IDisposable
     }
 
     // -------------------------------------------------------------------------
-    // Jobs — decode on the thread pool, store on the loader thread
+    // Jobs — decode on the thread pool, store on the prefetch thread
     // -------------------------------------------------------------------------
 
     private void StartJob(RunningJob spec)
@@ -252,11 +257,11 @@ internal sealed class PrefetchCache : IDisposable
                 {
                     case LoadKind.PreviewLight or LoadKind.PreviewHeavy:
                         var purpose = spec.Kind == LoadKind.PreviewHeavy ? Purpose.PreviewHeavy : Purpose.PreviewLight;
-                        if (await PhotoLoader.LoadPreview(photo, _device, purpose) is { } loaded)
+                        if (await PhotoDecoder.LoadPreview(photo, _device, purpose) is { } loaded)
                             (job.Preview, job.Thumbnail) = loaded;
                         break;
                     case LoadKind.Hq:
-                        job.Hq = await PhotoLoader.LoadHq(photo, _device, spec.AllowLarge, job.Cts.Token);
+                        job.Hq = await PhotoDecoder.LoadHq(photo, _device, spec.AllowLarge, job.Cts.Token);
                         break;
                     case LoadKind.DiskWrite:
                         await WriteToDiskCache(photo);
@@ -273,18 +278,30 @@ internal sealed class PrefetchCache : IDisposable
         });
     }
 
-    // Loader thread. Stores what the job brought, unless the job was abandoned or its photo left the list
+    // Prefetch thread. Stores what the job brought, unless the job was abandoned or its photo left the list
     // meanwhile — then it is released. A photo that left the window is unloaded by the next plan.
     private void Complete(Job job)
     {
         _running.Remove(job);
         int key = job.Spec.Key;
-        if (job.Failed)
+        if (!ReferenceEquals(_getPhoto(key), job.Photo))
         {
-            _parked.Add((key, job.Spec.Kind));
+            job.ReleaseResult(); // removed meanwhile: nothing about it is kept
             return;
         }
-        bool keep = !job.Abandoned && ReferenceEquals(_getPhoto(key), job.Photo);
+        if (job.Failed)
+        {
+            // A cancelled large decode throws too: nothing to show for it. Otherwise the decode threw, which shows
+            // the error screen, the same as a decoder that reports the failure.
+            if (job.Abandoned) return;
+            switch (job.Spec.Kind)
+            {
+                case LoadKind.DiskWrite: _needsDiskWrite.Remove(key); return; // not retried
+                case LoadKind.Hq: job.Hq = ImageReader.GetHqFailedIndicator(); break;
+                default: job.Preview = ImageReader.GetPreviewFailedIndicator(); break;
+            }
+        }
+        bool keep = !job.Abandoned;
         switch (job.Spec.Kind)
         {
             case LoadKind.DiskWrite:
@@ -348,7 +365,7 @@ internal sealed class PrefetchCache : IDisposable
     {
         if (photo.Images.Preview is not { Origin: Origin.Disk } preview) return;
         var (actualWidth, actualHeight) = photo.Images.GetSourcePixelSize();
-        await PhotoLoader.PutPreviewInDiskCache(photo.FilePath, preview,
+        await PhotoDecoder.PutPreviewInDiskCache(photo.FilePath, preview,
             (int)Math.Round(actualWidth), (int)Math.Round(actualHeight));
     }
     // -------------------------------------------------------------------------
@@ -362,7 +379,7 @@ internal sealed class PrefetchCache : IDisposable
         var status = (_plan.CachedBefore, left, _plan.CachedAfter, right);
         if (status == _lastStatus) return;
         _lastStatus = status;
-        CacheStatusChanged?.Invoke($"{status.Item1}/{left} < Cache > {status.Item3}/{right}");
+        CacheStatusChanged?.Invoke($"{_plan.CachedBefore}/{left} < Cache > {_plan.CachedAfter}/{right}");
     }
     // -------------------------------------------------------------------------
     // IDisposable
@@ -372,7 +389,7 @@ internal sealed class PrefetchCache : IDisposable
     {
         _stop.Cancel();
         _thread?.Join(2000);
-        // The loader is gone: nothing reads these now. Results still on their way are released by their tasks.
+        // The prefetch thread is gone: nothing reads these now. Results still on their way are released by their tasks.
         foreach (var job in _running) job.Cts.Cancel();
         _wake.Dispose();
     }

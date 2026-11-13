@@ -24,25 +24,20 @@ internal static class KeyWindow
     }
 
     /// <summary>
-    /// The key nearest to <paramref name="centre"/>, within <paramref name="half"/>, that <paramref name="wanted"/>
-    /// accepts; null when none does. At equal distance the one before the centre wins, the order the window
-    /// sync queues keys in.
+    /// The positions within <paramref name="half"/> of <paramref name="centre"/> in a list of
+    /// <paramref name="count"/>, nearest first: the centre, then before and after at distance 1, 2, … (at equal
+    /// distance the one before the centre wins). Positions outside the list are skipped.
     /// </summary>
-    public static int? Nearest(IReadOnlyList<int> keys, int centre, int half, Func<int, bool> wanted)
+    public static IEnumerable<int> NearestFirst(int count, int centre, int half)
     {
-        if (centre < 0 || centre >= keys.Count) return null;
+        if (centre < 0 || centre >= count) yield break;
         for (int rank = 0; rank <= 2 * half; rank++)
-            if (NthNearest(keys.Count, centre, rank) is var pos and >= 0 && wanted(keys[pos]))
-                return keys[pos];
-        return null;
+            if (NthNearest(count, centre, rank) is var pos and >= 0)
+                yield return pos;
     }
 
-    /// <summary>
-    /// The position <paramref name="rank"/> steps out from <paramref name="centre"/> in nearest-first order — rank 0
-    /// is the centre, then before and after at distance 1, 2, … (before wins a tie) — or -1 when it lies outside a list
-    /// of <paramref name="count"/>. A window of half-width h covers ranks 0..2h.
-    /// </summary>
-    public static int NthNearest(int count, int centre, int rank)
+    // The position rank steps out from centre in nearest-first order, or -1 outside the list.
+    private static int NthNearest(int count, int centre, int rank)
     {
         int distance = (rank + 1) / 2;
         int pos = rank == 0 ? centre : rank % 2 == 1 ? centre - distance : centre + distance;

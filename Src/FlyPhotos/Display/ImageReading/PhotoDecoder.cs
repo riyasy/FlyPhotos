@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Core;
@@ -14,7 +15,7 @@ namespace FlyPhotos.Display.ImageReading;
 /// The decodes behind the prefetch cache and the first photo. Each returns what it loaded, with its lease, for the
 /// caller to store in the photo's <see cref="PhotoImages"/> (or release). Holds no state of its own.
 /// </summary>
-internal static class PhotoLoader
+internal static class PhotoDecoder
 {
     /// <summary>
     /// The first photo's fast path (<see cref="ImageReader.GetFirstPreviewSpecialHandlingAsync"/>), which may
@@ -45,7 +46,7 @@ internal static class PhotoLoader
     {
         var images = photo.Images;
         var (hq, oversized) = await ImageReader.GetHqImage(device, photo.FilePath,
-            IsKnownOversized(images, device.Device.MaximumBitmapSizeInPixels), allowLarge, ct);
+            images.IsKnownOversized(device.Device.MaximumBitmapSizeInPixels), allowLarge, ct);
         if (oversized) images.KnownOversized = true; // a deferred neighbour skips the doomed normal decode next time
         if (hq is TiledHqDisplayItem tiled) await HealCachedPreviewSize(photo, tiled);
         return hq;
@@ -64,14 +65,6 @@ internal static class PhotoLoader
         var thumbnail = preview.IsErrorOrUndefined() ? null : MakeThumbnail(device, preview);
         return (preview, thumbnail);
     }
-
-    /// <summary>
-    /// Whether the HQ load already knows the image exceeds the GPU's maximum bitmap size (<paramref name="maxSize"/>),
-    /// so it can go straight to the tiled reader and skip the normal decoders, which would fail. Known when an
-    /// earlier load found it oversized, or when the preview metadata gives the full size.
-    /// </summary>
-    private static bool IsKnownOversized(PhotoImages images, int maxSize) => images.KnownOversized ||
-        images.Preview?.Metadata is { FullWidth: > 0, FullHeight: > 0 } m && (m.FullWidth > maxSize || m.FullHeight > maxSize);
 
     /// <summary>
     /// Older builds cached a failed large image's preview with the error icon's size as the photo's size,
@@ -111,8 +104,8 @@ internal static class PhotoLoader
             {
                 if (preview.Rotation != 0)
                 {
-                    var center = new System.Numerics.Vector2(size / 2f, size / 2f);
-                    ds.Transform = System.Numerics.Matrix3x2.CreateRotation(
+                    var center = new Vector2(size / 2f, size / 2f);
+                    ds.Transform = Matrix3x2.CreateRotation(
                         (float)(preview.Rotation * Math.PI / 180.0), center);
                 }
                 ds.DrawImage(src,

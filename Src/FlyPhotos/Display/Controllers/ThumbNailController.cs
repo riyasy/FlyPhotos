@@ -38,7 +38,8 @@ internal partial class ThumbNailController : IThumbnailController
     public event Action<int> ThumbnailClicked;
 
     private readonly CanvasAnimatedControl _d2dCanvasThumbNail;
-    private IPhotoProvider _provider;
+    private Func<int, Photo> _getPhoto;
+    private Func<NavState> _getNav;
 
     private int _numOfThumbNailsInOneDirection = 20;
     private int _thumbnailBoxSize = AppConfig.Settings.ThumbnailSize;
@@ -93,8 +94,7 @@ internal partial class ThumbNailController : IThumbnailController
         _thumbNailSelectionColor = ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor);
     }
 
-    public void SetPhotoProvider(IPhotoProvider provider) => _provider = provider;
-
+    public void SetPhotoSource(Func<int, Photo> getPhoto, Func<NavState> getNav) => (_getPhoto, _getNav) = (getPhoto, getNav);
 
     // --- Canvas event handlers ---
 
@@ -187,7 +187,7 @@ internal partial class ThumbNailController : IThumbnailController
         if (e.GetCurrentPoint(_d2dCanvasThumbNail).Properties.PointerUpdateKind
             is not Microsoft.UI.Input.PointerUpdateKind.LeftButtonPressed) return;
 
-        var nav = _provider?.Nav;
+        var nav = _getNav?.Invoke();
         var keys = nav?.Keys;
         if (keys == null || keys.Count <= 1) return;
 
@@ -261,7 +261,7 @@ internal partial class ThumbNailController : IThumbnailController
     {
         // Capture the snapshot once — this method is called from a ThreadPool continuation and the
         // list may be swapped by DeleteCurrentPhoto on the UI thread at any moment.
-        var nav = _provider?.Nav;
+        var nav = _getNav?.Invoke();
         var keys = nav?.Keys;
         if (keys == null || keys.Count == 0) return;
 
@@ -367,7 +367,7 @@ internal partial class ThumbNailController : IThumbnailController
     private void BuildRibbon(ICanvasAnimatedControl sender)
     {
         // Capture the key snapshot once — lock-free per the PhotoList contract.
-        var nav = _provider?.Nav;
+        var nav = _getNav?.Invoke();
         var keys = nav?.Keys;
         if (keys == null || keys.Count < 1 || !_canDrawThumbnails || !AppConfig.Settings.ShowThumbnails)
         {
@@ -510,7 +510,7 @@ internal partial class ThumbNailController : IThumbnailController
         if (thumbnailPosition < 0 || thumbnailPosition >= keys.Count) return;
 
         var key = keys[thumbnailPosition];
-        var photo = _provider?.GetPhoto(key);
+        var photo = _getPhoto?.Invoke(key);
         // Read once: the UI thread may null Photo.Thumbnail (preview eviction) at any moment.
         var thumbnail = photo?.Images.Thumbnail;
 
@@ -573,6 +573,7 @@ internal partial class ThumbNailController : IThumbnailController
 
         ReleaseDeviceResources();
         ThumbnailClicked = null;
-        _provider = null;
+        _getPhoto = null;
+        _getNav = null;
     }
 }

@@ -15,7 +15,7 @@ using NLog;
 
 namespace FlyPhotos.Display.Controllers;
 
-internal partial class PhotoDisplayController : IPhotoProvider
+internal partial class PhotoDisplayController
 {
     public event Action<string>? CacheStatusChanged;
     public event Action<FileDisplayDetails>? FileNameOrDetailsChanged;
@@ -28,7 +28,7 @@ internal partial class PhotoDisplayController : IPhotoProvider
 
     // UI thread: presses since the last Brake. Past the threshold it is a burst, which holds HQ loading.
     private int _keyPressCounter;
-    private const int ContinuousPressThreshold = 1;
+    private const int BurstThreshold = 1;
 
     // The photo collection: Photo objects + the sorted-key snapshot. Its concurrency model (a
     // ConcurrentDictionary for lock-free reads + a volatile copy-on-write key snapshot) lives inside it.
@@ -71,7 +71,7 @@ internal partial class PhotoDisplayController : IPhotoProvider
         _cache.Loaded += OnLoaded;
         _cache.CacheStatusChanged += status => CacheStatusChanged?.Invoke(status);
 
-        _thumbNailController.SetPhotoProvider(this);
+        _thumbNailController.SetPhotoSource(_photoList.GetPhoto, () => _nav);
 
         // The opened photo alone, until the listing replaces it with the whole folder/Explorer view around it.
         _photoList.Initialize([firstPhotoPath]);
@@ -105,7 +105,7 @@ internal partial class PhotoDisplayController : IPhotoProvider
 
     private async Task LoadAndShowFirstPhoto(Photo firstPhoto)
     {
-        bool continueLoadingHq = await PhotoLoader.LoadFirstPreview(firstPhoto, _d2dCanvas);
+        bool continueLoadingHq = await PhotoDecoder.LoadFirstPreview(firstPhoto, _d2dCanvas);
 
         // The open-zoom animation begins on the FIRST SetSource below. Arm the completion wait now
         // so the W2D subscribe is enqueued (FIFO) before that SetSource installs/starts the animation.
@@ -116,7 +116,7 @@ internal partial class PhotoDisplayController : IPhotoProvider
         if (continueLoadingHq)
         {
             await SetSourceAsync(firstPhoto, DisplayLevel.Preview);
-            if (await Task.Run(() => PhotoLoader.LoadHq(firstPhoto, _d2dCanvas)) is { } hq)
+            if (await Task.Run(() => PhotoDecoder.LoadHq(firstPhoto, _d2dCanvas)) is { } hq)
                 firstPhoto.Images.TryAttachHq(hq);
         }
 
@@ -140,10 +140,16 @@ internal partial class PhotoDisplayController : IPhotoProvider
         {
             // Secondary instances only display the single opened image.
             // No folder or Explorer-window discovery is performed.
-            files =
-                AppConfig.Volatile.IsSecondaryInstance ? [selectedFilePath] :
-                IsFolderMode ? ListFolderAndStartWatching(selectedFilePath) :
-                FileDiscovery.DiscoverFiles(selectedFilePath, _launchedExternally);
+            if (AppConfig.Volatile.IsSecondaryInstance)
+                files = [selectedFilePath];
+            else if (IsFolderMode)
+            {
+                _folder = new FolderSource();
+                _folder.Changed += Watcher_Changed;
+                files = _folder.ListAndWatch(selectedFilePath);
+            }
+            else
+                files = FileDiscovery.DiscoverFiles(selectedFilePath, _launchedExternally);
         }
         catch (Exception ex)
         {
@@ -191,23 +197,23 @@ internal partial class PhotoDisplayController : IPhotoProvider
 
     // --- Cache events & display upgrade ---
 
-    // 1 while a RefreshCurrent is queued on the UI thread, so a burst of loads queues one refresh.
-    private int _refreshQueued;
+    // 1 while an UpgradeCurrent is queued on the UI thread, so a run of loads queues one upgrade.
+    private int _upgradeQueued;
 
     // UI thread: the item last handed to the canvas, to tell a reload (same level, new item) from a repeat.
     private DisplayItem? _shownItem;
 
-    // Loader thread: an image was stored for a key. The strip redraws that slot; whether the screen changes is
-    // decided on the UI thread, which alone knows what is on screen. Never compared with the loader's own centre:
-    // the loader may not have seen the latest navigation yet.
+    // Prefetch thread: an image was stored for a key. The strip redraws that slot; whether the screen changes is
+    // decided on the UI thread, which alone knows what is on screen. Never compared with the cache's own centre:
+    // the cache may not have seen the latest navigation yet.
     private void OnLoaded(int key)
     {
         _thumbNailController.RedrawThumbNailsIfNeeded(key);
-        if (Interlocked.Exchange(ref _refreshQueued, 1) == 0)
+        if (Interlocked.Exchange(ref _upgradeQueued, 1) == 0)
             _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
             {
-                Volatile.Write(ref _refreshQueued, 0);
-                RefreshCurrent();
+                Volatile.Write(ref _upgradeQueued, 0);
+                UpgradeCurrent();
             });
     }
 
@@ -215,7 +221,7 @@ internal partial class PhotoDisplayController : IPhotoProvider
     /// UI thread. Shows the best image the photo on screen now has, if it is a higher level than the one shown, or
     /// the same level reloaded (a RAW setting change). Never steps down.
     /// </summary>
-    private void RefreshCurrent()
+    private void UpgradeCurrent()
     {
         if (_photoList.GetPhoto(_nav.Key) is not { } photo) return;
         var level = BestLevel(photo);
@@ -238,10 +244,11 @@ internal partial class PhotoDisplayController : IPhotoProvider
     }
 
     // UI thread. Shows the photo at displayLevel, or the next level down when that item was released meanwhile (the
-    // loader may unload it at any moment): the placeholder is always there, so something is always shown. The lease
+    // cache may unload it at any moment): the placeholder is always there, so something is always shown. The lease
     // taken here passes to the canvas, which holds it while the item is on screen.
     private async Task SetSourceAsync(Photo photo, DisplayLevel displayLevel)
     {
+        if (_cts.IsCancellationRequested) return; // shutting down: the canvas may be gone
         var item = LeaseAtOrBelow(photo, ref displayLevel);
         _displayLevel = displayLevel;
         _shownItem = item;
@@ -252,7 +259,7 @@ internal partial class PhotoDisplayController : IPhotoProvider
         catch (Exception ex) when (displayLevel > DisplayLevel.PlaceHolder)
         {
             // The canvas could not draw the item (it released the lease). Show the placeholder rather than leave the
-            // previous photo up. _shownItem keeps the failed item, so RefreshCurrent doesn't retry it on every load;
+            // previous photo up. _shownItem keeps the failed item, so UpgradeCurrent doesn't retry it on every load;
             // a newer item, or coming back to the photo, tries again.
             Logger.Error(ex, $"Showing {photo.FilePath} at {displayLevel} failed");
             await _canvasController.SetSource(photo, ImageReader.GetLoadingIndicator(), DisplayLevel.PlaceHolder);
@@ -275,7 +282,7 @@ internal partial class PhotoDisplayController : IPhotoProvider
         var keys = _photoList.Keys;
         if (keys.Count <= 1) return;
         // A list that can't be navigated must never open a burst: HQ stays held until a Brake().
-        if (++_keyPressCounter == ContinuousPressThreshold + 1) _cache.HoldHq(true);
+        if (++_keyPressCounter == BurstThreshold + 1) _cache.HoldHq();
         int currentPosition = _nav.Position;
         if (currentPosition < 0) return; // TODO Should not happen if state is consistent
         int newPosition = currentPosition + (direction == NavDirection.Next ? 1 : -1);
@@ -323,7 +330,7 @@ internal partial class PhotoDisplayController : IPhotoProvider
 
     public async Task Brake()
     {
-        if (IsContinuousKeyPress()) _cache.HoldHq(false);
+        if (IsBurst()) _cache.ResumeHq();
         _keyPressCounter = 0;
         if (_displayLevel != DisplayLevel.Hq && _photoList.GetPhoto(_nav.Key) is { Images.Hq: not null } photo)
             await SetSourceAsync(photo, DisplayLevel.Hq);
@@ -385,7 +392,7 @@ internal partial class PhotoDisplayController : IPhotoProvider
 
     // Drops cached RAW HQ bitmaps so the new decoder settings take effect, and re-decodes them.
     // Called from the UI thread when a RAW decode setting (DecodeRawData / decoder priority) changes. A RAW HQ on
-    // screen stays (the canvas holds its own lease) until the re-decoded one replaces it (RefreshCurrent).
+    // screen stays (the canvas holds its own lease) until the re-decoded one replaces it (UpgradeCurrent).
     public void InvalidateRawHqCache() => _cache.InvalidateHqForRawFiles();
 
     // UI thread: a cache window size changed; the cache re-plans now rather than at the next navigation.
@@ -396,7 +403,7 @@ internal partial class PhotoDisplayController : IPhotoProvider
     public bool CanDeleteCurrentPhoto()
     {
         if (!_initialFileListingCompleted) return false; // the list is still just the opened photo
-        if (IsContinuousKeyPress()) return false;
+        if (IsBurst()) return false;
         if (_displayLevel != DisplayLevel.Hq) return false;
         return true;
     }
@@ -503,7 +510,7 @@ internal partial class PhotoDisplayController : IPhotoProvider
     public bool CanRenameCurrentPhoto()
     {
         if (!_initialFileListingCompleted) return false; // the list is still just the opened photo
-        if (IsContinuousKeyPress()) return false;
+        if (IsBurst()) return false;
         if (_displayLevel != DisplayLevel.Hq) return false;
         return true;
     }
@@ -556,16 +563,13 @@ internal partial class PhotoDisplayController : IPhotoProvider
 
     // --- Queries ---
 
-    private bool IsContinuousKeyPress() => _keyPressCounter > ContinuousPressThreshold;
+    private bool IsBurst() => _keyPressCounter > BurstThreshold;
 
     public bool IsSinglePhoto() => _photoList.Count <= 1;
 
     public string GetFullPathCurrentFile() => _photoList[_nav.Key].FilePath;
 
     /// <summary>Whether the on-screen photo is a RAW file. Lock-free read; safe to call cross-thread.</summary>
-    NavState IPhotoProvider.Nav => _nav;
-    Photo? IPhotoProvider.GetPhoto(int key) => _photoList.GetPhoto(key);
-
     public bool CurrentPhotoIsRaw =>
         _photoList.GetPhoto(_nav.Key) is { IsRaw: true };
 

@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
@@ -50,11 +51,11 @@ internal sealed class FolderSource : IDisposable
         if (Path.GetDirectoryName(selectedFilePath) is not { } folder) return [selectedFilePath];
 
         _watcher = StartWatcher(folder);
-        long start = System.Diagnostics.Stopwatch.GetTimestamp();
+        long start = Stopwatch.GetTimestamp();
         var files = FolderListing.ListFolder(folder, CodecDiscovery.SupportedExtensions, _order,
             Path.GetFileName(selectedFilePath));
         Logger.Trace($"Listed {files.Length} files from folder in " +
-                     $"{System.Diagnostics.Stopwatch.GetElapsedTime(start).TotalMilliseconds:F0} ms");
+                     $"{Stopwatch.GetElapsedTime(start).TotalMilliseconds:F0} ms");
         return files.Length == 0 ? [selectedFilePath] : files;
     }
 

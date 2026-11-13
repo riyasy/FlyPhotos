@@ -44,8 +44,10 @@ internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, 
     }
 
     /// <summary>
-    /// Frees the bitmap. Only the lease count calls this (directly or through <see cref="FreeSink"/>). Virtual so
-    /// items that own more, such as <see cref="SvgHqDisplayItem"/>'s scene, can release it too.
+    /// Frees the bitmap. Called once, after the last lease ends: by <see cref="Release"/>, or by whoever
+    /// <see cref="FreeSink"/> handed the item to (the canvas, on its render thread). Never call it on an item that
+    /// still has leases. Virtual so items that own more, such as <see cref="SvgHqDisplayItem"/>'s scene, can release
+    /// it too.
     /// </summary>
     public virtual void Free() => Bitmap?.Dispose();
 }
@@ -89,8 +91,8 @@ internal sealed partial class TiledHqDisplayItem(CanvasBitmap overview, Origin o
 /// drawing one up front would cost a full extra draw of the scene, so <see cref="Rasterize"/> makes one only
 /// when pixels are needed (copy to clipboard).
 /// </summary>
-/// <param name="lease">The loader's lease on the GPU scene; this item owns it from now on.</param>
-/// <param name="width">The size the photo reports (<see cref="Photo.GetActualSize"/>): the scene fitted to
+/// <param name="lease">The SVG reader's lease on the GPU scene; this item owns it from now on.</param>
+/// <param name="width">The size the photo reports (<see cref="PhotoImages.GetActualSize"/>): the scene fitted to
 /// 2000 px on the longer side, as the resvg raster was.</param>
 internal sealed partial class SvgHqDisplayItem(Origin origin, SvgScene.Lease lease, int width, int height)
     : HqDisplayItem(null, origin, 0)

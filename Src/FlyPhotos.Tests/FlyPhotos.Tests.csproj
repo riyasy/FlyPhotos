@@ -19,6 +19,7 @@
     <Compile Include="..\FlyPhotos\Services\FolderWatcher.cs" Link="Linked\FolderWatcher.cs" />
     <Compile Include="..\FlyPhotos\Display\State\ListChange.cs" Link="Linked\ListChange.cs" />
     <Compile Include="..\FlyPhotos\Display\State\KeyWindow.cs" Link="Linked\KeyWindow.cs" />
+    <Compile Include="..\FlyPhotos\Display\State\NavState.cs" Link="Linked\NavState.cs" />
     <Compile Include="..\FlyPhotos\Core\Model\LeaseCount.cs" Link="Linked\LeaseCount.cs" />
     <Compile Include="..\FlyPhotos\Display\Controllers\PrefetchPlanner.cs" Link="Linked\PrefetchPlanner.cs" />
     <Compile Include="..\FlyPhotos\Infra\Interop\NativeDdsBridge.cs" Link="Linked\NativeDdsBridge.cs" />
