@@ -26,9 +26,8 @@ internal partial class PhotoDisplayController : IPhotoProvider
     private readonly CancellationTokenSource _cts = new();
     private readonly TaskCompletionSource<bool> _firstPhotoLoadedTcs = new();
 
-    // UI thread: presses since the last Brake, and whether that made a burst that holds HQ loading.
+    // UI thread: presses since the last Brake. Past the threshold it is a burst, which holds HQ loading.
     private int _keyPressCounter;
-    private bool _holdingHq;
     private const int ContinuousPressThreshold = 1;
 
     // The photo collection: Photo objects + the sorted-key snapshot. Its concurrency model (a
@@ -99,7 +98,8 @@ internal partial class PhotoDisplayController : IPhotoProvider
         if (continueLoadingHq)
         {
             await SetSourceAsync(firstPhoto, DisplayLevel.Preview);
-            await Task.Run(() => PhotoLoader.LoadHq(firstPhoto, _d2dCanvas));
+            if (await Task.Run(() => PhotoLoader.LoadHq(firstPhoto, _d2dCanvas)) is { } hq)
+                firstPhoto.Images.TryAttachHq(hq);
         }
 
         await SetSourceAsync(firstPhoto, DisplayLevel.Hq);
@@ -183,7 +183,7 @@ internal partial class PhotoDisplayController : IPhotoProvider
     {
         if (_photoList.GetPhoto(_nav.Key) is not { } photo) return;
         var level = BestLevel(photo);
-        if (level == DisplayLevel.PlaceHolder || level < _displayLevel) return;
+        if (level < _displayLevel) return;
         if (level == _displayLevel && ReferenceEquals(photo.Images.Get(level), _shownItem)) return;
         _ = SetSourceAsync(photo, level);
     }
@@ -217,12 +217,7 @@ internal partial class PhotoDisplayController : IPhotoProvider
         var keys = _photoList.Keys;
         if (keys.Count <= 1) return;
         // A list that can't be navigated must never open a burst: HQ stays held until a Brake().
-        _keyPressCounter++;
-        if (IsContinuousKeyPress() && !_holdingHq)
-        {
-            _holdingHq = true;
-            _cache.HoldHq(true);
-        }
+        if (++_keyPressCounter == ContinuousPressThreshold + 1) _cache.HoldHq(true);
         int currentPosition = _nav.Position;
         if (currentPosition < 0) return; // TODO Should not happen if state is consistent
         int newPosition = currentPosition + (direction == NavDirection.Next ? 1 : -1);
@@ -270,12 +265,8 @@ internal partial class PhotoDisplayController : IPhotoProvider
 
     public async Task Brake()
     {
+        if (IsContinuousKeyPress()) _cache.HoldHq(false);
         _keyPressCounter = 0;
-        if (_holdingHq)
-        {
-            _holdingHq = false;
-            _cache.HoldHq(false);
-        }
         if (_displayLevel != DisplayLevel.Hq && _photoList.GetPhoto(_nav.Key) is { Images.Hq: not null } photo)
             await SetSourceAsync(photo, DisplayLevel.Hq);
     }
@@ -390,8 +381,7 @@ internal partial class PhotoDisplayController : IPhotoProvider
         if (_photoList.Keys.Count <= 1) return new DeleteResult(true, true);
 
         // Same path as a Folder mode removal: the next photo is shown, else the previous one.
-        await ApplyListChangeAsync(new ListChangeBatch(
-            path => path.Equals(deletedPath, StringComparison.OrdinalIgnoreCase), null, [], null), goToFirst: false);
+        await ApplyListChangeAsync(ListChangeBatch.Remove(deletedPath), goToFirst: false);
         return new DeleteResult(true, false);
     }
 
@@ -414,7 +404,7 @@ internal partial class PhotoDisplayController : IPhotoProvider
         var currentPath = _photoList.GetPhoto(currentKey)?.FilePath;
 
         // Renamed photos keep their key; the canvas knows them by path, so it has to follow.
-        var removed = _photoList.ApplyChanges(batch.IsRemoved, batch.Renamed, batch.Added, batch.Order, currentKey,
+        var removed = _photoList.ApplyChanges(batch, currentKey,
             onRenamed: _canvasController.OnPhotoRenamed);
         var keys = _photoList.Keys;
         if (ReferenceEquals(keys, oldKeys)) return; // nothing actually changed

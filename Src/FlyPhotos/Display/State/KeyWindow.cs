@@ -31,14 +31,21 @@ internal static class KeyWindow
     public static int? Nearest(IReadOnlyList<int> keys, int centre, int half, Func<int, bool> wanted)
     {
         if (centre < 0 || centre >= keys.Count) return null;
-        if (wanted(keys[centre])) return keys[centre];
-        for (int d = 1; d <= half; d++)
-        {
-            int before = centre - d, after = centre + d;
-            if (before < 0 && after >= keys.Count) break;
-            if (before >= 0 && wanted(keys[before])) return keys[before];
-            if (after < keys.Count && wanted(keys[after])) return keys[after];
-        }
+        for (int rank = 0; rank <= 2 * half; rank++)
+            if (NthNearest(keys.Count, centre, rank) is var pos and >= 0 && wanted(keys[pos]))
+                return keys[pos];
         return null;
+    }
+
+    /// <summary>
+    /// The position <paramref name="rank"/> steps out from <paramref name="centre"/> in nearest-first order — rank 0
+    /// is the centre, then before and after at distance 1, 2, … (before wins a tie) — or -1 when it lies outside a list
+    /// of <paramref name="count"/>. A window of half-width h covers ranks 0..2h.
+    /// </summary>
+    public static int NthNearest(int count, int centre, int rank)
+    {
+        int distance = (rank + 1) / 2;
+        int pos = rank == 0 ? centre : rank % 2 == 1 ? centre - distance : centre + distance;
+        return pos >= 0 && pos < count ? pos : -1;
     }
 }

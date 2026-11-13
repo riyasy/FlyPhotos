@@ -184,7 +184,7 @@ internal partial class CanvasController : ICanvasController
             _realImageDisplayedForCurrentPhoto = true;
 
         var ctx = new PhotoInstallContext(_currentPhotoPath, previousPhotoPath, canvasSize,
-            isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder);
+            isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, displayItem);
 
         // Handle the specific type of display item (Animated, HQ Static, Preview, MultiPage, Tiled)
         switch (displayItem)
@@ -219,7 +219,7 @@ internal partial class CanvasController : ICanvasController
             InstallRenderer(
                 new StaticImageRenderer(_d2dCanvas, animDispItem.Bitmap,
                     photo.SupportsTransparency, RequestInvalidate, generateMipChain: false),
-                _imageSize, animDispItem.Rotation, ctx, forceThumbNailRedraw: true, animDispItem);
+                _imageSize, animDispItem.Rotation, ctx, forceThumbNailRedraw: true);
 
             // Asynchronously create the appropriate animator (GIF, WebP, APNG, or AVIF).
             var bytes = animDispItem.FileAsByteArray;
@@ -255,8 +255,7 @@ internal partial class CanvasController : ICanvasController
             // frame already placed it (AsFollowUp clears the view-reset flags).
             InstallRenderer(
                 new AnimatedImageRenderer(_d2dCanvas, newAnimator, photo.SupportsTransparency, RequestInvalidate),
-                _imageSize, animDispItem.Rotation, ctx.AsFollowUp(), forceThumbNailRedraw: false,
-                item: null); // the animator draws its own frames, not the item's bitmap
+                _imageSize, animDispItem.Rotation, ctx.AsFollowUp(), forceThumbNailRedraw: false);
             // Keep the control running while the animated image is active.
             RequestInvalidate();
         }
@@ -271,7 +270,7 @@ internal partial class CanvasController : ICanvasController
         InstallRenderer(
             new StaticImageRenderer(_d2dCanvas, hqDispItem.Bitmap,
                 photo.SupportsTransparency, RequestInvalidate),
-            _imageSize, hqDispItem.Rotation, ctx, forceThumbNailRedraw: true, hqDispItem);
+            _imageSize, hqDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
     private void HandleHqMultiPageDisplayItem(Photo photo, MultiPageHqDisplayItem multiDispItem, PhotoInstallContext ctx)
@@ -279,7 +278,7 @@ internal partial class CanvasController : ICanvasController
         InstallRenderer(
             new MultiPageRenderer(_d2dCanvas, multiDispItem.FileAsByteArray, 0,
                 photo.SupportsTransparency, RequestInvalidate, multiDispItem.PageOrder),
-            _imageSize, multiDispItem.Rotation, ctx, forceThumbNailRedraw: true, multiDispItem);
+            _imageSize, multiDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
     private void HandleHqTiledDisplayItem(Photo photo, TiledHqDisplayItem tiledDispItem, PhotoInstallContext ctx)
@@ -287,7 +286,7 @@ internal partial class CanvasController : ICanvasController
         InstallRenderer(
             new TiledImageRenderer(_d2dCanvas, tiledDispItem,
                 photo.SupportsTransparency, RequestInvalidate),
-            _imageSize, tiledDispItem.Rotation, ctx, forceThumbNailRedraw: true, tiledDispItem);
+            _imageSize, tiledDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
     /// <summary>Installs the vector renderer for an SVG drawn on the GPU (sharp at any zoom).</summary>
@@ -295,7 +294,7 @@ internal partial class CanvasController : ICanvasController
     {
         InstallRenderer(
             new SvgVectorRenderer(_d2dCanvas, svgDispItem, photo.SupportsTransparency, RequestInvalidate),
-            _imageSize, svgDispItem.Rotation, ctx, forceThumbNailRedraw: true, svgDispItem);
+            _imageSize, svgDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
     private void HandlePreviewDisplayItem(Photo photo, PreviewDisplayItem previewDispItem, PhotoInstallContext ctx)
@@ -309,8 +308,7 @@ internal partial class CanvasController : ICanvasController
         InstallRenderer(
             new StaticImageRenderer(_d2dCanvas, previewDispItem.Bitmap,
                 photo.SupportsTransparency, RequestInvalidate, generateMipChain: false),
-            new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, ctx, forceThumbNailRedraw: true,
-            previewDispItem);
+            new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
     /// <summary>
@@ -319,11 +317,14 @@ internal partial class CanvasController : ICanvasController
     /// </summary>
     private readonly record struct PhotoInstallContext(
         string PhotoPath, string PreviousPhotoPath, Size CanvasSize,
-        bool IsFirstPhotoEver, bool IsNewPhoto, bool IsUpgradeFromPlaceholder)
+        bool IsFirstPhotoEver, bool IsNewPhoto, bool IsUpgradeFromPlaceholder, DisplayItem Item)
     {
-        /// <summary>A follow-up install for the same photo (e.g. animator after its static first frame) that must not reset the view.</summary>
+        /// <summary>
+        /// A follow-up install for the same photo (an animator after its static first frame) that must not reset the
+        /// view. It carries no item: the animator draws its own frames, so the first frame's lease ends with the swap.
+        /// </summary>
         public PhotoInstallContext AsFollowUp() =>
-            this with { IsFirstPhotoEver = false, IsNewPhoto = false, IsUpgradeFromPlaceholder = false };
+            this with { IsFirstPhotoEver = false, IsNewPhoto = false, IsUpgradeFromPlaceholder = false, Item = null };
     }
 
     /// <summary>
@@ -363,9 +364,9 @@ internal partial class CanvasController : ICanvasController
     /// swap + view-state update apply atomically in the same tick — no one-frame mismatch, and Draw
     /// can never see a renderer mid-disposal.
     /// </summary>
-    /// <param name="item">The item the renderer draws, with a lease taken for it; owned by the canvas from here.</param>
+    /// <remarks>ctx.Item is the item the renderer draws, leased in SetSource; the canvas owns the lease from here.</remarks>
     private void InstallRenderer(IRenderer newRenderer, Size imageSize,
-        int imageRotation, PhotoInstallContext ctx, bool forceThumbNailRedraw, DisplayItem item)
+        int imageRotation, PhotoInstallContext ctx, bool forceThumbNailRedraw)
     {
         // InstallRenderer is always called on the UI thread, so we can fire the event directly here
         // without a DispatcherQueue.TryEnqueue. Only notify when the multipage state actually changes
@@ -397,7 +398,7 @@ internal partial class CanvasController : ICanvasController
             var oldRenderer = _currentRenderer;
             var oldItem = _currentItem;
             _currentRenderer = newRenderer;
-            _currentItem = item;
+            _currentItem = ctx.Item;
 
             if (oldRenderer is AnimatedImageRenderer)
                 _ = Task.Run(oldRenderer.Dispose); // drain in-flight UpdateFrameAsync off the W2D thread

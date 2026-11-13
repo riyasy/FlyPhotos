@@ -26,8 +26,9 @@ internal enum LoadKind
 internal readonly record struct SlotState(bool HasPreview, bool HasHq, bool TiledHq = false, bool NeedsHeavy = false,
     bool NeedsDiskWrite = false, bool PreviewParked = false, bool HqParked = false);
 
-/// <summary>A job the cache is running (or one that was cancelled and has not returned yet).</summary>
-internal readonly record struct RunningJob(int Key, LoadKind Kind, bool AllowLarge);
+/// <summary>A job to start, or one the cache is running (or cancelled and not yet returned).</summary>
+/// <param name="AllowLarge">An HQ job that may load a tiled large image: only the centre's.</param>
+internal readonly record struct RunningJob(int Key, LoadKind Kind, bool AllowLarge = false);
 
 /// <summary>How many jobs of each kind may run at once. Previews (light and heavy together) share one budget.</summary>
 internal readonly record struct JobLimits(int Previews, int Heavy, int Hq, int DiskWrites)
@@ -39,16 +40,26 @@ internal readonly record struct JobLimits(int Previews, int Heavy, int Hq, int D
     public static JobLimits ForCores(int cores) => new(Math.Max(1, cores - 1), 4, cores, cores);
 }
 
-/// <summary>The planner's decisions for one round. Reused across rounds: <see cref="PrefetchPlanner.Make"/> clears it.</summary>
+/// <summary>
+/// The planner's decisions for one round. Reused across rounds (the planner runs after every batch of loader
+/// messages, hundreds of times a second while a window fills): <see cref="PrefetchPlanner.Make"/> clears it.
+/// </summary>
 internal sealed class PrefetchPlan
 {
-    public readonly List<(int Key, LoadKind Kind, bool AllowLarge)> Start = [];
+    public readonly List<RunningJob> Start = [];
     /// <summary>Indexes into the running list of jobs to cancel; their results are discarded.</summary>
     public readonly List<int> Cancel = [];
     /// <summary>Photos to unload completely (preview and HQ).</summary>
     public readonly List<int> EvictAll = [];
     /// <summary>Photos to unload the HQ of, keeping the preview.</summary>
     public readonly List<int> EvictHq = [];
+    /// <summary>Photos in the preview window that have their preview, before and after the centre.</summary>
+    public int CachedBefore, CachedAfter;
+
+    // Scratch for Make.
+    internal readonly HashSet<(int, LoadKind)> Busy = [];
+    internal readonly Dictionary<int, int> Positions = []; // key -> position, for the window around the centre
+    internal readonly List<int> DiskWrites = [];
 
     public void Clear()
     {
@@ -56,6 +67,10 @@ internal sealed class PrefetchPlan
         Cancel.Clear();
         EvictAll.Clear();
         EvictHq.Clear();
+        CachedBefore = CachedAfter = 0;
+        Busy.Clear();
+        Positions.Clear();
+        DiskWrites.Clear();
     }
 }
 
@@ -74,45 +89,44 @@ internal sealed class PrefetchPlan
 /// </summary>
 internal static class PrefetchPlanner
 {
-    public static void Make(PrefetchPlan plan, IReadOnlyList<int> keys, int centre, IEnumerable<int> loaded,
+    public static void Make(PrefetchPlan plan, IReadOnlyList<int> keys, int centre, HashSet<int> loaded,
         Func<int, SlotState> slotOf, IReadOnlyList<RunningJob> running, bool holdHq,
         int previewHalf, int hqHalf, JobLimits limits)
     {
         plan.Clear();
         if (centre < 0 || centre >= keys.Count) return;
         int centreKey = keys[centre];
+        var (lo, hi) = KeyWindow.Range(keys.Count, centre, Math.Max(previewHalf, hqHalf));
+        for (int pos = lo; pos <= hi; pos++) plan.Positions[keys[pos]] = pos;
 
         // --- What is running, and what to cancel ---
         int previews = 0, heavy = 0, hqs = 0, diskWrites = 0;
-        var busy = new HashSet<(int, LoadKind)>();
         for (int i = 0; i < running.Count; i++)
         {
             var job = running[i];
-            busy.Add((job.Key, job.Kind));
+            plan.Busy.Add((job.Key, job.Kind));
             switch (job.Kind)
             {
                 case LoadKind.PreviewLight: previews++; break;
                 case LoadKind.PreviewHeavy: previews++; heavy++; break;
                 case LoadKind.Hq: hqs++; break;
-                case LoadKind.DiskWrite: diskWrites++; break;
+                case LoadKind.DiskWrite: diskWrites++; continue; // writes always finish
             }
-            int half = job.Kind == LoadKind.Hq ? hqHalf : previewHalf;
-            bool leftWindow = KeyWindow.IndexOf(keys, job.Key, centre, half) < 0;
+            bool leftWindow = !Within(plan, job.Key, centre, job.Kind == LoadKind.Hq ? hqHalf : previewHalf);
             bool largeLeftCentre = job.Kind == LoadKind.Hq && job.AllowLarge && job.Key != centreKey;
-            if ((leftWindow || largeLeftCentre) && job.Kind != LoadKind.DiskWrite) plan.Cancel.Add(i);
+            if (leftWindow || largeLeftCentre) plan.Cancel.Add(i);
         }
 
         // --- Evictions ---
         foreach (int key in loaded)
         {
-            if (KeyWindow.IndexOf(keys, key, centre, previewHalf) < 0)
+            if (!Within(plan, key, centre, previewHalf))
             {
                 plan.EvictAll.Add(key);
                 continue;
             }
             var slot = slotOf(key);
-            if (!slot.HasHq) continue;
-            if (KeyWindow.IndexOf(keys, key, centre, hqHalf) < 0 || slot.TiledHq && key != centreKey)
+            if (slot.HasHq && (!Within(plan, key, centre, hqHalf) || slot.TiledHq && key != centreKey))
                 plan.EvictHq.Add(key);
         }
 
@@ -120,36 +134,46 @@ internal static class PrefetchPlanner
         if (!holdHq)
         {
             var centreSlot = slotOf(centreKey);
-            bool centreLoading = busy.Contains((centreKey, LoadKind.Hq));
+            bool centreLoading = plan.Busy.Contains((centreKey, LoadKind.Hq));
             if (!centreSlot.HasHq && !centreLoading && !centreSlot.HqParked && hqs < limits.Hq)
             {
-                plan.Start.Add((centreKey, LoadKind.Hq, true));
+                plan.Start.Add(new RunningJob(centreKey, LoadKind.Hq, AllowLarge: true));
                 hqs++;
                 centreLoading = true;
             }
             if (!centreLoading)
-                foreach (int key in NearestFirst(keys, centre, hqHalf))
+                for (int rank = 1; rank <= 2 * hqHalf && hqs < limits.Hq; rank++)
                 {
-                    if (hqs >= limits.Hq) break;
-                    if (key == centreKey || busy.Contains((key, LoadKind.Hq))) continue;
+                    if (KeyWindow.NthNearest(keys.Count, centre, rank) is not (var pos and >= 0)) continue;
+                    int key = keys[pos];
+                    if (plan.Busy.Contains((key, LoadKind.Hq))) continue;
                     var slot = slotOf(key);
                     if (slot.HasHq || slot.HqParked) continue;
-                    plan.Start.Add((key, LoadKind.Hq, false));
+                    plan.Start.Add(new RunningJob(key, LoadKind.Hq));
                     hqs++;
                 }
         }
 
-        // --- Previews: light and heavy lanes, one budget ---
+        // --- Previews (light and heavy lanes, one budget); also counts the cached ones and finds disk writes ---
         bool lightWaiting = false;
-        foreach (int key in NearestFirst(keys, centre, previewHalf))
+        for (int rank = 0; rank <= 2 * previewHalf; rank++)
         {
-            if (busy.Contains((key, LoadKind.PreviewLight)) || busy.Contains((key, LoadKind.PreviewHeavy))) continue;
+            if (KeyWindow.NthNearest(keys.Count, centre, rank) is not (var pos and >= 0)) continue;
+            int key = keys[pos];
             var slot = slotOf(key);
-            if (slot.HasPreview || slot.PreviewParked) continue;
+            if (slot.HasPreview)
+            {
+                if (pos < centre) plan.CachedBefore++;
+                else if (pos > centre) plan.CachedAfter++;
+                if (slot.NeedsDiskWrite && !plan.Busy.Contains((key, LoadKind.DiskWrite))) plan.DiskWrites.Add(key);
+                continue;
+            }
+            if (slot.PreviewParked || plan.Busy.Contains((key, LoadKind.PreviewLight))
+                                   || plan.Busy.Contains((key, LoadKind.PreviewHeavy))) continue;
             if (slot.NeedsHeavy)
             {
                 if (previews >= limits.Previews || heavy >= limits.Heavy) continue;
-                plan.Start.Add((key, LoadKind.PreviewHeavy, false));
+                plan.Start.Add(new RunningJob(key, LoadKind.PreviewHeavy));
                 previews++;
                 heavy++;
             }
@@ -157,32 +181,22 @@ internal static class PrefetchPlanner
             {
                 lightWaiting = true;
                 if (previews >= limits.Previews) continue;
-                plan.Start.Add((key, LoadKind.PreviewLight, false));
+                plan.Start.Add(new RunningJob(key, LoadKind.PreviewLight));
                 previews++;
             }
         }
 
         // --- Disk-cache writes, once no light preview is waiting for a slot ---
         if (lightWaiting) return;
-        foreach (int key in NearestFirst(keys, centre, previewHalf))
+        foreach (int key in plan.DiskWrites)
         {
             if (diskWrites >= limits.DiskWrites) break;
-            if (busy.Contains((key, LoadKind.DiskWrite)) || !slotOf(key).NeedsDiskWrite) continue;
-            plan.Start.Add((key, LoadKind.DiskWrite, false));
+            plan.Start.Add(new RunningJob(key, LoadKind.DiskWrite));
             diskWrites++;
         }
     }
 
-    /// <summary>The keys within <paramref name="half"/> of the centre: the centre, then before/after at each distance.</summary>
-    private static IEnumerable<int> NearestFirst(IReadOnlyList<int> keys, int centre, int half)
-    {
-        yield return keys[centre];
-        for (int d = 1; d <= half; d++)
-        {
-            int before = centre - d, after = centre + d;
-            if (before < 0 && after >= keys.Count) yield break;
-            if (before >= 0) yield return keys[before];
-            if (after < keys.Count) yield return keys[after];
-        }
-    }
+    /// <summary>Whether <paramref name="key"/> lies within <paramref name="half"/> of the centre.</summary>
+    private static bool Within(PrefetchPlan plan, int key, int centre, int half) =>
+        plan.Positions.TryGetValue(key, out int pos) && Math.Abs(pos - centre) <= half;
 }

@@ -54,13 +54,25 @@ internal sealed class PrefetchCache : IDisposable
     private Thread? _thread;
 
     // --- Loader-thread state ---
-    private sealed class Job(int key, LoadKind kind, bool allowLarge, Photo photo)
+    private sealed class Job(RunningJob spec, Photo photo)
     {
-        public readonly RunningJob Spec = new(key, kind, allowLarge);
+        public readonly RunningJob Spec = spec;
         public readonly Photo Photo = photo;
         public readonly CancellationTokenSource Cts = new();
         // Cancelled, or made stale by a RAW setting change: its result is released, not stored.
         public bool Abandoned;
+
+        // The result, written by the decode before it posts the job back (the post publishes them).
+        public PreviewDisplayItem? Preview;
+        public Thumbnail? Thumbnail;
+        public HqDisplayItem? Hq;
+        public bool Failed;
+
+        public void ReleaseResult()
+        {
+            Preview?.Release();
+            Hq?.Release();
+        }
     }
 
     private NavState _nav = NavState.None;
@@ -74,7 +86,7 @@ internal sealed class PrefetchCache : IDisposable
     private readonly HashSet<(int, LoadKind)> _parked = []; // failed or deferred; retried when the centre moves
     private readonly PrefetchPlan _plan = new();
     private readonly JobLimits _limits = JobLimits.ForCores(Environment.ProcessorCount);
-    private string? _lastStatus;
+    private (int, int, int, int) _lastStatus = (-1, -1, -1, -1);
 
     public PrefetchCache(Func<int, Photo?> getPhoto, ICanvasResourceCreatorWithDpi device)
     {
@@ -90,6 +102,7 @@ internal sealed class PrefetchCache : IDisposable
     public void Start(NavState nav)
     {
         MoveWindow(nav);
+        Post(() => _loaded.Add(nav.Key)); // the photo on screen was loaded by the controller (the first photo)
         _thread = new Thread(Run) { IsBackground = true, Name = "PrefetchLoader" };
         _thread.Start();
     }
@@ -99,7 +112,6 @@ internal sealed class PrefetchCache : IDisposable
     {
         if (nav.Key != _nav.Key) _parked.Clear(); // a new centre gets another try at everything
         _nav = nav;
-        if (nav.Position >= 0) _loaded.Add(nav.Key); // the first photo was loaded by the controller
     });
 
     /// <summary>Holds HQ loading (a burst) or lets it go (the burst ended). Previews keep loading either way.</summary>
@@ -139,8 +151,6 @@ internal sealed class PrefetchCache : IDisposable
         _parked.RemoveWhere(p => p.Item2 == LoadKind.Hq);
     });
 
-    /// <summary>A planning setting (window sizes) changed.</summary>
-    public void Replan() => Post(static () => { });
 
     private void Post(Action message)
     {
@@ -201,8 +211,7 @@ internal sealed class PrefetchCache : IDisposable
         }
         foreach (int key in _plan.EvictHq)
             _getPhoto(key)?.Images.DetachHq()?.Release();
-        foreach (var (key, kind, allowLarge) in _plan.Start)
-            StartJob(key, kind, allowLarge);
+        foreach (var spec in _plan.Start) StartJob(spec);
 
         ReportStatus();
     }
@@ -231,139 +240,131 @@ internal sealed class PrefetchCache : IDisposable
     // Jobs — decode on the thread pool, store on the loader thread
     // -------------------------------------------------------------------------
 
-    private void StartJob(int key, LoadKind kind, bool allowLarge)
+    private void StartJob(RunningJob spec)
     {
-        if (_getPhoto(key) is not { } photo) return;
-        var job = new Job(key, kind, allowLarge, photo);
+        if (_getPhoto(spec.Key) is not { } photo) return;
+        var job = new Job(spec, photo);
         _running.Add(job);
         _ = Task.Run(async () =>
         {
-            object? result = null;
             try
             {
-                result = kind switch
+                switch (spec.Kind)
                 {
-                    LoadKind.PreviewLight => await PhotoLoader.LoadPreview(photo, _device, Purpose.PreviewLight),
-                    LoadKind.PreviewHeavy => await PhotoLoader.LoadPreview(photo, _device, Purpose.PreviewHeavy),
-                    LoadKind.Hq => await PhotoLoader.LoadHq(photo, _device, allowLarge, job.Cts.Token),
-                    _ => await WriteToDiskCache(photo)
-                };
+                    case LoadKind.PreviewLight or LoadKind.PreviewHeavy:
+                        var purpose = spec.Kind == LoadKind.PreviewHeavy ? Purpose.PreviewHeavy : Purpose.PreviewLight;
+                        if (await PhotoLoader.LoadPreview(photo, _device, purpose) is { } loaded)
+                            (job.Preview, job.Thumbnail) = loaded;
+                        break;
+                    case LoadKind.Hq:
+                        job.Hq = await PhotoLoader.LoadHq(photo, _device, spec.AllowLarge, job.Cts.Token);
+                        break;
+                    case LoadKind.DiskWrite:
+                        await WriteToDiskCache(photo);
+                        break;
+                }
             }
             catch (Exception ex)
             {
-                Logger.Error(ex, $"{kind} load failed for {photo.FilePath}");
-                result = ex;
+                Logger.Error(ex, $"{spec.Kind} load failed for {photo.FilePath}");
+                job.Failed = true;
             }
-            if (_stop.IsCancellationRequested) ReleaseResult(result);
-            else Post(() => Complete(job, result));
+            if (_stop.IsCancellationRequested) job.ReleaseResult();
+            else Post(() => Complete(job));
         });
     }
 
-    // Loader thread. Stores what the job brought, unless the job was abandoned or its photo left the list or the
-    // window meanwhile — then it is released.
-    private void Complete(Job job, object? result)
+    // Loader thread. Stores what the job brought, unless the job was abandoned or its photo left the list
+    // meanwhile — then it is released. A photo that left the window is unloaded by the next plan.
+    private void Complete(Job job)
     {
         _running.Remove(job);
         int key = job.Spec.Key;
+        if (job.Failed)
+        {
+            _parked.Add((key, job.Spec.Kind));
+            return;
+        }
         bool keep = !job.Abandoned && ReferenceEquals(_getPhoto(key), job.Photo);
-        var images = job.Photo.Images;
-
-        switch (result)
+        switch (job.Spec.Kind)
         {
-            case Exception:
-                _parked.Add((key, job.Spec.Kind));
-                return;
-
-            case ValueTuple<PreviewDisplayItem, Thumbnail> (var preview, var thumbnail):
-                _needsHeavy.Remove(key);
-                // Replaces nothing but an error placeholder (shared, never freed).
-                if (!keep || images.Preview is { } existing && !existing.IsErrorOrUndefined())
-                {
-                    preview.Release();
-                    return;
-                }
-                if (!images.TryAttachPreview(preview, thumbnail)) return; // retired: released by TryAttachPreview
-                _loaded.Add(key);
-                if (preview.Origin == Origin.Disk) _needsDiskWrite.Add(key);
-                Loaded?.Invoke(key);
-                return;
-
-            case HqDisplayItem hq:
-                if (!keep || images.Hq != null || hq is TiledHqDisplayItem && key != _nav.Key)
-                {
-                    hq.Release();
-                    return;
-                }
-                if (!images.TryAttachHq(hq)) return; // retired: released by TryAttachHq
-                _loaded.Add(key);
-                Loaded?.Invoke(key);
-                return;
-
-            case bool: // a disk-cache write finished
+            case LoadKind.DiskWrite:
                 _needsDiskWrite.Remove(key);
-                return;
-
-            case null when job.Spec.Kind == LoadKind.PreviewLight:
-                // Only a full-image decode can make this preview: the planner hands it to the heavy lane.
-                _needsHeavy.Add(key);
-                return;
-
-            case null when job.Spec.Kind == LoadKind.Hq:
-                // An oversized neighbour deferred, or a large decode cancelled. Retried when it is the centre.
-                if (!job.Abandoned && key != _nav.Key) _parked.Add((key, LoadKind.Hq));
-                return;
-
-            case null:
-                _parked.Add((key, job.Spec.Kind)); // a heavy pass that found nothing
-                return;
+                break;
+            case LoadKind.Hq:
+                CompleteHq(job, keep);
+                break;
+            default:
+                CompletePreview(job, keep);
+                break;
         }
     }
 
-    private static void ReleaseResult(object? result)
+    private void CompletePreview(Job job, bool keep)
     {
-        switch (result)
+        int key = job.Spec.Key;
+        if (job.Preview is not { } preview)
         {
-            case ValueTuple<PreviewDisplayItem, Thumbnail> (var preview, _): preview.Release(); break;
-            case HqDisplayItem hq: hq.Release(); break;
+            // Light pass: only a full-image decode can make this preview, so the planner hands it to the heavy
+            // lane. Heavy pass: nothing found at all.
+            if (job.Spec.Kind == LoadKind.PreviewLight) _needsHeavy.Add(key);
+            else _parked.Add((key, job.Spec.Kind));
+            return;
         }
+        _needsHeavy.Remove(key);
+        var images = job.Photo.Images;
+        // Replaces nothing but an error placeholder (shared, never freed).
+        if (!keep || images.Preview is { } existing && !existing.IsErrorOrUndefined())
+        {
+            preview.Release();
+            return;
+        }
+        if (!images.TryAttachPreview(preview, job.Thumbnail)) return; // retired: released by TryAttachPreview
+        _loaded.Add(key);
+        if (preview.Origin == Origin.Disk) _needsDiskWrite.Add(key);
+        Loaded?.Invoke(key);
     }
 
-    private static async Task<bool> WriteToDiskCache(Photo photo)
+    private void CompleteHq(Job job, bool keep)
     {
-        if (photo.Images.Preview is not { Origin: Origin.Disk } preview || !preview.TryAcquire()) return true;
-        try
+        int key = job.Spec.Key;
+        if (job.Hq is not { } hq)
         {
-            var (actualWidth, actualHeight) = photo.Images.GetSourcePixelSize();
-            await DiskCacherWithSqlite.Instance.PutInCache(photo.FilePath, preview.Bitmap,
-                (int)Math.Round(actualWidth), (int)Math.Round(actualHeight), preview.Rotation);
+            // An oversized neighbour deferred, or a large decode cancelled. Retried when it is the centre.
+            if (!job.Abandoned && key != _nav.Key) _parked.Add((key, LoadKind.Hq));
+            return;
         }
-        finally { preview.Release(); }
-        return true;
+        var images = job.Photo.Images;
+        if (!keep || images.Hq != null || hq is TiledHqDisplayItem && key != _nav.Key)
+        {
+            hq.Release();
+            return;
+        }
+        if (!images.TryAttachHq(hq)) return; // retired: released by TryAttachHq
+        _loaded.Add(key);
+        Loaded?.Invoke(key);
     }
 
+    private static async Task WriteToDiskCache(Photo photo)
+    {
+        if (photo.Images.Preview is not { Origin: Origin.Disk } preview) return;
+        var (actualWidth, actualHeight) = photo.Images.GetSourcePixelSize();
+        await PhotoLoader.PutPreviewInDiskCache(photo.FilePath, preview,
+            (int)Math.Round(actualWidth), (int)Math.Round(actualHeight));
+    }
     // -------------------------------------------------------------------------
     // Status
     // -------------------------------------------------------------------------
 
+    // The planner counted the cached previews on its pass over the window; formatted only when something changed.
     private void ReportStatus()
     {
-        var keys = _nav.Keys;
-        int centre = _nav.Position;
-        int left = centre, right = keys.Count - 1 - centre;
-
-        // Counted by position, not by key value (keys are not ordered). Previews are only kept inside the window.
-        var (lo, hi) = KeyWindow.Range(keys.Count, centre, AppConfig.Settings.CacheSizeOneSidePreviews);
-        int cachedLeft = 0, cachedRight = 0;
-        for (int pos = lo; pos < centre; pos++)
-            if (_getPhoto(keys[pos])?.Images.Preview != null) cachedLeft++;
-        for (int pos = centre + 1; pos <= hi; pos++)
-            if (_getPhoto(keys[pos])?.Images.Preview != null) cachedRight++;
-        var status = $"{cachedLeft}/{left} < Cache > {cachedRight}/{right}";
+        int left = _nav.Position, right = _nav.Keys.Count - 1 - _nav.Position;
+        var status = (_plan.CachedBefore, left, _plan.CachedAfter, right);
         if (status == _lastStatus) return;
         _lastStatus = status;
-        CacheStatusChanged?.Invoke(status);
+        CacheStatusChanged?.Invoke($"{status.Item1}/{left} < Cache > {status.Item3}/{right}");
     }
-
     // -------------------------------------------------------------------------
     // IDisposable
     // -------------------------------------------------------------------------

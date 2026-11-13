@@ -80,14 +80,6 @@ internal sealed class PhotoImages
         }
     }
 
-    /// <summary>
-    /// Drops a tiled HQ so its gigabytes of CPU tiles can be reclaimed once the user has moved on. A renderer still
-    /// drawing it holds its own lease, so it is freed once the canvas swaps renderers.
-    /// </summary>
-    public void ReleaseTiledHq()
-    {
-        if (_hq is TiledHqDisplayItem) DetachHq()?.Release();
-    }
 
     /// <summary>The photo has left the list for good: releases its items. Idempotent.</summary>
     public void Retire()

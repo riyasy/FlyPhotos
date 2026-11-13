@@ -32,6 +32,7 @@ internal static class ImageReader
     public static void Initialize(ICanvasResourceCreatorWithDpi d2dCanvas)
     {
         _indicators = new IndicatorFactory(d2dCanvas);
+        _loadingIndicator = null;
     }
 
     /// <summary>
@@ -128,7 +129,12 @@ internal static class ImageReader
     }
 
     /// <summary>Returns a loading indicator display item to show while an image is being asynchronously decoded.</summary>
-    public static DisplayItem GetLoadingIndicator() => new PreviewDisplayItem(_indicators.Loading, Origin.ErrorScreen);
+    private static DisplayItem? _loadingIndicator;
+
+    /// <summary>The one shared placeholder item (never freed), so it can be told apart by reference.</summary>
+    // Made on first use, like the bitmap behind it. A race may make two; both are shared and never freed.
+    public static DisplayItem GetLoadingIndicator() =>
+        _loadingIndicator ??= new PreviewDisplayItem(_indicators.Loading, Origin.ErrorScreen);
 
     /// <summary>
     /// Runs the decoder chain for the file's format; null when every decoder failed. Only then is the header

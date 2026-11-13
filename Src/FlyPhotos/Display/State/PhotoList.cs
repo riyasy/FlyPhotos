@@ -96,11 +96,11 @@ internal sealed class PhotoList
     /// navigate. Returns the removed (key, photo) pairs. Call from the one thread that mutates the list.
     /// <paramref name="onRenamed"/> gets each applied rename as (the photo's exact old path, its new path).
     /// </summary>
-    public List<(int Key, Photo Photo)> ApplyChanges(Predicate<string> isRemoved,
-        IReadOnlyDictionary<string, string>? renamed, IReadOnlyList<string> addedSorted,
-        IComparer<string>? order, int keepKey, Action<string, string>? onRenamed = null)
+    public List<(int Key, Photo Photo)> ApplyChanges(ListChangeBatch batch, int keepKey,
+        Action<string, string>? onRenamed = null)
     {
-        var result = ListChange.Apply(_keys, key => _photos[key].FilePath, isRemoved, renamed, addedSorted, order,
+        var result = ListChange.Apply(_keys, key => _photos[key].FilePath, batch.IsRemoved, batch.Renamed, batch.Added,
+            batch.Order,
             create: path =>
             {
                 int key = _nextKey++;

@@ -15,7 +15,12 @@ namespace FlyPhotos.Display.State;
 /// added (sorted by <see cref="Order"/>, which is null when nothing is added or renamed).
 /// </summary>
 internal sealed record ListChangeBatch(Predicate<string> IsRemoved, IReadOnlyDictionary<string, string>? Renamed,
-    IReadOnlyList<string> Added, IComparer<string>? Order);
+    IReadOnlyList<string> Added, IComparer<string>? Order)
+{
+    /// <summary>The file at <paramref name="path"/> is gone (deleted in Fly).</summary>
+    public static ListChangeBatch Remove(string path) =>
+        new(p => p.Equals(path, StringComparison.OrdinalIgnoreCase), null, [], null);
+}
 
 /// <summary>
 /// Where Folder mode's photo list comes from: one folder sorted by Fly (<see cref="FolderSortComparer"/>), kept live

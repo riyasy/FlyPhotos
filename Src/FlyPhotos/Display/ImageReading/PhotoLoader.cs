@@ -84,9 +84,15 @@ internal static class PhotoLoader
         if (photo.Images.Preview is not { Origin: Origin.DiskCache, Bitmap: not null } p) return;
         int w = tiled.Pyramid.FullWidth, h = tiled.Pyramid.FullHeight;
         if (p.Metadata is { } m && (int)Math.Round(m.FullWidth) == w && (int)Math.Round(m.FullHeight) == h) return;
-        if (!p.TryAcquire()) return; // evicted meanwhile
-        try { await DiskCacherWithSqlite.Instance.PutInCache(photo.FilePath, p.Bitmap, w, h, p.Rotation); }
-        finally { p.Release(); }
+        await PutPreviewInDiskCache(photo.FilePath, p, w, h);
+    }
+
+    /// <summary>Writes a preview to the disk cache under its own lease (the cache may release it meanwhile).</summary>
+    public static async Task PutPreviewInDiskCache(string path, PreviewDisplayItem preview, int width, int height)
+    {
+        if (!preview.TryAcquire()) return; // already released
+        try { await DiskCacherWithSqlite.Instance.PutInCache(path, preview.Bitmap, width, height, preview.Rotation); }
+        finally { preview.Release(); }
     }
 
     /// <summary>A square, centre-cropped thumbnail of <paramref name="preview"/>; null if it can't be made.</summary>
