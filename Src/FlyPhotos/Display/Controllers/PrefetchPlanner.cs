@@ -119,9 +119,12 @@ internal static class PrefetchPlanner
         }
 
         // --- Evictions ---
+        // A photo in either window keeps what it has: with an HQ window wider than the preview window (a hand-edited
+        // setting) a neighbour's HQ would otherwise be unloaded right after it loads, and loaded again, forever.
+        int keepHalf = Math.Max(previewHalf, hqHalf);
         foreach (int key in loaded)
         {
-            if (!Within(plan, key, centre, previewHalf))
+            if (!Within(plan, key, centre, keepHalf))
             {
                 plan.EvictAll.Add(key);
                 continue;

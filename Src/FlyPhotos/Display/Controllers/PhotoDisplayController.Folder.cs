@@ -38,7 +38,7 @@ internal partial class PhotoDisplayController
         try
         {
             await _listingReady.Task;
-            _d2dCanvas.DispatcherQueue.TryEnqueue(() => _ = ApplyWatcherChangesAsync(watcher, changes));
+            PostToUi(() => _ = ApplyWatcherChangesAsync(watcher, changes));
         }
         catch (Exception ex)
         {

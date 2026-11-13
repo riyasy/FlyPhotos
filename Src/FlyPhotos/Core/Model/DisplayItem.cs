@@ -35,6 +35,9 @@ internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, 
     /// <summary>Takes a lease. False once the item has been freed: the caller must not touch it.</summary>
     public bool TryAcquire() => IsErrorOrUndefined() || _leases.TryAcquire();
 
+    /// <summary>Whether the last lease has ended. Never true for the shared error and placeholder items.</summary>
+    public bool IsFreed => !IsErrorOrUndefined() && _leases.IsReleased;
+
     /// <summary>Ends a lease; the last one frees the item.</summary>
     public void Release()
     {

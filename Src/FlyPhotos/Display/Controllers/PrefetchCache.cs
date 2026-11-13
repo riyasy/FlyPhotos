@@ -8,11 +8,21 @@ using FlyPhotos.Core.Model;
 using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
-using FlyPhotos.Services;
-using Microsoft.Graphics.Canvas;
 using NLog;
 
 namespace FlyPhotos.Display.Controllers;
+
+/// <summary>How a <see cref="PrefetchCache"/> runs.</summary>
+/// <param name="Time">The clock for the folder-switch quiet period.</param>
+/// <param name="Limits">How many jobs of each kind may run at once.</param>
+/// <param name="OwnThread">
+/// True: the cache runs its own prefetch thread. False: nothing runs until someone calls
+/// <see cref="PrefetchCache.Step"/> (tests, which step the cache by hand on a manual clock).
+/// </param>
+internal sealed record PrefetchOptions(TimeProvider Time, JobLimits Limits, bool OwnThread = true)
+{
+    public static PrefetchOptions Default => new(TimeProvider.System, JobLimits.ForCores(Environment.ProcessorCount));
+}
 
 /// <summary>
 /// Owns all background photo loading: keeps the <b>window</b> of photos around the <b>window centre</b> loaded
@@ -21,14 +31,14 @@ namespace FlyPhotos.Display.Controllers;
 /// <para>
 /// Threading: one dedicated <b>prefetch thread</b> owns every bit of loading state (the window, running jobs, load
 /// hints) and is the only writer of the photos' <see cref="PhotoImages"/> slots once started. Other threads talk to
-/// it only through its inbox: the UI posts window moves and settings, and decodes running on the thread pool post
-/// their results. After each batch of messages the prefetch thread asks <see cref="PrefetchPlanner"/> what to do and does it.
+/// it only through its inbox: the UI posts window moves and settings, and decodes post their results. After each
+/// batch of messages the prefetch thread asks <see cref="PrefetchPlanner"/> what to do and does it (<see cref="Step"/>).
 /// The UI thread never waits on any of this, and loading never waits on the UI thread.
 /// </para>
 /// <para>
 /// The class does not own the photo list: it resolves keys to photos through a delegate, and is told where the
 /// viewer is with every <see cref="MoveWindow"/>. It announces each stored image through <see cref="Loaded"/>; the
-/// controller decides whether the screen should change.
+/// controller decides whether the screen should change. Decoding goes through <see cref="IPhotoDecoder"/>.
 /// </para>
 /// </summary>
 internal sealed class PrefetchCache : IDisposable
@@ -45,13 +55,15 @@ internal sealed class PrefetchCache : IDisposable
     public event Action<string>? CacheStatusChanged;
 
     private readonly Func<int, Photo?> _getPhoto;
-    private readonly ICanvasResourceCreatorWithDpi _device;
+    private readonly IPhotoDecoder _decoder;
+    private readonly PrefetchOptions _options;
 
     // --- Inbox (any thread) ---
     private readonly ConcurrentQueue<Action> _inbox = new();
     private readonly AutoResetEvent _wake = new(false);
     private readonly CancellationTokenSource _stop = new();
     private Thread? _thread;
+    private volatile bool _disposed;
 
     // --- Prefetch-thread state ---
     private sealed class Job(RunningJob spec, Photo photo)
@@ -62,11 +74,32 @@ internal sealed class PrefetchCache : IDisposable
         // Cancelled, or made stale by a RAW setting change: its result is released, not stored.
         public bool Abandoned;
 
-        // The result, written by the decode before it posts the job back (the post publishes them).
+        // The result, written by the decode before it hands the job back (the hand-off publishes them).
         public PreviewDisplayItem? Preview;
         public Thumbnail? Thumbnail;
         public HqDisplayItem? Hq;
         public bool Failed;
+
+        // Who owns the result once the decode returns: the prefetch thread (Returned, through the inbox), or, once
+        // the cache is disposed, whichever of the decode and Dispose comes second (Orphaned), which releases it.
+        private const int Running = 0, Returned = 1, Orphaned = 2;
+        private int _state = Running;
+
+        /// <summary>The decode returned. False: the cache was disposed and the result has been released.</summary>
+        public bool TryReturn()
+        {
+            if (Interlocked.Exchange(ref _state, Returned) != Orphaned) return true;
+            ReleaseResult();
+            return false;
+        }
+
+        /// <summary>The cache is gone (its thread stopped): releases a result already returned, or one still to come.</summary>
+        public void Orphan()
+        {
+            Abandoned = true;
+            Cts.Cancel();
+            if (Interlocked.Exchange(ref _state, Orphaned) == Returned) ReleaseResult();
+        }
 
         public void ReleaseResult()
         {
@@ -77,7 +110,7 @@ internal sealed class PrefetchCache : IDisposable
 
     private NavState _nav = NavState.None;
     private bool _holdHq;
-    private long _holdHqUntil;                         // Environment.TickCount64; the folder-switch quiet period
+    private TimeSpan _holdHqUntil;                     // on _options.Time; the folder-switch quiet period
     private readonly List<Job> _running = [];
     private readonly List<RunningJob> _runningSpecs = [];
     private readonly HashSet<int> _loaded = [];        // keys this cache has stored images for
@@ -85,24 +118,41 @@ internal sealed class PrefetchCache : IDisposable
     private readonly HashSet<int> _needsDiskWrite = []; // preview decoded from the file, not yet in the disk cache
     private readonly HashSet<(int Key, LoadKind Kind)> _parked = []; // failed or deferred; retried once it is the centre
     private readonly PrefetchPlan _plan = new();
-    private readonly JobLimits _limits = JobLimits.ForCores(Environment.ProcessorCount);
     private (int CachedBefore, int Before, int CachedAfter, int After) _lastStatus = (-1, -1, -1, -1);
 
-    public PrefetchCache(Func<int, Photo?> getPhoto, ICanvasResourceCreatorWithDpi device)
+    public PrefetchCache(Func<int, Photo?> getPhoto, IPhotoDecoder decoder, PrefetchOptions? options = null)
     {
         _getPhoto = getPhoto;
-        _device = device;
+        _decoder = decoder;
+        _options = options ?? PrefetchOptions.Default;
     }
+
+    /// <summary>The job limits the planner works to.</summary>
+    public JobLimits Limits => _options.Limits;
+
+    /// <summary>
+    /// What the cache tracks, for tests: a key the list has forgotten must not linger in any of these. Read on the
+    /// prefetch thread, or between <see cref="Step"/>s.
+    /// </summary>
+    internal (int Loaded, int NeedsHeavy, int NeedsDiskWrite, int Parked, int Running) Counts =>
+        (_loaded.Count, _needsHeavy.Count, _needsDiskWrite.Count, _parked.Count, _running.Count);
+
+    /// <summary>Whether messages are waiting for the next <see cref="Step"/>.</summary>
+    internal bool HasMessages => !_inbox.IsEmpty;
+
+    // Time on the cache's clock (only differences matter).
+    private TimeSpan Now => _options.Time.GetElapsedTime(0);
 
     // -------------------------------------------------------------------------
     // Public API — any thread; every call only posts to the prefetch thread
     // -------------------------------------------------------------------------
 
-    /// <summary>Starts the prefetch thread around <paramref name="nav"/>. Not called for secondary instances.</summary>
+    /// <summary>Starts loading around <paramref name="nav"/>. Not called for secondary instances.</summary>
     public void Start(NavState nav)
     {
         MoveWindow(nav);
         Post(() => _loaded.Add(nav.Key)); // the photo on screen was loaded by the controller (the first photo)
+        if (!_options.OwnThread) return;
         _thread = new Thread(Run) { IsBackground = true, Name = "PrefetchCache" };
         _thread.Start();
     }
@@ -125,8 +175,8 @@ internal sealed class PrefetchCache : IDisposable
     /// <summary>Holds HQ loading for <paramref name="ms"/> from now (skipping through folders).</summary>
     public void HoldHqFor(int ms)
     {
-        long until = Environment.TickCount64 + ms;
-        Post(() => _holdHqUntil = Math.Max(_holdHqUntil, until));
+        var until = Now + TimeSpan.FromMilliseconds(ms);
+        Post(() => { if (until > _holdHqUntil) _holdHqUntil = until; });
     }
 
     /// <summary>Photos removed from the list. Their images are released by <see cref="PhotoImages.Retire"/>.</summary>
@@ -157,7 +207,7 @@ internal sealed class PrefetchCache : IDisposable
         _parked.RemoveWhere(p => p.Kind == LoadKind.Hq);
     });
 
-    /// <summary>A planning setting (a window size) changed: plan again now. The planner reads it from the settings.</summary>
+    /// <summary>A planning setting (a window size) changed, or the clock moved: plan again now.</summary>
     public void Replan() => Post(static () => { });
 
     private void Post(Action message)
@@ -179,15 +229,23 @@ internal sealed class PrefetchCache : IDisposable
             // One bad step must not stop loading for the rest of the session: log it and plan again next wake-up.
             try { Step(); }
             catch (Exception ex) { Logger.Error(ex, "Prefetch step failed"); }
-            long wait = _holdHqUntil - Environment.TickCount64;
-            try { WaitHandle.WaitAny(handles, wait > 0 ? (int)wait + 1 : Timeout.Infinite); }
+            var wait = _holdHqUntil - Now;
+            try { WaitHandle.WaitAny(handles, wait > TimeSpan.Zero ? (int)wait.TotalMilliseconds + 1 : Timeout.Infinite); }
             catch (ObjectDisposedException) { return; } // shutting down
         }
     }
 
-    /// <summary>Applies every queued message, then plans once and carries the plan out.</summary>
-    private void Step()
+    /// <summary>
+    /// Applies every queued message, then plans once and carries the plan out. The prefetch thread's loop body; with
+    /// <see cref="PrefetchOptions.OwnThread"/> false the caller runs it, never two at once.
+    /// </summary>
+    internal void Step()
     {
+        if (_disposed)
+        {
+            _inbox.Clear(); // Dispose released whatever the queued results hold
+            return;
+        }
         while (_inbox.TryDequeue(out var message))
         {
             try { message(); }
@@ -197,10 +255,10 @@ internal sealed class PrefetchCache : IDisposable
 
         _runningSpecs.Clear();
         foreach (var job in _running) _runningSpecs.Add(job.Spec);
-        bool holdHq = _holdHq || Environment.TickCount64 < _holdHqUntil;
+        bool holdHq = _holdHq || Now < _holdHqUntil;
         var settings = AppConfig.Settings;
         PrefetchPlanner.Make(_plan, _nav, _loaded, SlotOf, _runningSpecs, holdHq,
-            settings.CacheSizeOneSidePreviews, settings.CacheSizeOneSideHqImages, _limits);
+            settings.CacheSizeOneSidePreviews, settings.CacheSizeOneSideHqImages, _options.Limits);
 
         foreach (int i in _plan.Cancel) Abandon(_running[i]);
         foreach (int key in _plan.EvictAll)
@@ -241,7 +299,7 @@ internal sealed class PrefetchCache : IDisposable
     }
 
     // -------------------------------------------------------------------------
-    // Jobs — decode on the thread pool, store on the prefetch thread
+    // Jobs — decode off the prefetch thread, store on it
     // -------------------------------------------------------------------------
 
     private void StartJob(RunningJob spec)
@@ -249,33 +307,36 @@ internal sealed class PrefetchCache : IDisposable
         if (_getPhoto(spec.Key) is not { } photo) return;
         var job = new Job(spec, photo);
         _running.Add(job);
-        _ = Task.Run(async () =>
+        _ = RunJob(job);
+    }
+
+    // Starts on the prefetch thread; the decoder moves the work off it. The rest runs wherever the decode finished.
+    private async Task RunJob(Job job)
+    {
+        var (spec, photo) = (job.Spec, job.Photo);
+        try
         {
-            try
+            switch (spec.Kind)
             {
-                switch (spec.Kind)
-                {
-                    case LoadKind.PreviewLight or LoadKind.PreviewHeavy:
-                        var purpose = spec.Kind == LoadKind.PreviewHeavy ? Purpose.PreviewHeavy : Purpose.PreviewLight;
-                        if (await PhotoDecoder.LoadPreview(photo, _device, purpose) is { } loaded)
-                            (job.Preview, job.Thumbnail) = loaded;
-                        break;
-                    case LoadKind.Hq:
-                        job.Hq = await PhotoDecoder.LoadHq(photo, _device, spec.AllowLarge, job.Cts.Token);
-                        break;
-                    case LoadKind.DiskWrite:
-                        await WriteToDiskCache(photo);
-                        break;
-                }
+                case LoadKind.PreviewLight or LoadKind.PreviewHeavy:
+                    var purpose = spec.Kind == LoadKind.PreviewHeavy ? Purpose.PreviewHeavy : Purpose.PreviewLight;
+                    if (await _decoder.LoadPreview(photo, purpose).ConfigureAwait(false) is { } loaded)
+                        (job.Preview, job.Thumbnail) = loaded;
+                    break;
+                case LoadKind.Hq:
+                    job.Hq = await _decoder.LoadHq(photo, spec.AllowLarge, job.Cts.Token).ConfigureAwait(false);
+                    break;
+                case LoadKind.DiskWrite:
+                    await WriteToDiskCache(photo).ConfigureAwait(false);
+                    break;
             }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, $"{spec.Kind} load failed for {photo.FilePath}");
-                job.Failed = true;
-            }
-            if (_stop.IsCancellationRequested) job.ReleaseResult();
-            else Post(() => Complete(job));
-        });
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, $"{spec.Kind} load failed for {photo.FilePath}");
+            job.Failed = true;
+        }
+        if (job.TryReturn()) Post(() => Complete(job));
     }
 
     // Prefetch thread. Stores what the job brought, unless the job was abandoned or its photo left the list
@@ -293,12 +354,16 @@ internal sealed class PrefetchCache : IDisposable
         {
             // A cancelled large decode throws too: nothing to show for it. Otherwise the decode threw, which shows
             // the error screen, the same as a decoder that reports the failure.
-            if (job.Abandoned) return;
+            if (job.Abandoned)
+            {
+                job.ReleaseResult();
+                return;
+            }
             switch (job.Spec.Kind)
             {
                 case LoadKind.DiskWrite: _needsDiskWrite.Remove(key); return; // not retried
-                case LoadKind.Hq: job.Hq = ImageReader.GetHqFailedIndicator(); break;
-                default: job.Preview = ImageReader.GetPreviewFailedIndicator(); break;
+                case LoadKind.Hq: job.Hq = _decoder.HqFailed(); break;
+                default: job.Preview = _decoder.PreviewFailed(); break;
             }
         }
         bool keep = !job.Abandoned;
@@ -323,6 +388,7 @@ internal sealed class PrefetchCache : IDisposable
         {
             // Light pass: only a full-image decode can make this preview, so the planner hands it to the heavy
             // lane. Heavy pass: nothing found at all.
+            if (!keep) return;
             if (job.Spec.Kind == LoadKind.PreviewLight) _needsHeavy.Add(key);
             else _parked.Add((key, job.Spec.Kind));
             return;
@@ -347,7 +413,7 @@ internal sealed class PrefetchCache : IDisposable
         if (job.Hq is not { } hq)
         {
             // An oversized neighbour deferred, or a large decode cancelled. Retried when it is the centre.
-            if (!job.Abandoned && key != _nav.Key) _parked.Add((key, LoadKind.Hq));
+            if (keep && key != _nav.Key) _parked.Add((key, LoadKind.Hq));
             return;
         }
         var images = job.Photo.Images;
@@ -361,13 +427,15 @@ internal sealed class PrefetchCache : IDisposable
         Loaded?.Invoke(key);
     }
 
-    private static async Task WriteToDiskCache(Photo photo)
+    private Task WriteToDiskCache(Photo photo)
     {
-        if (photo.Images.Preview is not { Origin: Origin.Disk } preview) return;
+        if (photo.Images.Preview is not { Origin: Origin.Disk } preview) return Task.CompletedTask;
         var (actualWidth, actualHeight) = photo.Images.GetSourcePixelSize();
-        await PhotoDecoder.PutPreviewInDiskCache(photo.FilePath, preview,
+        // The path is read now, as the job starts: a rename meanwhile files it under the name it was decoded from.
+        return _decoder.PutPreviewInDiskCache(photo.FilePath, preview,
             (int)Math.Round(actualWidth), (int)Math.Round(actualHeight));
     }
+
     // -------------------------------------------------------------------------
     // Status
     // -------------------------------------------------------------------------
@@ -381,16 +449,27 @@ internal sealed class PrefetchCache : IDisposable
         _lastStatus = status;
         CacheStatusChanged?.Invoke($"{_plan.CachedBefore}/{left} < Cache > {_plan.CachedAfter}/{right}");
     }
+
     // -------------------------------------------------------------------------
     // IDisposable
     // -------------------------------------------------------------------------
 
+    /// <summary>
+    /// Stops loading. Every decode still running, or returned but not yet stored, has its result released whenever
+    /// it arrives. Images already stored stay with their photos (retired by the controller).
+    /// </summary>
     public void Dispose()
     {
+        if (_disposed) return;
+        _disposed = true;
         _stop.Cancel();
-        _thread?.Join(2000);
-        // The prefetch thread is gone: nothing reads these now. Results still on their way are released by their tasks.
-        foreach (var job in _running) job.Cts.Cancel();
+        if (_thread == null || _thread.Join(2000))
+        {
+            // The prefetch thread is gone: nothing else reads the running list now.
+            foreach (var job in _running) job.Orphan();
+            _running.Clear();
+        }
+        else Logger.Warn("The prefetch thread did not stop; results of its running decodes may not be released");
         _wake.Dispose();
     }
 }

@@ -1,6 +1,5 @@
 #nullable enable
 using System.Threading;
-using FlyPhotos.Display.ImageReading;
 
 namespace FlyPhotos.Core.Model;
 
@@ -34,35 +33,39 @@ internal sealed class PhotoImages
     public bool IsKnownOversized(int maxSize) => KnownOversized ||
         _preview?.Metadata is { FullWidth: > 0, FullHeight: > 0 } m && (m.FullWidth > maxSize || m.FullHeight > maxSize);
 
-    /// <summary>Stores a loaded HQ, taking over its lease. False (the item released) once retired.</summary>
+    /// <summary>
+    /// Stores a loaded HQ, taking over its lease; an item it replaces is released. False (the item released) once
+    /// retired.
+    /// </summary>
     public bool TryAttachHq(HqDisplayItem hq)
     {
+        HqDisplayItem? replaced = null;
+        bool stored;
         lock (_lock)
         {
-            if (!_retired)
-            {
-                _hq = hq;
-                return true;
-            }
+            stored = !_retired;
+            if (stored) (replaced, _hq) = (_hq, hq);
         }
-        hq.Release();
-        return false;
+        (stored ? replaced : hq)?.Release(); // the same item stored twice: its extra lease is the one released
+        return stored;
     }
 
     /// <summary>Stores a loaded preview and its thumbnail (if any), as <see cref="TryAttachHq"/>.</summary>
     public bool TryAttachPreview(PreviewDisplayItem preview, Thumbnail? thumbnail)
     {
+        PreviewDisplayItem? replaced = null;
+        bool stored;
         lock (_lock)
         {
-            if (!_retired)
+            stored = !_retired;
+            if (stored)
             {
-                _preview = preview;
+                (replaced, _preview) = (_preview, preview);
                 if (thumbnail != null) _thumbnail = thumbnail;
-                return true;
             }
         }
-        preview.Release();
-        return false;
+        (stored ? replaced : preview)?.Release();
+        return stored;
     }
 
     /// <summary>Empties the HQ slot and hands its lease to the caller, who releases it.</summary>
@@ -105,11 +108,11 @@ internal sealed class PhotoImages
         preview?.Release();
     }
 
+    /// <summary>The stored item for <paramref name="level"/>; null for the placeholder, which no photo stores.</summary>
     public DisplayItem? Get(DisplayLevel level) => level switch
     {
         DisplayLevel.Preview => _preview,
         DisplayLevel.Hq => _hq,
-        DisplayLevel.PlaceHolder => ImageReader.GetLoadingIndicator(),
         _ => null
     };
 

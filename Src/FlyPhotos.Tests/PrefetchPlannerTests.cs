@@ -35,6 +35,18 @@ public sealed class PrefetchPlannerTests
     }
 
     [TestMethod]
+    public void AnHqWindowWiderThanThePreviewWindowKeepsTheHqsItLoads()
+    {
+        // A hand-edited setting: previews 0 per side, HQs 2. A neighbour's HQ must not be unloaded and reloaded forever.
+        Have(105, new SlotState(HasPreview: true, HasHq: true));
+        Have(106, new SlotState(HasPreview: false, HasHq: true));
+        var plan = Plan(centre: 5, previewHalf: 0, hqHalf: 2);
+        Assert.AreEqual(0, plan.EvictAll.Count);
+        Assert.AreEqual(0, plan.EvictHq.Count);
+        Assert.IsFalse(Started(plan, LoadKind.Hq).Contains(106));
+    }
+
+    [TestMethod]
     public void TheCentresHqStartsFirstAndAloneMayBeLarge()
     {
         var plan = Plan(centre: 5);

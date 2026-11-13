@@ -16,7 +16,7 @@ public class SettingsWrapper
 public static class AppConfig
 {
     private static string _userSettingsPath;
-    public static AppSettings Settings { get; private set; }
+    public static AppSettings Settings { get; internal set; } // tests set their own
     public static AppVolatileState Volatile { get; } = new();
 
     // Loads user settings on startup. Falls back to AppSettings defaults if the file is

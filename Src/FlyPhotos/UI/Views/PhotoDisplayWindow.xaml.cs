@@ -127,7 +127,10 @@ public sealed partial class PhotoDisplayWindow
 
         _thumbNailController = new ThumbNailController(D2dCanvasThumbNail);
         _canvasController = new CanvasController(D2dCanvas, _thumbNailController);
-        _photoController = new PhotoDisplayController(D2dCanvas, _canvasController, _thumbNailController, firstPhotoPath, extLaunch);
+        _photoController = new PhotoDisplayController(_canvasController, _thumbNailController,
+            new Display.ImageReading.PhotoDecoder(D2dCanvas),
+            new Microsoft.UI.Dispatching.DispatcherQueueSynchronizationContext(D2dCanvas.DispatcherQueue),
+            firstPhotoPath, extLaunch);
         _photoController.CacheStatusChanged += PhotoController_CacheStatusChanged;
         _photoController.FileNameOrDetailsChanged += PhotoController_FileNameOrDetailsChanged;
         _photoController.FirstPhotoLoaded += OnFirstPhotoLoaded;

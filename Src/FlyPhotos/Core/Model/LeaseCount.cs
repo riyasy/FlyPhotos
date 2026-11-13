@@ -24,6 +24,9 @@ internal struct LeaseCount()
         return false;
     }
 
+    /// <summary>Whether the last lease has ended (the thing is freed). A snapshot: only final once true.</summary>
+    public readonly bool IsReleased => Volatile.Read(in _count) <= 0;
+
     /// <summary>Ends a lease. True for the last one: the caller frees the thing.</summary>
     public bool Release()
     {
