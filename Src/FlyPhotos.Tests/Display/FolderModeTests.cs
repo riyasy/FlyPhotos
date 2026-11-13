@@ -91,4 +91,61 @@ public sealed class FolderModeTests
         h.Settle();
         h.CheckInvariants();
     }
+
+    [TestMethod]
+    public void A_file_added_before_the_listing_is_published_appears_once()
+    {
+        using var h = new DisplayHarness(photos: 5, openAt: 2, source: ListSource.Folder);
+        Thread.Sleep(300); // the startup thread has watched and listed the folder, and waits for the first photo
+        File.WriteAllBytes(Path.Combine(h.PhotoFolder, "img_00002b.jpg"), []);
+        Thread.Sleep(800); // the watcher's batch is out, held until the listing is published
+        h.Open();
+
+        h.RunUntil(() => h.Nav.Keys.Count == 6, "the new file");
+        Thread.Sleep(300);
+        h.Settle();
+        Assert.AreEqual(6, h.Nav.Keys.Count, "listed once, not twice");
+        Assert.AreEqual(1, h.Nav.Keys.Count(k => h.Controller.Photos.GetPhoto(k)!.FilePath.EndsWith("img_00002b.jpg")));
+        Assert.AreEqual("img_00002.jpg", h.CurrentName);
+        h.CheckInvariants();
+    }
+
+    [TestMethod]
+    public void A_held_folder_switch_key_switches_one_folder_at_a_time()
+    {
+        using var h = new DisplayHarness(photos: 3, source: ListSource.Folder);
+        foreach (var (folder, file) in new[] { ("c_photos", "c1.jpg"), ("d_photos", "d1.jpg") })
+            File.WriteAllBytes(Path.Combine(Directory.CreateDirectory(Path.Combine(h.Folder, folder)).FullName, file), []);
+        h.Open();
+
+        var first = h.Controller.TryOpenSiblingFolderAsync(NavDirection.Next);
+        var repeat = h.Controller.TryOpenSiblingFolderAsync(NavDirection.Next); // key repeat while the switch runs
+        Assert.IsTrue(repeat.IsCompleted, "dropped at once");
+        Assert.IsNull(repeat.Result);
+
+        h.RunUntil(() => first.IsCompleted, "the first switch", stepCache: false);
+        Assert.AreEqual("c_photos", first.Result, "one folder on, not two");
+        Assert.AreEqual("c1.jpg", h.CurrentName);
+        h.Settle();
+        h.Advance(500);
+        h.Settle();
+        h.CheckInvariants();
+    }
+
+    [TestMethod]
+    public void A_folder_that_cannot_be_watched_opens_alone_and_cannot_switch_folders()
+    {
+        using var h = new DisplayHarness(photos: 3, source: ListSource.Folder,
+            beforeStart: folder => Directory.Delete(folder, recursive: true));
+        var sibling = Directory.CreateDirectory(Path.Combine(h.Folder, "c_photos")).FullName;
+        File.WriteAllBytes(Path.Combine(sibling, "c1.jpg"), []);
+        h.Open();
+        Assert.AreEqual(1, h.Nav.Keys.Count);
+
+        string? name = "unset";
+        h.Run(async () => name = await h.Controller.TryOpenSiblingFolderAsync(NavDirection.Next));
+        Assert.IsNull(name, "siblings are found from the watched folder; there is none");
+        Assert.AreEqual(0, h.Strip.Bounces.Count, "not even a bounce");
+        h.CheckInvariants();
+    }
 }

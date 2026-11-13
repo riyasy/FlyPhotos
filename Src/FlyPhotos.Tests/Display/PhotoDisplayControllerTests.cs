@@ -91,6 +91,32 @@ public sealed class PhotoDisplayControllerTests
         h.CheckInvariants();
     }
 
+    [TestMethod]
+    public void A_secondary_instance_shows_only_the_opened_photo_and_loads_nothing_else()
+    {
+        AppConfig.Volatile.IsSecondaryInstance = true;
+        try
+        {
+            using var h = new DisplayHarness(photos: 10, openAt: 4);
+            h.Open();
+            Assert.AreEqual(1, h.Nav.Keys.Count, "no folder listing");
+            Assert.AreEqual("img_00004.jpg", h.CurrentName);
+            Assert.AreEqual(DisplayLevel.Hq, h.ShownLevel);
+
+            h.Next();
+            h.Settle();
+            Assert.AreEqual("img_00004.jpg", h.CurrentName);
+            Assert.AreEqual(0, h.Strip.Bounces.Count);
+            Assert.IsTrue(h.Decoder.All.All(d => d.Path == h.Current.FilePath),
+                "nothing else is decoded: the prefetch cache never starts");
+            h.CheckInvariants();
+        }
+        finally
+        {
+            AppConfig.Volatile.IsSecondaryInstance = false;
+        }
+    }
+
     // --- Every key press shows something ---
 
     [TestMethod]

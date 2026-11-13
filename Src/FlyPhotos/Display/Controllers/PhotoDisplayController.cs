@@ -507,7 +507,7 @@ internal partial class PhotoDisplayController
         }
 
         var deletedPath = photo.FilePath;
-        var delResult = await StorageOps.DeleteFileFromDisk(deletedPath);
+        var delResult = await DeleteFile(deletedPath);
         if (!delResult.DeleteSuccess) return delResult;
 
         // The last photo is gone: the window closes the app.
@@ -519,6 +519,9 @@ internal partial class PhotoDisplayController
         await ApplyListChangeAsync(ListChangeBatch.Remove(deletedPath), goToFirst: false);
         return new DeleteResult(true, false);
     }
+
+    /// <summary>Deletes a file from disk (to the Recycle Bin). Tests swap it, so they don't fill the Recycle Bin.</summary>
+    internal Func<string, Task<DeleteResult>> DeleteFile { get; set; } = StorageOps.DeleteFileFromDisk;
 
     // --- List changes (delete, Folder mode) ---
 
