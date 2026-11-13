@@ -2,6 +2,7 @@ using FlyPhotos.Services;
 
 namespace FlyPhotos.Tests.Display.Harness;
 
+/// <summary>One-time setup for the whole test assembly.</summary>
 [TestClass]
 public static class TestSetup
 {

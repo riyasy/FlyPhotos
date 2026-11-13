@@ -8,20 +8,27 @@ namespace FlyPhotos.Core.Model;
 
 /// <summary>
 /// One photo in the list: its file and what its format implies, plus its decoded <see cref="Images"/>.
-/// Decoding lives in <c>PhotoDecoder</c>.
+/// Decoding lives in <c>PhotoDecoder</c>. The list knows a photo by an int key (see <c>PhotoList</c>); the canvas
+/// knows it by <see cref="FilePath"/>.
 /// </summary>
 internal sealed class Photo
 {
+    /// <summary>The file on disk. Changes only through <see cref="Rename"/>.</summary>
     public string FilePath { get; private set; }
 
+    /// <summary>The decoded preview, HQ and thumbnail; filled and emptied by the prefetch cache.</summary>
     public PhotoImages Images { get; } = new();
 
+    /// <summary>The format can carry alpha, so the canvas draws the checkered background behind it.</summary>
     public bool SupportsTransparency { get; }
 
+    /// <summary>An SVG: drawn as vectors, and has no pixel size to show in the filename bar.</summary>
     public bool IsVector { get; }
 
+    /// <summary>A camera RAW file: its HQ is reloaded when the RAW decode settings change.</summary>
     public bool IsRaw { get; }
 
+    /// <summary>Derives the format flags from the extension of <paramref name="selectedFilePath"/>, once.</summary>
     public Photo(string selectedFilePath)
     {
         FilePath = selectedFilePath;
@@ -35,6 +42,7 @@ internal sealed class Photo
     // extension change as remove + add), so the format-derived flags above stay valid.
     public void Rename(string newFilePath) => FilePath = newFilePath;
 
+    /// <summary>The extensions behind <see cref="SupportsTransparency"/>.</summary>
     private static readonly HashSet<string> FormatsSupportingTransparency =
         new(StringComparer.OrdinalIgnoreCase)
     {

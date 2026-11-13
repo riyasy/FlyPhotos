@@ -132,11 +132,14 @@ internal static class ImageReader
         return (HqFailed(), true);
     }
 
-    /// <summary>Returns a loading indicator display item to show while an image is being asynchronously decoded.</summary>
+    // The shared placeholder; reset by Initialize. Made on first use, like the bitmap behind it. A race may make two;
+    // both are shared and never freed.
     private static DisplayItem? _loadingIndicator;
 
-    /// <summary>The one shared placeholder item (never freed), so it can be told apart by reference.</summary>
-    // Made on first use, like the bitmap behind it. A race may make two; both are shared and never freed.
+    /// <summary>
+    /// The placeholder shown while nothing of a photo is loaded yet: one shared item (never freed, needs no lease),
+    /// so it can be told apart by reference.
+    /// </summary>
     public static DisplayItem GetLoadingIndicator() =>
         _loadingIndicator ??= new PreviewDisplayItem(_indicators.Loading, Origin.ErrorScreen);
 

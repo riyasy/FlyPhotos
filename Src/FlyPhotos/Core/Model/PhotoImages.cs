@@ -11,15 +11,19 @@ namespace FlyPhotos.Core.Model;
 /// </summary>
 internal sealed class PhotoImages
 {
-    // Written under _lock; read anywhere without it.
+    // The slots. Written under _lock; read anywhere without it.
     private volatile HqDisplayItem? _hq;
     private volatile PreviewDisplayItem? _preview;
     private volatile Thumbnail? _thumbnail;
     private readonly Lock _lock = new();
+    // Set once by Retire: from then on nothing is stored, and whatever arrives is released.
     private bool _retired;
 
+    /// <summary>The full-quality image, or null. May be released the moment after it is read: lease it to use it.</summary>
     public HqDisplayItem? Hq => _hq;
+    /// <summary>The fast, smaller image shown until the HQ is ready, or null. Lease it to use it, as <see cref="Hq"/>.</summary>
     public PreviewDisplayItem? Preview => _preview;
+    /// <summary>The thumbnail strip's pixels, made from the preview; dropped with it.</summary>
     public Thumbnail? Thumbnail => _thumbnail;
 
     /// <summary>An earlier HQ load found the image larger than the GPU's maximum bitmap size.</summary>
@@ -116,6 +120,7 @@ internal sealed class PhotoImages
         _ => null
     };
 
+    /// <summary>Whether <paramref name="level"/> has nothing real to show: an empty slot, or an error item.</summary>
     public bool IsErrorScreen(DisplayLevel level) => Get(level) is not { } item || item.IsErrorOrUndefined();
 
     /// <summary>The size to lay the photo out at: the best loaded item's full size.</summary>

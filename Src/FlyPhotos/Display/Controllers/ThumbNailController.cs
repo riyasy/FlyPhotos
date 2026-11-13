@@ -38,6 +38,9 @@ internal partial class ThumbNailController : IThumbnailController
     public event Action<int> ThumbnailClicked;
 
     private readonly CanvasAnimatedControl _d2dCanvasThumbNail;
+
+    // Set by SetPhotoSource: resolve a key to its photo, and read the viewer's list and position (one NavState, so
+    // the keys and the position always belong together). Both are lock-free and read on any thread.
     private Func<int, Photo> _getPhoto;
     private Func<NavState> _getNav;
 
@@ -49,8 +52,8 @@ internal partial class ThumbNailController : IThumbnailController
     private CanvasRenderTarget _thumbnailOffscreen;
     private CanvasBitmap _loadingIndicatorBitmap;
 
-    // W2D-owned GPU copies of Photo.Thumbnail pixels, keyed by Thumbnail instance so a regenerated
-    // thumbnail never reuses a stale bitmap. The UI thread only drops Photo.Thumbnail references. Each
+    // W2D-owned GPU copies of PhotoImages.Thumbnail pixels, keyed by Thumbnail instance so a regenerated
+    // thumbnail never reuses a stale bitmap. The prefetch cache only drops Thumbnail references. Each
     // ribbon pass moves the bitmaps it draws from _previousPassBitmaps into _currentPassBitmaps; whatever
     // is left behind wasn't drawn (scrolled off, evicted or deleted) and is disposed.
     private Dictionary<Thumbnail, CanvasBitmap> _currentPassBitmaps = new();
@@ -94,6 +97,7 @@ internal partial class ThumbNailController : IThumbnailController
         _thumbNailSelectionColor = ColorConverter.FromHex(AppConfig.Settings.ThumbnailSelectionColor);
     }
 
+    /// <inheritdoc />
     public void SetPhotoSource(Func<int, Photo> getPhoto, Func<NavState> getNav) => (_getPhoto, _getNav) = (getPhoto, getNav);
 
     // --- Canvas event handlers ---
@@ -113,7 +117,7 @@ internal partial class ThumbNailController : IThumbnailController
     }
 
     // Device (re)created (first load or device loss). Drop the device-bound surfaces so they rebuild
-    // from the device-independent Photo.Thumbnail pixels. Runs on the W2D thread.
+    // from the device-independent Thumbnail pixels. Runs on the W2D thread.
     private void D2dCanvasThumbNail_CreateResources(CanvasAnimatedControl sender,
         Microsoft.Graphics.Canvas.UI.CanvasCreateResourcesEventArgs args)
     {
@@ -254,13 +258,13 @@ internal partial class ThumbNailController : IThumbnailController
     }
 
     /// <summary>
-    /// Called when an external thumbnail has been loaded.
-    /// This method throttles redraw requests to prevent overwhelming the UI thread.
+    /// Called when a photo's thumbnail has been loaded. Redraws only if that photo is in view, and
+    /// throttles redraw requests to prevent overwhelming the UI thread.
     /// </summary>
     public void RedrawThumbNailsIfNeeded(int updatedKey)
     {
-        // Capture the snapshot once — this method is called from a ThreadPool continuation and the
-        // list may be swapped by DeleteCurrentPhoto on the UI thread at any moment.
+        // Capture the snapshot once — this method is called on the prefetch thread and the list may be
+        // swapped by a list change on the UI thread at any moment.
         var nav = _getNav?.Invoke();
         var keys = nav?.Keys;
         if (keys == null || keys.Count == 0) return;
@@ -511,7 +515,7 @@ internal partial class ThumbNailController : IThumbnailController
 
         var key = keys[thumbnailPosition];
         var photo = _getPhoto?.Invoke(key);
-        // Read once: the UI thread may null Photo.Thumbnail (preview eviction) at any moment.
+        // Read once: the prefetch cache may drop the thumbnail (preview eviction) at any moment.
         var thumbnail = photo?.Images.Thumbnail;
 
         var bitmap = (thumbnail != null ? TakeOrCreateThumbnailBitmap(thumbnail, creator) : null)

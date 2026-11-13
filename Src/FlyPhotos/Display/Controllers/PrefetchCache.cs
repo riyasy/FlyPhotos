@@ -54,21 +54,24 @@ internal sealed class PrefetchCache : IDisposable
     /// <summary>Fired on the prefetch thread with the formatted "left/total &lt; Cache &gt; right/total" status.</summary>
     public event Action<string>? CacheStatusChanged;
 
-    private readonly Func<int, Photo?> _getPhoto;
+    private readonly Func<int, Photo?> _getPhoto;  // the photo list's lookup; null once a key is forgotten
     private readonly IPhotoDecoder _decoder;
     private readonly PrefetchOptions _options;
 
     // --- Inbox (any thread) ---
-    private readonly ConcurrentQueue<Action> _inbox = new();
-    private readonly AutoResetEvent _wake = new(false);
-    private readonly CancellationTokenSource _stop = new();
-    private Thread? _thread;
+    private readonly ConcurrentQueue<Action> _inbox = new(); // messages, run in order on the prefetch thread
+    private readonly AutoResetEvent _wake = new(false);       // set by every Post
+    private readonly CancellationTokenSource _stop = new();   // Dispose: the thread exits
+    private Thread? _thread;                                  // null in stepped mode (tests)
     private volatile bool _disposed;
 
     // --- Prefetch-thread state ---
+
+    /// <summary>One load in flight: what it is, for which photo, and what it brought back.</summary>
     private sealed class Job(RunningJob spec, Photo photo)
     {
         public readonly RunningJob Spec = spec;
+        // The photo object it loads for: a photo removed and its key forgotten meanwhile no longer matches.
         public readonly Photo Photo = photo;
         public readonly CancellationTokenSource Cts = new();
         // Cancelled, or made stale by a RAW setting change: its result is released, not stored.
@@ -101,6 +104,7 @@ internal sealed class PrefetchCache : IDisposable
             if (Interlocked.Exchange(ref _state, Orphaned) == Returned) ReleaseResult();
         }
 
+        /// <summary>Releases whatever the decode brought (nothing is stored).</summary>
         public void ReleaseResult()
         {
             Preview?.Release();
@@ -108,18 +112,22 @@ internal sealed class PrefetchCache : IDisposable
         }
     }
 
-    private NavState _nav = NavState.None;
-    private bool _holdHq;
+    private NavState _nav = NavState.None;             // the window centre; may lag the UI thread's _nav by a message
+    private bool _holdHq;                              // a burst is on (HoldHq until ResumeHq)
     private TimeSpan _holdHqUntil;                     // on _options.Time; the folder-switch quiet period
-    private readonly List<Job> _running = [];
-    private readonly List<RunningJob> _runningSpecs = [];
+    private readonly List<Job> _running = [];          // jobs out (including abandoned ones not yet returned)
+    private readonly List<RunningJob> _runningSpecs = []; // _running's specs, for the planner (reused)
     private readonly HashSet<int> _loaded = [];        // keys this cache has stored images for
     private readonly HashSet<int> _needsHeavy = [];    // light preview pass found nothing (until the preview loads)
     private readonly HashSet<int> _needsDiskWrite = []; // preview decoded from the file, not yet in the disk cache
     private readonly HashSet<(int Key, LoadKind Kind)> _parked = []; // failed or deferred; retried once it is the centre
-    private readonly PrefetchPlan _plan = new();
+    private readonly PrefetchPlan _plan = new();        // reused every Step
+    // The counts last reported, so the status text is formatted only when one changes.
     private (int CachedBefore, int Before, int CachedAfter, int After) _lastStatus = (-1, -1, -1, -1);
 
+    /// <param name="getPhoto">Resolves a key to its photo (the photo list's lookup).</param>
+    /// <param name="decoder">Does every load.</param>
+    /// <param name="options">The clock, job limits and threading; <see cref="PrefetchOptions.Default"/> if null.</param>
     public PrefetchCache(Func<int, Photo?> getPhoto, IPhotoDecoder decoder, PrefetchOptions? options = null)
     {
         _getPhoto = getPhoto;
@@ -210,6 +218,7 @@ internal sealed class PrefetchCache : IDisposable
     /// <summary>A planning setting (a window size) changed, or the clock moved: plan again now.</summary>
     public void Replan() => Post(static () => { });
 
+    // Queues message for the prefetch thread and wakes it.
     private void Post(Action message)
     {
         _inbox.Enqueue(message);
@@ -221,6 +230,7 @@ internal sealed class PrefetchCache : IDisposable
     // The prefetch thread
     // -------------------------------------------------------------------------
 
+    // The prefetch thread: Step, then sleep until a message, Dispose, or the end of the folder-switch quiet period.
     private void Run()
     {
         var handles = new WaitHandle[] { _wake, _stop.Token.WaitHandle };
@@ -278,6 +288,7 @@ internal sealed class PrefetchCache : IDisposable
         ReportStatus();
     }
 
+    // The planner's view of one key: its slots plus this cache's own notes about it.
     private SlotState SlotOf(int key)
     {
         var images = _getPhoto(key)?.Images;
@@ -291,6 +302,7 @@ internal sealed class PrefetchCache : IDisposable
             HqParked: _parked.Contains((key, LoadKind.Hq)));
     }
 
+    // The job's result is no longer wanted: it is released when it returns. The job stays in _running until then.
     private static void Abandon(Job job)
     {
         if (job.Abandoned) return;
@@ -302,6 +314,7 @@ internal sealed class PrefetchCache : IDisposable
     // Jobs — decode off the prefetch thread, store on it
     // -------------------------------------------------------------------------
 
+    // Prefetch thread. Tracks the job as running and starts its load (skipped if the key is no longer listed).
     private void StartJob(RunningJob spec)
     {
         if (_getPhoto(spec.Key) is not { } photo) return;
@@ -381,6 +394,8 @@ internal sealed class PrefetchCache : IDisposable
         }
     }
 
+    // Prefetch thread. Stores a preview over nothing or an error item, and notes what to do next for the key: the heavy
+    // lane (light pass found nothing), parking (heavy pass found nothing), or a disk-cache write (decoded from the file).
     private void CompletePreview(Job job, bool keep)
     {
         int key = job.Spec.Key;
@@ -407,6 +422,8 @@ internal sealed class PrefetchCache : IDisposable
         Loaded?.Invoke(key);
     }
 
+    // Prefetch thread. Stores an HQ into an empty slot; a tiled large image only for the current centre. No result
+    // (a deferred or cancelled large image) parks a neighbour until it is the centre.
     private void CompleteHq(Job job, bool keep)
     {
         int key = job.Spec.Key;
@@ -427,6 +444,7 @@ internal sealed class PrefetchCache : IDisposable
         Loaded?.Invoke(key);
     }
 
+    // Writes a preview decoded from the file (Origin.Disk) to the disk cache with the photo's real pixel size.
     private Task WriteToDiskCache(Photo photo)
     {
         if (photo.Images.Preview is not { Origin: Origin.Disk } preview) return Task.CompletedTask;

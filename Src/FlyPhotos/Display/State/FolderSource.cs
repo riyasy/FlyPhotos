@@ -36,7 +36,10 @@ internal sealed class FolderSource : IDisposable
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    // The sort order of the current folder; it remembers each listed file's sort key, so additions and renames sort
+    // without touching the disk. Replaced by a fresh one on a rescan or a folder switch.
     private FolderSortComparer _order = new(AppConfig.Settings.FolderSortBy, AppConfig.Settings.FolderSortDescending);
+    // The current folder's watcher; null when the folder can't be watched (the list then stays as listed).
     private FolderWatcher? _watcher;
 
     /// <summary>Fired on a thread-pool thread with a batch from the watcher of <paramref name="watcher"/>'s folder.</summary>
@@ -145,6 +148,7 @@ internal sealed class FolderSource : IDisposable
     /// <summary>Whether Fly can switch folders from here: the folder is watched (siblings are found from it).</summary>
     public bool CanSwitch => _watcher != null;
 
+    // Watches folder and forwards its batches to Changed; null (logged) when the location can't be watched.
     private FolderWatcher? StartWatcher(string folder)
     {
         try
@@ -161,6 +165,7 @@ internal sealed class FolderSource : IDisposable
         }
     }
 
+    /// <summary>Stops watching. No <see cref="Changed"/> follows.</summary>
     public void Dispose()
     {
         _watcher?.Dispose();

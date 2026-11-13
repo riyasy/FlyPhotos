@@ -6,6 +6,7 @@ using Microsoft.Graphics.Canvas;
 
 namespace FlyPhotos.Core.Model;
 
+/// <summary>The full image's pixel size, known to a preview that is smaller than the photo (0 when unknown).</summary>
 internal record ImageMetadata(double FullWidth, double FullHeight);
 
 /// <summary>
@@ -17,10 +18,14 @@ internal record ImageMetadata(double FullWidth, double FullHeight);
 /// </summary>
 internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, int rotation)
 {
+    /// <summary>The decoded pixels on the canvas device. Null for an SVG (drawn as vectors) and the empty items.</summary>
     public CanvasBitmap Bitmap { get; } = bitmap;
+    /// <summary>Where the image came from (file, disk cache, …); <c>ErrorScreen</c>/<c>Undefined</c> mark shared items.</summary>
     public Origin Origin { get; } = origin;
+    /// <summary>Degrees to rotate when drawing (EXIF orientation).</summary>
     public int Rotation { get; } = rotation;
 
+    // The creator's lease, then one per holder; the last Release frees the item.
     private LeaseCount _leases = new();
 
     /// <summary>
@@ -29,6 +34,7 @@ internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, 
     /// </summary>
     public static Action<DisplayItem> FreeSink { get; set; }
 
+    /// <summary>A shared error or placeholder item: never freed, and its leases cost nothing.</summary>
     public bool IsErrorOrUndefined() =>
         Origin == Origin.ErrorScreen || Origin == Origin.Undefined;
 
@@ -55,24 +61,35 @@ internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, 
     public virtual void Free() => Bitmap?.Dispose();
 }
 
+/// <summary>A preview: a fast, usually downsized image (disk cache, embedded thumbnail, or a reduced decode).</summary>
 internal sealed partial class PreviewDisplayItem(CanvasBitmap bitmap, Origin origin, ImageMetadata metadata = null, int rotation = 0) : DisplayItem(bitmap, origin, rotation)
-{    
+{
+    /// <summary>The full image's size, so the photo is laid out at its real size before the HQ arrives.</summary>
     public ImageMetadata Metadata { get; } = metadata;
     private static readonly PreviewDisplayItem _empty = new(null, Origin.Undefined);
+    /// <summary>A shared item with no bitmap (never freed).</summary>
     public static PreviewDisplayItem Empty() => _empty;
 }
 
+/// <summary>A full-quality image. The subclass says how the canvas draws it.</summary>
 internal abstract partial class HqDisplayItem(CanvasBitmap bitmap, Origin origin, int rotation) : DisplayItem(bitmap, origin, rotation)
 {
     private static readonly HqDisplayItem _empty = new StaticHqDisplayItem(null, Origin.Undefined);
+    /// <summary>A shared item with no bitmap (never freed).</summary>
     public static HqDisplayItem Empty() => _empty;
 }
 
+/// <summary>A single-frame image drawn from its <see cref="DisplayItem.Bitmap"/>.</summary>
 internal sealed partial class StaticHqDisplayItem(CanvasBitmap bitmap, Origin origin, int rotation = 0) : HqDisplayItem(bitmap, origin, rotation);
 
+/// <summary>
+/// An animation (GIF, WebP, APNG, AVIF). <see cref="DisplayItem.Bitmap"/> is its first frame, shown at once; the
+/// animator then decodes the frames from the file bytes itself.
+/// </summary>
 internal sealed partial class AnimatedHqDisplayItem(CanvasBitmap firstFrame, Origin origin, byte[] fileAsByteArray,
     ImageFormat format) : HqDisplayItem(firstFrame, origin, 0)
 {
+    /// <summary>The whole file, for the animator.</summary>
     public byte[] FileAsByteArray { get; } = fileAsByteArray;
 
     /// <summary>The format the reader decoded, which picks the animator; the file's extension may be wrong.</summary>
@@ -122,9 +139,14 @@ internal sealed partial class SvgHqDisplayItem(Origin origin, SvgScene.Lease lea
     public override void Free() => lease.Dispose();
 }
 
+/// <summary>
+/// A multi-page image (multi-page TIFF, multi-frame ICO). <see cref="DisplayItem.Bitmap"/> is the first page; the
+/// renderer decodes other pages from the file bytes as the user pages through.
+/// </summary>
 internal sealed partial class MultiPageHqDisplayItem(CanvasBitmap firstFrame, Origin origin, byte[] fileAsByteArray,
     int[] pageOrder) : HqDisplayItem(firstFrame, origin, 0)
 {
+    /// <summary>The whole file, for decoding the other pages.</summary>
     public byte[] FileAsByteArray { get; } = fileAsByteArray;
 
     /// <summary>
@@ -142,5 +164,6 @@ internal sealed partial class MultiPageHqDisplayItem(CanvasBitmap firstFrame, Or
 /// </summary>
 internal sealed partial class Thumbnail(byte[] pixels)
 {
+    /// <summary>BGRA pixels of a square Constants.ThumbnailPixelBufferSize image.</summary>
     public byte[] Pixels { get; } = pixels;
 }

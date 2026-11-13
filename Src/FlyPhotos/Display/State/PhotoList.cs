@@ -11,21 +11,22 @@ namespace FlyPhotos.Display.State;
 /// position-ordered key snapshot used for navigation. Keys are stable identities, NOT positions: Folder
 /// mode inserts new keys anywhere, so key values say nothing about order — never compare or binary-search them.
 /// <para>
-/// The concurrency model is preserved verbatim from when these were two fields on
-/// <c>PhotoDisplayController</c>:
+/// Concurrency:
 /// <list type="bullet">
-///   <item>the dictionary is a <see cref="ConcurrentDictionary{TKey,TValue}"/> — lock-free reads on
-///     ThreadPool threads (the prefetch cache, the thumbnail strip) while the UI thread mutates it on
-///     delete;</item>
+///   <item>the dictionary is a <see cref="ConcurrentDictionary{TKey,TValue}"/> — lock-free reads on any thread
+///     (the prefetch cache, the thumbnail strip) while the list is changed;</item>
 ///   <item>the key list is a <b>volatile copy-on-write snapshot</b> — readers capture the reference
 ///     and iterate without a lock; mutation publishes a new list, never edits in place.</item>
 /// </list>
-/// Position is not owned here: see <see cref="NavState"/>.
+/// Writers take turns: the startup thread builds the listing (<see cref="PrepareListing"/>), then the UI thread
+/// publishes it and makes every later change. Position is not owned here: see <see cref="NavState"/>.
 /// </para>
 /// </summary>
 internal sealed class PhotoList
 {
+    // Every photo the list holds, plus removed ones until Forget.
     private readonly ConcurrentDictionary<int, Photo> _photos = new();
+    // The published key order.
     private volatile IReadOnlyList<int> _keys = Array.Empty<int>();
 
     /// <summary>
@@ -48,7 +49,7 @@ internal sealed class PhotoList
 
     /// <summary>
     /// Builds the collection from <paramref name="files"/> (keys 0..n-1) and publishes the key snapshot
-    /// atomically once fully populated. Mirrors the original startup population loop.
+    /// atomically once fully populated. Used for the startup list: the opened photo alone.
     /// </summary>
     public void Initialize(IReadOnlyList<string> files)
     {

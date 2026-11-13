@@ -538,7 +538,7 @@ public sealed partial class PhotoDisplayWindow
     }
 
     /// <summary>
-    /// Ends a navigation burst. Fly() parks the HQ tier for as long as the key is held and only
+    /// Ends a navigation burst. Fly() holds HQ loading for as long as the key is held and only
     /// Brake() unwinds it, so this has to follow whatever chord is bound to Next/Prev — braking on
     /// a hard-coded Left/Right would leave every photo at preview quality once they are rebound.
     /// </summary>
@@ -1311,7 +1311,8 @@ public sealed partial class PhotoDisplayWindow
     private ActionCheckLicense LicenseAction => field ??= new ActionCheckLicense(
         xamlRootProvider: () => Content?.XamlRoot, onTrialExpired: AnimatePhotoDisplayWindowClose);
 
-    // FirstPhotoLoaded fires on the controller's STA thread; marshal to the UI thread.
+    // FirstPhotoLoaded fires on the UI thread (when the listing is published); queued so the license check runs
+    // after the current work.
     private void OnFirstPhotoLoaded() => DispatcherQueue.TryEnqueue(async () =>
     {
         try { await LicenseAction.PhotoLoadedAsync(); }

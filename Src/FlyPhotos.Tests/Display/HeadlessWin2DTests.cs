@@ -3,6 +3,7 @@ using Windows.UI;
 
 namespace FlyPhotos.Tests.Display;
 
+/// <summary>The premise the display tests rest on: Win2D makes real bitmaps on a software device, with no window or GPU.</summary>
 [TestClass]
 public sealed class HeadlessWin2DTests
 {

@@ -12,12 +12,15 @@ internal enum LoadKind
     PreviewLight,
     /// <summary>A preview that needs a full-image decode: the heavy lane, few at once (#276).</summary>
     PreviewHeavy,
+    /// <summary>The full-quality image (a tiled large image only for the window centre).</summary>
     Hq,
     /// <summary>Writes a freshly decoded preview to the disk cache.</summary>
     DiskWrite
 }
 
 /// <summary>What the prefetch cache knows about one photo, as the planner needs it.</summary>
+/// <param name="HasPreview">A preview is stored.</param>
+/// <param name="HasHq">An HQ is stored.</param>
 /// <param name="TiledHq">The HQ is a tiled large image (gigabytes of CPU tiles).</param>
 /// <param name="NeedsHeavy">Its light preview pass found nothing: only the heavy lane can make its preview.</param>
 /// <param name="NeedsDiskWrite">Its preview was decoded from the file and is not in the disk cache yet.</param>
@@ -46,6 +49,7 @@ internal readonly record struct JobLimits(int Previews, int Heavy, int Hq, int D
 /// </summary>
 internal sealed class PrefetchPlan
 {
+    /// <summary>Jobs to start, in priority order.</summary>
     public readonly List<RunningJob> Start = [];
     /// <summary>Indexes into the running list of jobs to cancel; their results are discarded.</summary>
     public readonly List<int> Cancel = [];
@@ -61,6 +65,7 @@ internal sealed class PrefetchPlan
     internal readonly Dictionary<int, int> Positions = []; // key -> position, for the window around the centre
     internal readonly List<int> DiskWrites = [];
 
+    /// <summary>Empties every list for the next round.</summary>
     public void Clear()
     {
         Start.Clear();
@@ -89,6 +94,15 @@ internal sealed class PrefetchPlan
 /// </summary>
 internal static class PrefetchPlanner
 {
+    /// <summary>Fills <paramref name="plan"/> with this round's decisions.</summary>
+    /// <param name="nav">The window centre: the viewer's key list and position.</param>
+    /// <param name="loaded">Keys that hold a preview or HQ (the candidates for unloading).</param>
+    /// <param name="slotOf">What a key has loaded and what the cache knows about it.</param>
+    /// <param name="running">The jobs in flight; <see cref="PrefetchPlan.Cancel"/> indexes into this list.</param>
+    /// <param name="holdHq">A burst or folder-switch quiet period: start no HQ.</param>
+    /// <param name="previewHalf">Photos each side of the centre that keep a preview.</param>
+    /// <param name="hqHalf">Photos each side of the centre that keep an HQ.</param>
+    /// <param name="limits">How many jobs of each kind may run at once.</param>
     public static void Make(PrefetchPlan plan, NavState nav, HashSet<int> loaded,
         Func<int, SlotState> slotOf, IReadOnlyList<RunningJob> running, bool holdHq,
         int previewHalf, int hqHalf, JobLimits limits)
