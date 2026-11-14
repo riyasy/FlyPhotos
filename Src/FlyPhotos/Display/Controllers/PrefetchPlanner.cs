@@ -40,7 +40,7 @@ internal readonly record struct JobLimits(int Previews, int Heavy, int Hq, int D
     /// Previews leave a core spare for the on-screen HQ decode, and stop at 8: a read benchmark (NVMe, SATA SSD,
     /// internal and USB hard disks) found small reads peak at 8 at once on every drive, and hard disks slow down
     /// past it. The heavy lane is capped whatever the core count, since each full decode can take hundreds of MB.
-    /// HQ stops at 4: the HQ window rarely needs more, and whole-file reads on a hard disk get slower in parallel.
+    /// HQ stops at 4 (the centre's own HQ may go up to twice that): the HQ window rarely needs more, and whole-file reads on a hard disk get slower in parallel.
     /// Disk-cache writes insert one at a time behind the cache's lock, so two keep one encoding while one inserts.
     /// </summary>
     public static JobLimits ForCores(int cores) => new(Math.Clamp(cores - 1, 1, 8), 4, Math.Min(cores, 4), 2);
@@ -87,8 +87,9 @@ internal sealed class PrefetchPlan
 /// cache runs it after each batch of events and carries out the result; nothing here touches a photo or a thread.
 /// <list type="bullet">
 ///   <item>Work goes nearest the window centre first; at equal distance the photo before the centre wins.</item>
-///   <item>The centre's HQ goes first. Neighbour HQs start only once it is no longer loading, so they don't slow the
-///     photo on screen. While HQ is held (a burst, a folder-switch quiet period) no HQ starts at all.</item>
+///   <item>The centre's HQ goes first, and may use up to twice the HQ limit. Neighbour HQs start only once it is no
+///     longer loading, so they don't slow the photo on screen. While HQ is held (a burst, a folder-switch quiet
+///     period) no HQ starts at all.</item>
 ///   <item>Only the centre may load (and keep) a tiled large image; a neighbour's large HQ is deferred.</item>
 ///   <item>Previews needing a full decode go to the heavy lane; it shares the preview budget.</item>
 ///   <item>Disk-cache writes run only when no light preview is waiting, so they never slow the window filling.</item>
@@ -156,7 +157,10 @@ internal static class PrefetchPlanner
         {
             var centreSlot = slotOf(centreKey);
             bool centreLoading = plan.Busy.Contains((centreKey, LoadKind.Hq));
-            if (!centreSlot.HasHq && !centreLoading && !centreSlot.HqParked && hqs < limits.Hq)
+            // Up to twice limits.Hq: the slots may all be taken by slow decodes of photos already left behind (a
+            // cancelled decode keeps its slot until it returns), and the photo on screen must not wait for them. The
+            // ceiling still stops a race through slow files from piling decodes up.
+            if (!centreSlot.HasHq && !centreLoading && !centreSlot.HqParked && hqs < limits.Hq * 2)
             {
                 plan.Start.Add(new RunningJob(centreKey, LoadKind.Hq, AllowLarge: true));
                 hqs++;

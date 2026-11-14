@@ -557,7 +557,8 @@ public sealed class PrefetchCacheTests
         var deadline = Environment.TickCount64 + 20_000;
         while ((centre.Images.Hq == null || rig.Decoder.InFlight > 0) && Environment.TickCount64 < deadline) Thread.Sleep(5);
         Assert.IsNotNull(centre.Images.Hq, "the photo the viewer stopped on gets its HQ");
-        Assert.IsTrue(rig.Decoder.MaxPreviews <= 3 && rig.Decoder.MaxHq <= 2 && rig.Decoder.MaxHeavy <= 2);
+        // HQ: the centre's own may go up to twice the limit.
+        Assert.IsTrue(rig.Decoder.MaxPreviews <= 3 && rig.Decoder.MaxHq <= 4 && rig.Decoder.MaxHeavy <= 2);
         Assert.AreEqual(0, rig.Log.Errors.Count, string.Join("\n", rig.Log.Errors.Select(e => e.Exception?.ToString())));
     }
 }

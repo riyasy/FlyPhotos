@@ -55,6 +55,21 @@ public sealed class PrefetchPlannerTests
     }
 
     [TestMethod]
+    public void TheCentresHqStartsEvenWhenSlowDecodesLeftBehindFillEverySlot()
+    {
+        // Two slow decodes of photos the viewer has stepped away from, cancelled but not yet returned.
+        _running.Add(new RunningJob(100, LoadKind.Hq));
+        _running.Add(new RunningJob(101, LoadKind.Hq));
+        var plan = Plan(centre: 5, limits: Wide with { Hq = 2 });
+        CollectionAssert.AreEqual(new[] { 105 }, Started(plan, LoadKind.Hq)); // the centre only, no neighbours
+
+        // At twice the limit even the centre waits.
+        _running.Add(new RunningJob(102, LoadKind.Hq));
+        _running.Add(new RunningJob(108, LoadKind.Hq));
+        Assert.AreEqual(0, Started(Plan(centre: 5, limits: Wide with { Hq = 2 }), LoadKind.Hq).Count);
+    }
+
+    [TestMethod]
     public void NeighbourHqsWaitWhileTheCentreLoads()
     {
         _running.Add(new RunningJob(105, LoadKind.Hq, true));
