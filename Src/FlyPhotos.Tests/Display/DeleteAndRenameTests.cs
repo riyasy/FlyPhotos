@@ -51,8 +51,8 @@ public sealed class DeleteAndRenameTests
         Assert.AreEqual(3, h.Nav.Position);
         Assert.AreEqual(9, h.Nav.Keys.Count);
         Assert.IsFalse(h.Nav.Keys.Any(k => ReferenceEquals(h.Controller.Photos.GetPhoto(k), photo)), "gone from the list");
-        Assert.IsNull(photo.Images.Hq, "its images are released");
-        Assert.IsNull(photo.Images.Preview);
+        Assert.IsNull(photo.Slots.Hq, "its images are released");
+        Assert.IsNull(photo.Slots.Preview);
         h.Settle();
         h.CheckInvariants();
     }
@@ -108,7 +108,7 @@ public sealed class DeleteAndRenameTests
         Assert.AreSame(photo, h.Current);
         Assert.AreEqual(10, h.Nav.Keys.Count);
         Assert.AreEqual(installs, h.Canvas.History.Count, "nothing reinstalled");
-        Assert.IsNotNull(photo.Images.Hq, "its images are kept");
+        Assert.IsNotNull(photo.Slots.Hq, "its images are kept");
         h.CheckInvariants();
     }
 

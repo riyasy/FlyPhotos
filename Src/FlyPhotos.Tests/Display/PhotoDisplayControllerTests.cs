@@ -276,11 +276,11 @@ public sealed class PhotoDisplayControllerTests
         var next = h.PhotoAt(6);
         var stale = new StaticHqDisplayItem(TestGpu.Bitmap(), Origin.Disk);
         stale.Release(); // freed
-        next.Images.DetachHq()?.Release();
-        next.Images.TryAttachHq(stale); // what the slot held when the cache freed it a moment ago
+        next.Slots.DetachHq()?.Release();
+        next.Slots.TryAttachHq(stale); // what the slot held when the cache freed it a moment ago
         h.Decoder.Script = _ => Reply.Pending;
         h.Next();
-        next.Images.DetachHq(); // take the freed item back out before anything releases it again
+        next.Slots.DetachHq(); // take the freed item back out before anything releases it again
         Assert.AreEqual(DisplayLevel.Preview, h.ShownLevel);
         Assert.AreEqual(0, h.Canvas.Violations.Count);
     }
@@ -404,7 +404,7 @@ public sealed class PhotoDisplayControllerTests
         h.Run(() => h.Controller.FlyBy(5)); // past the HQ window: its HQ is still to load
         h.Settle();
         var current = h.Current;
-        h.Canvas.Fails = item => ReferenceEquals(item, current.Images.Hq);
+        h.Canvas.Fails = item => ReferenceEquals(item, current.Slots.Hq);
         var hq = h.Decoder.PendingOf(DecodeKind.Hq).Single(d => ReferenceEquals(d.Photo, current));
         hq.Succeed();
         h.Settle();
@@ -432,7 +432,7 @@ public sealed class PhotoDisplayControllerTests
         using var h = new DisplayHarness(photos: 10, openAt: 4);
         h.Open();
         var removed = h.Current;
-        var removedHq = removed.Images.Hq!;
+        var removedHq = removed.Slots.Hq!;
         h.Remove(removed.FilePath);
         Assert.AreEqual("img_00005.jpg", h.CurrentName);
         Assert.AreEqual(4, h.Nav.Position);
@@ -476,7 +476,7 @@ public sealed class PhotoDisplayControllerTests
         using var h = new DisplayHarness(photos: 10, openAt: 4);
         h.Open();
         var old = h.Current;
-        var oldHq = old.Images.Hq!;
+        var oldHq = old.Slots.Hq!;
         var path = old.FilePath;
 
         // An editor saved over the file: the watcher reports it gone and added again in one batch.
@@ -487,7 +487,7 @@ public sealed class PhotoDisplayControllerTests
         Assert.AreEqual(path, h.Current.FilePath, "the viewer stays on the file");
         Assert.AreEqual(4, h.Nav.Position);
         Assert.AreEqual(10, h.Nav.Keys.Count);
-        Assert.IsNull(old.Images.Hq, "the old photo is retired");
+        Assert.IsNull(old.Slots.Hq, "the old photo is retired");
         h.Settle();
         Assert.AreEqual(DisplayLevel.Hq, h.ShownLevel, "the new file is loaded");
         Assert.AreNotSame(oldHq, h.Canvas.Held);
@@ -521,8 +521,8 @@ public sealed class PhotoDisplayControllerTests
         h.Remove(target.FilePath);
         foreach (var d in pending) d.Succeed();
         h.Settle();
-        Assert.IsNull(target.Images.Preview);
-        Assert.IsNull(target.Images.Hq);
+        Assert.IsNull(target.Slots.Preview);
+        Assert.IsNull(target.Slots.Hq);
         h.Decoder.CompleteAll();
         h.Settle();
         h.CheckInvariants();
@@ -539,7 +539,7 @@ public sealed class PhotoDisplayControllerTests
         AppConfig.Settings.CacheSizeOneSideHqImages = 0;
         h.Controller.CacheSizeChanged();
         h.Settle();
-        Assert.AreEqual(5, h.Nav.Keys.Count(k => h.Controller.Photos.GetPhoto(k)!.Images.Preview != null));
+        Assert.AreEqual(5, h.Nav.Keys.Count(k => h.Controller.Photos.GetPhoto(k)!.Slots.Preview != null));
         Assert.AreEqual(DisplayLevel.Hq, h.ShownLevel);
         h.CheckInvariants();
     }

@@ -133,7 +133,7 @@ internal partial class PhotoDisplayController
         {
             // Show the error screen rather than nothing, and let the listing go on so the user can move away.
             Logger.Error(ex, $"Loading the first photo failed: {firstPhoto.FilePath}");
-            if (firstPhoto.Images.Hq == null) firstPhoto.Images.TryAttachHq(_decoder.HqFailed());
+            if (firstPhoto.Slots.Hq == null) firstPhoto.Slots.TryAttachHq(_decoder.HqFailed());
             await SetSourceAsync(firstPhoto, DisplayLevel.Hq);
         }
         finally
@@ -159,7 +159,7 @@ internal partial class PhotoDisplayController
         {
             await SetSourceAsync(firstPhoto, DisplayLevel.Preview);
             if (await _decoder.LoadHq(firstPhoto, allowLarge: true, _cts.Token) is { } hq)
-                firstPhoto.Images.TryAttachHq(hq);
+                firstPhoto.Slots.TryAttachHq(hq);
         }
 
         await SetSourceAsync(firstPhoto, DisplayLevel.Hq);
@@ -270,13 +270,13 @@ internal partial class PhotoDisplayController
         if (_photoList.GetPhoto(_nav.Key) is not { } photo) return;
         var level = BestLevel(photo);
         if (level < _displayLevel || level == DisplayLevel.PlaceHolder) return;
-        if (level == _displayLevel && ReferenceEquals(photo.Images.Get(level), _shownItem)) return;
+        if (level == _displayLevel && ReferenceEquals(photo.Slots.Get(level), _shownItem)) return;
         _ = SetSourceAsync(photo, level);
     }
 
     private static DisplayLevel BestLevel(Photo photo) =>
-        photo.Images.Hq != null ? DisplayLevel.Hq :
-        photo.Images.Preview != null ? DisplayLevel.Preview : DisplayLevel.PlaceHolder;
+        photo.Slots.Hq != null ? DisplayLevel.Hq :
+        photo.Slots.Preview != null ? DisplayLevel.Preview : DisplayLevel.PlaceHolder;
 
     // UI thread. Shows the photo on screen at the best level it has, and re-centres the cache on it — posted first,
     // so prefetching never waits for a slow install (an animation's first frames).
@@ -314,7 +314,7 @@ internal partial class PhotoDisplayController
     private DisplayItem LeaseAtOrBelow(Photo photo, ref DisplayLevel level)
     {
         for (; level > DisplayLevel.PlaceHolder; level--)
-            if (photo.Images.Get(level) is { } item && item.TryAcquire())
+            if (photo.Slots.Get(level) is { } item && item.TryAcquire())
                 return item;
         return _decoder.LoadingIndicator; // shared, never freed: needs no lease
     }
@@ -386,7 +386,7 @@ internal partial class PhotoDisplayController
     {
         if (IsBurst()) _cache.ResumeHq();
         _keyPressCounter = 0;
-        if (_displayLevel != DisplayLevel.Hq && _photoList.GetPhoto(_nav.Key) is { Images.Hq: not null } photo)
+        if (_displayLevel != DisplayLevel.Hq && _photoList.GetPhoto(_nav.Key) is { Slots.Hq: not null } photo)
             await SetSourceAsync(photo, DisplayLevel.Hq);
     }
 
@@ -421,7 +421,7 @@ internal partial class PhotoDisplayController
             var showDimension = AppConfig.Settings.ShowImageDimensions &&
                                 _displayLevel != DisplayLevel.PlaceHolder &&
                                 !photo.IsVector &&
-                                !photo.Images.IsErrorScreen(_displayLevel);
+                                !photo.Slots.IsErrorScreen(_displayLevel);
 
             if (showDimension)
             {
@@ -433,7 +433,7 @@ internal partial class PhotoDisplayController
                 }
                 else
                 {
-                    var (w, h) = photo.Images.GetActualSize();
+                    var (w, h) = photo.Slots.GetActualSize();
                     dimensionText = $"({w} x {h})";
                 }
             }
@@ -575,7 +575,7 @@ internal partial class PhotoDisplayController
         {
             // The canvas holds its own lease on whatever it still draws, and a load still running for a removed photo
             // releases what it brings, so retiring at once is safe. Done whatever happened above: they are gone.
-            foreach (var (_, photo) in removed) photo.Images.Retire();
+            foreach (var (_, photo) in removed) photo.Slots.Retire();
         }
     }
 
@@ -685,7 +685,7 @@ internal partial class PhotoDisplayController
         _firstPhotoLoadedTcs.TrySetCanceled();
         DisposeFolderMode();
         _cache.Dispose();
-        foreach (int key in _photoList.Keys) _photoList.GetPhoto(key)?.Images.Retire();
+        foreach (int key in _photoList.Keys) _photoList.GetPhoto(key)?.Slots.Retire();
         Logger.Info("PhotoDisplayController disposed.");
     }
 }

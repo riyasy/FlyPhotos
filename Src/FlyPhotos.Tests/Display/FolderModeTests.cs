@@ -30,7 +30,7 @@ public sealed class FolderModeTests
         h.RunUntil(() => !ReferenceEquals(h.Current, shown), "the deleted photo on screen to be replaced");
         Assert.AreEqual("img_00002b.jpg", h.CurrentName, "the next one in sort order");
         h.Settle();
-        Assert.IsNull(shown.Images.Hq, "the deleted photo's images are released");
+        Assert.IsNull(shown.Slots.Hq, "the deleted photo's images are released");
         h.CheckInvariants();
     }
 
@@ -76,7 +76,7 @@ public sealed class FolderModeTests
         h.Advance(500);
         h.Settle();
         Assert.AreEqual(DisplayLevel.Hq, h.ShownLevel);
-        Assert.IsTrue(oldPhotos.All(p => p.Images.Preview == null && p.Images.Hq == null), "the old folder's images are released");
+        Assert.IsTrue(oldPhotos.All(p => p.Slots.Preview == null && p.Slots.Hq == null), "the old folder's images are released");
 
         h.Run(async () => name = await h.Controller.TryOpenSiblingFolderAsync(NavDirection.Next));
         Assert.IsNull(name, "no folder after c_photos");

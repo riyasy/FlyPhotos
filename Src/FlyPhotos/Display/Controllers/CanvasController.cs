@@ -171,7 +171,7 @@ internal partial class CanvasController : ICanvasController
 
         var isUpgradeFromPlaceholder = !_realImageDisplayedForCurrentPhoto && displayLevel > DisplayLevel.PlaceHolder;
 
-        var size = photo.Images.GetActualSize();
+        var size = photo.Slots.GetActualSize();
         _imageSize = new Size(size.Item1, size.Item2);
 
         Debug.WriteLine($"Displaying {photo.FilePath} at level {displayLevel} with size {_imageSize.Width}x{_imageSize.Height}");

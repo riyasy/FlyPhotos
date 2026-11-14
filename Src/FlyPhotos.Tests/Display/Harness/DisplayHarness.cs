@@ -197,9 +197,9 @@ internal sealed class DisplayHarness : IDisposable
         int previews = 0, hqs = 0;
         foreach (int key in nav.Keys)
         {
-            var images = Controller.Photos.GetPhoto(key)!.Images;
-            if (images.Preview is { } p) { Assert.IsFalse(p.IsFreed, "a stored preview is freed"); held.Add(p); previews++; }
-            if (images.Hq is { } h) { Assert.IsFalse(h.IsFreed, "a stored HQ is freed"); held.Add(h); hqs++; }
+            var slots = Controller.Photos.GetPhoto(key)!.Slots;
+            if (slots.Preview is { } p) { Assert.IsFalse(p.IsFreed, "a stored preview is freed"); held.Add(p); previews++; }
+            if (slots.Hq is { } h) { Assert.IsFalse(h.IsFreed, "a stored HQ is freed"); held.Add(h); hqs++; }
         }
         if (Canvas.Held is { } shown) held.Add(shown);
 

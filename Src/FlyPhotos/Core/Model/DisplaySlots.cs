@@ -9,7 +9,7 @@ namespace FlyPhotos.Core.Model;
 /// uses an item takes its own. Once the photo leaves the list it is retired: its items are released and anything a
 /// load still brings is released instead of stored.
 /// </summary>
-internal sealed class PhotoImages
+internal sealed class DisplaySlots
 {
     // The slots. Written under _lock; read anywhere without it.
     private volatile HqDisplayItem? _hq;

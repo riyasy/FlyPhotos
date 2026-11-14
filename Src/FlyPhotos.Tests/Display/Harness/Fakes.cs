@@ -223,7 +223,7 @@ internal sealed class FakeDecoder : IPhotoDecoder
         {
             case DecodeKind.FirstPreview:
                 var first = Track(new PreviewDisplayItem(TestGpu.Bitmap(), PreviewOrigin), d);
-                d.Photo.Images.TryAttachPreview(first, new Thumbnail(new byte[4]));
+                d.Photo.Slots.TryAttachPreview(first, new Thumbnail(new byte[4]));
                 return true;
             case DecodeKind.PreviewLight or DecodeKind.PreviewHeavy:
                 var origin = d.Kind == DecodeKind.PreviewHeavy ? Origin.Disk : PreviewOrigin;
@@ -311,7 +311,7 @@ internal sealed class FakeCanvas : ICanvasController
             return Task.CompletedTask;
         }
         if (item.IsFreed) Violations.Add($"freed item handed over for {photo.FilePath} at {level}");
-        _ = photo.Images.GetActualSize(); // the real canvas lays the photo out from it
+        _ = photo.Slots.GetActualSize(); // the real canvas lays the photo out from it
         if (Fails?.Invoke(item) == true)
         {
             Failures++;

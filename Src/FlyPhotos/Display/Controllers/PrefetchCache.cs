@@ -30,7 +30,7 @@ internal sealed record PrefetchOptions(TimeProvider Time, JobLimits Limits, bool
 /// See CONTEXT.md for the vocabulary.
 /// <para>
 /// Threading: one dedicated <b>prefetch thread</b> owns every bit of loading state (the window, running jobs, load
-/// hints) and is the only writer of the photos' <see cref="PhotoImages"/> slots once started. Other threads talk to
+/// hints) and is the only writer of the photos' <see cref="DisplaySlots"/> slots once started. Other threads talk to
 /// it only through its inbox: the UI posts window moves and settings, and decodes post their results. After each
 /// batch of messages the prefetch thread asks <see cref="PrefetchPlanner"/> what to do and does it (<see cref="Step"/>).
 /// The UI thread never waits on any of this, and loading never waits on the UI thread.
@@ -187,7 +187,7 @@ internal sealed class PrefetchCache : IDisposable
         Post(() => { if (until > _holdHqUntil) _holdHqUntil = until; });
     }
 
-    /// <summary>Photos removed from the list. Their images are released by <see cref="PhotoImages.Retire"/>.</summary>
+    /// <summary>Photos removed from the list. Their images are released by <see cref="DisplaySlots.Retire"/>.</summary>
     public void Forget(IReadOnlyList<int> keys) => Post(() =>
     {
         foreach (int key in keys)
@@ -208,7 +208,7 @@ internal sealed class PrefetchCache : IDisposable
     {
         foreach (int key in _loaded)
             if (_getPhoto(key) is { IsRaw: true } photo)
-                photo.Images.DetachHq()?.Release();
+                photo.Slots.DetachHq()?.Release();
         foreach (var job in _running)
             if (job.Spec.Kind == LoadKind.Hq && job.Photo.IsRaw)
                 Abandon(job);
@@ -275,14 +275,14 @@ internal sealed class PrefetchCache : IDisposable
         {
             if (_getPhoto(key) is { } photo)
             {
-                photo.Images.DetachHq()?.Release(); // the canvas leases what is on screen
-                photo.Images.DetachPreview()?.Release();
+                photo.Slots.DetachHq()?.Release(); // the canvas leases what is on screen
+                photo.Slots.DetachPreview()?.Release();
             }
             _loaded.Remove(key);
             _needsDiskWrite.Remove(key);
         }
         foreach (int key in _plan.EvictHq)
-            _getPhoto(key)?.Images.DetachHq()?.Release();
+            _getPhoto(key)?.Slots.DetachHq()?.Release();
         foreach (var spec in _plan.Start) StartJob(spec);
 
         ReportStatus();
@@ -291,11 +291,11 @@ internal sealed class PrefetchCache : IDisposable
     // The planner's view of one key: its slots plus this cache's own notes about it.
     private SlotState SlotOf(int key)
     {
-        var images = _getPhoto(key)?.Images;
+        var slots = _getPhoto(key)?.Slots;
         return new SlotState(
-            HasPreview: images?.Preview != null,
-            HasHq: images?.Hq != null,
-            TiledHq: images?.Hq is TiledHqDisplayItem,
+            HasPreview: slots?.Preview != null,
+            HasHq: slots?.Hq != null,
+            TiledHq: slots?.Hq is TiledHqDisplayItem,
             NeedsHeavy: _needsHeavy.Contains(key),
             NeedsDiskWrite: _needsDiskWrite.Contains(key),
             PreviewParked: _parked.Contains((key, LoadKind.PreviewLight)) || _parked.Contains((key, LoadKind.PreviewHeavy)),
@@ -409,14 +409,14 @@ internal sealed class PrefetchCache : IDisposable
             return;
         }
         _needsHeavy.Remove(key);
-        var images = job.Photo.Images;
+        var slots = job.Photo.Slots;
         // Replaces nothing but an error placeholder (shared, never freed).
-        if (!keep || images.Preview is { } existing && !existing.IsErrorOrUndefined())
+        if (!keep || slots.Preview is { } existing && !existing.IsErrorOrUndefined())
         {
             preview.Release();
             return;
         }
-        if (!images.TryAttachPreview(preview, job.Thumbnail)) return; // retired: released by TryAttachPreview
+        if (!slots.TryAttachPreview(preview, job.Thumbnail)) return; // retired: released by TryAttachPreview
         _loaded.Add(key);
         if (preview.Origin == Origin.Disk) _needsDiskWrite.Add(key);
         Loaded?.Invoke(key);
@@ -433,13 +433,13 @@ internal sealed class PrefetchCache : IDisposable
             if (keep && key != _nav.Key) _parked.Add((key, LoadKind.Hq));
             return;
         }
-        var images = job.Photo.Images;
-        if (!keep || images.Hq != null || hq is TiledHqDisplayItem && key != _nav.Key)
+        var slots = job.Photo.Slots;
+        if (!keep || slots.Hq != null || hq is TiledHqDisplayItem && key != _nav.Key)
         {
             hq.Release();
             return;
         }
-        if (!images.TryAttachHq(hq)) return; // retired: released by TryAttachHq
+        if (!slots.TryAttachHq(hq)) return; // retired: released by TryAttachHq
         _loaded.Add(key);
         Loaded?.Invoke(key);
     }
@@ -447,8 +447,8 @@ internal sealed class PrefetchCache : IDisposable
     // Writes a preview decoded from the file (Origin.Disk) to the disk cache with the photo's real pixel size.
     private Task WriteToDiskCache(Photo photo)
     {
-        if (photo.Images.Preview is not { Origin: Origin.Disk } preview) return Task.CompletedTask;
-        var (actualWidth, actualHeight) = photo.Images.GetSourcePixelSize();
+        if (photo.Slots.Preview is not { Origin: Origin.Disk } preview) return Task.CompletedTask;
+        var (actualWidth, actualHeight) = photo.Slots.GetSourcePixelSize();
         // The path is read now, as the job starts: a rename meanwhile files it under the name it was decoded from.
         return _decoder.PutPreviewInDiskCache(photo.FilePath, preview,
             (int)Math.Round(actualWidth), (int)Math.Round(actualHeight));

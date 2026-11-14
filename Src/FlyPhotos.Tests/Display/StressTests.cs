@@ -184,8 +184,8 @@ public sealed class StressTests
                     for (int i = Math.Max(0, nav.Position - 10); i < Math.Min(nav.Keys.Count, nav.Position + 10); i++)
                     {
                         var photo = h.Strip.GetPhoto!(nav.Keys[i]);
-                        _ = photo?.Images.Thumbnail;
-                        _ = photo?.Images.GetActualSize();
+                        _ = photo?.Slots.Thumbnail;
+                        _ = photo?.Slots.GetActualSize();
                     }
                 }
                 catch (Exception) { Interlocked.Increment(ref stripErrors); }

@@ -14,7 +14,7 @@ namespace FlyPhotos.Display.ImageReading;
 /// <summary>
 /// Where the display pipeline (the controller and the prefetch cache) gets its images: decodes, the disk cache and
 /// the shared indicator items. Every load returns at once and decodes off the calling thread; what it returns carries
-/// its lease, for the caller to store in the photo's <see cref="PhotoImages"/> or release. Tests use a scripted one.
+/// its lease, for the caller to store in the photo's <see cref="DisplaySlots"/> or release. Tests use a scripted one.
 /// </summary>
 internal interface IPhotoDecoder
 {
@@ -72,10 +72,10 @@ internal sealed class PhotoDecoder : IPhotoDecoder
         switch (first)
         {
             case PreviewDisplayItem preview:
-                photo.Images.TryAttachPreview(preview, MakeThumbnail(preview));
+                photo.Slots.TryAttachPreview(preview, MakeThumbnail(preview));
                 return true;
             case HqDisplayItem hq:
-                photo.Images.TryAttachHq(hq);
+                photo.Slots.TryAttachHq(hq);
                 break;
         }
         return false;
@@ -83,10 +83,10 @@ internal sealed class PhotoDecoder : IPhotoDecoder
 
     public Task<HqDisplayItem?> LoadHq(Photo photo, bool allowLarge, CancellationToken ct) => Task.Run(async () =>
     {
-        var images = photo.Images;
+        var slots = photo.Slots;
         var (hq, oversized) = await ImageReader.GetHqImage(_device, photo.FilePath,
-            images.IsKnownOversized(_device.Device.MaximumBitmapSizeInPixels), allowLarge, ct);
-        if (oversized) images.KnownOversized = true; // a deferred neighbour skips the doomed normal decode next time
+            slots.IsKnownOversized(_device.Device.MaximumBitmapSizeInPixels), allowLarge, ct);
+        if (oversized) slots.KnownOversized = true; // a deferred neighbour skips the doomed normal decode next time
         if (hq is TiledHqDisplayItem tiled) await HealCachedPreviewSize(photo, tiled);
         return hq;
     });
@@ -115,7 +115,7 @@ internal sealed class PhotoDecoder : IPhotoDecoder
     // those builds are a few releases old (a stale entry otherwise only costs a wrong first fit).
     private static async Task HealCachedPreviewSize(Photo photo, TiledHqDisplayItem tiled)
     {
-        if (photo.Images.Preview is not { Origin: Origin.DiskCache, Bitmap: not null } p) return;
+        if (photo.Slots.Preview is not { Origin: Origin.DiskCache, Bitmap: not null } p) return;
         int w = tiled.Pyramid.FullWidth, h = tiled.Pyramid.FullHeight;
         if (p.Metadata is { } m && (int)Math.Round(m.FullWidth) == w && (int)Math.Round(m.FullHeight) == h) return;
         await PutInDiskCache(photo.FilePath, p, w, h);

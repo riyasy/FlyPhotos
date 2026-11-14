@@ -42,7 +42,7 @@ internal static class PhotoClipboard
 
             // 2. IN-MEMORY BITMAP (for paste-as-image targets). A GPU SVG has no bitmap; draw one just for this.
             // Leased for the copy: the cache may release the item meanwhile (window move, RAW setting change).
-            var item = level == DisplayLevel.PlaceHolder ? null : photo.Images.Get(level);
+            var item = level == DisplayLevel.PlaceHolder ? null : photo.Slots.Get(level);
             if (item != null && !item.TryAcquire()) item = null;
             var svgBitmap = item is SvgHqDisplayItem svg ? TryRasterize(svg) : null;
             try

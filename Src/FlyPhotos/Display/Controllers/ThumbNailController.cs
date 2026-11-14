@@ -52,7 +52,7 @@ internal partial class ThumbNailController : IThumbnailController
     private CanvasRenderTarget _thumbnailOffscreen;
     private CanvasBitmap _loadingIndicatorBitmap;
 
-    // W2D-owned GPU copies of PhotoImages.Thumbnail pixels, keyed by Thumbnail instance so a regenerated
+    // W2D-owned GPU copies of DisplaySlots.Thumbnail pixels, keyed by Thumbnail instance so a regenerated
     // thumbnail never reuses a stale bitmap. The prefetch cache only drops Thumbnail references. Each
     // ribbon pass moves the bitmaps it draws from _previousPassBitmaps into _currentPassBitmaps; whatever
     // is left behind wasn't drawn (scrolled off, evicted or deleted) and is disposed.
@@ -516,7 +516,7 @@ internal partial class ThumbNailController : IThumbnailController
         var key = keys[thumbnailPosition];
         var photo = _getPhoto?.Invoke(key);
         // Read once: the prefetch cache may drop the thumbnail (preview eviction) at any moment.
-        var thumbnail = photo?.Images.Thumbnail;
+        var thumbnail = photo?.Slots.Thumbnail;
 
         var bitmap = (thumbnail != null ? TakeOrCreateThumbnailBitmap(thumbnail, creator) : null)
                      ?? GetOrCreateLoadingIndicatorBitmap(creator);

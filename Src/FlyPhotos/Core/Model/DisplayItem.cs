@@ -112,7 +112,7 @@ internal sealed partial class TiledHqDisplayItem(CanvasBitmap overview, Origin o
 /// when pixels are needed (copy to clipboard).
 /// </summary>
 /// <param name="lease">The SVG reader's lease on the GPU scene; this item owns it from now on.</param>
-/// <param name="width">The size the photo reports (<see cref="PhotoImages.GetActualSize"/>): the scene fitted to
+/// <param name="width">The size the photo reports (<see cref="DisplaySlots.GetActualSize"/>): the scene fitted to
 /// 2000 px on the longer side, as the resvg raster was.</param>
 internal sealed partial class SvgHqDisplayItem(Origin origin, SvgScene.Lease lease, int width, int height)
     : HqDisplayItem(null, origin, 0)

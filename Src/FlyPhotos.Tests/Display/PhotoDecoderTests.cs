@@ -33,7 +33,7 @@ public sealed class PhotoDecoderTests
     [TestCleanup]
     public void Cleanup()
     {
-        foreach (var photo in _photos) photo.Images.Retire();
+        foreach (var photo in _photos) photo.Slots.Retire();
         try { Directory.Delete(_folder, recursive: true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
     }
 
@@ -70,9 +70,9 @@ public sealed class PhotoDecoderTests
     {
         var photo = NewPhoto(await Png("plain.png", 300, 100));
         Assert.IsFalse(await _decoder.LoadFirstPreview(photo), "no preview step: the HQ is all there is");
-        Assert.IsNotNull(photo.Images.Hq);
-        Assert.IsNull(photo.Images.Preview);
-        Assert.AreEqual(300u, photo.Images.Hq.Bitmap.SizeInPixels.Width);
+        Assert.IsNotNull(photo.Slots.Hq);
+        Assert.IsNull(photo.Slots.Preview);
+        Assert.AreEqual(300u, photo.Slots.Hq.Bitmap.SizeInPixels.Width);
     }
 
     [TestMethod]
@@ -87,10 +87,10 @@ public sealed class PhotoDecoderTests
 
         var photo = NewPhoto(path);
         Assert.IsTrue(await _decoder.LoadFirstPreview(photo), "a preview on screen, the HQ still to load");
-        Assert.AreEqual(Origin.DiskCache, photo.Images.Preview!.Origin);
-        Assert.AreEqual(new ImageMetadata(300, 100), photo.Images.Preview.Metadata);
-        Assert.IsNotNull(photo.Images.Thumbnail);
-        Assert.IsNull(photo.Images.Hq);
+        Assert.AreEqual(Origin.DiskCache, photo.Slots.Preview!.Origin);
+        Assert.AreEqual(new ImageMetadata(300, 100), photo.Slots.Preview.Metadata);
+        Assert.IsNotNull(photo.Slots.Thumbnail);
+        Assert.IsNull(photo.Slots.Hq);
     }
 
     [TestMethod]
@@ -146,10 +146,10 @@ public sealed class PhotoDecoderTests
 
         var photo = NewPhoto(path);
         Assert.IsTrue(await _decoder.LoadFirstPreview(photo), "the cached preview first");
-        Assert.AreEqual(new ImageMetadata(600, 600), photo.Images.Preview!.Metadata);
+        Assert.AreEqual(new ImageMetadata(600, 600), photo.Slots.Preview!.Metadata);
 
         Assert.IsNull(await _decoder.LoadHq(photo, allowLarge: false, CancellationToken.None), "deferred as a neighbour");
-        Assert.IsTrue(photo.Images.KnownOversized, "next time the doomed normal decode is skipped");
+        Assert.IsTrue(photo.Slots.KnownOversized, "next time the doomed normal decode is skipped");
 
         var hq = await _decoder.LoadHq(photo, allowLarge: true, CancellationToken.None);
         Assert.IsInstanceOfType<TiledHqDisplayItem>(hq);
@@ -158,10 +158,10 @@ public sealed class PhotoDecoderTests
 
         var reopened = NewPhoto(path);
         Assert.IsTrue(await _decoder.LoadFirstPreview(reopened));
-        Assert.AreEqual(new ImageMetadata(max + 16, 1), reopened.Images.Preview!.Metadata, "the cached size healed");
+        Assert.AreEqual(new ImageMetadata(max + 16, 1), reopened.Slots.Preview!.Metadata, "the cached size healed");
 
         // Free the GPU bitmaps before the device goes.
-        foreach (var p in _photos) p.Images.Retire();
+        foreach (var p in _photos) p.Slots.Retire();
         _photos.Clear();
     }
 }

@@ -7,7 +7,7 @@ using FlyPhotos.Services;
 namespace FlyPhotos.Core.Model;
 
 /// <summary>
-/// One photo in the list: its file and what its format implies, plus its decoded <see cref="Images"/>.
+/// One photo in the list: its file and what its format implies, plus its decoded <see cref="Slots"/>.
 /// Decoding lives in <c>PhotoDecoder</c>. The list knows a photo by an int key (see <c>PhotoList</c>); the canvas
 /// knows it by <see cref="FilePath"/>.
 /// </summary>
@@ -17,7 +17,7 @@ internal sealed class Photo
     public string FilePath { get; private set; }
 
     /// <summary>The decoded preview, HQ and thumbnail; filled and emptied by the prefetch cache.</summary>
-    public PhotoImages Images { get; } = new();
+    public DisplaySlots Slots { get; } = new();
 
     /// <summary>The format can carry alpha, so the canvas draws the checkered background behind it.</summary>
     public bool SupportsTransparency { get; }

@@ -79,7 +79,7 @@ public sealed class PrefetchCacheTests
             List.Forget(removed);
             int position = Math.Clamp(_position, 0, List.Keys.Count - 1);
             Cache.MoveWindow(Nav(position));
-            foreach (var (_, photo) in removed) photo.Images.Retire();
+            foreach (var (_, photo) in removed) photo.Slots.Retire();
             Settle();
         }
 
@@ -87,7 +87,7 @@ public sealed class PrefetchCacheTests
         {
             Cache.Dispose();
             Decoder.CompleteAll();
-            foreach (int key in List.Keys) List.GetPhoto(key)!.Images.Retire();
+            foreach (int key in List.Keys) List.GetPhoto(key)!.Slots.Retire();
             // A decode on the thread pool counts as finished just before it makes its image and hands it back; the
             // cache releases that late result a moment later (as in DisplayHarness.Dispose).
             var settleBy = Environment.TickCount64 + (_ownThread ? 5_000 : 0);
@@ -115,7 +115,7 @@ public sealed class PrefetchCacheTests
 
         hq.Succeed();
         rig.Settle();
-        Assert.IsNotNull(rig.At(5).Images.Hq);
+        Assert.IsNotNull(rig.At(5).Slots.Hq);
         var neighbours = rig.Decoder.PendingOf(DecodeKind.Hq);
         Assert.AreEqual(2, neighbours.Count);
         CollectionAssert.AreEquivalent(new[] { rig.At(4), rig.At(6) }, neighbours.Select(d => d.Photo).ToArray());
@@ -137,8 +137,8 @@ public sealed class PrefetchCacheTests
             rig.Settle();
         }
         Assert.AreEqual(0, rig.Decoder.Pending.Count, "everything finished");
-        int withPreview = rig.List.Keys.Count(k => rig.List.GetPhoto(k)!.Images.Preview != null);
-        int withHq = rig.List.Keys.Count(k => rig.List.GetPhoto(k)!.Images.Hq != null);
+        int withPreview = rig.List.Keys.Count(k => rig.List.GetPhoto(k)!.Slots.Preview != null);
+        int withHq = rig.List.Keys.Count(k => rig.List.GetPhoto(k)!.Slots.Hq != null);
         Assert.AreEqual(121, withPreview, "the whole preview window");
         Assert.AreEqual(7, withHq, "the whole HQ window");
         Assert.IsTrue(rig.Decoder.MaxPreviews <= 4 && rig.Decoder.MaxHeavy <= 2 && rig.Decoder.MaxHq <= 2 && rig.Decoder.MaxWrites <= 2,
@@ -188,7 +188,7 @@ public sealed class PrefetchCacheTests
         preview.Complete(Reply.Nothing); // light pass found nothing: must not mark a removed photo for the heavy lane
         rig.Settle();
         Assert.AreEqual(heavy, rig.Cache.Counts.NeedsHeavy);
-        Assert.IsNull(removedPhoto.Images.Preview);
+        Assert.IsNull(removedPhoto.Slots.Preview);
         Assert.AreEqual((loaded, writes, parked), (rig.Cache.Counts.Loaded, rig.Cache.Counts.NeedsDiskWrite, rig.Cache.Counts.Parked));
     }
 
@@ -204,10 +204,10 @@ public sealed class PrefetchCacheTests
         var removed = rig.List.ApplyChanges(new ListChangeBatch(p => p == photo.FilePath, null, [], null), rig.Key(5));
         rig.List.Forget(removed);
         rig.Settle();
-        Assert.IsNull(photo.Images.Preview, "not stored into a photo that left the list");
+        Assert.IsNull(photo.Slots.Preview, "not stored into a photo that left the list");
         Assert.IsFalse(rig.LoadedKeys.Contains(key), "nobody is told about it");
         Assert.AreEqual(0, rig.Cache.Counts.NeedsDiskWrite);
-        photo.Images.Retire();
+        photo.Slots.Retire();
     }
 
     [TestMethod]
@@ -220,7 +220,7 @@ public sealed class PrefetchCacheTests
         rig.Remove(4);
         preview.Succeed();
         rig.Settle();
-        Assert.IsNull(photo.Images.Preview);
+        Assert.IsNull(photo.Slots.Preview);
         Assert.IsTrue(rig.Decoder.Created.Single().IsFreed);
     }
 
@@ -245,7 +245,7 @@ public sealed class PrefetchCacheTests
         using var rig = new Rig(script: d => d.Kind is DecodeKind.PreviewLight ? Reply.Throw : Reply.Pending);
         rig.Start(5);
         var photo = rig.At(5);
-        Assert.IsTrue(photo.Images.Preview!.IsErrorOrUndefined());
+        Assert.IsTrue(photo.Slots.Preview!.IsErrorOrUndefined());
         Assert.IsTrue(rig.LoadedKeys.Contains(rig.Key(5)), "the screen is told, so it leaves the placeholder");
         int lightDecodes = rig.Decoder.All.Count(d => d.Kind == DecodeKind.PreviewLight && ReferenceEquals(d.Photo, photo));
         rig.Move(4);
@@ -259,8 +259,8 @@ public sealed class PrefetchCacheTests
     {
         using var rig = new Rig(script: d => d.Kind == DecodeKind.Hq ? Reply.Throw : Reply.Item);
         rig.Start(5);
-        Assert.IsTrue(rig.At(5).Images.Hq!.IsErrorOrUndefined());
-        Assert.IsTrue(rig.At(4).Images.Hq!.IsErrorOrUndefined());
+        Assert.IsTrue(rig.At(5).Slots.Hq!.IsErrorOrUndefined());
+        Assert.IsTrue(rig.At(4).Slots.Hq!.IsErrorOrUndefined());
     }
 
     [TestMethod]
@@ -282,7 +282,7 @@ public sealed class PrefetchCacheTests
     {
         using var rig = new Rig(script: d => d.Kind == DecodeKind.Hq ? Reply.Error : Reply.Item);
         rig.Start(5);
-        Assert.IsTrue(rig.At(5).Images.Hq!.IsErrorOrUndefined());
+        Assert.IsTrue(rig.At(5).Slots.Hq!.IsErrorOrUndefined());
     }
 
     // --- Lanes, parking and retries ---
@@ -311,11 +311,11 @@ public sealed class PrefetchCacheTests
     {
         using var rig = new Rig(script: d => d.Kind == DecodeKind.Hq && !d.AllowLarge ? Reply.Nothing : Reply.Item);
         rig.Start(5);
-        Assert.IsNull(rig.At(6).Images.Hq, "too large for a neighbour");
+        Assert.IsNull(rig.At(6).Slots.Hq, "too large for a neighbour");
         rig.Move(4);
         Assert.AreEqual(1, rig.Decoder.All.Count(d => d.Kind == DecodeKind.Hq && ReferenceEquals(d.Photo, rig.At(6))));
         rig.Move(6);
-        Assert.IsNotNull(rig.At(6).Images.Hq);
+        Assert.IsNotNull(rig.At(6).Slots.Hq);
         Assert.IsTrue(rig.Decoder.All.Any(d => d.Kind == DecodeKind.Hq && d.AllowLarge && ReferenceEquals(d.Photo, rig.At(6))));
     }
 
@@ -325,12 +325,12 @@ public sealed class PrefetchCacheTests
         // Like the real decoder: a neighbour (large not allowed) gets nothing for an oversized image.
         using var rig = new Rig(script: d => d.Kind != DecodeKind.Hq ? Reply.Item : d.AllowLarge ? Reply.Tiled : Reply.Nothing);
         rig.Start(5);
-        Assert.IsInstanceOfType<TiledHqDisplayItem>(rig.At(5).Images.Hq);
-        var tiled = rig.At(5).Images.Hq!;
-        Assert.IsNull(rig.At(4).Images.Hq, "a neighbour's large image is deferred");
+        Assert.IsInstanceOfType<TiledHqDisplayItem>(rig.At(5).Slots.Hq);
+        var tiled = rig.At(5).Slots.Hq!;
+        Assert.IsNull(rig.At(4).Slots.Hq, "a neighbour's large image is deferred");
         rig.Move(6);
         Assert.IsTrue(tiled.IsFreed, "the old centre's tiles go as soon as it is not the centre");
-        Assert.IsInstanceOfType<TiledHqDisplayItem>(rig.At(6).Images.Hq);
+        Assert.IsInstanceOfType<TiledHqDisplayItem>(rig.At(6).Slots.Hq);
     }
 
     // --- Cancelling ---
@@ -346,8 +346,8 @@ public sealed class PrefetchCacheTests
         rig.Settle();
         foreach (int pos in new[] { 3, 4, 5, 6, 7 })
         {
-            Assert.IsNull(rig.At(pos).Images.Preview, $"photo {pos} left the window");
-            Assert.IsNull(rig.At(pos).Images.Hq);
+            Assert.IsNull(rig.At(pos).Slots.Preview, $"photo {pos} left the window");
+            Assert.IsNull(rig.At(pos).Slots.Hq);
         }
     }
 
@@ -359,7 +359,7 @@ public sealed class PrefetchCacheTests
         var large = rig.Only(DecodeKind.Hq, 5);
         rig.Move(30);
         Assert.IsTrue(large.IsDone, "the large decode observes cancellation");
-        Assert.IsNull(rig.At(5).Images.Hq);
+        Assert.IsNull(rig.At(5).Slots.Hq);
         rig.Move(5);
         Assert.AreEqual(2, rig.Decoder.All.Count(d => d.Kind == DecodeKind.Hq && ReferenceEquals(d.Photo, rig.At(5))));
     }
@@ -369,10 +369,10 @@ public sealed class PrefetchCacheTests
     {
         using var rig = new Rig(photos: 40, previewHalf: 2, hqHalf: 1, script: _ => Reply.Item);
         rig.Start(5);
-        var shown = rig.At(5).Images.Hq!;
+        var shown = rig.At(5).Slots.Hq!;
         Assert.IsTrue(shown.TryAcquire()); // the canvas
         rig.Move(30);
-        Assert.IsNull(rig.At(5).Images.Hq);
+        Assert.IsNull(rig.At(5).Slots.Hq);
         Assert.IsFalse(shown.IsFreed);
         shown.Release();
         Assert.IsTrue(shown.IsFreed);
@@ -438,8 +438,8 @@ public sealed class PrefetchCacheTests
         AppConfig.Settings.CacheSizeOneSideHqImages = 0;
         rig.Cache.Replan();
         rig.Settle();
-        Assert.AreEqual(3, rig.List.Keys.Count(k => rig.List.GetPhoto(k)!.Images.Preview != null));
-        Assert.AreEqual(1, rig.List.Keys.Count(k => rig.List.GetPhoto(k)!.Images.Hq != null));
+        Assert.AreEqual(3, rig.List.Keys.Count(k => rig.List.GetPhoto(k)!.Slots.Preview != null));
+        Assert.AreEqual(1, rig.List.Keys.Count(k => rig.List.GetPhoto(k)!.Slots.Hq != null));
     }
 
     [TestMethod]
@@ -449,17 +449,17 @@ public sealed class PrefetchCacheTests
         using var rig = new Rig(extension: ".cr2",
             script: d => d.Kind == DecodeKind.Hq && d.Path.EndsWith("00006.cr2") ? Reply.Pending : Reply.Item);
         rig.Start(5);
-        var oldHq = rig.At(5).Images.Hq!;
+        var oldHq = rig.At(5).Slots.Hq!;
         var inFlight = rig.Only(DecodeKind.Hq, 6);
         rig.Cache.InvalidateHqForRawFiles();
         rig.Settle();
         Assert.IsTrue(oldHq.IsFreed);
-        Assert.IsNotNull(rig.At(5).Images.Hq);
-        Assert.AreNotSame(oldHq, rig.At(5).Images.Hq, "decoded again with the new settings");
+        Assert.IsNotNull(rig.At(5).Slots.Hq);
+        Assert.AreNotSame(oldHq, rig.At(5).Slots.Hq, "decoded again with the new settings");
         inFlight.Succeed();
         rig.Settle();
         Assert.IsTrue(rig.Decoder.Created.Where(i => !i.IsFreed).All(i =>
-            rig.List.Keys.Any(k => ReferenceEquals(rig.List.GetPhoto(k)!.Images.Hq, i) || ReferenceEquals(rig.List.GetPhoto(k)!.Images.Preview, i))));
+            rig.List.Keys.Any(k => ReferenceEquals(rig.List.GetPhoto(k)!.Slots.Hq, i) || ReferenceEquals(rig.List.GetPhoto(k)!.Slots.Preview, i))));
     }
 
     // --- Resilience ---
@@ -472,7 +472,7 @@ public sealed class PrefetchCacheTests
         rig.Cache.Loaded += _ => { if (++calls == 1) throw new InvalidOperationException("listener bug"); };
         rig.Start(5);
         Assert.IsTrue(calls > 5, "later loads still announced");
-        Assert.IsNotNull(rig.At(6).Images.Preview);
+        Assert.IsNotNull(rig.At(6).Slots.Preview);
         Assert.AreEqual(1, rig.Log.Errors.Count(e => e.Exception?.Message == "listener bug"));
     }
 
@@ -482,7 +482,7 @@ public sealed class PrefetchCacheTests
         using var rig = new Rig(photos: 30, previewHalf: 5, hqHalf: 0, limits: new JobLimits(2, 1, 1, 1),
             script: d => d.Kind == DecodeKind.PreviewLight && d.Path.EndsWith("00010.jpg") ? Reply.Hang : Reply.Item);
         rig.Start(10);
-        Assert.AreEqual(10, rig.List.Keys.Count(k => rig.List.GetPhoto(k)!.Images.Preview != null),
+        Assert.AreEqual(10, rig.List.Keys.Count(k => rig.List.GetPhoto(k)!.Slots.Preview != null),
             "the other photos load around the stuck one, through the remaining slot");
     }
 
@@ -555,8 +555,8 @@ public sealed class PrefetchCacheTests
         for (int pos = 0; pos < 300; pos++) rig.Cache.MoveWindow(rig.Nav(pos));
         var centre = rig.At(299);
         var deadline = Environment.TickCount64 + 20_000;
-        while ((centre.Images.Hq == null || rig.Decoder.InFlight > 0) && Environment.TickCount64 < deadline) Thread.Sleep(5);
-        Assert.IsNotNull(centre.Images.Hq, "the photo the viewer stopped on gets its HQ");
+        while ((centre.Slots.Hq == null || rig.Decoder.InFlight > 0) && Environment.TickCount64 < deadline) Thread.Sleep(5);
+        Assert.IsNotNull(centre.Slots.Hq, "the photo the viewer stopped on gets its HQ");
         // HQ: the centre's own may go up to twice the limit.
         Assert.IsTrue(rig.Decoder.MaxPreviews <= 3 && rig.Decoder.MaxHq <= 4 && rig.Decoder.MaxHeavy <= 2);
         Assert.AreEqual(0, rig.Log.Errors.Count, string.Join("\n", rig.Log.Errors.Select(e => e.Exception?.ToString())));
