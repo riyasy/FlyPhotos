@@ -162,4 +162,29 @@ public sealed class DeleteAndRenameTests
         Assert.AreEqual("[2/5] zzz.jpg (2 x 2)", details[^1].DisplayText);
         h.CheckInvariants();
     }
+
+    [TestMethod]
+    public void A_rename_onto_an_existing_file_fails_and_changes_nothing()
+    {
+        using var h = new DisplayHarness(photos: 5, openAt: 1);
+        h.Open();
+        var photo = h.Current;
+        var oldPath = photo.FilePath;
+
+        RenameResult? result = null;
+        h.Run(async () => result = await h.Controller.RenameCurrentPhoto("img_00003.jpg"));
+
+        Assert.IsFalse(result!.Success);
+        Assert.IsFalse(string.IsNullOrEmpty(result.FailMessage), "the user is told why");
+        Assert.AreSame(photo, h.Current);
+        Assert.AreEqual(oldPath, photo.FilePath);
+        Assert.AreEqual(1, h.Nav.Position);
+        Assert.AreEqual(5, h.Nav.Keys.Count);
+        Assert.IsTrue(File.Exists(oldPath) && File.Exists(h.PathOf(3)), "neither file touched");
+        Assert.AreEqual(0, h.Canvas.Renames.Count);
+        // The failure message comes from the app's resources, which the test process may not load; if so it is
+        // logged as an error and reported with the exception's message instead. Either way it is a failed rename.
+        h.Log.Errors.Clear();
+        h.CheckInvariants();
+    }
 }

@@ -143,7 +143,14 @@ internal sealed class FakeDecoder : IPhotoDecoder
 
     public HqDisplayItem HqFailed() => new StaticHqDisplayItem(_errorBitmap, Origin.ErrorScreen);
     public PreviewDisplayItem PreviewFailed() => new(_errorBitmap, Origin.ErrorScreen);
-    public void WarmUp() => Interlocked.Increment(ref WarmUps);
+    /// <summary>Opening the disk cache throws (set before the controller is made: the startup thread calls it).</summary>
+    public bool WarmUpFails;
+
+    public void WarmUp()
+    {
+        Interlocked.Increment(ref WarmUps);
+        if (WarmUpFails) throw new ScriptedFailure();
+    }
 
     public IReadOnlyList<Decode> Pending { get { lock (_lock) return [.. _pending]; } }
     public IReadOnlyList<Decode> PendingOf(DecodeKind kind) => [.. Pending.Where(d => d.Kind == kind)];
@@ -318,8 +325,11 @@ internal sealed class FakeCanvas : ICanvasController
         return Task.CompletedTask;
     }
 
-    public Task WaitForPanZoomAnimationAsync(int timeoutMs) => Task.CompletedTask;
-    public MultiPagePosition? CurrentPage => null;
+    /// <summary>The pan/zoom animation a wait returns for (the open zoom); done at once by default.</summary>
+    public Task Animation { get; set; } = Task.CompletedTask;
+    public Task WaitForPanZoomAnimationAsync(int timeoutMs) => Animation;
+    /// <summary>The page on screen of a multi-page photo; null for any other.</summary>
+    public MultiPagePosition? CurrentPage { get; set; }
     public void OnPhotoRenamed(string oldPath, string newPath) => Renames.Add((oldPath, newPath));
 
     public void Dispose()
@@ -359,6 +369,9 @@ internal sealed class ManualUi : SynchronizationContext, IDisposable
     public override void Post(SendOrPostCallback d, object? state) => _queue.Enqueue((d, state));
     public override void Send(SendOrPostCallback d, object? state) => throw new NotSupportedException();
     public override SynchronizationContext CreateCopy() => this;
+
+    /// <summary>How much posted work waits to run.</summary>
+    public int Queued => _queue.Count;
 
     /// <summary>Runs everything queued, including what that queues. Returns how much ran.</summary>
     public int RunPending()

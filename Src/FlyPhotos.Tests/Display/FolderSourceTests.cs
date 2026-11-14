@@ -2,6 +2,7 @@ using FlyPhotos.Core.Model;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Services;
+using FlyPhotos.Tests.Display.Harness;
 
 namespace FlyPhotos.Tests.Display;
 
@@ -81,5 +82,28 @@ public sealed class FolderSourceTests
         Assert.AreEqual("c", switched?.Name);
         Assert.IsFalse(source.IsCurrent(old), "the controller drops its batches");
         Assert.IsNull(await source.ToBatchAsync(old, Rescan, keepName: null), "a rescan for it yields nothing");
+    }
+
+    [TestMethod]
+    public void Disposing_during_a_folder_switch_leaves_no_watcher_behind()
+    {
+        var before = Folder("b", "b1.jpg");
+        Folder("c", "c1.jpg");
+        var source = new FolderSource();
+        source.ListAndWatch(Path.Combine(before, "b1.jpg"));
+        using var ui = new ManualUi(); // the switch finishes on this "UI thread", after the dispose below
+
+        var switching = source.SwitchToSiblingAsync(NavDirection.Next);
+        source.Dispose();
+        var deadline = Environment.TickCount64 + 5_000;
+        while (!switching.IsCompleted)
+        {
+            ui.RunPending();
+            Assert.IsTrue(Environment.TickCount64 < deadline, "the switch finished");
+            Thread.Sleep(1);
+        }
+
+        Assert.IsNull(switching.Result, "nothing to switch to once disposed");
+        Assert.IsFalse(source.CanSwitch, "the sibling's watcher was stopped, not kept");
     }
 }

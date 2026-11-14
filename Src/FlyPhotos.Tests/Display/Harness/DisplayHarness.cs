@@ -33,8 +33,10 @@ internal sealed class DisplayHarness : IDisposable
     /// <param name="ownThread">Run the prefetch cache on its own thread (stress runs) instead of stepping it.</param>
     public DisplayHarness(int photos = 20, int openAt = 0, int previewHalf = 5, int hqHalf = 2,
         ListSource source = ListSource.Explorer, bool ownThread = false, JobLimits? limits = null,
-        Func<Decode, Reply>? script = null, string extension = ".jpg", Action<string>? beforeStart = null)
+        Func<Decode, Reply>? script = null, string extension = ".jpg", Action<string>? beforeStart = null,
+        bool warmUpFails = false)
     {
+        Decoder.WarmUpFails = warmUpFails;
         Folder = Path.Combine(Path.GetTempPath(), "FlyHarness_" + Guid.NewGuid().ToString("N"));
         var sub = Path.Combine(Folder, "b_photos");
         Directory.CreateDirectory(sub);

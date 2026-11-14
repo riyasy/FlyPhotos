@@ -24,6 +24,7 @@ public sealed class PrefetchCacheTests
         public readonly LogCapture Log = new();
         public readonly JobLimits Limits;
         private int _position = -1;
+        private readonly bool _ownThread;
 
         public Rig(int photos = 11, int previewHalf = 5, int hqHalf = 2, JobLimits? limits = null,
             Func<Decode, Reply>? script = null, string extension = ".jpg", bool ownThread = false)
@@ -32,6 +33,7 @@ public sealed class PrefetchCacheTests
             List.Initialize([.. Enumerable.Range(0, photos).Select(i => $@"c:\nowhere\p{i:D5}{extension}")]);
             Decoder.Script = script ?? (_ => Reply.Pending);
             Limits = limits ?? new JobLimits(Previews: 3, Heavy: 2, Hq: 2, DiskWrites: 2);
+            _ownThread = ownThread;
             Cache = new PrefetchCache(List.GetPhoto, Decoder, new PrefetchOptions(Clock, Limits, ownThread));
             Cache.Loaded += k => { lock (LoadedKeys) LoadedKeys.Add(k); };
             Cache.CacheStatusChanged += s => Statuses.Add(s);
@@ -86,6 +88,10 @@ public sealed class PrefetchCacheTests
             Cache.Dispose();
             Decoder.CompleteAll();
             foreach (int key in List.Keys) List.GetPhoto(key)!.Images.Retire();
+            // A decode on the thread pool counts as finished just before it makes its image and hands it back; the
+            // cache releases that late result a moment later (as in DisplayHarness.Dispose).
+            var settleBy = Environment.TickCount64 + (_ownThread ? 5_000 : 0);
+            while (Decoder.Created.Any(i => !i.IsFreed) && Environment.TickCount64 < settleBy) Thread.Sleep(5);
             var alive = Decoder.Created.Where(i => !i.IsFreed).ToList();
             Log.Dispose();
             Assert.AreEqual(0, alive.Count, $"{alive.Count} images leaked");

@@ -1,5 +1,6 @@
 using FlyPhotos.Core.Model;
 using FlyPhotos.Display.Controllers;
+using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Tests.Display.Harness;
 
@@ -50,6 +51,55 @@ public sealed class PhotoDisplayControllerTests
     }
 
     [TestMethod]
+    public void The_filename_bar_shows_no_size_when_the_setting_is_off()
+    {
+        using var h = new DisplayHarness(photos: 20, openAt: 3);
+        AppConfig.Settings.ShowImageDimensions = false;
+        var details = new List<FileDisplayDetails>();
+        h.Controller.FileNameOrDetailsChanged += details.Add;
+        h.Open();
+        h.Next();
+        Assert.AreEqual("[5/20] img_00004.jpg", details[^1].DisplayText);
+    }
+
+    [TestMethod]
+    public void The_filename_bar_shows_no_size_for_an_svg_or_an_error_screen()
+    {
+        using (var svg = new DisplayHarness(photos: 5, openAt: 1, extension: ".svg"))
+        {
+            var details = new List<FileDisplayDetails>();
+            svg.Controller.FileNameOrDetailsChanged += details.Add;
+            svg.Open();
+            Assert.AreEqual("[2/5] img_00001.svg", details[^1].DisplayText, "a vector has no pixel size");
+        }
+
+        using var h = new DisplayHarness(photos: 5, openAt: 1,
+            script: d => d.Kind == DecodeKind.Hq && d.Path.EndsWith("img_00002.jpg") ? Reply.Error : Reply.Item);
+        var bar = new List<FileDisplayDetails>();
+        h.Controller.FileNameOrDetailsChanged += bar.Add;
+        h.Open();
+        h.Next();
+        h.Settle();
+        Assert.IsTrue(h.Canvas.Held!.IsErrorOrUndefined());
+        Assert.AreEqual("[3/5] img_00002.jpg", bar[^1].DisplayText, "the error screen's size is not the photo's");
+    }
+
+    [TestMethod]
+    public void The_filename_bar_shows_the_page_on_screen_of_a_multi_page_photo()
+    {
+        using var h = new DisplayHarness(photos: 5, openAt: 1);
+        var details = new List<FileDisplayDetails>();
+        h.Controller.FileNameOrDetailsChanged += details.Add;
+        h.Open();
+        h.Canvas.CurrentPage = new MultiPagePosition(h.Current.FilePath, Index: 2, Count: 4, Width: 64, Height: 48);
+        h.Controller.UpdateFileNameAndDetails();
+        Assert.AreEqual("[2/5] img_00001.jpg (64 x 48 - 3/4)", details[^1].DisplayText);
+
+        h.Next(); // the canvas still reports the old photo's page: ignored
+        Assert.AreEqual("[3/5] img_00002.jpg (2 x 2)", details[^1].DisplayText);
+    }
+
+    [TestMethod]
     public void A_first_photo_that_throws_shows_the_error_screen_and_the_viewer_still_works()
     {
         using var h = new DisplayHarness(photos: 10, openAt: 4,
@@ -75,6 +125,72 @@ public sealed class PhotoDisplayControllerTests
         h.Settle();
         Assert.AreEqual(DisplayLevel.Preview, h.ShownLevel, "the cache's preview replaced the placeholder");
         h.Decoder.CompleteAll();
+        h.Settle();
+        Assert.AreEqual(DisplayLevel.Hq, h.ShownLevel);
+        h.CheckInvariants();
+    }
+
+    [TestMethod]
+    public void A_first_photo_whose_hq_throws_after_its_preview_shows_the_error_screen_once()
+    {
+        using var h = new DisplayHarness(photos: 10, openAt: 4,
+            script: d => d.Kind == DecodeKind.Hq && d.Path.EndsWith("img_00004.jpg") ? Reply.Throw : Reply.Item);
+        h.Open();
+        Assert.AreEqual(DisplayLevel.Preview, h.Canvas.History[0].Level, "the preview came first");
+        Assert.AreEqual(DisplayLevel.Hq, h.ShownLevel);
+        Assert.IsTrue(h.Canvas.Held!.IsErrorOrUndefined(), "the error HQ replaced the preview");
+        Assert.AreEqual(1, h.Decoder.All.Count(d => d.Kind == DecodeKind.Hq && d.Path.EndsWith("img_00004.jpg")),
+            "the cache does not decode it again");
+        h.CheckInvariants();
+    }
+
+    [TestMethod]
+    public void A_first_photo_whose_hq_finds_nothing_stays_on_its_preview_until_the_cache_loads_it()
+    {
+        int firstHqs = 0;
+        using var h = new DisplayHarness(photos: 10, openAt: 4,
+            script: d => d.Kind == DecodeKind.Hq && d.Path.EndsWith("img_00004.jpg") && firstHqs++ == 0
+                ? Reply.Nothing : Reply.Item);
+        var first = h.Controller.LoadFirstPhoto();
+        h.RunUntil(() => first.IsCompleted && h.Controller.ListingPublished, "the listing", stepCache: false);
+        Assert.AreEqual(DisplayLevel.Preview, h.ShownLevel, "nothing better yet; startup is not held");
+
+        h.Settle();
+        Assert.AreEqual(DisplayLevel.Hq, h.ShownLevel, "the cache loaded the HQ");
+        Assert.AreEqual(2, firstHqs);
+        h.CheckInvariants();
+    }
+
+    [TestMethod]
+    public void With_the_open_zoom_on_the_listing_waits_for_the_animation()
+    {
+        using var h = new DisplayHarness(photos: 10, openAt: 2);
+        AppConfig.Settings.OpenExitZoom = true;
+        var zoom = new TaskCompletionSource();
+        h.Canvas.Animation = zoom.Task;
+
+        var first = h.Controller.LoadFirstPhoto();
+        h.RunUntil(() => h.ShownLevel == DisplayLevel.Hq, "the HQ on screen", stepCache: false);
+        Thread.Sleep(100); // time for the startup thread, were it not waiting
+        h.Ui.RunPending();
+        Assert.IsFalse(first.IsCompleted, "the first photo waits for the open zoom");
+        Assert.IsFalse(h.Controller.ListingPublished, "so does the listing");
+
+        zoom.SetResult();
+        h.RunUntil(() => first.IsCompleted && h.Controller.ListingPublished, "the listing");
+        h.Settle();
+        Assert.AreEqual(10, h.Nav.Keys.Count);
+        h.CheckInvariants();
+    }
+
+    [TestMethod]
+    public void A_disk_cache_that_fails_to_open_does_not_stop_the_listing()
+    {
+        using var h = new DisplayHarness(photos: 10, openAt: 3, warmUpFails: true);
+        h.Open();
+        Assert.AreEqual(1, h.Decoder.WarmUps);
+        Assert.AreEqual(10, h.Nav.Keys.Count);
+        h.Next();
         h.Settle();
         Assert.AreEqual(DisplayLevel.Hq, h.ShownLevel);
         h.CheckInvariants();
@@ -351,6 +467,31 @@ public sealed class PhotoDisplayControllerTests
         Assert.AreEqual(installs, h.Canvas.History.Count);
         Assert.IsTrue(h.Strip.RedrawRequests > redraws);
         h.Settle();
+        h.CheckInvariants();
+    }
+
+    [TestMethod]
+    public void A_file_replaced_in_place_keeps_the_viewer_on_it_and_reloads_it()
+    {
+        using var h = new DisplayHarness(photos: 10, openAt: 4);
+        h.Open();
+        var old = h.Current;
+        var oldHq = old.Images.Hq!;
+        var path = old.FilePath;
+
+        // An editor saved over the file: the watcher reports it gone and added again in one batch.
+        h.ChangeList(new ListChangeBatch(p => p.Equals(path, StringComparison.OrdinalIgnoreCase), null, [path],
+            StringComparer.OrdinalIgnoreCase));
+
+        Assert.AreNotSame(old, h.Current, "a new photo (new key) for the new file");
+        Assert.AreEqual(path, h.Current.FilePath, "the viewer stays on the file");
+        Assert.AreEqual(4, h.Nav.Position);
+        Assert.AreEqual(10, h.Nav.Keys.Count);
+        Assert.IsNull(old.Images.Hq, "the old photo is retired");
+        h.Settle();
+        Assert.AreEqual(DisplayLevel.Hq, h.ShownLevel, "the new file is loaded");
+        Assert.AreNotSame(oldHq, h.Canvas.Held);
+        Assert.IsTrue(oldHq.IsFreed, "the old file's HQ is freed once the canvas let go");
         h.CheckInvariants();
     }
 

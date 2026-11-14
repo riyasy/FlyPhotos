@@ -41,6 +41,8 @@ internal sealed class FolderSource : IDisposable
     private FolderSortComparer _order = new(AppConfig.Settings.FolderSortBy, AppConfig.Settings.FolderSortDescending);
     // The current folder's watcher; null when the folder can't be watched (the list then stays as listed).
     private FolderWatcher? _watcher;
+    // Set by Dispose (UI thread); a folder switch still running then installs nothing.
+    private bool _disposed;
 
     /// <summary>Fired on a thread-pool thread with a batch from the watcher of <paramref name="watcher"/>'s folder.</summary>
     public event Action<FolderWatcher, FolderChanges>? Changed;
@@ -138,6 +140,12 @@ internal sealed class FolderSource : IDisposable
             }
         });
         if (next.Folder == null) return null;
+        if (_disposed)
+        {
+            // Closed while the sibling was found: nobody would stop its watcher.
+            next.Watcher?.Dispose();
+            return null;
+        }
 
         _watcher?.Dispose();
         _watcher = next.Watcher;
@@ -168,6 +176,7 @@ internal sealed class FolderSource : IDisposable
     /// <summary>Stops watching. No <see cref="Changed"/> follows.</summary>
     public void Dispose()
     {
+        _disposed = true;
         _watcher?.Dispose();
         _watcher = null;
     }

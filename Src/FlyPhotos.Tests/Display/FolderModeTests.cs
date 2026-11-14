@@ -133,6 +133,65 @@ public sealed class FolderModeTests
     }
 
     [TestMethod]
+    public void Deleting_in_fly_then_the_watchers_report_of_it_removes_the_photo_once()
+    {
+        using var h = new DisplayHarness(photos: 5, openAt: 2, source: ListSource.Folder);
+        h.Controller.DeleteFile = path =>
+        {
+            File.Delete(path); // a real delete, so the watcher reports it; not to the Recycle Bin
+            return Task.FromResult(new DeleteResult(true, false));
+        };
+        h.Open();
+        DeleteResult? result = null;
+        h.Run(async () => result = await h.Controller.DeleteCurrentPhoto());
+        Assert.IsTrue(result!.DeleteSuccess);
+        Assert.AreEqual("img_00003.jpg", h.CurrentName);
+        var shown = h.Current;
+
+        Thread.Sleep(300); // the watcher's report of the delete: nothing left to do
+        h.Settle();
+        Assert.AreEqual(4, h.Nav.Keys.Count);
+        Assert.AreSame(shown, h.Current, "the viewer does not move again");
+        Assert.AreEqual(2, h.Nav.Position);
+        h.CheckInvariants();
+    }
+
+    [TestMethod]
+    public void Closing_during_a_folder_switch_switches_nothing()
+    {
+        using var h = new DisplayHarness(photos: 3, source: ListSource.Folder);
+        File.WriteAllBytes(Path.Combine(Directory.CreateDirectory(Path.Combine(h.Folder, "c_photos")).FullName, "c1.jpg"), []);
+        h.Open();
+        var keys = h.Nav.Keys;
+
+        var switching = h.Controller.TryOpenSiblingFolderAsync(NavDirection.Next); // finds the sibling off the UI thread
+        h.Controller.Dispose(); // the window closes meanwhile
+        h.RunUntil(() => switching.IsCompleted, "the switch", stepCache: false);
+
+        Assert.IsNull(switching.Result);
+        Assert.AreSame(keys, h.Nav.Keys, "the list is untouched after close");
+        Assert.AreEqual(0, h.Strip.Bounces.Count);
+    }
+
+    [TestMethod]
+    public void A_watcher_batch_queued_at_close_is_dropped()
+    {
+        using var h = new DisplayHarness(photos: 3, source: ListSource.Folder);
+        h.Open();
+        File.WriteAllBytes(Path.Combine(h.PhotoFolder, "img_00001b.jpg"), []);
+        var deadline = Environment.TickCount64 + 5_000;
+        while (h.Ui.Queued == 0) // the watcher's batch, waiting for the UI thread
+        {
+            Assert.IsTrue(Environment.TickCount64 < deadline, "the watcher reported the new file");
+            Thread.Sleep(5);
+        }
+
+        h.Controller.Dispose();
+        h.Ui.RunPending();
+        Assert.AreEqual(3, h.Nav.Keys.Count, "not applied after close");
+    }
+
+    [TestMethod]
     public void A_folder_that_cannot_be_watched_opens_alone_and_cannot_switch_folders()
     {
         using var h = new DisplayHarness(photos: 3, source: ListSource.Folder,
