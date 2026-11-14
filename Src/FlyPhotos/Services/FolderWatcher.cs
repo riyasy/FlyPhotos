@@ -163,10 +163,13 @@ internal sealed class FolderWatcher : IDisposable
         bool rescan;
         lock (_lock)
         {
-            _timerArmed = false;
             if (_disposed) return;
             rescan = _rescan;
             _rescan = false;
+            // A probing flush stays armed until it ends, so events meanwhile can't start a second, overlapping
+            // one: it would probe the same files again (piling up pool threads on a hung network share) and race
+            // this one's batch to the consumer.
+            if (rescan) _timerArmed = false;
             long now = Environment.TickCount64;
             if (!rescan)
                 foreach (var (path, tick) in _pendingAdds)
@@ -196,6 +199,7 @@ internal sealed class FolderWatcher : IDisposable
         lock (_lock)
         {
             if (_disposed) return;
+            _timerArmed = false;
             if (settled != null)
                 foreach (var p in settled) _pendingAdds.Remove(p);
 

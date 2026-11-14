@@ -215,7 +215,9 @@ internal partial class CanvasController : ICanvasController
             throw;
         }
 
-        if (displayLevel > DisplayLevel.PlaceHolder)
+        // Only if still the latest: a superseded animated load returns here after the next photo's install,
+        // and must not mark that photo as having shown its real image.
+        if (displayLevel > DisplayLevel.PlaceHolder && currentOperationId == _latestSetSourceOperationId)
             _realImageDisplayedForCurrentPhoto = true;
     }
 

@@ -22,6 +22,7 @@ namespace FlyPhotos;
 /// </summary>
 public partial class App
 {
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private string _selectedFilePath;
     private static Mutex _mutex;
     private PhotoDisplayWindow _photoDisplayWindow;
@@ -42,6 +43,10 @@ public partial class App
     public App()
     {
         GlobalDiagnosticsContext.Set("LogPath", PathResolver.GetLogFolderPath());
+
+        // A fire-and-forget task (`_ = SomeAsync()`) that faults is otherwise dropped without a trace. Fires when
+        // the GC finalizes the task, so the entry may come a while after the failure.
+        TaskScheduler.UnobservedTaskException += (_, e) => Logger.Error(e.Exception, "Unobserved task exception");
 
         // Must call Initialize before reading AllowMultiInstance setting.
         AppConfig.Initialize();
