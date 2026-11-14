@@ -33,20 +33,31 @@ namespace FlyPhotos.Display.Controllers;
 /// or inside Update/Draw itself. The UI thread never touches them directly — it posts work via
 /// <see cref="_pump"/>. There is therefore no lock on the render hot path.
 ///
-/// All public methods must be called on the UI (DispatcherQueue) thread. The canvas holds a lease on the item it
-/// draws (see <see cref="DisplayItem"/>), so a photo's bitmap is never freed while on screen.
+/// All public methods must be called on the UI (DispatcherQueue) thread.
+///
+/// Leases — the canvas holds a lease on the item it draws (see <see cref="DisplayItem"/>), so a photo's bitmap is
+/// never freed while on screen, whatever the prefetch cache unloads meanwhile. The caller of <see cref="SetSource"/>
+/// takes the lease; it travels with the install to the W2D thread and is ended there when the next install replaces
+/// the renderer (<see cref="_currentItem"/>). The canvas is also where every item's bitmap is finally freed: it sets
+/// <see cref="DisplayItem.FreeSink"/>, so the last release on any thread queues the free onto the W2D thread.
 /// </summary>
 internal partial class CanvasController : ICanvasController
 {
+    /// <summary>The zoom percentage changed (coalesced; the latest value wins). UI thread.</summary>
     public event Action<int> OnZoomChanged;
+    /// <summary>The image became, or stopped being, fitted to the window. UI thread.</summary>
     public event Action<bool> OnFitToScreenStateChanged;
+    /// <summary>The image became, or stopped being, shown at 100%. UI thread.</summary>
     public event Action<bool> OnOneToOneStateChanged;
+    /// <summary>The photo on screen became, or stopped being, a multi-page one (shows the page buttons). UI thread.</summary>
     public event Action<bool> OnMutliPagePhotoLoaded;
 
     /// <summary>Raised on the UI thread after a multi-page navigation settled on a new page.</summary>
     public event Action OnPageChanged;
 
+    // The thumbnail strip: told to redraw when a new photo is installed.
     private readonly IThumbnailController _thumbNailController;
+    // The XAML control whose W2D thread runs Update/Draw.
     private readonly CanvasAnimatedControl _d2dCanvas;
 
     // The single UI -> W2D handoff. Drained at the top of every Update on the W2D thread.
@@ -59,32 +70,36 @@ internal partial class CanvasController : ICanvasController
     // animator). Released after that renderer is disposed, so a photo's bitmap is never freed while on screen.
     private DisplayItem _currentItem;
 
-    // Items whose last lease ended, freed together on the W2D thread (see DisplayItem.FreeSink).
+    // Items whose last lease ended, waiting to be freed together on the W2D thread (see DisplayItem.FreeSink).
+    // Filled on any thread, emptied on the W2D thread.
     private readonly ConcurrentQueue<DisplayItem> _toFree = new();
+    // 1 while a FreeQueued job is queued on the pump, so a burst of releases queues one job, not one per item.
     private int _freeQueued;
 
     // W2D-owned: created lazily in the install action, disposed on device loss in CreateResources.
     private CanvasImageBrush _checkeredBrush;
 
-    // W2D-owned view state and view logic.
+    // W2D-owned view state (zoom, pan, rotation, the transform) and the logic that changes it, including the
+    // per-photo views remembered by path.
     private readonly CanvasViewState _canvasViewState;
     private readonly CanvasViewManager _canvasViewManager;
-
-    // W2D-owned: set inside the ZoomOutOnExit action, read in WaitForPanZoomAnimationAsync.
 
     // W2D-owned: true while ZoomAtPointByFactor ticks are arriving (touchpad/right-click/pinch continuous zoom).
     // Treated as animating so Draw uses mip-based quality. Cleared 700 ms after the last tick.
     private bool _continuousZoomActive;
+    // W2D-owned: cancels the pending 700 ms "zoom ended" timer when another tick arrives.
     private CancellationTokenSource _continuousZoomCts;
 
+    // Incremented by every SetSource (UI thread). An animated load that finishes after a newer SetSource sees a
+    // different number and drops its animator instead of installing it over the newer photo.
     private int _latestSetSourceOperationId;
 
     // UI-owned orchestration fields — touched inside SetSource / InstallRenderer, and _imageSize also in
     // the closing UI hop of LoadAndFitPageAsync (a page can resize the image). All on the UI thread.
-    private Size _imageSize;
-    private string _currentPhotoPath = string.Empty;
-    private bool _realImageDisplayedForCurrentPhoto;
-    private bool _isMultiPageActive;
+    private Size _imageSize;                          // the photo's full size (or the page's), for fitting
+    private string _currentPhotoPath = string.Empty;  // the photo on screen; empty before the first one
+    private bool _realImageDisplayedForCurrentPhoto;  // a preview or HQ has been shown for it (not just the placeholder)
+    private bool _isMultiPageActive;                  // last value raised through OnMutliPagePhotoLoaded
 
     // Published W2D -> UI for synchronous pointer hit-testing (IsPressedOnImage).
     // Written every Update on the W2D thread; read on the UI thread during pointer events.
@@ -97,10 +112,14 @@ internal partial class CanvasController : ICanvasController
     /// <summary>The pending image-sized window resize: canvas origin shift and the canvas size it expects.</summary>
     private (Point Shift, Size CanvasSize)? _pendingImageSizedResize;
 
+    // Zoom percentage hand-off, W2D -> UI (RequestZoomUpdate): 1 while an OnZoomChanged is queued on the UI thread;
+    // the value it will raise (written on W2D, read on UI); and the last value queued (W2D only), so an unchanged
+    // percentage queues nothing.
     private int _zoomPercentUiUpdatePending;
     private int _pendingZoomPercent;
     private int _lastDispatchedZoomPercent = -1;
 
+    // Backing field of CurrentPage.
     private volatile MultiPagePosition _currentPage;
 
     /// <summary>
@@ -111,6 +130,10 @@ internal partial class CanvasController : ICanvasController
 
     // --- Initialization ---
 
+    /// <summary>
+    /// UI thread. Hooks the control's render loop and makes the canvas the place every display item is freed
+    /// (<see cref="DisplayItem.FreeSink"/>).
+    /// </summary>
     public CanvasController(CanvasAnimatedControl d2dCanvas, IThumbnailController thumbNailController)
     {
         _d2dCanvas = d2dCanvas;
@@ -221,6 +244,8 @@ internal partial class CanvasController : ICanvasController
             _realImageDisplayedForCurrentPhoto = true;
     }
 
+    // UI thread. Two installs: the first frame at once (it takes the item's lease), then the animator once it is
+    // built, as a follow-up that ends the first frame's lease (the animator decodes its own frames from the bytes).
     private async Task HandleHqAnimatedDisplayItemAsync(int currentOperationId, Photo photo,
         AnimatedHqDisplayItem animDispItem, PhotoInstallContext ctx)
     {
@@ -277,6 +302,7 @@ internal partial class CanvasController : ICanvasController
         }
     }
 
+    // UI thread. A single-frame HQ; the renderer builds a mip chain from it for smooth zoomed-out drawing.
     private void HandleHqStaticDisplayItem(Photo photo, HqDisplayItem hqDispItem, PhotoInstallContext ctx)
     {
         InstallRenderer(
@@ -285,6 +311,7 @@ internal partial class CanvasController : ICanvasController
             _imageSize, hqDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
+    // UI thread. A multi-page TIFF or ICO; the renderer decodes the pages from the file bytes, starting at page 0.
     private void HandleHqMultiPageDisplayItem(Photo photo, MultiPageHqDisplayItem multiDispItem, PhotoInstallContext ctx)
     {
         InstallRenderer(
@@ -293,6 +320,7 @@ internal partial class CanvasController : ICanvasController
             _imageSize, multiDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
+    // UI thread. An image larger than the GPU allows; the renderer draws its CPU tiles.
     private void HandleHqTiledDisplayItem(Photo photo, TiledHqDisplayItem tiledDispItem, PhotoInstallContext ctx)
     {
         InstallRenderer(
@@ -309,6 +337,8 @@ internal partial class CanvasController : ICanvasController
             _imageSize, svgDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
+    // UI thread. A preview, laid out at the photo's full size so the HQ later replaces it in place. No mip chain:
+    // a preview is small and on screen only briefly.
     private void HandlePreviewDisplayItem(Photo photo, PreviewDisplayItem previewDispItem, PhotoInstallContext ctx)
     {
         // Previews can sometimes have a slightly different aspect ratio than the HQ image.
@@ -327,6 +357,13 @@ internal partial class CanvasController : ICanvasController
     /// Immutable parameters describing a photo-install request, captured on the UI thread and
     /// applied on the W2D thread inside <see cref="InstallRenderer"/>.
     /// </summary>
+    /// <param name="PhotoPath">The photo being installed.</param>
+    /// <param name="PreviousPhotoPath">The photo it replaces, whose view is remembered before the swap.</param>
+    /// <param name="CanvasSize">The canvas size, read on the UI thread.</param>
+    /// <param name="IsFirstPhotoEver">The very first install: the open-zoom animation plays, if it is turned on.</param>
+    /// <param name="IsNewPhoto">Another photo than the one on screen (not an upgrade of the same one).</param>
+    /// <param name="IsUpgradeFromPlaceholder">The first real image for this photo, after the placeholder.</param>
+    /// <param name="Item">The leased item the renderer draws; the canvas ends the lease when it is replaced.</param>
     private readonly record struct PhotoInstallContext(
         string PhotoPath, string PreviousPhotoPath, Size CanvasSize,
         bool IsFirstPhotoEver, bool IsNewPhoto, bool IsUpgradeFromPlaceholder, DisplayItem Item)
@@ -350,6 +387,8 @@ internal partial class CanvasController : ICanvasController
         if (Interlocked.Exchange(ref _freeQueued, 1) == 0) _pump.Enqueue(FreeQueued);
     }
 
+    // W2D thread (a pump job). Frees everything queued so far. The flag is cleared first, so an item queued while this
+    // runs either is freed by this loop or queues a fresh job — never left behind.
     private void FreeQueued()
     {
         Volatile.Write(ref _freeQueued, 0);
@@ -427,7 +466,9 @@ internal partial class CanvasController : ICanvasController
     }
 
     // --- Zoom & pan ---
+    // Every method here runs on the UI thread and only queues the change for the W2D thread.
 
+    /// <summary>One mouse-wheel step in or out, keeping <paramref name="zoomAnchor"/> (canvas pixels) still.</summary>
     public void ZoomAtPoint(ZoomDirection zoomDirection, Point zoomAnchor) =>
         SafeEnqueue(v => v.ZoomAtPoint(zoomDirection, zoomAnchor));
 
@@ -449,6 +490,10 @@ internal partial class CanvasController : ICanvasController
         ZoomAtPointByFactor((float)Math.Pow(1 + AppConfig.Settings.FineZoomStepPercent / 100.0, delta / 120.0),
             zoomAnchor, stopAtOneToOne: true);
 
+    /// <summary>
+    /// Scales by <paramref name="scaleFactor"/> around <paramref name="zoomAnchor"/>, without animation (continuous
+    /// zoom: touchpad, pinch, right-drag). <paramref name="stopAtOneToOne"/> stops at 100% on the way past it.
+    /// </summary>
     public void ZoomAtPointByFactor(float scaleFactor, Point zoomAnchor, bool stopAtOneToOne = false)
     {
         // A no-op factor must not re-arm the continuous-zoom debounce below.
@@ -475,6 +520,7 @@ internal partial class CanvasController : ICanvasController
         });
     }
 
+    /// <summary>A keyboard zoom step, at <paramref name="zoomAnchor"/> if given (the cursor while dragging), else the centre.</summary>
     public void ZoomByKeyboard(ZoomDirection zoomDirection, Point? zoomAnchor = null)
     {
         var canvasSize = _d2dCanvas.GetSize();
@@ -489,30 +535,35 @@ internal partial class CanvasController : ICanvasController
         });
     }
 
+    /// <summary>Animated zoom to the next step (screen fit, 100%, 400%) in <paramref name="zoomDirection"/>.</summary>
     public void StepZoom(ZoomDirection zoomDirection, Point? zoomAnchor = null)
     {
         var canvasSize = _d2dCanvas.GetSize();
         SafeEnqueue(v => v.StepZoom(zoomDirection, canvasSize, zoomAnchor));
     }
 
+    /// <summary>Zooms to 100% around the canvas centre.</summary>
     public void ZoomToHundred()
     {
         var canvasSize = _d2dCanvas.GetSize();
         SafeEnqueue(v => v.ZoomToHundred(canvasSize));
     }
 
+    /// <summary>Zooms to 100% keeping <paramref name="anchor"/> still.</summary>
     public void ZoomToHundred(Point anchor)
     {
         var canvasSize = _d2dCanvas.GetSize();
         SafeEnqueue(v => v.ZoomToHundred(canvasSize, anchor));
     }
 
+    /// <summary>The closing animation: shrinks the image away over <paramref name="exitAnimationDuration"/>.</summary>
     public void ZoomOutOnExit(double exitAnimationDuration)
     {
         var canvasSize = _d2dCanvas.GetSize();
         SafeEnqueue(v => v.ZoomOutOnExit(exitAnimationDuration, canvasSize));
     }
 
+    /// <summary>Fits the image to the window, animated or at once.</summary>
     public void FitToScreen(bool animateChange)
     {
         var canvasSize = _d2dCanvas.GetSize();
@@ -520,12 +571,16 @@ internal partial class CanvasController : ICanvasController
         SafeEnqueue(v => v.ZoomPanToFit(animateChange, imageSize, canvasSize));
     }
 
+    /// <summary>Moves the image by (<paramref name="dx"/>, <paramref name="dy"/>) canvas pixels.</summary>
     public void Pan(double dx, double dy) => SafeEnqueue(v => v.Pan(dx, dy));
 
+    /// <summary>Rotates the view of the photo on screen by 90° (the file is not changed).</summary>
     public void RotateCurrentPhotoBy90(bool clockWise) => SafeEnqueue(v => v.RotateBy(clockWise ? 90 : -90));
 
+    /// <summary>A small shake of the photo: an action was refused (e.g. delete before the HQ is on screen).</summary>
     public void Shrug() => SafeEnqueue(v => v.Shrug());
 
+    /// <summary>Shows the next/previous page of a multi-page photo (no wraparound).</summary>
     public void ChangePage(NavDirection navDirection)
     {
         // Canvas size and photo path must be read on the calling (UI) thread; the load runs off the pump.
@@ -637,6 +692,8 @@ internal partial class CanvasController : ICanvasController
         renderer.Draw(args.DrawingSession, _canvasViewState, drawingQuality, isAnimating);
     }
 
+    // UI thread. The canvas was resized: re-fit or re-centre the image (on the W2D thread). A resize the window made
+    // to fit the image (PrepareForImageSizedWindow) instead keeps the image where it is on screen.
     private void D2dCanvas_SizeChanged(object sender, SizeChangedEventArgs args)
     {
         var newSize = args.NewSize.AdjustForDpi(_d2dCanvas);
@@ -685,6 +742,10 @@ internal partial class CanvasController : ICanvasController
 
     // --- Hit-testing ---
 
+    /// <summary>
+    /// UI thread. Whether <paramref name="position"/> (canvas pixels) is on the image, using the transform the W2D
+    /// thread published at its last Update.
+    /// </summary>
     public bool IsPressedOnImage(Point position)
     {
         Matrix3x2 matInv;
@@ -751,8 +812,10 @@ internal partial class CanvasController : ICanvasController
 
     // --- Settings ---
 
+    /// <summary>The checkered-background setting changed: redraw.</summary>
     public void HandleCheckeredBackgroundChange() => _pump.Wake(); // wake the canvas; Draw() reads the setting live
 
+    /// <summary>The scaling-quality setting changed: the renderer rebuilds its mip chain with the new quality.</summary>
     public void HandleImageScalingQualityChange() => _pump.Enqueue(() => _currentRenderer?.HandleScalingMethodChange());
 
     // --- Threading helpers ---
@@ -780,6 +843,8 @@ internal partial class CanvasController : ICanvasController
 
     // --- Zoom UI publishing ---
 
+    // W2D thread (CanvasViewManager.ZoomChanged). Hands the new zoom percentage to the UI thread, at most one queued
+    // hand-off at a time.
     private void RequestZoomUpdate()
     {
         // Capture the zoom percentage here (W2D thread) so the dispatched lambda does not read
@@ -800,6 +865,11 @@ internal partial class CanvasController : ICanvasController
 
     // --- Cleanup ---
 
+    /// <summary>
+    /// UI thread, when the window closes. Stops the render loop, then frees the renderer, ends the lease on the item
+    /// on screen and frees every item still queued. From then on items are freed on the thread that ends their
+    /// last lease.
+    /// </summary>
     public void Dispose()
     {
         try

@@ -30,6 +30,11 @@ internal enum Purpose
 /// <c>BitmapDecoder</c> or the user's <see cref="RawDecoder"/> setting). <see cref="ImageReader"/> maps each
 /// to the reader method it names.
 /// </summary>
+/// <remarks>
+/// Names read as reader + what it produces: <c>Embedded</c> a preview stored in the file, <c>Resized</c> a reduced
+/// decode, <c>Hq</c> the full image, <c>Raw</c> the camera-RAW variant, <c>Large</c> the tiled decode of an image
+/// over the GPU's maximum bitmap size. Steps named after a format (Gif, Png, …) are that format's own HQ reader.
+/// </remarks>
 internal enum DecodeStep
 {
     HeifEmbeddedOnly, HeifResized, HeifHq, AvifHq,

@@ -18,16 +18,37 @@ namespace FlyPhotos.Display.ImageRendering;
 
 // TODO -
 // 1. Now antialiasing is disabled when drawing checkerboard. Find another way
+
+/// <summary>
+/// Draws one bitmap: a preview, a static HQ, or an animation's first frame. For an HQ it also builds a <b>mip
+/// chain</b> (halved copies) on a background task, so a zoomed-out or animating view draws from a smaller copy
+/// instead of resampling the full image every frame.
+/// <para>
+/// Threads: created on the UI thread; <see cref="Draw"/>, <see cref="HandleScalingMethodChange"/> and
+/// <see cref="Dispose"/> run on the canvas's W2D thread; the mip chain is built on the thread pool.
+/// </para>
+/// <para>
+/// Lifetime of the bitmap: the renderer does not own <see cref="_sourceBitmap"/>. The canvas holds a lease on the
+/// item it belongs to for as long as this renderer is installed, and the mip task takes its own lease on that item
+/// (<see cref="_mipChainOwner"/>), since it may still be reading the bitmap after the renderer is replaced.
+/// </para>
+/// </summary>
 internal partial class StaticImageRenderer : IRenderer
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    // The bitmap drawn: the display item's, not this renderer's to dispose.
     private readonly CanvasBitmap _sourceBitmap;
+    // Wakes the canvas's render loop (any thread): used when the mip chain is ready.
     private readonly Action _invalidateCanvas;
 
+    // The checkered background for transparent images; set by the canvas on the W2D thread, owned by the canvas.
     private CanvasImageBrush _checkeredBrush;
+    /// <summary>The checkered background brush, owned by the canvas.</summary>
     public CanvasImageBrush CheckeredBrush { set => _checkeredBrush = value; }
+    // The format can carry alpha: draw the checkered background behind it (if that setting is on).
     private readonly bool _supportsTransparency;
+    // The canvas, for its device when making mips.
     private readonly CanvasAnimatedControl _canvas;
 
     // Mipmap pyramid for smooth animation. Index 0 = 0.5× source, 1 = 0.25×, 2 = 0.125×, …
@@ -37,10 +58,19 @@ internal partial class StaticImageRenderer : IRenderer
     // The item that owns _sourceBitmap; null = no mip chain. The mip task leases it, since the canvas may
     // release the item (freeing the bitmap) when this renderer is replaced, before the task ends.
     private readonly DisplayItem _mipChainOwner;
+    // Guards _mipChain, _mipChainReady and _mipGenCts between the mip task and the W2D thread.
     private readonly Lock _mipChainLock = new();
+    // Cancels the running mip task (a quality change restarts it; Dispose stops it).
     private CancellationTokenSource _mipGenCts;
+    // _mipChain is complete and may be drawn from. Until then Draw uses the source bitmap.
     private volatile bool _mipChainReady;
 
+    /// <param name="canvas">The main canvas.</param>
+    /// <param name="sourceBitmap">The bitmap to draw; its item stays leased by the canvas while this renderer is installed.</param>
+    /// <param name="supportsTransparency">Draw the checkered background behind it.</param>
+    /// <param name="invalidateCanvas">Wakes the render loop.</param>
+    /// <param name="mipChainOwner">The item that owns <paramref name="sourceBitmap"/>: given (an HQ), a mip chain is
+    /// built; null (a preview, an animation's first frame), none is.</param>
     public StaticImageRenderer(CanvasAnimatedControl canvas, CanvasBitmap sourceBitmap,
         bool supportsTransparency, Action invalidateCanvas, DisplayItem mipChainOwner = null)
     {
@@ -54,6 +84,8 @@ internal partial class StaticImageRenderer : IRenderer
             KickOffMipGeneration();
     }
 
+    // Starts building the mip chain on the thread pool, under a lease on the item so its bitmap stays alive until the
+    // task ends, even if the canvas replaces this renderer and releases the item first.
     private void KickOffMipGeneration()
     {
         _mipGenCts = new CancellationTokenSource();
@@ -68,6 +100,8 @@ internal partial class StaticImageRenderer : IRenderer
         });
     }
 
+    // Thread pool. Halves the image level by level (up to 5 levels, none under 64 px), then publishes the whole chain
+    // at once under the lock. A cancelled run disposes what it made and publishes nothing.
     private void GenerateMipChain(CancellationToken token)
     {
         const int MaxLevels = 5;
@@ -139,6 +173,7 @@ internal partial class StaticImageRenderer : IRenderer
     }
 
 
+    /// <summary>W2D thread. Draws the checkered background if wanted, then the best-fitting mip level (or the source).</summary>
     public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating)
     {
         session.Units = CanvasUnits.Pixels;
@@ -174,6 +209,10 @@ internal partial class StaticImageRenderer : IRenderer
         return k == 0 ? _sourceBitmap : _mipChain[k - 1];
     }
 
+    /// <summary>
+    /// W2D thread. The scaling quality changed (or the device was re-created): drops the mip chain and builds it
+    /// again with the new quality. Nothing to do without a mip chain.
+    /// </summary>
     public void HandleScalingMethodChange()
     {
         if (_mipChainOwner == null) return;
@@ -187,6 +226,7 @@ internal partial class StaticImageRenderer : IRenderer
         _invalidateCanvas(); // wake canvas immediately; Draw falls back to source while mips rebuild
     }
 
+    // Inside _mipChainLock. Disposes the mips (they are this renderer's own) and goes back to drawing the source.
     private void DestroyMipChain()
     {
         foreach (var mip in _mipChain) mip?.Dispose();
@@ -194,6 +234,10 @@ internal partial class StaticImageRenderer : IRenderer
         _mipChainReady = false;
     }
 
+    /// <summary>
+    /// W2D thread, when the canvas swaps this renderer out. Stops the mip task and frees the mips. The source bitmap
+    /// is not disposed here: the canvas releases its item's lease right after.
+    /// </summary>
     public void Dispose()
     {
         lock (_mipChainLock)

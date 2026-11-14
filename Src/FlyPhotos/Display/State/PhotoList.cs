@@ -24,9 +24,11 @@ namespace FlyPhotos.Display.State;
 /// </summary>
 internal sealed class PhotoList
 {
-    // Every photo the list holds, plus removed ones until Forget.
+    // Every photo the list holds, by key, plus removed ones until Forget. Also holds the photos PrepareListing made
+    // before they are published. Read lock-free on any thread; written only by the thread that changes the list.
     private readonly ConcurrentDictionary<int, Photo> _photos = new();
-    // The published key order.
+    // The published key order: an immutable list, replaced whole (never edited) by Initialize, Publish and
+    // ApplyChanges. Every key in it is in _photos.
     private volatile IReadOnlyList<int> _keys = Array.Empty<int>();
 
     /// <summary>
@@ -35,7 +37,10 @@ internal sealed class PhotoList
     /// </summary>
     public IReadOnlyList<int> Keys => _keys;
 
-    /// <summary>Number of photos currently in the collection.</summary>
+    /// <summary>
+    /// Number of photos in the dictionary. Includes photos prepared but not yet published, and removed ones not yet
+    /// forgotten; use <see cref="Keys"/>.Count for the list's length.
+    /// </summary>
     public int Count => _photos.Count;
 
     /// <summary>The photo for <paramref name="key"/>, or null if absent. Lock-free.</summary>
@@ -89,8 +94,9 @@ internal sealed class PhotoList
     /// <summary>Publishes a key list from <see cref="PrepareListing"/>, atomically. The thread that owns the list.</summary>
     public void Publish(IReadOnlyList<int> keys) => _keys = keys;
 
-    // Keys are never reused, so a cache entry or in-flight load for a removed key can never be
-    // mistaken for a newer photo. Only the thread that mutates the list touches this.
+    // The key the next new photo gets. Keys are never reused, so a cache entry or in-flight load for a removed key can
+    // never be mistaken for a newer photo. Only the thread that mutates the list touches this (the startup thread in
+    // PrepareListing, then the UI thread).
     private int _nextKey;
 
     /// <summary>

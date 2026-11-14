@@ -18,19 +18,30 @@ namespace FlyPhotos.Display.Controllers;
 /// The viewer's orchestrator: owns the photo list, where the viewer is (<see cref="NavState"/>) and what is on
 /// screen, and drives the <see cref="PrefetchCache"/> that loads around it.
 /// <para>
-/// Flow: a key press moves <c>_nav</c> and shows the best image the photo already has (HQ, else preview, else the
-/// placeholder) at once, then re-centres the cache. When the cache stores a better image for the photo on screen
-/// (<see cref="PrefetchCache.Loaded"/>), <see cref="UpgradeCurrent"/> shows it.
+/// <b>Flow.</b> A key press moves <c>_nav</c> and shows the best image the photo already has (HQ, else preview, else
+/// the placeholder) at once, then re-centres the cache. When the cache stores a better image for the photo on screen
+/// (<see cref="PrefetchCache.Loaded"/>), <see cref="UpgradeCurrent"/> shows it. A key press never waits for a decode:
+/// "every key press shows something at once".
 /// </para>
 /// <para>
-/// Threading: every public method runs on the UI thread, which alone changes the list and <c>_nav</c>. A startup
-/// thread lists the folder or Explorer view once; the prefetch cache runs on its own thread. Neither touches the
-/// screen: they post to the UI thread (<see cref="PostToUi"/>).
+/// <b>Threads.</b>
+/// <list type="bullet">
+///   <item><b>UI thread</b>: every public method runs here, and it alone changes the list, <c>_nav</c> and what is on
+///     screen. List changes (delete, rename, Folder mode) take turns through <c>_listChangeGate</c>.</item>
+///   <item><b>Startup thread</b>: lists the folder or Explorer view once (<see cref="DoStartupActivities"/>), then
+///     hands the listing to the UI thread.</item>
+///   <item><b>Prefetch thread</b>: the cache's own; it loads and unloads images and reports through
+///     <see cref="OnLoaded"/>.</item>
+/// </list>
+/// Neither background thread touches the screen: they post to the UI thread (<see cref="PostToUi"/>). The thumbnail
+/// strip and the prefetch cache read the list and <c>_nav</c> lock-free from their own threads; both are immutable
+/// snapshots published by reference, so a reader always sees a consistent pair.
 /// </para>
 /// <para>
-/// Images are leased (<see cref="DisplayItem"/>): the item handed to the canvas carries its own lease, so the cache
-/// can unload a photo at any time without freeing what is on screen.
+/// <b>Leases.</b> Images are leased (<see cref="DisplayItem"/>): the item handed to the canvas carries its own lease,
+/// so the cache can unload a photo at any time without freeing what is on screen.
 /// </para>
+/// <para>Folder mode (a live folder, sibling-folder switching) is in PhotoDisplayController.Folder.cs.</para>
 /// </summary>
 internal partial class PhotoDisplayController
 {
@@ -43,16 +54,21 @@ internal partial class PhotoDisplayController
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    // Cancelled by Dispose: the window is closing.
+    // Cancelled by Dispose: the window is closing. Checked before anything that would touch the canvas, and stops the
+    // startup thread's wait for the first photo.
     private readonly CancellationTokenSource _cts = new();
-    // Set once the first photo is on screen; the startup thread waits for it before building the full listing.
+    // Completed once the first photo is on screen (or failed). The startup thread waits for it before building the
+    // full listing, so the opened photo gets the whole machine first.
     private readonly TaskCompletionSource<bool> _firstPhotoLoadedTcs = new();
 
-    // UI thread: presses since the last Brake. Past the threshold it is a burst, which holds HQ loading.
+    // UI thread: navigation presses since the last Brake. Above BurstThreshold the user is holding a key down (a
+    // burst): HQ loading is held so the cores go to previews, and delete/rename are refused.
     private int _keyPressCounter;
+    // Presses allowed before it counts as a burst: 1, so a single press loads HQ and the second press in a row holds it.
     private const int BurstThreshold = 1;
 
-    // The photo collection: Photo objects + the ordered key snapshot (lock-free reads on any thread).
+    // The photo collection: Photo objects + the ordered key snapshot (lock-free reads on any thread). Changed only on
+    // the UI thread once the listing is published.
     private readonly PhotoList _photoList = new();
 
     // Owns all background loading (previews, HQ, disk-cache writes) on its own thread. The controller drives it with
@@ -60,21 +76,22 @@ internal partial class PhotoDisplayController
     private readonly PrefetchCache _cache;
 
     // False while the list holds only the opened photo (the listing is still running): the filename bar shows no
-    // position yet, and delete/rename wait.
+    // position yet, and delete/rename wait. Set once, on the UI thread, by PublishListing.
     private volatile bool _initialFileListingCompleted = false;
 
     private readonly ICanvasController _canvasController;     // the main canvas: shows one item at a time
     private readonly IThumbnailController _thumbNailController; // the strip: reads the list and _nav itself
     private readonly IPhotoDecoder _decoder;                  // decodes, disk cache, shared indicator items
-    private readonly SynchronizationContext _ui;              // the UI thread
+    private readonly SynchronizationContext _ui;              // the UI thread, for PostToUi
     private readonly string _firstPhotoPath;                  // the file Fly was opened with
     private readonly bool _launchedExternally;                // opened from Explorer (picks the Explorer listing)
 
     // Where the viewer is (key snapshot + position), one reference so the thumbnail strip never sees a position
-    // from another list. Written on the UI thread only.
+    // from another list. Written on the UI thread only; read by the strip on its render thread.
     private volatile NavState _nav = NavState.None;
 
-    // The level the canvas was last asked to show. UI thread.
+    // UI thread: the level the canvas was last asked to show. UpgradeCurrent never goes below it; delete and rename
+    // need it to be Hq (the user sees what they act on).
     private DisplayLevel _displayLevel;
 
     // --- Initialization ---
@@ -83,11 +100,15 @@ internal partial class PhotoDisplayController
     /// Starts with the opened photo alone in the list and starts the startup thread that lists the rest; the window
     /// then calls <see cref="LoadFirstPhoto"/>.
     /// </summary>
+    /// <param name="canvasController">The main canvas.</param>
+    /// <param name="thumbNailController">The thumbnail strip.</param>
     /// <param name="decoder">Where images come from (<see cref="PhotoDecoder"/> in the app).</param>
     /// <param name="ui">
     /// The UI thread, which owns navigation and the list. The controller's methods run on it, and work from other
     /// threads is posted to it.
     /// </param>
+    /// <param name="firstPhotoPath">The file Fly was opened with.</param>
+    /// <param name="launchedExternally">Opened from Explorer: the listing follows Explorer's view and order.</param>
     /// <param name="prefetch">How the prefetch cache runs; the default runs it on its own thread.</param>
     public PhotoDisplayController(ICanvasController canvasController, IThumbnailController thumbNailController,
         IPhotoDecoder decoder, SynchronizationContext ui, string firstPhotoPath, bool launchedExternally,
@@ -115,7 +136,7 @@ internal partial class PhotoDisplayController
         thread.Start();
     }
 
-    // Runs action on the UI thread, later.
+    // Any thread. Runs action on the UI thread, later (never inline, even when called on the UI thread).
     private void PostToUi(Action action) => _ui.Post(static a => ((Action)a!)(), action);
 
     /// <summary>
@@ -142,8 +163,9 @@ internal partial class PhotoDisplayController
         }
     }
 
-    // The first photo's own fast path: a cheap preview on screen first (unless the HQ came straight away), then the
-    // HQ, which may be a tiled large image. Waits for the open-zoom animation so the listing doesn't disturb it.
+    // UI thread. The first photo's own fast path: a cheap preview on screen first (unless the HQ came straight away),
+    // then the HQ, which may be a tiled large image. The prefetch cache is not running yet, so the controller loads
+    // and stores these itself. Waits for the open-zoom animation so the listing doesn't disturb it.
     private async Task LoadAndShowFirstPhoto(Photo firstPhoto)
     {
         bool continueLoadingHq = await _decoder.LoadFirstPreview(firstPhoto);
@@ -223,7 +245,8 @@ internal partial class PhotoDisplayController
         PostToUi(() => PublishListing(keys, position));
     }
 
-    // UI thread. Swaps the startup list for the full listing; navigation, delete and rename start working here.
+    // UI thread. Swaps the startup list for the full listing; navigation, delete and rename start working here, and so
+    // does background loading.
     private void PublishListing(IReadOnlyList<int> keys, int position)
     {
         if (_cts.IsCancellationRequested) return;
@@ -241,10 +264,12 @@ internal partial class PhotoDisplayController
 
     // --- Cache events & display upgrade ---
 
-    // 1 while an UpgradeCurrent is queued on the UI thread, so a run of loads queues one upgrade.
+    // 1 while an UpgradeCurrent is queued on the UI thread, so a run of loads queues one upgrade, not one per load.
+    // Set on the prefetch thread (OnLoaded), cleared on the UI thread just before the upgrade runs.
     private int _upgradeQueued;
 
-    // UI thread: the item last handed to the canvas, to tell a reload (same level, new item) from a repeat.
+    // UI thread: the item last handed to the canvas, to tell a reload (same level, new item) from a repeat. Only
+    // compared by reference, never used, so it holds no lease.
     private DisplayItem? _shownItem;
 
     // Prefetch thread: an image was stored for a key. The strip redraws that slot; whether the screen changes is
@@ -274,6 +299,8 @@ internal partial class PhotoDisplayController
         _ = SetSourceAsync(photo, level);
     }
 
+    // The highest level the photo has stored right now. Only a hint: the cache may unload it a moment later, which
+    // SetSourceAsync handles by stepping down.
     private static DisplayLevel BestLevel(Photo photo) =>
         photo.Slots.Hq != null ? DisplayLevel.Hq :
         photo.Slots.Preview != null ? DisplayLevel.Preview : DisplayLevel.PlaceHolder;
@@ -311,6 +338,8 @@ internal partial class PhotoDisplayController
         UpdateFileNameAndDetails();
     }
 
+    // UI thread. Leases the photo's item at level, or the highest one below it that is still alive, and lowers level
+    // to match. The placeholder needs no lease, so this always returns something to show.
     private DisplayItem LeaseAtOrBelow(Photo photo, ref DisplayLevel level)
     {
         for (; level > DisplayLevel.PlaceHolder; level--)
@@ -370,7 +399,7 @@ internal partial class PhotoDisplayController
         await FlyTo(keys, newPosition);
     }
 
-    // Moves the viewer to toPosition in keys (the snapshot the caller read the position from) and shows it.
+    // UI thread. Moves the viewer to toPosition in keys (the snapshot the caller read the position from) and shows it.
     private async Task FlyTo(IReadOnlyList<int> keys, int toPosition)
     {
         if (!_photoList.Contains(keys[toPosition])) return;
@@ -488,6 +517,7 @@ internal partial class PhotoDisplayController
         }
     }
 
+    // UI thread, inside _listChangeGate. Deletes the file, then removes it from the list as a Folder mode removal would.
     private async Task<DeleteResult> DeleteCurrentPhotoCore()
     {
         // --- Step 1: Guard Clauses and State Capture ---
@@ -525,14 +555,15 @@ internal partial class PhotoDisplayController
 
     // --- List changes (delete, Folder mode) ---
 
-    // Serializes everything that mutates the list on the UI thread: delete, watcher batches, folder switches.
+    // Serializes everything that mutates the list on the UI thread: delete, rename, watcher batches, folder switches.
+    // They all await (a disk operation, a folder listing), so without it a second change could start inside the first.
     private readonly SemaphoreSlim _listChangeGate = new(1, 1);
 
     /// <summary>
     /// UI thread, inside <see cref="_listChangeGate"/>. Applies one change to the list (see
-    /// <see cref="PhotoList.ApplyChanges"/>) and
-    /// keeps the viewer on the same file: its position is recomputed, and if it was removed the nearest
-    /// surviving neighbour in the old order is shown — the next one, else the previous one.
+    /// <see cref="PhotoList.ApplyChanges"/>) and keeps the viewer on the same file: its position is recomputed, and if
+    /// it was removed the nearest surviving neighbour in the old order is shown — the next one, else the previous one.
+    /// <paramref name="goToFirst"/> (a folder switch) shows the first photo instead.
     /// </summary>
     private async Task ApplyListChangeAsync(ListChangeBatch batch, bool goToFirst)
     {
@@ -561,6 +592,7 @@ internal partial class PhotoDisplayController
                                       string.Equals(_photoList.GetPhoto(key)?.FilePath, currentPath, StringComparison.OrdinalIgnoreCase));
             if (keys[newPosition] == currentKey)
             {
+                // Same photo, new position: nothing to re-show, but the cache, the strip and the counter must follow.
                 _nav = new NavState(keys, newPosition);
                 _cache.MoveWindow(_nav);
                 _thumbNailController.RequestThumbnailRedraw();
@@ -643,7 +675,7 @@ internal partial class PhotoDisplayController
 
     // --- Queries ---
 
-    // A navigation key is being held (more presses than the threshold since the last Brake).
+    // UI thread. A navigation key is being held (more presses than the threshold since the last Brake).
     private bool IsBurst() => _keyPressCounter > BurstThreshold;
 
     /// <summary>Only one photo in the list (also true until the listing is published).</summary>
@@ -656,12 +688,17 @@ internal partial class PhotoDisplayController
     public bool CurrentPhotoIsRaw =>
         _photoList.GetPhoto(_nav.Key) is { IsRaw: true };
 
-    // --- For tests: the state the invariants are checked against. UI thread. ---
+    // --- For tests: the state the invariants are checked against (DisplayHarness). UI thread. ---
 
+    /// <summary>The prefetch cache (tests step it by hand).</summary>
     internal PrefetchCache Cache => _cache;
+    /// <summary>The photo list.</summary>
     internal PhotoList Photos => _photoList;
+    /// <summary>Where the viewer is.</summary>
     internal NavState Nav => _nav;
+    /// <summary>The level the canvas was last asked to show.</summary>
     internal DisplayLevel ShownLevel => _displayLevel;
+    /// <summary>Whether the full listing has replaced the startup list.</summary>
     internal bool ListingPublished => _initialFileListingCompleted;
 
     /// <summary>Applies a list change the way Folder mode and delete do, inside the list-change gate.</summary>
@@ -684,7 +721,7 @@ internal partial class PhotoDisplayController
         _cts.Cancel();
         _firstPhotoLoadedTcs.TrySetCanceled();
         DisposeFolderMode();
-        _cache.Dispose();
+        _cache.Dispose(); // first: once its thread has stopped, nothing else stores into the slots retired below
         foreach (int key in _photoList.Keys) _photoList.GetPhoto(key)?.Slots.Retire();
         Logger.Info("PhotoDisplayController disposed.");
     }

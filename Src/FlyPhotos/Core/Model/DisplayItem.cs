@@ -15,6 +15,13 @@ internal record ImageMetadata(double FullWidth, double FullHeight);
 /// it is on screen, a clipboard copy, a disk-cache write — takes its own with <see cref="TryAcquire"/>. The last
 /// <see cref="Release"/> frees it, so it is never disposed while something still draws or reads it.
 /// Error and placeholder items share bitmaps across photos; they are never freed and their leases are free.
+/// <para>
+/// The usual lifetime of a prefetched image: the decode creates it (lease 1) → the prefetch cache stores it in the
+/// photo's slot, which takes over that lease → the UI thread leases it for the canvas (lease 2) → the cache unloads
+/// the photo and releases the slot's lease (1 left, the canvas still draws it) → the canvas swaps to another image
+/// and releases its lease (0) → the item is freed on the canvas's render thread (<see cref="FreeSink"/>).
+/// </para>
+/// <para>Thread-safe: leases may be taken and ended on any thread.</para>
 /// </summary>
 internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, int rotation)
 {
@@ -25,12 +32,14 @@ internal abstract partial class DisplayItem(CanvasBitmap bitmap, Origin origin, 
     /// <summary>Degrees to rotate when drawing (EXIF orientation).</summary>
     public int Rotation { get; } = rotation;
 
-    // The creator's lease, then one per holder; the last Release frees the item.
+    // The creator's lease, then one per holder; the last Release frees the item. A mutable struct: called in place,
+    // never copied (see LeaseCount). Unused for the shared error and placeholder items.
     private LeaseCount _leases = new();
 
     /// <summary>
     /// Where an item goes when its last lease ends. The canvas routes it to its render thread, so bitmaps are
-    /// freed there as they are today; unset (no canvas, or it is gone), the item is freed at once.
+    /// freed there, never while a draw is using the device; unset (no canvas, or it is gone), the item is freed at
+    /// once on the thread that ended the last lease. Set by the canvas on the UI thread; read on any thread.
     /// </summary>
     public static Action<DisplayItem> FreeSink { get; set; }
 
@@ -66,6 +75,7 @@ internal sealed partial class PreviewDisplayItem(CanvasBitmap bitmap, Origin ori
 {
     /// <summary>The full image's size, so the photo is laid out at its real size before the HQ arrives.</summary>
     public ImageMetadata Metadata { get; } = metadata;
+    // The one shared empty preview (Origin.Undefined, so never freed).
     private static readonly PreviewDisplayItem _empty = new(null, Origin.Undefined);
     /// <summary>A shared item with no bitmap (never freed).</summary>
     public static PreviewDisplayItem Empty() => _empty;
@@ -74,6 +84,7 @@ internal sealed partial class PreviewDisplayItem(CanvasBitmap bitmap, Origin ori
 /// <summary>A full-quality image. The subclass says how the canvas draws it.</summary>
 internal abstract partial class HqDisplayItem(CanvasBitmap bitmap, Origin origin, int rotation) : DisplayItem(bitmap, origin, rotation)
 {
+    // The one shared empty HQ (Origin.Undefined, so never freed).
     private static readonly HqDisplayItem _empty = new StaticHqDisplayItem(null, Origin.Undefined);
     /// <summary>A shared item with no bitmap (never freed).</summary>
     public static HqDisplayItem Empty() => _empty;
@@ -103,6 +114,8 @@ internal sealed partial class AnimatedHqDisplayItem(CanvasBitmap firstFrame, Ori
 internal sealed partial class TiledHqDisplayItem(CanvasBitmap overview, Origin origin, TilePyramid pyramid)
     : HqDisplayItem(overview, origin, 0)
 {
+    /// <summary>The CPU-side tiles at every level, and the image's full size. Can be gigabytes: only the photo on
+    /// screen keeps one (see PrefetchPlanner).</summary>
     public TilePyramid Pyramid { get; } = pyramid;
 }
 
@@ -155,6 +168,7 @@ internal sealed partial class MultiPageHqDisplayItem(CanvasBitmap firstFrame, Or
     /// </summary>
     public int[] PageOrder { get; } = pageOrder;
 
+    /// <summary>How many pages the image has.</summary>
     public int PageCount => PageOrder.Length;
 }
 

@@ -15,6 +15,10 @@ namespace FlyPhotos.Display.State;
 /// One <b>list change</b>, ready for <see cref="PhotoList.ApplyChanges"/>: paths removed, renamed (old -> new) and
 /// added (sorted by <see cref="Order"/>, which is null when nothing is added or renamed).
 /// </summary>
+/// <param name="IsRemoved">Whether a listed path is gone.</param>
+/// <param name="Renamed">Old path -> new path for each rename, or null.</param>
+/// <param name="Added">New paths, sorted by <paramref name="Order"/>.</param>
+/// <param name="Order">The folder's sort, which places additions and renames; null when there are none.</param>
 internal sealed record ListChangeBatch(Predicate<string> IsRemoved, IReadOnlyDictionary<string, string>? Renamed,
     IReadOnlyList<string> Added, IComparer<string>? Order)
 {
@@ -36,10 +40,14 @@ internal sealed class FolderSource : IDisposable
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    // The fields below are set up on the startup thread (construction, ListAndWatch); after the listing is published
+    // they are only touched on the UI thread, one call at a time.
+
     // The sort order of the current folder; it remembers each listed file's sort key, so additions and renames sort
     // without touching the disk. Replaced by a fresh one on a rescan or a folder switch.
     private FolderSortComparer _order = new(AppConfig.Settings.FolderSortBy, AppConfig.Settings.FolderSortDescending);
-    // The current folder's watcher; null when the folder can't be watched (the list then stays as listed).
+    // The current folder's watcher; null when the folder can't be watched (the list then stays as listed). Its
+    // identity also tells a batch for this folder from a late one for a folder since left (IsCurrent).
     private FolderWatcher? _watcher;
     // Set by Dispose (UI thread); a folder switch still running then installs nothing.
     private bool _disposed;

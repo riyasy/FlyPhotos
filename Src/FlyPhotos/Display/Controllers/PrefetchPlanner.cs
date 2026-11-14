@@ -30,17 +30,24 @@ internal readonly record struct SlotState(bool HasPreview, bool HasHq, bool Tile
     bool NeedsDiskWrite = false, bool PreviewParked = false, bool HqParked = false);
 
 /// <summary>A job to start, or one the cache is running (or cancelled and not yet returned).</summary>
+/// <param name="Key">The photo's key in the photo list.</param>
+/// <param name="Kind">What the job loads or writes.</param>
 /// <param name="AllowLarge">An HQ job that may load a tiled large image: only the centre's.</param>
 internal readonly record struct RunningJob(int Key, LoadKind Kind, bool AllowLarge = false);
 
 /// <summary>How many jobs of each kind may run at once. Previews (light and heavy together) share one budget.</summary>
+/// <param name="Previews">Preview jobs, light and heavy together.</param>
+/// <param name="Heavy">Of those, how many may be full-image decodes (the heavy lane).</param>
+/// <param name="Hq">HQ jobs. The centre's own HQ may start up to twice this (see <see cref="PrefetchPlanner"/>).</param>
+/// <param name="DiskWrites">Disk-cache writes.</param>
 internal readonly record struct JobLimits(int Previews, int Heavy, int Hq, int DiskWrites)
 {
     /// <summary>
     /// Previews leave a core spare for the on-screen HQ decode, and stop at 8: a read benchmark (NVMe, SATA SSD,
     /// internal and USB hard disks) found small reads peak at 8 at once on every drive, and hard disks slow down
     /// past it. The heavy lane is capped whatever the core count, since each full decode can take hundreds of MB.
-    /// HQ stops at 4 (the centre's own HQ may go up to twice that): the HQ window rarely needs more, and whole-file reads on a hard disk get slower in parallel.
+    /// HQ stops at 4 (the centre's own HQ may go up to twice that): the HQ window rarely needs more, and whole-file
+    /// reads on a hard disk get slower in parallel.
     /// Disk-cache writes insert one at a time behind the cache's lock, so two keep one encoding while one inserts.
     /// </summary>
     public static JobLimits ForCores(int cores) => new(Math.Clamp(cores - 1, 1, 8), 4, Math.Min(cores, 4), 2);
@@ -49,6 +56,8 @@ internal readonly record struct JobLimits(int Previews, int Heavy, int Hq, int D
 /// <summary>
 /// The planner's decisions for one round. Reused across rounds (the planner runs after every batch of cache
 /// messages, hundreds of times a second while a window fills): <see cref="PrefetchPlanner.Make"/> clears it.
+/// The prefetch cache carries the lists out in this order: <see cref="Cancel"/>, <see cref="EvictAll"/>,
+/// <see cref="EvictHq"/>, <see cref="Start"/>.
 /// </summary>
 internal sealed class PrefetchPlan
 {
@@ -60,12 +69,17 @@ internal sealed class PrefetchPlan
     public readonly List<int> EvictAll = [];
     /// <summary>Photos to unload the HQ of, keeping the preview.</summary>
     public readonly List<int> EvictHq = [];
-    /// <summary>Photos in the preview window that have their preview, before and after the centre.</summary>
+    /// <summary>Photos in the preview window that have their preview, before and after the centre (the status text).</summary>
     public int CachedBefore, CachedAfter;
 
-    // Scratch for Make.
+    // --- Scratch for Make, kept here so a round allocates nothing ---
+
+    // (key, kind) of every running job, so "is this load already in flight?" is one lookup.
     internal readonly HashSet<(int, LoadKind)> Busy = [];
-    internal readonly Dictionary<int, int> Positions = []; // key -> position, for the window around the centre
+    // key -> position, for every key within the wider of the two windows around the centre. A key not in here is
+    // outside both windows. Built once per round because keys are not ordered (see KeyWindow).
+    internal readonly Dictionary<int, int> Positions = [];
+    // Keys with a preview not yet in the disk cache, nearest the centre first; started only if no light preview waits.
     internal readonly List<int> DiskWrites = [];
 
     /// <summary>Empties every list for the next round.</summary>
@@ -84,7 +98,8 @@ internal sealed class PrefetchPlan
 
 /// <summary>
 /// Every prefetch decision, as one pure function of the window, what is loaded and what is running. The prefetch
-/// cache runs it after each batch of events and carries out the result; nothing here touches a photo or a thread.
+/// cache runs it after each batch of events and carries out the result; nothing here touches a photo or a thread,
+/// so every rule is unit tested directly (PrefetchPlannerTests).
 /// <list type="bullet">
 ///   <item>Work goes nearest the window centre first; at equal distance the photo before the centre wins.</item>
 ///   <item>The centre's HQ goes first, and may use up to twice the HQ limit. Neighbour HQs start only once it is no
@@ -95,10 +110,13 @@ internal sealed class PrefetchPlan
 ///   <item>Disk-cache writes run only when no light preview is waiting, so they never slow the window filling.</item>
 ///   <item>A photo leaving a window is unloaded, and a job for it is cancelled.</item>
 /// </list>
+/// There are two windows around the centre: the <b>preview window</b> (<c>previewHalf</c> photos each side) and the
+/// smaller <b>HQ window</b> (<c>hqHalf</c>). Both sizes come from the settings.
 /// </summary>
 internal static class PrefetchPlanner
 {
     /// <summary>Fills <paramref name="plan"/> with this round's decisions.</summary>
+    /// <param name="plan">Cleared, then filled.</param>
     /// <param name="nav">The window centre: the viewer's key list and position.</param>
     /// <param name="loaded">Keys that hold a preview or HQ (the candidates for unloading).</param>
     /// <param name="slotOf">What a key has loaded and what the cache knows about it.</param>
@@ -119,6 +137,7 @@ internal static class PrefetchPlanner
         for (int pos = lo; pos <= hi; pos++) plan.Positions[keys[pos]] = pos;
 
         // --- What is running, and what to cancel ---
+        // The counts include cancelled jobs whose decode has not returned: they still use a core and memory.
         int previews = 0, heavy = 0, hqs = 0, diskWrites = 0;
         for (int i = 0; i < running.Count; i++)
         {
@@ -181,6 +200,7 @@ internal static class PrefetchPlanner
         }
 
         // --- Previews (light and heavy lanes, one budget); also counts the cached ones and finds disk writes ---
+        // lightWaiting: some photo in the window still needs a light preview (started now or waiting for a place).
         bool lightWaiting = false;
         foreach (int pos in KeyWindow.NearestFirst(keys.Count, centre, previewHalf))
         {
@@ -197,6 +217,8 @@ internal static class PrefetchPlanner
                                    || plan.Busy.Contains((key, LoadKind.PreviewHeavy))) continue;
             if (slot.NeedsHeavy)
             {
+                // A full decode skipped for want of a place doesn't block the photos behind it: their light previews
+                // may still fit, so the loop goes on rather than stopping.
                 if (previews >= limits.Previews || heavy >= limits.Heavy) continue;
                 plan.Start.Add(new RunningJob(key, LoadKind.PreviewHeavy));
                 previews++;

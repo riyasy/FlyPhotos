@@ -30,13 +30,21 @@ namespace FlyPhotos.Display.Controllers;
 /// it isn't sliding or rebuilding, so at rest it costs nothing.
 /// <para>
 /// Reading the photo collection on the W2D thread is safe: <see cref="PhotoList"/> exposes a lock-free
-/// <c>GetPhoto</c> and a volatile copy-on-write <c>Keys</c> snapshot expressly for non-UI readers.
+/// <c>GetPhoto</c> and a volatile copy-on-write <c>Keys</c> snapshot expressly for non-UI readers, and the viewer's
+/// position comes as one immutable <see cref="NavState"/>, so the keys and the position always belong together.
+/// </para>
+/// <para>
+/// The strip draws each photo's <see cref="DisplaySlots.Thumbnail"/>: device-independent pixels the prefetch cache
+/// stores with the preview and drops with it. The GPU copies made from them are the strip's own, so the cache can
+/// drop a thumbnail on its thread without racing a draw here.
 /// </para>
 /// </summary>
 internal partial class ThumbNailController : IThumbnailController
 {
+    /// <summary>A thumbnail other than the centre one was clicked: the offset (positions) to move by. UI thread.</summary>
     public event Action<int> ThumbnailClicked;
 
+    // The strip's XAML control; its W2D thread runs Update/Draw.
     private readonly CanvasAnimatedControl _d2dCanvasThumbNail;
 
     // Set by SetPhotoSource: resolve a key to its photo, and read the viewer's list and position (one NavState, so
@@ -44,13 +52,18 @@ internal partial class ThumbNailController : IThumbnailController
     private Func<int, Photo> _getPhoto;
     private Func<NavState> _getNav;
 
+    // How many boxes fit on each side of the centre one. Written on the UI thread (resize) and the W2D thread (ribbon
+    // pass); read there and on the prefetch thread (RedrawThumbNailsIfNeeded). A plain int: a stale read only means
+    // one redraw too many or too few, and the next redraw corrects it.
     private int _numOfThumbNailsInOneDirection = 20;
+    // One box's width and height in pixels (the ThumbnailSize setting). UI thread writes it; the W2D thread reads it.
     private int _thumbnailBoxSize = AppConfig.Settings.ThumbnailSize;
+    // The frame drawn around the centre box (the ThumbnailSelectionColor setting).
     private Color _thumbNailSelectionColor;
 
     // W2D-owned: created/used/disposed only on the W2D thread (build + draw + CreateResources).
-    private CanvasRenderTarget _thumbnailOffscreen;
-    private CanvasBitmap _loadingIndicatorBitmap;
+    private CanvasRenderTarget _thumbnailOffscreen;   // the whole strip, pre-rendered; Draw only blits it
+    private CanvasBitmap _loadingIndicatorBitmap;     // drawn in a box whose photo has no thumbnail yet
 
     // W2D-owned GPU copies of DisplaySlots.Thumbnail pixels, keyed by Thumbnail instance so a regenerated
     // thumbnail never reuses a stale bitmap. The prefetch cache only drops Thumbnail references. Each
@@ -59,23 +72,29 @@ internal partial class ThumbNailController : IThumbnailController
     private Dictionary<Thumbnail, CanvasBitmap> _currentPassBitmaps = new();
     private Dictionary<Thumbnail, CanvasBitmap> _previousPassBitmaps = new();
 
+    // Thumbnails arriving while the window fills (hundreds a second) trigger at most one rebuild per interval.
     private static readonly TimeSpan ThrottleInterval = TimeSpan.FromMilliseconds(150);
+    // UI thread: a one-shot timer started by the first thumbnail in an interval; its tick asks for the rebuild.
     private readonly DispatcherTimer _throttledRedrawTimer = new() { Interval = ThrottleInterval };
+    // UI thread: a visible thumbnail arrived since the last tick.
     private bool _redrawNeeded;
+    // Set (UI thread) once there is something worth drawing: the first visible thumbnail, or the strip turned on.
+    // Until then a ribbon pass draws nothing and frees the strip's surfaces.
     private bool _canDrawThumbnails;
 
     // The single UI/other-thread -> W2D handoff. Arbitrary device-free work (slide reset, offscreen
     // disposal) is queued here; the heavier offscreen rebuild is flagged via _rebuildRequested because it
     // needs the live W2D `sender` for the device and render size. Both are drained at the top of Update.
     private readonly W2dActionPump _pump;
+    // 1 when a ribbon rebuild is wanted. Set (Interlocked) on any thread; cleared by the W2D thread as it rebuilds.
     private int _rebuildRequested;
 
     // Slide animation (W2D-owned): the strip is always rendered centered on the current photo, but on
     // navigation we seed a horizontal offset (delta * boxSize) so it appears to start at the old position,
     // then spring it back to 0 — a damped pixel-space slide stepped each frame in Update.
-    private readonly SpringAxis _slideOffset = new();
+    private readonly SpringAxis _slideOffset = new();  // the strip's horizontal offset in pixels, and its velocity
     private int? _lastRenderedKey; // the photo centred by the last ribbon pass; W2D thread only
-    private bool _slideAnimating;
+    private bool _slideAnimating;  // the spring is moving: keeps the render loop awake
 
     // Off-screen is rendered this many pixels wider than the canvas on each side (see
     // ThumbnailSlideMarginBoxes) so the sliding strip never exposes a transparent edge.
@@ -83,6 +102,7 @@ internal partial class ThumbNailController : IThumbnailController
 
     // --- Initialization ---
 
+    /// <summary>UI thread. Hooks the strip's render loop and pointer input. Nothing is drawn until <see cref="SetPhotoSource"/>.</summary>
     public ThumbNailController(CanvasAnimatedControl d2dCanvasThumbNail)
     {
         _d2dCanvasThumbNail = d2dCanvasThumbNail;
@@ -102,6 +122,7 @@ internal partial class ThumbNailController : IThumbnailController
 
     // --- Canvas event handlers ---
 
+    // UI thread. Applies the ShowThumbnails setting once the control is in the tree.
     private void D2dCanvasThumbNail_Loaded(object sender, RoutedEventArgs e)
     {
         _d2dCanvasThumbNail.Visibility = AppConfig.Settings.ShowThumbnails ? Visibility.Visible : Visibility.Collapsed;
@@ -156,6 +177,7 @@ internal partial class ThumbNailController : IThumbnailController
         _pump.PauseIfIdle(WorkPending());
     }
 
+    // W2D thread. Whether the loop must keep running: a rebuild is wanted or the strip is sliding.
     private bool WorkPending() =>
         Volatile.Read(ref _rebuildRequested) == 1 || _slideAnimating;
 
@@ -186,6 +208,7 @@ internal partial class ThumbNailController : IThumbnailController
         }
     }
 
+    // UI thread. A left click on a box other than the centre raises ThumbnailClicked with how far it is from the centre.
     private void D2dCanvasThumbNail_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
         if (e.GetCurrentPoint(_d2dCanvasThumbNail).Properties.PointerUpdateKind
@@ -221,6 +244,7 @@ internal partial class ThumbNailController : IThumbnailController
 
     // --- Public API ---
 
+    /// <summary>The ShowThumbnails setting changed: shows the strip (and rebuilds it), or hides it and frees its GPU surfaces. Any thread.</summary>
     public void ShowHideThumbnailBasedOnSettings()
     {
         RunOnUiThread(() =>
@@ -244,6 +268,7 @@ internal partial class ThumbNailController : IThumbnailController
         });
     }
 
+    /// <summary>The thumbnail size or selection colour setting changed: re-reads them and rebuilds. Any thread.</summary>
     public void RefreshThumbnail()
     {
         RunOnUiThread(() =>
@@ -444,7 +469,7 @@ internal partial class ThumbNailController : IThumbnailController
     }
 
     /// <summary>
-    /// This now fires once per throttled interval.
+    /// UI thread, at the end of a throttle interval: rebuilds once for every thumbnail that arrived during it.
     /// </summary>
     private void ThrottledRedrawTimer_Tick(object sender, object e)
     {
@@ -456,6 +481,8 @@ internal partial class ThumbNailController : IThumbnailController
         RequestRebuild();
     }
 
+    // W2D thread. The strip's own copy of the loading indicator, on the strip's device (the shared one belongs to the
+    // main canvas's device). Made once, freed with the other device resources.
     private CanvasBitmap GetOrCreateLoadingIndicatorBitmap(ICanvasResourceCreator resourceCreator)
     {
         if (_loadingIndicatorBitmap != null) return _loadingIndicatorBitmap;
@@ -500,6 +527,7 @@ internal partial class ThumbNailController : IThumbnailController
         DisposeAndClear(_currentPassBitmaps);
     }
 
+    // W2D thread. Disposes every bitmap in the map and empties it.
     private static void DisposeAndClear(Dictionary<Thumbnail, CanvasBitmap> bitmaps)
     {
         foreach (var bitmap in bitmaps.Values)
@@ -507,6 +535,8 @@ internal partial class ThumbNailController : IThumbnailController
         bitmaps.Clear();
     }
 
+    // W2D thread, during a ribbon pass. Draws box slotIndex (0 = the centre, negative = before it) as a rounded
+    // thumbnail, or the loading indicator when the photo has no thumbnail (yet, or any more).
     private void DrawThumbnailSlot(CanvasDrawingSession ds, CanvasImageBrush brush, ICanvasResourceCreator creator,
         int startX, int slotIndex, IReadOnlyList<int> keys, int currentPosition)
     {
@@ -545,6 +575,7 @@ internal partial class ThumbNailController : IThumbnailController
         _pump.Wake();
     }
 
+    // Runs action now if on the UI thread, else posts it there.
     private void RunOnUiThread(Action action)
     {
         if (!_d2dCanvasThumbNail.DispatcherQueue.HasThreadAccess)
@@ -557,6 +588,7 @@ internal partial class ThumbNailController : IThumbnailController
 
     // --- Lifecycle ---
 
+    /// <summary>UI thread, when the window closes. Stops the render loop first, then frees the GPU surfaces.</summary>
     public void Dispose()
     {
         _throttledRedrawTimer.Stop();

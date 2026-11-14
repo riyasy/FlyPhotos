@@ -17,6 +17,11 @@ namespace FlyPhotos.Display.ImageReading;
 /// Loads display items for a path. Each load opens one <see cref="ImageFile"/>, runs the decoder chain that
 /// <see cref="DecoderChains"/> picks for its format, and only when that fails looks further: at the header
 /// (a mislabelled file) and, for the full image, at the size (larger than the GPU can hold).
+/// <para>
+/// Stateless apart from the shared indicator items, so loads run on any number of thread-pool threads at once.
+/// Every item returned carries its creator's lease (see <see cref="DisplayItem"/>), except the shared indicator and
+/// error items, which are never freed.
+/// </para>
 /// </summary>
 internal static class ImageReader
 {

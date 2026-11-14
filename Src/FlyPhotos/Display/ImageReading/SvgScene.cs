@@ -65,6 +65,7 @@ internal sealed partial class SvgScene
     /// </summary>
     public sealed class Lease : IDisposable
     {
+        // The scene while this lease still holds it; swapped to null by the first Dispose, so a second one is a no-op.
         private SvgScene? _held;
 
         /// <summary>The scene this lease holds (still set after Dispose; don't draw it then).</summary>
@@ -73,6 +74,7 @@ internal sealed partial class SvgScene
         /// <summary>Takes an ownership already counted in <see cref="_owners"/>.</summary>
         internal Lease(SvgScene scene) => _held = Scene = scene;
 
+        /// <summary>Drops this ownership. Any thread; safe to call more than once.</summary>
         public void Dispose() => Interlocked.Exchange(ref _held, null)?.Release();
     }
 

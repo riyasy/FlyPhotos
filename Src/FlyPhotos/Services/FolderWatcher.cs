@@ -32,27 +32,41 @@ internal sealed record FolderChanges(IReadOnlyList<FileStamp> Added, IReadOnlyLi
 /// delete), and an added path may already be in it (a file listed and then reported). The consumer
 /// ignores both. Removals are applied before additions, so a file replaced in place comes back fresh.
 /// </para>
+/// <para>
+/// Threads: the <see cref="FileSystemWatcher"/> raises its events on thread-pool threads, possibly several at once;
+/// each takes <see cref="_lock"/> to note what happened. The batch timer (<see cref="Flush"/>) also runs on the pool.
+/// </para>
 /// </summary>
 internal sealed class FolderWatcher : IDisposable
 {
+    // The OS watcher for the folder (no subfolders).
     private readonly FileSystemWatcher _watcher;
+    // Whether a path has a supported image extension; other files are ignored.
     private readonly Func<string, bool> _isSupported;
+    // How long a new file must go without events before it is reported; also the batch interval.
     private readonly int _quietMs;
+    // One-shot timer that runs Flush; armed by the first event of a batch (ArmTimer).
     private readonly Timer _timer;
+    // Guards everything below.
     private readonly Lock _lock = new();
 
     // Guarded by _lock. Path -> tick of its latest event; reported once quiet and readable.
     private readonly Dictionary<string, long> _pendingAdds = new(StringComparer.OrdinalIgnoreCase);
+    // Guarded by _lock. Paths gone since the last batch (by the name the consumer knows).
     private readonly HashSet<string> _pendingRemoves = new(StringComparer.OrdinalIgnoreCase);
     // Current name -> the name the file had when the batch started, so a chain a->b->c reports a->c.
     private readonly Dictionary<string, string> _pendingRenames = new(StringComparer.OrdinalIgnoreCase);
+    // Events were lost (OnError): the next batch is a rescan and the pending lists were dropped.
     private bool _rescan;
+    // A Flush is scheduled or running, so further events don't schedule another.
     private bool _timerArmed;
+    // Set by Dispose: no timer is armed and no batch raised from then on.
     private bool _disposed;
 
     /// <summary>Raised on a ThreadPool thread; the sender is this watcher.</summary>
     public event EventHandler<FolderChanges>? Changed;
 
+    /// <summary>The watched folder.</summary>
     public string Folder { get; }
 
     /// <param name="isSupported">Whether a path has a supported image extension.</param>
@@ -77,6 +91,7 @@ internal sealed class FolderWatcher : IDisposable
         _watcher.EnableRaisingEvents = true;
     }
 
+    // Thread pool. A supported file was created, or a pending new file was written to: (re)start its quiet period.
     private void OnCreatedOrChanged(object sender, FileSystemEventArgs e)
     {
         if (!_isSupported(e.FullPath)) return;
@@ -89,6 +104,7 @@ internal sealed class FolderWatcher : IDisposable
         }
     }
 
+    // Thread pool. A supported file was deleted.
     private void OnDeleted(object sender, FileSystemEventArgs e)
     {
         if (!_isSupported(e.FullPath)) return;
@@ -135,6 +151,8 @@ internal sealed class FolderWatcher : IDisposable
         }
     }
 
+    // Thread pool. The watcher lost events (buffer overflow) or failed: what is pending can't be trusted, so the next
+    // batch tells the consumer to list the folder again.
     // Internal so tests can raise the event-loss path directly; a real buffer overflow can't be forced reliably.
     internal void OnError(object? sender, ErrorEventArgs e)
     {
@@ -157,6 +175,8 @@ internal sealed class FolderWatcher : IDisposable
         _timer.Change(_quietMs, Timeout.Infinite);
     }
 
+    // Timer tick, thread pool. Builds and raises one batch: a rescan; or the quiet new files that open (probed outside
+    // the lock), the removals and the renames. Re-arms itself while new files are still being written.
     private void Flush()
     {
         List<string>? candidates = null;
@@ -224,6 +244,7 @@ internal sealed class FolderWatcher : IDisposable
         if (changes != null) Changed?.Invoke(this, changes);
     }
 
+    // Ready: written and readable. Busy: still open for writing, try next tick. Gone: deleted or unreadable, drop it.
     private enum ProbeResult { Ready, Busy, Gone }
 
     // Opening while denying writers fails as long as anyone still holds the file open for writing. The same

@@ -53,19 +53,27 @@ internal interface IPhotoDecoder
     PreviewDisplayItem PreviewFailed();
 }
 
-/// <summary>The real <see cref="IPhotoDecoder"/>: <see cref="ImageReader"/>'s chains and the SQLite disk cache.</summary>
+/// <summary>
+/// The real <see cref="IPhotoDecoder"/>: <see cref="ImageReader"/>'s chains and the SQLite disk cache. Stateless apart
+/// from the device, so any number of loads may run at once on the thread pool; the prefetch cache's job limits decide
+/// how many do. See <see cref="IPhotoDecoder"/> for what each member does.
+/// </summary>
 internal sealed class PhotoDecoder : IPhotoDecoder
 {
+    // The main canvas's Win2D device: every bitmap is created on it, so the canvas can draw it directly.
     private readonly ICanvasResourceCreatorWithDpi _device;
 
+    /// <param name="device">The main canvas's device.</param>
     public PhotoDecoder(ICanvasResourceCreatorWithDpi device)
     {
         _device = device;
         ImageReader.Initialize(device); // the indicators are made lazily, once the device is up
     }
 
+    // Touching the instance opens the SQLite database.
     public void WarmUp() => _ = DiskCacherWithSqlite.Instance;
 
+    // The special first-photo reader may return the HQ outright (a small file is decoded in full at once).
     public async Task<bool> LoadFirstPreview(Photo photo)
     {
         var first = await Task.Run(() => ImageReader.GetFirstPreviewSpecialHandlingAsync(_device, photo.FilePath));
@@ -81,6 +89,7 @@ internal sealed class PhotoDecoder : IPhotoDecoder
         return false;
     }
 
+    // Thread pool. Goes straight to the tiled reader when the photo is already known to be too large for the GPU.
     public Task<HqDisplayItem?> LoadHq(Photo photo, bool allowLarge, CancellationToken ct) => Task.Run(async () =>
     {
         var slots = photo.Slots;
@@ -91,6 +100,7 @@ internal sealed class PhotoDecoder : IPhotoDecoder
         return hq;
     });
 
+    // Thread pool. An error preview gets no thumbnail: the strip shows its loading indicator for it.
     public Task<(PreviewDisplayItem Preview, Thumbnail? Thumbnail)?> LoadPreview(Photo photo, Purpose purpose) =>
         Task.Run<(PreviewDisplayItem, Thumbnail?)?>(async () =>
         {
@@ -103,6 +113,7 @@ internal sealed class PhotoDecoder : IPhotoDecoder
     public Task PutPreviewInDiskCache(string path, PreviewDisplayItem preview, int width, int height) =>
         Task.Run(() => PutInDiskCache(path, preview, width, height));
 
+    // The shared indicator items, made once by ImageReader.
     public DisplayItem LoadingIndicator => ImageReader.GetLoadingIndicator();
     public HqDisplayItem HqFailed() => ImageReader.GetHqFailedIndicator();
     public PreviewDisplayItem PreviewFailed() => ImageReader.GetPreviewFailedIndicator();
@@ -121,6 +132,8 @@ internal sealed class PhotoDecoder : IPhotoDecoder
         await PutInDiskCache(photo.FilePath, p, w, h);
     }
 
+    // Thread pool. Encodes and stores the preview under its own lease: the prefetch cache may unload the preview while
+    // the write runs, and the lease keeps the bitmap alive until the write is done.
     private static async Task PutInDiskCache(string path, PreviewDisplayItem preview, int width, int height)
     {
         if (!preview.TryAcquire()) return; // already released

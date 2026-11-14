@@ -38,8 +38,13 @@ internal sealed class Photo
         IsRaw = !string.IsNullOrEmpty(extension) && CodecDiscovery.Support.Raw(extension);
     }
 
-    // Extension is never changed by a rename (the UI keeps it fixed, and the folder watcher reports an
-    // extension change as remove + add), so the format-derived flags above stay valid.
+    /// <summary>
+    /// The file was renamed: the photo keeps its key and its loaded images. UI thread (the one that changes the list).
+    /// </summary>
+    /// <remarks>
+    /// The extension is never changed by a rename (the UI keeps it fixed, and the folder watcher reports an
+    /// extension change as remove + add), so the format-derived flags above stay valid.
+    /// </remarks>
     public void Rename(string newFilePath) => FilePath = newFilePath;
 
     /// <summary>The extensions behind <see cref="SupportsTransparency"/>.</summary>

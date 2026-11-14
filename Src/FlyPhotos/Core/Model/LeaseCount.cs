@@ -9,6 +9,8 @@ namespace FlyPhotos.Core.Model;
 /// </summary>
 internal struct LeaseCount()
 {
+    // Leases still held. Only changed with Interlocked; 0 means freed, and once 0 it never rises again (TryAcquire
+    // refuses), so a freed thing can't be brought back to life by a late reader.
     private int _count = 1;
 
     /// <summary>Takes a lease. False once the count has reached zero: the thing is freed and must not be touched.</summary>

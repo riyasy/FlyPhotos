@@ -34,34 +34,67 @@ using WinUIEx;
 
 namespace FlyPhotos.UI.Views;
 
+/// <summary>
+/// The main viewer window: builds the three display controllers, turns input (keys, mouse, touch, buttons) into
+/// their calls, and shows what they report (file name, zoom, cache status).
+/// <para>
+/// Wiring: <see cref="ThumbNailController"/> (the strip) and <see cref="CanvasController"/> (the photo) each draw on
+/// their own Win2D render thread; <see cref="PhotoDisplayController"/> owns the photo list and navigation, runs
+/// on the UI thread and drives both. The controller is given a <see cref="Display.ImageReading.PhotoDecoder"/> on
+/// the main canvas's device and the UI thread's synchronization context, which it uses to bring background work
+/// back to this thread.
+/// </para>
+/// <para>
+/// Threading: everything here runs on the UI thread. The controllers raise their events on the UI thread too, except
+/// <see cref="PhotoDisplayController.CacheStatusChanged"/>, which comes from the prefetch thread and is posted here.
+/// </para>
+/// <para>
+/// Navigation bursts: holding a Next/Prev key (or button, or side button, or scrolling the wheel) is a <b>burst</b>,
+/// during which the controller holds HQ loading. Every input that starts one must end it with
+/// <see cref="PhotoDisplayController.Brake"/>: key-up, the window losing focus, a button let go, or the wheel going
+/// quiet.
+/// </para>
+/// </summary>
 public sealed partial class PhotoDisplayWindow
 {
     #region Fields
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    // The smallest window the user can resize to, in DIPs.
     private const int MinWindowWidth = 400;
     private const int MinWindowHeight = 300;
 
-    private readonly CanvasController _canvasController;
-    private readonly ThumbNailController _thumbNailController;
-    private readonly PhotoDisplayController _photoController;
+    private readonly CanvasController _canvasController;       // draws the photo, zoom and pan
+    private readonly ThumbNailController _thumbNailController; // draws the thumbnail strip
+    private readonly PhotoDisplayController _photoController;  // the photo list, navigation and loading
 
+    // The settings window while it is open; null otherwise.
     private Settings? _settingWindow;
 
+    // Let one "Open with" panel / More menu open at a time, however fast the key is pressed.
     private readonly SingleFlightGate _shortcutsGate = new();
     private readonly SingleFlightGate _moreMenuGate = new();
+    // The "Open with" panel, made on first use.
     private ShortcutsFlyoutControl? _shortcutsControl;
+    // The delete and rename flows (confirmation, refusal feedback), made on first use.
     private FileActionDelete? _fileActionDelete;
     private FileActionRename? _fileActionRename;
+    // Registrations of the IsPressed callbacks on the four nav buttons, to unregister them on close.
     private readonly long _backIsPressedToken;
     private readonly long _nextIsPressedToken;
     private readonly long _edgePrevIsPressedToken;
     private readonly long _edgeNextIsPressedToken;
+    // Ends a wheel-scroll navigation burst once the wheel has been still this long (restarted by each notch).
     private readonly DispatcherTimer _wheelScrollBrakeTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
+    // Which button the last mouse press on the canvas was, so a double press of a side button isn't taken as a
+    // double-tap (D2dCanvas_DoubleTapped).
     private PointerUpdateKind _lastPointerDownKind;
+    // Mouse back/forward side buttons: navigate (with a burst while held) or step-zoom, as set.
     private readonly SideButtonNavBehavior _sideButtonNav = null!;
 
+    // What each command does (InitCommands), and which key chord runs which command (ShortcutCatalog, re-resolved
+    // when the user changes key bindings).
     private Dictionary<CommandId, Func<Task>> _commands = null!;
     private Dictionary<KeyChord, CommandId> _routes = ShortcutCatalog.Resolve();
 
@@ -69,28 +102,32 @@ public sealed partial class PhotoDisplayWindow
     /// chord is bound to Next/Prev rather than on a hard-coded Left/Right.</summary>
     private VirtualKey _burstKey = VirtualKey.None;
 
+    // The cache status text is showing (toggled by the expander button).
     private bool _cacheStatusExpanded;
 
-    private readonly OpacityFader _opacityFader;
-    private readonly InactivityFader _inactivityFader;
-    private readonly InactivityFader _folderNameFader;
-    private readonly MouseAutoHider _mouseAutoHider;
-    private readonly WindowCaptionButtonFader _captionButtonFader;
-    private readonly EdgeNavArrowFader _edgeNavArrowFader;
-    private readonly CaptionScrimFader _captionScrimFader;
-    private readonly WindowPlacementManager _windPlacementManager;
-    private readonly WindowFullScreenManager _windFullScreenManager;
-    private readonly WindowAppearanceManager _windAppearanceManager;
-    private readonly CtrlDragWindowMover _ctrlDragWindowMover;
+    // Window chrome behaviours, each owning one piece of show/hide or placement logic.
+    private readonly OpacityFader _opacityFader;                   // fades the toolbar, strip and file name when idle
+    private readonly InactivityFader _inactivityFader;             // shows the zoom/status text briefly, then hides it
+    private readonly InactivityFader _folderNameFader;             // flashes the folder name after a folder switch
+    private readonly MouseAutoHider _mouseAutoHider;               // hides an idle mouse cursor
+    private readonly WindowCaptionButtonFader _captionButtonFader; // fades the min/max/close buttons
+    private readonly EdgeNavArrowFader _edgeNavArrowFader;         // the prev/next arrows at the window edges
+    private readonly CaptionScrimFader _captionScrimFader;         // the shade behind the caption buttons
+    private readonly WindowPlacementManager _windPlacementManager; // remembers the window's position and size
+    private readonly WindowFullScreenManager _windFullScreenManager; // full screen, maximize, restore
+    private readonly WindowAppearanceManager _windAppearanceManager; // theme, backdrop, title bar
+    private readonly CtrlDragWindowMover _ctrlDragWindowMover;     // drags the window by its background
 
+    // The first photo's load has started (D2dCanvas_CreateResources), so a device re-creation doesn't start it again.
     private bool _loadingStarted;
+    // The close animation is running: further close requests are ignored.
     private bool _isClosing;
 
-    // Accumulators for smooth scrolling
+    // Accumulators for wheel navigation: deltas add up until they pass the ScrollThreshold setting (one step).
     private int _verticalDeltaAccumulator;
     private int _horizontalDeltaAccumulator;
 
-    // For Dragging
+    // For Dragging: the last pointer position, and whether a pan drag is under way.
     private Point _lastPoint;
     private bool _isDragging;
 
@@ -103,12 +140,19 @@ public sealed partial class PhotoDisplayWindow
     // True for as long as the right button is physically held; guards a Tick that was already
     // queued on the dispatcher at the moment the button is released from acting on stale state.
     private bool _isRightClickHeld;
+    // Where the right button went down: the point the hold-zoom zooms around.
     private Point _rightClickPosition;
 
     #endregion
 
     #region Construction & Init
 
+    /// <summary>
+    /// Builds the controllers and hooks every input and event. The first photo starts loading once the canvas has
+    /// its device (<see cref="D2dCanvas_CreateResources"/>).
+    /// </summary>
+    /// <param name="firstPhotoPath">The file Fly was opened with.</param>
+    /// <param name="extLaunch">Opened from Explorer: the list follows Explorer's view.</param>
     public PhotoDisplayWindow(string firstPhotoPath, bool extLaunch)
     {
         InitializeComponent();
@@ -125,6 +169,8 @@ public sealed partial class PhotoDisplayWindow
 
         DispatcherQueue.EnsureSystemDispatcherQueue();
 
+        // The strip first (the canvas redraws it), then the canvas, then the controller that drives both. The
+        // controller starts listing the folder on its own startup thread right away.
         _thumbNailController = new ThumbNailController(D2dCanvasThumbNail);
         _canvasController = new CanvasController(D2dCanvas, _thumbNailController);
         _photoController = new PhotoDisplayController(_canvasController, _thumbNailController,
@@ -215,6 +261,7 @@ public sealed partial class PhotoDisplayWindow
         InitCommands();
     }
 
+    // Wraps a synchronous action as a command.
     private static Func<Task> Act(Action a) => () =>
     {
         a();
@@ -299,6 +346,7 @@ public sealed partial class PhotoDisplayWindow
 
     #region Window Lifecycle & Closing
 
+    // The system close (Alt+F4, the X button): cancelled, so the close animation can play first.
     private async void PhotoDisplayWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {
         args.Cancel = true;
@@ -308,6 +356,9 @@ public sealed partial class PhotoDisplayWindow
     private async void ButtonFullScreenClose_Click(object sender, RoutedEventArgs e) =>
         await AnimatePhotoDisplayWindowClose();
 
+    // The window is gone: unhooks everything, then disposes the controllers. The canvas goes first (its render loop
+    // stops and it frees the image on screen), then the photo controller (loading stops, the photos' images are
+    // released), and the disk cache last, once nothing writes to it.
     private void PhotoDisplayWindow_Closed(object sender, WindowEventArgs args)
     {
         ButtonBack.UnregisterPropertyChangedCallback(ButtonBase.IsPressedProperty, _backIsPressedToken);
@@ -372,6 +423,7 @@ public sealed partial class PhotoDisplayWindow
         _windPlacementManager.Dispose();
     }
 
+    // Full screen on/off: placement tracking pauses (full screen is not a size to remember) and the chrome adapts.
     private void WindFullScreenManager_FullScreenToggled(bool isFullScreen)
     {
         _windPlacementManager.PauseTracking = isFullScreen;
@@ -382,6 +434,7 @@ public sealed partial class PhotoDisplayWindow
     private void WindAppearanceManager_CaptionButtonForegroundChanged(Color glyphColor) =>
         _captionScrimFader.GlyphColor = glyphColor;
 
+    // Maximizes, or restores a maximized or full-screen window.
     private void ToggleMaximizeRestore()
     {
         if (_windFullScreenManager.IsMaximizedOrFullScreen)
@@ -454,6 +507,7 @@ public sealed partial class PhotoDisplayWindow
         return true;
     }
 
+    // Every way of closing ends here: plays the exit zoom (if on), saves the window state, then closes.
     private async Task AnimatePhotoDisplayWindowClose()
     {
         if (_isClosing) return; // A second Esc / click-outside during the exit animation.
@@ -474,6 +528,7 @@ public sealed partial class PhotoDisplayWindow
         Close();
     }
 
+    // Remembers the window's placement for next launch, when the launch mode is "last window state".
     private void SaveLastWindowState()
     {
         if (AppConfig.Settings.WindowLaunchMode == WindowLaunchMode.LastWindowState)
@@ -512,6 +567,7 @@ public sealed partial class PhotoDisplayWindow
 
     #region Keyboard Input
 
+    // Runs the command bound to the pressed chord. A navigation command remembers its key, so key-up ends the burst.
     private async void HandleKeyDown(object sender, KeyRoutedEventArgs e)
     {
         try
@@ -548,6 +604,7 @@ public sealed partial class PhotoDisplayWindow
         await EndBurstAsync();
     }
 
+    // Ends a keyboard burst: forgets the key and brakes (HQ loading resumes, the HQ is shown if already loaded).
     private async Task EndBurstAsync()
     {
         _burstKey = VirtualKey.None;
@@ -557,7 +614,7 @@ public sealed partial class PhotoDisplayWindow
 
     /// <summary>
     /// A burst key released after the window lost focus sends its KeyUp to another window, so the burst
-    /// would never end: HQ stays parked and Delete/Rename stay refused. End it when focus leaves instead.
+    /// would never end: HQ loading stays held and Delete/Rename stay refused. End it when focus leaves instead.
     /// </summary>
     private async void PhotoDisplayWindow_Activated(object sender, WindowActivatedEventArgs args)
     {
@@ -569,6 +626,7 @@ public sealed partial class PhotoDisplayWindow
 
     #region Navigation
 
+    // A toolbar or edge nav button: one step per click, and per repeat while held (they are RepeatButtons).
     private async void ButtonBackNext_OnClick(object sender, RoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
@@ -599,9 +657,11 @@ public sealed partial class PhotoDisplayWindow
         });
     }
 
+    // Whether any of the four nav buttons is held down.
     private bool AnyNavButtonPressed() =>
         ButtonBack.IsPressed || ButtonNext.IsPressed || EdgeButtonPrev.IsPressed || EdgeButtonNext.IsPressed;
 
+    // Scrolling over the nav buttons navigates, like scrolling over the strip.
     private async void ButtonBackNext_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         var props = e.GetCurrentPoint((UIElement)sender).Properties;
@@ -611,6 +671,7 @@ public sealed partial class PhotoDisplayWindow
     private void ButtonRotate_OnClick(object sender, RoutedEventArgs e) =>
         _canvasController.RotateCurrentPhotoBy90(true);
 
+    // Scrolling over the rotate button rotates: up clockwise, down anticlockwise.
     private void ButtonRotate_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         if (_photoController.IsSinglePhoto()) return;
@@ -621,18 +682,22 @@ public sealed partial class PhotoDisplayWindow
     private void ButtonPrevNextPage_OnClick(object sender, RoutedEventArgs e) =>
         _canvasController.ChangePage(ReferenceEquals(sender, ButtonPrevPage) ? NavDirection.Prev : NavDirection.Next);
 
+    // Scrolling over the page buttons pages through a multi-page photo.
     private void ButtonBackNextPage_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         var delta = e.GetCurrentPoint(ButtonBack).Properties.MouseWheelDelta;
         _canvasController.ChangePage(delta > 0 ? NavDirection.Prev : NavDirection.Next);
     }
 
+    // A thumbnail was clicked: jump by its offset from the centre. A single jump, so no burst and no brake.
     private async void Thumbnail_Clicked(int shiftIndex) => await _photoController.FlyBy(shiftIndex);
 
     #endregion
 
     #region Zoom / Fit Toolbar
 
+    // The fit toggle only turns fitting on: clicking it while fitted keeps it checked. The canvas reports when the
+    // view stops being fitted, which unchecks it. The 1:1 toggle below works the same way.
     private void ButtonScaleSet_Click(object sender, RoutedEventArgs e)
     {
         if (ButtonScaleSet.IsChecked != false)
@@ -653,6 +718,7 @@ public sealed partial class PhotoDisplayWindow
 
     #region Canvas Pointer Input
 
+    // The canvas has its device: the first photo can be decoded on it now.
     private void D2dCanvas_CreateResources(CanvasAnimatedControl sender,
         CanvasCreateResourcesEventArgs args)
     {
@@ -666,6 +732,7 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
+    // Mouse/pen press on the image: left starts a pan drag, right arms the hold-to-zoom timer (if set).
     private void D2dCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
         // Touch pans/pinches through the manipulation handlers; the mouse-drag path below would
@@ -707,6 +774,7 @@ public sealed partial class PhotoDisplayWindow
     /// </summary>
     private Point? CurrentDragAnchor() => _isDragging ? _lastPoint.AdjustForDpi(D2dCanvas) : null;
 
+    // Pans by how far the pointer moved since the last move, while a left-button drag is on.
     private void D2dCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
         if (!_isDragging) return;
@@ -723,6 +791,8 @@ public sealed partial class PhotoDisplayWindow
         _lastPoint = currentPoint;
     }
 
+    // Release: right shows the Explorer context menu (unless it was zooming), left ends a drag or is a click outside
+    // the image, middle and the side buttons do what the settings say.
     private void D2dCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
         var currentPoint = e.GetCurrentPoint(D2dCanvas);
@@ -782,6 +852,7 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
+    // The wheel over the photo: navigate or zoom, by modifier keys and then the DefaultMouseWheelBehavior setting.
     private async void D2dCanvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         var props = e.GetCurrentPoint(D2dCanvas).Properties;
@@ -820,6 +891,8 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
+    // A click on the background (not the image, not the title bar, not the second click of a double-click): restore
+    // the window or close the app, as the ClickOutsideBehavior setting says.
     private void HandleClickOutside(Point rawPosition)
     {
         if (Environment.TickCount64 - _lastDoubleTappedAt < Win32Methods.GetDoubleClickTime()) return;
@@ -839,6 +912,7 @@ public sealed partial class PhotoDisplayWindow
         }
     }
 
+    // A touch tap: the touch version of a click outside the image.
     private void D2dCanvas_Tapped(object sender, TappedRoutedEventArgs e)
     {
         if (e.PointerDeviceType == PointerDeviceType.Touch)
@@ -861,6 +935,7 @@ public sealed partial class PhotoDisplayWindow
         _ctrlDragWindowMover.CancelDrag();
     }
 
+    // A touch pan/pinch step.
     private void D2dCanvas_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
     {
         var delta = e.Delta;
@@ -871,6 +946,7 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.ZoomAtPointByFactor(delta.Scale, e.Position.AdjustForDpi(D2dCanvas));
     }
 
+    // Double-click/tap: on the image toggles 1:1 and fit; on the background maximizes a restored window.
     private void D2dCanvas_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
     {
         // Touch presses don't update _lastPointerDownKind, so the X-button check only applies to mouse.
@@ -905,6 +981,7 @@ public sealed partial class PhotoDisplayWindow
 
     #region Mouse Wheel Nav & Zoom
 
+    // Scrolling over the strip always navigates.
     private async void ThumbNail_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         var props = e.GetCurrentPoint(D2dCanvasThumbNail).Properties;
@@ -913,6 +990,8 @@ public sealed partial class PhotoDisplayWindow
         await HandleMouseWheelNavigation(delta, isHorizontal);
     }
 
+    // One step per ScrollThreshold of wheel travel. Each step is a press in a burst (HQ loading is held from the
+    // second one on); the brake timer ends the burst once the wheel stops.
     private async Task HandleMouseWheelNavigation(int delta, bool isHorizontalScroll)
     {
         if (_photoController.IsSinglePhoto()) return;
@@ -931,6 +1010,7 @@ public sealed partial class PhotoDisplayWindow
         RestartBrakeTimer();
     }
 
+    // Zooms around the pointer: smoothly for a touchpad, one step per notch for a wheel.
     private void HandleMouseWheelZoom(int delta, Point point)
     {
         var adjustedPoint = point.AdjustForDpi(D2dCanvas);
@@ -948,12 +1028,14 @@ public sealed partial class PhotoDisplayWindow
     /// </summary>
     private static bool IsPrecisionTouchpad(int delta) => Math.Abs(delta) % 120 != 0;
 
+    // Pushes the wheel burst's end back by another interval.
     private void RestartBrakeTimer()
     {
         _wheelScrollBrakeTimer.Stop();
         _wheelScrollBrakeTimer.Start();
     }
 
+    // The wheel has been still for the interval: the wheel burst ends.
     private async void WheelScrollBrakeTimer_Tick(object? sender, object e)
     {
         _wheelScrollBrakeTimer.Stop();
@@ -975,6 +1057,7 @@ public sealed partial class PhotoDisplayWindow
         _rightClickZoomRepeatTimer.Start();
     }
 
+    // Every 16 ms while the right button stays held: zooms in a little around where it was pressed.
     private void RightClickZoomRepeatTimer_Tick(object? sender, object e)
     {
         if (!_isRightClickHeld) { _rightClickZoomRepeatTimer.Stop(); return; } // released before this queued tick ran
@@ -1012,6 +1095,7 @@ public sealed partial class PhotoDisplayWindow
     private void MenuItemOpenFileLocation_OnClick(object sender, RoutedEventArgs e) =>
         OpenFileInExplorer();
 
+    // Opens an Explorer window with the photo selected.
     private void OpenFileInExplorer()
     {
         var filePath = _photoController.GetFullPathCurrentFile();
@@ -1023,6 +1107,7 @@ public sealed partial class PhotoDisplayWindow
 
     #region External App Shortcuts
 
+    // Ctrl+1..4: opens the photo in the configured external app at index (0-based), if there is one.
     private async Task LaunchExternalAppAsync(int index)
     {
         var filePathArgument = _photoController.GetFullPathCurrentFile();
@@ -1036,6 +1121,7 @@ public sealed partial class PhotoDisplayWindow
             _ = app.LaunchAsync(filePathArgument);
     }
 
+    // A More-menu "Open with" item: its Tag is the app.
     private void LaunchExternalAppFromSender(object sender)
     {
         var filePathArgument = _photoController.GetFullPathCurrentFile();
@@ -1060,6 +1146,7 @@ public sealed partial class PhotoDisplayWindow
         _shortcutsControl.Show(BorderButtonPanel, apps);
     });
 
+    // The "Open with" panel, made once; a click launches the app on the photo on screen at that moment.
     private ShortcutsFlyoutControl CreateShortcutsControl()
     {
         var control = new ShortcutsFlyoutControl();
@@ -1067,6 +1154,8 @@ public sealed partial class PhotoDisplayWindow
         return control;
     }
 
+    // Rebuilds the "Open with" items at the top of the More menu (everything above SeparatorAfterOpenWith), each time
+    // the menu opens, so it follows the current shortcut settings.
     private async Task PopulateOpenWithSectionAsync()
     {
         while (ButtonMoreMenuFlyout.Items[0] != SeparatorAfterOpenWith)
@@ -1100,6 +1189,7 @@ public sealed partial class PhotoDisplayWindow
                 new MenuFlyoutItem { Text = L.Get("NoShortcutsCreated/Message"), IsEnabled = false });
     }
 
+    // Shortens a long app name for the menu; the full name is in the tooltip.
     private static string TruncateAppName(string name, int maxLength = 24) =>
         name.Length > maxLength ? name[..maxLength] + "…" : name;
 
@@ -1112,6 +1202,9 @@ public sealed partial class PhotoDisplayWindow
         try { await ShowRenameFlyoutAsync(); }
         catch (Exception ex) { Logger.Error(ex); }
     }
+
+    // Opens the rename box for the photo on screen. Refused (a shrug) while the controller says no: the listing
+    // isn't published yet, a burst is on, or the HQ isn't on screen.
     private Task ShowRenameFlyoutAsync()
     {
         _fileActionRename ??= new FileActionRename(
@@ -1123,6 +1216,7 @@ public sealed partial class PhotoDisplayWindow
         return _fileActionRename.ExecuteAsync();
     }
 
+    // The photo on screen changed: a rename box open for another file closes.
     private void CloseRenameFlyoutIfFileChanged(string currentFilePath) =>
         _fileActionRename?.Close(currentFilePath);
 
@@ -1136,6 +1230,8 @@ public sealed partial class PhotoDisplayWindow
         catch (Exception ex) { Logger.Error(ex); }
     }
 
+    // Deletes the photo on screen through FileActionDelete. Refused with "loading high quality" while the controller
+    // says no; closes the app when the last photo is deleted.
     private Task DeleteCurrentlyDisplayedPhoto()
     {
         _fileActionDelete ??= new FileActionDelete(
@@ -1155,6 +1251,7 @@ public sealed partial class PhotoDisplayWindow
 
     #region Settings Window
 
+    // Opens the settings window, or brings the open one forward.
     private void ButtonSettings_OnClick(object sender, RoutedEventArgs e)
     {
         if (_settingWindow == null)
@@ -1177,6 +1274,8 @@ public sealed partial class PhotoDisplayWindow
         _settingWindow = null;
     }
 
+    // A setting changed in the settings window (already stored in AppConfig.Settings): passes it on to whatever
+    // needs to react now. Settings read fresh on every use need no case here.
     private void SettingWindow_SettingChanged(Setting setting)
     {
         switch (setting)
@@ -1244,6 +1343,7 @@ public sealed partial class PhotoDisplayWindow
 
     #region Cache Status
 
+    // Shows or hides the cache status text.
     private void ButtonExpander_Click(object sender, RoutedEventArgs e)
     {
         _cacheStatusExpanded = !_cacheStatusExpanded;
@@ -1251,6 +1351,7 @@ public sealed partial class PhotoDisplayWindow
         CacheStatusProgress.Visibility = _cacheStatusExpanded ? Visibility.Visible : Visibility.Collapsed;
     }
 
+    // Raised on the prefetch thread: posted to the UI thread.
     private void PhotoController_CacheStatusChanged(string cacheProgressStatus) =>
         DispatcherQueue.TryEnqueue(() => { CacheStatusProgress.Text = cacheProgressStatus; });
 
@@ -1258,6 +1359,9 @@ public sealed partial class PhotoDisplayWindow
 
     #region State Callbacks
 
+    // The photo on screen or its details changed: updates the file name bar and the window title, and closes the
+    // info panel and rename box if they belong to another file. Raised on the UI thread; still queued, so it runs
+    // after the navigation that raised it.
     private void PhotoController_FileNameOrDetailsChanged(FileDisplayDetails fileDisplayDetails)
     {
         DispatcherQueue.TryEnqueue(() =>
@@ -1278,6 +1382,7 @@ public sealed partial class PhotoDisplayWindow
         _folderNameFader.ReportActivity();
     }
 
+    // Shows the zoom percentage briefly, if that setting is on. UI thread (the canvas marshals it).
     private void CanvasController_OnZoomChanged(int zoomPercent)
     {
         if (AppConfig.Settings.ShowZoomPercent)
@@ -1293,6 +1398,7 @@ public sealed partial class PhotoDisplayWindow
     // CanvasController marshals this event to the UI thread.
     private void CanvasController_OnOneToOneStateChanged(bool isOneToOne) => ButtonOneIsToOne.IsChecked = isOneToOne;
 
+    // Shows the page buttons only for a multi-page photo. UI thread.
     private void CanvasController_OnMultiPagePhotoLoaded(bool isMultiPagePhoto)
     {
         var visibilityState = isMultiPagePhoto ? Visibility.Visible : Visibility.Collapsed;
@@ -1308,6 +1414,7 @@ public sealed partial class PhotoDisplayWindow
 
     #region License
 
+    // The trial/license checks, made on first use; closes the app when the trial has expired.
     private ActionCheckLicense LicenseAction => field ??= new ActionCheckLicense(
         xamlRootProvider: () => Content?.XamlRoot, onTrialExpired: AnimatePhotoDisplayWindowClose);
 
@@ -1319,6 +1426,7 @@ public sealed partial class PhotoDisplayWindow
         catch (Exception ex) { Logger.Error(ex); }
     });
 
+    // The window's content is loaded: the license check's window-loaded step.
     private async void MainLayout_Loaded(object sender, RoutedEventArgs e)
     {
         try { await LicenseAction.WindowLoadedAsync(); }
@@ -1335,7 +1443,9 @@ public sealed partial class PhotoDisplayWindow
     /// </summary>
     private sealed class SingleFlightGate
     {
+        // A run is in flight. UI thread only, so a plain bool.
         private bool _isRunning;
+        /// <summary>Runs <paramref name="action"/> unless a run is already in flight.</summary>
         public async Task RunAsync(Func<Task> action)
         {
             if (_isRunning) return;
