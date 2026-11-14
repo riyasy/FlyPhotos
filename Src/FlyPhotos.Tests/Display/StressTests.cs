@@ -166,9 +166,8 @@ public sealed class StressTests
     [TestMethod]
     public void Holding_a_key_through_thousands_of_photos_on_live_threads_keeps_every_rule()
     {
-        int cores = Environment.ProcessorCount;
         using var h = new DisplayHarness(photos: 3000, openAt: 0, previewHalf: 50, hqHalf: 2, ownThread: true,
-            limits: new JobLimits(Math.Max(1, cores - 1), 4, cores, 2));
+            limits: JobLimits.ForCores(Environment.ProcessorCount));
         h.Open();
         h.Decoder.Script = _ => Reply.Async;
 

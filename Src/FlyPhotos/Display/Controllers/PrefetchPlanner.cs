@@ -37,10 +37,13 @@ internal readonly record struct RunningJob(int Key, LoadKind Kind, bool AllowLar
 internal readonly record struct JobLimits(int Previews, int Heavy, int Hq, int DiskWrites)
 {
     /// <summary>
-    /// Previews leave a core spare for the on-screen HQ decode; the heavy lane is capped whatever the core count,
-    /// since each full decode can take hundreds of MB.
+    /// Previews leave a core spare for the on-screen HQ decode, and stop at 8: a read benchmark (NVMe, SATA SSD,
+    /// internal and USB hard disks) found small reads peak at 8 at once on every drive, and hard disks slow down
+    /// past it. The heavy lane is capped whatever the core count, since each full decode can take hundreds of MB.
+    /// HQ stops at 4: the HQ window rarely needs more, and whole-file reads on a hard disk get slower in parallel.
+    /// Disk-cache writes insert one at a time behind the cache's lock, so two keep one encoding while one inserts.
     /// </summary>
-    public static JobLimits ForCores(int cores) => new(Math.Max(1, cores - 1), 4, cores, cores);
+    public static JobLimits ForCores(int cores) => new(Math.Clamp(cores - 1, 1, 8), 4, Math.Min(cores, 4), 2);
 }
 
 /// <summary>
