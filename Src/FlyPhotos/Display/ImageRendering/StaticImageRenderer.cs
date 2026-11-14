@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using FlyPhotos.Core.Model;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Utils;
@@ -33,21 +34,23 @@ internal partial class StaticImageRenderer : IRenderer
     // _sourceBitmap is the implicit level 0 and is never stored here.
     // _mipChain and _mipGenCts are swapped/cancelled under _mipChainLock; Draw also holds it while selecting a level.
     private CanvasRenderTarget[] _mipChain = [];
-    private readonly bool _generateMipChain;
+    // The item that owns _sourceBitmap; null = no mip chain. The mip task leases it, since the canvas may
+    // release the item (freeing the bitmap) when this renderer is replaced, before the task ends.
+    private readonly DisplayItem _mipChainOwner;
     private readonly Lock _mipChainLock = new();
     private CancellationTokenSource _mipGenCts;
     private volatile bool _mipChainReady;
 
     public StaticImageRenderer(CanvasAnimatedControl canvas, CanvasBitmap sourceBitmap,
-        bool supportsTransparency, Action invalidateCanvas, bool generateMipChain = true)
+        bool supportsTransparency, Action invalidateCanvas, DisplayItem mipChainOwner = null)
     {
         _sourceBitmap = sourceBitmap;
         _supportsTransparency = supportsTransparency;
         _invalidateCanvas = invalidateCanvas;
-        _generateMipChain = generateMipChain;
+        _mipChainOwner = mipChainOwner;
         _canvas = canvas;
 
-        if (_generateMipChain)
+        if (_mipChainOwner != null)
             KickOffMipGeneration();
     }
 
@@ -55,7 +58,14 @@ internal partial class StaticImageRenderer : IRenderer
     {
         _mipGenCts = new CancellationTokenSource();
         var token = _mipGenCts.Token;
-        _ = Task.Run(() => GenerateMipChain(token), token);
+        if (!_mipChainOwner.TryAcquire()) return; // already freed: no mips, Draw uses the source
+        // No token on Task.Run: a task cancelled before it starts would skip the finally and leak the lease.
+        // GenerateMipChain checks the token itself.
+        _ = Task.Run(() =>
+        {
+            try { GenerateMipChain(token); }
+            finally { _mipChainOwner.Release(); }
+        });
     }
 
     private void GenerateMipChain(CancellationToken token)
@@ -166,7 +176,7 @@ internal partial class StaticImageRenderer : IRenderer
 
     public void HandleScalingMethodChange()
     {
-        if (!_generateMipChain) return;
+        if (_mipChainOwner == null) return;
         lock (_mipChainLock)
         {
             _mipGenCts?.Cancel();

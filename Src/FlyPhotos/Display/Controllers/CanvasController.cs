@@ -226,7 +226,7 @@ internal partial class CanvasController : ICanvasController
         // try: if this fails, nothing is installed and SetSource must hear about it.
         InstallRenderer(
             new StaticImageRenderer(_d2dCanvas, animDispItem.Bitmap,
-                photo.SupportsTransparency, RequestInvalidate, generateMipChain: false),
+                photo.SupportsTransparency, RequestInvalidate),
             _imageSize, animDispItem.Rotation, ctx, forceThumbNailRedraw: true);
 
         try
@@ -279,7 +279,7 @@ internal partial class CanvasController : ICanvasController
     {
         InstallRenderer(
             new StaticImageRenderer(_d2dCanvas, hqDispItem.Bitmap,
-                photo.SupportsTransparency, RequestInvalidate),
+                photo.SupportsTransparency, RequestInvalidate, mipChainOwner: hqDispItem),
             _imageSize, hqDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
@@ -317,7 +317,7 @@ internal partial class CanvasController : ICanvasController
 
         InstallRenderer(
             new StaticImageRenderer(_d2dCanvas, previewDispItem.Bitmap,
-                photo.SupportsTransparency, RequestInvalidate, generateMipChain: false),
+                photo.SupportsTransparency, RequestInvalidate),
             new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
