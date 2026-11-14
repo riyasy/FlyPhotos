@@ -164,6 +164,32 @@ public sealed class DeleteAndRenameTests
     }
 
     [TestMethod]
+    public void A_disk_cache_write_running_during_a_rename_is_filed_under_the_name_it_was_decoded_from()
+    {
+        // FMEA 21. Nothing quick for the first photo, so the cache decodes its preview from the file and writes it.
+        using var h = new DisplayHarness(photos: 5, openAt: 1, script: d => d.Kind switch
+        {
+            DecodeKind.FirstPreview => Reply.Nothing,
+            DecodeKind.DiskWrite => Reply.Pending,
+            _ => Reply.Item,
+        });
+        h.Open();
+        var oldPath = h.Current.FilePath;
+        var write = h.Decoder.PendingOf(DecodeKind.DiskWrite).Single(d => d.Path == oldPath);
+
+        RenameResult? result = null;
+        h.Run(async () => result = await h.Controller.RenameCurrentPhoto("zzz.jpg"));
+        Assert.IsTrue(result!.Success, result.FailMessage);
+        write.Succeed();
+        h.Settle();
+
+        CollectionAssert.AreEqual(new[] { oldPath }, h.Decoder.DiskWrites.ToArray(),
+            "written once, under the path read when the job started, not the new one");
+        Assert.AreEqual(Path.Combine(h.PhotoFolder, "zzz.jpg"), h.Current.FilePath);
+        h.CheckInvariants();
+    }
+
+    [TestMethod]
     public void A_rename_onto_an_existing_file_fails_and_changes_nothing()
     {
         using var h = new DisplayHarness(photos: 5, openAt: 1);

@@ -517,6 +517,36 @@ public sealed class PrefetchCacheTests
     }
 
     [TestMethod]
+    public void Dispose_gives_up_on_a_prefetch_thread_that_does_not_stop_and_the_thread_ends_by_itself()
+    {
+        // Not disposed through the rig: its leak check doesn't apply here. Results that reach the prefetch thread
+        // after Dispose gave up on it are not released (the accepted ceiling of this path).
+        var rig = new Rig(photos: 20, ownThread: true, script: _ => Reply.Item);
+        using var stuck = new ManualResetEventSlim();
+        using var entered = new ManualResetEventSlim();
+        rig.Cache.Loaded += _ =>
+        {
+            entered.Set();
+            stuck.Wait(); // the prefetch thread hangs in a listener
+        };
+        rig.Cache.Start(rig.Nav(5));
+        Assert.IsTrue(entered.Wait(5_000), "the prefetch thread stored something");
+
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        rig.Cache.Dispose(); // must not throw or wait forever
+        Assert.IsTrue(watch.ElapsedMilliseconds >= 1_900, $"waited {watch.ElapsedMilliseconds} ms for the thread");
+        Assert.IsTrue(watch.ElapsedMilliseconds < 10_000);
+
+        stuck.Set();
+        Thread.Sleep(300); // the thread finishes its step, sees the stop and ends
+        int decodes = rig.Decoder.All.Count;
+        Thread.Sleep(300);
+        Assert.AreEqual(decodes, rig.Decoder.All.Count, "nothing more is loaded once the thread ended");
+        Assert.AreEqual(0, rig.Log.Errors.Count, string.Join("\n", rig.Log.Errors.Select(e => $"{e.Message} {e.Exception}")));
+        rig.Log.Dispose();
+    }
+
+    [TestMethod]
     public void The_prefetch_thread_fills_the_window_while_the_viewer_races_through()
     {
         using var rig = new Rig(photos: 500, previewHalf: 20, hqHalf: 2, ownThread: true, script: _ => Reply.Async,
