@@ -112,7 +112,6 @@
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.6.5" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2957" />
 		<PackageReference Include="PhotoSauce.MagicScaler" Version="0.15.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
 		<PackageReference Include="NLog.Extensions.Logging" Version="6.2.2" />
 		<PackageReference Include="WinUIEx" Version="2.9.3" />
 		<Manifest Include="$(ApplicationManifest)" />

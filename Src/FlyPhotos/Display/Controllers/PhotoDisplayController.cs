@@ -128,7 +128,7 @@ internal partial class PhotoDisplayController
         _thumbNailController.SetPhotoSource(_photoList.GetPhoto, () => _nav);
 
         // The opened photo alone, until the listing replaces it with the whole folder/Explorer view around it.
-        _photoList.Initialize([firstPhotoPath]);
+        _photoList.Initialize(new[] { firstPhotoPath });
         _nav = new NavState(_photoList.Keys, 0);
 
         var thread = new Thread(() => { DoStartupActivities(_firstPhotoPath, _cts.Token); });
@@ -207,7 +207,7 @@ internal partial class PhotoDisplayController
             // Secondary instances only display the single opened image.
             // No folder or Explorer-window discovery is performed.
             if (AppConfig.Volatile.IsSecondaryInstance)
-                files = [selectedFilePath];
+                files = new[] { selectedFilePath };
             else if (IsFolderMode)
             {
                 _folder = new FolderSource();
@@ -220,7 +220,7 @@ internal partial class PhotoDisplayController
         catch (Exception ex)
         {
             Logger.Error(ex, "Listing failed; showing the opened photo alone");
-            files = [selectedFilePath];
+            files = new[] { selectedFilePath };
         }
 
         // The opened photo gets the whole machine until it is on screen.

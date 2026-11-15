@@ -84,7 +84,7 @@ internal static class DdsReader
             Logger.Error(ex, "Failed to read DDS header for {0}", filePath);
         }
 
-        var all = new List<ExifFieldGroup> { new("DDS Header", [.. summary, .. raw]) };
+        var all = new List<ExifFieldGroup> { new("DDS Header", (ExifField[])[.. summary, .. raw]) };
         return new ExifData(summary, new Lazy<IReadOnlyList<ExifFieldGroup>>(() => all));
     }
 

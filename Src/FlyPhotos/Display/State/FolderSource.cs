@@ -61,7 +61,7 @@ internal sealed class FolderSource : IDisposable
     /// </summary>
     public IReadOnlyList<string> ListAndWatch(string selectedFilePath)
     {
-        if (Path.GetDirectoryName(selectedFilePath) is not { } folder) return [selectedFilePath];
+        if (Path.GetDirectoryName(selectedFilePath) is not { } folder) return new[] { selectedFilePath };
 
         _watcher = StartWatcher(folder);
         long start = Stopwatch.GetTimestamp();
