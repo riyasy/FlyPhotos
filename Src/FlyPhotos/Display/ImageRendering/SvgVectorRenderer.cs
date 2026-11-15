@@ -58,9 +58,9 @@ internal partial class SvgVectorRenderer(CanvasAnimatedControl canvas, SvgHqDisp
     private sealed record Pending(SvgScene.Painter Painter, Snapshot Snap);
 
     /// <summary>
-    /// This renderer's ownership of the scene, taken at construction (UI thread, where the HQ cache also disposes
-    /// items) and dropped in <see cref="Dispose"/> (W2D thread), so the cache dropping the item can't free the
-    /// scene mid-draw. Null if the item was already disposed; nothing is drawn then.
+    /// This renderer's ownership of the scene, taken at construction (UI thread) and dropped in
+    /// <see cref="Dispose"/> (W2D thread), so the item being freed can't free the scene mid-draw. Null if the
+    /// scene was already released; nothing is drawn then.
     /// </summary>
     private readonly SvgScene.Lease _lease = item.Scene.TryAcquire();
     /// <summary>Set by <see cref="Dispose"/>, so a pending wake-up doesn't request frames for a dead renderer.</summary>

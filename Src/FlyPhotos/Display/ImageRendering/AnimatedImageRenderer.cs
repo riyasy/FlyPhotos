@@ -74,7 +74,7 @@ internal partial class AnimatedImageRenderer : IRenderer
     {
         try
         {
-            if (_isDisposed) { _animatorLock.Release(); return; }
+            if (_isDisposed) return; // finally releases the lock
 
             await _animator.UpdateAsync(_stopwatch.Elapsed);
 

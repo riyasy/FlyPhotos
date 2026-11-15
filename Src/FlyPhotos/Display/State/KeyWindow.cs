@@ -22,4 +22,25 @@ internal static class KeyWindow
             if (keys[pos] == key) return pos;
         return -1;
     }
+
+    /// <summary>
+    /// The positions within <paramref name="half"/> of <paramref name="centre"/> in a list of
+    /// <paramref name="count"/>, nearest first: the centre, then before and after at distance 1, 2, … (at equal
+    /// distance the one before the centre wins). Positions outside the list are skipped.
+    /// </summary>
+    public static IEnumerable<int> NearestFirst(int count, int centre, int half)
+    {
+        if (centre < 0 || centre >= count) yield break;
+        for (int rank = 0; rank <= 2 * half; rank++)
+            if (NthNearest(count, centre, rank) is var pos and >= 0)
+                yield return pos;
+    }
+
+    // The position rank steps out from centre in nearest-first order, or -1 outside the list.
+    private static int NthNearest(int count, int centre, int rank)
+    {
+        int distance = (rank + 1) / 2;
+        int pos = rank == 0 ? centre : rank % 2 == 1 ? centre - distance : centre + distance;
+        return pos >= 0 && pos < count ? pos : -1;
+    }
 }

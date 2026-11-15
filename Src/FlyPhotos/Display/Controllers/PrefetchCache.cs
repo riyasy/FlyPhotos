@@ -5,597 +5,575 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
-using FlyPhotos.Services;
-using Microsoft.Graphics.Canvas;
 using NLog;
 
 namespace FlyPhotos.Display.Controllers;
 
+/// <summary>How a <see cref="PrefetchCache"/> runs.</summary>
+/// <param name="Time">
+/// The clock for the folder-switch quiet period (<see cref="PrefetchCache.HoldHqFor"/>). The app uses the system
+/// clock; tests pass a manual one so they can move time on by hand.
+/// </param>
+/// <param name="Limits">How many jobs of each kind may run at once.</param>
+/// <param name="OwnThread">
+/// True: the cache runs its own prefetch thread. False: nothing runs until someone calls
+/// <see cref="PrefetchCache.Step"/> (tests, which step the cache by hand on a manual clock).
+/// </param>
+internal sealed record PrefetchOptions(TimeProvider Time, JobLimits Limits, bool OwnThread = true)
+{
+    /// <summary>The app's settings: the system clock, limits sized to this machine's cores, its own thread.</summary>
+    public static PrefetchOptions Default => new(TimeProvider.System, JobLimits.ForCores(Environment.ProcessorCount));
+}
+
 /// <summary>
-/// Owns all background photo loading: the preview, HQ and disk <b>tiers</b> (each a worker thread
-/// with its own queue, in-flight set and completed-keys set), throttling, the sliding <b>window</b>
-/// of neighbours kept loaded around the <b>window centre</b>, and disk write-back.
-///
-/// Nothing outside this class ever sees a tier. Callers drive it with <see cref="MoveWindow"/> when
-/// navigation moves and ask it questions with <see cref="IsHqLoaded"/> / <see cref="IsPreviewLoaded"/>;
-/// it announces completions through the ready events. See CONTEXT.md for the vocabulary.
-///
-/// Load order: the window centre (the photo on screen) gets its HQ decode first. Neighbour HQ decodes
-/// start only once it has loaded (<see cref="NeighbourMustWait"/>), and previews leave a core spare, so
-/// background work doesn't slow the image the user is waiting for. The UI thread never waits on any of it.
-///
-/// The class does not own the photo list: it resolves keys to photos through a delegate handed in at
-/// construction, and is told the key snapshot + centre on every <see cref="MoveWindow"/> call.
+/// Owns all background photo loading: keeps the <b>window</b> of photos around the <b>window centre</b> loaded
+/// (previews for many, HQ for a few), unloads what leaves it, and writes fresh previews to the disk cache.
+/// See CONTEXT.md for the vocabulary.
+/// <para>
+/// <b>Threading.</b> One dedicated <b>prefetch thread</b> owns every bit of loading state (the window, running jobs,
+/// load hints) and is the only writer of the photos' <see cref="DisplaySlots"/> once started. Other threads talk to it
+/// only through its inbox (<see cref="Post"/>): the UI thread posts window moves and settings, and decodes post their
+/// results. So none of the fields under "Prefetch-thread state" below needs a lock: only the prefetch thread reads or
+/// writes them. The UI thread never waits on any of this, and loading never waits on the UI thread.
+/// </para>
+/// <para>
+/// <b>One round</b> (<see cref="Step"/>): run every queued message, ask <see cref="PrefetchPlanner"/> what to do
+/// (a pure function of the window, what is loaded and what is running), then carry out its plan: cancel jobs, unload
+/// photos, start jobs. The thread then sleeps until the next message.
+/// </para>
+/// <para>
+/// <b>A job's life</b>:
+/// <list type="number">
+///   <item><see cref="StartJob"/> (prefetch thread) adds it to <see cref="_running"/> and starts the decode, which the
+///     decoder moves to the thread pool at once.</item>
+///   <item>The decode finishes on a thread-pool thread and writes its result into the job (<see cref="RunJob"/>).</item>
+///   <item>It posts <see cref="Complete"/> back to the inbox. The prefetch thread removes the job from
+///     <see cref="_running"/> and stores the result in the photo's slot, or releases it if it is no longer
+///     wanted.</item>
+/// </list>
+/// A job the planner cancels (its photo left the window) is <i>abandoned</i>: it stays in <see cref="_running"/>,
+/// and keeps counting against the job limits, until its decode returns. Only the tiled large-image decode stops
+/// early on cancellation; any other decode runs to the end and its result is then released.
+/// </para>
+/// <para>
+/// The class does not own the photo list: it resolves keys to photos through a delegate, and is told where the
+/// viewer is with every <see cref="MoveWindow"/>. It announces each stored image through <see cref="Loaded"/>; the
+/// controller decides whether the screen should change. Decoding goes through <see cref="IPhotoDecoder"/>.
+/// </para>
 /// </summary>
 internal sealed class PrefetchCache : IDisposable
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    /// <summary>One quality track: its work queue, wake signal, in-flight set and completed-keys set.</summary>
-    private sealed class PhotoCacheTier : IDisposable
-    {
-        public readonly ConcurrentStack<int>            Queue    = new();
-        public readonly AutoResetEvent                  Signal   = new(false);
-        public readonly ConcurrentDictionary<int, byte> InFlight = new();
-        public readonly ConcurrentDictionary<int, byte> Done     = new();
+    /// <summary>
+    /// Fired on the prefetch thread when a preview or HQ was stored for a key. The photo may or may not be on
+    /// screen — the controller checks. Not fired for the first photo (the controller loads that itself).
+    /// </summary>
+    public event Action<int>? Loaded;
 
-        public void Dispose() => Signal.Dispose();
-    }
-
-    private readonly CancellationTokenSource _cts = new();
-    // One fewer than the cores, so preview decodes leave some room for the on-screen HQ decode.
-    private readonly SemaphoreSlim _previewThrottler   = new(Math.Max(1, Environment.ProcessorCount - 1));
-    private readonly SemaphoreSlim _hqThrottler        = new(Environment.ProcessorCount);
-    private readonly SemaphoreSlim _diskCacheThrottler = new(Environment.ProcessorCount);
-
-    private readonly PhotoCacheTier       _previewTier     = new();
-    private readonly PhotoCacheTier       _hqTier          = new();
-    private readonly ConcurrentStack<int> _diskCacheQueue  = new();
-    private readonly ManualResetEvent     _diskCacheSignal = new(false);
-
-    // Reused across SyncCacheTier calls — only touched on the UI/STA thread (inside MoveWindow).
-    private readonly HashSet<int> _syncKeysToKeep = new();
-
-    // Items detached by the current window move, disposed together by FlushRetiring. UI/STA thread only.
-    private readonly List<DisplayItem> _retiring = new();
-
-    // Bumped (on the UI/STA thread) whenever RAW decode settings change so any RAW HQ decode that was
-    // already in flight is discarded on completion instead of committing a stale bitmap.
-    private volatile int _hqGeneration;
-
-    // Resolves a key to its Photo (or null). Read-only access into the controller's PhotoList; the
-    // controller owns the collection and disposal timing.
-    private readonly Func<int, Photo?> _getPhoto;
-    private readonly ICanvasResourceCreatorWithDpi _device;
-
-    // True while the user is holding a navigation key or skipping through folders. The HQ worker re-parks
-    // while this is set so it doesn't decode photos being skipped past. Supplied by the controller.
-    private readonly Func<bool> _isBursting;
-
-    // Latest window pushed in by MoveWindow. Replaces the old reach-ins to PhotoSessionState +
-    // _sortedPhotoKeys. _windowKeys is the full position-ordered key list (key values are NOT ordered);
-    // _windowCentre is the position in it.
-    private volatile IReadOnlyList<int> _windowKeys = Array.Empty<int>();
-    private volatile int _windowCentre;
-
-    // Cancelled whenever the centre photo changes, so a multi-second large-image decode for a photo the user
-    // has left stops early (only the large-image path observes it). Replaced on the UI/STA thread only.
-    // Replaced sources are cancelled, not disposed — they hold no timer, and an in-flight decode may
-    // still register on its token; the GC reclaims them.
-    private volatile CancellationTokenSource _centreCts = new();
-    private int _centreKey = int.MinValue;
-
-    /// <summary>Fired (on a ThreadPool thread) when a preview bitmap has finished loading for a key.</summary>
-    public event Action<int>? PreviewReady;
-
-    /// <summary>Fired (on a ThreadPool thread) when an HQ bitmap has finished loading for a key.</summary>
-    public event Action<int>? HqReady;
-
-    /// <summary>Fired with the formatted "left/total &lt; Cache &gt; right/total" status string.</summary>
+    /// <summary>Fired on the prefetch thread with the formatted "left/total &lt; Cache &gt; right/total" status.</summary>
     public event Action<string>? CacheStatusChanged;
 
-    /// <summary>
-    /// Runs an action once the canvas has applied the renderer swaps already queued. A photo leaving the window
-    /// may still be on screen until then (SetSource only queues its swap), so its bitmaps are disposed through
-    /// this. Wired by the controller; when unset they are disposed at once.
-    /// </summary>
-    public Action<Action>? RunAfterQueuedRenderWork { get; set; }
+    // --- Set once by the constructor; read on any thread ---
 
-    public PrefetchCache(Func<int, Photo?> getPhoto,
-                         ICanvasResourceCreatorWithDpi device,
-                         Func<bool> isBursting)
+    // The photo list's lookup (PhotoList.GetPhoto): lock-free, any thread. Null once the list has forgotten the key
+    // (the photo was removed), which is how a job notices its photo is gone.
+    private readonly Func<int, Photo?> _getPhoto;
+    // Does every load: previews, HQs and disk-cache writes. Each call returns at once and decodes on the thread pool.
+    private readonly IPhotoDecoder _decoder;
+    // The clock, the job limits, and whether the cache runs its own thread.
+    private readonly PrefetchOptions _options;
+
+    // --- Inbox (any thread) ---
+
+    // Messages for the prefetch thread, run in the order posted at the start of the next Step. Every change to the
+    // prefetch-thread state below arrives this way, which is what keeps that state single-threaded.
+    private readonly ConcurrentQueue<Action> _inbox = new();
+    // Set by every Post: wakes the prefetch thread from its sleep in Run.
+    private readonly AutoResetEvent _wake = new(false);
+    // Cancelled by Dispose: Run's loop ends and the thread exits.
+    private readonly CancellationTokenSource _stop = new();
+    // The prefetch thread; null before Start, and always null in stepped mode (tests call Step themselves).
+    private Thread? _thread;
+    // Set by Dispose (UI thread), read by Step: once set, queued messages are dropped instead of run.
+    private volatile bool _disposed;
+
+    // --- Prefetch-thread state: read and written only on the prefetch thread (or by a test between Steps) ---
+
+    /// <summary>
+    /// One load in flight: what it is, for which photo, and what it brought back. Created by <see cref="StartJob"/>
+    /// on the prefetch thread; its decode fills in the result on a thread-pool thread; <see cref="Complete"/> reads it
+    /// back on the prefetch thread.
+    /// </summary>
+    private sealed class Job(RunningJob spec, Photo photo)
+    {
+        // The key and kind of load, as the planner asked for it. Also what the planner sees of this job next round.
+        public readonly RunningJob Spec = spec;
+        // The photo object it loads for. A photo removed (and its key forgotten) meanwhile no longer matches what
+        // _getPhoto returns for the key, so Complete releases the result instead of storing it.
+        public readonly Photo Photo = photo;
+        // Cancelled when the job is abandoned or the cache is disposed. Only the tiled large-image decode observes it.
+        public readonly CancellationTokenSource Cts = new();
+        // Cancelled, or made stale by a RAW setting change: its result is released, not stored. Prefetch thread only,
+        // except Orphan, which runs after that thread has stopped.
+        public bool Abandoned;
+
+        // The result, written by the decode before it hands the job back. The hand-off (TryReturn's interlocked
+        // exchange, then the inbox) publishes these to whichever thread reads them next.
+        public PreviewDisplayItem? Preview; // a preview load's image (holds the creator's lease)
+        public Thumbnail? Thumbnail;        // the strip's pixels made from that preview
+        public HqDisplayItem? Hq;           // an HQ load's image (holds the creator's lease)
+        public bool Failed;                 // the decode threw
+
+        // Who owns the result once the decode returns. While the cache lives: the prefetch thread (Returned, through
+        // the inbox). Once the cache is disposed: whichever of the decode and Dispose comes second (Orphaned), which
+        // releases it. The exchange in TryReturn and Orphan makes sure exactly one side does.
+        private const int Running = 0, Returned = 1, Orphaned = 2;
+        private int _state = Running;
+
+        /// <summary>The decode returned. False: the cache was disposed and the result has been released.</summary>
+        public bool TryReturn()
+        {
+            if (Interlocked.Exchange(ref _state, Returned) != Orphaned) return true;
+            ReleaseResult();
+            return false;
+        }
+
+        /// <summary>The cache is gone (its thread stopped): releases a result already returned, or one still to come.</summary>
+        public void Orphan()
+        {
+            Abandoned = true;
+            Cts.Cancel();
+            if (Interlocked.Exchange(ref _state, Orphaned) == Returned) ReleaseResult();
+        }
+
+        /// <summary>Releases whatever the decode brought (nothing is stored).</summary>
+        public void ReleaseResult()
+        {
+            Preview?.Release();
+            Hq?.Release();
+        }
+    }
+
+    // The window centre: the key list and position the cache loads around. Set by MoveWindow. It may lag the
+    // controller's own _nav by a message, which is why the controller never asks the cache what is on screen.
+    private NavState _nav = NavState.None;
+    // A navigation burst is on (a key held down): no HQ starts until ResumeHq. Previews keep loading.
+    private bool _holdHq;
+    // The end of the folder-switch quiet period, on _options.Time: no HQ starts before it. Only ever moves later.
+    private TimeSpan _holdHqUntil;
+    // Every job started and not yet completed, including abandoned ones whose decode has not returned. The job limits
+    // count all of them, so slow abandoned decodes can't pile up behind the planner's back.
+    private readonly List<Job> _running = [];
+    // _running's specs, rebuilt every Step for the planner (kept to avoid allocating a list each round).
+    private readonly List<RunningJob> _runningSpecs = [];
+    // Keys this cache has stored a preview or HQ for: the candidates for unloading. The planner scans these, not the
+    // whole list, to find photos that left the window.
+    private readonly HashSet<int> _loaded = [];
+    // Keys whose light preview pass found nothing (no disk-cache entry, no embedded thumbnail): only a full-image
+    // decode (the heavy lane) can make their preview. Cleared once the preview loads.
+    private readonly HashSet<int> _needsHeavy = [];
+    // Keys whose preview was decoded from the file and is not in the disk cache yet: a DiskWrite job will store it.
+    private readonly HashSet<int> _needsDiskWrite = [];
+    // Loads that failed (the heavy preview pass found nothing) or were deferred (a neighbour too large to tile). Not
+    // retried while the photo is only a neighbour, so a broken file is not decoded on every key press; MoveWindow
+    // clears a key's entries when it becomes the centre.
+    private readonly HashSet<(int Key, LoadKind Kind)> _parked = [];
+    // The planner's output, filled afresh every Step (kept to avoid allocating every round).
+    private readonly PrefetchPlan _plan = new();
+    // The counts last reported, so the status text is formatted and raised only when one changes.
+    private (int CachedBefore, int Before, int CachedAfter, int After) _lastStatus = (-1, -1, -1, -1);
+
+    /// <param name="getPhoto">Resolves a key to its photo (the photo list's lookup).</param>
+    /// <param name="decoder">Does every load.</param>
+    /// <param name="options">The clock, job limits and threading; <see cref="PrefetchOptions.Default"/> if null.</param>
+    public PrefetchCache(Func<int, Photo?> getPhoto, IPhotoDecoder decoder, PrefetchOptions? options = null)
     {
         _getPhoto = getPhoto;
-        _device = device;
-        _isBursting = isBursting;
+        _decoder = decoder;
+        _options = options ?? PrefetchOptions.Default;
     }
 
+    /// <summary>The job limits the planner works to.</summary>
+    public JobLimits Limits => _options.Limits;
+
+    /// <summary>
+    /// What the cache tracks, for tests: a key the list has forgotten must not linger in any of these. Read on the
+    /// prefetch thread, or between <see cref="Step"/>s.
+    /// </summary>
+    internal (int Loaded, int NeedsHeavy, int NeedsDiskWrite, int Parked, int Running) Counts =>
+        (_loaded.Count, _needsHeavy.Count, _needsDiskWrite.Count, _parked.Count, _running.Count);
+
+    /// <summary>Whether messages are waiting for the next <see cref="Step"/>.</summary>
+    internal bool HasMessages => !_inbox.IsEmpty;
+
+    // Time on the cache's clock. Only differences matter (it is compared with _holdHqUntil), so the zero start is fine.
+    private TimeSpan Now => _options.Time.GetElapsedTime(0);
+
     // -------------------------------------------------------------------------
-    // Public API — the only door in
+    // Public API — any thread; every call only posts to the prefetch thread
     // -------------------------------------------------------------------------
 
-    /// <summary>Spawns the three worker threads. Not called for secondary instances.</summary>
-    public void Start()
+    /// <summary>
+    /// Starts loading around <paramref name="nav"/>, and starts the prefetch thread (unless the cache is stepped by
+    /// hand). Called once, when the listing is published. Not called for secondary instances.
+    /// </summary>
+    public void Start(NavState nav)
     {
-        var previewThread = new Thread(() => PreviewCacheBuilderDoWork(_cts.Token))
-            { IsBackground = true, Name = "PreviewCacheBuilder" };
-        previewThread.Start();
-        var hqThread = new Thread(() => HqImageCacheBuilderDoWork(_cts.Token))
-            { IsBackground = true, Name = "HqCacheBuilder" };
-        hqThread.Start();
-        var diskThread = new Thread(() => PreviewDiskCacherDoWork(_cts.Token))
-            { IsBackground = true, Name = "DiskCacheBuilder" };
-        diskThread.Start();
+        MoveWindow(nav);
+        Post(() => _loaded.Add(nav.Key)); // the photo on screen was loaded by the controller (the first photo)
+        if (!_options.OwnThread) return;
+        _thread = new Thread(Run) { IsBackground = true, Name = "PrefetchCache" };
+        _thread.Start();
+    }
+
+    /// <summary>The viewer moved (navigation, or a list change): re-centre the window on <paramref name="nav"/>.</summary>
+    public void MoveWindow(NavState nav) => Post(() =>
+    {
+        // The photo now on screen gets another try. Only it: a file that keeps failing is not decoded again on
+        // every key press while it stays in the window.
+        _parked.RemoveWhere(p => p.Key == nav.Key);
+        _nav = nav;
+    });
+
+    /// <summary>Holds HQ loading for a burst, until <see cref="ResumeHq"/>. Previews keep loading.</summary>
+    public void HoldHq() => Post(() => _holdHq = true);
+
+    /// <summary>The burst ended: HQ loading goes on.</summary>
+    public void ResumeHq() => Post(() => _holdHq = false);
+
+    /// <summary>
+    /// Holds HQ loading for <paramref name="ms"/> from now (skipping through folders). The time is read on the calling
+    /// thread, so the quiet period starts at the call, not when the message runs.
+    /// </summary>
+    public void HoldHqFor(int ms)
+    {
+        var until = Now + TimeSpan.FromMilliseconds(ms);
+        Post(() => { if (until > _holdHqUntil) _holdHqUntil = until; });
     }
 
     /// <summary>
-    /// Re-centre the window. Disposes photos that fall outside it and queues those inside it that are
-    /// not already loaded or in flight. <paramref name="signalHqLoading"/> mirrors the old
-    /// <c>if (triggerHqCaching) _hqTier.Signal.Set()</c> — it decides whether to kick the HQ worker;
-    /// whether the worker then proceeds is decided separately by the burst predicate.
+    /// Photos removed from the list: drops every note the cache keeps about their keys. Their images are released by
+    /// <see cref="DisplaySlots.Retire"/>, and a load still running for one releases what it brings
+    /// (<see cref="Complete"/> finds the key gone).
     /// </summary>
-    public void MoveWindow(int centrePosition, IReadOnlyList<int> keys, bool signalHqLoading)
+    public void Forget(IReadOnlyList<int> keys) => Post(() =>
     {
-        _windowKeys   = keys;
-        _windowCentre = centrePosition;
-
-        if (keys.Count == 0)
+        foreach (int key in keys)
         {
-            _hqTier.Done.Clear();
-            _previewTier.Done.Clear();
-            FireProgress();
-            return;
+            _loaded.Remove(key);
+            _needsHeavy.Remove(key);
+            _needsDiskWrite.Remove(key);
+            foreach (var kind in Enum.GetValues<LoadKind>()) _parked.Remove((key, kind));
         }
-        if (centrePosition < 0)
-        {
-            Logger.Warn($"MoveWindow: centre {centrePosition} out of range. Skipping cache update.");
-            return;
-        }
-
-        var centreKey = keys[centrePosition];
-        if (centreKey != _centreKey)
-        {
-            _centreKey = centreKey;
-            var left = _centreCts;
-            _centreCts = new CancellationTokenSource();
-            left.Cancel();
-            ReleaseTiledHqExcept(centreKey);
-        }
-
-        var desiredHqKeys      = FindNeighborKeys(centrePosition, AppConfig.Settings.CacheSizeOneSideHqImages);
-        var desiredPreviewKeys = FindNeighborKeys(centrePosition, AppConfig.Settings.CacheSizeOneSidePreviews);
-        SyncCacheTier(desiredHqKeys,      _hqTier,      static p => p.DetachHq());
-        SyncCacheTier(desiredPreviewKeys, _previewTier, static p => p.DetachPreview());
-        FlushRetiring();
-
-        FireProgress();
-        _previewTier.Signal.Set();
-        if (signalHqLoading) _hqTier.Signal.Set();
-    }
-
-    /// <summary>Wake the HQ worker once navigation stops holding it back (a burst ended, a folder-switch quiet period passed).</summary>
-    public void SignalHqLoading() => _hqTier.Signal.Set();
-
-    /// <summary>Mark a key as already HQ-loaded so the cache never re-decodes it (e.g. the first photo).</summary>
-    public void SeedHqLoaded(int key) => _hqTier.Done[key] = 0;
-
-    /// <summary>Drop a deleted key from the tiers. Does not dispose the Photo — the controller owns that.</summary>
-    public void Evict(int key)
-    {
-        _hqTier.Done.TryRemove(key, out _);
-        _previewTier.Done.TryRemove(key, out _);
-    }
-
-    public bool IsHqLoaded(int key)      => _hqTier.Done.ContainsKey(key);
-    public bool IsPreviewLoaded(int key) => _previewTier.Done.ContainsKey(key);
+    });
 
     /// <summary>
-    /// Drop every cached RAW-file HQ bitmap so the new decoder settings take effect, and bump the
-    /// generation so any in-flight RAW decode is discarded on completion. Requeues the in-window keys
-    /// via <see cref="MoveWindow"/>. Called on the UI/STA thread.
+    /// RAW decode settings changed: drops every RAW HQ so the new settings take effect, and discards RAW HQ decodes
+    /// still running. The window then reloads them. The canvas keeps its own lease on the one on screen until the
+    /// new one replaces it.
     /// </summary>
-    public void InvalidateHqForRawFiles()
+    public void InvalidateHqForRawFiles() => Post(() =>
     {
-        _hqGeneration++;
-
-        foreach (int key in _hqTier.Done.Keys)
+        foreach (int key in _loaded)
             if (_getPhoto(key) is { IsRaw: true } photo)
-            {
-                // The controller has queued the on-screen photo's step-down; disposed after it.
-                if (photo.DetachHq() is { } hq) _retiring.Add(hq);
-                _hqTier.Done.TryRemove(key, out _);
-            }
+                photo.Slots.DetachHq()?.Release();
+        foreach (var job in _running)
+            if (job.Spec.Kind == LoadKind.Hq && job.Photo.IsRaw)
+                Abandon(job);
+        _parked.RemoveWhere(p => p.Kind == LoadKind.Hq);
+    });
 
-        // Reuse the window sync to requeue the in-window keys we just dropped.
-        MoveWindow(_windowCentre, _windowKeys, signalHqLoading: true);
-        FlushRetiring(); // MoveWindow flushes too, unless it returned early
+    /// <summary>A planning setting (a window size) changed, or the clock moved: plan again now.</summary>
+    public void Replan() => Post(static () => { });
+
+    // Any thread. Queues a message for the prefetch thread and wakes it. In stepped mode nothing is woken: the
+    // message runs at the next Step.
+    private void Post(Action message)
+    {
+        _inbox.Enqueue(message);
+        try { _wake.Set(); }
+        catch (ObjectDisposedException) { } // shutting down
     }
 
     // -------------------------------------------------------------------------
-    // Worker threads
+    // The prefetch thread
     // -------------------------------------------------------------------------
 
-    private void PreviewCacheBuilderDoWork(CancellationToken token)
+    // The prefetch thread's body: Step, then sleep until a message, Dispose, or the end of the folder-switch quiet
+    // period (when HQ loading may start without any message arriving).
+    private void Run()
     {
-        try
+        var handles = new WaitHandle[] { _wake, _stop.Token.WaitHandle };
+        while (!_stop.IsCancellationRequested)
         {
-            while (!token.IsCancellationRequested)
-            {
-                if (_previewTier.Queue.IsEmpty)
-                {
-                    // Preview queue is empty — hand off to the disk-cache thread, which writes
-                    // the just-loaded previews (Origin.Disk) to the SQLite thumbnail store.
-                    _diskCacheSignal.Set();
-                    WaitHandle.WaitAny([_previewTier.Signal, token.WaitHandle]);
-                    if (token.IsCancellationRequested) break;
-                    _diskCacheSignal.Reset();
-                }
-
-                if (!_previewTier.Queue.TryPop(out var item)) continue;
-
-                // Claimed before the wait for a slot: a window move during the wait would otherwise see the key
-                // neither queued nor in flight, queue it again, and two loads would race for the same photo.
-                // Every exit of the load releases the claim. A key already claimed is being loaded; skip it.
-                if (!_previewTier.InFlight.TryAdd(item, 0)) continue;
-
-                _previewThrottler.Wait(token);
-
-                _ = Task.Run(() => LoadPreviewAsync(item), token);
-            }
-        }
-        catch (OperationCanceledException) { } // Expected on shutdown.
-    }
-
-    private void HqImageCacheBuilderDoWork(CancellationToken token)
-    {
-        try
-        {
-            while (!token.IsCancellationRequested)
-            {
-                // Re-checked after every wake-up: a signal sent while navigation is still holding HQ back
-                // (a window move during a burst or a folder-switch quiet period) must not start a decode.
-                // Neighbours also wait while the centre is loading, so they don't compete with the photo on
-                // screen; every finished load wakes this thread. The centre is popped first because the window
-                // sync and the requeue paths push it last, on top of the stack.
-                while (_hqTier.Queue.IsEmpty || _isBursting() || NeighbourMustWait())
-                {
-                    WaitHandle.WaitAny([_hqTier.Signal, token.WaitHandle]);
-                    token.ThrowIfCancellationRequested();
-                }
-
-                if (!_hqTier.Queue.TryPop(out var item)) continue;
-
-                // Claimed here, before the wait for a slot, not inside the load: a window move during the wait
-                // must not queue the key again (two loads would race for the same photo), and the next pass
-                // already sees the centre as loading. A key already claimed is being loaded; skip it.
-                if (!_hqTier.InFlight.TryAdd(item, 0)) continue;
-
-                _hqThrottler.Wait(token);
-
-                _ = Task.Run(() => LoadHqAsync(item), token);
-            }
-        }
-        catch (OperationCanceledException) { } // Expected on shutdown.
-    }
-
-    private void PreviewDiskCacherDoWork(CancellationToken token)
-    {
-        try
-        {
-            while (!token.IsCancellationRequested)
-            {
-                WaitHandle.WaitAny([_diskCacheSignal, token.WaitHandle]);
-                if (token.IsCancellationRequested) break;
-
-                if (_diskCacheQueue.IsEmpty)
-                {
-                    _diskCacheSignal.Reset();
-                    continue;
-                }
-
-                if (!_diskCacheQueue.TryPop(out var key)) continue;
-
-                _diskCacheThrottler.Wait(token);
-
-                _ = Task.Run(() => DiskCachePreviewAsync(key), token);
-            }
-        }
-        catch (OperationCanceledException) { } // Expected on shutdown.
-    }
-
-    // -------------------------------------------------------------------------
-    // Per-key loaders
-    // -------------------------------------------------------------------------
-
-    // Every loader holds a use on its photo (Photo.TryBeginUse) for as long as it touches the photo's bitmaps,
-    // so a photo that leaves the list mid-load is disposed by whichever of the owner and the load finishes last.
-
-    // The preview worker marks the key in flight before starting this; every exit below clears it.
-    private async Task LoadPreviewAsync(int key)
-    {
-        Photo? photo = null;
-        try
-        {
-            if (_getPhoto(key) is not { } p || !p.TryBeginUse())
-            {
-                _previewTier.InFlight.Remove(key, out _);
-                return;
-            }
-            photo = p;
-            await photo.LoadPreview(_device);
-            if (DiscardIfRemoved(key, photo, _previewTier)) return;
-            _previewTier.Done[key] = 0;
-            _previewTier.InFlight.Remove(key, out _);
-            if (photo.Preview?.Origin == Origin.Disk) _diskCacheQueue.Push(key);
-            PreviewReady?.Invoke(key);
-            FireProgress();
-        }
-        catch (Exception ex)
-        {
-            // A key left in flight would never reload. Released here, not in finally: an exit above may have
-            // released it already and the worker claimed it again for a new load, whose claim must survive.
-            _previewTier.InFlight.Remove(key, out _);
-            Logger.Error(ex, $"Preview load failed for key {key}");
-        }
-        finally
-        {
-            photo?.EndUse();
-            _previewThrottler.Release();
-        }
-    }
-
-    // The HQ worker marks the key in flight before starting this; every exit below clears it.
-    private async Task LoadHqAsync(int key)
-    {
-        Photo? photo = null;
-        try
-        {
-            int gen = _hqGeneration;
-            if (_getPhoto(key) is not { } p || !p.TryBeginUse())
-            {
-                _hqTier.InFlight.Remove(key, out _);
-                return;
-            }
-            photo = p;
-            var isCentre = IsWindowCentre(key);
-            var loaded = await photo.LoadHq(_device, allowLarge: isCentre,
-                isCentre ? _centreCts.Token : CancellationToken.None);
-            if (DiscardIfRemoved(key, photo, _hqTier)) return;
-
-            // A large image finished just as the user left it: don't keep gigabytes for a neighbour.
-            if (loaded && photo.Hq is TiledHqDisplayItem && !IsWindowCentre(key))
-            {
-                photo.ReleaseTiledHq();
-                loaded = false;
-            }
-            if (!loaded)
-            {
-                // Oversized neighbour deferred, or its decode cancelled. MoveWindow re-queues it when it becomes
-                // the centre — unless that already happened while this load was in flight (MoveWindow skips
-                // in-flight keys), so check again now. Removed before the push: a window move in between then
-                // queues the key itself rather than skipping it as in flight and clearing this push.
-                _hqTier.InFlight.Remove(key, out _);
-                if (IsWindowCentre(key)) _hqTier.Queue.Push(key);
-                return;
-            }
-            if (DiscardedStaleRawDecode(key, photo, gen)) return;
-            _hqTier.Done[key] = 0;
-            _hqTier.InFlight.Remove(key, out _);
-            HqReady?.Invoke(key);
-        }
-        catch (Exception ex)
-        {
-            // A key left in flight would never reload, and as the centre it would hold back every neighbour.
-            _hqTier.InFlight.Remove(key, out _);
-            Logger.Error(ex, $"HQ load failed for key {key}");
-        }
-        finally
-        {
-            photo?.EndUse();
-            _hqThrottler.Release();
-            _hqTier.Signal.Set(); // wakes the HQ worker: a neighbour may be waiting, or a key was requeued
+            // One bad step must not stop loading for the rest of the session: log it and plan again next wake-up.
+            try { Step(); }
+            catch (Exception ex) { Logger.Error(ex, "Prefetch step failed"); }
+            var wait = _holdHqUntil - Now;
+            try { WaitHandle.WaitAny(handles, wait > TimeSpan.Zero ? (int)wait.TotalMilliseconds + 1 : Timeout.Infinite); }
+            catch (ObjectDisposedException) { return; } // shutting down
         }
     }
 
     /// <summary>
-    /// The photo left the list while it was loading (deleted, or removed by a folder change/switch): record
-    /// nothing for the key. Its bitmaps — including any this load just attached — are disposed when the photo
-    /// is retired and its last use ends. Returns true when the load was discarded.
+    /// One round: applies every queued message, then plans once and carries the plan out. The prefetch thread's loop
+    /// body; with <see cref="PrefetchOptions.OwnThread"/> false the caller runs it, never two at once.
+    /// <para>
+    /// The order matters: cancel first, so a job abandoned this round frees its place in the limits for the next
+    /// (it still counts until it returns); then unload; then start new jobs.
+    /// </para>
     /// </summary>
-    private bool DiscardIfRemoved(int key, Photo photo, PhotoCacheTier tier)
+    internal void Step()
     {
-        if (ReferenceEquals(_getPhoto(key), photo)) return false;
-        tier.InFlight.Remove(key, out _);
-        return true;
+        if (_disposed)
+        {
+            _inbox.Clear(); // Dispose released whatever the queued results hold
+            return;
+        }
+        while (_inbox.TryDequeue(out var message))
+        {
+            // One failing message (a bug) must not stop the rest of the batch.
+            try { message(); }
+            catch (Exception ex) { Logger.Error(ex); }
+        }
+        if (_nav.Position < 0) return; // not started yet: no window to plan
+
+        _runningSpecs.Clear();
+        foreach (var job in _running) _runningSpecs.Add(job.Spec);
+        bool holdHq = _holdHq || Now < _holdHqUntil;
+        var settings = AppConfig.Settings; // the window sizes are read fresh every round, so a change applies at once
+        PrefetchPlanner.Make(_plan, _nav, _loaded, SlotOf, _runningSpecs, holdHq,
+            settings.CacheSizeOneSidePreviews, settings.CacheSizeOneSideHqImages, _options.Limits);
+
+        foreach (int i in _plan.Cancel) Abandon(_running[i]);
+        foreach (int key in _plan.EvictAll)
+        {
+            if (_getPhoto(key) is { } photo)
+            {
+                photo.Slots.DetachHq()?.Release(); // the canvas leases what is on screen
+                photo.Slots.DetachPreview()?.Release();
+            }
+            _loaded.Remove(key);
+            _needsDiskWrite.Remove(key);
+        }
+        foreach (int key in _plan.EvictHq)
+            _getPhoto(key)?.Slots.DetachHq()?.Release();
+        foreach (var spec in _plan.Start) StartJob(spec);
+
+        ReportStatus();
     }
 
-    /// <summary>
-    /// If RAW decode settings changed while this RAW HQ decode was in flight, the bitmap used the old
-    /// settings. Discards it (and requeues the key if still in the HQ window) and returns true, so the
-    /// caller skips committing the stale result. Returns false for the normal case.
-    /// </summary>
-    private bool DiscardedStaleRawDecode(int key, Photo photo, int gen)
+    // Prefetch thread. The planner's view of one key: what its slots hold, plus this cache's own notes about it.
+    private SlotState SlotOf(int key)
     {
-        if (gen == _hqGeneration || !photo.IsRaw) return false;
-
-        if (photo.DetachHq() is { } hq) DisposeAfterQueuedRenderWork([hq]);
-        _hqTier.InFlight.Remove(key, out _);
-        if (IsInDesiredHqWindow(key)) _hqTier.Queue.Push(key); // the caller's finally wakes the worker
-        return true;
+        var slots = _getPhoto(key)?.Slots;
+        return new SlotState(
+            HasPreview: slots?.Preview != null,
+            HasHq: slots?.Hq != null,
+            TiledHq: slots?.Hq is TiledHqDisplayItem,
+            NeedsHeavy: _needsHeavy.Contains(key),
+            NeedsDiskWrite: _needsDiskWrite.Contains(key),
+            PreviewParked: _parked.Contains((key, LoadKind.PreviewLight)) || _parked.Contains((key, LoadKind.PreviewHeavy)),
+            HqParked: _parked.Contains((key, LoadKind.Hq)));
     }
 
-    private async Task DiskCachePreviewAsync(int key)
+    // Prefetch thread. The job's result is no longer wanted: it is released when it returns. The job stays in _running
+    // (and counts against the limits) until then.
+    private static void Abandon(Job job)
     {
+        if (job.Abandoned) return;
+        job.Abandoned = true;
+        job.Cts.Cancel(); // only the large-image decode observes it; the others finish and are released
+    }
+
+    // -------------------------------------------------------------------------
+    // Jobs — decode off the prefetch thread, store on it
+    // -------------------------------------------------------------------------
+
+    // Prefetch thread. Tracks the job as running and starts its load (skipped if the key is no longer listed).
+    private void StartJob(RunningJob spec)
+    {
+        if (_getPhoto(spec.Key) is not { } photo) return;
+        var job = new Job(spec, photo);
+        _running.Add(job);
+        _ = RunJob(job); // never awaited: RunJob catches everything and reports back through the inbox
+    }
+
+    // Starts on the prefetch thread; the decoder moves the work off it at once. Everything after the first await runs
+    // on the thread pool (ConfigureAwait(false)), so the job's fields are written there; TryReturn and the inbox hand
+    // them back to the prefetch thread.
+    private async Task RunJob(Job job)
+    {
+        var (spec, photo) = (job.Spec, job.Photo);
         try
         {
-            if (_previewTier.Done.ContainsKey(key) &&
-                _getPhoto(key) is { Preview.Origin: Origin.Disk } image && image.TryBeginUse())
+            switch (spec.Kind)
             {
-                try
-                {
-                    if (image.Preview is { } preview)
-                    {
-                        var (actualWidth, actualHeight) = image.GetSourcePixelSize();
-                        await DiskCacherWithSqlite.Instance.PutInCache(image.FilePath, preview.Bitmap,
-                            (int)Math.Round(actualWidth), (int)Math.Round(actualHeight), preview.Rotation);
-                    }
-                }
-                finally { image.EndUse(); }
+                case LoadKind.PreviewLight or LoadKind.PreviewHeavy:
+                    var purpose = spec.Kind == LoadKind.PreviewHeavy ? Purpose.PreviewHeavy : Purpose.PreviewLight;
+                    if (await _decoder.LoadPreview(photo, purpose).ConfigureAwait(false) is { } loaded)
+                        (job.Preview, job.Thumbnail) = loaded;
+                    break;
+                case LoadKind.Hq:
+                    job.Hq = await _decoder.LoadHq(photo, spec.AllowLarge, job.Cts.Token).ConfigureAwait(false);
+                    break;
+                case LoadKind.DiskWrite:
+                    await WriteToDiskCache(photo).ConfigureAwait(false);
+                    break;
             }
         }
-        finally { _diskCacheThrottler.Release(); }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, $"{spec.Kind} load failed for {photo.FilePath}");
+            job.Failed = true;
+        }
+        if (job.TryReturn()) Post(() => Complete(job));
+    }
+
+    // Prefetch thread. Takes the job off the running list and stores what it brought, unless the job was abandoned or
+    // its photo left the list meanwhile — then it is released. A photo that left the window is unloaded by the next plan.
+    private void Complete(Job job)
+    {
+        _running.Remove(job);
+        int key = job.Spec.Key;
+        if (!ReferenceEquals(_getPhoto(key), job.Photo))
+        {
+            job.ReleaseResult(); // removed meanwhile: nothing about it is kept
+            return;
+        }
+        if (job.Failed)
+        {
+            // A cancelled large decode throws too: nothing to show for it. Otherwise the decode threw, which shows
+            // the error screen, the same as a decoder that reports the failure.
+            if (job.Abandoned)
+            {
+                job.ReleaseResult();
+                return;
+            }
+            switch (job.Spec.Kind)
+            {
+                case LoadKind.DiskWrite: _needsDiskWrite.Remove(key); return; // not retried
+                case LoadKind.Hq: job.Hq = _decoder.HqFailed(); break;
+                default: job.Preview = _decoder.PreviewFailed(); break;
+            }
+        }
+        bool keep = !job.Abandoned;
+        switch (job.Spec.Kind)
+        {
+            case LoadKind.DiskWrite:
+                _needsDiskWrite.Remove(key);
+                break;
+            case LoadKind.Hq:
+                CompleteHq(job, keep);
+                break;
+            default:
+                CompletePreview(job, keep);
+                break;
+        }
+    }
+
+    // Prefetch thread. Stores a preview over nothing or an error item, and notes what to do next for the key: the heavy
+    // lane (light pass found nothing), parking (heavy pass found nothing), or a disk-cache write (decoded from the file).
+    // keep is false for an abandoned job: its result is released and nothing is noted.
+    private void CompletePreview(Job job, bool keep)
+    {
+        int key = job.Spec.Key;
+        if (job.Preview is not { } preview)
+        {
+            // Light pass: only a full-image decode can make this preview, so the planner hands it to the heavy
+            // lane. Heavy pass: nothing found at all.
+            if (!keep) return;
+            if (job.Spec.Kind == LoadKind.PreviewLight) _needsHeavy.Add(key);
+            else _parked.Add((key, job.Spec.Kind));
+            return;
+        }
+        _needsHeavy.Remove(key);
+        var slots = job.Photo.Slots;
+        // Replaces nothing but an error placeholder (shared, never freed).
+        if (!keep || slots.Preview is { } existing && !existing.IsErrorOrUndefined())
+        {
+            preview.Release();
+            return;
+        }
+        if (!slots.TryAttachPreview(preview, job.Thumbnail)) return; // retired: released by TryAttachPreview
+        _loaded.Add(key);
+        if (preview.Origin == Origin.Disk) _needsDiskWrite.Add(key);
+        Loaded?.Invoke(key);
+    }
+
+    // Prefetch thread. Stores an HQ into an empty slot; a tiled large image only for the current centre (gigabytes of
+    // tiles are kept for the photo on screen alone). No result (a deferred or cancelled large image) parks a neighbour
+    // until it is the centre.
+    private void CompleteHq(Job job, bool keep)
+    {
+        int key = job.Spec.Key;
+        if (job.Hq is not { } hq)
+        {
+            // An oversized neighbour deferred, or a large decode cancelled. Retried when it is the centre.
+            if (keep && key != _nav.Key) _parked.Add((key, LoadKind.Hq));
+            return;
+        }
+        var slots = job.Photo.Slots;
+        if (!keep || slots.Hq != null || hq is TiledHqDisplayItem && key != _nav.Key)
+        {
+            hq.Release();
+            return;
+        }
+        if (!slots.TryAttachHq(hq)) return; // retired: released by TryAttachHq
+        _loaded.Add(key);
+        Loaded?.Invoke(key);
+    }
+
+    // Starts on the prefetch thread (from RunJob). Writes a preview decoded from the file (Origin.Disk) to the disk
+    // cache with the photo's real pixel size. Nothing to do if the preview was unloaded or replaced meanwhile.
+    private Task WriteToDiskCache(Photo photo)
+    {
+        if (photo.Slots.Preview is not { Origin: Origin.Disk } preview) return Task.CompletedTask;
+        var (actualWidth, actualHeight) = photo.Slots.GetSourcePixelSize();
+        // The path is read now, as the job starts: a rename meanwhile files it under the name it was decoded from.
+        return _decoder.PutPreviewInDiskCache(photo.FilePath, preview,
+            (int)Math.Round(actualWidth), (int)Math.Round(actualHeight));
     }
 
     // -------------------------------------------------------------------------
-    // Window maintenance
+    // Status
     // -------------------------------------------------------------------------
 
-    // Disposes the items it is given, never "the photo's current item": the photo may reload before this runs.
-    // One pump job for the batch, so a far jump that drops hundreds of previews wakes the canvas once.
-    private void DisposeAfterQueuedRenderWork(DisplayItem[] items)
+    // Prefetch thread. The planner counted the cached previews on its pass over the window; formatted and raised only
+    // when something changed.
+    private void ReportStatus()
     {
-        if (RunAfterQueuedRenderWork is { } run) run(() => DisposeAll(items));
-        else DisposeAll(items);
-
-        static void DisposeAll(DisplayItem[] items)
-        {
-            foreach (var item in items) item.Dispose();
-        }
-    }
-
-    // UI/STA thread: disposes what this window move detached, after the renderer swap it follows.
-    private void FlushRetiring()
-    {
-        if (_retiring.Count == 0) return;
-        var items = _retiring.ToArray();
-        _retiring.Clear();
-        DisposeAfterQueuedRenderWork(items);
-    }
-
-    private void SyncCacheTier(List<int> desiredKeys, PhotoCacheTier tier, Func<Photo, DisplayItem?> detach)
-    {
-        _syncKeysToKeep.Clear();
-        _syncKeysToKeep.UnionWith(desiredKeys);
-
-        foreach (int key in tier.Done.Keys)
-            if (!_syncKeysToKeep.Contains(key))
-            {
-                if (_getPhoto(key) is { } photo && detach(photo) is { } item)
-                    _retiring.Add(item);
-                tier.Done.TryRemove(key, out _);
-            }
-
-        tier.Queue.Clear();
-        foreach (int key in desiredKeys)
-            if (!tier.Done.ContainsKey(key) && !tier.InFlight.ContainsKey(key))
-                tier.Queue.Push(key);
-    }
-
-    // Membership test for the HQ window. Called from a ThreadPool thread (the stale-RAW-decode discard
-    // path), so it snapshots the copy-on-write key list and centre once and scans only that snapshot —
-    // never re-reading the shared fields or indexing a list that may have been swapped underneath it.
-    private bool IsInDesiredHqWindow(int key)
-    {
-        var keys = _windowKeys;
-        int centre = _windowCentre;
-        if (centre < 0 || centre >= keys.Count) return false;
-        return KeyWindow.IndexOf(keys, key, centre, AppConfig.Settings.CacheSizeOneSideHqImages) >= 0;
-    }
-
-    // A tiled HQ holds gigabytes of CPU tiles, so only the centre photo keeps one; a neighbour reloads on
-    // return. Runs on the UI/STA thread inside MoveWindow.
-    private void ReleaseTiledHqExcept(int centreKey)
-    {
-        foreach (var key in _hqTier.Done.Keys)
-            if (key != centreKey && _getPhoto(key) is { Hq: TiledHqDisplayItem } photo)
-            {
-                photo.ReleaseTiledHq();
-                _hqTier.Done.TryRemove(key, out _);
-            }
-    }
-
-    // Same snapshot discipline as IsInDesiredHqWindow — called from a ThreadPool thread.
-    private bool IsWindowCentre(int key)
-    {
-        var keys = _windowKeys;
-        int centre = _windowCentre;
-        return centre >= 0 && centre < keys.Count && keys[centre] == key;
-    }
-
-    // HQ worker thread: the next queued key is a neighbour and the current centre is still loading.
-    // Never holds the centre itself, and releases as soon as the centre moves (a new key) or its load ends
-    // (every exit of LoadHqAsync clears the in-flight mark and wakes the worker). Neighbour decodes already
-    // running are not stopped. A centre decode that never returns holds neighbours until the user moves on.
-    // Racy by design: the queue or window can change between this peek and the pop, letting at most one
-    // neighbour start early.
-    private bool NeighbourMustWait()
-    {
-        if (!_hqTier.Queue.TryPeek(out var next)) return false;
-        var keys = _windowKeys;
-        int centre = _windowCentre;
-        return centre >= 0 && centre < keys.Count && keys[centre] != next
-               && _hqTier.InFlight.ContainsKey(keys[centre]);
-    }
-
-    private List<int> FindNeighborKeys(int currentPosition, int cacheSizeOneSide)
-    {
-        var keys = _windowKeys;
-        var desiredKeys = new List<int>(cacheSizeOneSide * 2 + 1);
-        for (int i = cacheSizeOneSide; i >= 1; i--)
-        {
-            int nextPos = currentPosition + i;
-            if (nextPos < keys.Count)
-                desiredKeys.Add(keys[nextPos]);
-
-            int prevPos = currentPosition - i;
-            if (prevPos >= 0)
-                desiredKeys.Add(keys[prevPos]);
-        }
-        desiredKeys.Add(keys[currentPosition]);
-        return desiredKeys;
-    }
-
-    private void FireProgress()
-    {
-        var keys = _windowKeys;
-        int centre = _windowCentre;
-        if (centre < 0 || centre >= keys.Count) return;
-        int noOfFilesOnLeft = centre;
-        int noOfFilesOnRight = keys.Count - 1 - centre;
-
-        // Counted by position, not by key value (keys are not ordered). Previews are only kept inside the
-        // window, so scanning it finds every cached one.
-        var (lo, hi) = KeyWindow.Range(keys.Count, centre, AppConfig.Settings.CacheSizeOneSidePreviews);
-        int noOfCachedItemsOnLeft = 0;
-        int noOfCachedItemsOnRight = 0;
-        for (int pos = lo; pos < centre; pos++)
-            if (_previewTier.Done.ContainsKey(keys[pos])) noOfCachedItemsOnLeft++;
-        for (int pos = centre + 1; pos <= hi; pos++)
-            if (_previewTier.Done.ContainsKey(keys[pos])) noOfCachedItemsOnRight++;
-        CacheStatusChanged?.Invoke($"{noOfCachedItemsOnLeft}/{noOfFilesOnLeft} < Cache > {noOfCachedItemsOnRight}/{noOfFilesOnRight}");
+        int left = _nav.Position, right = _nav.Keys.Count - 1 - _nav.Position;
+        var status = (_plan.CachedBefore, left, _plan.CachedAfter, right);
+        if (status == _lastStatus) return;
+        _lastStatus = status;
+        CacheStatusChanged?.Invoke($"{_plan.CachedBefore}/{left} < Cache > {_plan.CachedAfter}/{right}");
     }
 
     // -------------------------------------------------------------------------
     // IDisposable
     // -------------------------------------------------------------------------
 
+    /// <summary>
+    /// UI thread. Stops loading. Every decode still running, or returned but not yet stored, has its result released
+    /// whenever it arrives. Images already stored stay with their photos (retired by the controller).
+    /// </summary>
     public void Dispose()
     {
-        _cts.Cancel();
-        _centreCts.Cancel();
-        _previewTier.Signal.Set();
-        _hqTier.Signal.Set();
-        _diskCacheSignal.Set();
-
-        _cts.Dispose();
-        _previewThrottler.Dispose();
-        _hqThrottler.Dispose();
-        _diskCacheThrottler.Dispose();
-
-        _previewTier.Dispose();
-        _hqTier.Dispose();
-        _diskCacheSignal.Dispose();
+        if (_disposed) return;
+        _disposed = true;
+        _stop.Cancel();
+        if (_thread == null || _thread.Join(2000))
+        {
+            // The prefetch thread is gone: nothing else reads the running list now.
+            foreach (var job in _running) job.Orphan();
+            _running.Clear();
+        }
+        else Logger.Warn("The prefetch thread did not stop; results of its running decodes may not be released");
+        _wake.Dispose();
     }
 }

@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<AssemblyVersion>2.8.0.0</AssemblyVersion>
-		<TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
+		<TargetFramework>net11.0-windows10.0.22621.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 		<RootNamespace>FlyPhotos</RootNamespace>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
@@ -19,6 +19,8 @@
 
 		<ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
 		<PublishAot>true</PublishAot>
+		<!-- .NET 11 runtime async: the JIT/ILC builds async state machines instead of the C# compiler. -->
+		<Features>$(Features);runtime-async=on</Features>
 		<IlcOptimizationPreference>Speed</IlcOptimizationPreference>
 		<DefaultLanguage>en-US</DefaultLanguage>
 		<SatelliteResourceLanguages>en-US;de-DE;fr-FR;es-ES;ja-JP;ko-KR;it-IT;pl-PL;ru-RU;uk-UA;nl-NL;sv-SE;fi-FI;zh-CN;zh-TW;ml-IN;pt-PT;pt-BR;hu-HU;ar-SA</SatelliteResourceLanguages>

@@ -71,6 +71,12 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     /// </summary>
     public static DiskCacherWithSqlite Instance => _instance.Value;
 
+    /// <summary>
+    /// Where the database lives, when not the app's data folder. Set before the first <see cref="Instance"/>; tests
+    /// point it at a temp folder so they never touch the user's cache.
+    /// </summary>
+    internal static string? Folder { get; set; }
+
     // -------------------------------------------------------------------------
     // Prepared SQL commands (reused across calls for performance)
     // -------------------------------------------------------------------------
@@ -166,7 +172,7 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     /// </summary>
     private DiskCacherWithSqlite()
     {
-        var dbPath = Path.Combine(PathResolver.GetDbFolderPath(), "FlyPhotosCache_sqlite_2.db");
+        var dbPath = Path.Combine(Folder ?? PathResolver.GetDbFolderPath(), "FlyPhotosCache_sqlite_2.db");
 
         Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
 

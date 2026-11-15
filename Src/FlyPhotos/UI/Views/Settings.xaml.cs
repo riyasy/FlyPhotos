@@ -518,12 +518,14 @@ internal sealed partial class Settings
     private async void SliderLowResCacheSize_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
         AppConfig.Settings.CacheSizeOneSidePreviews = (int)SliderLowResCacheSize.Value;
+        SettingChanged?.Invoke(Setting.CacheSizeChange);
         await AppConfig.SaveAsync();
     }
 
     private async void SliderHighResCacheSize_OnValueChanged(object sender, RangeBaseValueChangedEventArgs e)
     {
         AppConfig.Settings.CacheSizeOneSideHqImages = (int)SliderHighResCacheSize.Value;
+        SettingChanged?.Invoke(Setting.CacheSizeChange);
         await AppConfig.SaveAsync();
     }
 

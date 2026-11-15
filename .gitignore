@@ -26,6 +26,7 @@ win-ARM64.pubxml.user
 # Local build scripts (00_build_all.ps1, 01_vcpkg_libheif.ps1/.md, 02_..., 99_clear_vcpkg_cache.ps1)
 /Src/[0-9][0-9]_*
 /Src/build_libheif/vcpkg
+/Src/FlyPhotos.Benchmarks/
 
 /Src/FlyPhotos/CLAUDE.md
 /Src/FlyPhotos/CONTEXT.md

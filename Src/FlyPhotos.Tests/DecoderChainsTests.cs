@@ -1,5 +1,6 @@
 using FlyPhotos.Core.Model;
 using FlyPhotos.Display.ImageReading;
+using FlyPhotos.Display.State;
 using D = FlyPhotos.Display.ImageReading.DecodeStep;
 
 namespace FlyPhotos.Tests;
@@ -12,10 +13,10 @@ public sealed class DecoderChainsTests
 
     /// <summary>A small stand-in for what CodecDiscovery finds on a real machine.</summary>
     private static readonly CodecSupport Codecs = new(
-        wic: Set(".jpg", ".png", ".gif", ".webp", ".bmp", ".tif", ".heic", ".nef", ".dds"),
-        wicRaw: Set(".nef"),
-        magick: Set(".jpg", ".png", ".heic", ".avif", ".psd", ".nef", ".tga", ".dds"),
-        magickRaw: Set(".nef"),
+        wic: Set(".jpg", ".png", ".gif", ".webp", ".bmp", ".tif", ".heic", ".nef", ".dng", ".jxl", ".dds"),
+        wicRaw: Set(".nef", ".dng"),
+        magick: Set(".jpg", ".png", ".heic", ".avif", ".psd", ".nef", ".dng", ".jxl", ".tga", ".dds"),
+        magickRaw: Set(".nef", ".dng"),
         rawler: Set(".nef"));
 
     /// <summary>The app's default settings: embedded previews on, RAW decoders WIC → Rawler → Magick.</summary>
@@ -45,7 +46,71 @@ public sealed class DecoderChainsTests
     public void First_heif_photo_never_generates_a_preview_but_the_strip_does()
     {
         CollectionAssert.AreEqual(new[] { D.HeifEmbeddedOnly, D.AvifHq, D.MagickHq }, Chain(".avif", Purpose.FirstPreview));
-        CollectionAssert.AreEqual(new[] { D.HeifEmbedded, D.MagickResized }, Chain(".heic", Purpose.Preview));
+        CollectionAssert.AreEqual(new[] { D.HeifEmbeddedOnly, D.HeifResized, D.MagickResized }, Chain(".heic", Purpose.Preview));
+    }
+
+    // The light chain is what background loading runs at full parallelism; a file it can't serve goes to the
+    // heavy lane (#276).
+
+    [TestMethod]
+    public void Window_positions_come_nearest_first_with_the_one_before_winning_a_tie()
+    {
+        CollectionAssert.AreEqual(new[] { 3, 2, 4, 1, 5, 0 }, KeyWindow.NearestFirst(6, 3, 300).ToList());
+        CollectionAssert.AreEqual(new[] { 0, 1, 2 }, KeyWindow.NearestFirst(6, 0, 2).ToList(), "clamped at the start");
+        CollectionAssert.AreEqual(new[] { 5, 4 }, KeyWindow.NearestFirst(6, 5, 1).ToList(), "clamped at the end");
+        Assert.AreEqual(0, KeyWindow.NearestFirst(6, -1, 300).Count(), "no centre");
+    }
+
+    [TestMethod]
+    public void Light_preview_of_heif_and_avif_is_the_stored_thumbnail_only()
+    {
+        CollectionAssert.AreEqual(new[] { D.HeifEmbeddedOnly }, Chain(".heic", Purpose.PreviewLight));
+        CollectionAssert.AreEqual(new[] { D.HeifEmbeddedOnly }, Chain(".avif", Purpose.PreviewLight));
+    }
+
+    [TestMethod]
+    public void Light_preview_stops_before_the_first_full_image_decode()
+    {
+        // JXL has no thumbnail and no reduced-size decode: only the quick thumbnail attempt is light.
+        CollectionAssert.AreEqual(new[] { D.WicEmbedded, D.MagicScalerResized, D.MagickResized }, Chain(".jxl", Purpose.Preview));
+        CollectionAssert.AreEqual(new[] { D.WicEmbedded }, Chain(".jxl", Purpose.PreviewLight));
+        CollectionAssert.AreEqual(new[] { D.WicEmbedded, D.MagickRawEmbedded }, Chain(".nef", Purpose.PreviewLight));
+        // ImageMagick only: nothing light at all.
+        Assert.AreEqual(0, Chain(".tga", Purpose.PreviewLight).Count);
+        // The DNG codec may return the full-size image as the thumbnail (iPhone ProRAW).
+        Assert.AreEqual(0, Chain(".dng", Purpose.PreviewLight).Count);
+    }
+
+    [TestMethod]
+    public void Light_preview_is_the_whole_chain_when_nothing_in_it_is_heavy()
+    {
+        foreach (var ext in new[] { ".png", ".gif", ".webp", ".bmp", ".tif", ".psd", ".svg", ".ico", ".dds" })
+            CollectionAssert.AreEqual(Chain(ext, Purpose.Preview), Chain(ext, Purpose.PreviewLight), ext);
+    }
+
+    [TestMethod]
+    public void Light_preview_of_jpeg_keeps_its_reduced_size_decode_and_drops_only_the_magick_fallback()
+    {
+        CollectionAssert.AreEqual(new[] { D.WicEmbedded, D.MagicScalerResized, D.MagickResized }, Chain(".jpg", Purpose.Preview));
+        CollectionAssert.AreEqual(new[] { D.WicEmbedded, D.MagicScalerResized }, Chain(".jpg", Purpose.PreviewLight));
+    }
+
+    [TestMethod]
+    public void Light_preview_is_a_prefix_of_the_preview_chain_without_heavy_steps()
+    {
+        foreach (var ext in new[] { ".jpg", ".png", ".gif", ".webp", ".bmp", ".tif", ".heic", ".avif", ".psd", ".svg",
+                     ".ico", ".dds", ".nef", ".dng", ".jxl", ".tga", ".xyz" })
+        {
+            var format = ImageFormats.FromExtension(ext);
+            var full = Chain(ext, Purpose.Preview);
+            var light = Chain(ext, Purpose.PreviewLight);
+
+            CollectionAssert.AreEqual(full.Take(light.Count).ToList(), light, ext);
+            CollectionAssert.AreEqual(full.Skip(light.Count).ToList(), Chain(ext, Purpose.PreviewHeavy), ext);
+            Assert.IsFalse(light.Any(step => DecoderChains.IsHeavy(step, format, ext)), ext);
+            // What was cut starts with a heavy step: the light chain doesn't stop early.
+            Assert.IsTrue(light.Count == full.Count || DecoderChains.IsHeavy(full[light.Count], format, ext), ext);
+        }
     }
 
     [TestMethod]

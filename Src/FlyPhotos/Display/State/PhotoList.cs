@@ -11,21 +11,24 @@ namespace FlyPhotos.Display.State;
 /// position-ordered key snapshot used for navigation. Keys are stable identities, NOT positions: Folder
 /// mode inserts new keys anywhere, so key values say nothing about order — never compare or binary-search them.
 /// <para>
-/// The concurrency model is preserved verbatim from when these were two fields on
-/// <c>PhotoDisplayController</c>:
+/// Concurrency:
 /// <list type="bullet">
-///   <item>the dictionary is a <see cref="ConcurrentDictionary{TKey,TValue}"/> — lock-free reads on
-///     ThreadPool threads (the prefetch cache, the thumbnail strip) while the UI thread mutates it on
-///     delete;</item>
+///   <item>the dictionary is a <see cref="ConcurrentDictionary{TKey,TValue}"/> — lock-free reads on any thread
+///     (the prefetch cache, the thumbnail strip) while the list is changed;</item>
 ///   <item>the key list is a <b>volatile copy-on-write snapshot</b> — readers capture the reference
 ///     and iterate without a lock; mutation publishes a new list, never edits in place.</item>
 /// </list>
-/// Position is intentionally NOT owned here — it stays in <c>PhotoSessionState</c>.
+/// Writers take turns: the startup thread builds the listing (<see cref="PrepareListing"/>), then the UI thread
+/// publishes it and makes every later change. Position is not owned here: see <see cref="NavState"/>.
 /// </para>
 /// </summary>
-internal sealed class PhotoList : IPhotoProvider
+internal sealed class PhotoList
 {
+    // Every photo the list holds, by key, plus removed ones until Forget. Also holds the photos PrepareListing made
+    // before they are published. Read lock-free on any thread; written only by the thread that changes the list.
     private readonly ConcurrentDictionary<int, Photo> _photos = new();
+    // The published key order: an immutable list, replaced whole (never edited) by Initialize, Publish and
+    // ApplyChanges. Every key in it is in _photos.
     private volatile IReadOnlyList<int> _keys = Array.Empty<int>();
 
     /// <summary>
@@ -34,7 +37,10 @@ internal sealed class PhotoList : IPhotoProvider
     /// </summary>
     public IReadOnlyList<int> Keys => _keys;
 
-    /// <summary>Number of photos currently in the collection.</summary>
+    /// <summary>
+    /// Number of photos in the dictionary. Includes photos prepared but not yet published, and removed ones not yet
+    /// forgotten; use <see cref="Keys"/>.Count for the list's length.
+    /// </summary>
     public int Count => _photos.Count;
 
     /// <summary>The photo for <paramref name="key"/>, or null if absent. Lock-free.</summary>
@@ -48,7 +54,7 @@ internal sealed class PhotoList : IPhotoProvider
 
     /// <summary>
     /// Builds the collection from <paramref name="files"/> (keys 0..n-1) and publishes the key snapshot
-    /// atomically once fully populated. Mirrors the original startup population loop.
+    /// atomically once fully populated. Used for the startup list: the opened photo alone.
     /// </summary>
     public void Initialize(IReadOnlyList<string> files)
     {
@@ -62,8 +68,35 @@ internal sealed class PhotoList : IPhotoProvider
         _keys = keys; // publish the fully populated list atomically
     }
 
-    // Keys are never reused, so a cache entry or in-flight load for a removed key can never be
-    // mistaken for a newer photo. Only the thread that mutates the list touches this.
+    /// <summary>
+    /// Builds the full listing to replace the startup list (the opened photo alone), without publishing it: the
+    /// photo at <paramref name="keepKey"/> — already loading or on screen — takes <paramref name="keepPosition"/>
+    /// and keeps its key; every other file gets a new photo, added under a key no snapshot holds yet. Returns the
+    /// key list for <see cref="Publish"/>. Call once, before any other change to the list.
+    /// </summary>
+    public IReadOnlyList<int> PrepareListing(IReadOnlyList<string> files, int keepPosition, int keepKey)
+    {
+        var keys = new List<int>(files.Count);
+        for (int i = 0; i < files.Count; i++)
+        {
+            if (i == keepPosition)
+            {
+                keys.Add(keepKey);
+                continue;
+            }
+            int key = _nextKey++;
+            _photos[key] = new Photo(files[i]);
+            keys.Add(key);
+        }
+        return keys;
+    }
+
+    /// <summary>Publishes a key list from <see cref="PrepareListing"/>, atomically. The thread that owns the list.</summary>
+    public void Publish(IReadOnlyList<int> keys) => _keys = keys;
+
+    // The key the next new photo gets. Keys are never reused, so a cache entry or in-flight load for a removed key can
+    // never be mistaken for a newer photo. Only the thread that mutates the list touches this (the startup thread in
+    // PrepareListing, then the UI thread).
     private int _nextKey;
 
     /// <summary>
@@ -74,11 +107,11 @@ internal sealed class PhotoList : IPhotoProvider
     /// navigate. Returns the removed (key, photo) pairs. Call from the one thread that mutates the list.
     /// <paramref name="onRenamed"/> gets each applied rename as (the photo's exact old path, its new path).
     /// </summary>
-    public List<(int Key, Photo Photo)> ApplyChanges(Predicate<string> isRemoved,
-        IReadOnlyDictionary<string, string>? renamed, IReadOnlyList<string> addedSorted,
-        IComparer<string>? order, int keepKey, Action<string, string>? onRenamed = null)
+    public List<(int Key, Photo Photo)> ApplyChanges(ListChangeBatch batch, int keepKey,
+        Action<string, string>? onRenamed = null)
     {
-        var result = ListChange.Apply(_keys, key => _photos[key].FilePath, isRemoved, renamed, addedSorted, order,
+        var result = ListChange.Apply(_keys, key => _photos[key].FilePath, batch.IsRemoved, batch.Renamed, batch.Added,
+            batch.Order,
             create: path =>
             {
                 int key = _nextKey++;
@@ -103,30 +136,5 @@ internal sealed class PhotoList : IPhotoProvider
     {
         foreach (var (key, _) in removed)
             _photos.TryRemove(key, out _);
-    }
-
-    /// <summary>Replaces (or adds) the photo at <paramref name="key"/> without touching the snapshot.</summary>
-    public void Set(int key, Photo photo) => _photos[key] = photo;
-
-    /// <summary>
-    /// Removes the photo at <paramref name="position"/> in the key snapshot: drops it from the
-    /// dictionary and publishes a new snapshot with that position removed. Returns the removed photo
-    /// (the caller owns disposal), or null if <paramref name="position"/> is out of range.
-    /// <para>
-    /// ThreadPool readers that captured the old snapshot continue to see a consistent (stale) list and
-    /// pick up the new one on their next read of <see cref="Keys"/> — the same copy-on-write contract
-    /// the controller relied on.
-    /// </para>
-    /// </summary>
-    public Photo? RemoveAt(int position)
-    {
-        var current = _keys;
-        if (position < 0 || position >= current.Count) return null;
-        int key = current[position];
-        _photos.TryRemove(key, out var removed);
-        var updated = new List<int>(current);
-        updated.RemoveAt(position);
-        _keys = updated; // publish atomically
-        return removed;
     }
 }

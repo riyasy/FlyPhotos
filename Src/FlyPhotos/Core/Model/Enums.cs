@@ -73,6 +73,10 @@ public enum RightClickHoldBehavior
     Nothing
 }
 
+/// <summary>
+/// Which setting the settings window just changed, so the viewer window can apply it at once
+/// (PhotoDisplayWindow.SettingWindow_SettingChanged). The new value is already in AppConfig.Settings.
+/// </summary>
 public enum Setting
 {
     ThumbnailShowHide,
@@ -92,7 +96,9 @@ public enum Setting
     ImageScalingQualityChange,
     RawDecodingChange,
     KeyBindingsChanged,
-    EdgeNavArrowsShowHide
+    EdgeNavArrowsShowHide,
+    /// <summary>A preview or HQ window size changed: the prefetch cache re-plans now.</summary>
+    CacheSizeChange
 }
 
 public enum ScrollDirection

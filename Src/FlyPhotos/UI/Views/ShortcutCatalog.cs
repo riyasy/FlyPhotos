@@ -382,7 +382,7 @@ internal enum CommandFlags
     /// trigger a browser-style copy, Enter would activate the focused button, Delete moves focus.</summary>
     Suppress = 1 << 1,
 
-    /// <summary>Opens a navigation burst, which parks the HQ cache tier until a <c>Brake()</c>
+    /// <summary>Opens a navigation burst, which holds HQ loading until a <c>Brake()</c>
     /// unwinds it, so key-up on whatever chord is bound to this has to brake.</summary>
     Burst = 1 << 2,
 
