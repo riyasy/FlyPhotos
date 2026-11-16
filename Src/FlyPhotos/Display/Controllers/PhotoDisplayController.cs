@@ -670,7 +670,9 @@ internal partial class PhotoDisplayController
     {
         if (_photoList.GetPhoto(_nav.Key) is not { } photo)
             return Task.CompletedTask;
-        return PhotoClipboard.CopyToClipboardAsync(photo, _displayLevel);
+        // The page on screen, if this photo is a multi-page one (a PDF copies that page).
+        var page = _canvasController.CurrentPage is { } p && p.Path == photo.FilePath ? p.Index : 0;
+        return PhotoClipboard.CopyToClipboardAsync(photo, _displayLevel, page);
     }
 
     // --- Queries ---

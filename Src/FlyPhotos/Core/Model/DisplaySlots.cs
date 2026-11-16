@@ -165,6 +165,7 @@ internal sealed class DisplaySlots
             {
                 TiledHqDisplayItem tiled => (tiled.Pyramid.FullWidth, tiled.Pyramid.FullHeight),
                 SvgHqDisplayItem svg => (svg.Width, svg.Height),
+                PdfHqDisplayItem pdf => (pdf.Width, pdf.Height),
                 PreviewDisplayItem { Metadata: { FullWidth: > 0, FullHeight: > 0 } m } => (m.FullWidth, m.FullHeight),
                 { Bitmap: { } bitmap } => (bitmap.SizeInPixels.Width, bitmap.SizeInPixels.Height),
                 _ => null

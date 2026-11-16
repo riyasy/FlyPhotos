@@ -165,6 +165,16 @@ public sealed class DecoderChainsTests
     }
 
     [TestMethod]
+    public void Pdf_uses_only_windows_data_pdf()
+    {
+        CollectionAssert.AreEqual(new[] { D.PdfHq }, Chain(".pdf", Purpose.Hq));
+        CollectionAssert.AreEqual(new[] { D.PdfHq }, Chain(".pdf", Purpose.FirstPreview));
+        CollectionAssert.AreEqual(new[] { D.PdfResized }, Chain(".pdf", Purpose.Preview));
+        CollectionAssert.AreEqual(new[] { D.PdfResized }, Chain(".pdf", Purpose.PreviewLight));
+        Assert.AreEqual(0, Chain(".pdf", Purpose.Large).Count);
+    }
+
+    [TestMethod]
     public void Raw_check_covers_every_raw_codec() =>
         Assert.IsTrue(Codecs.Raw(".nef") && !Codecs.Raw(".jpg"));
 

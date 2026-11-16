@@ -76,6 +76,8 @@ public sealed class ImageFormatTests
         Assert.AreEqual(ImageFormat.Ico, ImageFormats.Detect([0, 0, 1, 0, 2, 0, 16, 16]));
         Assert.AreEqual(ImageFormat.Dds, ImageFormats.Detect("DDS |\0\0\0"u8));
         Assert.AreEqual(ImageFormat.Dds, ImageFormats.FromExtension(".DDS"));
+        Assert.AreEqual(ImageFormat.Pdf, ImageFormats.Detect("%PDF-1.7\n%"u8));
+        Assert.AreEqual(ImageFormat.Pdf, ImageFormats.FromExtension(".PDF"));
     }
 
     [TestMethod]

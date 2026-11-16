@@ -145,7 +145,8 @@ internal static class CodecDiscovery
             new() { FriendlyName = "PSD Decoder", Type = "Fly", FileExtensions = [".psd"] },
             new() { FriendlyName = "SVG Decoder", Type = "Fly", FileExtensions = [".svg"] },
             new() { FriendlyName = "HEIC Decoder", Type = "Fly", FileExtensions = [.. HeifExtensions] },
-            new() { FriendlyName = "DDS Decoder", Type = "Fly", FileExtensions = [".dds"] }
+            new() { FriendlyName = "DDS Decoder", Type = "Fly", FileExtensions = [".dds"] },
+            new() { FriendlyName = "PDF Decoder", Type = "Fly", FileExtensions = [".pdf"] }
         };
         return list;
     }

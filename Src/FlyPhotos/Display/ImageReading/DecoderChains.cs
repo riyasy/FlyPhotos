@@ -42,7 +42,7 @@ internal enum DecodeStep
     WicEmbedded, WicResized, WicHq, WicRawHq,
     MagickHq, MagickRawHq, MagickResized, MagickRawEmbedded,
     MagicScalerResized,
-    PsdEmbedded, SvgHq, SvgResized,
+    PsdEmbedded, SvgHq, SvgResized, PdfHq, PdfResized,
     Gif, Webp, Png, Tiff, IcoHq, IcoPreview,
     Rawler,
     LargeHeif, LargeWic, LargeMagick
@@ -157,6 +157,10 @@ internal static class DecoderChains
             // No tiled path: the DDS reader caps its decode at the GPU limit, so a DDS is never oversized.
             case (Purpose.Large, ImageFormat.Dds): break;
             case (Purpose.Preview, ImageFormat.Svg): Add(DecodeStep.SvgResized); break;
+            // Windows.Data.Pdf only. ImageMagick reads PDFs through Ghostscript, which is not shipped.
+            case (Purpose.Preview, ImageFormat.Pdf): Add(DecodeStep.PdfResized); break;
+            // Drawn as vectors at any zoom: never oversized.
+            case (Purpose.Large, ImageFormat.Pdf): break;
             case (Purpose.Preview, ImageFormat.Gif or ImageFormat.Png or ImageFormat.Bmp or ImageFormat.Webp):
                 Add(DecodeStep.WicResized);
                 break;
@@ -217,6 +221,7 @@ internal static class DecoderChains
                 case ImageFormat.Psd: Add(DecodeStep.MagickHq); break;
                 case ImageFormat.Dds: Add(DecodeStep.DdsHq); break;
                 case ImageFormat.Svg: Add(DecodeStep.SvgHq); break;
+                case ImageFormat.Pdf: Add(DecodeStep.PdfHq); break;
                 case ImageFormat.Gif: Add(DecodeStep.Gif); break;
                 case ImageFormat.Webp: Add(DecodeStep.Webp); break;
                 case ImageFormat.Png: Add(DecodeStep.Png); break;

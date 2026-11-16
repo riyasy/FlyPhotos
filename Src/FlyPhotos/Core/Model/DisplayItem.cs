@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Utils;
@@ -150,6 +151,38 @@ internal sealed partial class SvgHqDisplayItem(Origin origin, SvgScene.Lease lea
 
     /// <summary>Drops this item's ownership of the scene; a renderer still drawing it keeps it alive.</summary>
     public override void Free() => lease.Dispose();
+}
+
+/// <summary>
+/// A PDF, drawn as vectors at any zoom by PdfRenderer, which opens the file itself (opening is cheap). Holds no
+/// pixels, no open document and no path: the file can be renamed while the item is cached, so users pass the
+/// photo's current path (<see cref="Photo.FilePath"/>). Only what the canvas needs before the renderer has drawn.
+/// </summary>
+/// <param name="device">The canvas device the reader ran on; the renderer and the clipboard render on it.</param>
+/// <param name="width">Page 1's size at 100% (96 DPI), the size the photo reports.</param>
+/// <param name="pageCount">How many pages the document has (known before the renderer opens it).</param>
+internal sealed partial class PdfHqDisplayItem(CanvasDevice device, Origin origin, int width, int height,
+    int pageCount) : HqDisplayItem(null, origin, 0)
+{
+    /// <summary>Longest side of a page copied to the clipboard: 200% of an A4 page, without a gigabyte A0 poster.</summary>
+    private const int ClipboardMaxDimension = 4096;
+
+    /// <summary>The canvas device the renderer and the clipboard render on.</summary>
+    public CanvasDevice Device { get; } = device;
+    /// <summary>Page 1's width at 100%.</summary>
+    public int Width { get; } = width;
+    /// <summary>Page 1's height at 100%.</summary>
+    public int Height { get; } = height;
+    /// <summary>How many pages the document has.</summary>
+    public int PageCount { get; } = pageCount;
+
+    /// <summary>
+    /// A new bitmap of page <paramref name="pageIndex"/> (clamped to the document) of the PDF at <paramref name="path"/>
+    /// at 200%, at most <see cref="ClipboardMaxDimension"/> on the longer side, owned by the caller; for
+    /// paste-as-image. Rendered on the thread pool. Throws if the file can't be opened or drawn.
+    /// </summary>
+    public Task<CanvasBitmap> RasterizeAsync(string path, int pageIndex) =>
+        PdfReader.RenderPage(Device, path, Math.Clamp(pageIndex, 0, PageCount - 1), 2.0, ClipboardMaxDimension);
 }
 
 /// <summary>

@@ -222,6 +222,9 @@ internal partial class CanvasController : ICanvasController
                 case SvgHqDisplayItem svgDispItem:
                     HandleHqSvgDisplayItem(photo, svgDispItem, ctx);
                     break;
+                case PdfHqDisplayItem pdfDispItem:
+                    HandleHqPdfDisplayItem(photo, pdfDispItem, ctx);
+                    break;
                 case HqDisplayItem hqDispItem:
                     HandleHqStaticDisplayItem(photo, hqDispItem, ctx);
                     break;
@@ -337,6 +340,19 @@ internal partial class CanvasController : ICanvasController
             _imageSize, svgDispItem.Rotation, ctx, forceThumbNailRedraw: true);
     }
 
+    /// <summary>
+    /// UI thread. Installs the vector renderer for a PDF. The HQ item holds no pixels, so the renderer is lent the
+    /// photo's preview (its own lease) to draw until its first render of the page lands. It reads the photo's path
+    /// whenever it opens the file, so a rename (in the app, or one the folder watcher reports) is followed.
+    /// </summary>
+    private void HandleHqPdfDisplayItem(Photo photo, PdfHqDisplayItem pdfDispItem, PhotoInstallContext ctx)
+    {
+        var preview = photo.Slots.Get(DisplayLevel.Preview) as PreviewDisplayItem;
+        if (preview != null && !preview.TryAcquire()) preview = null;
+        InstallRenderer(new PdfRenderer(_d2dCanvas, pdfDispItem, () => photo.FilePath, preview, RequestInvalidate),
+            _imageSize, 0, ctx, forceThumbNailRedraw: true);
+    }
+
     // UI thread. A preview, laid out at the photo's full size so the HQ later replaces it in place. No mip chain:
     // a preview is small and on screen only briefly.
     private void HandlePreviewDisplayItem(Photo photo, PreviewDisplayItem previewDispItem, PhotoInstallContext ctx)
@@ -422,7 +438,9 @@ internal partial class CanvasController : ICanvasController
         // InstallRenderer is always called on the UI thread, so we can fire the event directly here
         // without a DispatcherQueue.TryEnqueue. Only notify when the multipage state actually changes
         // to avoid redundant button-visibility updates on every photo navigation.
-        var isMultiPage = newRenderer is MultiPageRenderer;
+        // A one-page PDF gets no page buttons or label, like a single-page TIFF.
+        var multiPage = newRenderer is IMultiPage { PageCount: > 1 } m ? m : null;
+        var isMultiPage = multiPage != null;
         if (isMultiPage != _isMultiPageActive)
         {
             _isMultiPageActive = isMultiPage;
@@ -431,7 +449,7 @@ internal partial class CanvasController : ICanvasController
 
         // Publish (or clear) the page label for the filename bar. Unlike the event above this must be
         // written on every install, since the path and page count change from photo to photo.
-        CurrentPage = newRenderer is MultiPageRenderer multiPage
+        CurrentPage = isMultiPage
             ? new MultiPagePosition(ctx.PhotoPath, 0, multiPage.PageCount,
                 (int)imageSize.Width, (int)imageSize.Height)
             : null;
@@ -588,7 +606,7 @@ internal partial class CanvasController : ICanvasController
         var photoPath = _currentPhotoPath;
         _pump.Enqueue(() =>
         {
-            if (_currentRenderer is not MultiPageRenderer multiPageRenderer) return;
+            if (_currentRenderer is not IMultiPage multiPageRenderer) return;
             var targetIndex = navDirection == NavDirection.Next
                 ? multiPageRenderer.CurrentPageIndex + 1
                 : multiPageRenderer.CurrentPageIndex - 1;
@@ -603,7 +621,7 @@ internal partial class CanvasController : ICanvasController
     /// Pages of equal size (the normal multi-page TIFF case) leave the user's zoom/pan untouched;
     /// ICO frames, which shrink from 256 px to 16 px, get a fresh fit each time.
     /// </summary>
-    private async Task LoadAndFitPageAsync(MultiPageRenderer renderer, int targetIndex, Size canvasSize, string photoPath)
+    private async Task LoadAndFitPageAsync(IMultiPage renderer, int targetIndex, Size canvasSize, string photoPath)
     {
         if (await renderer.LoadPageAsync(targetIndex) is not { } pageSize) return;
 

@@ -9,7 +9,7 @@ namespace FlyPhotos.Display.ImageReading;
 /// The formats that get their own decoder chain. Everything else (JPEG, BMP, RAW, the WIC/Magick long tail)
 /// shares the generic chain, which is picked by extension.
 /// </summary>
-internal enum ImageFormat { Other, Jpeg, Png, Gif, Webp, Bmp, Tiff, Ico, Heif, Avif, Psd, Svg, Dds }
+internal enum ImageFormat { Other, Jpeg, Png, Gif, Webp, Bmp, Tiff, Ico, Heif, Avif, Psd, Svg, Dds, Pdf }
 
 /// <summary>Maps extensions and file headers to <see cref="ImageFormat"/>. Pure: no I/O.</summary>
 internal static class ImageFormats
@@ -28,7 +28,8 @@ internal static class ImageFormats
         [".avif"] = ImageFormat.Avif,
         [".psd"] = ImageFormat.Psd,
         [".svg"] = ImageFormat.Svg,
-        [".dds"] = ImageFormat.Dds
+        [".dds"] = ImageFormat.Dds,
+        [".pdf"] = ImageFormat.Pdf
     };
 
     /// <summary>The format an extension names; <see cref="ImageFormat.Other"/> when it has no chain of its own.</summary>
@@ -50,6 +51,7 @@ internal static class ImageFormats
         ImageFormat.Psd => ".psd",
         ImageFormat.Svg => ".svg",
         ImageFormat.Dds => ".dds",
+        ImageFormat.Pdf => ".pdf",
         _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Other has no single extension")
     };
 
@@ -66,6 +68,7 @@ internal static class ImageFormats
             return ImageFormat.Webp;
         if (header.StartsWith("8BPS"u8)) return ImageFormat.Psd;
         if (header.StartsWith("DDS "u8)) return ImageFormat.Dds;
+        if (header.StartsWith("%PDF-"u8)) return ImageFormat.Pdf;
         // "BM" alone is weak; its two reserved header fields (bytes 6-9) are always zero.
         if (header.Length >= 14 && header.StartsWith("BM"u8) && BinaryPrimitives.ReadUInt32LittleEndian(header[6..]) == 0)
             return ImageFormat.Bmp;

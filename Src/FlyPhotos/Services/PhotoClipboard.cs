@@ -15,8 +15,8 @@ namespace FlyPhotos.Services;
 /// <summary>
 /// Writes a photo to the Windows clipboard: a file reference (with hidden/system-file fallback)
 /// plus the in-memory bitmap at the current display level for paste-as-image targets. A pure leaf
-/// operation — depends only on the photo and its display level, not on navigation, the photo list,
-/// or the prefetch cache.
+/// operation — depends only on the photo, its display level and (for a PDF) the page on screen, not on
+/// navigation, the photo list, or the prefetch cache.
 /// </summary>
 internal static class PhotoClipboard
 {
@@ -26,7 +26,9 @@ internal static class PhotoClipboard
     /// Copies <paramref name="photo"/> to the clipboard. Errors are swallowed and logged — a failed
     /// copy must never crash the caller. No-ops if the source file no longer exists on disk.
     /// </summary>
-    public static async Task CopyToClipboardAsync(Photo photo, DisplayLevel level)
+    /// <param name="pageIndex">The page on screen. Only a PDF uses it (that page is copied as the image); other
+    /// multi-page photos copy their first page.</param>
+    public static async Task CopyToClipboardAsync(Photo photo, DisplayLevel level, int pageIndex)
     {
         try
         {
@@ -44,10 +46,16 @@ internal static class PhotoClipboard
             // Leased for the copy: the cache may release the item meanwhile (window move, RAW setting change).
             var item = level == DisplayLevel.PlaceHolder ? null : photo.Slots.Get(level);
             if (item != null && !item.TryAcquire()) item = null;
-            var svgBitmap = item is SvgHqDisplayItem svg ? TryRasterize(svg) : null;
+            // Vector items have no bitmap of their own: draw one. A PDF draws the page on screen.
+            var drawnBitmap = item switch
+            {
+                SvgHqDisplayItem svg => TryRasterize(svg),
+                PdfHqDisplayItem pdf => await TryRenderPdfPage(pdf, filePath, pageIndex),
+                _ => null
+            };
             try
             {
-                var canvasBitmap = svgBitmap ?? item?.Bitmap;
+                var canvasBitmap = drawnBitmap ?? item?.Bitmap;
                 if (canvasBitmap != null)
                 {
                     var streamReference = await GetCanvasBitmapAsAccessStream(canvasBitmap);
@@ -56,7 +64,7 @@ internal static class PhotoClipboard
             }
             finally
             {
-                svgBitmap?.Dispose();
+                drawnBitmap?.Dispose();
                 item?.Release();
             }
 
@@ -79,6 +87,22 @@ internal static class PhotoClipboard
         catch (Exception ex)
         {
             Logger.Error(ex, "SVG GPU rasterize for the clipboard failed");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// The PDF page drawn at 200% (readable when pasted); null if that fails, so only the file reference is copied.
+    /// </summary>
+    private static async Task<CanvasBitmap?> TryRenderPdfPage(PdfHqDisplayItem pdf, string path, int pageIndex)
+    {
+        try
+        {
+            return await pdf.RasterizeAsync(path, pageIndex);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "PDF page render for the clipboard failed");
             return null;
         }
     }

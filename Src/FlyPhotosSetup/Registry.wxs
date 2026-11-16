@@ -6,7 +6,8 @@
 
       * HKCR\FlyPhotos.Image                  - the ProgID (icon + open command)
       * HKCR\Applications\FlyPhotos.exe        - app open command + SupportedTypes
-                                                 (90 empty values -> "Open With" list)
+                                                 (91 empty values -> "Open With" list;
+                                                 .pdf only here, so it is never offered as the default)
       * HKLM\Software\RegisteredApplications    - Default Programs pointer
         + HKLM\Software\FlyPhotos\Capabilities  - ApplicationName + FileAssociations
                                                  (90 values -> FlyPhotos.Image)
@@ -34,7 +35,7 @@
         </RegistryKey>
       </Component>
 
-      <!-- HKCR\Applications\FlyPhotos.exe : open command + 90 SupportedTypes -->
+      <!-- HKCR\Applications\FlyPhotos.exe : open command + 91 SupportedTypes -->
       <Component Id="App_FlyPhotosExe" Guid="*">
         <RegistryKey Root="HKCR" Key="Applications\FlyPhotos.exe" ForceDeleteOnUninstall="yes">
           <RegistryValue Key="shell\open\command" Type="string"
@@ -106,6 +107,7 @@
           <RegistryValue Key="SupportedTypes" Name=".dng" Type="string" Value="" />
           <RegistryValue Key="SupportedTypes" Name=".psd" Type="string" Value="" />
           <RegistryValue Key="SupportedTypes" Name=".svg" Type="string" Value="" />
+          <RegistryValue Key="SupportedTypes" Name=".pdf" Type="string" Value="" />
           <RegistryValue Key="SupportedTypes" Name=".cin" Type="string" Value="" />
           <RegistryValue Key="SupportedTypes" Name=".dpx" Type="string" Value="" />
           <RegistryValue Key="SupportedTypes" Name=".exr" Type="string" Value="" />

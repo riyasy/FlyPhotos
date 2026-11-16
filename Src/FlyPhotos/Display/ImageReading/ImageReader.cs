@@ -48,7 +48,13 @@ internal static class ImageReader
         ICanvasResourceCreatorWithDpi d2dCanvas, string path)
     {
         if (!File.Exists(path)) return new StaticHqDisplayItem(_indicators.FileNotFound, Origin.ErrorScreen);
-        if (!AppConfig.Settings.OpenExitZoom && await FromDiskCache(d2dCanvas, path) is { } cached) return cached;
+        // Open-exit-zoom skips the cached preview so the zoom plays on the full image. A PDF's full image has no
+        // pixels of its own (its renderer shows the preview until its first render lands), so a cached PDF preview
+        // is shown first either way. With no cached one, the chain goes straight to the HQ: a PDF preview would
+        // cost a full page render, the same as the renderer's own first render.
+        var useDiskCache = !AppConfig.Settings.OpenExitZoom ||
+                           ImageFormats.FromExtension(Path.GetExtension(path)) == ImageFormat.Pdf;
+        if (useDiskCache && await FromDiskCache(d2dCanvas, path) is { } cached) return cached;
 
         using var file = new ImageFile(path);
         if (await Decode(d2dCanvas, file, Purpose.FirstPreview) is { } item) return item;
@@ -210,7 +216,8 @@ internal static class ImageReader
     private static bool ReadsByPath(DecodeStep step) => step is
         DecodeStep.HeifEmbeddedOnly or DecodeStep.HeifResized or DecodeStep.HeifHq or DecodeStep.DdsHq or DecodeStep.DdsResized or
         DecodeStep.MagickHq or DecodeStep.MagickRawHq or DecodeStep.MagickResized or DecodeStep.MagickRawEmbedded or
-        DecodeStep.PsdEmbedded or DecodeStep.SvgHq or DecodeStep.SvgResized or DecodeStep.Rawler or
+        DecodeStep.PsdEmbedded or DecodeStep.SvgHq or DecodeStep.SvgResized or DecodeStep.PdfHq or
+        DecodeStep.PdfResized or DecodeStep.Rawler or
         DecodeStep.LargeHeif or DecodeStep.LargeMagick;
 
     /// <summary>Runs one reader; null when it couldn't read the file.</summary>
@@ -236,6 +243,8 @@ internal static class ImageReader
             DecodeStep.PsdEmbedded => ItemOrNull(await PsdReader.GetEmbedded(ctrl, file.Path)),
             DecodeStep.SvgHq => ItemOrNull(await SvgReader.GetHq(ctrl, file.Path)),
             DecodeStep.SvgResized => ItemOrNull(await SvgReader.GetResized(ctrl, file.Path)),
+            DecodeStep.PdfHq => ItemOrNull(await PdfReader.GetHq(ctrl, file.Path)),
+            DecodeStep.PdfResized => ItemOrNull(await PdfReader.GetResized(ctrl, file.Path)),
             DecodeStep.Gif => ItemOrNull(await GifReader.GetHq(ctrl, file)),
             DecodeStep.Webp => ItemOrNull(await WebpReader.GetHq(ctrl, file)),
             DecodeStep.Png => ItemOrNull(await PngReader.GetHq(ctrl, file)),
@@ -265,11 +274,12 @@ internal static class ImageReader
     /// by a broken file. Only failures pay for this size probe.
     /// </summary>
     /// <remarks>
-    /// Never true for DDS: its reader caps the decode at the GPU limit itself, and the size probe would run
-    /// WIC and ImageMagick on a format only DirectXTex decodes.
+    /// Never true for a format with no tiled decoder (DDS caps its decode at the GPU limit, PDF has no pixel
+    /// size): "too big" couldn't change what happens, and the probe would run WIC and ImageMagick on a format
+    /// they don't read.
     /// </remarks>
     private static async Task<bool> IsOversized(ICanvasResourceCreatorWithDpi d2dCanvas, ImageFile file) =>
-        file.Oversized ??= file.Format != ImageFormat.Dds &&
+        file.Oversized ??= ChainFor(file, Purpose.Large).Count > 0 &&
                            await LargeImageReader.IsOversizedAsync(file, d2dCanvas.Device.MaximumBitmapSizeInPixels);
 
     /// <summary>The error screen shown when no decoder could read the image.</summary>

@@ -20,7 +20,7 @@ namespace FlyPhotos.Display.ImageRendering;
 /// navigate through pages. A <c>pageOrder</c> map lets a caller present the frames in an order other
 /// than the file's own (ICO shows them largest first).
 /// </summary>
-internal partial class MultiPageRenderer : IRenderer
+internal partial class MultiPageRenderer : IRenderer, IMultiPage
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
