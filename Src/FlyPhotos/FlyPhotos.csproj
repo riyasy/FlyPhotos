@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<AssemblyVersion>2.8.0.0</AssemblyVersion>
+		<AssemblyVersion>2.9.0.0</AssemblyVersion>
 		<TargetFramework>net11.0-windows10.0.22621.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 		<RootNamespace>FlyPhotos</RootNamespace>
@@ -47,6 +47,16 @@
 	<ItemGroup>
 		<LinkerArg Include="/Brepro" />
 	</ItemGroup>
+
+	<!-- MSIX + .NET 11: the MSIX tooling (WinAppSdkRemoveLinkedFilesFromPayload) strips the managed
+	     payload from an AOT package via @(_AssembliesToSkipPublish), but ILCompiler 11 no longer emits
+	     that item. Without this the Store package ships coreclr, the BCL and every managed DLL next to
+	     the native exe (~100 MB instead of ~50 MB). Remove once the MSIX tooling handles ILCompiler 11. -->
+	<Target Name="FlyAotMsixSkipList" AfterTargets="ComputeLinkedFilesToPublish" BeforeTargets="WinAppSdkRemoveLinkedFilesFromPayload" Condition="'$(PublishAot)' == 'true'">
+		<ItemGroup>
+			<_AssembliesToSkipPublish Include="@(_RuntimePackFilesToSkipPublish);@(_IlcManagedInputAssemblies);@(IlcSatelliteAssembly)" />
+		</ItemGroup>
+	</Target>
 
 	<Target Name="CopyYourFolderAfterPublish" AfterTargets="Publish">
 		<Exec Command="XCOPY $(ProjectDir)Assets\*.* $(PublishDir)\Assets\ /S /Y" />
