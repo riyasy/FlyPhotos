@@ -53,6 +53,12 @@
             Background="Transparent"
             ClearColor="Transparent"
             IsFixedTimeStep="False" />
+        <!--  #280: the canvas's 1px top margin keeps the swap chain on composed flip (see docs/02_study/20260603_CanvasAnimatedControl_Backdrop_DWM_Notes.md), which left the backdrop/desktop showing as a line above the photo. Cover that row with black so it blends with the bezel.  -->
+        <Rectangle
+            Height="1"
+            VerticalAlignment="Top"
+            Fill="Black"
+            IsHitTestVisible="False" />
         <!--  Caption-button scrim (#168): keeps the glyphs legible over pure white/black photo areas. CaptionScrimFader shows it on hover and re-tints the stops to contrast with the glyphs. Height is in DIPs, so it scales with the caption buttons.  -->
         <Rectangle
             x:Name="CaptionScrim"
