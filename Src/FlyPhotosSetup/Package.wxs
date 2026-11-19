@@ -210,12 +210,18 @@
           <Text Value="&lt;a href=&quot;https://github.com/sponsors/riyasy&quot;&gt;Donate on GitHub Sponsors&lt;/a&gt;" />
         </Control>
 
+        <!-- Next stays disabled until this is ticked, so the user pauses on the page.
+             SUPPORT_LATER is deliberately not declared: unset = unchecked. -->
+        <Control Id="LaterCheckBox" Type="CheckBox" X="25" Y="205" Width="320" Height="17"
+                 Property="SUPPORT_LATER" CheckBoxValue="1" Text="Maybe later" />
+
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
                  Text="!(loc.WixUIBack)">
           <Publish Event="NewDialog" Value="ContextMenuDlg" />
         </Control>
         <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
-                 Default="yes" Text="!(loc.WixUINext)">
+                 Default="yes" Text="!(loc.WixUINext)" Disabled="yes"
+                 EnableCondition="SUPPORT_LATER" DisableCondition="NOT SUPPORT_LATER">
           <Publish Event="NewDialog" Value="VerifyReadyDlg" />
         </Control>
         <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
