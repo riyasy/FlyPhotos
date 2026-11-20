@@ -6,11 +6,10 @@
 
       * HKCR\FlyPhotos.Image                  - the ProgID (icon + open command)
       * HKCR\Applications\FlyPhotos.exe        - app open command + SupportedTypes
-                                                 (91 empty values -> "Open With" list;
-                                                 .pdf only here, so it is never offered as the default)
+                                                 (91 empty values -> "Open With" list)
       * HKLM\Software\RegisteredApplications    - Default Programs pointer
         + HKLM\Software\FlyPhotos\Capabilities  - ApplicationName + FileAssociations
-                                                 (90 values -> FlyPhotos.Image)
+                                                 (91 values -> FlyPhotos.Image)
       * HKCR\*\shell\Open with Fly             - right-click entry, gated on the
                                                  ADDCONTEXTMENU property (vdproj CHECKBOXA1)
 
@@ -134,7 +133,7 @@
         </RegistryKey>
       </Component>
 
-      <!-- Default Programs: RegisteredApplications + Capabilities (90 FileAssociations) -->
+      <!-- Default Programs: RegisteredApplications + Capabilities (91 FileAssociations) -->
       <Component Id="Capabilities" Guid="*">
         <RegistryValue Root="HKLM" Key="Software\RegisteredApplications"
                        Name="FlyPhotos" Type="string"
@@ -209,6 +208,7 @@
             <RegistryValue Key="FileAssociations" Name=".dng" Type="string" Value="FlyPhotos.Image" />
             <RegistryValue Key="FileAssociations" Name=".psd" Type="string" Value="FlyPhotos.Image" />
             <RegistryValue Key="FileAssociations" Name=".svg" Type="string" Value="FlyPhotos.Image" />
+            <RegistryValue Key="FileAssociations" Name=".pdf" Type="string" Value="FlyPhotos.Image" />
             <RegistryValue Key="FileAssociations" Name=".cin" Type="string" Value="FlyPhotos.Image" />
             <RegistryValue Key="FileAssociations" Name=".dpx" Type="string" Value="FlyPhotos.Image" />
             <RegistryValue Key="FileAssociations" Name=".exr" Type="string" Value="FlyPhotos.Image" />
