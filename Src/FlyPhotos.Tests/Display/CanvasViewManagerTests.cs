@@ -180,6 +180,19 @@ public sealed class CanvasViewManagerTests
     }
 
     [TestMethod]
+    public void OpenZoom_ReaimedByFit_ShowsTheFitsReadout()
+    {
+        AppConfig.Settings.OpenExitZoom = true;
+        var r = new Rig();
+        r.Show("A", 4000, 3000);
+        r.Tick(3);
+        var before = r.ZoomChanges;
+        r.M.ZoomPanToFit(animateChange: true, Canvas);
+        r.Tick();
+        Assert.IsTrue(r.ZoomChanges > before, "Fit re-aims the open-zoom's animation, which must not stay silent");
+    }
+
+    [TestMethod]
     public void OpenZoom_NotStartedWhenTheCanvasHasNoSize()
     {
         AppConfig.Settings.OpenExitZoom = true;
@@ -838,7 +851,7 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomOutOnExit(0, Canvas);
+        r.M.ZoomOutOnExit(Canvas);
         Assert.IsFalse(r.Fitted);
         r.Settle();
         Near(0.001, r.Scale, 1e-6, "a dot");

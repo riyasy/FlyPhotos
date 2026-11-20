@@ -620,13 +620,11 @@ internal class CanvasViewManager : IAnimationHost
     }
 
     /// <summary>
-    /// The zoom-out when closing the application. <paramref name="exitAnimationDuration"/> is kept for the caller but
-    /// no longer drives a fixed tween — the spring settles on its own, reaching a sub-pixel dot well within the
-    /// caller's close deadline (PanZoomAnimationDurationForExit * 2).
+    /// The zoom-out when closing the application. The spring settles on its own, reaching a sub-pixel dot well within
+    /// the caller's close deadline (PanZoomAnimationDurationForExit * 2).
     /// </summary>
-    public void ZoomOutOnExit(double exitAnimationDuration, Size canvasSize)
+    public void ZoomOutOnExit(Size canvasSize)
     {
-        _ = exitAnimationDuration;
         StartPanZoomAnimation(ExitZoomTargetScale, ZoomGeometry.Centre(canvasSize), canvasSize).SuppressZoomReadout = true;
         IsFittedToScreen = false;
         UpdateOneToOne();
@@ -756,7 +754,10 @@ internal class CanvasViewManager : IAnimationHost
     /// previous spring's internal state (which would otherwise render from the stale/default scale and
     /// spring from ~100% down to fit instead of growing up from tiny).
     /// </param>
-    /// <returns>The running animation (a re-target keeps the same one, and its <see cref="PanZoomAnimation.SuppressZoomReadout"/>).</returns>
+    /// <returns>
+    /// The running animation; a re-target keeps the same one but turns its
+    /// <see cref="PanZoomAnimation.SuppressZoomReadout"/> back off, so a Fit or 100% during the open-zoom shows its readout.
+    /// </returns>
     private PanZoomAnimation StartPanZoomAnimation(float targetScale, Point targetPosition, Size targetCanvasSize,
         bool forceReseed = false)
     {
@@ -766,6 +767,7 @@ internal class CanvasViewManager : IAnimationHost
         var reseedPan = forceReseed || _activeAnimation is not PanZoomAnimation;
         var panZoom = _activeAnimation as PanZoomAnimation ?? new PanZoomAnimation(this);
         panZoom.Aim(targetScale, targetPosition, targetCanvasSize, reseedPan);
+        panZoom.SuppressZoomReadout = false;
         BeginAnimation(panZoom);
         ViewChanged?.Invoke();
         return panZoom;

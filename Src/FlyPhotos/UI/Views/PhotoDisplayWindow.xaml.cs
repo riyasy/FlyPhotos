@@ -520,7 +520,7 @@ public sealed partial class PhotoDisplayWindow
             // start action, then wait for the actual animation to finish instead of a fixed delay.
             var exitAnimation = _canvasController.WaitForPanZoomAnimationAsync(
                 Constants.PanZoomAnimationDurationForExit * 2);
-            _canvasController.ZoomOutOnExit(Constants.PanZoomAnimationDurationForExit);
+            _canvasController.ZoomOutOnExit();
             await exitAnimation;
         }
         SaveLastWindowState();

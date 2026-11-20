@@ -572,11 +572,11 @@ internal partial class CanvasController : ICanvasController
         SafeEnqueue(v => v.ZoomToHundred(canvasSize, anchor));
     }
 
-    /// <summary>The closing animation: shrinks the image away over <paramref name="exitAnimationDuration"/>.</summary>
-    public void ZoomOutOnExit(double exitAnimationDuration)
+    /// <summary>The closing animation: shrinks the image away.</summary>
+    public void ZoomOutOnExit()
     {
         var canvasSize = _d2dCanvas.GetSize();
-        SafeEnqueue(v => v.ZoomOutOnExit(exitAnimationDuration, canvasSize));
+        SafeEnqueue(v => v.ZoomOutOnExit(canvasSize));
     }
 
     /// <summary>Fits the image to the window, animated or at once.</summary>
