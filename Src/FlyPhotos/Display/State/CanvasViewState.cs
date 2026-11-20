@@ -4,6 +4,21 @@ using Windows.Foundation;
 
 namespace FlyPhotos.Display.State;
 
+/// <summary>
+/// The view of the photo on screen: what <see cref="Controllers.CanvasViewManager"/> changes and the renderers draw
+/// with. W2D thread only. The coordinate systems:
+/// <list type="bullet">
+///   <item><b>Layout pixels</b> — <see cref="ImageRect"/> is (0, 0, W, H) with W×H the photo's <i>full</i> size. A
+///     preview is stretched over the same rect (its width matched to its own aspect ratio), so 100% means one HQ
+///     pixel per screen pixel even before the HQ arrives.</item>
+///   <item><b>Screen pixels</b> — physical canvas pixels (DPI-adjusted). <see cref="ImagePos"/> is where the image's
+///     centre is on screen.</item>
+///   <item><see cref="Scale"/> is screen pixels per layout pixel; <see cref="Rotation"/> is in degrees (multiples of
+///     90, not normalized), the photo's EXIF rotation plus the user's own.</item>
+/// </list>
+/// <see cref="Mat"/> maps layout pixels to the screen: move the image centre to the origin, scale, rotate, then move
+/// to <see cref="ImagePos"/>.
+/// </summary>
 internal class CanvasViewState
 {
     public Rect ImageRect;
@@ -11,8 +26,14 @@ internal class CanvasViewState
     public Matrix3x2 Mat;
     public Matrix3x2 MatInv;
 
+    /// <summary>The scale on screen now.</summary>
     public float Scale = 1.0f;
-    public float LastScaleTo = 1.0f;
+
+    /// <summary>
+    /// The scale the view is heading to: an animation's target while one runs, else equal to <see cref="Scale"/>.
+    /// Zoom steps build on it, so quick wheel notches compound from where the view is going, not from mid-flight.
+    /// </summary>
+    public float TargetScale = 1.0f;
 
     public int Rotation = 0;
 

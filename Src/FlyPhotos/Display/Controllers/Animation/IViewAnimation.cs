@@ -29,8 +29,8 @@ internal interface IViewAnimation
 }
 
 /// <summary>
-/// The slice of <see cref="CanvasViewManager"/> an <see cref="IViewAnimation"/> needs: the live view, the
-/// shared spring bank + frame clock + target scale (kept shared so velocity/clock carry continuously across
+/// The slice of <see cref="CanvasViewManager"/> an <see cref="IViewAnimation"/> needs: the live view (which holds the
+/// target scale), the shared spring bank + frame clock (kept shared so velocity/clock carry continuously across
 /// re-targets and across animation types), and the event / fit-state / completion plumbing.
 /// </summary>
 internal interface IAnimationHost
@@ -40,9 +40,6 @@ internal interface IAnimationHost
     SpringAxis ScaleSpring { get; } // springs LOG(scale)
     SpringAxis PanXSpring { get; }  // springs ImagePos.X (pixels)
     SpringAxis PanYSpring { get; }  // springs ImagePos.Y (pixels)
-
-    /// <summary>The scale the active spring is converging to (shared between the spring animations).</summary>
-    float TargetScale { get; set; }
 
     /// <summary>Milliseconds since the current animation's clock was (re)started — used by the shrug.</summary>
     double ElapsedMs { get; }

@@ -21,6 +21,9 @@ internal sealed class PanZoomAnimation : IViewAnimation
     /// <summary>The image-centre position the spring settles at (pixel-grid aligned).</summary>
     public Point PanTarget => _panTarget;
 
+    /// <summary>Don't show the zoom readout while this runs (the launch open-zoom and the exit zoom-out).</summary>
+    public bool SuppressZoomReadout { get; set; }
+
     /// <summary>
     /// Points the spring at <paramref name="targetScale"/> / <paramref name="targetPosition"/>. The pan target
     /// is pre-aligned to the pixel grid so the at-rest snap is a no-op. <paramref name="reseedPan"/> seeds the
@@ -35,7 +38,7 @@ internal sealed class PanZoomAnimation : IViewAnimation
             _host.PanXSpring.Reset((float)view.ImagePos.X);
             _host.PanYSpring.Reset((float)view.ImagePos.Y);
         }
-        _host.TargetScale = targetScale;
+        view.TargetScale = targetScale;
         _panTarget = view.SnapImagePosToPixelGrid(targetScale, targetPosition);
         _targetCanvasSize = targetCanvasSize;
     }
@@ -49,7 +52,7 @@ internal sealed class PanZoomAnimation : IViewAnimation
         var panX = _host.PanXSpring;
         var panY = _host.PanYSpring;
 
-        var targetLog = (float)Math.Log(_host.TargetScale);
+        var targetLog = (float)Math.Log(view.TargetScale);
         scale.Step(targetLog, dt);
         panX.Step((float)_panTarget.X, dt);
         panY.Step((float)_panTarget.Y, dt);
@@ -64,7 +67,7 @@ internal sealed class PanZoomAnimation : IViewAnimation
             scale.SettleTo(targetLog);
             panX.SettleTo((float)_panTarget.X);
             panY.SettleTo((float)_panTarget.Y);
-            view.Scale = _host.TargetScale;
+            view.Scale = view.TargetScale;
         }
         else
         {
@@ -74,7 +77,7 @@ internal sealed class PanZoomAnimation : IViewAnimation
         view.ImagePos.Y = panY.Position;
         view.UpdateTransform();
         _host.RaiseViewChanged();
-        _host.RaiseZoomChanged();
+        if (!SuppressZoomReadout) _host.RaiseZoomChanged();
 
         if (settled)
         {
@@ -102,7 +105,7 @@ internal sealed class PanZoomAnimation : IViewAnimation
     public void CompleteImmediately()
     {
         var view = _host.View;
-        view.Scale = _host.TargetScale;
+        view.Scale = view.TargetScale;
         view.ImagePos = _panTarget;
         view.UpdateTransform();
     }

@@ -9,6 +9,7 @@ using Windows.Foundation;
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Display.Animators;
+using FlyPhotos.Display.Controllers.Animation;
 using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Display.ImageRendering;
 using FlyPhotos.Display.State;
@@ -183,17 +184,13 @@ internal partial class CanvasController : ICanvasController
         var canvasSize = _d2dCanvas.GetSize();
 
         var currentOperationId = Interlocked.Increment(ref _latestSetSourceOperationId);
-        var isFirstPhotoEver = string.IsNullOrEmpty(_currentPhotoPath);
-        var previousPhotoPath = _currentPhotoPath;
-        var isNewPhoto = photo.FilePath != _currentPhotoPath;
+        var arrival = ClassifyArrival(_currentPhotoPath, _realImageDisplayedForCurrentPhoto, photo.FilePath, displayLevel);
 
-        if (isNewPhoto)
+        if (arrival is ViewArrival.FirstPhoto or ViewArrival.NewPhoto)
         {
             _currentPhotoPath = photo.FilePath;
             _realImageDisplayedForCurrentPhoto = false;
         }
-
-        var isUpgradeFromPlaceholder = !_realImageDisplayedForCurrentPhoto && displayLevel > DisplayLevel.PlaceHolder;
 
         var size = photo.Slots.GetActualSize();
         _imageSize = new Size(size.Item1, size.Item2);
@@ -203,8 +200,7 @@ internal partial class CanvasController : ICanvasController
         // The caller's lease on the item travels with the install and is held while the renderer is on screen.
         if (displayItem == null) return;
 
-        var ctx = new PhotoInstallContext(_currentPhotoPath, previousPhotoPath, canvasSize,
-            isFirstPhotoEver, isNewPhoto, isUpgradeFromPlaceholder, displayItem);
+        var ctx = new PhotoInstallContext(_currentPhotoPath, canvasSize, arrival, displayItem);
 
         // Handle the specific type of display item (Animated, HQ Static, Preview, MultiPage, Tiled)
         try
@@ -358,16 +354,28 @@ internal partial class CanvasController : ICanvasController
     // a preview is small and on screen only briefly.
     private void HandlePreviewDisplayItem(Photo photo, PreviewDisplayItem previewDispItem, PhotoInstallContext ctx)
     {
-        // Previews can sometimes have a slightly different aspect ratio than the HQ image.
-        // To prevent distortion when the HQ image eventually loads, we adjust the preview's
-        // display dimensions to match the final aspect ratio.
-        var previewAspectRatio = previewDispItem.Bitmap.Bounds.Width / previewDispItem.Bitmap.Bounds.Height;
-        var correctedWidth = _imageSize.Height * previewAspectRatio;
-
+        // Laid out at the photo's full size in the preview's own axes and aspect ratio (a preview's aspect can differ
+        // slightly from the HQ's), so the preview isn't distorted and 100% means the same on both.
+        var bounds = previewDispItem.Bitmap.Bounds;
         InstallRenderer(
             new StaticImageRenderer(_d2dCanvas, previewDispItem.Bitmap,
                 photo.SupportsTransparency, RequestInvalidate),
-            new Size(correctedWidth, _imageSize.Height), previewDispItem.Rotation, ctx, forceThumbNailRedraw: true);
+            ZoomGeometry.PreviewLayoutSize(_imageSize, bounds.Width, bounds.Height), previewDispItem.Rotation, ctx,
+            forceThumbNailRedraw: true);
+    }
+
+    /// <summary>
+    /// How an install relates to what is on screen. UI thread, in install order. <paramref name="shownPath"/> is the
+    /// photo on screen (empty before the first one) and <paramref name="realImageShown"/> whether a preview or HQ of
+    /// it has been shown (not only the placeholder).
+    /// </summary>
+    internal static ViewArrival ClassifyArrival(string shownPath, bool realImageShown, string photoPath,
+        DisplayLevel level)
+    {
+        if (string.IsNullOrEmpty(shownPath)) return ViewArrival.FirstPhoto;
+        if (photoPath != shownPath) return ViewArrival.NewPhoto;
+        if (!realImageShown && level > DisplayLevel.PlaceHolder) return ViewArrival.FirstRealImage;
+        return ViewArrival.SameImageUpgrade;
     }
 
     /// <summary>
@@ -375,22 +383,17 @@ internal partial class CanvasController : ICanvasController
     /// applied on the W2D thread inside <see cref="InstallRenderer"/>.
     /// </summary>
     /// <param name="PhotoPath">The photo being installed.</param>
-    /// <param name="PreviousPhotoPath">The photo it replaces, whose view is remembered before the swap.</param>
     /// <param name="CanvasSize">The canvas size, read on the UI thread.</param>
-    /// <param name="IsFirstPhotoEver">The very first install: the open-zoom animation plays, if it is turned on.</param>
-    /// <param name="IsNewPhoto">Another photo than the one on screen (not an upgrade of the same one).</param>
-    /// <param name="IsUpgradeFromPlaceholder">The first real image for this photo, after the placeholder.</param>
+    /// <param name="Arrival">How it relates to what is on screen; picks the view rule.</param>
     /// <param name="Item">The leased item the renderer draws; the canvas ends the lease when it is replaced.</param>
     private readonly record struct PhotoInstallContext(
-        string PhotoPath, string PreviousPhotoPath, Size CanvasSize,
-        bool IsFirstPhotoEver, bool IsNewPhoto, bool IsUpgradeFromPlaceholder, DisplayItem Item)
+        string PhotoPath, Size CanvasSize, ViewArrival Arrival, DisplayItem Item)
     {
         /// <summary>
         /// A follow-up install for the same photo (an animator after its static first frame) that must not reset the
         /// view. It carries no item: the animator draws its own frames, so the first frame's lease ends with the swap.
         /// </summary>
-        public PhotoInstallContext AsFollowUp() =>
-            this with { IsFirstPhotoEver = false, IsNewPhoto = false, IsUpgradeFromPlaceholder = false, Item = null };
+        public PhotoInstallContext AsFollowUp() => this with { Arrival = ViewArrival.SameImageUpgrade, Item = null };
     }
 
     /// <summary>
@@ -460,11 +463,6 @@ internal partial class CanvasController : ICanvasController
             _checkeredBrush ??= Util.CreateCheckeredBrush(_d2dCanvas, Constants.CheckerSize);
             newRenderer.CheckeredBrush = _checkeredBrush;
 
-            // Cache the OLD photo's view state before applying the new one. _canvasViewState still
-            // holds the previous photo's state at this point, so this reads it race-free.
-            if (ctx.IsNewPhoto && !string.IsNullOrEmpty(ctx.PreviousPhotoPath))
-                _canvasViewManager.CacheCurrentViewState(ctx.PreviousPhotoPath, ctx.CanvasSize);
-
             var oldRenderer = _currentRenderer;
             var oldItem = _currentItem;
             _currentRenderer = newRenderer;
@@ -476,8 +474,7 @@ internal partial class CanvasController : ICanvasController
                 oldRenderer?.Dispose();
             oldItem?.Release(); // an animated renderer draws its own frames, so its item (if any) can go now
 
-            _canvasViewManager.SetScaleAndPosition(ctx.PhotoPath, imageSize, imageRotation,
-                ctx.CanvasSize, ctx.IsFirstPhotoEver, ctx.IsNewPhoto, ctx.IsUpgradeFromPlaceholder);
+            _canvasViewManager.SetScaleAndPosition(ctx.PhotoPath, imageSize, imageRotation, ctx.CanvasSize, ctx.Arrival);
 
             if (forceThumbNailRedraw)
                 _thumbNailController.RequestThumbnailRedraw(); // just flags the strip's own W2D loop; thread-safe

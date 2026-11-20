@@ -36,7 +36,7 @@ internal sealed class AnchoredZoomAnimation : IViewAnimation
             _anchorX = view.ImagePos.X;
             _anchorY = view.ImagePos.Y;
         }
-        _host.TargetScale = targetScale;
+        view.TargetScale = targetScale;
 
         // Precompute the constant grid-alignment offset δ (≤0.5 px/axis): take where the exact-anchor zoom
         // would settle (the anchor-preserving pan at the target scale), nudge it so the composed translation
@@ -58,7 +58,7 @@ internal sealed class AnchoredZoomAnimation : IViewAnimation
 
         var view = _host.View;
         var scale = _host.ScaleSpring;
-        var targetLog = (float)Math.Log(_host.TargetScale);
+        var targetLog = (float)Math.Log(view.TargetScale);
         scale.Step(targetLog, dt);
 
         var settled = scale.IsSettled(targetLog, Constants.SpringScaleSettleEpsilon, Constants.SpringScaleVelocitySettle);
@@ -67,7 +67,7 @@ internal sealed class AnchoredZoomAnimation : IViewAnimation
         if (settled)
         {
             scale.SettleTo(targetLog);
-            newScale = _host.TargetScale;
+            newScale = view.TargetScale;
         }
         else
         {
@@ -123,11 +123,11 @@ internal sealed class AnchoredZoomAnimation : IViewAnimation
         var oldScale = view.Scale;
         if (oldScale > 0)
         {
-            var track = ZoomGeometry.AnchorPreservingPan(_zoomCenter, new Point(_anchorX, _anchorY), oldScale, _host.TargetScale);
+            var track = ZoomGeometry.AnchorPreservingPan(_zoomCenter, new Point(_anchorX, _anchorY), oldScale, view.TargetScale);
             _anchorX = track.X;
             _anchorY = track.Y;
         }
-        view.Scale = _host.TargetScale;
+        view.Scale = view.TargetScale;
         view.ImagePos.X = _anchorX + _gridOffsetX;
         view.ImagePos.Y = _anchorY + _gridOffsetY;
         view.UpdateTransform();
