@@ -49,6 +49,11 @@ internal sealed class ShrugAnimation : IViewAnimation
         _startPosition.Y += dy;
     }
 
-    /// <summary>A shrug has no settled target to jump to, so a forced stop simply ends the wiggle.</summary>
-    public void CompleteImmediately() { }
+    /// <summary>A forced stop puts the image back where the wiggle started, so no wiggle offset outlives it.</summary>
+    public void CompleteImmediately()
+    {
+        var view = _host.View;
+        view.ImagePos = _startPosition;
+        view.UpdateTransform();
+    }
 }

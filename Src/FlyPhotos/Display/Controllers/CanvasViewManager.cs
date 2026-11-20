@@ -62,8 +62,8 @@ namespace FlyPhotos.Display.Controllers;
 ///     in-flight animation (snapping to its target first, so Retain-mode inherits the settled view).</item>
 ///   <item><b>Preview→HQ upgrade of the same photo</b> → must be seamless. If an animation is in flight it
 ///     is kept alive and rescaled by the resolution ratio (<see cref="RebaseAnimationScale"/>) so the image
-///     keeps its on-screen size and the spring keeps converging; otherwise scale is adjusted to preserve the
-///     scene-relative zoom.</item>
+///     keeps its on-screen size and the spring keeps converging; otherwise a fitted view is re-fitted and any
+///     other keeps the image's on-screen height.</item>
 ///   <item><b>Launch open-zoom</b> force-reseeds the spring from 0.01 (a deliberate reset, guarded on a
 ///     valid fit scale so it never feeds <c>log(0)</c>). <b>Exit zoom-out</b> springs toward ~0; the caller
 ///     closes the window on a short wait (see <see cref="Constants.PanZoomAnimationDurationForExit"/>),
@@ -147,6 +147,13 @@ internal class CanvasViewManager : IAnimationHost
             ? Math.Min(MinZoomOutFixedScale, MinZoomOutLongSidePixels / (float)longSide)
             : MinZoomOutFixedScale;
     }
+
+    /// <summary>
+    /// Whether the image centre <paramref name="imagePos"/> sits at the canvas centre. 1 px covers float noise AND
+    /// the ≤0.5 px pixel-grid alignment of a settled position.
+    /// </summary>
+    private static bool IsCentred(Point imagePos, Size canvasSize) =>
+        Math.Abs(imagePos.X - canvasSize.Width / 2.0) < 1.0 && Math.Abs(imagePos.Y - canvasSize.Height / 2.0) < 1.0;
 
     // --- Events ---
 
@@ -275,7 +282,7 @@ internal class CanvasViewManager : IAnimationHost
     /// <summary>
     /// A pure quality upgrade (Preview → HQ of the same already-displayed photo) must preserve the live visual
     /// view exactly — never reset or jump, even when a zoom/pan animation is still in flight as the HQ buffer
-    /// arrives. Scale is adjusted so the scene-relative zoom (Scale / fitScale) is unchanged; pan stays fixed in
+    /// arrives. A fitted view stays fitted; any other keeps the image's on-screen height; pan stays fixed in
     /// canvas coordinates; rotation is re-based onto the new EXIF baseline. (Routing this through
     /// <see cref="SetViewFromPrevious"/> would wrongly apply an image-size ratio to the pan offset — preview
     /// thumbnails can be 10–15× smaller than the HQ image, turning a 300 px pan into 3000+ px after the upgrade.)
@@ -290,9 +297,22 @@ internal class CanvasViewManager : IAnimationHost
         _canvasViewState.Rotation += imageRotation - _originalImageRotation;
         _originalImageRotation = imageRotation;
 
-        var oldFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, oldImageSize, oldRotation);
         var newFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
-        var scaleRatio = oldFitScale > 0 ? newFitScale / oldFitScale : 1f;
+        // A fitted view stays fitted. Any other keeps the image's on-screen height: the preview is laid out at the
+        // HQ's height, so this is 1 (and an explicit 100% stays 100%) unless the layout units differ — a preview
+        // with no full-size metadata, or one already turned upright while the HQ carries an EXIF rotation.
+        // Keeping the fit ratio instead would turn 100% into e.g. 112% when only the aspect ratio differs.
+        float scaleRatio;
+        if (IsFittedToScreen)
+        {
+            var oldFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, oldImageSize, oldRotation);
+            scaleRatio = oldFitScale > 0 ? newFitScale / oldFitScale : 1f;
+        }
+        else
+        {
+            var newHeight = ZoomGeometry.OnScreenHeight(imageSize, _canvasViewState.Rotation);
+            scaleRatio = newHeight > 0 ? (float)(ZoomGeometry.OnScreenHeight(oldImageSize, oldRotation) / newHeight) : 1f;
+        }
 
         if (animating)
         {
@@ -303,7 +323,8 @@ internal class CanvasViewManager : IAnimationHost
             _canvasViewState.Scale *= scaleRatio;
             _canvasViewState.LastScaleTo *= scaleRatio;
             RebaseAnimationScale(scaleRatio);
-            IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < ScaleTolerance;
+            // From the target, not the mid-flight scale: a zoom heading to 100% is 1:1.
+            IsAtOneToOne = Math.Abs(_canvasViewState.LastScaleTo - 1.0f) < ScaleTolerance;
         }
         else if (IsFittedToScreen)
         {
@@ -314,8 +335,8 @@ internal class CanvasViewManager : IAnimationHost
         }
         else
         {
-            // Preserve scene-relative zoom: multiply scale by (newFitScale / oldFitScale). Pan stays unchanged
-            // in canvas coordinates — the image centre remains at the same pixel on screen.
+            // Keep the on-screen height (scaleRatio above). Pan stays unchanged in canvas coordinates — the image
+            // centre remains at the same pixel on screen.
             _canvasViewState.Scale *= scaleRatio;
             _canvasViewState.LastScaleTo *= scaleRatio;
             IsAtOneToOne = Math.Abs(_canvasViewState.Scale - 1.0f) < ScaleTolerance;
@@ -453,6 +474,16 @@ internal class CanvasViewManager : IAnimationHost
     /// </summary>
     public void HandleSizeChange(Size newSize, Size previousSize)
     {
+        // The springs only write the view, so a resize written over a running animation would be overwritten on
+        // the next frame. A pan/zoom spring is re-aimed at the new canvas and keeps going (the launch open-zoom
+        // still plays); any other animation is jumped to its end first.
+        if (_activeAnimation is PanZoomAnimation panZoom)
+        {
+            RetargetPanZoomForResize(panZoom, newSize, previousSize);
+            return;
+        }
+        StopAnimationSnappingToTarget();
+
         if (IsFittedToScreen)
         {
             // If the image is fitted, recalculate the fit for the new window size.
@@ -481,13 +512,38 @@ internal class CanvasViewManager : IAnimationHost
     }
 
     /// <summary>
+    /// The resize rules of <see cref="HandleSizeChange"/>, applied to a running pan/zoom spring's target instead of
+    /// the view: a fitted target becomes the new canvas's fit and centre; any other keeps its scale and has its pan
+    /// target moved in proportion to the canvas. The spring keeps its velocity and glides to the new target.
+    /// </summary>
+    private void RetargetPanZoomForResize(PanZoomAnimation panZoom, Size newSize, Size previousSize)
+    {
+        if (IsFittedToScreen)
+        {
+            var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
+            var fitScale = ZoomGeometry.CalculateScreenFitScale(newSize, imageSize, _canvasViewState.Rotation);
+            _canvasViewState.LastScaleTo = fitScale;
+            StartSpringPanAndZoomAnimation(fitScale, new Point(newSize.Width / 2, newSize.Height / 2), newSize);
+            IsAtOneToOne = Math.Abs(fitScale - 1.0f) < ScaleTolerance;
+        }
+        else if (previousSize.Width > 0 && previousSize.Height > 0)
+        {
+            var target = panZoom.PanTarget;
+            var newTarget = new Point(target.X * newSize.Width / previousSize.Width,
+                                      target.Y * newSize.Height / previousSize.Height);
+            StartSpringPanAndZoomAnimation(_zoomTargetScale, newTarget, newSize);
+        }
+    }
+
+    /// <summary>
     /// Keeps the image at its screen position after the window was resized around it. The canvas
     /// origin moved by <paramref name="canvasOriginShift"/> physical pixels. If the window had to be
     /// clamped to the work area and a fitted image no longer fits, it is re-fitted instead.
     /// </summary>
     public void HandleImageSizedWindowResize(Point canvasOriginShift, Size newSize)
     {
-        ClearActiveAnimation();
+        // Jump any animation to its end rather than freezing it mid-frame.
+        StopAnimationSnappingToTarget();
         if (IsFittedToScreen)
         {
             var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
@@ -523,6 +579,9 @@ internal class CanvasViewManager : IAnimationHost
             || !_isStateModifiedByUser || _isOnResizedPage)
             return;
 
+        // Save the view the user was heading to, not a mid-animation frame (the navigation that follows would
+        // jump the animation to its end anyway).
+        StopAnimationSnappingToTarget();
         _viewStore.Save(photoPath, _canvasViewState.Scale, _canvasViewState.LastScaleTo,
             _canvasViewState.ImagePos, _canvasViewState.Rotation, _originalImageRotation, canvasSize);
     }
@@ -547,13 +606,8 @@ internal class CanvasViewManager : IAnimationHost
         var originalRotationNormalized = ((_originalImageRotation % 360) + 360) % 360;
         var isDefaultRotation = currentRotationNormalized == originalRotationNormalized;
 
-        // 4. Check if the pan position is centered on the canvas. A tolerance of 1 pixel covers float
-        // inaccuracy AND the ≤0.5 px pixel-grid alignment applied to the settled fit/centre position
-        // (the resting ImagePos can sit just off exact centre so the composed translation lands on the grid).
-        var canvasCenterX = canvasSize.Width / 2.0;
-        var canvasCenterY = canvasSize.Height / 2.0;
-        var isDefaultPan = Math.Abs(_canvasViewState.ImagePos.X - canvasCenterX) < 1.0 &&
-                           Math.Abs(_canvasViewState.ImagePos.Y - canvasCenterY) < 1.0;
+        // 4. Check if the pan position is centered on the canvas.
+        var isDefaultPan = IsCentred(_canvasViewState.ImagePos, canvasSize);
 
         // 5. The view is considered "default" only if scale, rotation, AND pan match the default state.
         if (isDefaultScale && isDefaultRotation && isDefaultPan)
@@ -581,9 +635,10 @@ internal class CanvasViewManager : IAnimationHost
         _canvasViewState.LastScaleTo = scaleTo;
         StartZoomAnimation(scaleTo, zoomAnchor);
 
-        // Any manual zoom action invalidates both fitted and 1:1 states.
+        // An anchored zoom is never "fitted" (the pan isn't centred); it is 1:1 when it lands on 100%
+        // (sticky zoom stops there).
         IsFittedToScreen = false;
-        IsAtOneToOne = false;
+        IsAtOneToOne = Math.Abs(scaleTo - 1.0f) < ScaleTolerance;
         _isStateModifiedByUser = true;
     }
 
@@ -614,9 +669,9 @@ internal class CanvasViewManager : IAnimationHost
         ViewChanged?.Invoke();
         ZoomChanged?.Invoke();
 
-        // Any manual zoom action invalidates both fitted and 1:1 states.
+        // An anchored zoom is never "fitted"; it is 1:1 when it lands on 100% (stopAtOneToOne stops there).
         IsFittedToScreen = false;
-        IsAtOneToOne = false;
+        IsAtOneToOne = Math.Abs(newScale - 1.0f) < ScaleTolerance;
         _isStateModifiedByUser = true;
     }
 
@@ -659,8 +714,9 @@ internal class CanvasViewManager : IAnimationHost
         else
             StartSpringPanAndZoomAnimation(targetScale, anchor, canvasSize);
 
-        // Set state immediately for responsive UI.
-        IsFittedToScreen = Math.Abs(targetScale - screenFitScale) < ScaleTolerance;
+        // Set state immediately for responsive UI. An anchored step keeps the cursor point still, so the pan
+        // isn't centred and the view isn't "fitted" even at the fit scale.
+        IsFittedToScreen = !zoomAnchor.HasValue && Math.Abs(targetScale - screenFitScale) < ScaleTolerance;
         IsAtOneToOne = Math.Abs(targetScale - 1.0f) < ScaleTolerance;
         _isStateModifiedByUser = true;
     }
@@ -692,23 +748,15 @@ internal class CanvasViewManager : IAnimationHost
         const float targetScale = 1.0f;
         _canvasViewState.LastScaleTo = 1.0f;
 
-        // Compute the target image position so that the provided anchor remains at the same
-        // screen coordinate after scaling to 1:1.
-        var oldScale = _canvasViewState.Scale;
-        // If already at 1:1, just center on anchor
-        if (Math.Abs(oldScale - targetScale) < 0.0001f)
-        {
-            StartSpringPanAndZoomAnimation(targetScale, anchor, canvasSize);
-        }
-        else
-        {
-            var targetPos = ZoomGeometry.AnchorPreservingPan(anchor, _canvasViewState.ImagePos, oldScale, targetScale);
-            StartSpringPanAndZoomAnimation(targetScale, targetPos, canvasSize);
-        }
+        // Keep the anchor at the same screen point. Already at 1:1 this leaves the pan where it is (there used to
+        // be a special case here that moved the image's centre onto the anchor: a big jump on double-click).
+        var targetPos = ZoomGeometry.AnchorPreservingPan(anchor, _canvasViewState.ImagePos, _canvasViewState.Scale, targetScale);
+        StartSpringPanAndZoomAnimation(targetScale, targetPos, canvasSize);
 
         var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
         var screenFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
-        IsFittedToScreen = Math.Abs(targetScale - screenFitScale) < ScaleTolerance;
+        // Fitted means fit scale AND centred: the anchored target usually isn't centred.
+        IsFittedToScreen = Math.Abs(targetScale - screenFitScale) < ScaleTolerance && IsCentred(targetPos, canvasSize);
         IsAtOneToOne = true;
         _isStateModifiedByUser = true;
         CheckIfViewBackToDefaultState(targetScale, canvasSize, imageSize);
@@ -731,10 +779,13 @@ internal class CanvasViewManager : IAnimationHost
     }
 
     /// <summary>
-    /// Explicit user action to fit the image to the screen. Allows upscaling of small images.
+    /// Explicit user action to fit the image to the screen. Allows upscaling of small images. Fits the image as it
+    /// is laid out on screen (<see cref="CanvasViewState.ImageRect"/>), which for a preview whose aspect ratio
+    /// differs from the HQ's is not the photo's full size.
     /// </summary>
-    public void ZoomPanToFit(bool animateChange, Size imageSize, Size canvasSize)
+    public void ZoomPanToFit(bool animateChange, Size canvasSize)
     {
+        var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
         // This is the EXPLICIT user action, so it DOES upscale small images.
         var scaleFactor = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
 
@@ -952,7 +1003,7 @@ internal class CanvasViewManager : IAnimationHost
     private void StopAnimationSnappingToTarget()
     {
         // Re-enable snapping FIRST so CompleteImmediately's UpdateTransform builds a snapped, device-pixel
-        // aligned resting frame. CompleteImmediately is a no-op for a shrug (it has no settled target).
+        // aligned resting frame. For a shrug, CompleteImmediately puts the image back at the wiggle's start.
         _canvasViewState.SnapTranslation = true;
         _activeAnimation?.CompleteImmediately();
         _animationStopwatch.Stop();
@@ -987,10 +1038,12 @@ internal class CanvasViewManager : IAnimationHost
     void IAnimationHost.ReportSettledFit(Size canvasSize)
     {
         // Final "truth-setter" for the fitted / 1:1 flags from the settled scale, using the stored canvas size.
+        // It may only CLEAR the fitted flag: a pan during the animation (or an off-centre target) cleared it,
+        // and the scale alone can't tell that the image is no longer centred.
         if (canvasSize.Width <= 0 || canvasSize.Height <= 0) return;
         var imageSize = new Size(_canvasViewState.ImageRect.Width, _canvasViewState.ImageRect.Height);
         var screenFitScale = ZoomGeometry.CalculateScreenFitScale(canvasSize, imageSize, _canvasViewState.Rotation);
-        IsFittedToScreen = Math.Abs(_zoomTargetScale - screenFitScale) < ScaleTolerance;
+        IsFittedToScreen = IsFittedToScreen && Math.Abs(_zoomTargetScale - screenFitScale) < ScaleTolerance;
         IsAtOneToOne = Math.Abs(_zoomTargetScale - 1.0f) < ScaleTolerance;
     }
 

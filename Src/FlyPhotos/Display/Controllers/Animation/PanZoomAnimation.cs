@@ -18,6 +18,9 @@ internal sealed class PanZoomAnimation : IViewAnimation
 
     public PanZoomAnimation(IAnimationHost host) => _host = host;
 
+    /// <summary>The image-centre position the spring settles at (pixel-grid aligned).</summary>
+    public Point PanTarget => _panTarget;
+
     /// <summary>
     /// Points the spring at <paramref name="targetScale"/> / <paramref name="targetPosition"/>. The pan target
     /// is pre-aligned to the pixel grid so the at-rest snap is a no-op. <paramref name="reseedPan"/> seeds the

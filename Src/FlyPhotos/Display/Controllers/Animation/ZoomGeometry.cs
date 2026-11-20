@@ -55,6 +55,10 @@ internal static class ZoomGeometry
         return (float)Math.Min(horizontalScale, verticalScale);
     }
 
+    /// <summary>The image's height on screen per unit of scale: a 90°/270° rotation shows its width as the height.</summary>
+    public static double OnScreenHeight(Size imageSize, int imageRotation) =>
+        imageRotation % 180 != 0 ? imageSize.Width : imageSize.Height;
+
     /// <summary>
     /// When sticky zoom is enabled, snaps a freshly computed <paramref name="newScale"/> onto the first
     /// <see cref="ZoomSnapPoints"/> stop crossed in the zoom <paramref name="direction"/>; otherwise returns

@@ -94,9 +94,10 @@ internal partial class CanvasController : ICanvasController
     // different number and drops its animator instead of installing it over the newer photo.
     private int _latestSetSourceOperationId;
 
-    // UI-owned orchestration fields — touched inside SetSource / InstallRenderer, and _imageSize also in
-    // the closing UI hop of LoadAndFitPageAsync (a page can resize the image). All on the UI thread.
-    private Size _imageSize;                          // the photo's full size (or the page's), for fitting
+    // UI-owned orchestration fields — touched inside SetSource / InstallRenderer. All on the UI thread.
+    // _imageSize only lays out the item being installed; once installed, the view's ImageRect (W2D thread) is the
+    // one size every zoom/fit calculation uses (a preview's layout width can differ from the photo's).
+    private Size _imageSize;                          // the photo's full size, for laying out the item
     private string _currentPhotoPath = string.Empty;  // the photo on screen; empty before the first one
     private bool _realImageDisplayedForCurrentPhoto;  // a preview or HQ has been shown for it (not just the placeholder)
     private bool _isMultiPageActive;                  // last value raised through OnMutliPagePhotoLoaded
@@ -585,8 +586,7 @@ internal partial class CanvasController : ICanvasController
     public void FitToScreen(bool animateChange)
     {
         var canvasSize = _d2dCanvas.GetSize();
-        var imageSize = _imageSize;
-        SafeEnqueue(v => v.ZoomPanToFit(animateChange, imageSize, canvasSize));
+        SafeEnqueue(v => v.ZoomPanToFit(animateChange, canvasSize));
     }
 
     /// <summary>Moves the image by (<paramref name="dx"/>, <paramref name="dy"/>) canvas pixels.</summary>
@@ -637,13 +637,12 @@ internal partial class CanvasController : ICanvasController
             if (pageSize.Width != shownSize.Width || pageSize.Height != shownSize.Height)
                 _canvasViewManager.SetPageSize(pageSize, canvasSize, pageIndex == 0);
 
-            // _imageSize and CurrentPage are UI-owned; hand them over on the UI thread. The photo may
-            // have been navigated away from in the meantime, in which case this result is stale.
+            // CurrentPage is UI-owned; hand it over on the UI thread. The photo may have been navigated
+            // away from in the meantime, in which case this result is stale.
             _d2dCanvas.DispatcherQueue.TryEnqueue(() =>
             {
                 if (_currentPhotoPath != photoPath) return;
 
-                _imageSize = pageSize;
                 CurrentPage = new MultiPagePosition(photoPath, pageIndex, pageCount,
                     (int)pageSize.Width, (int)pageSize.Height);
                 OnPageChanged?.Invoke();
