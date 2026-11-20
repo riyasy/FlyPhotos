@@ -64,8 +64,7 @@ internal static class ZoomGeometry
     public static Point AnchorPreservingPan(Point anchor, Point currentPos, float oldScale, float newScale)
     {
         var k = newScale / oldScale;
-        return new Point(anchor.X - k * (anchor.X - currentPos.X),
-                         anchor.Y - k * (anchor.Y - currentPos.Y));
+        return ScaleAbout(currentPos, anchor, k, k);
     }
 
     /// <summary>
@@ -77,9 +76,7 @@ internal static class ZoomGeometry
     public static float CalculateScreenFitScale(Size canvasSize, Size imageSize, int imageRotation)
     {
         // A vertical orientation (90°/270°) swaps the image's effective width and height.
-        var isVertical = (imageRotation % 180) != 0;
-        var effectiveWidth = isVertical ? imageSize.Height : imageSize.Width;
-        var effectiveHeight = isVertical ? imageSize.Width : imageSize.Height;
+        var (effectiveWidth, effectiveHeight) = OnScreenSize(imageSize, imageRotation);
 
         // Usable canvas after the user's fit padding.
         var paddedCanvasWidth = canvasSize.Width * (AppConfig.Settings.ImageFitPercentage / 100.0f);
@@ -189,27 +186,31 @@ internal static class ZoomGeometry
         return new Size(height * previewWidth / previewHeight, height);
     }
 
-    /// <summary>The image's height on screen per unit of scale: a 90°/270° rotation shows its width as the height.</summary>
-    public static double OnScreenHeight(Size imageSize, int imageRotation) =>
-        imageRotation % 180 != 0 ? imageSize.Width : imageSize.Height;
+    /// <summary><paramref name="p"/> moved away from (k &gt; 1) or towards <paramref name="centre"/>, per axis.</summary>
+    public static Point ScaleAbout(Point p, Point centre, double kx, double ky) =>
+        new(centre.X + (p.X - centre.X) * kx, centre.Y + (p.Y - centre.Y) * ky);
+
+    /// <summary>The image's size on screen per unit of scale: a 90°/270° rotation swaps the axes.</summary>
+    public static (double Width, double Height) OnScreenSize(Size imageSize, int imageRotation) =>
+        imageRotation % 180 != 0 ? (imageSize.Height, imageSize.Width) : (imageSize.Width, imageSize.Height);
 
     /// <summary>
     /// What the scale is multiplied by when a better image of the same photo replaces the one on screen (preview →
-    /// HQ). A <paramref name="fitted"/> view stays fitted (the fit ratio). Any other keeps the image's on-screen
-    /// height: the preview is laid out at the HQ's height, so that is 1 — an explicit 100% stays 100% — unless the
-    /// layout units differ (a preview with no full-size metadata, or one already turned upright while the HQ carries an
-    /// EXIF rotation). 1 when a size is empty.
+    /// HQ). A <paramref name="fitted"/> view stays fitted (the fit ratio). An image laid out
+    /// <paramref name="inPhotoPixels"/> keeps its zoom (1), whatever size the HQ's decoder made. One laid out at its
+    /// bitmap's size (a preview with no full-size metadata) keeps its on-screen height. 1 when a size is empty.
     /// </summary>
     public static float UpgradeScaleRatio(Size canvasSize, Size oldImageSize, int oldRotation,
-        Size newImageSize, int newRotation, bool fitted)
+        Size newImageSize, int newRotation, bool fitted, bool inPhotoPixels)
     {
         if (fitted)
         {
             var oldFit = CalculateScreenFitScale(canvasSize, oldImageSize, oldRotation);
             return oldFit > 0 ? CalculateScreenFitScale(canvasSize, newImageSize, newRotation) / oldFit : 1f;
         }
-        var newHeight = OnScreenHeight(newImageSize, newRotation);
-        return newHeight > 0 ? (float)(OnScreenHeight(oldImageSize, oldRotation) / newHeight) : 1f;
+        if (inPhotoPixels) return 1f;
+        var newHeight = OnScreenSize(newImageSize, newRotation).Height;
+        return newHeight > 0 ? (float)(OnScreenSize(oldImageSize, oldRotation).Height / newHeight) : 1f;
     }
 
     /// <summary>
@@ -217,13 +218,11 @@ internal static class ZoomGeometry
     /// image-size ratio, so the same relative point of the image stays at the centre (the scale is kept as is).
     /// Unchanged when the old size is empty.
     /// </summary>
-    public static Point RetainedPan(Point imagePos, Size canvasSize, Size oldImageSize, Size newImageSize)
-    {
-        if (oldImageSize.Width <= 0 || oldImageSize.Height <= 0) return imagePos;
-        var c = Centre(canvasSize);
-        return new Point(c.X + (imagePos.X - c.X) * (newImageSize.Width / oldImageSize.Width),
-                         c.Y + (imagePos.Y - c.Y) * (newImageSize.Height / oldImageSize.Height));
-    }
+    public static Point RetainedPan(Point imagePos, Size canvasSize, Size oldImageSize, Size newImageSize) =>
+        oldImageSize.Width <= 0 || oldImageSize.Height <= 0
+            ? imagePos
+            : ScaleAbout(imagePos, Centre(canvasSize),
+                newImageSize.Width / oldImageSize.Width, newImageSize.Height / oldImageSize.Height);
 
     /// <summary>
     /// The pan after the canvas is resized: the image centre keeps its place relative to the canvas (equivalently,

@@ -49,7 +49,7 @@ internal sealed class DisplaySlots
     /// earlier load found it oversized, or when the preview metadata gives the full size.
     /// </summary>
     public bool IsKnownOversized(int maxSize) => KnownOversized ||
-        _preview?.Metadata is { FullWidth: > 0, FullHeight: > 0 } m && (m.FullWidth > maxSize || m.FullHeight > maxSize);
+        _preview?.Metadata is { HasFullSize: true } m && (m.FullWidth > maxSize || m.FullHeight > maxSize);
 
     /// <summary>
     /// Stores a loaded HQ, taking over its lease; an item it replaces is released. False (the item released) once
@@ -166,7 +166,7 @@ internal sealed class DisplaySlots
                 TiledHqDisplayItem tiled => (tiled.Pyramid.FullWidth, tiled.Pyramid.FullHeight),
                 SvgHqDisplayItem svg => (svg.Width, svg.Height),
                 PdfHqDisplayItem pdf => (pdf.Width, pdf.Height),
-                PreviewDisplayItem { Metadata: { FullWidth: > 0, FullHeight: > 0 } m } => (m.FullWidth, m.FullHeight),
+                PreviewDisplayItem { Metadata: { HasFullSize: true } m } => (m.FullWidth, m.FullHeight),
                 { Bitmap: { } bitmap } => (bitmap.SizeInPixels.Width, bitmap.SizeInPixels.Height),
                 _ => null
             };

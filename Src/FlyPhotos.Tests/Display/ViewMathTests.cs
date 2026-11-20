@@ -153,47 +153,60 @@ public sealed class ViewMathTests
     [TestMethod]
     public void UpgradeRatio_SameImage_IsOne()
     {
-        Near(1, ZoomGeometry.UpgradeScaleRatio(Canvas, Photo, 0, Photo, 0, fitted: false));
-        Near(1, ZoomGeometry.UpgradeScaleRatio(Canvas, Photo, 0, Photo, 0, fitted: true));
+        Near(1, ZoomGeometry.UpgradeScaleRatio(Canvas, Photo, 0, Photo, 0, fitted: false, inPhotoPixels: false));
+        Near(1, ZoomGeometry.UpgradeScaleRatio(Canvas, Photo, 0, Photo, 0, fitted: true, inPhotoPixels: false));
     }
 
     [TestMethod]
-    public void UpgradeRatio_NotFitted_KeepsTheOnScreenHeight()
+    public void UpgradeRatio_NotFittedNoMetadata_KeepsTheOnScreenHeight()
     {
-        Near(0.1, ZoomGeometry.UpgradeScaleRatio(Canvas, new Size(400, 300), 0, Photo, 0, false), what: "no metadata");
-        Near(0.75, ZoomGeometry.UpgradeScaleRatio(Canvas, new Size(2250, 3000), 0, Photo, 90, false), what: "upright preview");
-        Near(1, ZoomGeometry.UpgradeScaleRatio(new Size(1000, 1000), Photo, 0, new Size(4500, 3000), 0, false),
+        Near(0.1, ZoomGeometry.UpgradeScaleRatio(Canvas, new Size(400, 300), 0, Photo, 0, fitted: false, inPhotoPixels: false), what: "no metadata");
+        Near(0.75, ZoomGeometry.UpgradeScaleRatio(Canvas, new Size(2250, 3000), 0, Photo, 90, fitted: false, inPhotoPixels: false), what: "upright preview");
+        Near(1, ZoomGeometry.UpgradeScaleRatio(new Size(1000, 1000), Photo, 0, new Size(4500, 3000), 0, fitted: false, inPhotoPixels: false),
             what: "only the aspect differs: 100% stays 100%");
     }
+
+    [TestMethod]
+    public void UpgradeRatio_NotFittedInPhotoPixels_KeepsTheZoom() =>
+        Near(1, ZoomGeometry.UpgradeScaleRatio(Canvas, new Size(5496, 3670), 0, new Size(1616, 1080), 0, fitted: false, inPhotoPixels: true));
 
     [TestMethod]
     public void UpgradeRatio_Fitted_KeepsTheFit()
     {
         var square = new Size(1000, 1000);
-        var ratio = ZoomGeometry.UpgradeScaleRatio(square, Photo, 0, new Size(4500, 3000), 0, true);
+        var ratio = ZoomGeometry.UpgradeScaleRatio(square, Photo, 0, new Size(4500, 3000), 0, fitted: true, inPhotoPixels: true);
         Near(ZoomGeometry.CalculateScreenFitScale(square, new Size(4500, 3000), 0),
             ZoomGeometry.CalculateScreenFitScale(square, Photo, 0) * ratio, what: "lands on the new fit");
     }
 
     [TestMethod]
     public void UpgradeRatio_EmptySizes_AreOne() =>
-        Near(1, ZoomGeometry.UpgradeScaleRatio(Canvas, Photo, 0, new Size(0, 0), 0, false));
+        Near(1, ZoomGeometry.UpgradeScaleRatio(Canvas, Photo, 0, new Size(0, 0), 0, fitted: false, inPhotoPixels: false));
 
     [TestMethod]
     public void UpgradeRatio_WhenFitBindsTheHeight_TheTwoRulesAgree()
     {
         // Landscape window, preview and HQ of different aspect but both limited by the height: either rule gives 1.
         var wide = new Size(2000, 800);
-        Near(1, ZoomGeometry.UpgradeScaleRatio(wide, Photo, 0, new Size(4500, 3000), 0, true));
-        Near(1, ZoomGeometry.UpgradeScaleRatio(wide, Photo, 0, new Size(4500, 3000), 0, false));
+        Near(1, ZoomGeometry.UpgradeScaleRatio(wide, Photo, 0, new Size(4500, 3000), 0, fitted: true, inPhotoPixels: false));
+        Near(1, ZoomGeometry.UpgradeScaleRatio(wide, Photo, 0, new Size(4500, 3000), 0, fitted: false, inPhotoPixels: false));
     }
 
     [TestMethod]
-    [DataRow(0, 3000.0)]
-    [DataRow(90, 4000.0)]
-    [DataRow(270, 4000.0)]
-    [DataRow(180, 3000.0)]
-    public void OnScreenHeight(int rotation, double expected) => Near(expected, ZoomGeometry.OnScreenHeight(Photo, rotation));
+    [DataRow(0, 4000.0, 3000.0)]
+    [DataRow(90, 3000.0, 4000.0)]
+    [DataRow(270, 3000.0, 4000.0)]
+    [DataRow(180, 4000.0, 3000.0)]
+    public void OnScreenSize(int rotation, double width, double height)
+    {
+        var size = ZoomGeometry.OnScreenSize(Photo, rotation);
+        Near(width, size.Width);
+        Near(height, size.Height);
+    }
+
+    [TestMethod]
+    public void ScaleAbout_MovesPerAxisAboutTheCentre() =>
+        NearPoint(new Point(700, 425), ZoomGeometry.ScaleAbout(new Point(600, 450), new Point(500, 400), 2, 0.5));
 
     // ---------------------------------------------------------------- pan rules
 
@@ -278,25 +291,36 @@ public sealed class ViewMathTests
     public void Store_RoundTrip_FollowsTheWindowAndTheExifBaseline()
     {
         var store = new PerPhotoViewStore();
-        store.Save("A", 0.5f, new Point(700, 500), 90, 0, Canvas);
+        store.Save("A", 0.5f, new Point(700, 500), 90, 0, Canvas, Photo);
 
-        Assert.IsTrue(store.TryRestore("A", 0, Canvas, out var same));
+        Assert.IsTrue(store.TryRestore("A", 0, Canvas, Photo, out var same));
         Near(0.5, same.Scale);
         NearPoint(new Point(700, 500), same.ImagePos);
         Assert.AreEqual(90, same.Rotation);
         Assert.IsFalse(same.PanIsCentered);
 
-        Assert.IsTrue(store.TryRestore("A", 90, new Size(2000, 1600), out var moved));
+        // An image whose EXIF says 90 comes in the other axes, so it is the same size on screen.
+        Assert.IsTrue(store.TryRestore("A", 90, new Size(2000, 1600), new Size(3000, 4000), out var moved));
         NearPoint(new Point(1400, 1000), moved.ImagePos);
         Assert.AreEqual(180, moved.Rotation, "user's 90 onto an EXIF 90");
+    }
+
+    [TestMethod]
+    public void Store_ImageOfAnotherSize_KeepsTheSamePartAtTheCentre()
+    {
+        // Saved on the HQ, restored onto a preview laid out at half its size: the offset from the centre halves.
+        var store = new PerPhotoViewStore();
+        store.Save("A", 0.5f, new Point(700, 500), 0, 0, Canvas, Photo);
+        Assert.IsTrue(store.TryRestore("A", 0, Canvas, new Size(2000, 1500), out var v));
+        NearPoint(new Point(600, 450), v.ImagePos);
     }
 
     [TestMethod]
     public void Store_CentredPan_IsReported()
     {
         var store = new PerPhotoViewStore();
-        store.Save("A", 0.5f, new Point(500, 400), 0, 0, Canvas);
-        Assert.IsTrue(store.TryRestore("A", 0, Canvas, out var v));
+        store.Save("A", 0.5f, new Point(500, 400), 0, 0, Canvas, Photo);
+        Assert.IsTrue(store.TryRestore("A", 0, Canvas, Photo, out var v));
         Assert.IsTrue(v.PanIsCentered);
     }
 
@@ -304,14 +328,14 @@ public sealed class ViewMathTests
     public void Store_RemoveRenameMissing()
     {
         var store = new PerPhotoViewStore();
-        Assert.IsFalse(store.TryRestore("A", 0, Canvas, out _), "nothing stored");
-        store.Save("A", 0.5f, new Point(700, 500), 0, 0, Canvas);
+        Assert.IsFalse(store.TryRestore("A", 0, Canvas, Photo, out _), "nothing stored");
+        store.Save("A", 0.5f, new Point(700, 500), 0, 0, Canvas, Photo);
         store.Rename("A", "B");
-        Assert.IsFalse(store.TryRestore("A", 0, Canvas, out _));
-        Assert.IsTrue(store.TryRestore("B", 0, Canvas, out _));
+        Assert.IsFalse(store.TryRestore("A", 0, Canvas, Photo, out _));
+        Assert.IsTrue(store.TryRestore("B", 0, Canvas, Photo, out _));
         store.Rename("missing", "C"); // no-op
         store.Remove("B");
-        Assert.IsFalse(store.TryRestore("B", 0, Canvas, out _));
+        Assert.IsFalse(store.TryRestore("B", 0, Canvas, Photo, out _));
     }
 
     // ---------------------------------------------------------------- ClassifyArrival

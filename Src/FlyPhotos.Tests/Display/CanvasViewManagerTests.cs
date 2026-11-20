@@ -43,19 +43,19 @@ public sealed class CanvasViewManagerTests
         }
 
         /// <summary>One install, as the canvas controller hands it over.</summary>
-        public void Arrive(string path, double w, double h, ViewArrival a, int rotation = 0)
+        public void Arrive(string path, double w, double h, ViewArrival a, int rotation = 0, bool inPhotoPixels = true)
         {
-            M.SetScaleAndPosition(path, new Size(w, h), rotation, Canvas, a);
+            M.SetScaleAndPosition(path, new Size(w, h), rotation, Canvas, a, inPhotoPixels);
             _shown = path;
         }
 
         /// <summary>
         /// Shows a photo the way the canvas controller classifies it: the first one ever, a new one, or a better
-        /// image of the one on screen.
+        /// image of the one on screen. <paramref name="inPhotoPixels"/> false: a preview with no full-size metadata.
         /// </summary>
-        public void Show(string path, double w, double h, int rotation = 0) =>
+        public void Show(string path, double w, double h, int rotation = 0, bool inPhotoPixels = true) =>
             Arrive(path, w, h, _shown == "" ? ViewArrival.FirstPhoto
-                : path != _shown ? ViewArrival.NewPhoto : ViewArrival.SameImageUpgrade, rotation);
+                : path != _shown ? ViewArrival.NewPhoto : ViewArrival.SameImageUpgrade, rotation, inPhotoPixels);
 
         public void Tick(int frames = 1)
         {
@@ -523,7 +523,7 @@ public sealed class CanvasViewManagerTests
     public void Upgrade_MidWheelZoom_KeepsOnScreenSizeAndConverges()
     {
         var r = new Rig();
-        r.Show("A", 400, 300); // a preview with no full-size metadata, laid out at its own size; at 100%
+        r.Show("A", 400, 300, inPhotoPixels: false); // a preview with no full-size metadata, laid out at its own size; at 100%
         r.M.ZoomAtPoint(ZoomDirection.In, Centre); // heading to 1.25
         r.Tick(3);
         var heightOnScreen = r.Scale * 300;
@@ -1012,13 +1012,13 @@ public sealed class CanvasViewManagerTests
     public void Upgrade_KeepsOnScreenHeight_WhenLayoutUnitsDiffer()
     {
         var r = new Rig();
-        r.Show("A", 400, 300); // no full-size metadata: laid out at its own small size
+        r.Show("A", 400, 300, inPhotoPixels: false); // no full-size metadata: laid out at its own small size
         r.M.ZoomAtPointByFactor(1.5f, Centre);
         var before = r.Scale * 300;
         r.Show("A", 4000, 3000);
         Near(before, r.Scale * 3000, 1e-3, "no metadata");
 
-        r.Show("B", 2250, 3000); // already turned upright...
+        r.Show("B", 2250, 3000, inPhotoPixels: false); // already turned upright...
         r.M.ZoomAtPointByFactor(1.5f, Centre);
         before = r.Scale * 3000;
         r.Show("B", 4000, 3000, rotation: 90); // ...while the HQ carries a 90° EXIF rotation
@@ -1053,6 +1053,194 @@ public sealed class CanvasViewManagerTests
         Assert.IsTrue(r.OneToOne);
         r.Settle();
         Near(1, r.Scale, 1e-6, "snapped to 100%");
+    }
+
+    // ---------------------------------------------------------------- preview -> HQ of another size (#195)
+
+    /// <summary>
+    /// A RAW's preview, laid out at the full size its metadata gives, and the HQ one decoder makes of it. Measured on
+    /// the RAW test files (preview metadata from WIC, HQ from Rawler, WIC or ImageMagick, RAW decode on or off).
+    /// </summary>
+    private sealed record RawCase(string Name, double MetaW, double MetaH, double BmpW, double BmpH,
+        double HqW, double HqH, int HqRotation, bool HqFailed = false)
+    {
+        public Size Layout => ZoomGeometry.PreviewLayoutSize(new Size(MetaW, MetaH), BmpW, BmpH);
+    }
+
+    private static readonly RawCase[] RawCases =
+    [
+        new("CR3, Rawler crops the sensor border", 5496, 3670, 800, 534, 5472, 3648, 0),
+        new("CR3, ImageMagick: the metadata size", 5496, 3670, 800, 534, 5496, 3670, 0),
+        new("ARW, small embedded JPEG", 6024, 4024, 1024, 684, 1616, 1080, 0),
+        new("ARW, Rawler decode", 6024, 4024, 1024, 684, 6000, 4000, 0),
+        new("ARW, WIC embedded JPEG", 6240, 4168, 1024, 682, 6192, 4128, 0),
+        new("portrait NEF, sensor axes + 270", 4040, 6064, 682, 1024, 6048, 4032, 270),
+        new("portrait NEF, ImageMagick upright", 4040, 6064, 682, 1024, 4032, 6048, 0),
+        new("portrait NEF, sensor axes + 90", 5520, 8280, 682, 1024, 8256, 5504, 90),
+        new("Z9 NEF, embedded JPEG", 8280, 5520, 1024, 682, 8256, 5504, 0),
+        new("HQ failed: the error icon", 5496, 3670, 800, 534, 600, 600, 0, HqFailed: true),
+    ];
+
+    /// <summary>The cases by name: a test method can't take the private record, and the name reads well per row.</summary>
+    public static IEnumerable<object[]> RawCaseNames => RawCases.Select(c => new object[] { c.Name });
+
+    private static RawCase Case(string name) => RawCases.Single(c => c.Name == name);
+
+    private static void ShowPreview(Rig r, string path, RawCase c) => r.Show(path, c.Layout.Width, c.Layout.Height);
+    private static void ShowHq(Rig r, string path, RawCase c) => r.Show(path, c.HqW, c.HqH, c.HqRotation);
+
+    /// <summary>
+    /// Where the canvas centre falls within the image's on-screen bounds, 0..1 per axis, and the size of those bounds
+    /// in screen pixels.
+    /// </summary>
+    private static (double X, double Y, double W, double H) CentreFraction(Rig r)
+    {
+        float w = (float)r.View.ImageRect.Width, h = (float)r.View.ImageRect.Height;
+        Vector2[] corners = [r.ScreenOf(new(0, 0)), r.ScreenOf(new(w, 0)), r.ScreenOf(new(0, h)), r.ScreenOf(new(w, h))];
+        double minX = corners.Min(p => p.X), maxX = corners.Max(p => p.X);
+        double minY = corners.Min(p => p.Y), maxY = corners.Max(p => p.Y);
+        return ((Centre.X - minX) / (maxX - minX), (Centre.Y - minY) / (maxY - minY), maxX - minX, maxY - minY);
+    }
+
+    /// <summary>
+    /// The canvas centre is on the same part of the photo as <paramref name="before"/>, to within a screen pixel (the
+    /// resting frame is snapped to the pixel grid).
+    /// </summary>
+    private static void SamePartAtCentre((double X, double Y, double W, double H) before, Rig r)
+    {
+        var after = CentreFraction(r);
+        Near(before.X, after.X, 1 / after.W, "centre X");
+        Near(before.Y, after.Y, 1 / after.H, "centre Y");
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(RawCaseNames))]
+    public void UpgradeToRawHq_Fitted_FitsTheHq(string name)
+    {
+        var c = Case(name);
+        var r = new Rig();
+        ShowPreview(r, "A", c);
+        ShowHq(r, "A", c);
+        Assert.IsTrue(r.Fitted);
+        Near(ZoomGeometry.CalculateScreenFitScale(Canvas, new Size(c.HqW, c.HqH), c.HqRotation), r.Scale, 1e-6, "fit");
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(RawCaseNames))]
+    public void UpgradeToRawHq_At100_StaysAt100_WithTheSamePartAtTheCentre(string name)
+    {
+        var c = Case(name);
+        var r = new Rig();
+        ShowPreview(r, "A", c);
+        r.M.ZoomToHundred(Canvas, new Point(200, 150));
+        r.Settle();
+        var part = CentreFraction(r);
+
+        ShowHq(r, "A", c);
+        Near(1, r.Scale, 1e-6, "100%");
+        Assert.IsTrue(r.OneToOne);
+        SamePartAtCentre(part, r);
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(RawCaseNames))]
+    public void UpgradeToRawHq_ZoomedAndPanned_KeepsTheZoomAndThePartAtTheCentre(string name)
+    {
+        var c = Case(name);
+        var r = new Rig();
+        ShowPreview(r, "A", c);
+        r.M.ZoomAtPointByFactor(7f, new Point(250, 600));
+        r.M.Pan(30, -20);
+        var (scale, part) = (r.Scale, CentreFraction(r));
+
+        ShowHq(r, "A", c);
+        Near(scale, r.Scale, 1e-6, "zoom");
+        SamePartAtCentre(part, r);
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(RawCaseNames))]
+    public void UpgradeToRawHq_MidZoom_KeepsZoomingAndLandsOnTheSamePart(string name)
+    {
+        var c = Case(name);
+        // Both spring kinds: double-click 100% (pan + zoom) and a wheel notch (anchored zoom).
+        Action<Rig>[] zooms =
+        [
+            r => r.M.ZoomToHundred(Canvas, new Point(300, 200)),
+            r => r.M.ZoomAtPoint(ZoomDirection.In, new Point(300, 200)),
+        ];
+        foreach (var zoom in zooms)
+        {
+            var reference = new Rig(); // the same zoom with no HQ arriving
+            ShowPreview(reference, "A", c);
+            zoom(reference);
+            reference.Settle();
+            var part = CentreFraction(reference);
+
+            var r = new Rig();
+            ShowPreview(r, "A", c);
+            zoom(r);
+            r.Tick(3);
+            ShowHq(r, "A", c);
+            Assert.IsTrue(r.M.PanZoomAnimationOnGoing, "the zoom keeps going");
+            r.Settle();
+            Near(reference.Scale, r.Scale, 1e-6, "zoom");
+            SamePartAtCentre(part, r);
+        }
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(RawCaseNames))]
+    public void RetainAndRemember_RawHq_At100_StaysAt100AcrossPhotos(string name)
+    {
+        var c = Case(name);
+        SetMode(PanZoomBehaviourOnNavigation.RetainFromLastPhoto);
+        var r = new Rig();
+        ShowPreview(r, "P0", c);
+        ShowHq(r, "P0", c);
+        r.M.ZoomToHundred(Canvas);
+        r.Settle();
+        for (var i = 1; i <= 10; i++)
+        {
+            ShowPreview(r, "P" + i, c);
+            ShowHq(r, "P" + i, c);
+            Near(1, r.Scale, 1e-6, $"retained on photo {i}");
+            Assert.IsTrue(r.OneToOne, $"1:1 on photo {i}");
+        }
+
+        if (c.HqFailed) return; // the error icon at 100% is its default view, which is not remembered
+        SetMode(PanZoomBehaviourOnNavigation.RememberPerPhoto);
+        ShowPreview(r, "Q", c);
+        ShowHq(r, "Q", c);
+        ShowPreview(r, "P10", c);
+        ShowHq(r, "P10", c);
+        Near(1, r.Scale, 1e-6, "remembered");
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(RawCaseNames))]
+    public void Remember_RawHq_PannedView_KeepsTheSamePartOnEveryRevisit(string name)
+    {
+        // The view is saved on the HQ and restored onto the preview, laid out at the metadata size (#195 review).
+        var c = Case(name);
+        SetMode(PanZoomBehaviourOnNavigation.RememberPerPhoto);
+        var r = new Rig();
+        ShowPreview(r, "P", c);
+        ShowHq(r, "P", c);
+        r.M.ZoomAtPointByFactor(7f, new Point(250, 600));
+        r.M.Pan(30, -20);
+        var (scale, part) = (r.Scale, CentreFraction(r));
+
+        for (var i = 1; i <= 5; i++)
+        {
+            ShowPreview(r, "Q", c);
+            ShowHq(r, "Q", c);
+            ShowPreview(r, "P", c);
+            SamePartAtCentre(part, r); // already on the preview
+            ShowHq(r, "P", c);
+            Near(scale, r.Scale, 1e-6, $"zoom on revisit {i}");
+            SamePartAtCentre(part, r);
+        }
     }
 
     [TestMethod]

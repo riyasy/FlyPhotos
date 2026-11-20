@@ -8,7 +8,10 @@ using Microsoft.Graphics.Canvas;
 namespace FlyPhotos.Core.Model;
 
 /// <summary>The full image's pixel size, known to a preview that is smaller than the photo (0 when unknown).</summary>
-internal record ImageMetadata(double FullWidth, double FullHeight);
+internal record ImageMetadata(double FullWidth, double FullHeight)
+{
+    public bool HasFullSize => FullWidth > 0 && FullHeight > 0;
+}
 
 /// <summary>
 /// A decoded image of a photo. Its lifetime is counted in <b>leases</b>: the creator holds the first one (handed

@@ -1,3 +1,4 @@
+using Windows.Foundation;
 using FlyPhotos.Display.State;
 using Size = FlyPhotos.Core.Model.Size;
 
@@ -26,6 +27,14 @@ internal interface IViewAnimation
     /// animation (e.g. a wheel-zoom spring) keeps converging to its scale target.
     /// </summary>
     void NudgePan(double dx, double dy);
+
+    /// <summary>
+    /// Maps the animation's pan state (positions, velocities, targets, anchors, in canvas pixels) through
+    /// <see cref="ZoomGeometry.ScaleAbout"/>, as the view's pan is when a better image of another on-screen size
+    /// replaces the one on screen (preview → HQ, with any scale change already applied). The pan formulas are affine,
+    /// so the animation then runs as if it had started on the new image.
+    /// </summary>
+    void ScalePanAbout(Point centre, double kx, double ky);
 }
 
 /// <summary>

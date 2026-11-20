@@ -390,6 +390,12 @@ internal partial class CanvasController : ICanvasController
         string PhotoPath, Size CanvasSize, ViewArrival Arrival, DisplayItem Item)
     {
         /// <summary>
+        /// The item is laid out in the photo's own pixels: anything but a preview with no full-size metadata, which is
+        /// laid out at its bitmap's size.
+        /// </summary>
+        public bool InPhotoPixels { get; } = Item is not PreviewDisplayItem p || p.Metadata is { HasFullSize: true };
+
+        /// <summary>
         /// A follow-up install for the same photo (an animator after its static first frame) that must not reset the
         /// view. It carries no item: the animator draws its own frames, so the first frame's lease ends with the swap.
         /// </summary>
@@ -474,7 +480,8 @@ internal partial class CanvasController : ICanvasController
                 oldRenderer?.Dispose();
             oldItem?.Release(); // an animated renderer draws its own frames, so its item (if any) can go now
 
-            _canvasViewManager.SetScaleAndPosition(ctx.PhotoPath, imageSize, imageRotation, ctx.CanvasSize, ctx.Arrival);
+            _canvasViewManager.SetScaleAndPosition(ctx.PhotoPath, imageSize, imageRotation, ctx.CanvasSize, ctx.Arrival,
+                ctx.InPhotoPixels);
 
             if (forceThumbNailRedraw)
                 _thumbNailController.RequestThumbnailRedraw(); // just flags the strip's own W2D loop; thread-safe

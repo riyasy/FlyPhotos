@@ -49,6 +49,9 @@ internal sealed class ShrugAnimation : IViewAnimation
         _startPosition.Y += dy;
     }
 
+    public void ScalePanAbout(Point centre, double kx, double ky) =>
+        _startPosition = ZoomGeometry.ScaleAbout(_startPosition, centre, kx, ky);
+
     /// <summary>A forced stop puts the image back where the wiggle started, so no wiggle offset outlives it.</summary>
     public void CompleteImmediately()
     {
