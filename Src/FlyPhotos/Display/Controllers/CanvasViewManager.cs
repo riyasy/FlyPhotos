@@ -53,11 +53,11 @@ internal enum ViewArrival
 ///   <item><term>NewPhoto, FirstRealImage</term><description>Any animation is first jumped to its end, then the
 ///     <see cref="PanZoomBehaviourOnNavigation"/> setting: <b>Reset</b> → default view. <b>RememberPerPhoto</b> →
 ///     the stored view (<see cref="PerPhotoViewStore"/>) or the default. <b>RetainFromLastPhoto</b> → fitted stays
-///     fitted; otherwise the absolute scale is kept and the pan offset scales with the image size
-///     (<see cref="ZoomGeometry.RetainedPan"/>); rotation is the new photo's EXIF rotation, or after a placeholder
+///     fitted; otherwise the zoom on the photo is kept (<see cref="PhotoZoom"/>), and the same part of the photo stays at the centre
+///     (<see cref="ZoomGeometry.CentreOnImage"/>); rotation is the new photo's EXIF rotation, or after a placeholder
 ///     the user's rotation carried over.</description></item>
 ///   <item><term>SameImageUpgrade</term><description>The view on screen is kept (see
-///     <see cref="ApplyQualityUpgrade"/>): fitted stays fitted, an image in photo pixels keeps its zoom, the same part
+///     <see cref="ApplyQualityUpgrade"/>): fitted stays fitted, otherwise the image keeps its size on screen, the same part
 ///     of the photo stays at the centre, and a running zoom keeps running.</description></item>
 /// </list></para>
 ///
@@ -95,8 +95,7 @@ internal enum ViewArrival
 ///   <item><b>Output-only spring state</b> (each <see cref="SpringAxis"/>'s Position/Velocity): the spring
 ///     WRITES scale/pan into <see cref="CanvasViewState"/> each tick and never reads them back, so an external
 ///     mid-flight write is overwritten on the next frame. Anything that changes the view while an animation runs
-///     must therefore fold into it (<see cref="IViewAnimation.NudgePan"/>, <see cref="IViewAnimation.ScalePanAbout"/>,
-///     re-aiming, rebasing the scale spring) or
+///     must therefore fold into it (<see cref="IViewAnimation.NudgePan"/>, re-aiming, rebasing the scale spring) or
 ///     jump it to its end first (<see cref="StopAnimationSnappingToTarget"/>). State is seeded from the live view
 ///     only when starting fresh (<see cref="SeedScaleSpringIfFresh"/>); a running spring keeps its velocity so
 ///     re-targets (e.g. rapid wheel notches) stay continuous instead of restarting with a lurch.</item>
@@ -125,10 +124,27 @@ internal class CanvasViewManager : IAnimationHost
     private int _exifRotation;
 
     /// <summary>
-    /// The image on screen is laid out in the photo's own pixels (an HQ, or a preview with full-size metadata), so
-    /// its zoom carries over to the HQ unchanged. False for a preview laid out at its bitmap's size.
+    /// The image on screen's pixels per pixel of the photo by its metadata (<see cref="ZoomGeometry.ImagePixelsPerPhotoPixel"/>),
+    /// null when the metadata gives no size. The upgrade and Retain go by it, so a preview laid out at the metadata size
+    /// and an HQ the decoder made smaller show the photo at the same size, and the zoom doesn't compound (#195).
     /// </summary>
-    private bool _inPhotoPixels = true;
+    private float? _imagePixelsPerPhotoPixel;
+
+    /// <summary>The zoom on the photo itself (screen pixels per pixel of the photo by its metadata), which Remember keeps.</summary>
+    private float PhotoZoom => _view.Scale * (_imagePixelsPerPhotoPixel ?? 1f);
+
+    /// <summary>
+    /// The scale that shows the photo at the same size on an image with <paramref name="imagePixelsPerPhotoPixel"/>
+    /// as on the image on screen; the same scale when either isn't known.
+    /// </summary>
+    private float SamePhotoSizeScale(float? imagePixelsPerPhotoPixel) =>
+        _imagePixelsPerPhotoPixel is { } onScreen && imagePixelsPerPhotoPixel is { } other
+            ? _view.Scale * onScreen / other
+            : _view.Scale;
+
+    /// <summary>Where the canvas centre falls on the image on screen (<see cref="ZoomGeometry.CentreOnImage"/>).</summary>
+    private Point CentreOnImage(Size canvasSize) =>
+        ZoomGeometry.CentreOnImage(_view.ImagePos, _view.Scale, _imageSize, _view.Rotation, canvasSize);
 
     /// <summary>
     /// Per-session memory of user-modified views for "RememberPerPhoto" mode (see <see cref="PerPhotoViewStore"/>).
@@ -274,14 +290,15 @@ internal class CanvasViewManager : IAnimationHost
     /// <summary>
     /// Applies the view for newly installed content (<paramref name="imageSize"/> in layout pixels, its
     /// <paramref name="exifRotation"/>), by how it <paramref name="arrival"/>d — see the remarks.
-    /// <paramref name="inPhotoPixels"/> is false for a preview with no full-size metadata, laid out at its own size.
+    /// <paramref name="photoSize"/> is the photo's size on screen by its metadata, null when unknown.
     /// </summary>
     public void SetScaleAndPosition(string photoPath, Size imageSize, int exifRotation, Size canvasSize,
-        ViewArrival arrival, bool inPhotoPixels)
+        ViewArrival arrival, Size? photoSize)
     {
         // The outgoing photo's view first, while the state still describes it.
         if (arrival == ViewArrival.NewPhoto) RememberViewOnScreen(canvasSize);
 
+        var imagePixelsPerPhotoPixel = ZoomGeometry.ImagePixelsPerPhotoPixel(imageSize, exifRotation, photoSize);
         var exifDelta = exifRotation - _exifRotation;
         _exifRotation = exifRotation;
         _photoPath = photoPath;
@@ -294,16 +311,24 @@ internal class CanvasViewManager : IAnimationHost
                 ApplyDefaultView(exifRotation, canvasSize, openZoom: true);
                 break;
             case ViewArrival.SameImageUpgrade:
-                ApplyQualityUpgrade(imageSize, exifDelta, canvasSize);
+                ApplyQualityUpgrade(imageSize, exifDelta, canvasSize, imagePixelsPerPhotoPixel);
                 break;
             default:
-                ApplyNavigationView(photoPath, imageSize, exifRotation, exifDelta, canvasSize, arrival);
+                ApplyNavigationView(photoPath, imageSize, exifRotation, exifDelta, canvasSize, arrival,
+                    imagePixelsPerPhotoPixel);
                 break;
         }
-        _inPhotoPixels = inPhotoPixels; // after the upgrade, which goes by the image it replaces
+        _imagePixelsPerPhotoPixel = imagePixelsPerPhotoPixel; // after the upgrade and Retain, which go by the image before
 
         ViewChanged?.Invoke();
     }
+
+    /// <summary>
+    /// The photo on screen's size by its metadata (<paramref name="photoSize"/>, on screen), learnt after its image was
+    /// installed: its preview loaded after its HQ. A ratio already known is kept.
+    /// </summary>
+    public void LearnPhotoSize(Size photoSize) =>
+        _imagePixelsPerPhotoPixel ??= ZoomGeometry.ImagePixelsPerPhotoPixel(_imageSize, _exifRotation, photoSize);
 
     /// <summary>
     /// Re-fits the view for a new page of the current multi-page image. Only called when the page
@@ -322,23 +347,22 @@ internal class CanvasViewManager : IAnimationHost
     }
 
     /// <summary>
-    /// A better image of the photo on screen (Preview → HQ, a reload) keeps the live view. The rotation is re-based
-    /// onto the new EXIF baseline; the scale is multiplied by <see cref="ZoomGeometry.UpgradeScaleRatio"/>; the pan
-    /// offset from the canvas centre scales with the image's on-screen size, so the same part of the photo stays at the
-    /// centre; a running animation is mapped the same way, so it keeps going.
+    /// A better image of the photo on screen (Preview → HQ, a reload) keeps the live view: the rotation is re-based onto
+    /// the new EXIF baseline, the scale is multiplied by <see cref="ZoomGeometry.UpgradeScaleRatio"/>, and the same part
+    /// of the photo stays at the canvas centre (<see cref="ZoomGeometry.CentreOnImage"/>). A running animation keeps
+    /// running, its scale rebased, and owns the pan: it lands on the target it aimed at on the image before.
     /// </summary>
     /// <remarks>
-    /// An image laid out in photo pixels (<see cref="_inPhotoPixels"/>) keeps its zoom, though the HQ's decoder can
-    /// make another size than the preview's metadata gave (#195): WIC reports a RAW's whole sensor (CR3 5496×3670)
-    /// while Rawler crops it (5472×3648), an embedded JPEG can be far smaller (ARW 1616×1080 for 6024×4024), and the HQ
-    /// can come in sensor axes with an EXIF rotation. Keeping the on-screen size there made 100% read 100.6% (or 373%),
-    /// compounding photo after photo in RetainFromLastPhoto.
+    /// The photo keeps its size on screen even when the HQ's decoder made another size than the preview's metadata gave
+    /// (a RAW, #195), so 100% always means one HQ pixel per screen pixel. Retain and Remember go by the same ratio
+    /// (<see cref="_imagePixelsPerPhotoPixel"/>), so that difference doesn't compound photo after photo.
     /// </remarks>
-    private void ApplyQualityUpgrade(Size imageSize, int exifDelta, Size canvasSize)
+    private void ApplyQualityUpgrade(Size imageSize, int exifDelta, Size canvasSize, float? imagePixelsPerPhotoPixel)
     {
         var animating = IsSpringRunning;
         var oldImageSize = _imageSize;
         var oldRotation = _view.Rotation;
+        var centreOnImage = CentreOnImage(canvasSize);
 
         SetImageSize(imageSize);
         _view.Rotation += exifDelta;
@@ -349,22 +373,14 @@ internal class CanvasViewManager : IAnimationHost
         }
 
         // A running spring's scale is rebased too, so it keeps converging (re-fitting here would visibly reset
-        // mid-animation). The scale comes first: the animations' pan mapping reads it.
-        var ratio = ZoomGeometry.UpgradeScaleRatio(canvasSize, oldImageSize, oldRotation, imageSize, _view.Rotation,
-            IsFittedToScreen, _inPhotoPixels);
+        // mid-animation).
+        var ratio = ZoomGeometry.UpgradeScaleRatio(canvasSize, oldImageSize, oldRotation, _imagePixelsPerPhotoPixel,
+            imageSize, _view.Rotation, imagePixelsPerPhotoPixel, IsFittedToScreen);
         _view.Scale *= ratio;
         _view.TargetScale *= ratio;
         if (animating && ratio > 0f) _scaleSpring.Position += (float)Math.Log(ratio);
-
-        var (oldW, oldH) = ZoomGeometry.OnScreenSize(oldImageSize, oldRotation);
-        var (newW, newH) = ZoomGeometry.OnScreenSize(imageSize, _view.Rotation);
-        if (oldW > 0 && oldH > 0)
-        {
-            var centre = ZoomGeometry.Centre(canvasSize);
-            double kx = newW * ratio / oldW, ky = newH * ratio / oldH;
-            _view.ImagePos = ZoomGeometry.ScaleAbout(_view.ImagePos, centre, kx, ky);
-            _activeAnimation?.ScalePanAbout(centre, kx, ky);
-        }
+        if (_activeAnimation == null)
+            _view.ImagePos = ZoomGeometry.ImagePosFor(centreOnImage, _view.Scale, imageSize, _view.Rotation, canvasSize);
         _view.UpdateTransform();
         UpdateOneToOne(); // a zoom heading to 100% is 1:1
     }
@@ -374,19 +390,20 @@ internal class CanvasViewManager : IAnimationHost
     /// in-flight animation to its end, then applies the configured <see cref="PanZoomBehaviourOnNavigation"/>.
     /// </summary>
     private void ApplyNavigationView(string photoPath, Size imageSize, int exifRotation, int exifDelta,
-        Size canvasSize, ViewArrival arrival)
+        Size canvasSize, ViewArrival arrival, float? imagePixelsPerPhotoPixel)
     {
         // Jump the animation to its end, so its stale state can't clobber the new view and Retain inherits the
         // view the user was heading to.
         StopAnimationSnappingToTarget();
-        var oldImageSize = _imageSize;
+        var centreOnImage = CentreOnImage(canvasSize);
+        var retainedScale = SamePhotoSizeScale(imagePixelsPerPhotoPixel);
         SetImageSize(imageSize);
 
         switch (AppConfig.Settings.PanZoomBehaviourOnNavigation)
         {
             case PanZoomBehaviourOnNavigation.RememberPerPhoto:
-                if (_viewStore.TryRestore(photoPath, exifRotation, canvasSize, _imageSize, out var restored))
-                    ApplyRestoredView(restored, canvasSize);
+                if (_viewStore.TryRestore(photoPath, exifRotation, out var restored))
+                    ApplyRestoredView(restored.PhotoZoom / (imagePixelsPerPhotoPixel ?? 1f), restored, canvasSize);
                 else
                     ApplyDefaultView(exifRotation, canvasSize, openZoom: false);
                 break;
@@ -398,7 +415,7 @@ internal class CanvasViewManager : IAnimationHost
             case PanZoomBehaviourOnNavigation.RetainFromLastPhoto:
                 // A new photo takes its own EXIF rotation; after a placeholder the user's rotation carries over.
                 _view.Rotation = arrival == ViewArrival.NewPhoto ? exifRotation : _view.Rotation + exifDelta;
-                ApplyRetainedView(oldImageSize, canvasSize);
+                ApplyRetainedView(retainedScale, centreOnImage, canvasSize);
                 break;
         }
     }
@@ -436,31 +453,41 @@ internal class CanvasViewManager : IAnimationHost
     }
 
     /// <summary>
-    /// Applies a remembered view (de-normalized by <see cref="PerPhotoViewStore"/> for the current canvas and EXIF
-    /// baseline, which <see cref="_exifRotation"/> already holds, so a later Preview → HQ rotation delta nets to zero).
+    /// Applies a remembered view (its rotation re-based by <see cref="PerPhotoViewStore"/> onto the EXIF baseline, which
+    /// <see cref="_exifRotation"/> already holds, so a later Preview → HQ rotation delta nets to zero), with the same
+    /// part of the photo at the centre. <paramref name="scale"/> is its <see cref="PhotoZoom"/> on this image.
     /// </summary>
-    private void ApplyRestoredView(PerPhotoViewStore.RestoredView restored, Size canvasSize)
+    private void ApplyRestoredView(float scale, PerPhotoViewStore.RestoredView restored, Size canvasSize)
     {
-        _view.Scale = _view.TargetScale = restored.Scale;
         _view.Rotation = restored.Rotation;
-        _view.ImagePos = restored.ImagePos;
-        _view.UpdateTransform();
+        PlaceAt(scale, restored.CentreOnImage, canvasSize);
         // Fitted needs both the fit scale AND a centred pan: a panned-at-fit-scale photo is not "fitted".
-        IsFittedToScreen = ZoomGeometry.SameScale(restored.Scale, FitScale(canvasSize)) && restored.PanIsCentered;
-        UpdateOneToOne();
+        IsFittedToScreen = ZoomGeometry.SameScale(scale, FitScale(canvasSize))
+                           && ZoomGeometry.IsCentred(_view.ImagePos, canvasSize);
         _viewChangedByUser = true; // a remembered view is by definition one the user made
     }
 
-    /// <summary>RetainFromLastPhoto: fitted stays fitted; otherwise the scale stays and the pan follows the image size.</summary>
-    private void ApplyRetainedView(Size oldImageSize, Size canvasSize)
+    /// <summary>
+    /// RetainFromLastPhoto: fitted stays fitted; otherwise the zoom on the photo stays (<paramref name="scale"/> on this
+    /// image) and so does the part at the centre.
+    /// </summary>
+    private void ApplyRetainedView(float scale, Point centreOnImage, Size canvasSize)
     {
         if (IsFittedToScreen)
         {
             ApplyFitted(canvasSize);
             return;
         }
-        _view.ImagePos = ZoomGeometry.RetainedPan(_view.ImagePos, canvasSize, oldImageSize, _imageSize);
+        PlaceAt(scale, centreOnImage, canvasSize);
+    }
+
+    /// <summary>Puts the view at rest at <paramref name="scale"/>, with <paramref name="centreOnImage"/> at the centre.</summary>
+    private void PlaceAt(float scale, Point centreOnImage, Size canvasSize)
+    {
+        _view.Scale = _view.TargetScale = scale;
+        _view.ImagePos = ZoomGeometry.ImagePosFor(centreOnImage, scale, _imageSize, _view.Rotation, canvasSize);
         _view.UpdateTransform();
+        UpdateOneToOne();
     }
 
     // --- Window ---
@@ -552,7 +579,7 @@ internal class CanvasViewManager : IAnimationHost
             _viewStore.Remove(_photoPath);
             return;
         }
-        _viewStore.Save(_photoPath, _view.Scale, _view.ImagePos, _view.Rotation, _exifRotation, canvasSize, _imageSize);
+        _viewStore.Save(_photoPath, PhotoZoom, CentreOnImage(canvasSize), _view.Rotation, _exifRotation);
     }
 
     /// <summary>The view at rest is the photo's default: default scale, EXIF rotation, centred.</summary>

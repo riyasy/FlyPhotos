@@ -37,18 +37,11 @@ internal sealed class AnchoredZoomAnimation : IViewAnimation
             _anchorY = view.ImagePos.Y;
         }
         view.TargetScale = targetScale;
-        UpdateGridOffset();
-    }
 
-    /// <summary>
-    /// Precomputes the constant grid-alignment offset δ (≤0.5 px/axis): takes where the exact-anchor zoom would
-    /// settle (the anchor-preserving pan at the target scale), nudges it so the composed translation lands on whole
-    /// pixels, and stores the difference. Tick blends it in over the settle tail so the resting frame is grid-clean.
-    /// </summary>
-    private void UpdateGridOffset()
-    {
-        var view = _host.View;
-        var targetScale = view.TargetScale;
+        // Precompute the constant grid-alignment offset δ (≤0.5 px/axis): take where the exact-anchor zoom
+        // would settle (the anchor-preserving pan at the target scale), nudge it so the composed translation
+        // lands on whole pixels, and store the difference. Tick blends it in over the settle tail so the
+        // resting frame is grid-clean.
         var startScale = view.Scale;
         if (startScale > 0f)
         {
@@ -120,14 +113,6 @@ internal sealed class AnchoredZoomAnimation : IViewAnimation
         view.ImagePos.X += dx;
         view.ImagePos.Y += dy;
         view.UpdateTransform();
-    }
-
-    public void ScalePanAbout(Point centre, double kx, double ky)
-    {
-        _zoomCenter = ZoomGeometry.ScaleAbout(_zoomCenter, centre, kx, ky);
-        var track = ZoomGeometry.ScaleAbout(new Point(_anchorX, _anchorY), centre, kx, ky);
-        (_anchorX, _anchorY) = (track.X, track.Y);
-        UpdateGridOffset(); // for the new image's size
     }
 
     public void CompleteImmediately()

@@ -24,16 +24,6 @@ internal sealed class SpringAxis
         Velocity = 0f;
     }
 
-    /// <summary>
-    /// Moves the position away from (k &gt; 1) or towards <paramref name="centre"/> by <paramref name="k"/>, scaling the
-    /// velocity with it, so the motion continues as if it had started from the moved position.
-    /// </summary>
-    public void ScaleAbout(double centre, double k)
-    {
-        Position = (float)(centre + (Position - centre) * k);
-        Velocity = (float)(Velocity * k);
-    }
-
     /// <summary>Snaps exactly onto <paramref name="target"/> and stops — used when the settle test passes.</summary>
     public void SettleTo(float target)
     {

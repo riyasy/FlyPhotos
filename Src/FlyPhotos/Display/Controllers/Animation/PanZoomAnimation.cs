@@ -102,15 +102,6 @@ internal sealed class PanZoomAnimation : IViewAnimation
         view.UpdateTransform();
     }
 
-    public void ScalePanAbout(Point centre, double kx, double ky)
-    {
-        var view = _host.View;
-        // Re-aligned to the pixel grid for the new image, as Aim does.
-        _panTarget = view.SnapImagePosToPixelGrid(view.TargetScale, ZoomGeometry.ScaleAbout(_panTarget, centre, kx, ky));
-        _host.PanXSpring.ScaleAbout(centre.X, kx);
-        _host.PanYSpring.ScaleAbout(centre.Y, ky);
-    }
-
     public void CompleteImmediately()
     {
         var view = _host.View;

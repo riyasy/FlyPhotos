@@ -43,19 +43,19 @@ public sealed class CanvasViewManagerTests
         }
 
         /// <summary>One install, as the canvas controller hands it over.</summary>
-        public void Arrive(string path, double w, double h, ViewArrival a, int rotation = 0, bool inPhotoPixels = true)
+        public void Arrive(string path, double w, double h, ViewArrival a, int rotation = 0, Size? photoSize = null)
         {
-            M.SetScaleAndPosition(path, new Size(w, h), rotation, Canvas, a, inPhotoPixels);
+            M.SetScaleAndPosition(path, new Size(w, h), rotation, Canvas, a, photoSize);
             _shown = path;
         }
 
         /// <summary>
         /// Shows a photo the way the canvas controller classifies it: the first one ever, a new one, or a better
-        /// image of the one on screen. <paramref name="inPhotoPixels"/> false: a preview with no full-size metadata.
+        /// image of the one on screen. <paramref name="photoSize"/>: the photo's size on screen by its metadata.
         /// </summary>
-        public void Show(string path, double w, double h, int rotation = 0, bool inPhotoPixels = true) =>
+        public void Show(string path, double w, double h, int rotation = 0, Size? photoSize = null) =>
             Arrive(path, w, h, _shown == "" ? ViewArrival.FirstPhoto
-                : path != _shown ? ViewArrival.NewPhoto : ViewArrival.SameImageUpgrade, rotation, inPhotoPixels);
+                : path != _shown ? ViewArrival.NewPhoto : ViewArrival.SameImageUpgrade, rotation, photoSize);
 
         public void Tick(int frames = 1)
         {
@@ -269,14 +269,14 @@ public sealed class CanvasViewManagerTests
 
         r.Show("A", 4000, 3000);
         Near(0.5, r.Scale, 1e-6, "scale");
-        NearPoint(new Point(700, 500), r.Pos, 1e-6, "pan");
+        NearPoint(new Point(700, 500), r.Pos, 1e-3, "pan"); // through a float scale
         Assert.AreEqual(90, r.View.Rotation);
         Assert.IsFalse(r.Fitted);
         Assert.IsFalse(r.OneToOne);
     }
 
     [TestMethod]
-    public void Remember_PanFollowsTheWindowSize()
+    public void Remember_AfterAResize_TheSamePartIsAtTheCentre()
     {
         var r = ZoomedRotatedA(PanZoomBehaviourOnNavigation.RememberPerPhoto);
         r.Show("B", 4000, 3000);
@@ -284,7 +284,8 @@ public sealed class CanvasViewManagerTests
 
         r.Show("A", 4000, 3000);
         Near(0.5, r.Scale, 1e-6, "scale is absolute");
-        NearPoint(new Point(1400, 1000), r.Pos, 1e-6, "the offset from the centre doubles with the window");
+        // Saved 200 px right and 100 px below the centre; at the same scale that is the same part of the photo.
+        NearPoint(new Point(1200, 900), r.Pos, 1e-3, "the same offset from the new centre");
     }
 
     [TestMethod]
@@ -434,7 +435,7 @@ public sealed class CanvasViewManagerTests
 
         r.Show("B", 8000, 6000);
         Near(0.5, r.Scale, 1e-6, "absolute scale kept");
-        NearPoint(new Point(700, 500), r.Pos, 1e-6, "offset doubled with the image");
+        NearPoint(new Point(700, 500), r.Pos, 1e-3, "offset doubled with the image"); // through a float scale
         Assert.IsFalse(r.Fitted);
     }
 
@@ -461,7 +462,8 @@ public sealed class CanvasViewManagerTests
         r.Arrive("B", 4000, 3000, ViewArrival.FirstRealImage, rotation: 0);
 
         Near(0.5, r.Scale, 1e-6, "scale");
-        NearPoint(new Point(600, 450), r.Pos, 1e-3, "pan via the placeholder equals the direct one"); // Point is float
+        // The centre was 45% across and 46.7% down A's box on screen; it stays there on B, turned to 1500×2000.
+        NearPoint(new Point(575, 450 + 50 / 3.0), r.Pos, 1e-3, "the same place in the box on screen");
         Assert.AreEqual(90, r.View.Rotation, "the user's rotation survives");
     }
 
@@ -523,7 +525,7 @@ public sealed class CanvasViewManagerTests
     public void Upgrade_MidWheelZoom_KeepsOnScreenSizeAndConverges()
     {
         var r = new Rig();
-        r.Show("A", 400, 300, inPhotoPixels: false); // a preview with no full-size metadata, laid out at its own size; at 100%
+        r.Show("A", 400, 300); // a preview with no full-size metadata, laid out at its own size; at 100%
         r.M.ZoomAtPoint(ZoomDirection.In, Centre); // heading to 1.25
         r.Tick(3);
         var heightOnScreen = r.Scale * 300;
@@ -1012,13 +1014,13 @@ public sealed class CanvasViewManagerTests
     public void Upgrade_KeepsOnScreenHeight_WhenLayoutUnitsDiffer()
     {
         var r = new Rig();
-        r.Show("A", 400, 300, inPhotoPixels: false); // no full-size metadata: laid out at its own small size
+        r.Show("A", 400, 300); // no full-size metadata: laid out at its own small size
         r.M.ZoomAtPointByFactor(1.5f, Centre);
         var before = r.Scale * 300;
         r.Show("A", 4000, 3000);
         Near(before, r.Scale * 3000, 1e-3, "no metadata");
 
-        r.Show("B", 2250, 3000, inPhotoPixels: false); // already turned upright...
+        r.Show("B", 2250, 3000); // already turned upright...
         r.M.ZoomAtPointByFactor(1.5f, Centre);
         before = r.Scale * 3000;
         r.Show("B", 4000, 3000, rotation: 90); // ...while the HQ carries a 90° EXIF rotation
@@ -1086,8 +1088,24 @@ public sealed class CanvasViewManagerTests
 
     private static RawCase Case(string name) => RawCases.Single(c => c.Name == name);
 
-    private static void ShowPreview(Rig r, string path, RawCase c) => r.Show(path, c.Layout.Width, c.Layout.Height);
-    private static void ShowHq(Rig r, string path, RawCase c) => r.Show(path, c.HqW, c.HqH, c.HqRotation);
+    // The canvas controller hands every install the photo's size by its metadata: the preview's layout (upright here).
+    private static void ShowPreview(Rig r, string path, RawCase c) =>
+        r.Show(path, c.Layout.Width, c.Layout.Height, photoSize: c.Layout);
+    private static void ShowHq(Rig r, string path, RawCase c) => r.Show(path, c.HqW, c.HqH, c.HqRotation, c.Layout);
+
+    /// <summary>The HQ's pixels per pixel of the photo (the preview's layout): the scale on the HQ is the preview's over this.</summary>
+    private static double PerPhoto(RawCase c) =>
+        ZoomGeometry.ImagePixelsPerPhotoPixel(new Size(c.HqW, c.HqH), c.HqRotation, c.Layout).Value;
+
+    /// <summary>
+    /// The photo didn't jump: its larger on-screen side (the one a decoder's border crop changes least, or a downscale
+    /// as much as the other) is the size it was.
+    /// </summary>
+    private static void NoJump((double X, double Y, double W, double H) before, Rig r, string what)
+    {
+        var after = CentreFraction(r);
+        Near(1, Math.Max(after.W / before.W, after.H / before.H), 1e-5, what);
+    }
 
     /// <summary>
     /// Where the canvas centre falls within the image's on-screen bounds, 0..1 per axis, and the size of those bounds
@@ -1127,8 +1145,9 @@ public sealed class CanvasViewManagerTests
 
     [TestMethod]
     [DynamicData(nameof(RawCaseNames))]
-    public void UpgradeToRawHq_At100_StaysAt100_WithTheSamePartAtTheCentre(string name)
+    public void UpgradeToRawHq_At100OnThePreview_KeepsTheSizeOnScreen_AndThePartAtTheCentre(string name)
     {
+        // 100% of the metadata size; on the HQ the readout tells its own pixels (100.4% for a Rawler crop).
         var c = Case(name);
         var r = new Rig();
         ShowPreview(r, "A", c);
@@ -1137,14 +1156,15 @@ public sealed class CanvasViewManagerTests
         var part = CentreFraction(r);
 
         ShowHq(r, "A", c);
-        Near(1, r.Scale, 1e-6, "100%");
-        Assert.IsTrue(r.OneToOne);
+        Near(1 / PerPhoto(c), r.Scale, 1e-5, "the photo keeps its size");
+        NoJump(part, r, "no jump on screen");
+        Assert.AreEqual(ZoomGeometry.SameScale(r.Scale, 1f), r.OneToOne, "1:1 only at true 100%");
         SamePartAtCentre(part, r);
     }
 
     [TestMethod]
     [DynamicData(nameof(RawCaseNames))]
-    public void UpgradeToRawHq_ZoomedAndPanned_KeepsTheZoomAndThePartAtTheCentre(string name)
+    public void UpgradeToRawHq_ZoomedAndPanned_KeepsTheSizeOnScreenAndThePartAtTheCentre(string name)
     {
         var c = Case(name);
         var r = new Rig();
@@ -1154,14 +1174,17 @@ public sealed class CanvasViewManagerTests
         var (scale, part) = (r.Scale, CentreFraction(r));
 
         ShowHq(r, "A", c);
-        Near(scale, r.Scale, 1e-6, "zoom");
+        Near(scale / PerPhoto(c), r.Scale, 1e-5, "the photo keeps its size");
+        NoJump(part, r, "no jump on screen");
         SamePartAtCentre(part, r);
     }
 
     [TestMethod]
     [DynamicData(nameof(RawCaseNames))]
-    public void UpgradeToRawHq_MidZoom_KeepsZoomingAndLandsOnTheSamePart(string name)
+    public void UpgradeToRawHq_MidZoom_KeepsZoomingToItsTargetOnScreen(string name)
     {
+        // The running animation owns the pan, so it lands on the target it aimed at on the preview: the same part of
+        // the photo only when the HQ is the preview's size (a few pixels off for a sensor border).
         var c = Case(name);
         // Both spring kinds: double-click 100% (pan + zoom) and a wheel notch (anchored zoom).
         Action<Rig>[] zooms =
@@ -1175,7 +1198,6 @@ public sealed class CanvasViewManagerTests
             ShowPreview(reference, "A", c);
             zoom(reference);
             reference.Settle();
-            var part = CentreFraction(reference);
 
             var r = new Rig();
             ShowPreview(r, "A", c);
@@ -1184,14 +1206,13 @@ public sealed class CanvasViewManagerTests
             ShowHq(r, "A", c);
             Assert.IsTrue(r.M.PanZoomAnimationOnGoing, "the zoom keeps going");
             r.Settle();
-            Near(reference.Scale, r.Scale, 1e-6, "zoom");
-            SamePartAtCentre(part, r);
+            Near(reference.Scale / PerPhoto(c), r.Scale, 1e-5, "zoom");
         }
     }
 
     [TestMethod]
     [DynamicData(nameof(RawCaseNames))]
-    public void RetainAndRemember_RawHq_At100_StaysAt100AcrossPhotos(string name)
+    public void RetainAndRemember_RawHq_At100_StaysTrue1To1AcrossPhotos_WithoutAJump(string name)
     {
         var c = Case(name);
         SetMode(PanZoomBehaviourOnNavigation.RetainFromLastPhoto);
@@ -1202,8 +1223,17 @@ public sealed class CanvasViewManagerTests
         r.Settle();
         for (var i = 1; i <= 10; i++)
         {
-            ShowPreview(r, "P" + i, c);
-            ShowHq(r, "P" + i, c);
+            if (i % 2 == 1) // every other photo's HQ is already cached, so it comes with no preview first
+            {
+                ShowPreview(r, "P" + i, c);
+                var onPreview = CentreFraction(r);
+                ShowHq(r, "P" + i, c);
+                NoJump(onPreview, r, $"no jump on photo {i}");
+            }
+            else
+            {
+                ShowHq(r, "P" + i, c);
+            }
             Near(1, r.Scale, 1e-6, $"retained on photo {i}");
             Assert.IsTrue(r.OneToOne, $"1:1 on photo {i}");
         }
@@ -1215,6 +1245,65 @@ public sealed class CanvasViewManagerTests
         ShowPreview(r, "P10", c);
         ShowHq(r, "P10", c);
         Near(1, r.Scale, 1e-6, "remembered");
+    }
+
+    [TestMethod]
+    public void Retain_True1To1_LandscapeToPortraitCrop_StaysTrue1To1()
+    {
+        // Found in the UI test: Rawler crops 24 px off each axis of an ARW, a smaller share of the long side, which is
+        // a portrait photo's height on screen.
+        SetMode(PanZoomBehaviourOnNavigation.RetainFromLastPhoto);
+        var r = new Rig();
+        var landscape = ZoomGeometry.PreviewLayoutSize(new Size(6024, 4024), 1024, 684);
+        var portrait = new Size(landscape.Height, landscape.Width); // a portrait photo's preview, upright on screen
+        r.Show("A", landscape.Width, landscape.Height, photoSize: landscape);
+        r.Show("A", 6000, 4000, photoSize: landscape);
+        r.M.ZoomToHundred(Canvas);
+        r.Settle();
+
+        r.Show("B", 6000, 4000, rotation: 270, photoSize: portrait); // its HQ, already prefetched
+        Near(1, r.Scale, 1e-5, "portrait");
+        Assert.IsTrue(r.OneToOne);
+        r.Show("C", landscape.Width, landscape.Height, photoSize: landscape); // a landscape photo: preview, then HQ
+        r.Show("C", 6000, 4000, photoSize: landscape);
+        Near(1, r.Scale, 1e-5, "landscape again");
+    }
+
+    [TestMethod]
+    public void Retain_True1To1_ToAndFromAPhotoWithNoMetadata_StaysTrue1To1()
+    {
+        // Found in the UI test: ImageMagick found no preview in one CR3, so its size by metadata wasn't known.
+        SetMode(PanZoomBehaviourOnNavigation.RetainFromLastPhoto);
+        var r = new Rig();
+        var withMetadata = ZoomGeometry.PreviewLayoutSize(new Size(5496, 3670), 800, 534);
+        r.Show("A", 5472, 3648); // its HQ, with no preview
+        r.M.ZoomToHundred(Canvas);
+        r.Settle();
+
+        r.Show("B", 5472, 3648, photoSize: withMetadata);
+        Near(1, r.Scale, 1e-6, "to a photo with metadata");
+        r.Show("A", 5472, 3648);
+        Near(1, r.Scale, 1e-6, "back");
+        Assert.IsTrue(r.OneToOne);
+    }
+
+    [TestMethod]
+    public void Retain_True1To1_FromAPhotoWhosePreviewCameAfterItsHq_ThroughAPreview()
+    {
+        // Found in the UI test: the first photo opened was a CR3 with no quick preview, so its HQ went up first and
+        // its preview (with the metadata size) loaded later; the canvas controller passes that size on leaving it.
+        SetMode(PanZoomBehaviourOnNavigation.RetainFromLastPhoto);
+        var r = new Rig();
+        var layout = ZoomGeometry.PreviewLayoutSize(new Size(5496, 3670), 800, 534);
+        r.Show("A", 5472, 3648);
+        r.M.ZoomToHundred(Canvas);
+        r.Settle();
+
+        r.M.LearnPhotoSize(layout);
+        r.Show("B", layout.Width, layout.Height, photoSize: layout);
+        r.Show("B", 5472, 3648, photoSize: layout);
+        Near(1, r.Scale, 1e-6, "true 100% on B's HQ");
+        Assert.IsTrue(r.OneToOne);
     }
 
     [TestMethod]

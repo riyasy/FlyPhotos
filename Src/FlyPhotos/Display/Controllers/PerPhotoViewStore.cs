@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using FlyPhotos.Display.Controllers.Animation;
 using Windows.Foundation;
-using Size = FlyPhotos.Core.Model.Size;
 
 namespace FlyPhotos.Display.Controllers;
 
@@ -11,62 +9,46 @@ namespace FlyPhotos.Display.Controllers;
 /// "RememberPerPhoto" navigation mode. Stores each view in a deliberately *relative* form so it restores
 /// correctly even when conditions differ between caching and restoring:
 /// <list type="bullet">
-///   <item>pan is kept as an offset from the canvas centre divided by canvas size (not absolute pixels), so
-///     it survives window resizing (<see cref="ZoomGeometry.NormalizedPan"/>);</item>
+///   <item>zoom is kept on the photo itself (screen pixels per pixel of the photo by its metadata), and pan as the part
+///     of the photo at the canvas centre (<see cref="ZoomGeometry.CentreOnImage"/>), so both survive a window resize
+///     and a preview laid out at another size than the HQ they were saved on (a RAW's metadata size vs. its decoded
+///     size, #195);</item>
 ///   <item>rotation is kept as the user's manual rotation only (total minus the image's EXIF baseline), so
 ///     re-applying it onto a different baseline — e.g. a pre-oriented preview thumbnail vs. an HQ image whose
-///     EXIF rotation is applied at render — never double-counts the EXIF orientation;</item>
-///   <item>the image's on-screen size is kept with it, so a view saved on the HQ and restored onto a preview laid out
-///     at another size (a RAW's metadata size vs. its decoded size, #195) has the same part of the photo at the
-///     centre; the HQ then replaces the preview without moving it.</item>
+///     EXIF rotation is applied at render — never double-counts the EXIF orientation.</item>
 /// </list>
-/// The scale is absolute, and saved at rest (no animation running), so it is also the target scale.
+/// The zoom is saved at rest (no animation running), so it is also the target zoom.
 /// <see cref="CanvasViewManager"/> decides <i>when</i> to save and applies the restored values to the live view.
 /// </summary>
 internal sealed class PerPhotoViewStore
 {
-    private readonly record struct PerPhotoViewState(float Scale, Point NormalizedPan, int UserRotation,
-        (double Width, double Height) OnScreenSize);
+    private readonly record struct PerPhotoViewState(float PhotoZoom, Point CentreOnImage, int UserRotation);
 
     private readonly Dictionary<string, PerPhotoViewState> _cache = [];
 
-    /// <summary>A remembered view de-normalized for the current canvas and EXIF baseline.</summary>
-    public readonly record struct RestoredView(float Scale, Point ImagePos, int Rotation, bool PanIsCentered);
+    /// <summary>A remembered view with its rotation re-based onto the current EXIF baseline.</summary>
+    public readonly record struct RestoredView(float PhotoZoom, Point CentreOnImage, int Rotation);
 
     /// <summary>
-    /// Saves the view for <paramref name="photoPath"/>, normalized against <paramref name="canvasSize"/> and
-    /// <paramref name="exifRotation"/> so it survives resize and baseline changes, with the size of the image it was
-    /// made on (<paramref name="imageSize"/>, in layout pixels). The caller only calls this when the view is worth
-    /// remembering.
+    /// Saves the view for <paramref name="photoPath"/>, its rotation relative to <paramref name="exifRotation"/> so it
+    /// survives baseline changes. The caller only calls this when the view is worth remembering.
     /// </summary>
-    public void Save(string photoPath, float scale, Point imagePos, int rotation, int exifRotation, Size canvasSize,
-        Size imageSize) =>
-        _cache[photoPath] = new PerPhotoViewState(scale, ZoomGeometry.NormalizedPan(imagePos, canvasSize),
-            rotation - exifRotation, ZoomGeometry.OnScreenSize(imageSize, rotation));
+    public void Save(string photoPath, float photoZoom, Point centreOnImage, int rotation, int exifRotation) =>
+        _cache[photoPath] = new PerPhotoViewState(photoZoom, centreOnImage, rotation - exifRotation);
 
     /// <summary>
-    /// If a view is remembered for <paramref name="photoPath"/>, de-normalizes it for the current
-    /// <paramref name="canvasSize"/>, <paramref name="exifRotation"/> baseline and <paramref name="imageSize"/> and
-    /// returns true. Re-basing the user rotation onto the just-set baseline keeps a subsequent Preview → HQ rotation
-    /// delta netting to zero even when the preview and HQ baselines differ.
+    /// If a view is remembered for <paramref name="photoPath"/>, returns it with its rotation re-based onto the
+    /// <paramref name="exifRotation"/> baseline. That keeps a subsequent Preview → HQ rotation delta netting to zero
+    /// even when the preview and HQ baselines differ.
     /// </summary>
-    public bool TryRestore(string photoPath, int exifRotation, Size canvasSize, Size imageSize, out RestoredView view)
+    public bool TryRestore(string photoPath, int exifRotation, out RestoredView view)
     {
         if (!_cache.TryGetValue(photoPath, out var s))
         {
             view = default;
             return false;
         }
-
-        var rotation = exifRotation + s.UserRotation;
-        var pos = ZoomGeometry.PanFromNormalized(s.NormalizedPan, canvasSize);
-        // The offset from the centre scales with the image's on-screen size: the same part of the photo at the centre.
-        var (w, h) = ZoomGeometry.OnScreenSize(imageSize, rotation);
-        if (s.OnScreenSize.Width > 0 && s.OnScreenSize.Height > 0)
-            pos = ZoomGeometry.ScaleAbout(pos, ZoomGeometry.Centre(canvasSize),
-                w / s.OnScreenSize.Width, h / s.OnScreenSize.Height);
-        // A panned-at-fit-scale photo is not "fitted", so the caller needs to know the pan was centred.
-        view = new RestoredView(s.Scale, pos, rotation, ZoomGeometry.IsCentred(pos, canvasSize));
+        view = new RestoredView(s.PhotoZoom, s.CentreOnImage, exifRotation + s.UserRotation);
         return true;
     }
 

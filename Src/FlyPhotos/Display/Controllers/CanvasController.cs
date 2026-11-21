@@ -100,6 +100,7 @@ internal partial class CanvasController : ICanvasController
     // one size every zoom/fit calculation uses (a preview's layout width can differ from the photo's).
     private Size _imageSize;                          // the photo's full size, for laying out the item
     private string _currentPhotoPath = string.Empty;  // the photo on screen; empty before the first one
+    private Photo _currentPhoto;                      // the same photo, to read its size once its preview has loaded
     private bool _realImageDisplayedForCurrentPhoto;  // a preview or HQ has been shown for it (not just the placeholder)
     private bool _isMultiPageActive;                  // last value raised through OnMutliPagePhotoLoaded
 
@@ -188,7 +189,12 @@ internal partial class CanvasController : ICanvasController
 
         if (arrival is ViewArrival.FirstPhoto or ViewArrival.NewPhoto)
         {
+            // The photo left on screen may have been shown before its preview loaded (the first one, when its HQ came
+            // first), so its size by metadata wasn't known then. It is now, for Retain and Remember to measure by.
+            if (_currentPhoto != null && PhotoSizeOnScreen(_currentPhoto) is { } leavingSize)
+                _pump.Enqueue(() => _canvasViewManager.LearnPhotoSize(leavingSize));
             _currentPhotoPath = photo.FilePath;
+            _currentPhoto = photo;
             _realImageDisplayedForCurrentPhoto = false;
         }
 
@@ -200,7 +206,7 @@ internal partial class CanvasController : ICanvasController
         // The caller's lease on the item travels with the install and is held while the renderer is on screen.
         if (displayItem == null) return;
 
-        var ctx = new PhotoInstallContext(_currentPhotoPath, canvasSize, arrival, displayItem);
+        var ctx = new PhotoInstallContext(_currentPhotoPath, canvasSize, arrival, displayItem, PhotoSizeOnScreen(photo));
 
         // Handle the specific type of display item (Animated, HQ Static, Preview, MultiPage, Tiled)
         try
@@ -365,6 +371,28 @@ internal partial class CanvasController : ICanvasController
     }
 
     /// <summary>
+    /// UI thread. The photo's size on screen by its metadata: the size its preview is laid out at, turned by the
+    /// preview's rotation. It is what the view measures Retain and Remember zoom against, whichever image is shown.
+    /// Null with no preview giving the full size.
+    /// </summary>
+    private static Size? PhotoSizeOnScreen(Photo photo)
+    {
+        if (photo.Slots.Preview is not { } preview || !preview.TryAcquire()) return null;
+        try
+        {
+            if (preview.Metadata is not { HasFullSize: true } m || preview.Bitmap is not { } bitmap) return null;
+            var layout = ZoomGeometry.PreviewLayoutSize(new Size(m.FullWidth, m.FullHeight),
+                bitmap.Bounds.Width, bitmap.Bounds.Height);
+            var (width, height) = ZoomGeometry.OnScreenSize(layout, preview.Rotation);
+            return new Size(width, height);
+        }
+        finally
+        {
+            preview.Release();
+        }
+    }
+
+    /// <summary>
     /// How an install relates to what is on screen. UI thread, in install order. <paramref name="shownPath"/> is the
     /// photo on screen (empty before the first one) and <paramref name="realImageShown"/> whether a preview or HQ of
     /// it has been shown (not only the placeholder).
@@ -386,15 +414,10 @@ internal partial class CanvasController : ICanvasController
     /// <param name="CanvasSize">The canvas size, read on the UI thread.</param>
     /// <param name="Arrival">How it relates to what is on screen; picks the view rule.</param>
     /// <param name="Item">The leased item the renderer draws; the canvas ends the lease when it is replaced.</param>
+    /// <param name="PhotoSize">The photo's size on screen by its metadata (<see cref="PhotoSizeOnScreen"/>).</param>
     private readonly record struct PhotoInstallContext(
-        string PhotoPath, Size CanvasSize, ViewArrival Arrival, DisplayItem Item)
+        string PhotoPath, Size CanvasSize, ViewArrival Arrival, DisplayItem Item, Size? PhotoSize)
     {
-        /// <summary>
-        /// The item is laid out in the photo's own pixels: anything but a preview with no full-size metadata, which is
-        /// laid out at its bitmap's size.
-        /// </summary>
-        public bool InPhotoPixels { get; } = Item is not PreviewDisplayItem p || p.Metadata is { HasFullSize: true };
-
         /// <summary>
         /// A follow-up install for the same photo (an animator after its static first frame) that must not reset the
         /// view. It carries no item: the animator draws its own frames, so the first frame's lease ends with the swap.
@@ -481,7 +504,7 @@ internal partial class CanvasController : ICanvasController
             oldItem?.Release(); // an animated renderer draws its own frames, so its item (if any) can go now
 
             _canvasViewManager.SetScaleAndPosition(ctx.PhotoPath, imageSize, imageRotation, ctx.CanvasSize, ctx.Arrival,
-                ctx.InPhotoPixels);
+                ctx.PhotoSize);
 
             if (forceThumbNailRedraw)
                 _thumbNailController.RequestThumbnailRedraw(); // just flags the strip's own W2D loop; thread-safe
