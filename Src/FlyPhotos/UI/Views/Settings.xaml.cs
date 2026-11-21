@@ -60,6 +60,10 @@ internal sealed partial class Settings
     // Set when a long press revealed the clear X, so the Click raised on release doesn't open the picker.
     private bool _suppressShortcutClick;
 
+    // The RAW decoder priority collection the list shows and this window listens to; replaced when
+    // another instance's save swaps AppConfig.Settings.
+    private ObservableCollection<RawDecoder> _rawDecoderPriority = AppConfig.Settings.RawDecoderPriority;
+
     internal Settings()
     {
         InitializeComponent();
@@ -95,6 +99,9 @@ internal sealed partial class Settings
         {
             StopHeartBeat();
             _windAppearanceManager.Dispose();
+            // AppConfig's events are static: unsubscribe so they don't keep the closed window alive.
+            AppConfig.SettingsReloaded -= AppConfig_SettingsReloaded;
+            _rawDecoderPriority.CollectionChanged -= RawDecoderPriority_CollectionChanged;
         };
 
         SliderHighResCacheSize.Value = AppConfig.Settings.CacheSizeOneSideHqImages;
@@ -178,7 +185,8 @@ internal sealed partial class Settings
         ComboListSource.SelectionChanged += ComboListSource_OnSelectionChanged;
         ComboFolderSortBy.SelectionChanged += ComboFolderSortBy_OnSelectionChanged;
         ComboFolderSortOrder.SelectionChanged += ComboFolderSortOrder_OnSelectionChanged;
-        AppConfig.Settings.RawDecoderPriority.CollectionChanged += RawDecoderPriority_CollectionChanged;
+        _rawDecoderPriority.CollectionChanged += RawDecoderPriority_CollectionChanged;
+        AppConfig.SettingsReloaded += AppConfig_SettingsReloaded;
 
         // Initialize codec list view
         ListViewCodecs.ItemsSource = CodecDiscovery.GetAllCodecs();
@@ -206,6 +214,17 @@ internal sealed partial class Settings
         this.SetWindowSize(900, 768);
         Util.MoveWindowToMonitor(this, monitorId);
         this.CenterOnScreen();
+    }
+
+    // Another instance saved settings and AppConfig.Settings is now a new object (raised on the UI
+    // thread). Point the RAW decoder priority list at the new collection so reorders here edit and
+    // save the live settings, not the replaced ones.
+    private void AppConfig_SettingsReloaded()
+    {
+        _rawDecoderPriority.CollectionChanged -= RawDecoderPriority_CollectionChanged;
+        _rawDecoderPriority = AppConfig.Settings.RawDecoderPriority;
+        PriorityListView.ItemsSource = _rawDecoderPriority;
+        _rawDecoderPriority.CollectionChanged += RawDecoderPriority_CollectionChanged;
     }
 
     private async void RawDecoderPriority_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
