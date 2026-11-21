@@ -518,8 +518,8 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     /// Creates the <c>images</c> table and its index if they do not already
     /// exist, and configures SQLite performance pragmas for the connection.
     /// <list type="bullet">
+    /// <item><c>busy_timeout=5000</c> — set first, so even switching to WAL waits for another FlyPhotos process holding the write lock for up to 5 s instead of failing.</item>
     /// <item><c>WAL</c> — reduces write-lock contention.</item>
-    /// <item><c>busy_timeout=5000</c> — another FlyPhotos process holding the write lock is waited on for up to 5 s instead of failing.</item>
     /// <item>
     /// <c>synchronous=OFF</c> — safe for a regenerable cache; removes
     /// the fsync overhead on every write. A power-loss can corrupt the DB,
@@ -536,8 +536,8 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     {
         using var cmd = _conn.CreateCommand();
         cmd.CommandText = @"
-            PRAGMA journal_mode=WAL;
             PRAGMA busy_timeout=5000;
+            PRAGMA journal_mode=WAL;
             PRAGMA synchronous=OFF;
             PRAGMA temp_store=MEMORY;
             PRAGMA mmap_size=268435456;
