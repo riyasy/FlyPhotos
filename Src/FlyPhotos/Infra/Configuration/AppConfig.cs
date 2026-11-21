@@ -1,8 +1,8 @@
 using System;
 using System.IO;
-using System.Text.Json;
 using System.Threading.Tasks;
 using FlyPhotos.Services;
+using NLog;
 
 namespace FlyPhotos.Infra.Configuration;
 
@@ -15,70 +15,48 @@ public class SettingsWrapper
 
 public static class AppConfig
 {
-    private static string _userSettingsPath;
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+    private static SettingsStore _store;
     public static AppSettings Settings { get; internal set; } // tests set their own
     public static AppVolatileState Volatile { get; } = new();
 
     // Loads user settings on startup. Falls back to AppSettings defaults if the file is
     // absent or corrupt — no separate appsettings.json needed since all defaults live in the class.
+    // Also watches the file so changes saved by other running instances are picked up.
     public static void Initialize()
     {
-        _userSettingsPath = Path.Combine(PathResolver.GetUserSettingsFolder(), "usersettings.json");
-
-        if (File.Exists(_userSettingsPath))
-        {
-            try
-            {
-                var json = File.ReadAllText(_userSettingsPath);
-                var settingsWrapper = JsonSerializer.Deserialize(
-                    json,
-                    JsonSourceGenerationContext.Default.SettingsWrapper
-                );
-                Settings = settingsWrapper?.Settings;
-            }
-            catch (Exception ex)
-            {
-                // Corrupt or unreadable file — fall through to defaults below
-                System.Diagnostics.Debug.WriteLine($"Error loading user settings: {ex.Message}");
-            }
-        }
-
-        // First launch, or recovery from a corrupt file
-        Settings ??= new AppSettings();
+        var path = Path.Combine(PathResolver.GetUserSettingsFolder(), "usersettings.json");
+        _store = new SettingsStore(path, "FlyPhotosSettings");
+        Settings = _store.Load();
+        _store.Reloaded += s => Settings = s;
+        _store.StartWatching();
     }
 
     // This method saves the user's changes to their private settings file.
     public static async Task SaveAsync()
     {
+        if (_store == null) return;
         try
         {
-            var settingsWrapper = new SettingsWrapper { Settings = Settings };
-            var json = JsonSerializer.Serialize(
-                settingsWrapper,
-                JsonSourceGenerationContext.Default.SettingsWrapper // Get the pre-generated info for our type
-            );
-            await File.WriteAllTextAsync(_userSettingsPath, json);
+            await _store.SaveAsync(Settings);
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error saving settings: {ex.Message}");
+            Logger.Error(ex, "Error saving settings");
         }
     }
 
     public static void Save()
     {
+        if (_store == null) return;
         try
         {
-            var settingsWrapper = new SettingsWrapper { Settings = Settings };
-            var json = JsonSerializer.Serialize(
-                settingsWrapper,
-                JsonSourceGenerationContext.Default.SettingsWrapper // Get the pre-generated info for our type
-            );
-            File.WriteAllText(_userSettingsPath, json);
+            _store.Save(Settings);
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error saving settings: {ex.Message}");
+            Logger.Error(ex, "Error saving settings");
         }
     }
 }
