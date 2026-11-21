@@ -47,8 +47,6 @@ internal class FileActionDelete
 
     public async Task ExecuteAsync()
     {
-        if (AppConfig.Volatile.IsSecondaryInstance) return;
-
         // 1. Pre-Execute validation
         if (!_preExecute())
         {

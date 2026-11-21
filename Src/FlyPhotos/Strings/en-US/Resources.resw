@@ -403,10 +403,10 @@ Settings &gt; Apps &gt; Default apps.</value>
     <value>Search apps…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Extra instances only show the selected image (no navigation, delete, or settings).</value>
+    <value>Each window opens as a full viewer. When off, opening a photo closes any other FlyPhotos window.</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Allow Multiple Instances (Beta)</value>
+    <value>Allow Multiple Instances</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Hide the mouse pointer if mouse is inactive.</value>

@@ -3,7 +3,6 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using FlyPhotos.Core.Model;
-using FlyPhotos.Infra.Configuration;
 using FlyPhotos.UI.Controls;
 
 namespace FlyPhotos.UI.Actions;
@@ -41,8 +40,6 @@ internal class FileActionRename
 
     public Task ExecuteAsync()
     {
-        if (AppConfig.Volatile.IsSecondaryInstance) return Task.CompletedTask;
-
         if (!_preExecute())
         {
             _preExecuteFailed();

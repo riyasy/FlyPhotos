@@ -196,15 +196,6 @@ public sealed partial class PhotoDisplayWindow
         RtlLayoutBehavior.ForceLeftToRight((FrameworkElement)Content);
         RtlLayoutBehavior.ApplyFlowDirection(ButtonMoreMenuFlyout, AppConfig.Settings.Language);
 
-        // Secondary instances are restricted: no Settings, no cache status.
-        if (AppConfig.Volatile.IsSecondaryInstance)
-        {
-            ButtonSettings.Visibility = Visibility.Collapsed;
-            ButtonExpander.Visibility = Visibility.Collapsed;
-            ButtonBack.Visibility = Visibility.Collapsed;
-            ButtonNext.Visibility = Visibility.Collapsed;
-        }
-
         AppWindow.Closing += PhotoDisplayWindow_Closing;
         Closed += PhotoDisplayWindow_Closed;
         Activated += PhotoDisplayWindow_Activated;
@@ -634,9 +625,7 @@ public sealed partial class PhotoDisplayWindow
         await _photoController.Fly(isPrev ? NavDirection.Prev : NavDirection.Next);
     }
 
-    /// <summary>Secondary instances hide the toolbar nav buttons, so they get no edge arrows either.</summary>
-    private static bool EdgeNavArrowsWanted() =>
-        AppConfig.Settings.ShowEdgeNavArrows && !AppConfig.Volatile.IsSecondaryInstance;
+    private static bool EdgeNavArrowsWanted() => AppConfig.Settings.ShowEdgeNavArrows;
 
     /// <summary>
     /// Brakes once neither nav RepeatButton is held. RepeatButton has no "released" event, but

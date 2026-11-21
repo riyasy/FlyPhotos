@@ -26,7 +26,7 @@ public partial class App
     // The file Fly was opened with (the command line, or the file activation when packaged); empty: show InitWindow.
     private string _selectedFilePath;
     // The instance mutex (HandleInstanceManagement). Kept in a static so it lives as long as the app: a later launch
-    // that finds it taken is a secondary instance, or kills this one in single-instance mode.
+    // that finds it taken kills this one in single-instance mode.
     private static Mutex _mutex;
     // The viewer window.
     private PhotoDisplayWindow _photoDisplayWindow;
@@ -113,20 +113,14 @@ public partial class App
     /// <summary>
     ///     Handles single/multi-instance startup logic.
     ///     When AllowMultiInstance is false (default): kills any existing FlyPhotos processes (original behavior).
-    ///     When AllowMultiInstance is true: the first instance acquires the mutex and is the full-featured primary.
-    ///     Subsequent instances become secondary — they launch with restricted mode (no folder scan, no Settings, no Delete).
+    ///     When AllowMultiInstance is true: every instance is a full viewer and nothing else is done.
     /// </summary>
     private void HandleInstanceManagement()
     {
         const string appName = "FlyPhotosFlyPhotosWinUI";
         _mutex = new Mutex(true, appName, out var createdNew);
 
-        if (AppConfig.Settings.AllowMultiInstance)
-        {
-            // Multi-instance mode: first instance is primary, others are secondary.
-            AppConfig.Volatile.IsSecondaryInstance = !createdNew;
-        }
-        else
+        if (!AppConfig.Settings.AllowMultiInstance)
         {
             // Single-instance mode (default): kill any other running instances.
             if (!createdNew)
@@ -140,8 +134,6 @@ public partial class App
                 else
                     KillOtherFlys();
             }
-
-            AppConfig.Volatile.IsSecondaryInstance = false;
         }
     }
 
