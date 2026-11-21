@@ -84,6 +84,9 @@ public sealed class SettingsStoreTests
     {
         var a = NewStore();
         var b = NewStore();
+        // Create the file first so the save under test goes through File.Replace, not the first-launch Move.
+        a.Save(new AppSettings { ThumbnailSize = 11 });
+
         var received = new ConcurrentQueue<AppSettings>();
         b.Reloaded += s => received.Enqueue(s);
         b.StartWatching();
@@ -91,6 +94,65 @@ public sealed class SettingsStoreTests
         a.Save(new AppSettings { ThumbnailSize = 77 });
 
         Assert.IsTrue(WaitFor(() => received.Any(s => s.ThumbnailSize == 77), Timeout));
+    }
+
+    [TestMethod]
+    public void Content_equal_to_own_earlier_write_is_still_reloaded_after_another_change()
+    {
+        var a = NewStore();
+        var b = NewStore();
+        var received = new ConcurrentQueue<AppSettings>();
+        a.Reloaded += s => received.Enqueue(s);
+        a.StartWatching();
+
+        a.Save(new AppSettings { ThumbnailSize = 10 });   // X
+        b.Save(new AppSettings { ThumbnailSize = 20 });   // Y
+        Assert.IsTrue(WaitFor(() => received.Count == 1, Timeout), "A should reload Y");
+        b.Save(new AppSettings { ThumbnailSize = 10 });   // X again, byte-identical to A's own write
+
+        Assert.IsTrue(WaitFor(() => received.Count == 2, Timeout), $"A reloaded {received.Count} time(s)");
+        Assert.AreEqual(20, received.ElementAt(0).ThumbnailSize);
+        Assert.AreEqual(10, received.ElementAt(1).ThumbnailSize);
+    }
+
+    [TestMethod]
+    public void Stale_save_merges_with_another_instances_newer_change()
+    {
+        NewStore().Save(new AppSettings());
+        var a = NewStore();
+        var b = NewStore();
+        var sa = a.Load();
+        var sb = b.Load();
+        var received = new ConcurrentQueue<AppSettings>();
+        a.Reloaded += s => received.Enqueue(s);   // A is not watching: it never saw B's save
+
+        sb.ThumbnailSize = 77;
+        b.Save(sb);
+        sa.AllowMultiInstance = true;
+        a.Save(sa);
+
+        var onDisk = NewStore().Load();
+        Assert.AreEqual(77, onDisk.ThumbnailSize);
+        Assert.IsTrue(onDisk.AllowMultiInstance);
+        Assert.IsTrue(WaitFor(() => received.Any(s => s.ThumbnailSize == 77 && s.AllowMultiInstance), Timeout),
+            "A should adopt the merged settings");
+    }
+
+    [TestMethod]
+    public void Stale_save_of_the_same_property_lets_the_later_saver_win()
+    {
+        NewStore().Save(new AppSettings());
+        var a = NewStore();
+        var b = NewStore();
+        var sa = a.Load();
+        var sb = b.Load();
+
+        sb.ThumbnailSize = 77;
+        b.Save(sb);
+        sa.ThumbnailSize = 88;
+        a.Save(sa);
+
+        Assert.AreEqual(88, NewStore().Load().ThumbnailSize);
     }
 
     [TestMethod]
@@ -126,7 +188,7 @@ public sealed class SettingsStoreTests
                     // Never a torn file: every successful read is complete, valid JSON.
                     JsonSerializer.Deserialize(text, JsonSourceGenerationContext.Default.SettingsWrapper);
                 }
-                catch (IOException)
+                catch (Exception e) when (e is IOException or UnauthorizedAccessException)
                 {
                     // Windows briefly denies readers while File.Replace swaps the file; real readers retry.
                 }
