@@ -519,6 +519,7 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
     /// exist, and configures SQLite performance pragmas for the connection.
     /// <list type="bullet">
     /// <item><c>WAL</c> — reduces write-lock contention.</item>
+    /// <item><c>busy_timeout=5000</c> — another FlyPhotos process holding the write lock is waited on for up to 5 s instead of failing.</item>
     /// <item>
     /// <c>synchronous=OFF</c> — safe for a regenerable cache; removes
     /// the fsync overhead on every write. A power-loss can corrupt the DB,
@@ -536,6 +537,7 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
         using var cmd = _conn.CreateCommand();
         cmd.CommandText = @"
             PRAGMA journal_mode=WAL;
+            PRAGMA busy_timeout=5000;
             PRAGMA synchronous=OFF;
             PRAGMA temp_store=MEMORY;
             PRAGMA mmap_size=268435456;
