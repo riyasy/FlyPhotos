@@ -403,10 +403,10 @@
     <value>搜尋應用程式…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>其他執行個體只會顯示所選影像（無法瀏覽、刪除或變更設定）。</value>
+    <value>每個視窗都會以完整檢視器開啟。關閉時，開啟相片會關閉其他所有 FlyPhotos 視窗。</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>允許多個執行個體 (Beta)</value>
+    <value>允許多個執行個體</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>當滑鼠未使用時，隱藏滑鼠指標。</value>

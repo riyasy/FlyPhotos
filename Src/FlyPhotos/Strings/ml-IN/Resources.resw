@@ -400,10 +400,10 @@
     <value>ആപ്പുകൾ തിരയുക…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>അധിക ഇൻസ്റ്റൻസുകൾ തിരഞ്ഞെടുത്ത ചിത്രം മാത്രം കാണിക്കും (നാവിഗേഷൻ, ഡിലീറ്റ് , ക്രമീകരണങ്ങൾ ഇല്ല).</value>
+    <value>ഓരോ വിൻഡോയും ഒരു പൂർണ്ണ വ്യൂവറായി തുറക്കും. ഓഫ് ആണെങ്കിൽ, ഒരു ഫോട്ടോ തുറക്കുമ്പോൾ മറ്റ് FlyPhotos വിൻഡോകൾ എല്ലാം അടയ്ക്കും.</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>ഒന്നിലധികം ഇൻസ്റ്റൻസുകൾ അനുവദിക്കുക (Beta)</value>
+    <value>ഒന്നിലധികം ഇൻസ്റ്റൻസുകൾ അനുവദിക്കുക</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>മൗസ് നിഷ്ക്രിയമാണെങ്കിൽ പോയിന്റർ മായ്ക്കുക.</value>

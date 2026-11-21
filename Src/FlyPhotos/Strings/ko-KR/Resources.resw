@@ -402,10 +402,10 @@ FlyPhotos를 선택한 다음 항상을 선택합니다.</value>
     <value>앱 검색…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>추가 인스턴스에서는 선택한 이미지만 표시됩니다 (탐색, 삭제, 설정 사용 불가).</value>
+    <value>각 창이 완전한 뷰어로 열립니다. 끄면 사진을 열 때 다른 FlyPhotos 창이 모두 닫힙니다.</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>여러 인스턴스 허용 (Beta)</value>
+    <value>여러 인스턴스 허용</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>마우스가 비활성화되면 마우스 포인터를 숨깁니다.</value>

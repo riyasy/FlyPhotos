@@ -403,10 +403,10 @@ w Ustawieniach &gt; Aplikacje &gt; Aplikacje domyślne.</value>
     <value>Szukaj aplikacji…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Dodatkowe instancje pokazują tylko wybrany obraz (bez nawigacji, usuwania ani ustawień).</value>
+    <value>Każde okno otwiera się jako pełna przeglądarka. Gdy wyłączone, otwarcie zdjęcia zamyka wszystkie inne okna FlyPhotos.</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Zezwól na wiele instancji (Beta)</value>
+    <value>Zezwól na wiele instancji</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Ukryj wskaźnik myszy, jeśli mysz jest nieaktywna.</value>

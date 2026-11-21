@@ -403,10 +403,10 @@
     <value>البحث عن التطبيقات…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>تعرض المثيلات الإضافية الصورة المحددة فقط (بدون تنقل أو حذف أو إعدادات).</value>
+    <value>تُفتح كل نافذة كعارض كامل. عند إيقاف هذا الخيار، يؤدي فتح صورة إلى إغلاق أي نافذة FlyPhotos أخرى.</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>السماح بمثيلات متعددة (تجريبي)</value>
+    <value>السماح بمثيلات متعددة</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>إخفاء مؤشر الماوس إذا كان غير نشط.</value>

@@ -403,10 +403,10 @@
     <value>Пошук програм…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Додаткові вікна показують лише вибране зображення (без навігації, видалення та налаштувань).</value>
+    <value>Кожне вікно відкривається як повноцінний переглядач. Якщо вимкнено, відкриття фото закриває всі інші вікна FlyPhotos.</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Дозволити кілька вікон (бета)</value>
+    <value>Дозволити кілька вікон</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Приховувати вказівник миші, якщо миша не активна.</value>

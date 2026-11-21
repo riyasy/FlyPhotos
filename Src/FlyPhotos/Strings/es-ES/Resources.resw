@@ -403,10 +403,10 @@ Configuración &gt; Aplicaciones &gt; Aplicaciones predeterminadas.</value>
     <value>Buscar aplicaciones…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Las instancias adicionales solo muestran la imagen seleccionada (sin navegación, eliminación ni configuración).</value>
+    <value>Cada ventana se abre como un visor completo. Si está desactivado, al abrir una foto se cierra cualquier otra ventana de FlyPhotos.</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Permitir múltiples instancias (Beta)</value>
+    <value>Permitir múltiples instancias</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Ocultar el puntero del ratón cuando esté inactivo.</value>

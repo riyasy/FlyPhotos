@@ -403,10 +403,10 @@ Paramètres &gt; Applications &gt; Applications par défaut.</value>
     <value>Rechercher des applications…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Les instances supplémentaires affichent seulement l'image sélectionnée (pas de navigation, de suppression ni de paramètres).</value>
+    <value>Chaque fenêtre s'ouvre comme une visionneuse complète. Si désactivé, l'ouverture d'une photo ferme toute autre fenêtre FlyPhotos.</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Autoriser plusieurs instances (Beta)</value>
+    <value>Autoriser plusieurs instances</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Masquer le pointeur de la souris lorsque celle-ci est inactive.</value>

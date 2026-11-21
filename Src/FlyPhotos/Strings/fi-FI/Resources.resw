@@ -403,10 +403,10 @@ Asetukset &gt; Sovellukset &gt; Oletussovellukset.</value>
     <value>Etsi sovelluksia…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Lisäinstanssit näyttävät vain valitun kuvan (ei navigointia, poistamista tai asetuksia).</value>
+    <value>Jokainen ikkuna avautuu täysipainoisena katseluohjelmana. Kun asetus on pois päältä, kuvan avaaminen sulkee muut FlyPhotos-ikkunat.</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Salli useita instansseja (Beta)</value>
+    <value>Salli useita instansseja</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Piilota hiiren osoitin, jos hiiri on käyttämättömänä.</value>

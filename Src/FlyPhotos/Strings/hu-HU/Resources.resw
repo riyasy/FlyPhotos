@@ -402,10 +402,10 @@ Válassza ki a FlyPhotos-t, és válassza a Mindig lehetőséget.</value>
     <value>Alkalmazások keresése…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>A további példányok csak a kiválasztott képet jelenítik meg (navigáció, törlés vagy beállítások nélkül).</value>
+    <value>Minden ablak teljes értékű megjelenítőként nyílik meg. Kikapcsolva egy fénykép megnyitása bezárja a többi FlyPhotos-ablakot.</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Több példány engedélyezése (Béta)</value>
+    <value>Több példány engedélyezése</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Egérmutató elrejtése, ha az egér inaktív.</value>
