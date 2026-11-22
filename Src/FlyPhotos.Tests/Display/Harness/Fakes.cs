@@ -17,6 +17,8 @@ internal static class TestGpu
 {
     public static readonly CanvasDevice Device = new(forceSoftwareRenderer: true);
     public static CanvasBitmap Bitmap() => CanvasBitmap.CreateFromColors(Device, new Color[4], 2, 2);
+    public static CanvasBitmap Bitmap(int width, int height) =>
+        CanvasBitmap.CreateFromColors(Device, new Color[width * height], width, height);
 }
 
 /// <summary>Thrown by a scripted decode, so the log check can tell it from a real bug.</summary>

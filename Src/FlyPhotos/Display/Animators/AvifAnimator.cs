@@ -154,6 +154,11 @@ public partial class AvifAnimator : IAnimator
     /// <inheritdoc />
     public ICanvasImage Surface => _compositedSurface;
 
+    /// <inheritdoc />
+    public TimeSpan TimeToNextFrame => _currentFrameDurationMs <= 0
+        ? TimeSpan.MaxValue
+        : TimeSpan.FromMilliseconds(Math.Max(0, _currentFrameDurationMs - _accumulatedTimeMs));
+
     // -------------------------------------------------------------------------
     // Construction
     // -------------------------------------------------------------------------

@@ -5,10 +5,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Windows.Foundation;
 using FlyPhotos.Core.Model;
-using FlyPhotos.Display.State;
-using FlyPhotos.Infra.Configuration;
+using FlyPhotos.Display.Canvas;
 using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 
 namespace FlyPhotos.Display.ImageRendering;
@@ -31,15 +29,8 @@ internal partial class TiledImageRenderer : IRenderer
     private readonly CanvasAnimatedControl _canvas;
     /// <summary>The image being drawn: its pyramid and overview bitmap.</summary>
     private readonly TiledHqDisplayItem _item;
-    /// <summary>Whether the image may have alpha, so the checkerboard is drawn under it.</summary>
-    private readonly bool _supportsTransparency;
     /// <summary>Requests another frame; used while tiles are still uploading.</summary>
     private readonly Action _invalidate;
-
-    /// <summary>Checkerboard brush drawn under transparent images.</summary>
-    private CanvasImageBrush _checkeredBrush;
-    /// <summary>Set by CanvasController on the W2D thread when the renderer is installed.</summary>
-    public CanvasImageBrush CheckeredBrush { set => _checkeredBrush = value; }
 
     /// <summary>Uploaded tiles by (level, col, row), with the frame each was last drawn in (for LRU eviction).</summary>
     private readonly Dictionary<(int Level, int Col, int Row), (CanvasBitmap Bitmap, long LastUsed)> _gpuTiles = [];
@@ -49,12 +40,10 @@ internal partial class TiledImageRenderer : IRenderer
     private long _frame;
 
     /// <summary>Creates a renderer for <paramref name="item"/>. GPU tiles are uploaded lazily in <see cref="Draw"/>.</summary>
-    public TiledImageRenderer(CanvasAnimatedControl canvas, TiledHqDisplayItem item,
-        bool supportsTransparency, Action invalidate)
+    public TiledImageRenderer(CanvasAnimatedControl canvas, TiledHqDisplayItem item, Action invalidate)
     {
         _canvas = canvas;
         _item = item;
-        _supportsTransparency = supportsTransparency;
         _invalidate = invalidate;
     }
 
@@ -63,18 +52,11 @@ internal partial class TiledImageRenderer : IRenderer
     /// <see cref="MaxUploadsPerFrame"/> missing tiles, fills the rest from the overview, and requests another
     /// frame while any remain. When zoomed out to the top level, draws just the overview.
     /// </summary>
-    public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating)
+    public void Draw(CanvasDrawingSession session, in ViewFrame viewState, CanvasImageInterpolation quality, bool isAnimating)
     {
         _frame++;
-        session.Units = CanvasUnits.Pixels;
         // Aliased edges, otherwise adjacent tile rects leave hairline gaps where their AA edges meet.
         session.Antialiasing = CanvasAntialiasing.Aliased;
-
-        if (AppConfig.Settings.CheckeredBackground && _supportsTransparency)
-        {
-            _checkeredBrush.Transform = Matrix3x2.CreateScale(1f / viewState.Scale);
-            session.FillRectangle(viewState.ImageRect, _checkeredBrush);
-        }
 
         var pyramid = _item.Pyramid;
         var overview = _item.Bitmap;
@@ -158,7 +140,7 @@ internal partial class TiledImageRenderer : IRenderer
     }
 
     /// <summary>The part of the full-resolution image that is on screen, in image pixels.</summary>
-    private Rect VisibleImageRect(CanvasDrawingSession session, CanvasViewState viewState)
+    private Rect VisibleImageRect(CanvasDrawingSession session, in ViewFrame viewState)
     {
         // CanvasAnimatedControl.Size is safe to read from the game-loop thread; read it once.
         var size = _canvas.Size;

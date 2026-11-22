@@ -130,6 +130,9 @@ public partial class PngAnimator : IAnimator
     /// <inheritdoc />
     public ICanvasImage Surface => _compositedSurface;
 
+    /// <inheritdoc />
+    public TimeSpan TimeToNextFrame { get; private set; }
+
     /// <summary>
     ///     Stream wrapping the raw APNG bytes. Kept alive for the lifetime of the animator
     ///     because the parser may seek it during construction, and the stream must outlive
@@ -346,7 +349,11 @@ public partial class PngAnimator : IAnimator
     /// </param>
     public async Task UpdateAsync(TimeSpan totalElapsedTime)
     {
-        if (_totalAnimationDuration == TimeSpan.Zero) return;
+        if (_totalAnimationDuration == TimeSpan.Zero)
+        {
+            TimeToNextFrame = TimeSpan.MaxValue;
+            return;
+        }
 
         var elapsedInLoop = TimeSpan.FromTicks(totalElapsedTime.Ticks % _totalAnimationDuration.Ticks);
 
@@ -376,6 +383,7 @@ public partial class PngAnimator : IAnimator
                 await RenderFrameAsync(i);
 
         _currentFrameIndex = targetFrameIndex;
+        TimeToNextFrame = _frameCumulativeTime[targetFrameIndex] - elapsedInLoop;
     }
 
     /// <summary>

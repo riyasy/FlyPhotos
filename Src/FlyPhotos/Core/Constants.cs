@@ -7,9 +7,8 @@ internal static class Constants
     public const string AppVersion = "2.9.1";
 
     // ───────────────────────── Pan / Zoom animation ─────────────────────────
-    // The full model is documented on CanvasViewManager. In short: every user-triggered zoom/pan is a
-    // damped-spring animation (scale springs in LOG space, pan in pixels); launch open-zoom and exit
-    // zoom-out reuse that spring; only a now-dormant cubic tween remains as a fallback.
+    // The model is on ViewMotion: every animated zoom/pan is a damped spring (scale in log space, a pinned
+    // image point in pixels); the launch open-zoom and exit zoom-out use the same spring.
 
     // Close/launch WAIT budgets, in ms (the caller waits this x2 for AnimationCompleted, then proceeds).
     // NOT animation durations any more — the spring sets its own pace. For the exit, the spring shrinks the
@@ -75,7 +74,11 @@ internal static class Constants
     // Related to Shrug Animation for Delete Failure
     public const double ShrugAnimationDurationMs = 350;
     public const double ShrugAmplitude = 20; // How many pixels to shake
-    public const double ShrugFrequency = 4;  // How many "wiggles"       
+    public const double ShrugFrequency = 4;  // How many "wiggles"
+
+    // Continuous zoom (touchpad, pinch, Shift+wheel) draws at animation quality until this long after its last
+    // step, then once at full quality. Too short and a slow pinch flickers between the two qualities.
+    public const int ContinuousZoomSettleMs = 700;
         
     // Thumbnail Related
     public const int ThumbnailPixelBufferSize = 128; // intermediate square pixel buffer stored on Photo

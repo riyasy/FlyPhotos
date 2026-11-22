@@ -93,6 +93,9 @@ public partial class GifAnimator : IAnimator
     /// <inheritdoc />
     public ICanvasImage Surface => _compositedSurface;
 
+    /// <inheritdoc />
+    public TimeSpan TimeToNextFrame { get; private set; }
+
     // -------------------------------------------------------------------------
     // Private fields
     // -------------------------------------------------------------------------
@@ -275,7 +278,11 @@ public partial class GifAnimator : IAnimator
     /// </param>
     public async Task UpdateAsync(TimeSpan totalElapsedTime)
     {
-        if (_totalAnimationDuration == TimeSpan.Zero) return;
+        if (_totalAnimationDuration == TimeSpan.Zero)
+        {
+            TimeToNextFrame = TimeSpan.MaxValue;
+            return;
+        }
 
         var elapsedInLoop = TimeSpan.FromTicks(totalElapsedTime.Ticks % _totalAnimationDuration.Ticks);
 
@@ -311,6 +318,7 @@ public partial class GifAnimator : IAnimator
                 await RenderFrameAsync(i);
 
         _currentFrameIndex = targetFrameIndex;
+        TimeToNextFrame = _frameCumulativeTime[targetFrameIndex] - elapsedInLoop;
     }
 
     // -------------------------------------------------------------------------

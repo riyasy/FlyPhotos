@@ -7,7 +7,7 @@ using Windows.Graphics.DirectX;
 using Windows.UI;
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
-using FlyPhotos.Display.Controllers.Animation;
+using FlyPhotos.Display.Canvas;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Utils;
@@ -85,7 +85,7 @@ internal partial class ThumbNailController : IThumbnailController
     // The single UI/other-thread -> W2D handoff. Arbitrary device-free work (slide reset, offscreen
     // disposal) is queued here; the heavier offscreen rebuild is flagged via _rebuildRequested because it
     // needs the live W2D `sender` for the device and render size. Both are drained at the top of Update.
-    private readonly W2dActionPump _pump;
+    private readonly W2dQueue<Action> _pump;
     // 1 when a ribbon rebuild is wanted. Set (Interlocked) on any thread; cleared by the W2D thread as it rebuilds.
     private int _rebuildRequested;
 
@@ -106,7 +106,7 @@ internal partial class ThumbNailController : IThumbnailController
     public ThumbNailController(CanvasAnimatedControl d2dCanvasThumbNail)
     {
         _d2dCanvasThumbNail = d2dCanvasThumbNail;
-        _pump = new W2dActionPump(_d2dCanvasThumbNail);
+        _pump = new W2dQueue<Action>(_d2dCanvasThumbNail, static work => work());
         _d2dCanvasThumbNail.CreateResources += D2dCanvasThumbNail_CreateResources;
         _d2dCanvasThumbNail.Update += D2dCanvasThumbNail_Update;
         _d2dCanvasThumbNail.Draw += D2dCanvasThumbNail_Draw;
@@ -376,7 +376,7 @@ internal partial class ThumbNailController : IThumbnailController
     /// <summary>Ends an in-flight slide, snapping the offset to 0. W2D thread only.</summary>
     private void StopSlide()
     {
-        _slideOffset.SettleTo(0f);
+        _slideOffset.Reset(0f);
         _slideAnimating = false;
     }
 

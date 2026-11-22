@@ -1,21 +1,20 @@
-using System.Numerics;
+﻿using System.Numerics;
 using FlyPhotos.Core.Model;
-using FlyPhotos.Display.Controllers;
-using FlyPhotos.Display.Controllers.Animation;
-using FlyPhotos.Display.State;
+using FlyPhotos.Display.Canvas;
 using FlyPhotos.Infra.Configuration;
 using Windows.Foundation;
 using Size = FlyPhotos.Core.Model.Size;
+using View = FlyPhotos.Display.Canvas.View;
 
 namespace FlyPhotos.Tests.Display;
 
 /// <summary>
 /// The pan/zoom view on its own: no window, no Win2D. Each test drives a <see cref="Rig"/> — the real
-/// <see cref="CanvasViewManager"/> with a hand-stepped clock, so animations run frame by frame (16 ms) and every run is
+/// <see cref="ViewController"/> with a hand-stepped clock, so animations run frame by frame (16 ms) and every run is
 /// the same. The default canvas is 1000×800 and the default photo 4000×3000, which fits at 0.25 (the width limits it).
 /// </summary>
 [TestClass]
-public sealed class CanvasViewManagerTests
+public sealed class ViewControllerTests
 {
     private static readonly Size Canvas = new(1000, 800);
     private static readonly Point Centre = new(500, 400);
@@ -25,27 +24,33 @@ public sealed class CanvasViewManagerTests
 
     private sealed class Rig
     {
-        public readonly CanvasViewState View = new();
-        public readonly CanvasViewManager M;
+        public readonly ViewController M;
         public double Now;
         public bool Fitted, OneToOne;
         public int ZoomChanges, Completions;
-        public Size Canvas = CanvasViewManagerTests.Canvas;
         private string _shown = "";
 
         public Rig()
         {
-            M = new CanvasViewManager(View, () => Now);
+            M = new ViewController(() => Now) { CanvasSize = ViewControllerTests.Canvas };
             M.FitToScreenStateChanged += v => Fitted = v;
             M.OneToOneStateChanged += v => OneToOne = v;
-            M.ZoomChanged += () => ZoomChanges++;
+            M.ZoomChanged += _ => ZoomChanges++;
             M.AnimationCompleted += () => Completions++;
         }
 
-        /// <summary>One install, as the canvas controller hands it over.</summary>
+        public Size Canvas
+        {
+            get => M.CanvasSize;
+            set => M.CanvasSize = value;
+        }
+
+        public View View => M.View;
+
+        /// <summary>One install, as the canvas engine hands it over.</summary>
         public void Arrive(string path, double w, double h, ViewArrival a, int rotation = 0, Size? photoSize = null)
         {
-            M.SetScaleAndPosition(path, new Size(w, h), rotation, Canvas, a, photoSize);
+            M.Show(path, new Size(w, h), rotation, a, photoSize);
             _shown = path;
         }
 
@@ -54,39 +59,33 @@ public sealed class CanvasViewManagerTests
         /// image of the one on screen. <paramref name="photoSize"/>: the photo's size on screen by its metadata.
         /// </summary>
         public void Show(string path, double w, double h, int rotation = 0, Size? photoSize = null) =>
-            Arrive(path, w, h, _shown == "" ? ViewArrival.FirstPhoto
-                : path != _shown ? ViewArrival.NewPhoto : ViewArrival.SameImageUpgrade, rotation, photoSize);
+            Arrive(path, w, h, ViewController.ClassifyArrival(_shown, true, path, DisplayLevel.Hq), rotation, photoSize);
 
         public void Tick(int frames = 1)
         {
             for (var i = 0; i < frames; i++)
             {
                 Now += 16;
-                M.OnUpdate();
+                M.Tick();
             }
         }
 
         public void Settle()
         {
-            for (var i = 0; i < 2000 && M.PanZoomAnimationOnGoing; i++) Tick();
-            Assert.IsFalse(M.PanZoomAnimationOnGoing, "animation never settled");
+            for (var i = 0; i < 2000 && M.IsAnimating; i++) Tick();
+            Assert.IsFalse(M.IsAnimating, "animation never settled");
         }
 
-        public void ResizeTo(double w, double h)
-        {
-            var old = Canvas;
-            Canvas = new Size(w, h);
-            M.HandleSizeChange(Canvas, old);
-        }
+        public void ResizeTo(double w, double h) => M.Resize(new Size(w, h));
 
         /// <summary>The image pixel under screen point <paramref name="p"/>.</summary>
-        public Vector2 ImagePointAt(Point p) => Vector2.Transform(new Vector2((float)p.X, (float)p.Y), View.MatInv);
+        public Vector2 ImagePointAt(Point p) => Vector2.Transform(new Vector2((float)p.X, (float)p.Y), M.Frame.MatInv);
 
         /// <summary>Where image pixel <paramref name="ip"/> is on screen.</summary>
-        public Vector2 ScreenOf(Vector2 ip) => Vector2.Transform(ip, View.Mat);
+        public Vector2 ScreenOf(Vector2 ip) => Vector2.Transform(ip, M.Frame.Mat);
 
         public float Scale => View.Scale;
-        public Point Pos => View.ImagePos;
+        public Point Pos => View.Pos;
     }
 
     private static void Near(double expected, double actual, double tolerance, string what) =>
@@ -112,7 +111,7 @@ public sealed class CanvasViewManagerTests
         Assert.IsTrue(r.Fitted);
         Assert.IsFalse(r.OneToOne);
         Assert.AreEqual(0, r.View.Rotation);
-        Assert.IsFalse(r.M.PanZoomAnimationOnGoing);
+        Assert.IsFalse(r.M.IsAnimating);
     }
 
     [TestMethod]
@@ -157,7 +156,7 @@ public sealed class CanvasViewManagerTests
         var r = new Rig();
         r.Show("A", 4000, 3000);
         Near(0.01, r.Scale, 1e-6, "starts tiny");
-        Assert.IsTrue(r.M.PanZoomAnimationOnGoing);
+        Assert.IsTrue(r.M.IsAnimating);
         Assert.IsTrue(r.Fitted, "fitted is known up front");
 
         r.Settle();
@@ -174,7 +173,7 @@ public sealed class CanvasViewManagerTests
         var r = new Rig();
         r.Show("A", 4000, 3000);
         r.Tick(3);
-        r.M.ZoomAtPoint(ZoomDirection.In, Centre);
+        r.M.WheelZoom(ZoomDirection.In, Centre);
         r.Tick();
         Assert.IsTrue(r.ZoomChanges > 0, "only the open-zoom itself is silent");
     }
@@ -187,7 +186,7 @@ public sealed class CanvasViewManagerTests
         r.Show("A", 4000, 3000);
         r.Tick(3);
         var before = r.ZoomChanges;
-        r.M.ZoomPanToFit(animateChange: true, Canvas);
+        r.M.Fit(animate: true);
         r.Tick();
         Assert.IsTrue(r.ZoomChanges > before, "Fit re-aims the open-zoom's animation, which must not stay silent");
     }
@@ -198,7 +197,7 @@ public sealed class CanvasViewManagerTests
         AppConfig.Settings.OpenExitZoom = true;
         var r = new Rig { Canvas = new Size(0, 0) };
         r.Show("A", 4000, 3000);
-        Assert.IsFalse(r.M.PanZoomAnimationOnGoing, "a zero fit scale would feed log(0) to the spring");
+        Assert.IsFalse(r.M.IsAnimating, "a zero fit scale would feed log(0) to the spring");
     }
 
     // ---------------------------------------------------------------- navigation: Reset
@@ -208,9 +207,9 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPointByFactor(2f, new Point(300, 300));
+        r.M.ZoomBy(2f, new Point(300, 300));
         r.M.Pan(40, 40);
-        r.M.RotateBy(90);
+        r.M.Rotate(90);
 
         r.Show("B", 3000, 2000, rotation: 270);
 
@@ -239,12 +238,12 @@ public sealed class CanvasViewManagerTests
         SetMode(PanZoomBehaviourOnNavigation.RetainFromLastPhoto);
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPoint(ZoomDirection.In, Centre);
+        r.M.WheelZoom(ZoomDirection.In, Centre);
         r.Tick(2);
 
         r.Show("B", 4000, 3000);
 
-        Assert.IsFalse(r.M.PanZoomAnimationOnGoing);
+        Assert.IsFalse(r.M.IsAnimating);
         Near(0.3125, r.Scale, 1e-6, "B inherits the zoom target, not a mid-flight frame");
     }
 
@@ -255,8 +254,8 @@ public sealed class CanvasViewManagerTests
         SetMode(mode);
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPointByFactor(2f, new Point(300, 300)); // scale 0.5, centre moves to (700, 500)
-        r.M.RotateBy(90);
+        r.M.ZoomBy(2f, new Point(300, 300)); // scale 0.5, centre moves to (700, 500)
+        r.M.Rotate(90);
         return r;
     }
 
@@ -301,8 +300,8 @@ public sealed class CanvasViewManagerTests
     public void Remember_ViewPutBackToFit_ComesBackFitted()
     {
         var r = ZoomedRotatedA(PanZoomBehaviourOnNavigation.RememberPerPhoto);
-        r.M.RotateBy(-90);
-        r.M.ZoomPanToFit(animateChange: true, Canvas);
+        r.M.Rotate(-90);
+        r.M.Fit(animate: true);
         r.Settle();
         r.Show("B", 4000, 3000);
 
@@ -316,8 +315,8 @@ public sealed class CanvasViewManagerTests
     public void Remember_ViewPutBackToFit_ThenWindowResized_ComesBackAtTheNewFit()
     {
         var r = ZoomedRotatedA(PanZoomBehaviourOnNavigation.RememberPerPhoto);
-        r.M.RotateBy(-90);
-        r.M.ZoomPanToFit(animateChange: true, Canvas); // starts off centre, settles at the default
+        r.M.Rotate(-90);
+        r.M.Fit(animate: true); // starts off centre, settles at the default
         r.Settle();
         r.Show("B", 4000, 3000);
         r.ResizeTo(1600, 900);
@@ -332,10 +331,10 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPoint(ZoomDirection.In, new Point(200, 200));
+        r.M.WheelZoom(ZoomDirection.In, new Point(200, 200));
         r.Tick(2);
-        r.M.ZoomPanToFit(animateChange: false, Canvas);
-        Assert.IsFalse(r.M.PanZoomAnimationOnGoing, "nothing left to overwrite the fit");
+        r.M.Fit(animate: false);
+        Assert.IsFalse(r.M.IsAnimating, "nothing left to overwrite the fit");
         r.Tick(5);
         Near(0.25, r.Scale, 1e-6, "fit");
         NearPoint(Centre, r.Pos, 1e-6, "centred");
@@ -347,8 +346,8 @@ public sealed class CanvasViewManagerTests
         SetMode(PanZoomBehaviourOnNavigation.RememberPerPhoto);
         var r = new Rig();
         r.Show("A", 200, 100); // default is 100%
-        r.M.ZoomAtPointByFactor(2f, Centre);
-        r.M.ZoomToHundred(Canvas); // back to the default, and centred
+        r.M.ZoomBy(2f, Centre);
+        r.M.ZoomToHundred(); // back to the default, and centred
         r.Settle();
         r.Show("B", 4000, 3000);
         r.ResizeTo(1600, 900);
@@ -387,8 +386,8 @@ public sealed class CanvasViewManagerTests
         SetMode(PanZoomBehaviourOnNavigation.RememberPerPhoto);
         var r = new Rig();
         r.Show("ico", 256, 256);
-        r.M.SetPageSize(new Size(16, 16), Canvas, isFirstPage: false);
-        r.M.ZoomAtPointByFactor(10f, Centre);
+        r.M.ShowPage(new Size(16, 16), isFirstPage: false);
+        r.M.ZoomBy(10f, Centre);
         r.Show("B", 4000, 3000);
 
         r.Show("ico", 256, 256);
@@ -399,13 +398,13 @@ public sealed class CanvasViewManagerTests
     public void Remember_RenamedPhotoKeepsItsView()
     {
         var r = ZoomedRotatedA(PanZoomBehaviourOnNavigation.RememberPerPhoto);
-        r.M.RenamePhoto("A", "A2"); // renamed while on screen: its view is saved under the new name
+        r.M.Rename("A", "A2"); // renamed while on screen: its view is saved under the new name
         r.Arrive("B", 4000, 3000, ViewArrival.NewPhoto);
         r.Arrive("A2", 4000, 3000, ViewArrival.NewPhoto);
         Near(0.5, r.Scale, 1e-6, "the view moved with the rename");
 
         r.Arrive("C", 4000, 3000, ViewArrival.NewPhoto);
-        r.M.RenamePhoto("A2", "A3"); // renamed after it was saved: the stored view follows
+        r.M.Rename("A2", "A3"); // renamed after it was saved: the stored view follows
         r.Arrive("A3", 4000, 3000, ViewArrival.NewPhoto);
         Near(0.5, r.Scale, 1e-6, "the stored view moved with the rename");
     }
@@ -430,7 +429,7 @@ public sealed class CanvasViewManagerTests
         SetMode(PanZoomBehaviourOnNavigation.RetainFromLastPhoto);
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPointByFactor(2f, Centre);
+        r.M.ZoomBy(2f, Centre);
         r.M.Pan(100, 50);
 
         r.Show("B", 8000, 6000);
@@ -454,11 +453,11 @@ public sealed class CanvasViewManagerTests
         SetMode(PanZoomBehaviourOnNavigation.RetainFromLastPhoto);
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPointByFactor(2f, Centre);
+        r.M.ZoomBy(2f, Centre);
         r.M.Pan(100, 50);
 
         r.Arrive("B", 100, 100, ViewArrival.NewPhoto);
-        r.M.RotateBy(90); // the user rotates while the placeholder is up
+        r.M.Rotate(90); // the user rotates while the placeholder is up
         r.Arrive("B", 4000, 3000, ViewArrival.FirstRealImage, rotation: 0);
 
         Near(0.5, r.Scale, 1e-6, "scale");
@@ -484,7 +483,7 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPointByFactor(2f, new Point(300, 300));
+        r.M.ZoomBy(2f, new Point(300, 300));
         r.M.Pan(10, 20);
         var (scale, pos, zoomChanges) = (r.Scale, r.Pos, r.ZoomChanges);
 
@@ -499,7 +498,7 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 3000, 4000); // a preview already turned upright
-        r.M.RotateBy(90);
+        r.M.Rotate(90);
         r.Show("A", 4000, 3000, rotation: 90); // the HQ carries the EXIF rotation
         Assert.AreEqual(180, r.View.Rotation);
     }
@@ -510,9 +509,9 @@ public sealed class CanvasViewManagerTests
         // A portrait RAW: the HQ is 6000×4000 in sensor orientation with a 90° rotation; the disk-cached preview is
         // already upright, and its size may have been stored in sensor orientation.
         var r = new Rig();
-        var layout = ZoomGeometry.PreviewLayoutSize(new Size(6000, 4000), 400, 600);
+        var layout = ViewRules.PreviewLayoutSize(new Size(6000, 4000), 400, 600);
         r.Show("A", layout.Width, layout.Height);
-        r.M.ZoomToHundred(Canvas);
+        r.M.ZoomToHundred();
         r.Settle();
         Near(6000, r.View.ImageRect.Height, 1e-6, "the preview is laid out at the photo's upright height");
 
@@ -526,12 +525,12 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 400, 300); // a preview with no full-size metadata, laid out at its own size; at 100%
-        r.M.ZoomAtPoint(ZoomDirection.In, Centre); // heading to 1.25
+        r.M.WheelZoom(ZoomDirection.In, Centre); // heading to 1.25
         r.Tick(3);
         var heightOnScreen = r.Scale * 300;
 
         r.Show("A", 4000, 3000);
-        Assert.IsTrue(r.M.PanZoomAnimationOnGoing, "the zoom keeps going");
+        Assert.IsTrue(r.M.IsAnimating, "the zoom keeps going");
         Near(heightOnScreen, r.Scale * 3000, 1e-3, "no jump on screen");
 
         r.Settle();
@@ -544,9 +543,9 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig { Canvas = new Size(1000, 1000) };
         r.Show("A", 4000, 3000);
-        r.M.ZoomToHundred(r.Canvas);
+        r.M.ZoomToHundred();
         r.Settle();
-        r.M.ZoomPanToFit(animateChange: true, r.Canvas);
+        r.M.Fit(animate: true);
         r.Tick(3);
 
         r.Show("A", 4500, 3000);
@@ -587,7 +586,7 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPointByFactor(2f, Centre);
+        r.M.ZoomBy(2f, Centre);
         r.M.Pan(100, 100);
         r.ResizeTo(1600, 900);
         Near(0.5, r.Scale, 1e-6, "scale kept");
@@ -599,8 +598,9 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPointByFactor(2f, Centre);
-        r.M.HandleSizeChange(new Size(1600, 900), new Size(0, 0));
+        r.M.ZoomBy(2f, Centre);
+        r.Canvas = new Size(0, 0); // as before the canvas was first laid out
+        r.M.Resize(new Size(1600, 900));
         NearPoint(Centre, r.Pos, 1e-9, "no ratio to apply");
     }
 
@@ -609,13 +609,13 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.HandleImageSizedWindowResize(new Point(10, 20), new Size(2000, 1600));
+        r.M.ImageSizedResize(new Point(10, 20), new Size(2000, 1600));
         NearPoint(new Point(490, 380), r.Pos, 1e-9, "shifted with the canvas origin");
         Near(0.25, r.Scale, 1e-6, "scale kept: it still fits");
 
         var s = new Rig();
         s.Show("A", 4000, 3000);
-        s.M.HandleImageSizedWindowResize(new Point(10, 20), new Size(500, 400));
+        s.M.ImageSizedResize(new Point(10, 20), new Size(500, 400));
         Near(0.125, s.Scale, 1e-6, "clamped window: re-fitted");
         NearPoint(new Point(250, 200), s.Pos, 1e-6, "centred in it");
     }
@@ -630,7 +630,7 @@ public sealed class CanvasViewManagerTests
         var anchor = new Point(300, 250);
         var ip = r.ImagePointAt(anchor);
 
-        r.M.ZoomAtPoint(ZoomDirection.In, anchor);
+        r.M.WheelZoom(ZoomDirection.In, anchor);
         r.Tick(4);
         var mid = r.ScreenOf(ip);
         Near(anchor.X, mid.X, 0.75, "mid-zoom X");
@@ -647,12 +647,12 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPoint(ZoomDirection.In, Centre);
-        r.M.ZoomAtPoint(ZoomDirection.In, Centre);
+        r.M.WheelZoom(ZoomDirection.In, Centre);
+        r.M.WheelZoom(ZoomDirection.In, Centre);
         r.Settle();
         Near(0.25 * 1.25 * 1.25, r.Scale, 1e-6, "two notches in");
 
-        r.M.ZoomAtPoint(ZoomDirection.Out, Centre);
+        r.M.WheelZoom(ZoomDirection.Out, Centre);
         r.Settle();
         Near(0.25 * 1.25 * 1.25 * 0.8, r.Scale, 1e-6, "one notch out");
         Assert.IsFalse(r.Fitted);
@@ -664,15 +664,15 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000); // floor: min(5%, 50 px long side) = 0.0125
-        r.M.ZoomAtPointByFactor(0.052f, Centre); // 0.013
+        r.M.ZoomBy(0.052f, Centre); // 0.013
         Near(0.013, r.Scale, 1e-6, "just above the floor");
 
-        r.M.ZoomAtPoint(ZoomDirection.Out, Centre);
-        Assert.IsFalse(r.M.PanZoomAnimationOnGoing, "a wheel step below the floor is refused");
-        r.M.ZoomAtPointByFactor(0.9f, Centre);
+        r.M.WheelZoom(ZoomDirection.Out, Centre);
+        Assert.IsFalse(r.M.IsAnimating, "a wheel step below the floor is refused");
+        r.M.ZoomBy(0.9f, Centre);
         Near(0.013, r.Scale, 1e-6, "a pinch below the floor is refused");
 
-        r.M.ZoomAtPointByFactor(2f, Centre);
+        r.M.ZoomBy(2f, Centre);
         Near(0.026, r.Scale, 1e-6, "zooming in is never floored");
     }
 
@@ -682,8 +682,8 @@ public sealed class CanvasViewManagerTests
         AppConfig.Settings.StickyZoomLevels = true;
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPointByFactor(1.8f, Centre); // 0.45
-        r.M.ZoomAtPoint(ZoomDirection.In, Centre); // 0.5625 crosses 0.5
+        r.M.ZoomBy(1.8f, Centre); // 0.45
+        r.M.WheelZoom(ZoomDirection.In, Centre); // 0.5625 crosses 0.5
         r.Settle();
         Near(0.5, r.Scale, 1e-6, "snapped to 50%");
     }
@@ -695,8 +695,8 @@ public sealed class CanvasViewManagerTests
         r.Show("A", 4000, 3000);
         var anchor = new Point(300, 250);
         var ip = r.ImagePointAt(anchor);
-        r.M.ZoomAtPointByFactor(1.5f, anchor);
-        Assert.IsFalse(r.M.PanZoomAnimationOnGoing);
+        r.M.ZoomBy(1.5f, anchor);
+        Assert.IsFalse(r.M.IsAnimating);
         Near(0.375, r.Scale, 1e-6, "scale");
         var s = r.ScreenOf(ip);
         Near(anchor.X, s.X, 0.6, "anchor X");
@@ -710,27 +710,27 @@ public sealed class CanvasViewManagerTests
         var r = new Rig();
         r.Show("A", 4000, 3000);
 
-        r.M.StepZoom(ZoomDirection.In, Canvas);
+        r.M.StepZoom(ZoomDirection.In);
         Assert.IsTrue(r.OneToOne, "1:1 known up front");
         Assert.IsFalse(r.Fitted);
         r.Settle();
         Near(1, r.Scale, 1e-6, "100%");
         NearPoint(Centre, r.Pos, 0.5, "centred");
 
-        r.M.StepZoom(ZoomDirection.In, Canvas);
+        r.M.StepZoom(ZoomDirection.In);
         r.Settle();
         Near(4, r.Scale, 1e-6, "400%");
-        r.M.StepZoom(ZoomDirection.In, Canvas);
-        Assert.IsFalse(r.M.PanZoomAnimationOnGoing, "no stop above 400%");
+        r.M.StepZoom(ZoomDirection.In);
+        Assert.IsFalse(r.M.IsAnimating, "no stop above 400%");
 
-        r.M.StepZoom(ZoomDirection.Out, Canvas);
+        r.M.StepZoom(ZoomDirection.Out);
         r.Settle();
-        r.M.StepZoom(ZoomDirection.Out, Canvas);
+        r.M.StepZoom(ZoomDirection.Out);
         r.Settle();
         Near(0.25, r.Scale, 1e-6, "back at fit");
         Assert.IsTrue(r.Fitted);
-        r.M.StepZoom(ZoomDirection.Out, Canvas);
-        Assert.IsFalse(r.M.PanZoomAnimationOnGoing, "no stop below fit");
+        r.M.StepZoom(ZoomDirection.Out);
+        Assert.IsFalse(r.M.IsAnimating, "no stop below fit");
     }
 
     [TestMethod]
@@ -739,7 +739,7 @@ public sealed class CanvasViewManagerTests
         var r = new Rig();
         r.Show("A", 4000, 3000);
         r.M.Pan(30, 30);
-        r.M.ZoomToHundred(Canvas);
+        r.M.ZoomToHundred();
         Assert.IsTrue(r.OneToOne);
         Assert.IsFalse(r.Fitted);
         r.Settle();
@@ -754,7 +754,7 @@ public sealed class CanvasViewManagerTests
         r.Show("A", 4000, 3000);
         var anchor = new Point(300, 250);
         var ip = r.ImagePointAt(anchor);
-        r.M.ZoomToHundred(Canvas, anchor);
+        r.M.ZoomToHundred(anchor);
         r.Settle();
         var s = r.ScreenOf(ip);
         Near(anchor.X, s.X, 0.6, "X");
@@ -767,7 +767,7 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 200, 100);
-        r.M.ZoomPanToFit(animateChange: false, Canvas);
+        r.M.Fit(animate: false);
         Near(5, r.Scale, 1e-6, "fit even though StretchSmallImages is off");
         Assert.IsTrue(r.Fitted);
         Assert.IsFalse(r.OneToOne);
@@ -793,7 +793,7 @@ public sealed class CanvasViewManagerTests
         foreach (var r in new[] { plain, panned })
         {
             r.Show("A", 4000, 3000);
-            r.M.ZoomAtPoint(ZoomDirection.In, new Point(300, 250));
+            r.M.WheelZoom(ZoomDirection.In, new Point(300, 250));
             r.Tick(3);
         }
         panned.M.Pan(50, -20);
@@ -809,8 +809,8 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 200, 100);
-        r.M.RotateBy(90);
-        r.M.RotateBy(90);
+        r.M.Rotate(90);
+        r.M.Rotate(90);
         Assert.AreEqual(180, r.View.Rotation);
         Assert.IsFalse(r.Fitted);
         Assert.IsTrue(r.OneToOne);
@@ -824,12 +824,15 @@ public sealed class CanvasViewManagerTests
         r.Show("A", 4000, 3000);
         r.M.Pan(7, 3);
         var start = r.Pos;
+        var drawnAtRest = r.M.Frame.Mat;
         r.M.Shrug();
         r.Tick(3);
-        Assert.AreNotEqual(start.X, r.Pos.X, "moving");
-        Near(start.Y, r.Pos.Y, 1e-9, "only sideways");
+        // The wiggle is drawn, not written into the view, so it can't leave an offset behind.
+        Assert.AreNotEqual(drawnAtRest.M31, r.M.Frame.Mat.M31, "moving");
+        Near(drawnAtRest.M32, r.M.Frame.Mat.M32, 1e-3, "only sideways");
+        NearPoint(start, r.Pos, 1e-9, "the view itself doesn't move");
         r.Settle();
-        NearPoint(start, r.Pos, 1e-9, "back exactly");
+        Assert.AreEqual(drawnAtRest, r.M.Frame.Mat, "back exactly");
     }
 
     [TestMethod]
@@ -840,7 +843,7 @@ public sealed class CanvasViewManagerTests
         foreach (var r in new[] { plain, shrugged })
         {
             r.Show("A", 4000, 3000);
-            r.M.ZoomAtPoint(ZoomDirection.In, new Point(300, 250));
+            r.M.WheelZoom(ZoomDirection.In, new Point(300, 250));
         }
         shrugged.M.Shrug();
         plain.Settle();
@@ -853,7 +856,7 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomOutOnExit(Canvas);
+        r.M.ExitZoom();
         Assert.IsFalse(r.Fitted);
         r.Settle();
         Near(0.001, r.Scale, 1e-6, "a dot");
@@ -866,8 +869,8 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("ico", 256, 256);
-        r.M.RotateBy(90);
-        r.M.SetPageSize(new Size(16, 16), Canvas, isFirstPage: false);
+        r.M.Rotate(90);
+        r.M.ShowPage(new Size(16, 16), isFirstPage: false);
         Near(1, r.Scale, 1e-6, "16 px page at 100% (no stretch)");
         Assert.AreEqual(90, r.View.Rotation, "manual rotation kept");
         Assert.AreEqual(16, r.View.ImageRect.Width);
@@ -879,18 +882,17 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4001, 2999);
-        r.M.ZoomAtPoint(ZoomDirection.In, new Point(333.3, 277.7));
+        r.M.WheelZoom(ZoomDirection.In, new Point(333.3, 277.7));
         r.Tick(2);
-        Assert.IsFalse(r.View.SnapTranslation, "no rounding mid-animation");
+        Assert.IsTrue(r.M.IsAnimating, "no rounding mid-animation");
         r.Settle();
-        Assert.IsTrue(r.View.SnapTranslation);
-        Near(Math.Round(r.View.Mat.M31), r.View.Mat.M31, 1e-3, "M31 whole");
-        Near(Math.Round(r.View.Mat.M32), r.View.Mat.M32, 1e-3, "M32 whole");
+        Near(Math.Round(r.M.Frame.Mat.M31), r.M.Frame.Mat.M31, 1e-3, "M31 whole");
+        Near(Math.Round(r.M.Frame.Mat.M32), r.M.Frame.Mat.M32, 1e-3, "M32 whole");
 
-        r.M.ZoomPanToFit(animateChange: true, Canvas);
+        r.M.Fit(animate: true);
         r.Settle();
-        Near(Math.Round(r.View.Mat.M31), r.View.Mat.M31, 1e-3, "fit M31 whole");
-        Near(Math.Round(r.View.Mat.M32), r.View.Mat.M32, 1e-3, "fit M32 whole");
+        Near(Math.Round(r.M.Frame.Mat.M31), r.M.Frame.Mat.M31, 1e-3, "fit M31 whole");
+        Near(Math.Round(r.M.Frame.Mat.M32), r.M.Frame.Mat.M32, 1e-3, "fit M32 whole");
     }
 
     // ---------------------------------------------------------------- fixed defects
@@ -901,7 +903,7 @@ public sealed class CanvasViewManagerTests
         SetMode(PanZoomBehaviourOnNavigation.RememberPerPhoto);
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPoint(ZoomDirection.In, Centre);
+        r.M.WheelZoom(ZoomDirection.In, Centre);
         r.Tick(2);
         r.Show("B", 4000, 3000);
         r.Show("A", 4000, 3000);
@@ -913,10 +915,10 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig { Canvas = new Size(1000, 1000) }; // the width limits the fit
         r.Show("A", 4000, 3000); // 4:3 preview layout
-        r.M.ZoomToHundred(r.Canvas);
+        r.M.ZoomToHundred();
         r.Settle();
 
-        r.M.ZoomPanToFit(animateChange: true, r.Canvas);
+        r.M.Fit(animate: true);
         r.Settle();
         Near(0.25, r.Scale, 1e-6, "fitted to the preview as laid out");
         Assert.IsTrue(r.Fitted);
@@ -931,9 +933,9 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomToHundred(Canvas);
+        r.M.ZoomToHundred();
         r.Settle();
-        r.M.ZoomPanToFit(animateChange: true, Canvas);
+        r.M.Fit(animate: true);
         r.Tick(2);
         r.M.Pan(30, 0);
         r.Settle();
@@ -945,9 +947,9 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomToHundred(Canvas);
+        r.M.ZoomToHundred();
         r.Settle();
-        r.M.StepZoom(ZoomDirection.Out, Canvas, new Point(100, 100));
+        r.M.StepZoom(ZoomDirection.Out, new Point(100, 100));
         r.Settle();
         Near(0.25, r.Scale, 1e-6, "at the fit scale");
         Assert.IsFalse(r.Fitted, "off centre: not fitted");
@@ -958,12 +960,12 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomToHundred(Canvas);
+        r.M.ZoomToHundred();
         r.Settle();
-        r.M.ZoomPanToFit(animateChange: true, Canvas);
+        r.M.Fit(animate: true);
         r.Tick(2);
         r.ResizeTo(1600, 900);
-        Assert.IsTrue(r.M.PanZoomAnimationOnGoing, "the animation keeps going");
+        Assert.IsTrue(r.M.IsAnimating, "the animation keeps going");
         r.Settle();
         Near(0.3, r.Scale, 1e-6, "fit of the new canvas");
         NearPoint(new Point(800, 450), r.Pos, 0.5, "centred");
@@ -975,7 +977,7 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomToHundred(Canvas);
+        r.M.ZoomToHundred();
         r.Tick(2);
         r.ResizeTo(2000, 1600);
         r.Settle();
@@ -988,10 +990,10 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPoint(ZoomDirection.In, new Point(200, 200));
+        r.M.WheelZoom(ZoomDirection.In, new Point(200, 200));
         r.Tick(2);
         r.ResizeTo(1600, 900);
-        Assert.IsFalse(r.M.PanZoomAnimationOnGoing, "no animation left to overwrite the resize");
+        Assert.IsFalse(r.M.IsAnimating, "no animation left to overwrite the resize");
         Near(0.3125, r.Scale, 1e-6, "at the zoom target");
     }
 
@@ -1000,7 +1002,7 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig { Canvas = new Size(1000, 1000) };
         r.Show("A", 4000, 3000);
-        r.M.ZoomToHundred(r.Canvas);
+        r.M.ZoomToHundred();
         r.Settle();
         var pos = r.Pos;
 
@@ -1015,13 +1017,13 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 400, 300); // no full-size metadata: laid out at its own small size
-        r.M.ZoomAtPointByFactor(1.5f, Centre);
+        r.M.ZoomBy(1.5f, Centre);
         var before = r.Scale * 300;
         r.Show("A", 4000, 3000);
         Near(before, r.Scale * 3000, 1e-3, "no metadata");
 
         r.Show("B", 2250, 3000); // already turned upright...
-        r.M.ZoomAtPointByFactor(1.5f, Centre);
+        r.M.ZoomBy(1.5f, Centre);
         before = r.Scale * 3000;
         r.Show("B", 4000, 3000, rotation: 90); // ...while the HQ carries a 90° EXIF rotation
         Near(before, r.Scale * 4000, 1e-3, "rotated HQ");
@@ -1032,14 +1034,14 @@ public sealed class CanvasViewManagerTests
     {
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPointByFactor(3.9f, Centre); // 0.975
-        r.M.ZoomAtPointByFactor(1.1f, Centre, stopAtOneToOne: true);
+        r.M.ZoomBy(3.9f, Centre); // 0.975
+        r.M.ZoomBy(1.1f, Centre, stopAtOneToOne: true);
         Near(1, r.Scale, 1e-6, "stopped at 100%");
         Assert.IsTrue(r.OneToOne);
 
         r.M.Pan(100, 50);
         var pos = r.Pos;
-        r.M.ZoomToHundred(Canvas, new Point(200, 150));
+        r.M.ZoomToHundred(new Point(200, 150));
         r.Settle();
         NearPoint(pos, r.Pos, 1, "no jump");
     }
@@ -1050,8 +1052,8 @@ public sealed class CanvasViewManagerTests
         AppConfig.Settings.StickyZoomLevels = true;
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPointByFactor(3.4f, Centre); // 0.85
-        r.M.ZoomAtPoint(ZoomDirection.In, Centre);
+        r.M.ZoomBy(3.4f, Centre); // 0.85
+        r.M.WheelZoom(ZoomDirection.In, Centre);
         Assert.IsTrue(r.OneToOne);
         r.Settle();
         Near(1, r.Scale, 1e-6, "snapped to 100%");
@@ -1066,7 +1068,7 @@ public sealed class CanvasViewManagerTests
     private sealed record RawCase(string Name, double MetaW, double MetaH, double BmpW, double BmpH,
         double HqW, double HqH, int HqRotation, bool HqFailed = false)
     {
-        public Size Layout => ZoomGeometry.PreviewLayoutSize(new Size(MetaW, MetaH), BmpW, BmpH);
+        public Size Layout => ViewRules.PreviewLayoutSize(new Size(MetaW, MetaH), BmpW, BmpH);
     }
 
     private static readonly RawCase[] RawCases =
@@ -1095,7 +1097,7 @@ public sealed class CanvasViewManagerTests
 
     /// <summary>The HQ's pixels per pixel of the photo (the preview's layout): the scale on the HQ is the preview's over this.</summary>
     private static double PerPhoto(RawCase c) =>
-        ZoomGeometry.ImagePixelsPerPhotoPixel(new Size(c.HqW, c.HqH), c.HqRotation, c.Layout).Value;
+        ViewRules.ImagePixelsPerPhotoPixel(new Size(c.HqW, c.HqH), c.HqRotation, c.Layout).Value;
 
     /// <summary>
     /// The photo didn't jump: its larger on-screen side (the one a decoder's border crop changes least, or a downscale
@@ -1140,7 +1142,7 @@ public sealed class CanvasViewManagerTests
         ShowPreview(r, "A", c);
         ShowHq(r, "A", c);
         Assert.IsTrue(r.Fitted);
-        Near(ZoomGeometry.CalculateScreenFitScale(Canvas, new Size(c.HqW, c.HqH), c.HqRotation), r.Scale, 1e-6, "fit");
+        Near(ViewRules.FitScale(Canvas, new Size(c.HqW, c.HqH), c.HqRotation), r.Scale, 1e-6, "fit");
     }
 
     [TestMethod]
@@ -1151,14 +1153,14 @@ public sealed class CanvasViewManagerTests
         var c = Case(name);
         var r = new Rig();
         ShowPreview(r, "A", c);
-        r.M.ZoomToHundred(Canvas, new Point(200, 150));
+        r.M.ZoomToHundred(new Point(200, 150));
         r.Settle();
         var part = CentreFraction(r);
 
         ShowHq(r, "A", c);
         Near(1 / PerPhoto(c), r.Scale, 1e-5, "the photo keeps its size");
         NoJump(part, r, "no jump on screen");
-        Assert.AreEqual(ZoomGeometry.SameScale(r.Scale, 1f), r.OneToOne, "1:1 only at true 100%");
+        Assert.AreEqual(ViewRules.SameScale(r.Scale, 1f), r.OneToOne, "1:1 only at true 100%");
         SamePartAtCentre(part, r);
     }
 
@@ -1169,7 +1171,7 @@ public sealed class CanvasViewManagerTests
         var c = Case(name);
         var r = new Rig();
         ShowPreview(r, "A", c);
-        r.M.ZoomAtPointByFactor(7f, new Point(250, 600));
+        r.M.ZoomBy(7f, new Point(250, 600));
         r.M.Pan(30, -20);
         var (scale, part) = (r.Scale, CentreFraction(r));
 
@@ -1189,8 +1191,8 @@ public sealed class CanvasViewManagerTests
         // Both spring kinds: double-click 100% (pan + zoom) and a wheel notch (anchored zoom).
         Action<Rig>[] zooms =
         [
-            r => r.M.ZoomToHundred(Canvas, new Point(300, 200)),
-            r => r.M.ZoomAtPoint(ZoomDirection.In, new Point(300, 200)),
+            r => r.M.ZoomToHundred(new Point(300, 200)),
+            r => r.M.WheelZoom(ZoomDirection.In, new Point(300, 200)),
         ];
         foreach (var zoom in zooms)
         {
@@ -1204,7 +1206,7 @@ public sealed class CanvasViewManagerTests
             zoom(r);
             r.Tick(3);
             ShowHq(r, "A", c);
-            Assert.IsTrue(r.M.PanZoomAnimationOnGoing, "the zoom keeps going");
+            Assert.IsTrue(r.M.IsAnimating, "the zoom keeps going");
             r.Settle();
             Near(reference.Scale / PerPhoto(c), r.Scale, 1e-5, "zoom");
         }
@@ -1219,7 +1221,7 @@ public sealed class CanvasViewManagerTests
         var r = new Rig();
         ShowPreview(r, "P0", c);
         ShowHq(r, "P0", c);
-        r.M.ZoomToHundred(Canvas);
+        r.M.ZoomToHundred();
         r.Settle();
         for (var i = 1; i <= 10; i++)
         {
@@ -1254,11 +1256,11 @@ public sealed class CanvasViewManagerTests
         // a portrait photo's height on screen.
         SetMode(PanZoomBehaviourOnNavigation.RetainFromLastPhoto);
         var r = new Rig();
-        var landscape = ZoomGeometry.PreviewLayoutSize(new Size(6024, 4024), 1024, 684);
+        var landscape = ViewRules.PreviewLayoutSize(new Size(6024, 4024), 1024, 684);
         var portrait = new Size(landscape.Height, landscape.Width); // a portrait photo's preview, upright on screen
         r.Show("A", landscape.Width, landscape.Height, photoSize: landscape);
         r.Show("A", 6000, 4000, photoSize: landscape);
-        r.M.ZoomToHundred(Canvas);
+        r.M.ZoomToHundred();
         r.Settle();
 
         r.Show("B", 6000, 4000, rotation: 270, photoSize: portrait); // its HQ, already prefetched
@@ -1275,9 +1277,9 @@ public sealed class CanvasViewManagerTests
         // Found in the UI test: ImageMagick found no preview in one CR3, so its size by metadata wasn't known.
         SetMode(PanZoomBehaviourOnNavigation.RetainFromLastPhoto);
         var r = new Rig();
-        var withMetadata = ZoomGeometry.PreviewLayoutSize(new Size(5496, 3670), 800, 534);
+        var withMetadata = ViewRules.PreviewLayoutSize(new Size(5496, 3670), 800, 534);
         r.Show("A", 5472, 3648); // its HQ, with no preview
-        r.M.ZoomToHundred(Canvas);
+        r.M.ZoomToHundred();
         r.Settle();
 
         r.Show("B", 5472, 3648, photoSize: withMetadata);
@@ -1294,9 +1296,9 @@ public sealed class CanvasViewManagerTests
         // its preview (with the metadata size) loaded later; the canvas controller passes that size on leaving it.
         SetMode(PanZoomBehaviourOnNavigation.RetainFromLastPhoto);
         var r = new Rig();
-        var layout = ZoomGeometry.PreviewLayoutSize(new Size(5496, 3670), 800, 534);
+        var layout = ViewRules.PreviewLayoutSize(new Size(5496, 3670), 800, 534);
         r.Show("A", 5472, 3648);
-        r.M.ZoomToHundred(Canvas);
+        r.M.ZoomToHundred();
         r.Settle();
 
         r.M.LearnPhotoSize(layout);
@@ -1316,7 +1318,7 @@ public sealed class CanvasViewManagerTests
         var r = new Rig();
         ShowPreview(r, "P", c);
         ShowHq(r, "P", c);
-        r.M.ZoomAtPointByFactor(7f, new Point(250, 600));
+        r.M.ZoomBy(7f, new Point(250, 600));
         r.M.Pan(30, -20);
         var (scale, part) = (r.Scale, CentreFraction(r));
 
@@ -1338,7 +1340,7 @@ public sealed class CanvasViewManagerTests
         SetMode(PanZoomBehaviourOnNavigation.RetainFromLastPhoto);
         var r = new Rig();
         r.Show("A", 4000, 3000);
-        r.M.ZoomAtPointByFactor(2f, Centre);
+        r.M.ZoomBy(2f, Centre);
         r.M.Pan(40, 0);
         var pos = r.Pos;
         r.M.Shrug();

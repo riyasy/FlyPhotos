@@ -1,90 +1,80 @@
 using System;
 using System.Diagnostics;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using FlyPhotos.Display.Animators;
-using FlyPhotos.Display.State;
-using FlyPhotos.Infra.Configuration;
+using FlyPhotos.Display.Canvas;
 using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 
 namespace FlyPhotos.Display.ImageRendering;
 
+/// <summary>
+/// Draws an animator's surface and advances it. Between frames the canvas sleeps: a frame due soon is waited for by
+/// keeping the render loop running (a timer is too coarse), one further off by a single timed wake.
+/// </summary>
 internal partial class AnimatedImageRenderer : IRenderer
 {
+    private const double KeepRunningWithinMs = 20; // a little over a 60 Hz frame
+
     private readonly CanvasAnimatedControl _canvas;
     private readonly IAnimator _animator;
     private readonly Action _requestInvalidate;
-    private readonly Stopwatch _stopwatch = new();
-    private readonly SemaphoreSlim _animatorLock = new(1, 1);
-    private readonly bool _supportsTransparency;
-    private CanvasImageBrush _checkeredBrush;
-    public CanvasImageBrush CheckeredBrush { set => _checkeredBrush = value; }
-    // Read on the W2D thread (OnUpdate) and the ThreadPool decode continuation; written in Dispose.
+    private readonly DelayedWake _wake;
+    private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
+    private readonly SemaphoreSlim _animatorLock = new(1, 1); // one frame update at a time
     private volatile bool _isDisposed;
+    // When the next frame is due, as _stopwatch.Elapsed ticks; long.MaxValue for never. Written by the update task.
+    private long _nextFrameTicks;
 
-    public Rect SourceBounds => _animator.Surface.GetBounds(_canvas);
-
-    public AnimatedImageRenderer(CanvasAnimatedControl canvas, IAnimator animator, bool supportsTransparency,
-        Action requestInvalidate)
+    public AnimatedImageRenderer(CanvasAnimatedControl canvas, IAnimator animator, Action requestInvalidate)
     {
         _canvas = canvas;
         _animator = animator;
-        _supportsTransparency = supportsTransparency;
         _requestInvalidate = requestInvalidate;
-        _stopwatch.Start();
-        // No CompositionTarget.Rendering subscription — the Update loop in CanvasController drives us.
+        _wake = new DelayedWake(requestInvalidate);
     }
 
-    public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating)
+    public void Draw(CanvasDrawingSession session, in ViewFrame frame, CanvasImageInterpolation quality, bool isAnimating)
     {
-        session.Units = CanvasUnits.Pixels;
-        if (_animator?.Surface == null) return;
-
-        var drawCheckeredBackground = AppConfig.Settings.CheckeredBackground && _supportsTransparency;
-        session.Antialiasing = drawCheckeredBackground ? CanvasAntialiasing.Aliased : CanvasAntialiasing.Antialiased;
-        if (drawCheckeredBackground)
-        {
-            var brushScale = 1f / viewState.Scale;
-            _checkeredBrush.Transform = Matrix3x2.CreateScale(brushScale);
-            session.FillRectangle(viewState.ImageRect, _checkeredBrush);
-        }
-
-        session.DrawImage(_animator.Surface, viewState.ImageRect, _animator.Surface.GetBounds(_canvas), 1.0f, quality);
+        if (_animator?.Surface is not { } surface) return;
+        session.DrawImage(surface, frame.ImageRect, surface.GetBounds(_canvas), 1.0f, quality);
     }
 
-    /// <summary>
-    /// Called by CanvasController on the Win2D background thread each Update tick.
-    /// Fires an async frame-advance if the previous one has completed (non-blocking).
-    /// Always returns true — animated images keep the canvas running continuously.
-    /// </summary>
+    /// <summary>W2D thread, every Update. Returns whether the render loop should keep running for this animation.</summary>
     public bool OnUpdate()
     {
-        if (_isDisposed) 
+        if (_isDisposed) return false;
+        var next = Volatile.Read(ref _nextFrameTicks);
+        if (next == long.MaxValue) return false; // a still frame, or the animation failed
+
+        var now = _stopwatch.Elapsed;
+        var waitMs = (TimeSpan.FromTicks(next) - now).TotalMilliseconds;
+        if (waitMs > KeepRunningWithinMs)
+        {
+            _wake.After((int)(waitMs - KeepRunningWithinMs));
             return false;
-        if (_animatorLock.Wait(0))
-            _ = UpdateFrameAsync();
+        }
+        if (waitMs <= 0 && _animatorLock.Wait(0))
+            _ = UpdateFrameAsync(now);
         return true;
     }
 
-    private async Task UpdateFrameAsync()
+    private async Task UpdateFrameAsync(TimeSpan now)
     {
         try
         {
             if (_isDisposed) return; // finally releases the lock
-
-            await _animator.UpdateAsync(_stopwatch.Elapsed);
-
-            if (!_isDisposed)
-                _requestInvalidate(); // defensive: wakes the canvas if something externally paused it
+            await _animator.UpdateAsync(now);
+            var wait = _animator.TimeToNextFrame;
+            Volatile.Write(ref _nextFrameTicks, wait == TimeSpan.MaxValue ? long.MaxValue : (now + wait).Ticks);
+            if (!_isDisposed) _requestInvalidate();
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Animation update failed: {ex.Message}");
-            _stopwatch.Stop();
+            Volatile.Write(ref _nextFrameTicks, long.MaxValue);
         }
         finally
         {
@@ -94,14 +84,14 @@ internal partial class AnimatedImageRenderer : IRenderer
 
     public void HandleScalingMethodChange() { }
 
+    /// <summary>Waits for a running frame update, so blocks: the canvas calls it off the W2D thread.</summary>
     public void Dispose()
     {
         if (_isDisposed) return;
         _isDisposed = true;
-        // Drain any in-flight UpdateFrameAsync before disposing the animator.
+        _wake.Cancel();
         _animatorLock.Wait();
         _animatorLock.Release();
-        _stopwatch.Stop();
         _animator?.Dispose();
     }
 }

@@ -1,8 +1,6 @@
 using System.Numerics;
 using FlyPhotos.Core.Model;
-using FlyPhotos.Display.Controllers;
-using FlyPhotos.Display.Controllers.Animation;
-using FlyPhotos.Display.State;
+using FlyPhotos.Display.Canvas;
 using FlyPhotos.Infra.Configuration;
 using Windows.Foundation;
 using Size = FlyPhotos.Core.Model.Size;
@@ -10,8 +8,8 @@ using Size = FlyPhotos.Core.Model.Size;
 namespace FlyPhotos.Tests.Display;
 
 /// <summary>
-/// The view's pure parts: <see cref="ZoomGeometry"/>'s rules, <see cref="PerPhotoViewStore"/>'s normalization,
-/// <see cref="CanvasController.ClassifyArrival"/> and <see cref="CanvasViewState"/>'s transform.
+/// The view's pure parts: <see cref="ViewRules"/>, <see cref="PerPhotoViewStore"/>'s normalization,
+/// <see cref="ViewController.ClassifyArrival"/> and <see cref="View"/>'s transform.
 /// </summary>
 [TestClass]
 public sealed class ViewMathTests
@@ -42,36 +40,36 @@ public sealed class ViewMathTests
     [DataRow(450, 0.2)]
     [DataRow(360, 0.25)]
     public void FitScale_FollowsTheRotation(int rotation, double expected) =>
-        Near(expected, ZoomGeometry.CalculateScreenFitScale(Canvas, Photo, rotation));
+        Near(expected, ViewRules.FitScale(Canvas, Photo, rotation));
 
     [TestMethod]
     public void FitScale_UsesTheSmallerAxis_AndThePadding()
     {
-        Near(0.2, ZoomGeometry.CalculateScreenFitScale(Canvas, new Size(3000, 4000), 0), what: "portrait: height limits");
+        Near(0.2, ViewRules.FitScale(Canvas, new Size(3000, 4000), 0), what: "portrait: height limits");
         AppConfig.Settings.ImageFitPercentage = 50;
-        Near(0.125, ZoomGeometry.CalculateScreenFitScale(Canvas, Photo, 0), what: "50% padding");
+        Near(0.125, ViewRules.FitScale(Canvas, Photo, 0), what: "50% padding");
     }
 
     [TestMethod]
     public void FitScale_EmptyCanvasIsZero() =>
-        Near(0, ZoomGeometry.CalculateScreenFitScale(new Size(0, 0), Photo, 0));
+        Near(0, ViewRules.FitScale(new Size(0, 0), Photo, 0));
 
     [TestMethod]
     public void DefaultScale_NeverAbove100_UnlessStretching()
     {
-        Near(0.25, ZoomGeometry.DefaultScale(Canvas, Photo, 0), what: "large: the fit");
-        Near(1, ZoomGeometry.DefaultScale(Canvas, new Size(200, 100), 0), what: "small: 100%");
+        Near(0.25, ViewRules.DefaultScale(Canvas, Photo, 0), what: "large: the fit");
+        Near(1, ViewRules.DefaultScale(Canvas, new Size(200, 100), 0), what: "small: 100%");
         AppConfig.Settings.StretchSmallImages = true;
-        Near(5, ZoomGeometry.DefaultScale(Canvas, new Size(200, 100), 0), what: "small, stretched: the fit");
+        Near(5, ViewRules.DefaultScale(Canvas, new Size(200, 100), 0), what: "small, stretched: the fit");
     }
 
     [TestMethod]
     public void MinZoomOutScale_Is5Percent_OrA50PxLongSide()
     {
-        Near(0.05, ZoomGeometry.MinZoomOutScale(new Size(800, 600)), what: "normal image");
-        Near(0.0125, ZoomGeometry.MinZoomOutScale(Photo), what: "4000 px: 50 px long side");
-        Near(0.0005, ZoomGeometry.MinZoomOutScale(new Size(30000, 100000)), what: "huge, tall");
-        Near(0.05, ZoomGeometry.MinZoomOutScale(new Size(0, 0)), what: "empty");
+        Near(0.05, ViewRules.MinZoomOutScale(new Size(800, 600)), what: "normal image");
+        Near(0.0125, ViewRules.MinZoomOutScale(Photo), what: "4000 px: 50 px long side");
+        Near(0.0005, ViewRules.MinZoomOutScale(new Size(30000, 100000)), what: "huge, tall");
+        Near(0.05, ViewRules.MinZoomOutScale(new Size(0, 0)), what: "empty");
     }
 
     // ---------------------------------------------------------------- zoom steps
@@ -79,33 +77,33 @@ public sealed class ViewMathTests
     [TestMethod]
     public void AnchorPreservingPan_KeepsTheAnchorOverTheSamePixel()
     {
-        NearPoint(new Point(700, 500), ZoomGeometry.AnchorPreservingPan(new Point(300, 300), new Point(500, 400), 0.25f, 0.5f));
-        NearPoint(new Point(500, 400), ZoomGeometry.AnchorPreservingPan(new Point(300, 300), new Point(500, 400), 1f, 1f));
-        NearPoint(new Point(500, 400), ZoomGeometry.AnchorPreservingPan(new Point(500, 400), new Point(500, 400), 1f, 3f));
+        NearPoint(new Point(700, 500), ViewRules.AnchorPreservingPan(new Point(300, 300), new Point(500, 400), 0.25f, 0.5f));
+        NearPoint(new Point(500, 400), ViewRules.AnchorPreservingPan(new Point(300, 300), new Point(500, 400), 1f, 1f));
+        NearPoint(new Point(500, 400), ViewRules.AnchorPreservingPan(new Point(500, 400), new Point(500, 400), 1f, 3f));
     }
 
     [TestMethod]
     public void WheelStep_Is125PercentIn_80PercentOut()
     {
         AppConfig.Settings.StickyZoomLevels = false;
-        Near(0.3125, ZoomGeometry.WheelStepTarget(0.25f, ZoomDirection.In, Photo)!.Value);
-        Near(0.2, ZoomGeometry.WheelStepTarget(0.25f, ZoomDirection.Out, Photo)!.Value);
+        Near(0.3125, ViewRules.WheelStepTarget(0.25f, ZoomDirection.In, Photo)!.Value);
+        Near(0.2, ViewRules.WheelStepTarget(0.25f, ZoomDirection.Out, Photo)!.Value);
     }
 
     [TestMethod]
     public void WheelStep_SnapsWhenSticky()
     {
         AppConfig.Settings.StickyZoomLevels = true;
-        Near(1, ZoomGeometry.WheelStepTarget(0.85f, ZoomDirection.In, Photo)!.Value, what: "crosses 100%");
-        Near(0.5, ZoomGeometry.WheelStepTarget(0.6f, ZoomDirection.Out, Photo)!.Value, what: "crosses 50%");
-        Near(1.25, ZoomGeometry.WheelStepTarget(1f, ZoomDirection.In, Photo)!.Value, what: "from a stop: none crossed");
+        Near(1, ViewRules.WheelStepTarget(0.85f, ZoomDirection.In, Photo)!.Value, what: "crosses 100%");
+        Near(0.5, ViewRules.WheelStepTarget(0.6f, ZoomDirection.Out, Photo)!.Value, what: "crosses 50%");
+        Near(1.25, ViewRules.WheelStepTarget(1f, ZoomDirection.In, Photo)!.Value, what: "from a stop: none crossed");
     }
 
     [TestMethod]
     public void WheelStep_OutBelowTheFloor_IsRefused_InNever()
     {
-        Assert.IsNull(ZoomGeometry.WheelStepTarget(0.013f, ZoomDirection.Out, Photo));
-        Assert.IsNotNull(ZoomGeometry.WheelStepTarget(0.0001f, ZoomDirection.In, Photo));
+        Assert.IsNull(ViewRules.WheelStepTarget(0.013f, ZoomDirection.Out, Photo));
+        Assert.IsNotNull(ViewRules.WheelStepTarget(0.0001f, ZoomDirection.In, Photo));
     }
 
     [TestMethod]
@@ -115,8 +113,8 @@ public sealed class ViewMathTests
     [DataRow(1.0f, 1.25f, 1.0f)]     // out onto 1
     [DataRow(0.4f, 2.2f, 2.0f)]      // out past several: the nearest
     [DataRow(0.36f, 0.45f, 0.36f)]   // out, none crossed
-    public void ApplyZoomSnap(float newScale, float oldScale, float expected) =>
-        Near(expected, ZoomGeometry.ApplyZoomSnap(newScale, oldScale, newScale > oldScale ? ZoomDirection.In : ZoomDirection.Out));
+    public void SnapToStickyStop(float newScale, float oldScale, float expected) =>
+        Near(expected, ViewRules.SnapToStickyStop(newScale, oldScale, newScale > oldScale ? ZoomDirection.In : ZoomDirection.Out));
 
     [TestMethod]
     [DataRow(1.07f, 0.97f, 1f)]
@@ -125,27 +123,27 @@ public sealed class ViewMathTests
     [DataRow(1.2f, 1.1f, 1.2f)]
     [DataRow(0.9f, 1.0f, 0.9f)]      // starting on the stop is not crossing it
     public void StopOnCrossing(float newScale, float oldScale, float expected) =>
-        Near(expected, ZoomGeometry.StopOnCrossing(newScale, oldScale, 1f));
+        Near(expected, ViewRules.StopOnCrossing(newScale, oldScale, 1f));
 
     [TestMethod]
     public void ZoomStops_AreFit100And400_Deduplicated()
     {
-        CollectionAssert.AreEqual(new[] { 0.25f, 1f, 4f }, ZoomGeometry.BuildZoomStops(0.25f));
-        CollectionAssert.AreEqual(new[] { 1f, 4f }, ZoomGeometry.BuildZoomStops(1f));
-        CollectionAssert.AreEqual(new[] { 1f, 2f, 4f }, ZoomGeometry.BuildZoomStops(2f));
-        CollectionAssert.AreEqual(new[] { 1f, 4f, 5f }, ZoomGeometry.BuildZoomStops(5f));
+        CollectionAssert.AreEqual(new[] { 0.25f, 1f, 4f }, ViewRules.StepZoomStops(0.25f));
+        CollectionAssert.AreEqual(new[] { 1f, 4f }, ViewRules.StepZoomStops(1f));
+        CollectionAssert.AreEqual(new[] { 1f, 2f, 4f }, ViewRules.StepZoomStops(2f));
+        CollectionAssert.AreEqual(new[] { 1f, 4f, 5f }, ViewRules.StepZoomStops(5f));
     }
 
     [TestMethod]
     public void NextZoomStop_WalksTheStops_AndIsNullAtTheEnds()
     {
-        Near(1, ZoomGeometry.NextZoomStop(0.25f, 0.25f, ZoomDirection.In)!.Value);
-        Near(4, ZoomGeometry.NextZoomStop(1f, 0.25f, ZoomDirection.In)!.Value);
-        Assert.IsNull(ZoomGeometry.NextZoomStop(4f, 0.25f, ZoomDirection.In));
-        Near(0.25, ZoomGeometry.NextZoomStop(0.5f, 0.25f, ZoomDirection.Out)!.Value, what: "between stops: the one below");
-        Assert.IsNull(ZoomGeometry.NextZoomStop(0.25f, 0.25f, ZoomDirection.Out));
-        Near(4, ZoomGeometry.NextZoomStop(1.0005f, 0.25f, ZoomDirection.In)!.Value, what: "within tolerance of 1 counts as 1");
-        Assert.IsNull(ZoomGeometry.NextZoomStop(0.1f, 0.25f, ZoomDirection.Out), "below fit: nothing lower");
+        Near(1, ViewRules.NextZoomStop(0.25f, 0.25f, ZoomDirection.In)!.Value);
+        Near(4, ViewRules.NextZoomStop(1f, 0.25f, ZoomDirection.In)!.Value);
+        Assert.IsNull(ViewRules.NextZoomStop(4f, 0.25f, ZoomDirection.In));
+        Near(0.25, ViewRules.NextZoomStop(0.5f, 0.25f, ZoomDirection.Out)!.Value, what: "between stops: the one below");
+        Assert.IsNull(ViewRules.NextZoomStop(0.25f, 0.25f, ZoomDirection.Out));
+        Near(4, ViewRules.NextZoomStop(1.0005f, 0.25f, ZoomDirection.In)!.Value, what: "within tolerance of 1 counts as 1");
+        Assert.IsNull(ViewRules.NextZoomStop(0.1f, 0.25f, ZoomDirection.Out), "below fit: nothing lower");
     }
 
     // ---------------------------------------------------------------- upgrade ratio
@@ -153,59 +151,59 @@ public sealed class ViewMathTests
     [TestMethod]
     public void UpgradeRatio_SameImage_IsOne()
     {
-        Near(1, ZoomGeometry.UpgradeScaleRatio(Canvas, Photo, 0, null, Photo, 0, null, fitted: false));
-        Near(1, ZoomGeometry.UpgradeScaleRatio(Canvas, Photo, 0, null, Photo, 0, null, fitted: true));
+        Near(1, ViewRules.UpgradeScaleRatio(Canvas, Photo, 0, null, Photo, 0, null, fitted: false));
+        Near(1, ViewRules.UpgradeScaleRatio(Canvas, Photo, 0, null, Photo, 0, null, fitted: true));
     }
 
     [TestMethod]
     public void UpgradeRatio_NotFittedNoMetadata_KeepsTheOnScreenHeight()
     {
-        Near(0.1, ZoomGeometry.UpgradeScaleRatio(Canvas, new Size(400, 300), 0, null, Photo, 0, null, fitted: false), what: "no metadata");
-        Near(0.75, ZoomGeometry.UpgradeScaleRatio(Canvas, new Size(2250, 3000), 0, null, Photo, 90, null, fitted: false), what: "upright preview");
-        Near(1, ZoomGeometry.UpgradeScaleRatio(new Size(1000, 1000), Photo, 0, null, new Size(4500, 3000), 0, null, fitted: false),
+        Near(0.1, ViewRules.UpgradeScaleRatio(Canvas, new Size(400, 300), 0, null, Photo, 0, null, fitted: false), what: "no metadata");
+        Near(0.75, ViewRules.UpgradeScaleRatio(Canvas, new Size(2250, 3000), 0, null, Photo, 90, null, fitted: false), what: "upright preview");
+        Near(1, ViewRules.UpgradeScaleRatio(new Size(1000, 1000), Photo, 0, null, new Size(4500, 3000), 0, null, fitted: false),
             what: "only the aspect differs: 100% stays 100%");
     }
 
     [TestMethod]
     public void UpgradeRatio_NotFitted_SmallerHq_KeepsTheOnScreenHeight() =>
-        Near(3670 / 1080.0, ZoomGeometry.UpgradeScaleRatio(Canvas, new Size(5496, 3670), 0, null, new Size(1616, 1080), 0, null, fitted: false));
+        Near(3670 / 1080.0, ViewRules.UpgradeScaleRatio(Canvas, new Size(5496, 3670), 0, null, new Size(1616, 1080), 0, null, fitted: false));
 
     [TestMethod]
     public void UpgradeRatio_NotFitted_KnownPhotoSize_GoesByTheRatioToThePhoto() =>
-        Near(1 / 0.25, ZoomGeometry.UpgradeScaleRatio(Canvas, Photo, 0, 1f, new Size(1000, 760), 0, 0.25f, fitted: false));
+        Near(1 / 0.25, ViewRules.UpgradeScaleRatio(Canvas, Photo, 0, 1f, new Size(1000, 760), 0, 0.25f, fitted: false));
 
     [TestMethod]
     public void ImagePixelsPerPhotoPixel_IsTheLargerAxisRatio()
     {
         var photo = new Size(6024, 4024);
-        Near(1, ZoomGeometry.ImagePixelsPerPhotoPixel(photo, 0, photo).Value, what: "the preview, laid out at the photo's size");
-        Near(6000 / 6024.0, ZoomGeometry.ImagePixelsPerPhotoPixel(new Size(6000, 4000), 0, photo).Value, what: "Rawler crop");
-        Near(6000 / 6024.0, ZoomGeometry.ImagePixelsPerPhotoPixel(new Size(6000, 4000), 270, new Size(4024, 6024)).Value,
+        Near(1, ViewRules.ImagePixelsPerPhotoPixel(photo, 0, photo).Value, what: "the preview, laid out at the photo's size");
+        Near(6000 / 6024.0, ViewRules.ImagePixelsPerPhotoPixel(new Size(6000, 4000), 0, photo).Value, what: "Rawler crop");
+        Near(6000 / 6024.0, ViewRules.ImagePixelsPerPhotoPixel(new Size(6000, 4000), 270, new Size(4024, 6024)).Value,
             what: "the same crop on a portrait photo, HQ in sensor axes");
-        Near(1080 / 4024.0, ZoomGeometry.ImagePixelsPerPhotoPixel(new Size(1616, 1080), 0, photo).Value, what: "embedded JPEG");
-        Assert.IsNull(ZoomGeometry.ImagePixelsPerPhotoPixel(new Size(1616, 1080), 0, null), "no metadata");
+        Near(1080 / 4024.0, ViewRules.ImagePixelsPerPhotoPixel(new Size(1616, 1080), 0, photo).Value, what: "embedded JPEG");
+        Assert.IsNull(ViewRules.ImagePixelsPerPhotoPixel(new Size(1616, 1080), 0, null), "no metadata");
     }
 
     [TestMethod]
     public void UpgradeRatio_Fitted_KeepsTheFit()
     {
         var square = new Size(1000, 1000);
-        var ratio = ZoomGeometry.UpgradeScaleRatio(square, Photo, 0, null, new Size(4500, 3000), 0, null, fitted: true);
-        Near(ZoomGeometry.CalculateScreenFitScale(square, new Size(4500, 3000), 0),
-            ZoomGeometry.CalculateScreenFitScale(square, Photo, 0) * ratio, what: "lands on the new fit");
+        var ratio = ViewRules.UpgradeScaleRatio(square, Photo, 0, null, new Size(4500, 3000), 0, null, fitted: true);
+        Near(ViewRules.FitScale(square, new Size(4500, 3000), 0),
+            ViewRules.FitScale(square, Photo, 0) * ratio, what: "lands on the new fit");
     }
 
     [TestMethod]
     public void UpgradeRatio_EmptySizes_AreOne() =>
-        Near(1, ZoomGeometry.UpgradeScaleRatio(Canvas, Photo, 0, null, new Size(0, 0), 0, null, fitted: false));
+        Near(1, ViewRules.UpgradeScaleRatio(Canvas, Photo, 0, null, new Size(0, 0), 0, null, fitted: false));
 
     [TestMethod]
     public void UpgradeRatio_WhenFitBindsTheHeight_TheTwoRulesAgree()
     {
         // Landscape window, preview and HQ of different aspect but both limited by the height: either rule gives 1.
         var wide = new Size(2000, 800);
-        Near(1, ZoomGeometry.UpgradeScaleRatio(wide, Photo, 0, null, new Size(4500, 3000), 0, null, fitted: true));
-        Near(1, ZoomGeometry.UpgradeScaleRatio(wide, Photo, 0, null, new Size(4500, 3000), 0, null, fitted: false));
+        Near(1, ViewRules.UpgradeScaleRatio(wide, Photo, 0, null, new Size(4500, 3000), 0, null, fitted: true));
+        Near(1, ViewRules.UpgradeScaleRatio(wide, Photo, 0, null, new Size(4500, 3000), 0, null, fitted: false));
     }
 
     [TestMethod]
@@ -215,7 +213,7 @@ public sealed class ViewMathTests
     [DataRow(180, 4000.0, 3000.0)]
     public void OnScreenSize(int rotation, double width, double height)
     {
-        var size = ZoomGeometry.OnScreenSize(Photo, rotation);
+        var size = ViewRules.OnScreenSize(Photo, rotation);
         Near(width, size.Width);
         Near(height, size.Height);
     }
@@ -225,43 +223,43 @@ public sealed class ViewMathTests
     [TestMethod]
     public void CentreOnImage_IsTheFractionOfTheOnScreenBoxAtTheCanvasCentre()
     {
-        NearPoint(new Point(0.5, 0.5), ZoomGeometry.CentreOnImage(new Point(500, 400), 0.25f, Photo, 0, Canvas));
+        NearPoint(new Point(0.5, 0.5), ViewRules.CentreOnImage(new Point(500, 400), 0.25f, Photo, 0, Canvas));
         // 4000×3000 at 0.25 is 1000×750 on screen; its centre 200 px left of the canvas centre.
-        NearPoint(new Point(0.7, 0.5), ZoomGeometry.CentreOnImage(new Point(300, 400), 0.25f, Photo, 0, Canvas));
+        NearPoint(new Point(0.7, 0.5), ViewRules.CentreOnImage(new Point(300, 400), 0.25f, Photo, 0, Canvas));
         // Turned 90°: 750×1000 on screen; its centre 200 px above.
-        NearPoint(new Point(0.5, 0.7), ZoomGeometry.CentreOnImage(new Point(500, 200), 0.25f, Photo, 90, Canvas));
-        NearPoint(new Point(0.5, 0.5), ZoomGeometry.CentreOnImage(new Point(300, 200), 0.25f, new Size(0, 0), 0, Canvas));
+        NearPoint(new Point(0.5, 0.7), ViewRules.CentreOnImage(new Point(500, 200), 0.25f, Photo, 90, Canvas));
+        NearPoint(new Point(0.5, 0.5), ViewRules.CentreOnImage(new Point(300, 200), 0.25f, new Size(0, 0), 0, Canvas));
     }
 
     [TestMethod]
     public void ImagePosFor_InvertsCentreOnImage()
     {
         var pos = new Point(623, 371);
-        var centre = ZoomGeometry.CentreOnImage(pos, 0.3f, Photo, 270, Canvas);
-        NearPoint(pos, ZoomGeometry.ImagePosFor(centre, 0.3f, Photo, 270, Canvas));
+        var centre = ViewRules.CentreOnImage(pos, 0.3f, Photo, 270, Canvas);
+        NearPoint(pos, ViewRules.ImagePosFor(centre, 0.3f, Photo, 270, Canvas));
     }
 
     [TestMethod]
     public void CentreOnImage_LandsAlikeOnAnHqInSensorAxesAndAnUprightOne()
     {
         // The same portrait photo as two decoders make it: sensor axes with a 270° rotation, or already upright.
-        var centre = ZoomGeometry.CentreOnImage(new Point(300, 250), 0.25f, Photo, 0, Canvas);
-        NearPoint(ZoomGeometry.ImagePosFor(centre, 0.25f, new Size(4032, 6048), 0, Canvas),
-            ZoomGeometry.ImagePosFor(centre, 0.25f, new Size(6048, 4032), 270, Canvas));
+        var centre = ViewRules.CentreOnImage(new Point(300, 250), 0.25f, Photo, 0, Canvas);
+        NearPoint(ViewRules.ImagePosFor(centre, 0.25f, new Size(4032, 6048), 0, Canvas),
+            ViewRules.ImagePosFor(centre, 0.25f, new Size(6048, 4032), 270, Canvas));
     }
 
     [TestMethod]
     public void ResizedPan_KeepsTheRelativePlace()
     {
-        NearPoint(new Point(960, 562.5), ZoomGeometry.ResizedPan(new Point(600, 500), Canvas, new Size(1600, 900)));
-        NearPoint(new Point(600, 500), ZoomGeometry.ResizedPan(new Point(600, 500), new Size(0, 0), Canvas));
+        NearPoint(new Point(960, 562.5), ViewRules.ResizedPan(new Point(600, 500), Canvas, new Size(1600, 900)));
+        NearPoint(new Point(600, 500), ViewRules.ResizedPan(new Point(600, 500), new Size(0, 0), Canvas));
     }
 
     [TestMethod]
     public void IsCentred_WithinOnePixel()
     {
-        Assert.IsTrue(ZoomGeometry.IsCentred(new Point(500.9, 399.1), Canvas));
-        Assert.IsFalse(ZoomGeometry.IsCentred(new Point(501, 400), Canvas));
+        Assert.IsTrue(ViewRules.IsCentred(new Point(500.9, 399.1), Canvas));
+        Assert.IsFalse(ViewRules.IsCentred(new Point(501, 400), Canvas));
     }
 
     [TestMethod]
@@ -270,13 +268,13 @@ public sealed class ViewMathTests
     [DataRow(-90, 270)]
     [DataRow(450, 90)]
     [DataRow(-720, 0)]
-    public void NormalizeDegrees(int degrees, int expected) => Assert.AreEqual(expected, ZoomGeometry.NormalizeDegrees(degrees));
+    public void NormalizeDegrees(int degrees, int expected) => Assert.AreEqual(expected, ViewRules.NormalizeDegrees(degrees));
 
     [TestMethod]
     public void SameScale_WithinTheTolerance()
     {
-        Assert.IsTrue(ZoomGeometry.SameScale(1f, 1.0009f));
-        Assert.IsFalse(ZoomGeometry.SameScale(1f, 1.0011f));
+        Assert.IsTrue(ViewRules.SameScale(1f, 1.0009f));
+        Assert.IsFalse(ViewRules.SameScale(1f, 1.0011f));
     }
 
     // ---------------------------------------------------------------- preview layout
@@ -291,7 +289,7 @@ public sealed class ViewMathTests
     public void PreviewLayoutSize_IsTheFullSizeInThePreviewsAxes(double fw, double fh, double pw, double ph,
         double ew, double eh)
     {
-        var s = ZoomGeometry.PreviewLayoutSize(new Size(fw, fh), pw, ph);
+        var s = ViewRules.PreviewLayoutSize(new Size(fw, fh), pw, ph);
         Near(ew, s.Width, 1e-3, "width");
         Near(eh, s.Height, 1e-3, "height");
     }
@@ -333,51 +331,48 @@ public sealed class ViewMathTests
     [TestMethod]
     public void ClassifyArrival_CoversEveryInstall()
     {
-        Assert.AreEqual(ViewArrival.FirstPhoto, CanvasController.ClassifyArrival("", false, "a", DisplayLevel.Preview));
-        Assert.AreEqual(ViewArrival.FirstPhoto, CanvasController.ClassifyArrival("", false, "a", DisplayLevel.PlaceHolder));
-        Assert.AreEqual(ViewArrival.NewPhoto, CanvasController.ClassifyArrival("a", true, "b", DisplayLevel.Hq));
-        Assert.AreEqual(ViewArrival.NewPhoto, CanvasController.ClassifyArrival("a", false, "b", DisplayLevel.PlaceHolder));
-        Assert.AreEqual(ViewArrival.FirstRealImage, CanvasController.ClassifyArrival("a", false, "a", DisplayLevel.Preview));
-        Assert.AreEqual(ViewArrival.FirstRealImage, CanvasController.ClassifyArrival("a", false, "a", DisplayLevel.Hq));
-        Assert.AreEqual(ViewArrival.SameImageUpgrade, CanvasController.ClassifyArrival("a", true, "a", DisplayLevel.Hq));
-        Assert.AreEqual(ViewArrival.SameImageUpgrade, CanvasController.ClassifyArrival("a", true, "a", DisplayLevel.Preview),
+        Assert.AreEqual(ViewArrival.FirstPhoto, ViewController.ClassifyArrival("", false, "a", DisplayLevel.Preview));
+        Assert.AreEqual(ViewArrival.FirstPhoto, ViewController.ClassifyArrival("", false, "a", DisplayLevel.PlaceHolder));
+        Assert.AreEqual(ViewArrival.NewPhoto, ViewController.ClassifyArrival("a", true, "b", DisplayLevel.Hq));
+        Assert.AreEqual(ViewArrival.NewPhoto, ViewController.ClassifyArrival("a", false, "b", DisplayLevel.PlaceHolder));
+        Assert.AreEqual(ViewArrival.FirstRealImage, ViewController.ClassifyArrival("a", false, "a", DisplayLevel.Preview));
+        Assert.AreEqual(ViewArrival.FirstRealImage, ViewController.ClassifyArrival("a", false, "a", DisplayLevel.Hq));
+        Assert.AreEqual(ViewArrival.SameImageUpgrade, ViewController.ClassifyArrival("a", true, "a", DisplayLevel.Hq));
+        Assert.AreEqual(ViewArrival.SameImageUpgrade, ViewController.ClassifyArrival("a", true, "a", DisplayLevel.Preview),
             "a reload at the same level");
-        Assert.AreEqual(ViewArrival.SameImageUpgrade, CanvasController.ClassifyArrival("a", false, "a", DisplayLevel.PlaceHolder),
+        Assert.AreEqual(ViewArrival.SameImageUpgrade, ViewController.ClassifyArrival("a", false, "a", DisplayLevel.PlaceHolder),
             "the placeholder again");
     }
 
-    // ---------------------------------------------------------------- CanvasViewState
+    // ---------------------------------------------------------------- View
 
     [TestMethod]
     [DataRow(0.37f, 0)]
     [DataRow(1f, 0)]
     [DataRow(2.3f, 90)]
     [DataRow(0.1234f, 270)]
-    public void SnapToPixelGrid_LandsTheTranslationOnWholePixels(float scale, int rotation)
+    public void OnPixelGrid_LandsTheTranslationOnWholePixels(float scale, int rotation)
     {
-        var v = new CanvasViewState { ImageRect = new Rect(0, 0, 4001, 2999), Rotation = rotation, Scale = scale };
         var raw = new Point(123.37, 456.81);
-        v.ImagePos = v.SnapImagePosToPixelGrid(scale, raw);
-        Assert.IsTrue(Math.Abs(v.ImagePos.X - raw.X) <= 0.5 + 1e-4 && Math.Abs(v.ImagePos.Y - raw.Y) <= 0.5 + 1e-4, "≤ 0.5 px nudge");
-        v.SnapTranslation = false;
-        v.UpdateTransform();
-        Near(Math.Round(v.Mat.M31), v.Mat.M31, 2e-3, "M31");
-        Near(Math.Round(v.Mat.M32), v.Mat.M32, 2e-3, "M32");
+        var v = new View(new Rect(0, 0, 4001, 2999), scale, raw, rotation);
+        v = v with { Pos = v.OnPixelGrid(scale, raw) };
+        Assert.IsTrue(Math.Abs(v.Pos.X - raw.X) <= 0.5 + 1e-4 && Math.Abs(v.Pos.Y - raw.Y) <= 0.5 + 1e-4, "≤ 0.5 px nudge");
+        var mat = v.Matrix(snap: false);
+        Near(Math.Round(mat.M31), mat.M31, 2e-3, "M31");
+        Near(Math.Round(mat.M32), mat.M32, 2e-3, "M32");
     }
 
     [TestMethod]
-    public void Transform_MapsTheImageCentreToImagePos_AndInverts()
+    public void Transform_MapsTheImageCentreToPos_AndInverts()
     {
-        var v = new CanvasViewState { ImageRect = new Rect(0, 0, 4000, 3000), Rotation = 90, Scale = 0.5f, ImagePos = new Point(600, 450) };
-        v.SnapTranslation = false;
-        v.UpdateTransform();
-        var c = Vector2.Transform(new Vector2(2000, 1500), v.Mat);
+        var frame = new View(new Rect(0, 0, 4000, 3000), 0.5f, new Point(600, 450), 90).Frame(snap: false);
+        var c = Vector2.Transform(new Vector2(2000, 1500), frame.Mat);
         Near(600, c.X, 1e-3, "centre X");
         Near(450, c.Y, 1e-3, "centre Y");
-        var corner = Vector2.Transform(new Vector2(0, 0), v.Mat); // rotated 90°: top-left goes to the top-right
+        var corner = Vector2.Transform(new Vector2(0, 0), frame.Mat); // rotated 90°: top-left goes to the top-right
         Near(600 + 750, corner.X, 1e-3, "corner X");
         Near(450 - 1000, corner.Y, 1e-3, "corner Y");
-        var back = Vector2.Transform(corner, v.MatInv);
+        var back = Vector2.Transform(corner, frame.MatInv);
         Near(0, back.X, 1e-2, "inverse X");
         Near(0, back.Y, 1e-2, "inverse Y");
     }

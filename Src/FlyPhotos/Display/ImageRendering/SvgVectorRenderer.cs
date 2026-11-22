@@ -5,13 +5,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Display.Canvas;
 using FlyPhotos.Display.ImageReading;
-using FlyPhotos.Display.State;
-using FlyPhotos.Infra.Configuration;
 using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using static FlyPhotos.Display.ImageReading.SvgScene;
+using static FlyPhotos.Display.ImageRendering.SnapshotMath;
 
 namespace FlyPhotos.Display.ImageRendering;
 
@@ -27,10 +26,9 @@ namespace FlyPhotos.Display.ImageRendering;
 /// </summary>
 /// <param name="canvas">The main canvas; its device is used for the bitmaps and its size gives the visible area.</param>
 /// <param name="item">The SVG to draw; owns the scene (the renderer owns its bitmaps).</param>
-/// <param name="supportsTransparency">Draw the checkerboard under the SVG when that setting is on.</param>
 /// <param name="invalidate">Requests another frame (used to redraw sharp once the view settles).</param>
-internal partial class SvgVectorRenderer(CanvasAnimatedControl canvas, SvgHqDisplayItem item,
-    bool supportsTransparency, Action invalidate) : IRenderer
+internal partial class SvgVectorRenderer(CanvasAnimatedControl canvas, SvgHqDisplayItem item, Action invalidate)
+    : IRenderer
 {
     /// <summary>How long the view must stay still before the detail is redrawn (a vector draw can take a second).</summary>
     private const int SettleMs = 150;
@@ -63,20 +61,15 @@ internal partial class SvgVectorRenderer(CanvasAnimatedControl canvas, SvgHqDisp
     /// scene was already released; nothing is drawn then.
     /// </summary>
     private readonly SvgScene.Lease _lease = item.Scene.TryAcquire();
-    /// <summary>Set by <see cref="Dispose"/>, so a pending wake-up doesn't request frames for a dead renderer.</summary>
-    private volatile bool _disposed;
+    /// <summary>Requests the settle redraw; cancelled by <see cref="Dispose"/>.</summary>
+    private readonly DelayedWake _wake = new(invalidate);
 
     /// <summary>What one frame's drawing works from: the device, the view, and the scales derived from them.</summary>
     /// <param name="Viewport">The canvas in pixels.</param>
     /// <param name="K">SVG user units → HQ image pixels.</param>
     /// <param name="Target">SVG user units → screen pixels at this view.</param>
-    private readonly record struct Frame(CanvasDevice Device, CanvasViewState View, Rect Viewport, float K, float Target,
+    private readonly record struct Frame(CanvasDevice Device, ViewFrame View, Rect Viewport, float K, float Target,
         CanvasImageInterpolation Quality);
-
-    /// <summary>Checkerboard brush drawn under transparent images; set on the W2D thread at install.</summary>
-    private CanvasImageBrush _checkeredBrush;
-    /// <summary>Set by CanvasController on the W2D thread when the renderer is installed.</summary>
-    public CanvasImageBrush CheckeredBrush { set => _checkeredBrush = value; }
 
     /// <summary>The visible area at screen resolution; null until the first one is drawn.</summary>
     private Snapshot _detail;
@@ -90,24 +83,14 @@ internal partial class SvgVectorRenderer(CanvasAnimatedControl canvas, SvgHqDisp
     /// <summary>The view transform of the last frame, and when it last changed (Stopwatch ticks).</summary>
     private Matrix3x2 _lastMat;
     private long _lastChange;
-    /// <summary>1 while a delayed wake-up for the settle redraw is pending.</summary>
-    private int _wakePending;
 
     /// <summary>
-    /// Draws the checkerboard (if enabled) and the SVG. Redraws the detail when it doesn't match the view and the
-    /// view has settled (or there is none yet); otherwise draws the bitmaps it has. <paramref name="session"/>'s
-    /// transform maps the HQ image pixels (<see cref="CanvasViewState.ImageRect"/>) to the screen.
+    /// Redraws the detail when it doesn't match the view and the view has settled (or there is none yet); otherwise
+    /// draws the bitmaps it has. The session's transform maps the HQ image pixels (the frame's ImageRect) to the screen.
     /// </summary>
-    public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating)
+    public void Draw(CanvasDrawingSession session, in ViewFrame viewState, CanvasImageInterpolation quality, bool isAnimating)
     {
         if (_lease == null) return;
-        session.Units = CanvasUnits.Pixels;
-        if (AppConfig.Settings.CheckeredBackground && supportsTransparency)
-        {
-            session.Antialiasing = CanvasAntialiasing.Aliased;
-            _checkeredBrush.Transform = Matrix3x2.CreateScale(1f / viewState.Scale);
-            session.FillRectangle(viewState.ImageRect, _checkeredBrush);
-        }
 
         // ImageRect is in the HQ image's pixels; k converts SVG user units to those.
         var k = (float)(viewState.ImageRect.Width / item.Scene.Width);
@@ -158,7 +141,7 @@ internal partial class SvgVectorRenderer(CanvasAnimatedControl canvas, SvgHqDisp
                 }
                 else invalidate();
             }
-            else if (!isAnimating) WakeAfter(SettleMs - (int)waited);
+            else if (!isAnimating) _wake.After(SettleMs - (int)waited);
         }
         return fresh;
     }
@@ -302,30 +285,6 @@ internal partial class SvgVectorRenderer(CanvasAnimatedControl canvas, SvgHqDisp
         session.DrawImage(s.Bitmap, part, part, 1f, quality);
     }
 
-    /// <summary>
-    /// <paramref name="m"/> with its offset rounded to whole pixels when it maps bitmap pixels 1:1 onto screen
-    /// pixels (in 90° steps): a pan leaves a fractional offset at DPI scales other than 100%, which would
-    /// resample the bitmap soft.
-    /// </summary>
-    private static Matrix3x2 SnapToPixels(Matrix3x2 m)
-    {
-        static bool Whole(float v) => MathF.Abs(v - MathF.Round(v)) < 1e-3f;
-        if (!(Whole(m.M11) && Whole(m.M12) && Whole(m.M21) && Whole(m.M22))) return m;
-        return new Matrix3x2(MathF.Round(m.M11), MathF.Round(m.M12), MathF.Round(m.M21), MathF.Round(m.M22),
-            MathF.Round(m.M31), MathF.Round(m.M32));
-    }
-
-    /// <summary>Requests a frame in <paramref name="ms"/> ms (one pending at a time), for the settle redraw.</summary>
-    private void WakeAfter(int ms)
-    {
-        if (Interlocked.Exchange(ref _wakePending, 1) == 1) return;
-        _ = Task.Delay(Math.Max(1, ms)).ContinueWith(_ =>
-        {
-            Volatile.Write(ref _wakePending, 0);
-            if (!_disposed) invalidate();
-        });
-    }
-
     /// <summary>The canvas in pixels. CanvasAnimatedControl.Size is safe to read on the game-loop thread.</summary>
     private Rect Viewport(CanvasDrawingSession session)
     {
@@ -334,20 +293,13 @@ internal partial class SvgVectorRenderer(CanvasAnimatedControl canvas, SvgHqDisp
         return new Rect(0, 0, size.Width * dpi, size.Height * dpi);
     }
 
-    /// <summary>Whether <paramref name="outer"/> contains <paramref name="inner"/>, within half a pixel.</summary>
-    private static bool Contains(Rect outer, Rect inner) =>
-        inner.Left >= outer.Left - 0.5 && inner.Top >= outer.Top - 0.5 &&
-        inner.Right <= outer.Right + 0.5 && inner.Bottom <= outer.Bottom + 0.5;
-
-    private static Matrix3x2 Inverse(Matrix3x2 m) => Matrix3x2.Invert(m, out var inv) ? inv : Matrix3x2.Identity;
-
     /// <summary>The next frame at rest sees the new quality and redraws with it.</summary>
     public void HandleScalingMethodChange() => invalidate();
 
     /// <summary>Disposes the bitmaps and drops this renderer's ownership of the scene.</summary>
     public void Dispose()
     {
-        _disposed = true;
+        _wake.Cancel();
         Drop(_pending);
         Drop(_basePending);
         _pending = _basePending = null;

@@ -7,16 +7,15 @@ using System.Threading.Tasks;
 using Windows.Data.Pdf;
 using Windows.Foundation;
 using FlyPhotos.Core.Model;
-using FlyPhotos.Display.Controllers.Animation;
+using FlyPhotos.Display.Canvas;
 using FlyPhotos.Display.ImageReading;
-using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Interop;
 using FlyPhotos.Infra.Utils;
 using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
+using static FlyPhotos.Display.ImageRendering.SnapshotMath;
 using Size = FlyPhotos.Core.Model.Size;
 
 namespace FlyPhotos.Display.ImageRendering;
@@ -127,8 +126,8 @@ internal sealed partial class PdfRenderer : IRenderer, IMultiPage
     private Matrix3x2 _lastMat;
     /// <summary>When <see cref="_lastMat"/> last changed (Stopwatch ticks); the settle delay counts from here.</summary>
     private long _lastChange;
-    /// <summary>1 while a delayed wake-up for the settle redraw is pending.</summary>
-    private int _wakePending;
+    /// <summary>Requests the settle redraw; cancelled by <see cref="Dispose"/>.</summary>
+    private readonly DelayedWake _wake;
 
     /// <summary>
     /// UI thread. Starts opening the document and rendering page 1 on the thread pool.
@@ -144,13 +143,11 @@ internal sealed partial class PdfRenderer : IRenderer, IMultiPage
         _pageCount = item.PageCount;
         _preview = preview;
         _invalidate = invalidate;
+        _wake = new DelayedWake(invalidate);
         var size = canvas.GetSize();
         (_viewportW, _viewportH) = ((float)size.Width, (float)size.Height);
         _ = LoadPageAsync(0);
     }
-
-    /// <summary>Pages are opaque: no checkerboard.</summary>
-    public CanvasImageBrush CheckeredBrush { set { } }
 
     /// <inheritdoc/>
     public int PageCount => _pageCount;
@@ -161,13 +158,12 @@ internal sealed partial class PdfRenderer : IRenderer, IMultiPage
     /// <summary>
     /// Takes any finished bitmaps, starts a detail render if the settled view needs one, and draws: a bitmap that
     /// matches the view alone (snapped to pixels), else the base with the last detail over it. Before the first
-    /// base lands, the preview. <paramref name="session"/>'s transform maps image pixels
-    /// (<see cref="CanvasViewState.ImageRect"/>) to the screen.
+    /// base lands, the preview. <paramref name="session"/>'s transform maps image pixels (the frame's ImageRect) to
+    /// the screen.
     /// </summary>
-    public void Draw(CanvasDrawingSession session, CanvasViewState viewState, CanvasImageInterpolation quality, bool isAnimating)
+    public void Draw(CanvasDrawingSession session, in ViewFrame viewState, CanvasImageInterpolation quality, bool isAnimating)
     {
         if (_disposed) return;
-        session.Units = CanvasUnits.Pixels;
         session.Antialiasing = CanvasAntialiasing.Aliased; // bitmap edges; the detail must sit on the base without seams
 
         // The canvas in pixels. CanvasAnimatedControl.Size is safe to read on the game-loop thread.
@@ -207,13 +203,13 @@ internal sealed partial class PdfRenderer : IRenderer, IMultiPage
     /// the view has been still for <see cref="SettleMs"/> and no other detail render is running. Before that, asks
     /// for a frame when the settle time is up.
     /// </summary>
-    private void MaybeStartDetail(CanvasViewState view, Rect viewport, Rect visible, float scale, bool isAnimating)
+    private void MaybeStartDetail(in ViewFrame view, Rect viewport, Rect visible, float scale, bool isAnimating)
     {
         var now = Stopwatch.GetTimestamp();
         if (view.Mat != _lastMat) { _lastMat = view.Mat; _lastChange = now; }
         if (_shownGen == 0 || _shownGen != Volatile.Read(ref _gen) || visible.IsEmpty || isAnimating) return;
         var waited = Stopwatch.GetElapsedTime(_lastChange, now).TotalMilliseconds;
-        if (waited < SettleMs) { WakeAfter(SettleMs - (int)waited); return; }
+        if (waited < SettleMs) { _wake.After(SettleMs - (int)waited); return; }
         if (Interlocked.Exchange(ref _detailRendering, 1) == 1) return; // the running render requests a frame when done
 
         var margin = Math.Max(viewport.Width, viewport.Height) * Margin / scale;
@@ -359,16 +355,14 @@ internal sealed partial class PdfRenderer : IRenderer, IMultiPage
     }
 
     /// <summary>
-    /// The scale CanvasViewManager gives a page of <paramref name="pageSize"/> by default: fitted to the canvas
-    /// (with the user's fit padding and the view's rotation), and not above 100% unless small images stretch. A
-    /// base at that scale matches the default view exactly, so no detail render follows it.
+    /// The scale the view gives a page of <paramref name="pageSize"/> by default. A base at that scale matches the
+    /// default view exactly, so no detail render follows it.
     /// </summary>
     private float DefaultViewScale((int Width, int Height) pageSize)
     {
-        var fit = ZoomGeometry.CalculateScreenFitScale(new Size(_viewportW, _viewportH),
+        var scale = ViewRules.DefaultScale(new Size(_viewportW, _viewportH),
             new Size(pageSize.Width, pageSize.Height), _rotation);
-        if (!(fit > 0)) return 1f; // canvas not laid out yet
-        return AppConfig.Settings.StretchSmallImages ? fit : Math.Min(fit, 1f);
+        return scale > 0 ? scale : 1f; // canvas not laid out yet
     }
 
     /// <summary>Thread pool, under the gate. Queues a finished bitmap for Draw, or frees it if the renderer is gone.</summary>
@@ -419,37 +413,6 @@ internal sealed partial class PdfRenderer : IRenderer, IMultiPage
         session.DrawImage(s.Bitmap, s.Pixels, s.Pixels, 1f, quality);
     }
 
-    /// <summary>
-    /// <paramref name="m"/> with its offset rounded to whole pixels when it maps bitmap pixels 1:1 onto screen
-    /// pixels (in 90° steps), so a pan at a fractional DPI scale doesn't resample the bitmap soft.
-    /// </summary>
-    private static Matrix3x2 SnapToPixels(Matrix3x2 m)
-    {
-        static bool Whole(float v) => MathF.Abs(v - MathF.Round(v)) < 1e-3f;
-        if (!(Whole(m.M11) && Whole(m.M12) && Whole(m.M21) && Whole(m.M22))) return m;
-        return new Matrix3x2(MathF.Round(m.M11), MathF.Round(m.M12), MathF.Round(m.M21), MathF.Round(m.M22),
-            MathF.Round(m.M31), MathF.Round(m.M32));
-    }
-
-    /// <summary>Requests a frame in <paramref name="ms"/> ms (one pending at a time), for the settle redraw.</summary>
-    private void WakeAfter(int ms)
-    {
-        if (Interlocked.Exchange(ref _wakePending, 1) == 1) return;
-        _ = Task.Delay(Math.Max(1, ms)).ContinueWith(_ =>
-        {
-            Volatile.Write(ref _wakePending, 0);
-            if (!_disposed) _invalidate();
-        });
-    }
-
-    /// <summary>Whether <paramref name="outer"/> contains <paramref name="inner"/>, within half a pixel.</summary>
-    private static bool Contains(Rect outer, Rect inner) =>
-        inner.Left >= outer.Left - 0.5 && inner.Top >= outer.Top - 0.5 &&
-        inner.Right <= outer.Right + 0.5 && inner.Bottom <= outer.Bottom + 0.5;
-
-    /// <summary>The inverse of <paramref name="m"/>; identity if it has none.</summary>
-    private static Matrix3x2 Inverse(Matrix3x2 m) => Matrix3x2.Invert(m, out var inv) ? inv : Matrix3x2.Identity;
-
     /// <summary>Frees a snapshot's bitmap and clears the field.</summary>
     private static void Free(ref Snapshot s)
     {
@@ -473,6 +436,7 @@ internal sealed partial class PdfRenderer : IRenderer, IMultiPage
     public void Dispose()
     {
         _disposed = true;
+        _wake.Cancel();
         Free(ref _detail);
         Free(ref _base);
         Free(ref _pendingPage);

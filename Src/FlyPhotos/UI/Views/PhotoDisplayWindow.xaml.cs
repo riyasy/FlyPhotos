@@ -10,6 +10,7 @@ using Windows.System;
 using Windows.UI;
 using FlyPhotos.Core;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Display.Canvas;
 using FlyPhotos.Display.Controllers;
 using FlyPhotos.Display.State;
 using FlyPhotos.Infra.Configuration;
@@ -180,11 +181,11 @@ public sealed partial class PhotoDisplayWindow
         _photoController.CacheStatusChanged += PhotoController_CacheStatusChanged;
         _photoController.FileNameOrDetailsChanged += PhotoController_FileNameOrDetailsChanged;
         _photoController.FirstPhotoLoaded += OnFirstPhotoLoaded;
-        _canvasController.OnZoomChanged += CanvasController_OnZoomChanged;
-        _canvasController.OnFitToScreenStateChanged += CanvasController_OnFitToScreenStateChanged;
-        _canvasController.OnOneToOneStateChanged += CanvasController_OnOneToOneStateChanged;
-        _canvasController.OnMutliPagePhotoLoaded += CanvasController_OnMultiPagePhotoLoaded;
-        _canvasController.OnPageChanged += CanvasController_OnPageChanged;
+        _canvasController.ZoomChanged += CanvasController_OnZoomChanged;
+        _canvasController.FitToScreenStateChanged += CanvasController_OnFitToScreenStateChanged;
+        _canvasController.OneToOneStateChanged += CanvasController_OnOneToOneStateChanged;
+        _canvasController.MultiPageStateChanged += CanvasController_OnMultiPagePhotoLoaded;
+        _canvasController.PageChanged += CanvasController_OnPageChanged;
         _thumbNailController.ThumbnailClicked += Thumbnail_Clicked;
 
         TxtFileName.Text = Path.GetFileName(firstPhotoPath);
@@ -305,8 +306,8 @@ public sealed partial class PhotoDisplayWindow
             [CommandId.PrevPage] = Act(() => _canvasController.ChangePage(NavDirection.Prev)),
 
             // Zoom
-            [CommandId.ZoomIn] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.In, CurrentDragAnchor())),
-            [CommandId.ZoomOut] = Act(() => _canvasController.ZoomByKeyboard(ZoomDirection.Out, CurrentDragAnchor())),
+            [CommandId.ZoomIn] = Act(() => _canvasController.WheelZoom(ZoomDirection.In, CurrentDragAnchor())),
+            [CommandId.ZoomOut] = Act(() => _canvasController.WheelZoom(ZoomDirection.Out, CurrentDragAnchor())),
             [CommandId.StepZoomIn] = Act(() => _canvasController.StepZoom(ZoomDirection.In, CurrentDragAnchor())),
             [CommandId.StepZoomOut] = Act(() => _canvasController.StepZoom(ZoomDirection.Out, CurrentDragAnchor())),
 
@@ -381,11 +382,11 @@ public sealed partial class PhotoDisplayWindow
         _photoController.CacheStatusChanged -= PhotoController_CacheStatusChanged;
         _photoController.FileNameOrDetailsChanged -= PhotoController_FileNameOrDetailsChanged;
 
-        _canvasController.OnZoomChanged -= CanvasController_OnZoomChanged;
-        _canvasController.OnFitToScreenStateChanged -= CanvasController_OnFitToScreenStateChanged;
-        _canvasController.OnOneToOneStateChanged -= CanvasController_OnOneToOneStateChanged;
-        _canvasController.OnMutliPagePhotoLoaded -= CanvasController_OnMultiPagePhotoLoaded;
-        _canvasController.OnPageChanged -= CanvasController_OnPageChanged;
+        _canvasController.ZoomChanged -= CanvasController_OnZoomChanged;
+        _canvasController.FitToScreenStateChanged -= CanvasController_OnFitToScreenStateChanged;
+        _canvasController.OneToOneStateChanged -= CanvasController_OnOneToOneStateChanged;
+        _canvasController.MultiPageStateChanged -= CanvasController_OnMultiPagePhotoLoaded;
+        _canvasController.PageChanged -= CanvasController_OnPageChanged;
 
         _thumbNailController.ThumbnailClicked -= Thumbnail_Clicked;
 
@@ -872,7 +873,7 @@ public sealed partial class PhotoDisplayWindow
             // Shift + vertical scroll always zooms, in fine steps. Checked before Ctrl so Shift also
             // slows a touchpad pinch, which Windows delivers as Ctrl + wheel.
             case ScrollDirection.Vertical when Util.IsShiftPressed():
-                _canvasController.ZoomAtPointFine(delta, currentPoint.AdjustForDpi(D2dCanvas));
+                _canvasController.FineZoom(delta, currentPoint.AdjustForDpi(D2dCanvas));
                 break;
             // Ctrl + vertical scroll always zooms
             case ScrollDirection.Vertical when Util.IsControlPressed():
@@ -943,7 +944,7 @@ public sealed partial class PhotoDisplayWindow
         if (delta.Translation.X != 0 || delta.Translation.Y != 0)
             _canvasController.Pan(delta.Translation.X.AdjustForDpi(D2dCanvas), delta.Translation.Y.AdjustForDpi(D2dCanvas));
         // Pan first, then scale about the contacts' current centroid so the pinch point stays under the fingers.
-        _canvasController.ZoomAtPointByFactor(delta.Scale, e.Position.AdjustForDpi(D2dCanvas));
+        _canvasController.ZoomBy(delta.Scale, e.Position.AdjustForDpi(D2dCanvas));
     }
 
     // Double-click/tap: on the image toggles 1:1 and fit; on the background maximizes a restored window.
@@ -1016,9 +1017,9 @@ public sealed partial class PhotoDisplayWindow
         var adjustedPoint = point.AdjustForDpi(D2dCanvas);
 
         if (IsPrecisionTouchpad(delta))
-            _canvasController.ZoomAtPointPrecision(delta, adjustedPoint);
+            _canvasController.SmoothZoom(delta, adjustedPoint);
         else
-            _canvasController.ZoomAtPoint(delta > 0 ? ZoomDirection.In : ZoomDirection.Out, adjustedPoint);
+            _canvasController.WheelZoom(delta > 0 ? ZoomDirection.In : ZoomDirection.Out, adjustedPoint);
     }
 
     /// <summary>
@@ -1061,7 +1062,7 @@ public sealed partial class PhotoDisplayWindow
     private void RightClickZoomRepeatTimer_Tick(object? sender, object e)
     {
         if (!_isRightClickHeld) { _rightClickZoomRepeatTimer.Stop(); return; } // released before this queued tick ran
-        _canvasController.ZoomAtPointPrecision(10, _rightClickPosition);
+        _canvasController.SmoothZoom(10, _rightClickPosition);
     }
 
     #endregion
