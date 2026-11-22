@@ -1,6 +1,4 @@
 using System;
-using System.Diagnostics;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -47,6 +45,9 @@ internal sealed class CanvasController : ICanvasController
     /// <summary>A page step landed on a new page; <see cref="CurrentPage"/> has it.</summary>
     public event Action PageChanged;
 
+    /// <summary>Another photo's image went up (the thumbnail strip redraws on it).</summary>
+    public event Action PhotoInstalled;
+
     /// <summary>The Win2D control the canvas draws into; its Update and Draw run on the W2D thread.</summary>
     private readonly CanvasAnimatedControl _canvas;
 
@@ -81,11 +82,11 @@ internal sealed class CanvasController : ICanvasController
     public MultiPagePosition CurrentPage { get => _currentPage; private set => _currentPage = value; }
 
     /// <summary>Hooks the canvas's render loop and posts its current size, as its first SizeChanged may have passed.</summary>
-    public CanvasController(CanvasAnimatedControl canvas, IThumbnailController thumbNailController)
+    public CanvasController(CanvasAnimatedControl canvas)
     {
         _canvas = canvas;
         _dispatcher = canvas.DispatcherQueue;
-        _engine = new CanvasEngine(canvas, thumbNailController);
+        _engine = new CanvasEngine(canvas);
 
         // Before the render loop is hooked: these fire on its thread.
         var view = _engine.ViewController;
@@ -93,6 +94,7 @@ internal sealed class CanvasController : ICanvasController
         view.OneToOneStateChanged += oneToOne => OnUi(() => OneToOneStateChanged?.Invoke(oneToOne));
         view.ZoomChanged += QueueZoomPercent;
         _engine.PageShown += page => OnUi(() => ShowPage(page));
+        _engine.PhotoInstalled += () => OnUi(() => PhotoInstalled?.Invoke());
 
         _canvas.CreateResources += Canvas_CreateResources;
         _canvas.Update += Canvas_Update;
@@ -215,15 +217,14 @@ internal sealed class CanvasController : ICanvasController
     public void WheelZoom(ZoomDirection direction, Point? anchor = null) => _engine.Post(new Cmd.WheelZoom(direction, anchor));
 
     /// <summary>
-    /// Smooth zoom by wheel delta, at once (touchpad scrolling, the right-button hold): 120 units scale by 1.25, and a
-    /// small delta by proportionally less.
+    /// Smooth zoom by wheel delta, at once (touchpad scrolling, the right-button hold): a whole notch scales like a
+    /// wheel step, and a small delta by proportionally less.
     /// </summary>
-    public void SmoothZoom(double delta, Point anchor) =>
-        ZoomBy((float)Math.Pow(1.25, delta / 120.0), anchor);
+    public void SmoothZoom(double delta, Point anchor) => ZoomBy(ViewRules.WheelDeltaFactor(delta), anchor);
 
     /// <summary>Shift + wheel: each notch scales by FineZoomStepPercent, and stops at 1:1 on the way past.</summary>
     public void FineZoom(int delta, Point anchor) =>
-        ZoomBy((float)Math.Pow(1 + AppConfig.Settings.FineZoomStepPercent / 100.0, delta / 120.0),
+        ZoomBy(ViewRules.WheelDeltaFactor(delta, 1 + AppConfig.Settings.FineZoomStepPercent / 100.0),
             anchor, stopAtOneToOne: true);
 
     /// <summary>Scales by <paramref name="factor"/> at once around <paramref name="anchor"/>: pinch, and the two zooms above.</summary>
@@ -269,27 +270,14 @@ internal sealed class CanvasController : ICanvasController
     // ---------------------------------------------------------------- hit tests
 
     /// <summary>Whether canvas point <paramref name="position"/> is on the image, as of the last frame.</summary>
-    public bool IsPressedOnImage(Point position)
-    {
-        var frame = _engine.HitTestFrame;
-        var r = frame.ImageRect;
-        if (r.Width <= 0 || r.Height <= 0) return false; // nothing drawn yet
-        var p = Vector2.Transform(new Vector2((float)position.X, (float)position.Y), frame.MatInv);
-        return p.X >= r.X && p.Y >= r.Y && p.X <= r.Right && p.Y <= r.Bottom;
-    }
+    public bool IsPressedOnImage(Point position) => _engine.HitTestFrame.Contains(position);
 
     /// <summary>The image's bounds on the canvas, in physical pixels; false with no image.</summary>
     public bool TryGetDisplayedImageBounds(out Rect bounds)
     {
         var frame = _engine.HitTestFrame;
-        var r = frame.ImageRect;
-        bounds = default;
-        if (r.Width <= 0 || r.Height <= 0) return false;
-        // Rotation is in 90° steps, so two opposite corners span the box.
-        var a = Vector2.Transform(new Vector2((float)r.Left, (float)r.Top), frame.Mat);
-        var b = Vector2.Transform(new Vector2((float)r.Right, (float)r.Bottom), frame.Mat);
-        bounds = new Rect(new Point(a.X, a.Y), new Point(b.X, b.Y));
-        return true;
+        bounds = frame.HasImage ? frame.ScreenBounds() : default;
+        return frame.HasImage;
     }
 
     // ---------------------------------------------------------------- window
@@ -388,6 +376,6 @@ internal sealed class CanvasController : ICanvasController
             _canvas.SizeChanged -= Canvas_SizeChanged;
             _engine.Dispose();
         }
-        catch (Exception ex) { Debug.WriteLine(ex); }
+        catch (Exception ex) { Logger.Error(ex, "CanvasController - dispose failed"); }
     }
 }

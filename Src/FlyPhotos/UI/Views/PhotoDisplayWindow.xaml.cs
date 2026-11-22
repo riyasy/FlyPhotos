@@ -173,7 +173,7 @@ public sealed partial class PhotoDisplayWindow
         // The strip first (the canvas redraws it), then the canvas, then the controller that drives both. The
         // controller starts listing the folder on its own startup thread right away.
         _thumbNailController = new ThumbNailController(D2dCanvasThumbNail);
-        _canvasController = new CanvasController(D2dCanvas, _thumbNailController);
+        _canvasController = new CanvasController(D2dCanvas);
         _photoController = new PhotoDisplayController(_canvasController, _thumbNailController,
             new Display.ImageReading.PhotoDecoder(D2dCanvas),
             new Microsoft.UI.Dispatching.DispatcherQueueSynchronizationContext(D2dCanvas.DispatcherQueue),
@@ -184,8 +184,9 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.ZoomChanged += CanvasController_OnZoomChanged;
         _canvasController.FitToScreenStateChanged += CanvasController_OnFitToScreenStateChanged;
         _canvasController.OneToOneStateChanged += CanvasController_OnOneToOneStateChanged;
-        _canvasController.MultiPageStateChanged += CanvasController_OnMultiPagePhotoLoaded;
+        _canvasController.MultiPageStateChanged += CanvasController_MultiPageStateChanged;
         _canvasController.PageChanged += CanvasController_OnPageChanged;
+        _canvasController.PhotoInstalled += _thumbNailController.RequestThumbnailRedraw;
         _thumbNailController.ThumbnailClicked += Thumbnail_Clicked;
 
         TxtFileName.Text = Path.GetFileName(firstPhotoPath);
@@ -385,8 +386,9 @@ public sealed partial class PhotoDisplayWindow
         _canvasController.ZoomChanged -= CanvasController_OnZoomChanged;
         _canvasController.FitToScreenStateChanged -= CanvasController_OnFitToScreenStateChanged;
         _canvasController.OneToOneStateChanged -= CanvasController_OnOneToOneStateChanged;
-        _canvasController.MultiPageStateChanged -= CanvasController_OnMultiPagePhotoLoaded;
+        _canvasController.MultiPageStateChanged -= CanvasController_MultiPageStateChanged;
         _canvasController.PageChanged -= CanvasController_OnPageChanged;
+        _canvasController.PhotoInstalled -= _thumbNailController.RequestThumbnailRedraw;
 
         _thumbNailController.ThumbnailClicked -= Thumbnail_Clicked;
 
@@ -1400,7 +1402,7 @@ public sealed partial class PhotoDisplayWindow
     private void CanvasController_OnOneToOneStateChanged(bool isOneToOne) => ButtonOneIsToOne.IsChecked = isOneToOne;
 
     // Shows the page buttons only for a multi-page photo. UI thread.
-    private void CanvasController_OnMultiPagePhotoLoaded(bool isMultiPagePhoto)
+    private void CanvasController_MultiPageStateChanged(bool isMultiPagePhoto)
     {
         var visibilityState = isMultiPagePhoto ? Visibility.Visible : Visibility.Collapsed;
         ButtonNextPage.Visibility = visibilityState;

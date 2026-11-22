@@ -52,7 +52,7 @@ internal partial class TiledImageRenderer : IRenderer
     /// <see cref="MaxUploadsPerFrame"/> missing tiles, fills the rest from the overview, and requests another
     /// frame while any remain. When zoomed out to the top level, draws just the overview.
     /// </summary>
-    public void Draw(CanvasDrawingSession session, in ViewFrame viewState, CanvasImageInterpolation quality, bool isAnimating)
+    public void Draw(CanvasDrawingSession session, in ViewFrame frame, CanvasImageInterpolation quality, bool isAnimating)
     {
         _frame++;
         // Aliased edges, otherwise adjacent tile rects leave hairline gaps where their AA edges meet.
@@ -61,17 +61,17 @@ internal partial class TiledImageRenderer : IRenderer
         var pyramid = _item.Pyramid;
         var overview = _item.Bitmap;
         // Same level choice as StaticImageRenderer.SelectBitmapForScale: never upscale from a coarser level.
-        var k = viewState.Scale >= 1f ? 0 : (int)Math.Floor(Math.Log2(1.0 / viewState.Scale));
+        var k = frame.Scale >= 1f ? 0 : (int)Math.Floor(Math.Log2(1.0 / frame.Scale));
         k = Math.Clamp(k, 0, pyramid.Levels.Length - 1);
         if (k == pyramid.Levels.Length - 1) // the top level is the overview itself
         {
-            session.DrawImage(overview, viewState.ImageRect, overview.Bounds, 1f, quality);
+            session.DrawImage(overview, frame.ImageRect, overview.Bounds, 1f, quality);
             return;
         }
 
         var level = pyramid.Levels[k];
         var f = 1 << k; // level pixel → full-image pixel
-        var visible = VisibleImageRect(session, viewState);
+        var visible = VisibleImageRect(session, frame);
         if (visible.IsEmpty) return;
 
         var c0 = Math.Max(0, (int)(visible.Left / f) / TileLevel.Size);
@@ -140,7 +140,7 @@ internal partial class TiledImageRenderer : IRenderer
     }
 
     /// <summary>The part of the full-resolution image that is on screen, in image pixels.</summary>
-    private Rect VisibleImageRect(CanvasDrawingSession session, in ViewFrame viewState)
+    private Rect VisibleImageRect(CanvasDrawingSession session, in ViewFrame frame)
     {
         // CanvasAnimatedControl.Size is safe to read from the game-loop thread; read it once.
         var size = _canvas.Size;
@@ -149,15 +149,15 @@ internal partial class TiledImageRenderer : IRenderer
         var h = (float)size.Height * scale;
 
         // MatInv maps screen → image, rotation included; take the bounding box of the four corners.
-        var p0 = Vector2.Transform(new Vector2(0, 0), viewState.MatInv);
-        var p1 = Vector2.Transform(new Vector2(w, 0), viewState.MatInv);
-        var p2 = Vector2.Transform(new Vector2(0, h), viewState.MatInv);
-        var p3 = Vector2.Transform(new Vector2(w, h), viewState.MatInv);
+        var p0 = Vector2.Transform(new Vector2(0, 0), frame.MatInv);
+        var p1 = Vector2.Transform(new Vector2(w, 0), frame.MatInv);
+        var p2 = Vector2.Transform(new Vector2(0, h), frame.MatInv);
+        var p3 = Vector2.Transform(new Vector2(w, h), frame.MatInv);
         var min = Vector2.Min(Vector2.Min(p0, p1), Vector2.Min(p2, p3));
         var max = Vector2.Max(Vector2.Max(p0, p1), Vector2.Max(p2, p3));
 
         var rect = new Rect(new Point(min.X, min.Y), new Point(max.X, max.Y));
-        rect.Intersect(viewState.ImageRect);
+        rect.Intersect(frame.ImageRect);
         return rect;
     }
 

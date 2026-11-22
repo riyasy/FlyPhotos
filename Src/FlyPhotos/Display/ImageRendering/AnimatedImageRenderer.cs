@@ -7,6 +7,7 @@ using FlyPhotos.Display.Animators;
 using FlyPhotos.Display.Canvas;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
+using NLog;
 
 namespace FlyPhotos.Display.ImageRendering;
 
@@ -16,6 +17,7 @@ namespace FlyPhotos.Display.ImageRendering;
 /// </summary>
 internal partial class AnimatedImageRenderer : IRenderer
 {
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private const double KeepRunningWithinMs = 20; // a little over a 60 Hz frame
 
     private readonly CanvasAnimatedControl _canvas;
@@ -73,7 +75,7 @@ internal partial class AnimatedImageRenderer : IRenderer
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Animation update failed: {ex.Message}");
+            Logger.Error(ex, "AnimatedImageRenderer - animation update failed; the current frame stays up");
             Volatile.Write(ref _nextFrameTicks, long.MaxValue);
         }
         finally
@@ -84,14 +86,17 @@ internal partial class AnimatedImageRenderer : IRenderer
 
     public void HandleScalingMethodChange() { }
 
-    /// <summary>Waits for a running frame update, so blocks: the canvas calls it off the W2D thread.</summary>
+    /// <summary>Returns at once; the animator is disposed on the thread pool once a running frame update finishes.</summary>
     public void Dispose()
     {
         if (_isDisposed) return;
         _isDisposed = true;
         _wake.Cancel();
-        _animatorLock.Wait();
-        _animatorLock.Release();
-        _animator?.Dispose();
+        _ = Task.Run(async () =>
+        {
+            await _animatorLock.WaitAsync();
+            _animatorLock.Release();
+            _animator?.Dispose();
+        });
     }
 }

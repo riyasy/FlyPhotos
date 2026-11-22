@@ -126,6 +126,9 @@ internal sealed class ViewController
     /// <summary>The path of the photo on screen.</summary>
     public string PhotoPath => _photoPath;
 
+    /// <summary>A photo was shown. Before the first there is nothing to zoom or pan, and a resize only records the size.</summary>
+    public bool HasPhoto => !string.IsNullOrEmpty(_photoPath);
+
     /// <summary>A view animation or the shrug is running: the render loop must keep ticking.</summary>
     public bool IsAnimating => _motion.Running || _shrugStartMs != null;
 
@@ -153,12 +156,11 @@ internal sealed class ViewController
     /// <summary>
     /// An install, as the engine makes it: works out how it relates to what is on screen, learns the size of the photo
     /// leaving (its preview may have loaded after its HQ went up), and shows it. <paramref name="layout"/> is
-    /// <see cref="ViewRules.LayoutSize"/>, taken when the install was asked for. A follow-up (an animation after its
-    /// first frame) keeps the view.
+    /// <see cref="ViewRules.LayoutSize"/>, taken when the install was asked for.
     /// </summary>
-    public void Install(Photo photo, string path, Size layout, int rotation, DisplayLevel level, bool followUp = false)
+    public void Install(Photo photo, string path, Size layout, int rotation, DisplayLevel level)
     {
-        var arrival = followUp ? ViewArrival.SameImageUpgrade : ClassifyArrival(_photoPath, _realImageShown, path, level);
+        var arrival = ClassifyArrival(_photoPath, _realImageShown, path, level);
         if (arrival is ViewArrival.FirstPhoto or ViewArrival.NewPhoto)
         {
             if (_shownPhoto != null && ViewRules.PhotoSizeOnScreen(_shownPhoto) is { } leavingSize)
@@ -218,9 +220,13 @@ internal sealed class ViewController
     public void LearnPhotoSize(Size photoSize) =>
         _imagePixelsPerPhotoPixel ??= ViewRules.ImagePixelsPerPhotoPixel(_view.ImageSize, _exifRotation, photoSize);
 
-    /// <summary>A page of another size (ICO frames shrink to 16 px): a fresh default view, keeping the user's rotation.</summary>
+    /// <summary>
+    /// A page landed. One of another size (ICO frames shrink to 16 px) gets a fresh default view, keeping the user's
+    /// rotation; pages of one size (TIFF) keep the zoom and pan.
+    /// </summary>
     public void ShowPage(Size pageSize, bool isFirstPage)
     {
+        if (pageSize.Width == _view.ImageRect.Width && pageSize.Height == _view.ImageRect.Height) return;
         _onPageOfOtherSize = !isFirstPage;
         StopMotion();
         _view = _view with { ImageRect = Layout(pageSize) };
@@ -367,6 +373,7 @@ internal sealed class ViewController
     {
         var oldSize = CanvasSize;
         CanvasSize = newSize;
+        if (!HasPhoto) return;
         if (_motion.Running && _motion.PinsCentre)
         {
             // Re-aim a pan + zoom at the new canvas, so the launch open-zoom still plays.
@@ -390,6 +397,7 @@ internal sealed class ViewController
     public void ImageSizedResize(Point shift, Size newSize)
     {
         CanvasSize = newSize;
+        if (!HasPhoto) return;
         StopMotion();
         if (_fitted && FitScale() < _view.Scale - ViewRules.ScaleTolerance)
             RefitNow();

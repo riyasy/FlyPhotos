@@ -24,6 +24,9 @@ internal static class ViewRules
     /// <summary>The scale factor of one wheel notch or zoom key, in and out (inverses, so in-then-out returns).</summary>
     private const float ZoomInStep = 1.25f, ZoomOutStep = 0.8f;
 
+    /// <summary>One wheel notch in wheel-delta units (Win32 WHEEL_DELTA).</summary>
+    private const double WheelNotch = 120;
+
     /// <summary>The scales a wheel step stops on when it crosses them, with sticky zoom levels on.</summary>
     private static readonly float[] StickyStops = [0.5f, 1.0f, 2.0f, 5.0f, 10.0f];
 
@@ -78,6 +81,13 @@ internal static class ViewRules
             ? Math.Min(MinZoomOutFixedScale, MinZoomOutLongSidePixels / (float)longSide)
             : MinZoomOutFixedScale;
     }
+
+    /// <summary>
+    /// The scale factor for a wheel <paramref name="delta"/> when a whole notch scales by <paramref name="perNotch"/>
+    /// (default: a wheel step); a touchpad's small deltas scale by proportionally less.
+    /// </summary>
+    public static float WheelDeltaFactor(double delta, double perNotch = ZoomInStep) =>
+        (float)Math.Pow(perNotch, delta / WheelNotch);
 
     /// <summary>
     /// The target of one wheel step from <paramref name="fromScale"/>, stopping on a sticky stop when that setting is

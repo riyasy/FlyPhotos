@@ -88,18 +88,18 @@ internal partial class SvgVectorRenderer(CanvasAnimatedControl canvas, SvgHqDisp
     /// Redraws the detail when it doesn't match the view and the view has settled (or there is none yet); otherwise
     /// draws the bitmaps it has. The session's transform maps the HQ image pixels (the frame's ImageRect) to the screen.
     /// </summary>
-    public void Draw(CanvasDrawingSession session, in ViewFrame viewState, CanvasImageInterpolation quality, bool isAnimating)
+    public void Draw(CanvasDrawingSession session, in ViewFrame frame, CanvasImageInterpolation quality, bool isAnimating)
     {
         if (_lease == null) return;
 
         // ImageRect is in the HQ image's pixels; k converts SVG user units to those.
-        var k = (float)(viewState.ImageRect.Width / item.Scene.Width);
+        var k = (float)(frame.ImageRect.Width / item.Scene.Width);
         var viewport = Viewport(session);
-        var visible = TransformRect(viewport, viewState.MatInv);
-        visible.Intersect(viewState.ImageRect);
-        var frame = new Frame(session.Device, viewState, viewport, k, k * viewState.Scale, quality);
+        var visible = TransformRect(viewport, frame.MatInv);
+        visible.Intersect(frame.ImageRect);
+        var work = new Frame(session.Device, frame, viewport, k, k * frame.Scale, quality);
 
-        var fresh = AdvancePainting(frame, visible, isAnimating);
+        var fresh = AdvancePainting(work, visible, isAnimating);
         DrawSnapshots(session, quality, fresh);
     }
 

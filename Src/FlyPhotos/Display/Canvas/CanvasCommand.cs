@@ -33,7 +33,10 @@ internal abstract record CanvasCommand
     /// <param name="LayoutSize">The image's size in layout pixels (<see cref="ViewRules.LayoutSize"/>), taken on the UI thread.</param>
     /// <param name="Rotation">The image's EXIF rotation in degrees.</param>
     /// <param name="Checkered">The image can be transparent: draw the checkerboard under it when that setting is on.</param>
-    /// <param name="FollowUp">A second install for the same image (an animator after its first frame): the view stays.</param>
+    /// <param name="FollowUp">
+    /// The same image in a new renderer (an animator after its first frame): only the renderer changes; the view,
+    /// the page and the strip stay.
+    /// </param>
     public sealed record Install(Photo Photo, string PhotoPath, DisplayItem Item, DisplayLevel Level,
         IRenderer Renderer, Size LayoutSize, int Rotation, bool Checkered, bool FollowUp = false) : CanvasCommand;
 
@@ -44,7 +47,9 @@ internal abstract record CanvasCommand
     /// A page load finished on the thread pool. <paramref name="Renderer"/> identifies which renderer loaded it, so a
     /// page that lands after the user moved on is ignored.
     /// </summary>
-    public sealed record PageLoaded(IMultiPage Renderer, Size PageSize) : CanvasCommand;
+    /// <param name="Request">The engine's number for the request, so a failure of the newest one is told apart.</param>
+    /// <param name="PageSize">The page's size; null when the load failed or a newer one superseded it.</param>
+    public sealed record PageLoaded(IMultiPage Renderer, int Request, Size PageSize) : CanvasCommand;
 
     /// <summary>A photo was renamed: the view and its remembered views follow the new path.</summary>
     public sealed record Renamed(string OldPath, string NewPath) : CanvasCommand;

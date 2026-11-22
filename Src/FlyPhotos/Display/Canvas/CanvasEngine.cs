@@ -40,9 +40,6 @@ internal sealed class CanvasEngine
     /// <summary>The Win2D control; the engine runs inside its Update and Draw.</summary>
     private readonly CanvasAnimatedControl _canvas;
 
-    /// <summary>The thumbnail strip, redrawn when another photo is installed.</summary>
-    private readonly IThumbnailController _thumbnails;
-
     /// <summary>The commands posted from other threads, applied at the top of each Update.</summary>
     private readonly W2dQueue<Cmd> _queue;
 
@@ -60,6 +57,9 @@ internal sealed class CanvasEngine
 
     /// <summary>The page the user last asked for. Page steps count from it, so quick presses all count before the loads land.</summary>
     private int _requestedPageIndex;
+
+    /// <summary>Numbers page requests, so a failed load can tell whether it was the newest.</summary>
+    private int _pageRequest;
 
     /// <summary>Stopwatch timestamp until which the last continuous zoom draws at animation quality.</summary>
     private long _continuousZoomUntil;
@@ -94,11 +94,13 @@ internal sealed class CanvasEngine
     /// <summary>A page load landed: the page now on screen of the photo at its path. W2D thread.</summary>
     public event Action<MultiPagePosition> PageShown;
 
+    /// <summary>Another photo's image went up (not an animator replacing its first frame). W2D thread.</summary>
+    public event Action PhotoInstalled;
+
     /// <summary>Takes over freeing display items (<see cref="DisplayItem.FreeSink"/>) until <see cref="Dispose"/>.</summary>
-    public CanvasEngine(CanvasAnimatedControl canvas, IThumbnailController thumbnails)
+    public CanvasEngine(CanvasAnimatedControl canvas)
     {
         _canvas = canvas;
-        _thumbnails = thumbnails;
         _queue = new W2dQueue<Cmd>(canvas, Apply);
         _continuousZoomEnd = new DelayedWake(Wake);
         ViewController.AnimationCompleted += CompleteAnimationWaiters;
@@ -138,7 +140,7 @@ internal sealed class CanvasEngine
             case Cmd.WaitForAnimation c: AddAnimationWaiter(c.Done); break;
             case Cmd.FreeReleasedItems: FreeReleasedItems(); break;
             default:
-                if (_renderer != null) ApplyToView(command); // nothing to zoom before the first photo
+                if (ViewController.HasPhoto) ApplyToView(command);
                 break;
         }
     }
@@ -169,25 +171,21 @@ internal sealed class CanvasEngine
     /// </summary>
     private void Install(Cmd.Install c)
     {
-        if (!c.FollowUp) _requestedPageIndex = 0;
-
         var (oldRenderer, oldItem) = (_renderer, _item);
         (_renderer, _item, _checkered) = (c.Renderer, c.Item, c.Checkered);
-        if (oldRenderer is AnimatedImageRenderer)
-            _ = Task.Run(oldRenderer.Dispose); // it waits for its frame decode to finish; not on this thread
-        else
-            oldRenderer?.Dispose();
+        oldRenderer?.Dispose();
         oldItem?.Release();
+        if (c.FollowUp) return; // the same image in a new renderer: the view, page and strip stay
 
-        ViewController.Install(c.Photo, c.PhotoPath, c.LayoutSize, c.Rotation, c.Level, c.FollowUp);
-        if (!c.FollowUp) _thumbnails.RequestThumbnailRedraw();
+        _requestedPageIndex = 0;
+        ViewController.Install(c.Photo, c.PhotoPath, c.LayoutSize, c.Rotation, c.Level);
+        PhotoInstalled?.Invoke();
     }
 
-    /// <summary>Hands a resize to the view: before the first photo it only records the size.</summary>
+    /// <summary>Hands a resize to the view.</summary>
     private void Resize(Cmd.Resized c)
     {
-        if (_renderer == null) ViewController.CanvasSize = c.NewSize;
-        else if (c.ImageSizedShift is { } shift) ViewController.ImageSizedResize(shift, c.NewSize);
+        if (c.ImageSizedShift is { } shift) ViewController.ImageSizedResize(shift, c.NewSize);
         else ViewController.Resize(c.NewSize);
     }
 
@@ -198,26 +196,24 @@ internal sealed class CanvasEngine
         var target = _requestedPageIndex + (direction == NavDirection.Next ? 1 : -1);
         if (target < 0 || target >= pages.PageCount) return;
         _requestedPageIndex = target;
-        _ = LoadPageAsync(pages, target);
+        _ = LoadPageAsync(pages, ++_pageRequest, target);
     }
 
-    /// <summary>Loads a page off this thread and posts the result back; null (superseded or failed) posts nothing.</summary>
-    private async Task LoadPageAsync(IMultiPage pages, int index)
-    {
-        if (await pages.LoadPageAsync(index) is { } size) Post(new Cmd.PageLoaded(pages, size));
-    }
+    /// <summary>Loads a page off this thread and posts the result back, null when it was superseded or failed.</summary>
+    private async Task LoadPageAsync(IMultiPage pages, int request, int index) =>
+        Post(new Cmd.PageLoaded(pages, request, await pages.LoadPageAsync(index)));
 
-    /// <summary>
-    /// A page landed. One of another size (ICO frames) gets a fresh fit; pages of one size (TIFF) keep the user's
-    /// zoom and pan.
-    /// </summary>
+    /// <summary>A page landed, or the newest request failed and page steps count from the page on screen again.</summary>
     private void OnPageLoaded(Cmd.PageLoaded c)
     {
         if (!ReferenceEquals(_renderer, c.Renderer)) return; // navigated away while it loaded
         var index = c.Renderer.CurrentPageIndex;
-        var shown = ViewController.View.ImageRect;
-        if (c.PageSize.Width != shown.Width || c.PageSize.Height != shown.Height)
-            ViewController.ShowPage(c.PageSize, isFirstPage: index == 0);
+        if (c.PageSize == null)
+        {
+            if (c.Request == _pageRequest) _requestedPageIndex = index; // an older request was only superseded
+            return;
+        }
+        ViewController.ShowPage(c.PageSize, isFirstPage: index == 0);
         PageShown?.Invoke(new MultiPagePosition(ViewController.PhotoPath, index, c.Renderer.PageCount,
             (int)c.PageSize.Width, (int)c.PageSize.Height));
     }
@@ -243,7 +239,7 @@ internal sealed class CanvasEngine
     {
         _queue.Drain();
         ViewController.Tick();
-        var animationFrameDue = _renderer is AnimatedImageRenderer animated && animated.OnUpdate();
+        var animationFrameDue = _renderer?.OnUpdate() == true;
 
         _frame = ViewController.Frame;
         lock (_hitTestLock) _hitTestFrame = _frame;

@@ -161,7 +161,7 @@ internal sealed partial class PdfRenderer : IRenderer, IMultiPage
     /// base lands, the preview. <paramref name="session"/>'s transform maps image pixels (the frame's ImageRect) to
     /// the screen.
     /// </summary>
-    public void Draw(CanvasDrawingSession session, in ViewFrame viewState, CanvasImageInterpolation quality, bool isAnimating)
+    public void Draw(CanvasDrawingSession session, in ViewFrame frame, CanvasImageInterpolation quality, bool isAnimating)
     {
         if (_disposed) return;
         session.Antialiasing = CanvasAntialiasing.Aliased; // bitmap edges; the detail must sit on the base without seams
@@ -170,21 +170,21 @@ internal sealed partial class PdfRenderer : IRenderer, IMultiPage
         var dpi = session.Dpi / 96f;
         var viewport = new Rect(0, 0, _canvas.Size.Width * dpi, _canvas.Size.Height * dpi);
         (_viewportW, _viewportH) = ((float)viewport.Width, (float)viewport.Height);
-        _rotation = viewState.Rotation;
+        _rotation = frame.Rotation;
 
-        TakeResults(viewState.ImageRect);
+        TakeResults(frame.ImageRect);
 
-        var scale = new Vector2(viewState.Mat.M11, viewState.Mat.M12).Length(); // screen px per image px
-        var visible = SvgScene.TransformRect(viewport, viewState.MatInv);
-        visible.Intersect(viewState.ImageRect);
+        var scale = new Vector2(frame.Mat.M11, frame.Mat.M12).Length(); // screen px per image px
+        var visible = SvgScene.TransformRect(viewport, frame.MatInv);
+        visible.Intersect(frame.ImageRect);
         var detailFits = Matches(_detail, visible, scale);
         var baseFits = Matches(_base, visible, scale);
-        if (!detailFits && !baseFits) MaybeStartDetail(viewState, viewport, visible, scale, isAnimating);
+        if (!detailFits && !baseFits) MaybeStartDetail(frame, viewport, visible, scale, isAnimating);
 
         if (_base == null && _detail == null)
         {
             if (_preview?.Bitmap is { } preview)
-                session.DrawImage(preview, viewState.ImageRect, preview.Bounds, 1f, quality);
+                session.DrawImage(preview, frame.ImageRect, preview.Bounds, 1f, quality);
             return;
         }
         var saved = session.Transform;

@@ -29,6 +29,20 @@ public sealed class ViewMathTests
         Near(expected.Y, actual.Y, tolerance, "Y");
     }
 
+    // ---------------------------------------------------------------- hit tests
+
+    [TestMethod]
+    public void ViewFrame_HitTestsFollowTheRotatedImage()
+    {
+        // 100 x 50 at 200%, turned 90°, centred on (200, 100): 100 wide and 200 tall on screen.
+        var frame = new View(new Rect(0, 0, 100, 50), 2f, new Point(200, 100), 90).Frame(snap: false);
+        var b = frame.ScreenBounds();
+        Near(150, b.X, 1e-3); Near(0, b.Y, 1e-3); Near(100, b.Width, 1e-3); Near(200, b.Height, 1e-3);
+        Assert.IsTrue(frame.Contains(new Point(200, 190)), "inside the tall rotated box");
+        Assert.IsFalse(frame.Contains(new Point(280, 100)), "inside the unrotated box only");
+        Assert.IsFalse(default(ViewFrame).Contains(new Point(0, 0)), "no image");
+    }
+
     // ---------------------------------------------------------------- fit / default / floor
 
     [TestMethod]

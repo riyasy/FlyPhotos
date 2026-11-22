@@ -81,4 +81,24 @@ internal readonly record struct View(Rect ImageRect, float Scale, Point Pos, int
 /// <param name="Rotation">Degrees, as in <see cref="View.Rotation"/>.</param>
 /// <param name="Mat">Layout pixels to canvas pixels, including any snap and shrug offset.</param>
 /// <param name="MatInv">Canvas pixels back to layout pixels (hit tests, the visible part of the image).</param>
-internal readonly record struct ViewFrame(Rect ImageRect, float Scale, int Rotation, Matrix3x2 Mat, Matrix3x2 MatInv);
+internal readonly record struct ViewFrame(Rect ImageRect, float Scale, int Rotation, Matrix3x2 Mat, Matrix3x2 MatInv)
+{
+    /// <summary>An image is laid out; before the first photo the rect is empty.</summary>
+    public bool HasImage => ImageRect.Width > 0 && ImageRect.Height > 0;
+
+    /// <summary>Canvas point <paramref name="canvasPoint"/> falls on the image.</summary>
+    public bool Contains(Point canvasPoint)
+    {
+        if (!HasImage) return false;
+        var p = Vector2.Transform(new Vector2((float)canvasPoint.X, (float)canvasPoint.Y), MatInv);
+        return p.X >= ImageRect.X && p.Y >= ImageRect.Y && p.X <= ImageRect.Right && p.Y <= ImageRect.Bottom;
+    }
+
+    /// <summary>The image's bounds on the canvas, in canvas pixels. Rotation is in 90° steps, so two opposite corners span it.</summary>
+    public Rect ScreenBounds()
+    {
+        var a = Vector2.Transform(new Vector2((float)ImageRect.Left, (float)ImageRect.Top), Mat);
+        var b = Vector2.Transform(new Vector2((float)ImageRect.Right, (float)ImageRect.Bottom), Mat);
+        return new Rect(new Point(a.X, a.Y), new Point(b.X, b.Y));
+    }
+}

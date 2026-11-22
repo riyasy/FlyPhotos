@@ -395,6 +395,28 @@ public sealed class ViewControllerTests
     }
 
     [TestMethod]
+    public void Page_OfTheSameSizeKeepsZoomAndPan()
+    {
+        var r = new Rig();
+        r.Show("tiff", 4000, 3000);
+        r.M.ZoomBy(2f, Centre);
+        r.M.Pan(30, 0);
+        var before = r.M.View;
+        r.M.ShowPage(new Size(4000, 3000), isFirstPage: false);
+        Assert.AreEqual(before, r.M.View, "same-size page keeps the view");
+    }
+
+    [TestMethod]
+    public void Resize_BeforeTheFirstPhotoOnlyRecordsTheSize()
+    {
+        var m = new ViewController(() => 0) { CanvasSize = new Size(800, 600) };
+        var before = m.View;
+        m.Resize(new Size(1000, 700));
+        Assert.AreEqual(1000, m.CanvasSize.Width);
+        Assert.AreEqual(before, m.View, "no photo: the view stays");
+    }
+
+    [TestMethod]
     public void Remember_RenamedPhotoKeepsItsView()
     {
         var r = ZoomedRotatedA(PanZoomBehaviourOnNavigation.RememberPerPhoto);
