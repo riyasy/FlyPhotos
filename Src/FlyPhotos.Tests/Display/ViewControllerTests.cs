@@ -406,6 +406,24 @@ public sealed class ViewControllerTests
         Assert.AreEqual(before, r.M.View, "same-size page keeps the view");
     }
 
+    /// <summary>A PDF or TIFF left on a later page of the same size: its view comes back, on page 1.</summary>
+    [TestMethod]
+    public void Remember_LeftOnASameSizePage_ComesBack()
+    {
+        SetMode(PanZoomBehaviourOnNavigation.RememberPerPhoto);
+        var r = new Rig();
+        r.Show("pdf", 794, 1123);
+        r.M.ZoomBy(1.5f, Centre);
+        r.M.Pan(20, 40);
+        r.M.ShowPage(new Size(794, 1123), isFirstPage: false);
+        var left = r.View;
+        r.Show("B", 4000, 3000);
+
+        r.Show("pdf", 794, 1123);
+        Near(left.Scale, r.Scale, 1e-6, "zoom back");
+        NearPoint(left.Pos, r.Pos, 1e-6, "pan back");
+    }
+
     [TestMethod]
     public void Resize_BeforeTheFirstPhotoOnlyRecordsTheSize()
     {
@@ -443,6 +461,33 @@ public sealed class ViewControllerTests
         Near(0.2, r.Scale, 1e-6, "B's fit");
         NearPoint(Centre, r.Pos, 1e-6, "centred");
         Assert.IsTrue(r.Fitted);
+    }
+
+    /// <summary>Current behaviour, kept until a user reports it (test plan Q1): fitted is the intent, so it upscales.</summary>
+    [TestMethod]
+    public void Retain_FromAFittedPhoto_FitsASmallOne_EvenWithoutStretching()
+    {
+        SetMode(PanZoomBehaviourOnNavigation.RetainFromLastPhoto);
+        var r = new Rig();
+        r.Show("A", 6000, 4000);
+        Assert.IsTrue(r.Fitted);
+        r.Show("B", 300, 200);
+        Near(1000.0 / 300, r.Scale, 1e-4, "B at its fit, above 100%");
+        Assert.IsTrue(r.Fitted);
+    }
+
+    /// <summary>Current behaviour, kept until a user reports it (test plan Q2): a small photo's untouched 100% carries over.</summary>
+    [TestMethod]
+    public void Retain_FromAnUntouchedSmallPhoto_Keeps100OnALargeOne()
+    {
+        SetMode(PanZoomBehaviourOnNavigation.RetainFromLastPhoto);
+        var r = new Rig();
+        r.Show("A", 300, 200);
+        Assert.IsFalse(r.Fitted);
+        r.Show("B", 6000, 4000);
+        Near(1, r.Scale, 1e-6, "B at 100%");
+        Assert.IsFalse(r.Fitted);
+        Assert.IsTrue(r.OneToOne);
     }
 
     [TestMethod]
@@ -624,6 +669,31 @@ public sealed class ViewControllerTests
         r.Canvas = new Size(0, 0); // as before the canvas was first laid out
         r.M.Resize(new Size(1600, 900));
         NearPoint(Centre, r.Pos, 1e-9, "no ratio to apply");
+    }
+
+    /// <summary>A minimize may size the canvas to nothing; the view must come back as it was on restore.</summary>
+    [TestMethod]
+    public void Resize_ToZeroAndBack_KeepsAFittedView() => ResizeToZeroAndBack(fitted: true);
+
+    [TestMethod]
+    [Ignore("Won't fix (test plan F2): a zoomed view's pan goes to (0, 0); minimize doesn't send 0x0, so it can't happen")]
+    public void Resize_ToZeroAndBack_KeepsAZoomedView() => ResizeToZeroAndBack(fitted: false);
+
+    private static void ResizeToZeroAndBack(bool fitted)
+    {
+        var r = new Rig();
+        r.Show("A", 4000, 3000);
+        if (!fitted)
+        {
+            r.M.ZoomBy(2f, Centre);
+            r.M.Pan(30, -20);
+        }
+        var before = r.View;
+        r.ResizeTo(0, 0);
+        r.ResizeTo(1000, 800);
+        Near(before.Scale, r.Scale, 1e-6, "scale");
+        NearPoint(before.Pos, r.Pos, 1e-6, "pan");
+        Assert.AreEqual(fitted, r.Fitted);
     }
 
     [TestMethod]
@@ -1066,6 +1136,27 @@ public sealed class ViewControllerTests
         r.M.ZoomToHundred(new Point(200, 150));
         r.Settle();
         NearPoint(pos, r.Pos, 1, "no jump");
+    }
+
+    /// <summary>Fine zoom at the slider's range: each notch scales by the step, and the notch crossing 100% stops on it.</summary>
+    [TestMethod]
+    [DataRow(1)]
+    [DataRow(10)]
+    [DataRow(20)]
+    public void FineZoomSteps_ScaleByTheStep_AndStopAt100(int stepPercent)
+    {
+        var perNotch = 1 + stepPercent / 100.0;
+        var r = new Rig();
+        r.Show("A", 4000, 3000);
+        var from = r.Scale;
+        r.M.ZoomBy(ViewRules.WheelDeltaFactor(120, perNotch), Centre, stopAtOneToOne: true);
+        Near(from * perNotch, r.Scale, 1e-5, "one notch");
+
+        var notches = 0;
+        while (r.Scale < 1f && notches++ < 1000)
+            r.M.ZoomBy(ViewRules.WheelDeltaFactor(120, perNotch), Centre, stopAtOneToOne: true);
+        Near(1, r.Scale, 1e-6, "stopped at 100%");
+        Assert.IsTrue(r.OneToOne);
     }
 
     [TestMethod]

@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Display.Canvas;
 using FlyPhotos.Display.Controllers;
 using FlyPhotos.Display.ImageReading;
 using FlyPhotos.Display.State;
@@ -114,6 +115,9 @@ internal sealed class Decode(FakeDecoder owner, Photo photo, DecodeKind kind, bo
     public override string ToString() => $"{Kind} {System.IO.Path.GetFileName(Path)}";
 }
 
+/// <summary>A photo's size by its metadata, its preview bitmap's size and its HQ bitmap's size.</summary>
+internal sealed record ImageSizes(double MetaW, double MetaH, int PrevW, int PrevH, int HqW, int HqH);
+
 /// <summary>
 /// A scripted <see cref="IPhotoDecoder"/>. <see cref="Script"/> picks each decode's <see cref="Reply"/>; pending ones
 /// wait in <see cref="Pending"/> for the test. Every item it makes is kept in <see cref="Created"/>, so a test can
@@ -122,6 +126,8 @@ internal sealed class Decode(FakeDecoder owner, Photo photo, DecodeKind kind, bo
 internal sealed class FakeDecoder : IPhotoDecoder
 {
     public Func<Decode, Reply> Script { get; set; } = _ => Reply.Item;
+    /// <summary>The sizes every preview and HQ is made at; null for 2×2 images with no metadata.</summary>
+    public ImageSizes? Sizes { get; set; }
     /// <summary>Where light previews come from; <see cref="Origin.Disk"/> ones are then written to the disk cache.</summary>
     public Origin PreviewOrigin { get; set; } = Origin.Disk;
 
@@ -224,22 +230,26 @@ internal sealed class FakeDecoder : IPhotoDecoder
         switch (d.Kind)
         {
             case DecodeKind.FirstPreview:
-                var first = Track(new PreviewDisplayItem(TestGpu.Bitmap(), PreviewOrigin), d);
+                var first = Track(Preview(PreviewOrigin), d);
                 d.Photo.Slots.TryAttachPreview(first, new Thumbnail(new byte[4]));
                 return true;
             case DecodeKind.PreviewLight or DecodeKind.PreviewHeavy:
                 var origin = d.Kind == DecodeKind.PreviewHeavy ? Origin.Disk : PreviewOrigin;
-                return ((PreviewDisplayItem, Thumbnail?)?)(Track(new PreviewDisplayItem(TestGpu.Bitmap(), origin), d),
-                    new Thumbnail(new byte[4]));
+                return ((PreviewDisplayItem, Thumbnail?)?)(Track(Preview(origin), d), new Thumbnail(new byte[4]));
             case DecodeKind.Hq when reply == Reply.Tiled:
                 var pyramid = TilePyramid.Build(new TileLevel(4, 4), DirectXPixelFormat.B8G8R8A8UIntNormalized);
                 return Track(new TiledHqDisplayItem(TestGpu.Bitmap(), Origin.Disk, pyramid), d);
             case DecodeKind.Hq:
-                return Track(new StaticHqDisplayItem(TestGpu.Bitmap(), Origin.Disk), d);
+                var hq = Sizes is { } s ? TestGpu.Bitmap(s.HqW, s.HqH) : TestGpu.Bitmap();
+                return Track(new StaticHqDisplayItem(hq, Origin.Disk), d);
             default:
                 return null;
         }
     }
+
+    private PreviewDisplayItem Preview(Origin origin) => Sizes is { } s
+        ? new PreviewDisplayItem(TestGpu.Bitmap(s.PrevW, s.PrevH), origin, new ImageMetadata(s.MetaW, s.MetaH))
+        : new PreviewDisplayItem(TestGpu.Bitmap(), origin);
 
     private T Track<T>(T item, Decode d) where T : DisplayItem
     {
@@ -323,8 +333,35 @@ internal sealed class FakeCanvas : ICanvasController
         var old = Held;
         (Held, HeldPhoto, HeldLevel) = (item, photo, level);
         History.Add(new Install(photo, item, level));
+        if (View != null) ShowInView(photo, item, level);
         old?.Release();
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// When set, every install also reaches this view as the canvas engine hands it over, and a better image of the
+    /// photo on screen that changes its size on screen is a violation.
+    /// </summary>
+    public ViewController? View { get; set; }
+    private (Photo? Photo, DisplayLevel Level) _inView;
+
+    private void ShowInView(Photo photo, DisplayItem item, DisplayLevel level)
+    {
+        var before = OnScreen(View!);
+        var upgrade = ReferenceEquals(photo, _inView.Photo) && level > _inView.Level
+            && _inView.Level > DisplayLevel.PlaceHolder && !View!.IsAnimating;
+        View!.Install(photo, photo.FilePath, ViewRules.LayoutSize(photo, item), item.Rotation, level);
+        var after = OnScreen(View);
+        if (upgrade && Math.Abs(after / before - 1) > 2e-3)
+            Violations.Add($"{photo.FilePath} jumped from {before:F1} to {after:F1} px on screen at its {level}");
+        _inView = (photo, level);
+    }
+
+    /// <summary>The larger side of the image on screen, in screen pixels.</summary>
+    public static double OnScreen(ViewController view)
+    {
+        var (w, h) = ViewRules.OnScreenSize(view.View.ImageSize, view.View.Rotation);
+        return Math.Max(w, h) * view.View.Scale;
     }
 
     /// <summary>The pan/zoom animation a wait returns for (the open zoom); done at once by default.</summary>
@@ -332,7 +369,11 @@ internal sealed class FakeCanvas : ICanvasController
     public Task WaitForPanZoomAnimationAsync(int timeoutMs) => Animation;
     /// <summary>The page on screen of a multi-page photo; null for any other.</summary>
     public MultiPagePosition? CurrentPage { get; set; }
-    public void OnPhotoRenamed(string oldPath, string newPath) => Renames.Add((oldPath, newPath));
+    public void OnPhotoRenamed(string oldPath, string newPath)
+    {
+        Renames.Add((oldPath, newPath));
+        View?.Rename(oldPath, newPath);
+    }
 
     public void Dispose()
     {

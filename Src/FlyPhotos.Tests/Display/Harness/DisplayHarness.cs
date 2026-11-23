@@ -187,6 +187,11 @@ internal sealed class DisplayHarness : IDisposable
         Assert.IsTrue(nav.Position >= 0 && nav.Position < nav.Keys.Count, $"position {nav.Position} of {nav.Keys.Count}");
         Assert.AreSame(Controller.Photos.Keys, nav.Keys, "the viewer's key list is the published list");
         if (Canvas.Held is { } drawn) Assert.IsFalse(drawn.IsFreed, "the canvas draws a freed item");
+        if (Canvas.View is { } view && Canvas.HeldPhoto is { } onScreen)
+        {
+            Assert.AreEqual(onScreen.FilePath, view.PhotoPath, "the view is of the photo on screen");
+            Assert.IsTrue(float.IsFinite(view.View.Scale) && view.View.Scale > 0, $"view scale {view.View.Scale}");
+        }
         if (Controller.ListingPublished)
             Assert.AreSame(Current, Canvas.HeldPhoto, $"the screen shows {Canvas.HeldPhoto?.FilePath}, the viewer is on {Current.FilePath}");
 

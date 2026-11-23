@@ -1,4 +1,4 @@
-using FlyPhotos.Core.Model;
+﻿using FlyPhotos.Core.Model;
 using FlyPhotos.Display.Canvas;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Tests.Display.Harness;
@@ -347,6 +347,226 @@ public sealed class InstallPathTests
         app.ShowHq(a, k);
         Near(zoomed, app.V.View.Scale, zoomed * 1e-4, "A's view survived the placeholder");
     }
+
+    /// <summary>
+    /// Left on its HQ before its preview loaded, so its photo size was never learnt; back through the preview, then
+    /// the HQ, it must keep its size on screen.
+    /// </summary>
+    [TestMethod]
+    [DynamicData(nameof(KindNames))]
+    [Ignore("Known bug: the RAW kinds jump (embedded-JPEG ARW to 0.27x) until it is fixed")]
+    public void Remember_LeftBeforeItsPreviewLoaded_ComesBackWithoutAJump(string kind)
+    {
+        AppConfig.Settings.PanZoomBehaviourOnNavigation = PanZoomBehaviourOnNavigation.RememberPerPhoto;
+        var k = KindNamed(kind);
+        var app = new App().Watch();
+        var a = app.Photo(k);
+        app.ShowHq(a, k);
+        app.V.ZoomBy(2.5f, new Windows.Foundation.Point(400, 300));
+        var left = app.OnScreen;
+
+        var b = app.Photo(k);
+        app.ShowPreview(b, k);
+        app.ShowHq(b, k);
+
+        app.ShowPreview(a, k);
+        var onPreview = app.OnScreen;
+        app.ShowHq(a, k);
+        NoJump(onPreview, app, "A");
+        Near(left, app.OnScreen, left * 2e-3, "A at the size it was left at");
+    }
+
+    /// <summary>
+    /// A photo's default view is the same whichever of its images arrives first. Its HQ here is an embedded JPEG
+    /// smaller than the canvas: through the preview it is fitted, HQ first it would show at the HQ's 100%.
+    /// </summary>
+    [TestMethod]
+    [DataRow(PanZoomBehaviourOnNavigation.Reset)]
+    [DataRow(PanZoomBehaviourOnNavigation.RememberPerPhoto)]
+    [Ignore("Known bug: HQ first shows 600 px, through the preview 1000 px, until it is fixed")]
+    public void DefaultView_SameWhetherThePreviewOrTheHqComesFirst(PanZoomBehaviourOnNavigation mode)
+    {
+        AppConfig.Settings.PanZoomBehaviourOnNavigation = mode;
+        var k = new Kind("arw small embedded", ".arw", 6000, 4000, 300, 200, 600, 400);
+        var app = new App().Watch();
+        var a = app.Photo(k);
+        app.ShowPreview(a, k);
+        app.ShowHq(a, k);
+        var throughThePreview = app.OnScreen;
+
+        var b = app.Photo(k);
+        app.Placeholder(b);
+        app.ShowHq(b, k);
+        Near(throughThePreview, app.OnScreen, throughThePreview * 2e-3, "B, HQ first, at A's size on screen");
+    }
+
+    /// <summary>
+    /// Retain at true 100%, a far jump to a photo whose HQ goes up before its preview, and back before that preview
+    /// loads: the photo returned to comes back through its preview, and its HQ must land at true 100%. Sizes from the
+    /// CR3 in nav-sizes.ps1: metadata 5496×3670, HQ 5472×3648.
+    /// </summary>
+    [TestMethod]
+    [DataRow("cr3")]
+    [DataRow("arw embedded")]
+    [DataRow("arw rawler")]
+    [DataRow("jpeg")]
+    [Ignore("Known bug: the RAW kinds come back at 100.47% (CR3) to 373% (embedded-JPEG ARW) until it is fixed")]
+    public void Retain_FarJumpAndBack_LeavingBeforeThePreviewLoads_KeepsTrue100(string kind)
+    {
+        AppConfig.Settings.PanZoomBehaviourOnNavigation = PanZoomBehaviourOnNavigation.RetainFromLastPhoto;
+        var k = kind == "cr3" ? new Kind("cr3", ".cr3", 5496, 3670, 1498, 1000, 5472, 3648) : KindNamed(kind);
+        var app = new App().Watch();
+        var a = app.Photo(k);
+        app.ShowHq(a, k);
+        app.ZoomTo100();
+        App.PreviewLoads(a, k);
+
+        var z = app.Photo(k);           // End: its HQ before its preview
+        app.Placeholder(z);
+        app.ShowHq(z, k);
+        Near(1, app.V.View.Scale, 1e-4, "Z at true 100%");
+
+        a.Slots.DetachPreview()?.Release();
+        app.Placeholder(a);             // Home, before Z's preview loaded
+        app.ShowPreview(a, k);
+        app.ShowHq(a, k);
+        Near(1, app.V.View.Scale, 1e-4, "A back at true 100%");
+        Assert.IsTrue(app.OneToOne, "A: 1:1");
+    }
+
+    // ---------------------------------------------------------------- settings, pairwise
+
+    private static readonly Size Canvas = new(1000, 800);
+
+    private static readonly Kind SmallJpeg = new("small jpeg", ".jpg", 300, 200, 150, 100, 300, 200);
+    private static readonly Kind SmallArw = new("small arw embedded", ".arw", 600, 400, 300, 200, 150, 100);
+
+    private const string PreviewFirst = "preview>HQ", HqFirst = "HQ>preview", PlaceholderFirst = "placeholder>HQ>preview";
+
+    /// <summary>
+    /// Every pair of these values in nine rows (docs/07_refactor/20261123_nav-panzoom-test-plan.md §5): mode, install
+    /// order, photo smaller or larger than the canvas, HQ the preview's size or a quarter of it, stretch, fit %,
+    /// sticky zoom, open zoom.
+    /// </summary>
+    public static IEnumerable<object[]> PairwiseRows =>
+    [
+        ["P1", PanZoomBehaviourOnNavigation.RetainFromLastPhoto, PreviewFirst, true, true, true, 90, false, true],
+        ["P2", PanZoomBehaviourOnNavigation.RememberPerPhoto, PreviewFirst, false, false, false, 100, true, false],
+        ["P3", PanZoomBehaviourOnNavigation.Reset, PlaceholderFirst, true, true, false, 100, true, true],
+        ["P4", PanZoomBehaviourOnNavigation.Reset, HqFirst, false, false, true, 100, false, false],
+        ["P5", PanZoomBehaviourOnNavigation.RetainFromLastPhoto, HqFirst, true, false, false, 90, true, false],
+        ["P6", PanZoomBehaviourOnNavigation.RememberPerPhoto, PlaceholderFirst, false, true, true, 90, false, false],
+        ["P7", PanZoomBehaviourOnNavigation.RetainFromLastPhoto, PlaceholderFirst, false, false, true, 100, true, true],
+        ["P8", PanZoomBehaviourOnNavigation.RememberPerPhoto, HqFirst, true, true, false, 100, false, true],
+        ["P9", PanZoomBehaviourOnNavigation.Reset, PreviewFirst, false, true, true, 90, true, false],
+    ];
+
+    /// <summary>
+    /// Open A, wheel-zoom two notches, pan, go to B (the other size class), come back to A. Each image arrives in the
+    /// row's order; every preview → HQ keeps the size on screen, and the mode decides each photo's view.
+    /// </summary>
+    [TestMethod]
+    [DynamicData(nameof(PairwiseRows))]
+    public void Pairwise_SettingsAndInstallOrders(string row, PanZoomBehaviourOnNavigation mode, string order,
+        bool small, bool rawHq, bool stretch, int fitPercent, bool sticky, bool openZoom)
+    {
+        AppConfig.Settings = new AppSettings
+        {
+            PanZoomBehaviourOnNavigation = mode, StretchSmallImages = stretch, ImageFitPercentage = fitPercent,
+            StickyZoomLevels = sticky, OpenExitZoom = openZoom,
+        };
+        var kindA = small ? (rawHq ? SmallArw : SmallJpeg) : (rawHq ? KindNamed("arw embedded") : KindNamed("jpeg"));
+        var kindB = small ? (rawHq ? KindNamed("arw embedded") : KindNamed("jpeg")) : (rawHq ? SmallArw : SmallJpeg);
+        var app = new App().Watch();
+
+        // A, the first photo: no placeholder, and the open zoom if it is on.
+        var a = app.Photo(kindA);
+        Arrive(app, a, kindA, order == PlaceholderFirst ? HqFirst : order, () => AtDefault(app, $"{row} A"));
+
+        var from = app.V.View.Scale;
+        app.V.WheelZoom(ZoomDirection.In, new Windows.Foundation.Point(600, 350));
+        app.V.WheelZoom(ZoomDirection.In, new Windows.Foundation.Point(600, 350));
+        app.Settle();
+        var oneNotch = ViewRules.WheelStepTarget(from, ZoomDirection.In, app.V.View.ImageSize)!.Value;
+        var twoNotches = ViewRules.WheelStepTarget(oneNotch, ZoomDirection.In, app.V.View.ImageSize)!.Value;
+        Near(twoNotches, app.V.View.Scale, twoNotches * 1e-4, $"{row} A: two wheel notches");
+        app.V.Pan(40, -30);
+        Assert.IsFalse(app.Fitted, $"{row} A: zoomed is not fitted");
+
+        var (aScale, aPos, aCentre) = (app.V.View.Scale, app.V.View.Pos, CentreOnImage(app));
+        var aPhotoZoom = aScale * PerPhoto(app, a)!.Value;
+
+        var b = app.Photo(kindB);
+        Arrive(app, b, kindB, order, () =>
+        {
+            if (mode != PanZoomBehaviourOnNavigation.RetainFromLastPhoto)
+            {
+                AtDefault(app, $"{row} B");
+                return;
+            }
+            // The photo zoom carries over where B's size is known, else the scale itself.
+            var expected = PerPhoto(app, b) is { } perB ? aPhotoZoom / perB : aScale;
+            Near(expected, app.V.View.Scale, expected * 1e-3, $"{row} B: A's zoom retained");
+            Near(aCentre.X, CentreOnImage(app).X, 1e-3, $"{row} B: the same part at the centre, X");
+            Near(aCentre.Y, CentreOnImage(app).Y, 1e-3, $"{row} B: the same part at the centre, Y");
+            Assert.IsFalse(app.Fitted, $"{row} B: not fitted");
+        });
+
+        // Back to A, its preview gone from the cache, in the row's order again.
+        a.Slots.DetachPreview()?.Release();
+        Arrive(app, a, kindA, order, () =>
+        {
+            if (mode == PanZoomBehaviourOnNavigation.Reset) AtDefault(app, $"{row} A again");
+        });
+        if (mode != PanZoomBehaviourOnNavigation.RememberPerPhoto) return;
+        Near(aScale, app.V.View.Scale, aScale * 1e-4, $"{row} A: its own zoom back");
+        Near(aPos.X, app.V.View.Pos.X, 0.5, $"{row} A: its own pan back, X");
+        Near(aPos.Y, app.V.View.Pos.Y, 0.5, $"{row} A: its own pan back, Y");
+        Assert.IsFalse(app.Fitted, $"{row} A: not fitted");
+    }
+
+    /// <summary>
+    /// One photo arriving in <paramref name="order"/>. <paramref name="atFirstImage"/> checks the view on its first
+    /// real image; a preview → HQ after it must not jump.
+    /// </summary>
+    private static void Arrive(App app, Photo p, Kind k, string order, Action atFirstImage)
+    {
+        if (order == PlaceholderFirst) app.Placeholder(p);
+        if (order == PreviewFirst)
+        {
+            app.ShowPreview(p, k);
+            app.Settle();
+            atFirstImage();
+            var onPreview = app.OnScreen;
+            app.ShowHq(p, k);
+            NoJump(onPreview, app, k.Name);
+        }
+        else
+        {
+            app.ShowHq(p, k);
+            app.Settle();
+            atFirstImage();
+            App.PreviewLoads(p, k);
+        }
+    }
+
+    /// <summary>The default view: the default scale, centred, and fitted only if that is the fit.</summary>
+    private static void AtDefault(App app, string what)
+    {
+        var view = app.V.View;
+        var scale = ViewRules.DefaultScale(Canvas, view.ImageSize, view.Rotation);
+        Near(scale, view.Scale, scale * 1e-4, $"{what}: the default scale");
+        Assert.IsTrue(ViewRules.IsCentred(view.Pos, Canvas), $"{what}: centred");
+        Assert.AreEqual(ViewRules.SameScale(scale, ViewRules.FitScale(Canvas, view.ImageSize, view.Rotation)),
+            app.Fitted, $"{what}: fitted");
+    }
+
+    private static Windows.Foundation.Point CentreOnImage(App app) =>
+        ViewRules.CentreOnImage(app.V.View.Pos, app.V.View.Scale, app.V.View.ImageSize, app.V.View.Rotation, Canvas);
+
+    /// <summary>The image on screen's pixels per photo pixel, null while the photo's size is unknown.</summary>
+    private static float? PerPhoto(App app, Photo p) =>
+        ViewRules.ImagePixelsPerPhotoPixel(app.V.View.ImageSize, app.V.View.Rotation, ViewRules.PhotoSizeOnScreen(p));
 
     // ---------------------------------------------------------------- formats mixed
 
