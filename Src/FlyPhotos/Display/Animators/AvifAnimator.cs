@@ -23,13 +23,10 @@ namespace FlyPhotos.Display.Animators;
 ///         reset (<c>ResetAvifAnimation</c>) to loop back to the beginning.
 ///     </para>
 ///     <para>
-///         <b>Zero managed allocation on the hot path.</b>
+///         <b>No per-frame pixel allocation.</b>
 ///         The pixel buffer (<see cref="_pixelBuffer" />) is allocated on the Pinned Object Heap
 ///         (no <see cref="GCHandle" />). The native decoder writes directly into it via
 ///         <see cref="_pixelBufferPtr" />, and Win2D uploads from it via <c>SetPixelBytes</c>.
-///         <see cref="UpdateAsync" /> returns <c>Task.CompletedTask</c> � no async state machine
-///         is allocated per call. The combination achieves zero managed heap allocation during
-///         steady-state playback.
 ///     </para>
 ///     <para>
 ///         <b>Timing model.</b>
@@ -254,8 +251,8 @@ public partial class AvifAnimator : IAnimator
 
     /// <summary>
     ///     Advances the animation by the elapsed time since the previous call and renders
-    ///     the resulting frame to <see cref="_compositedSurface" />.
-    ///     Fully synchronous � returns <c>Task.CompletedTask</c> with no async state machine.
+    ///     the resulting frame to <see cref="_compositedSurface" />. Decodes on the thread pool, so the W2D thread
+    ///     never waits on the native decoder.
     /// </summary>
     /// <param name="totalElapsedTime">Total time elapsed since the animator was started.</param>
     public async Task UpdateAsync(TimeSpan totalElapsedTime)

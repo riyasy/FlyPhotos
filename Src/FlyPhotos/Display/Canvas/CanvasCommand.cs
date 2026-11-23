@@ -48,8 +48,9 @@ internal abstract record CanvasCommand
     /// page that lands after the user moved on is ignored.
     /// </summary>
     /// <param name="Request">The engine's number for the request, so a failure of the newest one is told apart.</param>
+    /// <param name="PageIndex">The page asked for. Carried, not read back: a newer load may already have moved the renderer on.</param>
     /// <param name="PageSize">The page's size; null when the load failed or a newer one superseded it.</param>
-    public sealed record PageLoaded(IMultiPage Renderer, int Request, Size PageSize) : CanvasCommand;
+    public sealed record PageLoaded(IMultiPage Renderer, int Request, int PageIndex, Size PageSize) : CanvasCommand;
 
     /// <summary>A photo was renamed: the view and its remembered views follow the new path.</summary>
     public sealed record Renamed(string OldPath, string NewPath) : CanvasCommand;

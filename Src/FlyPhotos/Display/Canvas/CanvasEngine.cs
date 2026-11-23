@@ -173,8 +173,8 @@ internal sealed class CanvasEngine
     {
         var (oldRenderer, oldItem) = (_renderer, _item);
         (_renderer, _item, _checkered) = (c.Renderer, c.Item, c.Checkered);
-        oldRenderer?.Dispose();
-        oldItem?.Release();
+        try { oldRenderer?.Dispose(); }
+        finally { oldItem?.Release(); }
         if (c.FollowUp) return; // the same image in a new renderer: the view, page and strip stay
 
         _requestedPageIndex = 0;
@@ -201,20 +201,20 @@ internal sealed class CanvasEngine
 
     /// <summary>Loads a page off this thread and posts the result back, null when it was superseded or failed.</summary>
     private async Task LoadPageAsync(IMultiPage pages, int request, int index) =>
-        Post(new Cmd.PageLoaded(pages, request, await pages.LoadPageAsync(index)));
+        Post(new Cmd.PageLoaded(pages, request, index, await pages.LoadPageAsync(index)));
 
     /// <summary>A page landed, or the newest request failed and page steps count from the page on screen again.</summary>
     private void OnPageLoaded(Cmd.PageLoaded c)
     {
         if (!ReferenceEquals(_renderer, c.Renderer)) return; // navigated away while it loaded
-        var index = c.Renderer.CurrentPageIndex;
         if (c.PageSize == null)
         {
-            if (c.Request == _pageRequest) _requestedPageIndex = index; // an older request was only superseded
+            // The newest failed, so no load is in flight and the renderer's page is the one on screen.
+            if (c.Request == _pageRequest) _requestedPageIndex = c.Renderer.CurrentPageIndex;
             return;
         }
-        ViewController.ShowPage(c.PageSize, isFirstPage: index == 0);
-        PageShown?.Invoke(new MultiPagePosition(ViewController.PhotoPath, index, c.Renderer.PageCount,
+        ViewController.ShowPage(c.PageSize, isFirstPage: c.PageIndex == 0);
+        PageShown?.Invoke(new MultiPagePosition(ViewController.PhotoPath, c.PageIndex, c.Renderer.PageCount,
             (int)c.PageSize.Width, (int)c.PageSize.Height));
     }
 
@@ -319,10 +319,9 @@ internal sealed class CanvasEngine
     public void Dispose()
     {
         _continuousZoomEnd.Cancel();
-        _renderer?.Dispose();
-        _renderer = null;
-        _item?.Release();
-        _item = null;
+        try { _renderer?.Dispose(); }
+        finally { _item?.Release(); }
+        (_renderer, _item) = (null, null);
         DisplayItem.FreeSink = null;
         while (_toFree.TryDequeue(out var item)) item.Free();
         _checkeredBrush?.Dispose();

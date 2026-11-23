@@ -120,9 +120,10 @@ internal sealed class CanvasController : ICanvasController
         Cmd.Install install;
         try
         {
+            var layoutSize = ViewRules.LayoutSize(photo, item); // first: a throw after the renderer exists would leak it
             var renderer = RendererFactory.Create(_canvas, photo, item, _engine.Wake);
-            install = new Cmd.Install(photo, photo.FilePath, item, level, renderer, ViewRules.LayoutSize(photo, item),
-                item.Rotation, Checkered: photo.SupportsTransparency);
+            install = new Cmd.Install(photo, photo.FilePath, item, level, renderer, layoutSize, item.Rotation,
+                Checkered: photo.SupportsTransparency);
         }
         catch
         {
