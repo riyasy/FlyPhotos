@@ -1,12 +1,11 @@
 using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
-using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
 using NLog;
 using PhotoSauce.MagicScaler;
+using Windows.Graphics.DirectX;
 
 namespace FlyPhotos.Display.ImageReading;
 
@@ -35,9 +34,6 @@ internal static class MagicScalerWrap
                 int originalHeight = fileInfo.Frames[0].Height;
                 var metadata = new ImageMetadata(originalWidth, originalHeight);
                 var settings = new ProcessImageSettings { Width = maxDimension, Height = maxDimension, ResizeMode = CropScaleMode.Max, HybridMode = HybridScaleMode.Turbo };
-                // Force JPEG output — a static format cannot carry animation, so MagicScaler
-                // processes only frame 0 instead of all frames of an animated GIF.
-                settings.TrySetEncoderFormat(ImageMimeTypes.Jpeg);
 
                 CanvasBitmap canvasBitmap;
                 if (originalWidth <= maxDimension && originalHeight <= maxDimension)
@@ -48,12 +44,18 @@ internal static class MagicScalerWrap
                 }
                 else
                 {
-                    // Create pipeline for resizing
+                    // Pulled here, not through WriteOutput: there a codec error is thrown inside a WIC callback,
+                    // which no catch can reach, and the process dies.
                     using var pipeline = MagicImageProcessor.BuildPipeline(file.Path, settings);
-                    using var ms = new MemoryStream(256 * 1024); // pre-size to avoid repeated buffer doublings
-                    pipeline.WriteOutput(ms);
-                    using var jpeg = ClosableStream.Open(ms);
-                    canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, jpeg.Stream);
+                    var source = pipeline.PixelSource;
+                    int w = source.Width, h = source.Height;
+                    int bpp = source.Format == PixelFormats.Bgra32bpp ? 4 : source.Format == PixelFormats.Bgr24bpp ? 3
+                        : source.Format == PixelFormats.Grey8bpp ? 1
+                        : throw new NotSupportedException($"MagicScaler pixel format {source.Format}");
+                    var raw = new byte[w * h * bpp];
+                    source.CopyPixels(new System.Drawing.Rectangle(0, 0, w, h), w * bpp, raw);
+                    var pixels = ToPremultipliedBgra(raw, bpp);
+                    canvasBitmap = CanvasBitmap.CreateFromBytes(ctrl, pixels, w, h, DirectXPixelFormat.B8G8R8A8UIntNormalized);
                 }
 
                 return (true, new PreviewDisplayItem(canvasBitmap, Origin.Disk, metadata));
@@ -64,5 +66,34 @@ internal static class MagicScalerWrap
                 return (false, PreviewDisplayItem.Empty());
             }
         }
+    }
+
+    // MagicScaler hands out Grey8, Bgr24 or straight-alpha Bgra32; Win2D wants premultiplied BGRA.
+    internal static byte[] ToPremultipliedBgra(byte[] src, int bpp)
+    {
+        int n = src.Length / bpp;
+        var dst = bpp == 4 ? src : new byte[n * 4];
+        for (int i = 0, s = 0, d = 0; i < n; i++, s += bpp, d += 4)
+        {
+            if (bpp == 1)
+            {
+                dst[d] = dst[d + 1] = dst[d + 2] = src[s];
+                dst[d + 3] = 255;
+            }
+            else if (bpp == 3)
+            {
+                dst[d] = src[s];
+                dst[d + 1] = src[s + 1];
+                dst[d + 2] = src[s + 2];
+                dst[d + 3] = 255;
+            }
+            else if (dst[d + 3] is var a and < 255)
+            {
+                dst[d] = (byte)((dst[d] * a + 127) / 255);
+                dst[d + 1] = (byte)((dst[d + 1] * a + 127) / 255);
+                dst[d + 2] = (byte)((dst[d + 2] * a + 127) / 255);
+            }
+        }
+        return dst;
     }
 }
