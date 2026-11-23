@@ -35,12 +35,10 @@
 //                   Returns a native IRandomAccessStream. Zero-copy, zero
 //                   adapter overhead. Hidden/system file access works.
 //
-//   Network / UNC — System.IO.FileStream → InMemoryRandomAccessStream
-//                   The file is fully buffered into native RAM and the file
-//                   handle is closed immediately. This prevents WIC from
-//                   holding the network file lock and blocking deletion.
-//                   The adapter cost only applies during the one-time copy,
-//                   not during decoding (WIC decodes from the in-memory stream).
+//   Network / UNC — File.ReadAllBytes → ClosableStream (Infra/Interop)
+//                   The file is read whole and the handle closed at once, so
+//                   WIC can't hold the network file lock and block deletion.
+//                   WIC reads the bytes natively, without the adapter.
 //
 // CLIPBOARD COPY STRATEGY: GetStorageFileOrVirtualFile
 // -----------------------------------------------------
@@ -112,9 +110,8 @@ internal class StorageOps
     /// Opens a file and returns an <see cref="IRandomAccessStream"/> optimised for Win2D / WIC
     /// decoding. For local files, bypasses the Windows Storage Broker via
     /// <c>CreateRandomAccessStreamOnFile</c> (shcore.dll), which also succeeds for hidden and
-    /// system files. For network and UNC paths the file is fully buffered into an
-    /// <see cref="InMemoryRandomAccessStream"/> first, releasing the network file handle
-    /// immediately — see the file header for the full performance rationale.
+    /// system files. For network and UNC paths the file is read whole first, releasing the network
+    /// file handle immediately — see the file header for the full performance rationale.
     /// </summary>
     /// <param name="path">Full path to the image file to open.</param>
     /// <param name="useBufferForNwPaths">Whether to use mem buffering for files on NW path</param>
@@ -126,23 +123,8 @@ internal class StorageOps
     {
         if (useBufferForNwPaths && ShouldBufferFile(path))
         {
-            var memStream = new InMemoryRandomAccessStream();
-            try
-            {
-                // ReadAllBytesAsync + one WriteAsync beats FileStream.CopyToAsync through the
-                // AsStreamForWrite() adapter (~15% faster measured; single full-length read =
-                // fewer SMB round trips) and avoids the adapter's 16 KB internal buffer, which
-                // silently truncated files under 16 KB when left unflushed.
-                var bytes = await File.ReadAllBytesAsync(path);
-                await memStream.WriteAsync(bytes.AsBuffer());
-                memStream.Seek(0);
-                return memStream;
-            }
-            catch
-            {
-                memStream.Dispose();
-                throw;
-            }
+            // One full-length read (fewer SMB round trips), decoded in place: no native copy.
+            return ClosableStream.Open(await File.ReadAllBytesAsync(path)).Stream;
         }
         else
         {

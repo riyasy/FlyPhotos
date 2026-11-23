@@ -6,6 +6,7 @@ using Windows.Storage.Streams;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Display.Canvas;
 using FlyPhotos.Display.ImageReading;
+using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using NLog;
@@ -31,9 +32,8 @@ internal partial class MultiPageRenderer : IRenderer, IMultiPage
     private int _latestPageLoadId;
     private readonly int[] _pageOrder;
 
-    // One decoder for all pages, opened at once in the background.
-    private readonly InMemoryRandomAccessStream _fileStream = new();
-    private byte[] _fileBytes;
+    // One decoder for all pages, opened at once in the background, reading the item's bytes without a copy.
+    private readonly ClosableStream.Opened _fileStream;
     private readonly Task<BitmapDecoder> _decoderTask;
 
     public MultiPageRenderer(CanvasAnimatedControl canvas, CanvasBitmap firstPage, byte[] fileBytes, Action invalidate,
@@ -41,10 +41,10 @@ internal partial class MultiPageRenderer : IRenderer, IMultiPage
     {
         _canvas = canvas;
         _firstPage = _currentBitmap = firstPage;
-        _fileBytes = fileBytes;
         _invalidate = invalidate;
         _pageOrder = pageOrder;
-        _decoderTask = OpenDecoderAsync();
+        _fileStream = ClosableStream.Open(fileBytes);
+        _decoderTask = BitmapDecoder.CreateAsync(_fileStream.Stream).AsTask();
     }
 
     public int CurrentPageIndex => _currentPageIndex;
@@ -107,20 +107,6 @@ internal partial class MultiPageRenderer : IRenderer, IMultiPage
         _invalidate();
         var size = bitmap.SizeInPixels;
         return new Size(size.Width, size.Height);
-    }
-
-    private async Task<BitmapDecoder> OpenDecoderAsync()
-    {
-        using (var outStream = _fileStream.GetOutputStreamAt(0))
-        using (var writer = new DataWriter(outStream))
-        {
-            writer.WriteBytes(_fileBytes);
-            await writer.StoreAsync();
-            await outStream.FlushAsync();
-        }
-        _fileBytes = null; // in the stream now
-        _fileStream.Seek(0);
-        return await BitmapDecoder.CreateAsync(_fileStream);
     }
 
     public void Dispose()

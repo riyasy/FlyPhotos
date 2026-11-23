@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Storage.Streams;
+using FlyPhotos.Infra.Interop;
 using FlyPhotos.Infra.Utils;
 using Microsoft.Graphics.Canvas;
 using Microsoft.UI;
@@ -134,13 +136,6 @@ public partial class PngAnimator : IAnimator
     public TimeSpan TimeToNextFrame { get; private set; }
 
     /// <summary>
-    ///     Stream wrapping the raw APNG bytes. Kept alive for the lifetime of the animator
-    ///     because the parser may seek it during construction, and the stream must outlive
-    ///     any async operations that reference it.
-    /// </summary>
-    private readonly IRandomAccessStream _stream;
-
-    /// <summary>
     ///     PNG chunks that are shared across all frames: PLTE (palette), tRNS (transparency),
     ///     and any other ancillary chunks that precede the first fcTL in the file.
     ///     Injected into every reconstructed per-frame PNG so the decoder has the context
@@ -185,10 +180,10 @@ public partial class PngAnimator : IAnimator
 
     /// <summary>
     ///     Reusable in-memory stream into which the per-frame PNG is assembled before decoding.
-    ///     Pre-allocated at construction; reset (Size = 0, Seek(0)) at the start of each frame
-    ///     render to avoid allocating a new stream per frame.
+    ///     Pre-allocated at construction; reset (SetLength(0)) at the start of each frame
+    ///     render to avoid allocating a new stream per frame. Decoded in place through a ClosableStream.
     /// </summary>
-    private readonly InMemoryRandomAccessStream _reusableStream = new();
+    private readonly MemoryStream _reusableStream = new();
 
     /// <summary>
     ///     Binary writer over <see cref="_reusableStream" /> used to write the PNG signature,
@@ -245,12 +240,10 @@ public partial class PngAnimator : IAnimator
     /// </summary>
     private PngAnimator(
         ICanvasResourceCreatorWithDpi canvas,
-        IRandomAccessStream stream,
         Parser.ApngData apngData,
         List<ApngFrameMetadata> metadata)
     {
         _canvas = canvas;
-        _stream = stream;
         _globalChunks = apngData.GlobalChunks;
         _frameMetadata = metadata;
         _totalAnimationDuration = TimeSpan.FromMilliseconds(metadata.Sum(m => m.Delay.TotalMilliseconds));
@@ -263,8 +256,8 @@ public partial class PngAnimator : IAnimator
             _frameCumulativeTime[i] = cumulative;
         }
 
-        _reusableWriter = new BinaryWriter(_reusableStream.AsStreamForWrite());
-        Array.Copy(apngData.IhdrChunk.Data, _ihdrBuffer, 13);
+        _reusableWriter = new BinaryWriter(_reusableStream);
+        apngData.IhdrChunk.Data.Span[..13].CopyTo(_ihdrBuffer);
 
         PixelWidth = apngData.CanvasWidth;
         PixelHeight = apngData.CanvasHeight;
@@ -285,54 +278,52 @@ public partial class PngAnimator : IAnimator
     /// <summary>
     ///     Asynchronously creates a <see cref="PngAnimator" /> from raw APNG file bytes.
     /// </summary>
-    /// <param name="apngData">Complete raw bytes of the APNG file.</param>
+    /// <param name="apngData">
+    ///     Complete raw bytes of the APNG file. The animator keeps slices of them, not copies, so it shares the
+    ///     display item's array.
+    /// </param>
     /// <param name="canvas">The Win2D <see cref="ICanvasResourceCreatorWithDpi" /> context.</param>
     /// <returns>A fully initialised <see cref="PngAnimator" /> ready for <see cref="UpdateAsync" /> calls.</returns>
     public static async Task<PngAnimator> CreateAsync(byte[] apngData, ICanvasResourceCreatorWithDpi canvas)
     {
-        // AsRandomAccessStream() wraps but does not own the underlying MemoryStream,
-        // so both must be named locals to ensure both are disposed on the failure path.
-        var memoryStream = new MemoryStream(apngData);
-        var randomAccessStream = memoryStream.AsRandomAccessStream();
-        try
+        var parsedData = await Task.Run(() => Parser.ParseApng(apngData));
+
+        // APNG spec (�4.4): delay = DelayNum / (DelayDen == 0 ? 100 : DelayDen) seconds.
+        // DelayNum == 0 means zero delay, which browsers treat as 100 ms.
+        var metadata = parsedData.FrameControls.Select(fc => new ApngFrameMetadata
         {
-            var parsedData = await Parser.ParseApngStreamAsync(randomAccessStream);
+            Delay = TimeSpan.FromMilliseconds(
+                fc.DelayNum == 0
+                    ? 100.0
+                    : (double)fc.DelayNum / (fc.DelayDen == 0 ? 100 : fc.DelayDen) * 1000.0),
+            Bounds = new Rect(fc.XOffset, fc.YOffset, fc.Width, fc.Height),
+            DisposeOp = fc.DisposeOp,
+            BlendOp = fc.BlendOp,
+            FrameDataChunks = fc.FrameDataChunks
+        }).ToList();
 
-            // APNG spec (�4.4): delay = DelayNum / (DelayDen == 0 ? 100 : DelayDen) seconds.
-            // DelayNum == 0 means zero delay, which browsers treat as 100 ms.
-            var metadata = parsedData.FrameControls.Select(fc => new ApngFrameMetadata
-            {
-                Delay = TimeSpan.FromMilliseconds(
-                    fc.DelayNum == 0
-                        ? 100.0
-                        : (double)fc.DelayNum / (fc.DelayDen == 0 ? 100 : fc.DelayDen) * 1000.0),
-                Bounds = new Rect(fc.XOffset, fc.YOffset, fc.Width, fc.Height),
-                DisposeOp = fc.DisposeOp,
-                BlendOp = fc.BlendOp,
-                FrameDataChunks = fc.FrameDataChunks
-            }).ToList();
+        var animator = new PngAnimator(canvas, parsedData, metadata);
 
-            var animator = new PngAnimator(canvas, randomAccessStream, parsedData, metadata);
-
-            // When the default image is the first animation frame, render it eagerly here
-            // so the surface is populated before the first UpdateAsync call arrives.
-            // This render must be awaited here (in the async CreateAsync) rather than
-            // performed synchronously in the constructor, because CanvasBitmap.LoadAsync
-            // requires the Win2D dispatcher queue and cannot be called from a blocked thread.
-            if (parsedData.IsDefaultImageFirstFrame)
+        // When the default image is the first animation frame, render it eagerly here
+        // so the surface is populated before the first UpdateAsync call arrives.
+        // This render must be awaited here (in the async CreateAsync) rather than
+        // performed synchronously in the constructor, because CanvasBitmap.LoadAsync
+        // requires the Win2D dispatcher queue and cannot be called from a blocked thread.
+        if (parsedData.IsDefaultImageFirstFrame)
+        {
+            try
             {
                 await animator.RenderFrameAsync(0);
-                animator._currentFrameIndex = 0;
             }
+            catch
+            {
+                animator.Dispose();
+                throw;
+            }
+            animator._currentFrameIndex = 0;
+        }
 
-            return animator;
-        }
-        catch
-        {
-            randomAccessStream.Dispose();
-            memoryStream.Dispose();
-            throw;
-        }
+        return animator;
     }
 
     #endregion
@@ -477,7 +468,6 @@ public partial class PngAnimator : IAnimator
         _reusableStream?.Dispose();
         _compositedSurface?.Dispose();
         _previousFrameBackup?.Dispose();
-        _stream?.Dispose();
         GC.SuppressFinalize(this);
     }
 
@@ -496,8 +486,8 @@ public partial class PngAnimator : IAnimator
             /// <summary>Four-character ASCII chunk type (e.g. "IHDR", "IDAT", "fcTL").</summary>
             public string Type;
 
-            /// <summary>Raw chunk payload bytes, excluding the 4-byte length and 4-byte CRC fields.</summary>
-            public byte[] Data;
+            /// <summary>Raw chunk payload, excluding the 4-byte length and CRC fields: a slice of the file's bytes.</summary>
+            public ReadOnlyMemory<byte> Data;
         }
 
         /// <summary>
@@ -561,76 +551,71 @@ public partial class PngAnimator : IAnimator
         private static readonly byte[] PngSig = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
 
         /// <summary>
-        ///     Parses the APNG chunk structure on a background thread and returns an
-        ///     <see cref="ApngData" /> with all structural components extracted.
+        ///     Parses the APNG chunk structure and returns an <see cref="ApngData" /> with all structural
+        ///     components extracted. Chunks are slices of <paramref name="file" />, not copies.
         /// </summary>
-        /// <param name="stream">Seekable stream positioned at byte 0 of the APNG file.</param>
-        public static async Task<ApngData> ParseApngStreamAsync(IRandomAccessStream stream)
+        /// <param name="file">The whole APNG file.</param>
+        public static ApngData ParseApng(byte[] file)
         {
-            return await Task.Run(() =>
-            {
-                stream.Seek(0);
-                using var reader = new BinaryReader(stream.AsStreamForRead());
-                if (!reader.ReadBytes(8).SequenceEqual(PngSig)) throw new ArgumentException("Invalid PNG");
+            if (file.Length < 8 || !file.AsSpan(0, 8).SequenceEqual(PngSig)) throw new ArgumentException("Invalid PNG");
 
-                var chunks = ReadAllChunks(reader);
-                var global = new List<PngChunk>();
-                var defaults = new List<PngChunk>();
-                var fcs = new List<FrameControl>();
-                PngChunk ihdr = null;
+            var chunks = ReadAllChunks(file);
+            var global = new List<PngChunk>();
+            var defaults = new List<PngChunk>();
+            var fcs = new List<FrameControl>();
+            PngChunk ihdr = null;
 
-                foreach (var c in chunks)
-                    if (c.Type == "IHDR")
-                    {
-                        ihdr = c;
-                        global.Add(c);
-                    }
-                    else if (c.Type == "fcTL")
-                    {
-                        fcs.Add(ParseFc(c));
-                    }
-                    else if (c.Type == "fdAT" && fcs.Count > 0)
-                    {
-                        // Convert fdAT -> IDAT by stripping the 4-byte sequence number prefix.
-                        fcs.Last().FrameDataChunks.Add(ConvertFdat(c));
-                    }
-                    else if (c.Type == "IDAT")
-                    {
-                        // IDAT chunks before the first fcTL belong to the default image.
-                        // IDAT chunks after an fcTL belong to the current animation frame.
-                        if (fcs.Count > 0) fcs.Last().FrameDataChunks.Add(c);
-                        else defaults.Add(c);
-                    }
-                    else if (c.Type != "IEND" && c.Type != "acTL")
-                    {
-                        // Collect global ancillary chunks (PLTE, tRNS, gAMA, cHRM, etc.).
-                        // acTL is intentionally skipped � it merely signals "this is an APNG".
-                        global.Add(c);
-                    }
-
-                if (ihdr == null) throw new ArgumentException("PNG missing IHDR chunk");
-
-                var ordered = fcs.OrderBy(f => f.SequenceNumber).ToList();
-                bool defaultIsFirst = false;
-
-                // If there is a default image AND it corresponds to animation frame 0
-                // (SequenceNumber == 0), merge the default IDAT data into frame 0's chunk list.
-                if (defaults.Count > 0 && ordered.Count > 0 && ordered[0].SequenceNumber == 0)
+            foreach (var c in chunks)
+                if (c.Type == "IHDR")
                 {
-                    ordered[0].FrameDataChunks.InsertRange(0, defaults);
-                    defaultIsFirst = true;
+                    ihdr = c;
+                    global.Add(c);
+                }
+                else if (c.Type == "fcTL")
+                {
+                    fcs.Add(ParseFc(c));
+                }
+                else if (c.Type == "fdAT" && fcs.Count > 0)
+                {
+                    // Convert fdAT -> IDAT by stripping the 4-byte sequence number prefix.
+                    fcs.Last().FrameDataChunks.Add(ConvertFdat(c));
+                }
+                else if (c.Type == "IDAT")
+                {
+                    // IDAT chunks before the first fcTL belong to the default image.
+                    // IDAT chunks after an fcTL belong to the current animation frame.
+                    if (fcs.Count > 0) fcs.Last().FrameDataChunks.Add(c);
+                    else defaults.Add(c);
+                }
+                else if (c.Type != "IEND" && c.Type != "acTL")
+                {
+                    // Collect global ancillary chunks (PLTE, tRNS, gAMA, cHRM, etc.).
+                    // acTL is intentionally skipped � it merely signals "this is an APNG".
+                    global.Add(c);
                 }
 
-                return new ApngData
-                {
-                    IhdrChunk = ihdr,
-                    GlobalChunks = [.. global.Where(x => x.Type != "IHDR")],
-                    FrameControls = ordered,
-                    IsDefaultImageFirstFrame = defaultIsFirst,
-                    CanvasWidth = ReadU32BE(ihdr.Data, 0),
-                    CanvasHeight = ReadU32BE(ihdr.Data, 4)
-                };
-            });
+            if (ihdr == null || ihdr.Data.Length < 13) throw new ArgumentException("PNG missing IHDR chunk");
+
+            var ordered = fcs.OrderBy(f => f.SequenceNumber).ToList();
+            bool defaultIsFirst = false;
+
+            // If there is a default image AND it corresponds to animation frame 0
+            // (SequenceNumber == 0), merge the default IDAT data into frame 0's chunk list.
+            if (defaults.Count > 0 && ordered.Count > 0 && ordered[0].SequenceNumber == 0)
+            {
+                ordered[0].FrameDataChunks.InsertRange(0, defaults);
+                defaultIsFirst = true;
+            }
+
+            return new ApngData
+            {
+                IhdrChunk = ihdr,
+                GlobalChunks = [.. global.Where(x => x.Type != "IHDR")],
+                FrameControls = ordered,
+                IsDefaultImageFirstFrame = defaultIsFirst,
+                CanvasWidth = BinaryPrimitives.ReadUInt32BigEndian(ihdr.Data.Span),
+                CanvasHeight = BinaryPrimitives.ReadUInt32BigEndian(ihdr.Data.Span[4..])
+            };
         }
 
         /// <summary>
@@ -652,37 +637,42 @@ public partial class PngAnimator : IAnimator
         /// <param name="hPx">Frame height in pixels.</param>
         /// <param name="dev">Win2D device used to create the resulting <see cref="CanvasBitmap" />.</param>
         public static async Task<CanvasBitmap> ReconstructAndLoadCanvasBitmapAsync(
-            InMemoryRandomAccessStream ms, BinaryWriter w, byte[] ihdr, byte[] crcBuf,
+            MemoryStream ms, BinaryWriter w, byte[] ihdr, byte[] crcBuf,
             IEnumerable<PngChunk> globals, IEnumerable<PngChunk> data,
             uint wPx, uint hPx, CanvasDevice dev)
         {
-            ms.Size = 0;
-            ms.Seek(0);
+            ms.SetLength(0);
             w.Write(PngSig);
 
             Array.Copy(GetU32BE(wPx), 0, ihdr, 0, 4);
             Array.Copy(GetU32BE(hPx), 0, ihdr, 4, 4);
 
             WriteChunk(w, "IHDR", ihdr, ref crcBuf);
-            foreach (var c in globals) WriteChunk(w, c.Type, c.Data, ref crcBuf);
-            foreach (var c in data) WriteChunk(w, c.Type, c.Data, ref crcBuf);
+            foreach (var c in globals) WriteChunk(w, c.Type, c.Data.Span, ref crcBuf);
+            foreach (var c in data) WriteChunk(w, c.Type, c.Data.Span, ref crcBuf);
             WriteChunk(w, "IEND", [], ref crcBuf);
 
-            await w.BaseStream.FlushAsync();
-            ms.Seek(0);
-            return await CanvasBitmap.LoadAsync(dev, ms);
+            w.Flush();
+            // Closed before the next frame reuses the buffer.
+            using var png = ClosableStream.Open(ms);
+            return await CanvasBitmap.LoadAsync(dev, png.Stream);
         }
 
-        /// <summary>Reads all PNG chunks from <paramref name="r" /> until IEND or end-of-stream.</summary>
-        private static List<PngChunk> ReadAllChunks(BinaryReader r)
+        /// <summary>
+        ///     Reads all PNG chunks of <paramref name="file" /> (after the signature) until IEND or the end of the
+        ///     file. A chunk cut short by the end of the file keeps what is there.
+        /// </summary>
+        private static List<PngChunk> ReadAllChunks(byte[] file)
         {
             var res = new List<PngChunk>();
-            while (r.BaseStream.Position < r.BaseStream.Length)
+            long pos = 8;
+            while (pos + 8 <= file.Length)
             {
-                var len = ReadU32BE(r);
-                var type = Encoding.ASCII.GetString(r.ReadBytes(4));
-                var data = r.ReadBytes((int)len);
-                r.ReadBytes(4); // CRC � verified by the PNG decoder; skipped here for speed.
+                long len = BinaryPrimitives.ReadUInt32BigEndian(file.AsSpan((int)pos));
+                var type = Encoding.ASCII.GetString(file, (int)pos + 4, 4);
+                int start = (int)pos + 8;
+                var data = file.AsMemory(start, (int)Math.Min(len, file.Length - start));
+                pos = start + len + 4; // CRC: verified by the PNG decoder; skipped here for speed.
                 res.Add(new PngChunk { Type = type, Data = data });
                 if (type == "IEND") break;
             }
@@ -693,18 +683,18 @@ public partial class PngAnimator : IAnimator
         /// <summary>Parses a raw fcTL chunk payload into a <see cref="FrameControl" />.</summary>
         private static FrameControl ParseFc(PngChunk c)
         {
-            using var r = new BinaryReader(new MemoryStream(c.Data));
+            var d = c.Data.Span;
             return new FrameControl
             {
-                SequenceNumber = ReadU32BE(r),
-                Width = ReadU32BE(r),
-                Height = ReadU32BE(r),
-                XOffset = ReadU32BE(r),
-                YOffset = ReadU32BE(r),
-                DelayNum = ReadU16BE(r),
-                DelayDen = ReadU16BE(r),
-                DisposeOp = r.ReadByte(),
-                BlendOp = r.ReadByte()
+                SequenceNumber = BinaryPrimitives.ReadUInt32BigEndian(d),
+                Width = BinaryPrimitives.ReadUInt32BigEndian(d[4..]),
+                Height = BinaryPrimitives.ReadUInt32BigEndian(d[8..]),
+                XOffset = BinaryPrimitives.ReadUInt32BigEndian(d[12..]),
+                YOffset = BinaryPrimitives.ReadUInt32BigEndian(d[16..]),
+                DelayNum = BinaryPrimitives.ReadUInt16BigEndian(d[20..]),
+                DelayDen = BinaryPrimitives.ReadUInt16BigEndian(d[22..]),
+                DisposeOp = d[24],
+                BlendOp = d[25]
             };
         }
 
@@ -713,12 +703,7 @@ public partial class PngAnimator : IAnimator
         ///     number prefix from the payload. The resulting chunk is structurally identical
         ///     to a standard IDAT chunk and can be decoded by any PNG decoder.
         /// </summary>
-        private static PngChunk ConvertFdat(PngChunk f)
-        {
-            var d = new byte[f.Data.Length - 4];
-            Array.Copy(f.Data, 4, d, 0, d.Length);
-            return new PngChunk { Type = "IDAT", Data = d };
-        }
+        private static PngChunk ConvertFdat(PngChunk f) => new() { Type = "IDAT", Data = f.Data[4..] };
 
         /// <summary>
         ///     Writes a complete PNG chunk to <paramref name="w" />:
@@ -734,7 +719,7 @@ public partial class PngAnimator : IAnimator
         ///         array copy is allocated regardless of whether the buffer is larger than needed.
         ///     </para>
         /// </summary>
-        private static void WriteChunk(BinaryWriter w, string t, byte[] d, ref byte[] crcBuf)
+        private static void WriteChunk(BinaryWriter w, string t, ReadOnlySpan<byte> d, ref byte[] crcBuf)
         {
             // The CRC input is the 4-byte type tag immediately followed by the chunk data.
             int needed = 4 + d.Length;
@@ -743,7 +728,7 @@ public partial class PngAnimator : IAnimator
 
             // Encode the 4-byte chunk type directly into the scratch buffer � no temp array.
             Encoding.ASCII.GetBytes(t, 0, 4, crcBuf, 0);
-            if (d.Length > 0) Buffer.BlockCopy(d, 0, crcBuf, 4, d.Length);
+            d.CopyTo(crcBuf.AsSpan(4));
 
             WriteU32BE(w, (uint)d.Length);
             w.Write(crcBuf, 0, 4); // write type tag bytes
@@ -753,24 +738,6 @@ public partial class PngAnimator : IAnimator
             // This covers exactly the type + data bytes regardless of the buffer's full length,
             // without creating a trimmed byte[] copy that the byte[] overload would require.
             WriteU32BE(w, Crc32.Compute(crcBuf.AsSpan(0, needed)));
-        }
-
-        /// <summary>Reads a 32-bit big-endian unsigned integer from a byte array at <paramref name="o" />.</summary>
-        private static uint ReadU32BE(byte[] b, int o)
-        {
-            return ((uint)b[o] << 24) | ((uint)b[o + 1] << 16) | ((uint)b[o + 2] << 8) | b[o + 3];
-        }
-
-        /// <summary>Reads a 32-bit big-endian unsigned integer from a <see cref="BinaryReader" />.</summary>
-        private static uint ReadU32BE(BinaryReader r)
-        {
-            return ((uint)r.ReadByte() << 24) | ((uint)r.ReadByte() << 16) | ((uint)r.ReadByte() << 8) | r.ReadByte();
-        }
-
-        /// <summary>Reads a 16-bit big-endian unsigned integer from a <see cref="BinaryReader" />.</summary>
-        private static ushort ReadU16BE(BinaryReader r)
-        {
-            return (ushort)((r.ReadByte() << 8) | r.ReadByte());
         }
 
         /// <summary>Writes a 32-bit big-endian unsigned integer to a <see cref="BinaryWriter" />.</summary>

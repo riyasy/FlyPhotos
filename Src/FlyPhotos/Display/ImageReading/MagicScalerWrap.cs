@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
 using NLog;
 using PhotoSauce.MagicScaler;
@@ -51,7 +52,8 @@ internal static class MagicScalerWrap
                     using var pipeline = MagicImageProcessor.BuildPipeline(file.Path, settings);
                     using var ms = new MemoryStream(256 * 1024); // pre-size to avoid repeated buffer doublings
                     pipeline.WriteOutput(ms);
-                    canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, ms.AsRandomAccessStream());
+                    using var jpeg = ClosableStream.Open(ms);
+                    canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, jpeg.Stream);
                 }
 
                 return (true, new PreviewDisplayItem(canvasBitmap, Origin.Disk, metadata));

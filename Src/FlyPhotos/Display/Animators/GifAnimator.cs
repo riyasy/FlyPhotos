@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
@@ -10,6 +9,7 @@ using Windows.Graphics.Imaging;
 using Windows.Storage.Streams;
 using Microsoft.Graphics.Canvas;
 using Microsoft.UI;
+using FlyPhotos.Infra.Interop;
 
 namespace FlyPhotos.Display.Animators;
 
@@ -104,10 +104,10 @@ public partial class GifAnimator : IAnimator
     private readonly BitmapDecoder _decoder;
 
     /// <summary>
-    ///     Stream wrapping the raw GIF bytes. Kept alive for the lifetime of the animator
+    ///     Stream over the raw GIF bytes. Kept alive for the lifetime of the animator
     ///     because <see cref="_decoder" /> reads from it on every <c>GetFrameAsync</c> call.
     /// </summary>
-    private readonly IRandomAccessStream _stream;
+    private readonly ClosableStream.Opened _stream;
 
     /// <summary>Pre-parsed metadata for all frames, indexed by frame number.</summary>
     private readonly List<FrameMetadata> _frameMetadata;
@@ -197,7 +197,7 @@ public partial class GifAnimator : IAnimator
     private GifAnimator(
         ICanvasResourceCreatorWithDpi canvas,
         BitmapDecoder decoder,
-        IRandomAccessStream stream,
+        ClosableStream.Opened stream,
         List<FrameMetadata> metadata)
     {
         _decoder = decoder;
@@ -246,20 +246,18 @@ public partial class GifAnimator : IAnimator
     /// <returns>A fully initialised <see cref="GifAnimator" /> ready for <see cref="UpdateAsync" /> calls.</returns>
     public static async Task<GifAnimator> CreateAsync(byte[] gifData, ICanvasResourceCreatorWithDpi canvas)
     {
-        // AsRandomAccessStream() wraps but does not own the underlying MemoryStream,
-        // so both must be named locals to ensure both are disposed on the failure path.
-        var memoryStream = new MemoryStream(gifData);
-        var randomAccessStream = memoryStream.AsRandomAccessStream();
+        // Not MemoryStream.AsRandomAccessStream(): the GIF decoder reads in <= 4 KB pieces every frame, and each read
+        // through that adapter costs ~38 µs (31-64% of a loop).
+        var stream = ClosableStream.Open(gifData);
         try
         {
-            var decoder = await BitmapDecoder.CreateAsync(randomAccessStream);
+            var decoder = await BitmapDecoder.CreateAsync(stream.Stream);
             var metadata = await ReadAllFrameMetadataAsync(decoder);
-            return new GifAnimator(canvas, decoder, randomAccessStream, metadata);
+            return new GifAnimator(canvas, decoder, stream, metadata);
         }
         catch
         {
-            randomAccessStream.Dispose();
-            memoryStream.Dispose();
+            stream.Dispose();
             throw;
         }
     }

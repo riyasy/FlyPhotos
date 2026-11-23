@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Windows.Graphics.DirectX;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
+using FlyPhotos.Infra.Interop;
 using ImageMagick;
 using ImageMagick.Formats;
 using Microsoft.Graphics.Canvas;
@@ -46,8 +47,8 @@ internal static class MagickNetWrap
             var height = verticalOrientation ? pingImage.Width : pingImage.Height;
             var metadata = new ImageMetadata(width, height);
 
-            using var stream = new MemoryStream(previewData).AsRandomAccessStream();
-            var (pixels, w, h, _, _) = await CappedDecode.DecodeAsync(stream);
+            using var stream = ClosableStream.Open(previewData);
+            var (pixels, w, h, _, _) = await CappedDecode.DecodeAsync(stream.Stream);
             var bitmap = CanvasBitmap.CreateFromBytes(resourceCreator, pixels, (int)w, (int)h,
                 DirectXPixelFormat.B8G8R8A8UIntNormalized);
             return (true, new PreviewDisplayItem(bitmap, Origin.Disk, metadata));
@@ -97,9 +98,9 @@ internal static class MagickNetWrap
                 image.Format = MagickFormat.Jpeg;
                 image.Quality = 80;
                 await image.WriteAsync(stream);
-                stream.Position = 0;
 
-                bitmap = await CanvasBitmap.LoadAsync(resourceCreator, stream.AsRandomAccessStream());
+                using var jpeg = ClosableStream.Open(stream);
+                bitmap = await CanvasBitmap.LoadAsync(resourceCreator, jpeg.Stream);
             }
 
             return (true, new PreviewDisplayItem(bitmap, Origin.Disk, metadata));
@@ -224,8 +225,8 @@ internal static class MagickNetWrap
             var previewData = image.GetProfile("dng:thumbnail")?.ToByteArray();
             if (previewData == null) return (false, null);
 
-            using var stream = new MemoryStream(previewData);
-            var bitmap = await CanvasBitmap.LoadAsync(resourceCreator, stream.AsRandomAccessStream());
+            using var stream = ClosableStream.Open(previewData);
+            var bitmap = await CanvasBitmap.LoadAsync(resourceCreator, stream.Stream);
             return (true, bitmap);
         }
         catch

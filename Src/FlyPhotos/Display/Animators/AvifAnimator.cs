@@ -58,12 +58,11 @@ public partial class AvifAnimator : IAnimator
     private IntPtr _nativeHandle;
 
     /// <summary>
-    ///     Pointer to the unmanaged memory block holding the raw AVIF file bytes.
-    ///     Allocated via <c>Marshal.AllocHGlobal</c> in <see cref="CreateAsync" /> and
-    ///     kept alive for the lifetime of the animator because the native decoder reads
-    ///     from it on every <c>DecodeNextAvifFrame</c> call. Freed in <see cref="Dispose(bool)" />.
+    ///     Pins the display item's file bytes, which the native decoder reads in place on every
+    ///     <c>DecodeNextAvifFrame</c> call: no second copy. Pinning costs nothing for an array on the
+    ///     large-object heap, which isn't compacted by default. Freed in <see cref="Dispose(bool)" />.
     /// </summary>
-    private IntPtr _unmanagedFileData;
+    private GCHandle _fileDataPin;
 
     /// <summary>
     ///     CPU-side pixel buffer that receives decoded frame data from the native decoder.
@@ -165,10 +164,10 @@ public partial class AvifAnimator : IAnimator
     ///     Performs only GPU resource creation � no native decode work happens here.
     ///     Must be called on the Win2D device thread (not inside <c>Task.Run</c>).
     /// </summary>
-    private AvifAnimator(IntPtr handle, IntPtr unmanagedFileData, ICanvasResourceCreatorWithDpi canvas)
+    private AvifAnimator(IntPtr handle, GCHandle fileDataPin, ICanvasResourceCreatorWithDpi canvas)
     {
         _nativeHandle = handle;
-        _unmanagedFileData = unmanagedFileData;
+        _fileDataPin = fileDataPin;
 
         PixelWidth = (uint)NativeAvifBridge.GetAvifCanvasWidth(handle);
         PixelHeight = (uint)NativeAvifBridge.GetAvifCanvasHeight(handle);
@@ -206,41 +205,35 @@ public partial class AvifAnimator : IAnimator
     /// <returns>A fully initialised <see cref="AvifAnimator" /> ready for <see cref="UpdateAsync" /> calls.</returns>
     public static async Task<AvifAnimator> CreateAsync(byte[] fileData, ICanvasResourceCreatorWithDpi canvas)
     {
-        // Phase 1 (threadpool): native allocation and decoder open � CPU-only work.
-        // The file bytes are copied into unmanaged memory so the native decoder can hold a
-        // raw pointer without pinning the managed array, allowing the GC to compact the heap.
-        var (handle, unmanagedMemory) = await Task.Run(() =>
-        {
-            IntPtr mem = Marshal.AllocHGlobal(fileData.Length);
-            try
-            {
-                Marshal.Copy(fileData, 0, mem, fileData.Length);
-
-                IntPtr h = NativeAvifBridge.OpenAvifAnimation(mem, (nuint)fileData.Length);
-                if (h == IntPtr.Zero)
-                    throw new InvalidOperationException("Failed to open animated AVIF via native decoder.");
-
-                return (h, mem);
-            }
-            catch
-            {
-                Marshal.FreeHGlobal(mem);
-                throw;
-            }
-        });
-
-        // Phase 2 (calling thread): GPU resource creation.
-        // unmanagedMemory is owned by this scope until the constructor takes it.
-        // If the constructor throws, both the native handle and unmanaged memory are
-        // cleaned up here; there is no other scope that holds a copy of the pointer.
+        // Phase 1 (threadpool): decoder open � CPU-only work. The decoder reads the pinned bytes in place.
+        var pin = GCHandle.Alloc(fileData, GCHandleType.Pinned);
+        IntPtr handle;
         try
         {
-            return new AvifAnimator(handle, unmanagedMemory, canvas);
+            handle = await Task.Run(() =>
+            {
+                IntPtr h = NativeAvifBridge.OpenAvifAnimation(pin.AddrOfPinnedObject(), (nuint)fileData.Length);
+                if (h == IntPtr.Zero)
+                    throw new InvalidOperationException("Failed to open animated AVIF via native decoder.");
+                return h;
+            });
+        }
+        catch
+        {
+            pin.Free();
+            throw;
+        }
+
+        // Phase 2 (calling thread): GPU resource creation. If the constructor throws, the native
+        // handle and the pin are released here; no other scope holds them.
+        try
+        {
+            return new AvifAnimator(handle, pin, canvas);
         }
         catch
         {
             NativeAvifBridge.CloseAvifAnimation(handle);
-            Marshal.FreeHGlobal(unmanagedMemory);
+            pin.Free();
             throw;
         }
     }
@@ -391,11 +384,8 @@ public partial class AvifAnimator : IAnimator
             _nativeHandle = IntPtr.Zero;
         }
 
-        if (_unmanagedFileData != IntPtr.Zero)
-        {
-            Marshal.FreeHGlobal(_unmanagedFileData);
-            _unmanagedFileData = IntPtr.Zero;
-        }
+        // After the native close: the decoder no longer reads the bytes.
+        if (_fileDataPin.IsAllocated) _fileDataPin.Free();
 
         // _pixelBuffer lives on the Pinned Object Heap: there is no GCHandle to release,
         // and it is reclaimed by the GC once this instance becomes unreachable. The native

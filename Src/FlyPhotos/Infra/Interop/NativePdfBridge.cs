@@ -14,13 +14,14 @@ using WinRT;
 namespace FlyPhotos.Infra.Interop;
 
 /// <summary>
-/// An open PDF: the Windows.Data.Pdf document and the file stream under it. The stream is opened with delete and
-/// write sharing, so the file can be renamed or deleted while it is on screen. Dispose to close the file.
+/// An open PDF: the Windows.Data.Pdf document and the file under it. The file is opened with delete and write
+/// sharing, so it can be renamed or deleted while it is on screen. Dispose to close the file: the document holds
+/// its stream until a GC, so the handle must close independently of it.
 /// </summary>
 internal sealed partial class PdfFile : IDisposable
 {
     /// <summary>The file, read by the document for as long as it is open.</summary>
-    private readonly FileStream _stream;
+    private readonly ClosableStream.Opened _stream;
 
     /// <summary>The file's last write time and length when opened, to notice it being overwritten or replaced.</summary>
     private readonly (DateTime Written, long Length) _stamp;
@@ -29,11 +30,8 @@ internal sealed partial class PdfFile : IDisposable
     public PdfDocument Document { get; }
 
     /// <summary>Use <see cref="OpenAsync"/>.</summary>
-    private PdfFile(FileStream stream, PdfDocument document)
-    {
-        (_stream, Document) = (stream, document);
-        _stamp = (File.GetLastWriteTimeUtc(stream.SafeFileHandle), stream.Length);
-    }
+    private PdfFile(ClosableStream.Opened stream, (DateTime, long) stamp, PdfDocument document) =>
+        (_stream, _stamp, Document) = (stream, stamp, document);
 
     /// <summary>
     /// Whether a file is at <paramref name="path"/> and it isn't the one this opened, as it was: written to since,
@@ -60,14 +58,18 @@ internal sealed partial class PdfFile : IDisposable
     /// </summary>
     public static async Task<PdfFile> OpenAsync(string path)
     {
-        var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+        var file = File.OpenHandle(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+        // Not FileStream.AsRandomAccessStream(): the document reads in many small pieces (3,000 to open a
+        // 1000-page file), and each costs ~100 µs through that adapter.
+        var stream = ClosableStream.Open(file);
         try
         {
-            return new PdfFile(stream, await PdfDocument.LoadFromStreamAsync(stream.AsRandomAccessStream()));
+            var stamp = (File.GetLastWriteTimeUtc(file), RandomAccess.GetLength(file));
+            return new PdfFile(stream, stamp, await PdfDocument.LoadFromStreamAsync(stream.Stream));
         }
         catch
         {
-            await stream.DisposeAsync();
+            stream.Dispose();
             throw;
         }
     }

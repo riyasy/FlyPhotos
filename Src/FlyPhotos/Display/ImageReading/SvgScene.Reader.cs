@@ -8,6 +8,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI;
+using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.Geometry;
@@ -209,8 +210,8 @@ internal sealed partial class SvgScene
     {
         try
         {
-            using var ms = NativeStream(stream + pos, length);
-            return await CanvasBitmap.LoadAsync(rc, ms.AsRandomAccessStream(), 96f);
+            using var image = OpenNative(stream + pos, length);
+            return await CanvasBitmap.LoadAsync(rc, image.Stream, 96f);
         }
         catch (Exception)
         {
@@ -219,7 +220,7 @@ internal sealed partial class SvgScene
     }
 
     /// <summary>A read-only stream over <paramref name="length"/> bytes of native memory at <paramref name="at"/>.</summary>
-    private static unsafe UnmanagedMemoryStream NativeStream(nint at, int length) => new((byte*)at, length);
+    private static unsafe ClosableStream.Opened OpenNative(nint at, int length) => ClosableStream.Open((byte*)at, length);
 
     /// <summary>Reads nodes until <see cref="NodeTag.End"/>.</summary>
     private static Node[] ReadChildren(Reader r)

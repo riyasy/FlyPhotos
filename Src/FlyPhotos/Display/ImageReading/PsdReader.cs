@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
 using NLog;
 
@@ -17,8 +18,8 @@ internal static class PsdReader
         {
             try
             {
-                using var stream = new MemoryStream(thumbnailData);
-                CanvasBitmap bitmap = await CanvasBitmap.LoadAsync(ctrl, stream.AsRandomAccessStream());
+                using var stream = ClosableStream.Open(thumbnailData);
+                CanvasBitmap bitmap = await CanvasBitmap.LoadAsync(ctrl, stream.Stream);
                 var metaData = new ImageMetadata(width, height);
                 return (true, new PreviewDisplayItem(bitmap, Origin.Disk, metaData));
             }

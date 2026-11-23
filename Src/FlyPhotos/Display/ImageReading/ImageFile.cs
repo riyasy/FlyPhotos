@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Storage.Streams;
+using FlyPhotos.Infra.Interop;
 using FlyPhotos.Services;
 using NLog;
 
@@ -25,6 +26,9 @@ internal sealed class ImageFile : IDisposable
 
     /// <summary>The shared stream, opened by the first reader that asks; null when closed.</summary>
     private IRandomAccessStream? _stream;
+
+    /// <summary>What <see cref="_stream"/> reads when it is over <see cref="_bytes"/> (a network file); else null.</summary>
+    private ClosableStream.Opened? _overBytes;
 
     /// <summary>The open stream can serve a full read: opened buffered, or found to be a local file.</summary>
     private bool _streamReadyForFullRead;
@@ -82,7 +86,17 @@ internal sealed class ImageFile : IDisposable
 
         if (_stream == null)
         {
-            _stream = await StorageOps.GetWin2DPerformantStream(Path, useBufferForNwPaths: fullRead);
+            if (fullRead && StorageOps.ShouldBufferFile(Path))
+            {
+                // Read whole and closed (#87); decoders and GetBytesAsync share the one array.
+                _bytes ??= await File.ReadAllBytesAsync(Path);
+                _overBytes = ClosableStream.Open(_bytes);
+                _stream = _overBytes.Stream;
+            }
+            else
+            {
+                _stream = await StorageOps.GetWin2DPerformantStream(Path, useBufferForNwPaths: false);
+            }
             _streamReadyForFullRead = fullRead;
         }
         _stream.Seek(0);
@@ -104,8 +118,9 @@ internal sealed class ImageFile : IDisposable
     /// <summary>Releases the shared stream but keeps the cached bytes.</summary>
     private void CloseStreamOnly()
     {
-        _stream?.Dispose();
-        _stream = null;
+        if (_overBytes != null) _overBytes.Dispose(); // disposes _stream too
+        else _stream?.Dispose();
+        (_stream, _overBytes) = (null, null);
     }
 
     /// <summary>

@@ -11,6 +11,7 @@ using Windows.Storage.Streams;
 using Windows.UI;
 using Microsoft.Graphics.Canvas;
 using Microsoft.UI;
+using FlyPhotos.Infra.Interop;
 using NLog;
 
 namespace FlyPhotos.Display.Animators;
@@ -133,7 +134,7 @@ public partial class WebpAnimator : IAnimator
     ///     Stream wrapping the raw WebP bytes. Kept alive for the lifetime of the animator
     ///     because <see cref="_decoder" /> reads from it on every <c>GetFrameAsync</c> call.
     /// </summary>
-    private readonly IRandomAccessStream _stream;
+    private readonly ClosableStream.Opened _stream;
 
     /// <summary>Pre-converted metadata for every animation frame, indexed by frame order.</summary>
     private readonly List<FrameMetadata> _frameMetadata;
@@ -226,7 +227,7 @@ public partial class WebpAnimator : IAnimator
     private WebpAnimator(
         ICanvasResourceCreatorWithDpi canvas,
         BitmapDecoder decoder,
-        IRandomAccessStream stream,
+        ClosableStream.Opened stream,
         uint canvasWidth,
         uint canvasHeight,
         Color backgroundColor,
@@ -288,13 +289,10 @@ public partial class WebpAnimator : IAnimator
         // WIC BitmapProperties does not expose any of these values for WebP.
         var parsed = Parser.Parse(webpData);
 
-        // AsRandomAccessStream() wraps but does not own the underlying MemoryStream,
-        // so both must be named locals to ensure both are disposed on the failure path.
-        var memStream = new MemoryStream(webpData);
-        var stream = memStream.AsRandomAccessStream();
+        var stream = ClosableStream.Open(webpData);
         try
         {
-            var decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.WebpDecoderId, stream);
+            var decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.WebpDecoderId, stream.Stream);
             if (decoder.FrameCount == 0) throw new ArgumentException("WebP contains no frames.");
 
             var metadata = BuildMetadata(parsed, decoder);
@@ -308,7 +306,6 @@ public partial class WebpAnimator : IAnimator
         catch
         {
             stream.Dispose();
-            memStream.Dispose();
             throw;
         }
     }
@@ -522,8 +519,6 @@ public partial class WebpAnimator : IAnimator
     {
         _compositedSurface?.Dispose();
         _reusablePatchTexture?.Dispose();
-        // _stream owns the MemoryStream wrapping the raw WebP bytes. BitmapDecoder does not
-        // implement IDisposable in its C# projection; its COM channel releases when _stream closes.
         _stream?.Dispose();
         GC.SuppressFinalize(this);
     }

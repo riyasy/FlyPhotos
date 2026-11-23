@@ -4,6 +4,7 @@ using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Effects;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using FlyPhotos.Display.ImageReading;
+using FlyPhotos.Infra.Interop;
 using Microsoft.UI;
 using System;
 using System.Buffers;
@@ -325,12 +326,11 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
             if (imageData != null)
                 try
                 {
-                    // Decode outside the lock: CanvasBitmap.LoadAsync is the
-                    // dominant cost here and does not touch the database.
-                    // Wrap the rented segment — MemoryStream over an existing
-                    // buffer does not copy; it is a free view.
-                    using var ms = new MemoryStream(imageData, 0, dataLength, false);
-                    var bitmap = await CanvasBitmap.LoadAsync(canvasControl, ms.AsRandomAccessStream());
+                    // Decode outside the lock: it doesn't touch the database. Not
+                    // MemoryStream.AsRandomAccessStream(): WIC's seeks through that adapter cost ~25% per hit.
+                    // Closed before the buffer goes back to the pool (end of this block, before finally).
+                    using var stream = ClosableStream.Open(imageData, dataLength);
+                    var bitmap = await CanvasBitmap.LoadAsync(canvasControl, stream.Stream);
                     return (bitmap, actualWidth, actualHeight);
                 }
                 finally
