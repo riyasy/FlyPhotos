@@ -87,8 +87,8 @@ internal sealed class ViewController
     private bool _onPlaceholder;
 
     /// <summary>
-    /// The remembered view restored for the photo on screen. Kept until the photo's own image arrives (its HQ after the
-    /// preview), which then gets the exact scale it was saved at, or until the user changes the view.
+    /// The remembered view restored for the photo on screen, or (Retain) the view on the last image left. Kept until
+    /// the photo's HQ arrives, which gets its exact scale if it is an image of that size, or until the user changes the view.
     /// </summary>
     private PerPhotoViewStore.RestoredView? _remembered;
 
@@ -208,7 +208,7 @@ internal sealed class ViewController
                 Upgrade(imageSize, exifDelta, perPhoto);
                 break;
             default:
-                Navigate(imageSize, exifRotation, exifDelta, arrival, perPhoto);
+                Navigate(imageSize, exifRotation, exifDelta, arrival, perPhoto, level);
                 break;
         }
         if (!placeholder) _imagePixelsPerPhotoPixel = perPhoto; // after Upgrade and Retain, which measure by the image before
@@ -280,11 +280,17 @@ internal sealed class ViewController
     /// <param name="exifDelta">The new image's EXIF rotation less the old one's.</param>
     /// <param name="arrival">NewPhoto or FirstRealImage: after a placeholder, Retain keeps the user's rotation.</param>
     /// <param name="perPhoto">The new image's pixels per photo pixel, null when unknown.</param>
-    private void Navigate(Size imageSize, int exifRotation, int exifDelta, ViewArrival arrival, float? perPhoto)
+    /// <param name="level">An HQ takes the retained view at once; a preview or placeholder keeps it for its HQ.</param>
+    private void Navigate(Size imageSize, int exifRotation, int exifDelta, ViewArrival arrival, float? perPhoto,
+        DisplayLevel level)
     {
         StopMotion(); // so Retain inherits where the user was heading, not a mid-flight frame
         var centre = CentreOnImage();
         var retainedScale = SamePhotoSizeScale(perPhoto);
+        // The view on the last real image left, kept through a placeholder or an untouched preview: an image of its
+        // size gets its exact scale back, as the photos' sizes by metadata can disagree (or be unknown).
+        var left = _remembered ?? (_onPlaceholder ? null
+            : new PerPhotoViewStore.RestoredView(PhotoZoom, centre, _view.Rotation, _view.ImageSize, _view.Scale));
         _view = _view with { ImageRect = Layout(imageSize) };
         _remembered = null;
 
@@ -307,7 +313,11 @@ internal sealed class ViewController
                 // A new photo takes its own EXIF rotation; after a placeholder the user's rotation carries over.
                 _view = _view with { Rotation = arrival == ViewArrival.NewPhoto ? exifRotation : _view.Rotation + exifDelta };
                 if (_fitted) PlaceFitted();
-                else PlaceAt(retainedScale, centre);
+                else
+                {
+                    PlaceAt(left?.ScaleOn(imageSize) ?? retainedScale, centre);
+                    if (level != DisplayLevel.Hq) _remembered = left; // Upgrade gives its HQ the exact scale
+                }
                 break;
         }
     }

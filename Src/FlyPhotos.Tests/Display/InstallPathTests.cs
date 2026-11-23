@@ -1,4 +1,4 @@
-﻿using FlyPhotos.Core.Model;
+using FlyPhotos.Core.Model;
 using FlyPhotos.Display.Canvas;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Tests.Display.Harness;
@@ -410,7 +410,6 @@ public sealed class InstallPathTests
     [DataRow("arw embedded")]
     [DataRow("arw rawler")]
     [DataRow("jpeg")]
-    [Ignore("Known bug: the RAW kinds come back at 100.47% (CR3) to 373% (embedded-JPEG ARW) until it is fixed")]
     public void Retain_FarJumpAndBack_LeavingBeforeThePreviewLoads_KeepsTrue100(string kind)
     {
         AppConfig.Settings.PanZoomBehaviourOnNavigation = PanZoomBehaviourOnNavigation.RetainFromLastPhoto;
