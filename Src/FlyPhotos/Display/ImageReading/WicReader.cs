@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Windows.Graphics.DirectX;
 using Windows.Graphics.Imaging;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
@@ -45,7 +44,7 @@ internal static class WicReader
     /// <summary>
     /// Decodes and resizes any WIC-supported image to a preview, capped at
     /// <paramref name="maxDimension"/> on the longest side. Uses a single BitmapDecoder
-    /// pass — WIC applies the resize natively inside GetPixelDataAsync.
+    /// pass — WIC applies the resize natively inside the decode.
     /// Works for JPEG, PNG, GIF (frame 0), TIFF (frame 0), BMP, and any other
     /// format WIC can auto-detect.
     /// </summary>
@@ -54,11 +53,11 @@ internal static class WicReader
     {
         try
         {
-            var (pixels, width, height, fullWidth, fullHeight) =
+            var (preview, fullWidth, fullHeight) =
                 await CappedDecode.DecodeAsync(await file.GetPartialReadStreamAsync(), maxDimension);
-            var bitmap = CanvasBitmap.CreateFromBytes(ctrl, pixels, (int)width, (int)height,
-                DirectXPixelFormat.B8G8R8A8UIntNormalized);
-            return (true, new PreviewDisplayItem(bitmap, Origin.Disk, new ImageMetadata(fullWidth, fullHeight)));
+            using (preview)
+                return (true, new PreviewDisplayItem(preview.ToCanvasBitmap(ctrl), Origin.Disk,
+                    new ImageMetadata(fullWidth, fullHeight)));
         }
         catch (Exception ex)
         {
@@ -208,9 +207,8 @@ internal static class WicReader
             CanvasBitmap canvasBitmap;
             if (tooLarge)
             {
-                var (pixels, width, height, _, _) = await CappedDecode.DecodeAsync(preview);
-                canvasBitmap = CanvasBitmap.CreateFromBytes(ctrl, pixels, (int)width, (int)height,
-                    DirectXPixelFormat.B8G8R8A8UIntNormalized);
+                using var scaled = (await CappedDecode.DecodeAsync(preview)).Bitmap;
+                canvasBitmap = scaled.ToCanvasBitmap(ctrl);
             }
             else
             {

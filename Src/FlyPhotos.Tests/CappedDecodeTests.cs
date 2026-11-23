@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices.WindowsRuntime;
 using FlyPhotos.Display.ImageReading;
 using Windows.Foundation;
 using Windows.Graphics.Imaging;
@@ -30,35 +31,58 @@ public sealed class CappedDecodeTests
     [TestMethod]
     public async Task A_large_jpeg_is_decoded_at_preview_size()
     {
-        var (pixels, w, h, fw, fh) = await CappedDecode.DecodeAsync(await Jpeg(2400, 1200));
-        Assert.AreEqual((800u, 400u, 2400u, 1200u), (w, h, fw, fh));
-        Assert.AreEqual(800 * 400 * 4, pixels.Length);
+        var (bitmap, fw, fh) = await CappedDecode.DecodeAsync(await Jpeg(2400, 1200));
+        using (bitmap) Assert.AreEqual((800, 400, 2400u, 1200u), (bitmap.PixelWidth, bitmap.PixelHeight, fw, fh));
     }
 
     [TestMethod]
     public async Task A_small_jpeg_is_decoded_as_is()
     {
-        var (pixels, w, h, fw, fh) = await CappedDecode.DecodeAsync(await Jpeg(160, 120));
-        Assert.AreEqual((160u, 120u, 160u, 120u), (w, h, fw, fh));
-        Assert.AreEqual(160 * 120 * 4, pixels.Length);
+        var (bitmap, fw, fh) = await CappedDecode.DecodeAsync(await Jpeg(160, 120));
+        using (bitmap) Assert.AreEqual((160, 120, 160u, 120u), (bitmap.PixelWidth, bitmap.PixelHeight, fw, fh));
     }
 
     /// <summary>A portrait camera JPEG stored landscape with EXIF orientation 6 (rotate 90°) comes out upright.</summary>
     [TestMethod]
     public async Task An_exif_rotated_jpeg_is_decoded_upright()
     {
-        var (pixels, w, h, fw, fh) = await CappedDecode.DecodeAsync(await Jpeg(2400, 1200, orientation: 6));
-        Assert.AreEqual((400u, 800u, 1200u, 2400u), (w, h, fw, fh));
-        Assert.AreEqual(400 * 800 * 4, pixels.Length);
+        var (bitmap, fw, fh) = await CappedDecode.DecodeAsync(await Jpeg(2400, 1200, orientation: 6));
+        using (bitmap) Assert.AreEqual((400, 800, 1200u, 2400u), (bitmap.PixelWidth, bitmap.PixelHeight, fw, fh));
     }
 
-    /// <summary>A grey JPEG of the given size in memory, optionally with an EXIF orientation tag.</summary>
-    private static async Task<IRandomAccessStream> Jpeg(uint w, uint h, ushort orientation = 0)
+    /// <summary>The stored image's top-left 300 px square lands top-right, still square: rotated, not squashed.</summary>
+    [TestMethod]
+    public async Task An_exif_rotated_jpeg_is_not_squashed()
     {
+        var (bitmap, _, _) = await CappedDecode.DecodeAsync(await Jpeg(2400, 1200, orientation: 6, marker: true));
+        using (bitmap)
+        {
+            var px = new byte[bitmap.PixelWidth * bitmap.PixelHeight * 4];
+            bitmap.CopyToBuffer(px.AsBuffer());
+            int x0 = int.MaxValue, x1 = -1, y0 = int.MaxValue, y1 = -1;
+            for (int y = 0; y < bitmap.PixelHeight; y++)
+                for (int x = 0; x < bitmap.PixelWidth; x++)
+                    if (px[(y * bitmap.PixelWidth + x) * 4 + 2] > 128)
+                        (x0, x1, y0, y1) = (Math.Min(x0, x), Math.Max(x1, x), Math.Min(y0, y), Math.Max(y1, y));
+            // ±3 px for JPEG bleed; squashed, the square was 200 px wide.
+            Assert.AreEqual((399, 0), (x1, y0));
+            Assert.AreEqual(100, x1 - x0 + 1, 3);
+            Assert.AreEqual(100, y1 - y0 + 1, 3);
+        }
+    }
+
+    /// <summary>A grey JPEG of the given size in memory, optionally with an EXIF orientation tag and a red
+    /// 300 px square in its stored top-left corner.</summary>
+    private static async Task<IRandomAccessStream> Jpeg(uint w, uint h, ushort orientation = 0, bool marker = false)
+    {
+        var pixels = Enumerable.Repeat((byte)128, (int)(w * h * 4)).ToArray();
+        if (marker)
+            for (int y = 0; y < 300; y++)
+                for (int x = 0; x < 300; x++)
+                    (pixels[(y * w + x) * 4], pixels[(y * w + x) * 4 + 1], pixels[(y * w + x) * 4 + 2]) = ((byte)0, (byte)0, (byte)255);
         var stream = new InMemoryRandomAccessStream();
         var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
-        encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Ignore, w, h, 96, 96,
-            Enumerable.Repeat((byte)128, (int)(w * h * 4)).ToArray());
+        encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Ignore, w, h, 96, 96, pixels);
         if (orientation != 0)
         {
             var props = new Dictionary<string, BitmapTypedValue>

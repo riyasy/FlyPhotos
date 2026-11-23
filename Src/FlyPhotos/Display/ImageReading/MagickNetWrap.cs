@@ -48,9 +48,8 @@ internal static class MagickNetWrap
             var metadata = new ImageMetadata(width, height);
 
             using var stream = ClosableStream.Open(previewData);
-            var (pixels, w, h, _, _) = await CappedDecode.DecodeAsync(stream.Stream);
-            var bitmap = CanvasBitmap.CreateFromBytes(resourceCreator, pixels, (int)w, (int)h,
-                DirectXPixelFormat.B8G8R8A8UIntNormalized);
+            using var scaled = (await CappedDecode.DecodeAsync(stream.Stream)).Bitmap;
+            var bitmap = scaled.ToCanvasBitmap(resourceCreator);
             return (true, new PreviewDisplayItem(bitmap, Origin.Disk, metadata));
         }
         catch (Exception ex)

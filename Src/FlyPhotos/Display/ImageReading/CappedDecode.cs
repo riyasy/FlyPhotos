@@ -17,25 +17,26 @@ internal static class CappedDecode
 
     /// <summary>Decodes the first frame of any WIC-readable stream as premultiplied BGRA8, EXIF-oriented and in sRGB,
     /// scaled to fit <paramref name="maxDimension"/> on its longest side.</summary>
-    /// <returns>The pixels and their size, and the full image's oriented size.</returns>
-    public static async Task<(byte[] Pixels, uint Width, uint Height, uint FullWidth, uint FullHeight)> DecodeAsync(
+    /// <returns>The decoded preview (the caller disposes it), and the full image's oriented size.</returns>
+    public static async Task<(SoftwareBitmap Bitmap, uint FullWidth, uint FullHeight)> DecodeAsync(
         IRandomAccessStream stream, uint maxDimension = PreviewMaxSize)
     {
         var decoder = await BitmapDecoder.CreateAsync(stream);
         uint fullWidth = decoder.OrientedPixelWidth, fullHeight = decoder.OrientedPixelHeight;
-        var (width, height) = Fit(fullWidth, fullHeight, maxDimension);
+        // Scaled sizes are in the stored (pre-EXIF-rotation) space; oriented ones squash a quarter-turned image.
+        var (width, height) = Fit(decoder.PixelWidth, decoder.PixelHeight, maxDimension);
 
         var frame = await decoder.GetFrameAsync(0);
-        // Scaled sizes are in the oriented (post-EXIF-rotation) space.
         var transform = new BitmapTransform
         {
             ScaledWidth = width,
             ScaledHeight = height,
             InterpolationMode = BitmapInterpolationMode.Fant
         };
-        var data = await frame.GetPixelDataAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied, transform,
+        // A SoftwareBitmap, not GetPixelDataAsync: that hands back a managed LOH array per preview.
+        var bitmap = await frame.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied, transform,
             ExifOrientationMode.RespectExifOrientation, ColorManagementMode.ColorManageToSRgb);
-        return (data.DetachPixelData(), width, height, fullWidth, fullHeight);
+        return (bitmap, fullWidth, fullHeight);
     }
 
     /// <summary>
