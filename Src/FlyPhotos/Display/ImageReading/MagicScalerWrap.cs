@@ -1,7 +1,9 @@
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
+using FlyPhotos.Services;
 using Microsoft.Graphics.Canvas;
 using NLog;
 using PhotoSauce.MagicScaler;
@@ -29,7 +31,10 @@ internal static class MagicScalerWrap
         {
             try
             {
-                var fileInfo = ImageFileInfo.Load(file.Path);
+                // On a share each open by path is a round trip (~10 ms), so read it once; the bytes are shared
+                // with the chain's other readers.
+                byte[] bytes =StorageOps.ShouldBufferFile(file.Path) ? await file.GetBytesAsync() : null;
+                var fileInfo = bytes != null ? ImageFileInfo.Load(bytes) : ImageFileInfo.Load(file.Path);
                 int originalWidth = fileInfo.Frames[0].Width;
                 int originalHeight = fileInfo.Frames[0].Height;
                 var metadata = new ImageMetadata(originalWidth, originalHeight);
@@ -46,7 +51,9 @@ internal static class MagicScalerWrap
                 {
                     // Pulled here, not through WriteOutput: there a codec error is thrown inside a WIC callback,
                     // which no catch can reach, and the process dies.
-                    using var pipeline = MagicImageProcessor.BuildPipeline(file.Path, settings);
+                    using var pipeline = bytes != null
+                        ? MagicImageProcessor.BuildPipeline(new MemoryStream(bytes, false), settings)
+                        : MagicImageProcessor.BuildPipeline(file.Path, settings);
                     var source = pipeline.PixelSource;
                     int w = source.Width, h = source.Height;
                     int bpp = source.Format == PixelFormats.Bgra32bpp ? 4 : source.Format == PixelFormats.Bgr24bpp ? 3
