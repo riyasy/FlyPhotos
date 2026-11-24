@@ -12,51 +12,39 @@ using FlyPhotos.Infra.Interop;
 using ImageMagick;
 using ImageMagick.Formats;
 using Microsoft.Graphics.Canvas;
-using NLog;
 
 namespace FlyPhotos.Display.ImageReading;
 
 internal static class MagickNetWrap
 {
-    /// <summary>Logger instance for MagickNetWrap.</summary>
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
     /// <summary>
     /// A preview from the embedded camera preview JPEG of a RAW file, without a RAW decode. The JPEG is often
     /// full size (24 MP+), so it is scaled to the preview size while it is decoded.
     /// </summary>
-    public static async Task<(bool, PreviewDisplayItem)> GetEmbeddedForRawFile(
+    public static async Task<PreviewDisplayItem?> GetEmbeddedForRawFile(
         ICanvasResourceCreatorWithDpi resourceCreator, string path)
     {
-        try
-        {
-            // One ping gives the embedded JPEG (see LoadEmbeddedPreviewAsync) and the image size and orientation.
-            using var pingImage = new MagickImage();
-            pingImage.Settings.SetDefines(new DngReadDefines { ReadThumbnail = true });
-            pingImage.Ping(path);
+        // One ping gives the embedded JPEG (see LoadEmbeddedPreviewAsync) and the image size and orientation.
+        using var pingImage = new MagickImage();
+        pingImage.Settings.SetDefines(new DngReadDefines { ReadThumbnail = true });
+        pingImage.Ping(path);
 
-            var previewData = pingImage.GetProfile("dng:thumbnail")?.ToByteArray();
-            if (previewData == null) return (false, PreviewDisplayItem.Empty());
+        var previewData = pingImage.GetProfile("dng:thumbnail")?.ToByteArray();
+        if (previewData == null) return null;
 
-            var verticalOrientation = pingImage.Orientation == Orientation.RightTop ||
-                                      pingImage.Orientation == Orientation.LeftBottom ||
-                                      pingImage.Orientation == Orientation.RightBottom ||
-                                      pingImage.Orientation == Orientation.LeftTop;
+        var verticalOrientation = pingImage.Orientation == Orientation.RightTop ||
+                                  pingImage.Orientation == Orientation.LeftBottom ||
+                                  pingImage.Orientation == Orientation.RightBottom ||
+                                  pingImage.Orientation == Orientation.LeftTop;
 
-            var width = verticalOrientation ? pingImage.Height : pingImage.Width;
-            var height = verticalOrientation ? pingImage.Width : pingImage.Height;
-            var metadata = new ImageMetadata(width, height);
+        var width = verticalOrientation ? pingImage.Height : pingImage.Width;
+        var height = verticalOrientation ? pingImage.Width : pingImage.Height;
+        var metadata = new ImageMetadata(width, height);
 
-            using var stream = ClosableStream.Open(previewData);
-            using var scaled = (await CappedDecode.DecodeAsync(stream.Stream)).Bitmap;
-            var bitmap = scaled.ToCanvasBitmap(resourceCreator);
-            return (true, new PreviewDisplayItem(bitmap, Origin.Disk, metadata));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, $"Failed to extract embedded preview with ImageMagick: {path}");
-            return (false, PreviewDisplayItem.Empty());
-        }
+        using var stream = ClosableStream.Open(previewData);
+        using var scaled = (await CappedDecode.DecodeAsync(stream.Stream)).Bitmap;
+        var bitmap = scaled.ToCanvasBitmap(resourceCreator);
+        return new PreviewDisplayItem(bitmap, Origin.Disk, metadata);
     }
 
     /// <summary>
@@ -65,50 +53,42 @@ internal static class MagickNetWrap
     /// pixel buffers to avoid an encode/decode round-trip. Large images are resized and encoded
     /// to a compact JPEG stream (Q80) before being handed to Win2D.
     /// </summary>
-    public static async Task<(bool, PreviewDisplayItem)> GetResized(ICanvasResourceCreatorWithDpi resourceCreator, string path, uint maxDimension = 800)
+    public static async Task<PreviewDisplayItem> GetResized(ICanvasResourceCreatorWithDpi resourceCreator, string path, uint maxDimension = 800)
     {
-        try
+        using var image = new MagickImage(path);
+        image.AutoOrient();
+
+        var metadata = new ImageMetadata(image.Width, image.Height);
+
+        CanvasBitmap bitmap;
+        if (image.Width <= maxDimension && image.Height <= maxDimension)
         {
-            using var image = new MagickImage(path);
-            image.AutoOrient();
-
-            var metadata = new ImageMetadata(image.Width, image.Height);
-
-            CanvasBitmap bitmap;
-            if (image.Width <= maxDimension && image.Height <= maxDimension)
-            {
-                // Small image: pixels are already decoded in memory.
-                // Hand the premultiplied BGRA buffer straight to Win2D, no encode/decode round-trip.
-                var pixelBytes = PrepareAndExportBgra(image);
-                bitmap = CanvasBitmap.CreateFromBytes(
-                    resourceCreator, pixelBytes,
-                    (int)image.Width, (int)image.Height,
-                    DirectXPixelFormat.B8G8R8A8UIntNormalized);
-            }
-            else
-            {
-                // Large image: resize first, then encode to a compact JPEG stream.
-                // Q80 is indistinguishable from Q95 at thumbnail sizes and produces
-                // a much smaller buffer for CanvasBitmap.LoadAsync to decode.
-                var geometry = new MagickGeometry(maxDimension, maxDimension) { Greater = true };
-                image.Resize(geometry);
-
-                using var stream = new MemoryStream(256 * 1024); // pre-size to avoid repeated doublings
-                image.Format = MagickFormat.Jpeg;
-                image.Quality = 80;
-                await image.WriteAsync(stream);
-
-                using var jpeg = ClosableStream.Open(stream);
-                bitmap = await CanvasBitmap.LoadAsync(resourceCreator, jpeg.Stream);
-            }
-
-            return (true, new PreviewDisplayItem(bitmap, Origin.Disk, metadata));
+            // Small image: pixels are already decoded in memory.
+            // Hand the premultiplied BGRA buffer straight to Win2D, no encode/decode round-trip.
+            var pixelBytes = PrepareAndExportBgra(image);
+            bitmap = CanvasBitmap.CreateFromBytes(
+                resourceCreator, pixelBytes,
+                (int)image.Width, (int)image.Height,
+                DirectXPixelFormat.B8G8R8A8UIntNormalized);
         }
-        catch (Exception ex)
+        else
         {
-            Logger.Error(ex, $"Failed to load and resize image with ImageMagick: {path}");
-            return (false, PreviewDisplayItem.Empty());
+            // Large image: resize first, then encode to a compact JPEG stream.
+            // Q80 is indistinguishable from Q95 at thumbnail sizes and produces
+            // a much smaller buffer for CanvasBitmap.LoadAsync to decode.
+            var geometry = new MagickGeometry(maxDimension, maxDimension) { Greater = true };
+            image.Resize(geometry);
+
+            using var stream = new MemoryStream(256 * 1024); // pre-size to avoid repeated doublings
+            image.Format = MagickFormat.Jpeg;
+            image.Quality = 80;
+            await image.WriteAsync(stream);
+
+            using var jpeg = ClosableStream.Open(stream);
+            bitmap = await CanvasBitmap.LoadAsync(resourceCreator, jpeg.Stream);
         }
+
+        return new PreviewDisplayItem(bitmap, Origin.Disk, metadata);
     }
 
     /// <summary>
@@ -118,43 +98,35 @@ internal static class MagickNetWrap
     /// only falls back to a full RAW sensor decode if the preview is unavailable.
     /// Alpha is premultiplied inside Magick before export to avoid two SoftwareBitmap copies.
     /// </summary>
-    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi d2dCanvas, string path, bool isRaw = false)
+    public static async Task<HqDisplayItem> GetHq(ICanvasResourceCreatorWithDpi d2dCanvas, string path, bool isRaw = false)
     {
-        try
+        // If DecodeRawData is disabled and the extension is a known ImageMagick RAW format,
+        // use the private LoadEmbeddedPreviewAsync directly to get the larger embedded camera JPEG.
+        // We skip the small EXIF thumbnail here — HQ display warrants the best quality available
+        // without a full decode.
+        if (isRaw && !AppConfig.Settings.DecodeRawData)
         {
-            // If DecodeRawData is disabled and the extension is a known ImageMagick RAW format,
-            // use the private LoadEmbeddedPreviewAsync directly to get the larger embedded camera JPEG.
-            // We skip the small EXIF thumbnail here — HQ display warrants the best quality available
-            // without a full decode.
-            if (isRaw && !AppConfig.Settings.DecodeRawData)
-            {
-                var (success, bitmap) = await LoadEmbeddedPreviewAsync(d2dCanvas, path);
-                if (success)
-                    return (true, new StaticHqDisplayItem(bitmap!, Origin.Disk));
-                // Embedded preview unavailable — fall through to full RAW decode below.
-            }
-
-            // --- 1. Decode at full resolution ---
-            using var image = new MagickImage(path);
-            image.AutoOrient();
-
-            // --- 2. Premultiply alpha inside Magick, then export raw BGRA pixels.
-            // This avoids the two SoftwareBitmap copies that straight→premultiplied
-            // conversion would otherwise require (saves ~2× full-res frame in managed memory).
-            var pixelBytes = PrepareAndExportBgra(image);
-
-            // --- 3. Upload directly to Win2D — no SoftwareBitmap intermediaries needed ---
-            var bitmap2 = CanvasBitmap.CreateFromBytes(
-                d2dCanvas, pixelBytes,
-                (int)image.Width, (int)image.Height,
-                DirectXPixelFormat.B8G8R8A8UIntNormalized);
-            return (true, new StaticHqDisplayItem(bitmap2, Origin.Disk));
+            var (success, bitmap) = await LoadEmbeddedPreviewAsync(d2dCanvas, path);
+            if (success)
+                return new StaticHqDisplayItem(bitmap!, Origin.Disk);
+            // Embedded preview unavailable — fall through to full RAW decode below.
         }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-            return (false, HqDisplayItem.Empty());
-        }
+
+        // --- 1. Decode at full resolution ---
+        using var image = new MagickImage(path);
+        image.AutoOrient();
+
+        // --- 2. Premultiply alpha inside Magick, then export raw BGRA pixels.
+        // This avoids the two SoftwareBitmap copies that straight→premultiplied
+        // conversion would otherwise require (saves ~2× full-res frame in managed memory).
+        var pixelBytes = PrepareAndExportBgra(image);
+
+        // --- 3. Upload directly to Win2D — no SoftwareBitmap intermediaries needed ---
+        var bitmap2 = CanvasBitmap.CreateFromBytes(
+            d2dCanvas, pixelBytes,
+            (int)image.Width, (int)image.Height,
+            DirectXPixelFormat.B8G8R8A8UIntNormalized);
+        return new StaticHqDisplayItem(bitmap2, Origin.Disk);
     }
 
     /// <summary>

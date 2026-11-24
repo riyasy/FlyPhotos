@@ -46,8 +46,7 @@ public sealed class MagicScalerShareBenchTests
     private static async Task<byte[]> Load(string path)
     {
         using var file = new ImageFile(path);
-        var (ok, item) = await MagicScalerWrap.GetResized(Ctrl, file);
-        Assert.IsTrue(ok, path);
+        var item = await MagicScalerWrap.GetResized(Ctrl, file);
         var pixels = item.Bitmap.GetPixelBytes();
         item.Release();
         return pixels;

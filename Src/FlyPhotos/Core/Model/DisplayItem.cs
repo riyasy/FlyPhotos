@@ -79,20 +79,10 @@ internal sealed partial class PreviewDisplayItem(CanvasBitmap bitmap, Origin ori
 {
     /// <summary>The full image's size, so the photo is laid out at its real size before the HQ arrives.</summary>
     public ImageMetadata Metadata { get; } = metadata;
-    // The one shared empty preview (Origin.Undefined, so never freed).
-    private static readonly PreviewDisplayItem _empty = new(null, Origin.Undefined);
-    /// <summary>A shared item with no bitmap (never freed).</summary>
-    public static PreviewDisplayItem Empty() => _empty;
 }
 
 /// <summary>A full-quality image. The subclass says how the canvas draws it.</summary>
-internal abstract partial class HqDisplayItem(CanvasBitmap bitmap, Origin origin, int rotation) : DisplayItem(bitmap, origin, rotation)
-{
-    // The one shared empty HQ (Origin.Undefined, so never freed).
-    private static readonly HqDisplayItem _empty = new StaticHqDisplayItem(null, Origin.Undefined);
-    /// <summary>A shared item with no bitmap (never freed).</summary>
-    public static HqDisplayItem Empty() => _empty;
-}
+internal abstract partial class HqDisplayItem(CanvasBitmap bitmap, Origin origin, int rotation) : DisplayItem(bitmap, origin, rotation);
 
 /// <summary>A single-frame image drawn from its <see cref="DisplayItem.Bitmap"/>.</summary>
 internal sealed partial class StaticHqDisplayItem(CanvasBitmap bitmap, Origin origin, int rotation = 0) : HqDisplayItem(bitmap, origin, rotation);

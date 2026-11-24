@@ -1,35 +1,24 @@
+#nullable enable
 using System;
 using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
-using NLog;
 
 namespace FlyPhotos.Display.ImageReading;
 internal static class PsdReader
 {
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
     // Get preview as a CanvasBitmap for WinUI
-    public static async Task<(bool, PreviewDisplayItem)> GetEmbedded(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
+    // Null when the file has no embedded thumbnail; throws on failure.
+    public static async Task<PreviewDisplayItem?> GetEmbedded(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
-        if (GetPsdInfo(inputPath, out int width, out var height, out var thumbnailData))
-        {
-            try
-            {
-                using var stream = ClosableStream.Open(thumbnailData);
-                CanvasBitmap bitmap = await CanvasBitmap.LoadAsync(ctrl, stream.Stream);
-                var metaData = new ImageMetadata(width, height);
-                return (true, new PreviewDisplayItem(bitmap, Origin.Disk, metaData));
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex);
-                return (false, PreviewDisplayItem.Empty());
-            }
-        }
-        return (false, PreviewDisplayItem.Empty());
+        if (!GetPsdInfo(inputPath, out int width, out var height, out var thumbnailData)) return null;
+
+        using var stream = ClosableStream.Open(thumbnailData!);
+        CanvasBitmap bitmap = await CanvasBitmap.LoadAsync(ctrl, stream.Stream);
+        var metaData = new ImageMetadata(width, height);
+        return new PreviewDisplayItem(bitmap, Origin.Disk, metaData);
     }
 
     /// <summary>
@@ -41,22 +30,10 @@ internal static class PsdReader
     /// <param name="height">The height of the main image.</param>
     /// <param name="thumbnailData">The byte array of the embedded JPEG thumbnail, or null if not found.</param>
     /// <returns>True if a thumbnail was read; false otherwise.</returns>
-    private static bool GetPsdInfo(string inputFilePath, out int width, out int height, out byte[] thumbnailData)
+    private static bool GetPsdInfo(string inputFilePath, out int width, out int height, out byte[]? thumbnailData)
     {
-        width = 0;
-        height = 0;
-        thumbnailData = null;
-
-        try
-        {
-            using var fileStream = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            return PsdThumbnail.TryRead(fileStream, out width, out height, out thumbnailData);
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex);
-            return false;
-        }
+        using var fileStream = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        return PsdThumbnail.TryRead(fileStream, out width, out height, out thumbnailData);
     }
 
 }

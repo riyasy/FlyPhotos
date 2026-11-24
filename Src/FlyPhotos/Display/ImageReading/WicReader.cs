@@ -6,7 +6,6 @@ using Windows.Graphics.Imaging;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
 using Microsoft.Graphics.Canvas;
-using NLog;
 
 namespace FlyPhotos.Display.ImageReading;
 
@@ -14,11 +13,6 @@ internal static class WicReader
 {
     private const string MS_RAW_DECODER = "Microsoft Raw Image Decoder";
     private const string NIKON_NEF_DECODER = "Nikon .NEF Raw File Decoder";
-
-    /// <summary>
-    /// Logger instance for WicReader.
-    /// </summary>
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// Windows Property key used to extract EXIF orientation metadata from an image.
@@ -31,14 +25,14 @@ internal static class WicReader
     /// </summary>
     /// <param name="ctrl">The Win2D ICanvasResourceCreatorWithDpi used for creating the CanvasBitmap.</param>
     /// <param name="file">The image file.</param>
-    /// <returns>A tuple indicating success and the resulting PreviewDisplayItem.</returns>
-    public static async Task<(bool, PreviewDisplayItem)> GetEmbedded(ICanvasResourceCreatorWithDpi ctrl, ImageFile file)
+    /// <returns>The preview, or null when the file has no embedded thumbnail. Throws on failure.</returns>
+    public static async Task<PreviewDisplayItem?> GetEmbedded(ICanvasResourceCreatorWithDpi ctrl, ImageFile file)
     {
         var (bmp, width, height, rotation) = await GetThumbnail(ctrl, file);
-        if (bmp == null) return (false, PreviewDisplayItem.Empty());
+        if (bmp == null) return null;
 
         var metadata = new ImageMetadata(width, height);
-        return (true, new PreviewDisplayItem(bmp, Origin.Disk, metadata, rotation));
+        return new PreviewDisplayItem(bmp, Origin.Disk, metadata, rotation);
     }
 
     /// <summary>
@@ -48,22 +42,14 @@ internal static class WicReader
     /// Works for JPEG, PNG, GIF (frame 0), TIFF (frame 0), BMP, and any other
     /// format WIC can auto-detect.
     /// </summary>
-    public static async Task<(bool, PreviewDisplayItem)> GetResized(ICanvasResourceCreatorWithDpi ctrl, ImageFile file,
+    public static async Task<PreviewDisplayItem> GetResized(ICanvasResourceCreatorWithDpi ctrl, ImageFile file,
         uint maxDimension = CappedDecode.PreviewMaxSize)
     {
-        try
-        {
-            var (preview, fullWidth, fullHeight) =
-                await CappedDecode.DecodeAsync(await file.GetPartialReadStreamAsync(), maxDimension);
-            using (preview)
-                return (true, new PreviewDisplayItem(preview.ToCanvasBitmap(ctrl), Origin.Disk,
-                    new ImageMetadata(fullWidth, fullHeight)));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "WicReader.GetResized failed for {0}", file.Path);
-            return (false, PreviewDisplayItem.Empty());
-        }
+        var (preview, fullWidth, fullHeight) =
+            await CappedDecode.DecodeAsync(await file.GetPartialReadStreamAsync(), maxDimension);
+        using (preview)
+            return new PreviewDisplayItem(preview.ToCanvasBitmap(ctrl), Origin.Disk,
+                new ImageMetadata(fullWidth, fullHeight));
     }
 
     /// <summary>
@@ -76,80 +62,58 @@ internal static class WicReader
     /// <param name="ctrl">The Win2D ICanvasResourceCreatorWithDpi used for creating the CanvasBitmap.</param>
     /// <param name="file">The image file.</param>
     /// <param name="isRaw">Is a camera RAW file</param>
-    /// <returns>A tuple indicating success and the resulting high-quality HqDisplayItem.</returns>
-    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, ImageFile file, bool isRaw = false)
+    /// <returns>The HQ item. Throws on failure.</returns>
+    public static async Task<HqDisplayItem> GetHq(ICanvasResourceCreatorWithDpi ctrl, ImageFile file, bool isRaw = false)
     {
-        try
+        // If the extension is not present in MICROSOFT RAW DECODER OR NIKON NEF DECODER
+        if (!isRaw)
         {
-            // The real extension, not file.Extension: it picks a camera codec quirk, and RAW files are never re-typed.
-            var ext = Path.GetExtension(file.Path);
-
-            // If the extension is not present in MICROSOFT RAW DECODER OR NIKON NEF DECODER
-            if (!isRaw)
-            {
-                var stream = await file.GetStreamAsync();
-                var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
-                return (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk, 0));
-            }
-            else
-            {
-                var isNefExt = ext.Equals(".nef", StringComparison.OrdinalIgnoreCase);
-                var stream = await file.GetStreamAsync();
-                var loadRawData = AppConfig.Settings.DecodeRawData;
-
-                BitmapDecoder? decoder = null;
-
-                if (!loadRawData) // LOAD EMBEDDED PREVIEW FROM RAW FILE
-                {
-                    try
-                    {
-                        decoder = await BitmapDecoder.CreateAsync(stream);
-                        using var preview = await decoder.GetPreviewAsync();
-                        var rotation = 0;
-                        // NIKON NEF Decoder applies EXIF orientation directly to the preview
-                        // Microsoft RAW decoder seems not to apply EXIF orientation in preview.
-                        // So we save rotation for applying during rendering.
-                        if (IsMsRawCodec(decoder))
-                            rotation = await GetRotationFromMetaData(decoder.BitmapProperties);
-
-                        var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
-                        return (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk, rotation));
-                    }
-                    catch (Exception)
-                    {
-                        // If Loading embedded preview in the last if failed, fallback to loading RAW data
-                        loadRawData = true;
-                        stream.Seek(0);
-                    }
-                }
-
-                if (loadRawData) // TRY TO LOAD RAW DATA ITSELF
-                {
-                    var rotation = 0;
-                    // NIKON NEF decoder doesn't apply EXIF orientation to RAW decode. 
-                    // Also 90/270 seems inverted for them, so we save rotation to apply during rendering.
-                    if (isNefExt)
-                    {
-                        decoder ??= await BitmapDecoder.CreateAsync(stream);
-                        if (IsNikonNefCodec(decoder))
-                        {
-                            rotation = await GetRotationFromMetaDataNikonNefCodec(decoder.BitmapProperties);
-                        }
-                        stream.Seek(0);
-                    }
-
-                    var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
-                    return (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk, rotation));
-                }
-            }
-
-            return (false, HqDisplayItem.Empty());
+            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, await file.GetStreamAsync());
+            return new StaticHqDisplayItem(canvasBitmap, Origin.Disk, 0);
         }
-        catch (Exception ex)
+
+        // The real extension, not file.Extension: it picks a camera codec quirk, and RAW files are never re-typed.
+        var isNefExt = Path.GetExtension(file.Path).Equals(".nef", StringComparison.OrdinalIgnoreCase);
+        var stream = await file.GetStreamAsync();
+        BitmapDecoder? decoder = null;
+
+        if (!AppConfig.Settings.DecodeRawData) // LOAD EMBEDDED PREVIEW FROM RAW FILE
         {
-            Logger.Error(ex);
-            return (false, HqDisplayItem.Empty());
+            try
+            {
+                decoder = await BitmapDecoder.CreateAsync(stream);
+                using var preview = await decoder.GetPreviewAsync();
+                var rotation = 0;
+                // NIKON NEF Decoder applies EXIF orientation directly to the preview
+                // Microsoft RAW decoder seems not to apply EXIF orientation in preview.
+                // So we save rotation for applying during rendering.
+                if (IsMsRawCodec(decoder))
+                    rotation = await GetRotationFromMetaData(decoder.BitmapProperties);
+
+                var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, preview);
+                return new StaticHqDisplayItem(canvasBitmap, Origin.Disk, rotation);
+            }
+            catch (Exception)
+            {
+                // The embedded preview failed: fall back to the RAW data.
+                stream.Seek(0);
+            }
         }
+
+        // LOAD THE RAW DATA ITSELF
+        var rawRotation = 0;
+        // NIKON NEF decoder doesn't apply EXIF orientation to RAW decode.
+        // Also 90/270 seems inverted for them, so we save rotation to apply during rendering.
+        if (isNefExt)
+        {
+            decoder ??= await BitmapDecoder.CreateAsync(stream);
+            if (IsNikonNefCodec(decoder))
+                rawRotation = await GetRotationFromMetaDataNikonNefCodec(decoder.BitmapProperties);
+            stream.Seek(0);
+        }
+
+        var rawBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
+        return new StaticHqDisplayItem(rawBitmap, Origin.Disk, rawRotation);
     }
 
     /// <summary>
@@ -181,18 +145,30 @@ internal static class WicReader
     /// </summary>
     /// <param name="ctrl">The Win2D ICanvasResourceCreatorWithDpi to bind initialization to.</param>
     /// <param name="file">The image file.</param>
-    /// <returns>A tuple containing the Win2D bitmap, its dimensions, and unapplied rotation (in degrees).</returns>
+    /// <returns>
+    /// The Win2D bitmap, its dimensions, and unapplied rotation (in degrees); a null bitmap when the file has no
+    /// embedded thumbnail. Throws on any other failure.
+    /// </returns>
     private static async Task<(CanvasBitmap? Bitmap, int Width, int Height, int Rotation)> GetThumbnail(ICanvasResourceCreatorWithDpi ctrl, ImageFile file)
     {
+        var decoder = await BitmapDecoder.CreateAsync(await file.GetPartialReadStreamAsync());
+        // OrientedPixelWidth/Height account for EXIF rotation automatically —
+        // no need to read the property bag and swap manually.
+        var originalWidth = (int)decoder.OrientedPixelWidth;
+        var originalHeight = (int)decoder.OrientedPixelHeight;
+
+        ImageStream preview;
         try
         {
-            var decoder = await BitmapDecoder.CreateAsync(await file.GetPartialReadStreamAsync());
-            // OrientedPixelWidth/Height account for EXIF rotation automatically —
-            // no need to read the property bag and swap manually.
-            var originalWidth = (int)decoder.OrientedPixelWidth;
-            var originalHeight = (int)decoder.OrientedPixelHeight;
-            using var preview = await decoder.GetThumbnailAsync();
+            preview = await decoder.GetThumbnailAsync();
+        }
+        catch (Exception ex) when (ex.HResult is WINCODEC_ERR_CODECNOTHUMBNAIL or E_INVALIDARG)
+        {
+            return (null, 0, 0, 0); // No embedded thumbnail: routine, not logged.
+        }
 
+        using (preview)
+        {
             var rotation = 0;
             // Nikon NEF decoder doesn't apply exif orientation for Thumbnail. We need to read manually and apply it in rendering.
             // The real extension, not file.Extension: RAW files are never re-typed by the header check.
@@ -216,11 +192,11 @@ internal static class WicReader
             }
             return (canvasBitmap, originalWidth, originalHeight, rotation);
         }
-        catch (Exception)
-        {
-            return (null, 0, 0, 0);
-        }
     }
+
+    // GetThumbnailAsync on a file with no embedded thumbnail; the CR3 codec answers E_INVALIDARG instead (measured).
+    private const int WINCODEC_ERR_CODECNOTHUMBNAIL = unchecked((int)0x88982F44);
+    private const int E_INVALIDARG = unchecked((int)0x80070057);
 
     /// <summary>
     /// Extracts EXIF rotation definitions from a traditional image system property structure.

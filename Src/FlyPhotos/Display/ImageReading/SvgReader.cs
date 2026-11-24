@@ -29,12 +29,12 @@ internal static partial class SvgReader
     /// The preview: the SVG rasterised to 800 px on the longer side, on the GPU when the scene can be built,
     /// otherwise by resvg on the CPU. Its metadata reports the 2000 px HQ size.
     /// </summary>
-    public static async Task<(bool, PreviewDisplayItem)> GetResized(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
+    public static async Task<PreviewDisplayItem?> GetResized(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         var (lease, bmp) = await LoadScene(ctrl, inputPath, PreviewMaxDimension);
         if (lease != null)
             using (lease) bmp = RasterizeOrRender(ctrl, lease.Scene, inputPath);
-        if (bmp == null) return (false, PreviewDisplayItem.Empty());
+        if (bmp == null) return null;
         var (width, height) = ((int)bmp.SizeInPixels.Width, (int)bmp.SizeInPixels.Height);
 
         // Scale the rendered preview dimensions up to what the HQ render would be,
@@ -45,24 +45,23 @@ internal static partial class SvgReader
         int metaHeight = (int)Math.Round(height * scale);
         var metadata = new ImageMetadata(metaWidth, metaHeight);
 
-        return (true, new PreviewDisplayItem(bmp, Origin.Disk, metadata));
+        return new PreviewDisplayItem(bmp, Origin.Disk, metadata);
     }
 
     /// <summary>
     /// The full-quality item: an <see cref="SvgHqDisplayItem"/> (GPU scene, redrawn as vectors at any zoom)
     /// when the scene can be built, otherwise a 2000 px resvg bitmap as a <see cref="StaticHqDisplayItem"/>.
     /// </summary>
-    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
+    public static async Task<HqDisplayItem?> GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         // GPU path: the scene is kept and drawn as vectors by the renderer; nothing is drawn here.
         var (lease, bmp) = await LoadScene(ctrl, inputPath, HqMaxDimension);
         if (lease != null)
         {
             var (w, h, _) = lease.Scene.FitTo(HqMaxDimension);
-            return (true, new SvgHqDisplayItem(Origin.Disk, lease, w, h));
+            return new SvgHqDisplayItem(Origin.Disk, lease, w, h);
         }
-        if (bmp == null) return (false, HqDisplayItem.Empty());
-        return (true, new StaticHqDisplayItem(bmp, Origin.Disk));
+        return bmp == null ? null : new StaticHqDisplayItem(bmp, Origin.Disk);
     }
 
     /// <summary>

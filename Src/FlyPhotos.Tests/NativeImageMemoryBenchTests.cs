@@ -47,10 +47,10 @@ public sealed class NativeImageMemoryBenchTests
     {
         DisplayItem? item = kind switch
         {
-            "heif" => (await NativeHeifReader.GetHq(ctrl, new ImageFile(path))).Item2,
-            "avif" => (await NativeAvifReader.GetHq(ctrl, new ImageFile(path))).Item2,
-            "dds" => NativeDdsReader.GetHq(ctrl, path).Item2,
-            "raw" => RawlerWrapper.GetHq(ctrl, path).Item2,
+            "heif" => await NativeHeifReader.GetHq(ctrl, new ImageFile(path)),
+            "avif" => await NativeAvifReader.GetHq(ctrl, new ImageFile(path)),
+            "dds" => NativeDdsReader.GetHq(ctrl, path),
+            "raw" => RawlerWrapper.GetHq(ctrl, path),
             "large" => LargeImageReader.DecodeHeif(ctrl, path, CancellationToken.None),
             _ => throw new ArgumentException(kind),
         };

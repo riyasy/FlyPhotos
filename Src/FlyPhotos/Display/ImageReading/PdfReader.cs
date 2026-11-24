@@ -6,7 +6,6 @@ using Windows.Foundation;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
-using NLog;
 
 namespace FlyPhotos.Display.ImageReading;
 
@@ -16,27 +15,17 @@ namespace FlyPhotos.Display.ImageReading;
 /// </summary>
 internal static class PdfReader
 {
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
     /// <summary>The preview's longer side, as for SVG.</summary>
     private const int PreviewMaxDimension = 800;
 
     /// <summary>Page 1 at 800 px on the longer side; its metadata reports the page's size at 100%.</summary>
-    public static async Task<(bool, PreviewDisplayItem)> GetResized(ICanvasResourceCreatorWithDpi ctrl, string path)
+    public static async Task<PreviewDisplayItem> GetResized(ICanvasResourceCreatorWithDpi ctrl, string path)
     {
-        try
-        {
-            using var pdf = await PdfFile.OpenAsync(path);
-            using var page = pdf.Document.GetPage(0);
-            var (width, height) = SizeAt100(page);
-            var bitmap = RenderWhole(ctrl.Device, page, (double)PreviewMaxDimension / Math.Max(width, height));
-            return (true, new PreviewDisplayItem(bitmap, Origin.Disk, new ImageMetadata(width, height)));
-        }
-        catch (Exception ex)
-        {
-            Logger.Warn(ex, "PDF preview failed: {Path}", path);
-            return (false, PreviewDisplayItem.Empty());
-        }
+        using var pdf = await PdfFile.OpenAsync(path);
+        using var page = pdf.Document.GetPage(0);
+        var (width, height) = SizeAt100(page);
+        var bitmap = RenderWhole(ctrl.Device, page, (double)PreviewMaxDimension / Math.Max(width, height));
+        return new PreviewDisplayItem(bitmap, Origin.Disk, new ImageMetadata(width, height));
     }
 
     /// <summary>
@@ -44,20 +33,12 @@ internal static class PdfReader
     /// file itself and draws every view as vectors. Fails for a file Windows.Data.Pdf can't open (damaged, not a
     /// PDF, or AES-256 / password encrypted), which then shows the error screen.
     /// </summary>
-    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, string path)
+    public static async Task<HqDisplayItem> GetHq(ICanvasResourceCreatorWithDpi ctrl, string path)
     {
-        try
-        {
-            using var pdf = await PdfFile.OpenAsync(path);
-            using var page = pdf.Document.GetPage(0);
-            var (width, height) = SizeAt100(page);
-            return (true, new PdfHqDisplayItem(ctrl.Device, Origin.Disk, width, height, (int)pdf.Document.PageCount));
-        }
-        catch (Exception ex)
-        {
-            Logger.Warn(ex, "PDF could not be opened: {Path}", path);
-            return (false, HqDisplayItem.Empty());
-        }
+        using var pdf = await PdfFile.OpenAsync(path);
+        using var page = pdf.Document.GetPage(0);
+        var (width, height) = SizeAt100(page);
+        return new PdfHqDisplayItem(ctrl.Device, Origin.Disk, width, height, (int)pdf.Document.PageCount);
     }
 
     /// <summary>

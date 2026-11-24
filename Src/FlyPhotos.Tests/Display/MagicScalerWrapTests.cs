@@ -24,9 +24,8 @@ public sealed class MagicScalerWrapTests
             }
 
             using var file = new ImageFile(path);
-            var (ok, item) = await MagicScalerWrap.GetResized(Ctrl, file);
+            var item = await MagicScalerWrap.GetResized(Ctrl, file);
 
-            Assert.IsTrue(ok);
             Assert.AreEqual(800u, item.Bitmap.SizeInPixels.Width);
             Assert.AreEqual(500u, item.Bitmap.SizeInPixels.Height);
             // A row-stride mix-up would smear channels across the image; check a far corner too.

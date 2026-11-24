@@ -51,38 +51,33 @@ internal static class RawlerWrapper
     /// <summary>
     /// Extracts the embedded JPEG preview from a RAW file if available.
     /// </summary>
-    public static (bool, PreviewDisplayItem) GetEmbeddedPreview(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
+    public static PreviewDisplayItem? GetEmbeddedPreview(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         var (success, bitmap, rotation, pWidth, pHeight) = LoadEmbeddedPreview(ctrl, inputPath);
-
-        if (!success || bitmap == null)
-            return (false, PreviewDisplayItem.Empty());
+        if (!success || bitmap == null) return null;
 
         var metadata = new ImageMetadata(pWidth, pHeight);
-        return (true, new PreviewDisplayItem(bitmap, Origin.Disk, metadata, rotation));
+        return new PreviewDisplayItem(bitmap, Origin.Disk, metadata, rotation);
     }
 
     /// <summary>
-    /// Fully decodes a RAW file into a high-quality render.
+    /// Fully decodes a RAW file into a high-quality render; null if it can't.
     /// Falls back to the embedded preview if high-quality decoding is disabled in settings.
     /// </summary>
-    public static (bool, HqDisplayItem) GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
+    public static HqDisplayItem? GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
     {
         // Skip full decode when the user has opted for preview-only mode.
         if (!AppConfig.Settings.DecodeRawData)
         {
             var (success, bitmap, rotation1, _, _) = LoadEmbeddedPreview(ctrl, inputPath);
             if (success && bitmap != null)
-                return (true, new StaticHqDisplayItem(bitmap, Origin.Disk, rotation1));
+                return new StaticHqDisplayItem(bitmap, Origin.Disk, rotation1);
 
             // Embedded preview unavailable — fall through to full RAW decode.
         }
 
         nint ptr = NativeRustBridge.rawler_render_raw(inputPath, out var width, out var height, out var rotation2);
         var canvasBitmap = CreateBitmapAndFree(ctrl, ptr, width, height);
-
-        return canvasBitmap != null
-            ? (true, new StaticHqDisplayItem(canvasBitmap, Origin.Disk, rotation2))
-            : (false, HqDisplayItem.Empty());
+        return canvasBitmap != null ? new StaticHqDisplayItem(canvasBitmap, Origin.Disk, rotation2) : null;
     }
 }

@@ -1,9 +1,8 @@
-using System;
+using System.IO;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
-using NLog;
 
 namespace FlyPhotos.Display.ImageReading;
 
@@ -14,8 +13,6 @@ namespace FlyPhotos.Display.ImageReading;
 /// </summary>
 internal static class NativeAvifReader
 {
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
     /// <summary>
     ///     Parses an AVIF/HEIC file from disk asynchronously, probes it for animation, and returns the appropriate
     ///     DisplayItem.
@@ -24,32 +21,18 @@ internal static class NativeAvifReader
     /// </summary>
     /// <param name="canvas">The ICanvasResourceCreatorWithDpi surface context used for creating Win2D bitmaps.</param>
     /// <param name="file">The image file.</param>
-    /// <returns>A tuple of (success, HqDisplayItem).</returns>
-    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi canvas, ImageFile file)
+    /// <returns>The HQ item. Throws on failure.</returns>
+    public static async Task<HqDisplayItem> GetHq(ICanvasResourceCreatorWithDpi canvas, ImageFile file)
     {
-        try
-        {
-            byte[] fileData = await file.GetBytesAsync();
+        byte[] fileData = await file.GetBytesAsync();
 
-            using var heifImage = NativeHeifWrapper.DecodePrimaryImageFromMemory(fileData, out bool isAnimated);
+        using var heifImage = NativeHeifWrapper.DecodePrimaryImageFromMemory(fileData, out bool isAnimated)
+                              ?? throw new InvalidDataException("No primary image could be decoded");
 
-            if (heifImage == null)
-            {
-                Logger.Warn("Failed to extract primary image or AVIF structure from byte array.");
-                return (false, HqDisplayItem.Empty());
-            }
+        var firstFrameBitmap = heifImage.ToBitmap(canvas);
 
-            var firstFrameBitmap = heifImage.ToBitmap(canvas);
-
-            if (isAnimated)
-                return (true, new AnimatedHqDisplayItem(firstFrameBitmap, Origin.Disk, fileData, ImageFormat.Avif));
-            else
-                return (true, new StaticHqDisplayItem(firstFrameBitmap, Origin.Disk));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Failed to read Avif High Quality {0}", file.Path);
-            return (false, HqDisplayItem.Empty());
-        }
+        if (isAnimated)
+            return new AnimatedHqDisplayItem(firstFrameBitmap, Origin.Disk, fileData, ImageFormat.Avif);
+        return new StaticHqDisplayItem(firstFrameBitmap, Origin.Disk);
     }
 }

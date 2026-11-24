@@ -46,8 +46,7 @@ public sealed class SvgSceneTests
 
     private async Task<SvgHqDisplayItem> LoadHq()
     {
-        var (ok, hq) = await SvgReader.GetHq(Ctrl, RedBlueSvg());
-        Assert.IsTrue(ok);
+        var hq = await SvgReader.GetHq(Ctrl, RedBlueSvg());
         Assert.IsInstanceOfType<SvgHqDisplayItem>(hq, "drawn as a GPU scene, not resvg's bitmap");
         return (SvgHqDisplayItem)hq;
     }
@@ -106,8 +105,8 @@ public sealed class SvgSceneTests
     [TestMethod]
     public async Task An_svg_preview_is_800_px_and_reports_the_hq_size()
     {
-        var (ok, preview) = await SvgReader.GetResized(Ctrl, RedBlueSvg());
-        Assert.IsTrue(ok);
+        var preview = await SvgReader.GetResized(Ctrl, RedBlueSvg());
+        Assert.IsNotNull(preview);
         Assert.AreEqual(800u, preview.Bitmap.SizeInPixels.Width);
         Assert.AreEqual(400u, preview.Bitmap.SizeInPixels.Height);
         Assert.AreEqual(new ImageMetadata(2000, 1000), preview.Metadata);

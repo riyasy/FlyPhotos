@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Buffers.Binary;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -56,23 +57,12 @@ internal static class PngReader
     /// </summary>
     /// <param name="ctrl">The Win2D <see cref="ICanvasResourceCreatorWithDpi" /> that owns the GPU device.</param>
     /// <param name="file">The image file.</param>
-    /// <returns>
-    ///     A tuple of (<c>success</c>, <see cref="PreviewDisplayItem" />).
-    ///     On failure, returns <c>(false, PreviewDisplayItem.Empty())</c> and logs the error.
-    /// </returns>
-    public static async Task<(bool, PreviewDisplayItem)> GetFirstFrameFullSize(ICanvasResourceCreatorWithDpi ctrl, ImageFile file)
+    /// <returns>The preview. Throws on failure.</returns>
+    public static async Task<PreviewDisplayItem> GetFirstFrameFullSize(ICanvasResourceCreatorWithDpi ctrl, ImageFile file)
     {
-        try
-        {
-            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, await file.GetStreamAsync());
-            var metaData = new ImageMetadata(canvasBitmap.SizeInPixels.Width, canvasBitmap.SizeInPixels.Height);
-            return (true, new PreviewDisplayItem(canvasBitmap, Origin.Disk, metaData));
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "PngReader - GetFirstFrameFullSize failed for {0}", file.Path);
-            return (false, PreviewDisplayItem.Empty());
-        }
+        var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, await file.GetStreamAsync());
+        var metaData = new ImageMetadata(canvasBitmap.SizeInPixels.Width, canvasBitmap.SizeInPixels.Height);
+        return new PreviewDisplayItem(canvasBitmap, Origin.Disk, metaData);
     }
 
     /// <summary>
@@ -81,7 +71,6 @@ internal static class PngReader
     /// <param name="ctrl">The Win2D <see cref="ICanvasResourceCreatorWithDpi" /> that owns the GPU device.</param>
     /// <param name="file">The image file.</param>
     /// <returns>
-    ///     A tuple of (<c>success</c>, <see cref="HqDisplayItem" />):
     ///     <list type="bullet">
     ///         <item><see cref="StaticHqDisplayItem" /> — for single-frame PNG files.</item>
     ///         <item>
@@ -89,7 +78,7 @@ internal static class PngReader
     ///             frame and the raw file bytes for the animator.
     ///         </item>
     ///     </list>
-    ///     On failure, returns <c>(false, HqDisplayItem.Empty())</c> and logs the error.
+    ///     Null for data of another format that has its own reader; throws on failure.
     /// </returns>
     /// <remarks>
     ///     The first 4 KB are scanned for the PNG signature and the <c>acTL</c> chunk, then
@@ -99,30 +88,19 @@ internal static class PngReader
     ///     files the raw file bytes are read for the animator; this is cheaper than a second full pixel decode
     ///     pass.
     /// </remarks>
-    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, ImageFile file)
+    public static async Task<HqDisplayItem?> GetHq(ICanvasResourceCreatorWithDpi ctrl, ImageFile file)
     {
-        try
-        {
-            var stream = await file.GetStreamAsync();
-            if (await IsAnimatedPngAsync(stream) is not { } isAnimated) return (false, HqDisplayItem.Empty());
+        var stream = await file.GetStreamAsync();
+        if (await IsAnimatedPngAsync(stream) is not { } isAnimated) return null;
 
-            stream.Seek(0);
-            var firstFrame = await CanvasBitmap.LoadAsync(ctrl, stream);
-            if (isAnimated) // Animated PNG
-            {
-                var bytes = await file.GetBytesAsync();
-                return (true, new AnimatedHqDisplayItem(firstFrame, Origin.Disk, bytes, ImageFormat.Png));
-            }
-            else
-            {
-                return (true, new StaticHqDisplayItem(firstFrame, Origin.Disk));
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Failed to process PNG/APNG file at {0}", file.Path);
-            return (false, HqDisplayItem.Empty());
-        }
+        // Read before the bitmap exists, so a failed read leaves no GPU bitmap behind.
+        var bytes = isAnimated ? await file.GetBytesAsync() : null;
+
+        stream.Seek(0);
+        var firstFrame = await CanvasBitmap.LoadAsync(ctrl, stream);
+        return bytes != null
+            ? new AnimatedHqDisplayItem(firstFrame, Origin.Disk, bytes, ImageFormat.Png)
+            : new StaticHqDisplayItem(firstFrame, Origin.Disk);
     }
 
     /// <summary>
