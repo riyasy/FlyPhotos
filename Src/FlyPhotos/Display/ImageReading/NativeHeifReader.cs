@@ -2,7 +2,7 @@
 // Also assuming the HeifDecoder class we created is available in this project.
 
 using System;
-using System.IO;
+using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
@@ -52,24 +52,26 @@ internal static class NativeHeifReader
     /// <summary>
     /// Gets the high-quality primary image using the high-performance native HeifDecoder.
     /// </summary>
-    public static (bool, HqDisplayItem) GetHq(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
+    public static async Task<(bool, HqDisplayItem)> GetHq(ICanvasResourceCreatorWithDpi ctrl, ImageFile file)
     {
         try
         {
-            // 1. Call our new native decoder to get the primary image's pixel data.
-            using var heifImage = NativeHeifWrapper.DecodePrimaryImage(inputPath, out bool isAnimated);
+            // On a share, decode from the bytes as the AVIF reader does, so an animation reuses them (one read).
+            if (await file.GetBytesIfNetworkAsync() != null) return await NativeAvifReader.GetHq(ctrl, file);
+
+            // 1. Locally libheif reads the path itself, with our handle closed.
+            using var heifImage = NativeHeifWrapper.DecodePrimaryImage(file.ReleaseForPathReader(), out bool isAnimated);
 
             // 2. Check if a valid image was returned.
             if (heifImage == null)
             {
-                Logger.Warn($"No primary image could be decoded from HEIF file: {inputPath}");
+                Logger.Warn($"No primary image could be decoded from HEIF file: {file.Path}");
                 return (false, HqDisplayItem.Empty());
             }
 
-            // 3. An image sequence (e.g. an animated AVIF saved as .heic): only then are the file's bytes read, for
-            //    AvifAnimator, which plays any libheif sequence. Read before the bitmap exists, so a failed read
-            //    leaves no GPU bitmap behind.
-            var animationBytes = isAnimated ? File.ReadAllBytes(inputPath) : null;
+            // 3. An image sequence (e.g. an animated AVIF saved as .heic): AvifAnimator plays it from the file's
+            //    bytes. Read before the bitmap exists, so a failed read leaves no GPU bitmap behind.
+            var animationBytes = isAnimated ? await file.GetBytesAsync() : null;
 
             // 4. Create the Win2D bitmap directly from the native pixels.
             var canvasBitmap = heifImage.ToBitmap(ctrl);
@@ -81,7 +83,7 @@ internal static class NativeHeifReader
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, $"Failed to decode HQ image from: {inputPath} using native decoder.");
+            Logger.Error(ex, $"Failed to decode HQ image from: {file.Path} using native decoder.");
             return (false, HqDisplayItem.Empty());
         }
     }

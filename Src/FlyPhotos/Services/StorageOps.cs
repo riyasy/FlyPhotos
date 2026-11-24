@@ -29,16 +29,12 @@
 // marshals every one of those tiny reads across the managed/native boundary.
 // The accumulated context-switch cost is enormous for large, complex formats.
 //
-// HYBRID STRATEGY: GetWin2DPerformantStream
-// -----------------------------------------
-//   Local files   — shcore.dll CreateRandomAccessStreamOnFile()
-//                   Returns a native IRandomAccessStream. Zero-copy, zero
-//                   adapter overhead. Hidden/system file access works.
-//
-//   Network / UNC — File.ReadAllBytes → ClosableStream (Infra/Interop)
-//                   The file is read whole and the handle closed at once, so
-//                   WIC can't hold the network file lock and block deletion.
-//                   WIC reads the bytes natively, without the adapter.
+// GetWin2DPerformantStream
+// ------------------------
+//   shcore.dll CreateRandomAccessStreamOnFile() returns a native
+//   IRandomAccessStream. Zero-copy, zero adapter overhead. Hidden/system file
+//   access works. Decoders get it only through ImageFile, which reads a
+//   network file whole instead (see Display/ImageReading/ImageFile.cs).
 //
 // CLIPBOARD COPY STRATEGY: GetStorageFileOrVirtualFile
 // -----------------------------------------------------
@@ -107,46 +103,29 @@ internal class StorageOps
     }
 
     /// <summary>
-    /// Opens a file and returns an <see cref="IRandomAccessStream"/> optimised for Win2D / WIC
-    /// decoding. For local files, bypasses the Windows Storage Broker via
-    /// <c>CreateRandomAccessStreamOnFile</c> (shcore.dll), which also succeeds for hidden and
-    /// system files. For network and UNC paths the file is read whole first, releasing the network
-    /// file handle immediately — see the file header for the full performance rationale.
+    /// Opens a file as a native <see cref="IRandomAccessStream"/> for Win2D / WIC decoding, through
+    /// <c>CreateRandomAccessStreamOnFile</c> (shcore.dll): no Storage Broker, so hidden and system files open
+    /// too. It reads the file in place; for a network file, <c>ImageFile</c> decides when to read it whole instead.
     /// </summary>
     /// <param name="path">Full path to the image file to open.</param>
-    /// <param name="useBufferForNwPaths">Whether to use mem buffering for files on NW path</param>
-    /// <returns>
-    /// A native <see cref="IRandomAccessStream"/> ready for Win2D / WIC decoding.
-    /// The caller is responsible for disposing this stream.
-    /// </returns>
-    public static async Task<IRandomAccessStream> GetWin2DPerformantStream(string path, bool useBufferForNwPaths = true)
+    /// <returns>The stream. The caller is responsible for disposing it.</returns>
+    public static Task<IRandomAccessStream> GetWin2DPerformantStream(string path) => Task.Run(() =>
     {
-        if (useBufferForNwPaths && ShouldBufferFile(path))
+        IntPtr nativePtr = IntPtr.Zero;
+        try
         {
-            // One full-length read (fewer SMB round trips), decoded in place: no native copy.
-            return ClosableStream.Open(await File.ReadAllBytesAsync(path)).Stream;
-        }
-        else
-        {
-            return await Task.Run(() =>
-            {
-                IntPtr nativePtr = IntPtr.Zero;
-                try
-                {
-                    int hr = Win32Methods.CreateRandomAccessStreamOnFile(
-                        path, 0, ref Win32Methods.IID_IRandomAccessStream, out nativePtr);
-                    Marshal.ThrowExceptionForHR(hr);
+            int hr = Win32Methods.CreateRandomAccessStreamOnFile(
+                path, 0, ref Win32Methods.IID_IRandomAccessStream, out nativePtr);
+            Marshal.ThrowExceptionForHR(hr);
 
-                    return WinRT.MarshalInterface<IRandomAccessStream>.FromAbi(nativePtr);
-                }
-                finally
-                {
-                    if (nativePtr != IntPtr.Zero)
-                        Marshal.Release(nativePtr);
-                }
-            });
+            return WinRT.MarshalInterface<IRandomAccessStream>.FromAbi(nativePtr);
         }
-    }
+        finally
+        {
+            if (nativePtr != IntPtr.Zero)
+                Marshal.Release(nativePtr);
+        }
+    });
 
     /// <summary>
     /// [KEPT FOR REFERENCE — DO NOT USE IN PRODUCTION]

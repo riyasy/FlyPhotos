@@ -3,7 +3,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using FlyPhotos.Core.Model;
-using FlyPhotos.Services;
 using Microsoft.Graphics.Canvas;
 using NLog;
 using PhotoSauce.MagicScaler;
@@ -31,9 +30,9 @@ internal static class MagicScalerWrap
         {
             try
             {
-                // On a share each open by path is a round trip (~10 ms), so read it once; the bytes are shared
-                // with the chain's other readers.
-                byte[] bytes =StorageOps.ShouldBufferFile(file.Path) ? await file.GetBytesAsync() : null;
+                // Locally by path without releasing the file: the small-image branch below reuses the shared
+                // stream, and MagicScaler's own read handle doesn't block a delete for longer than the decode.
+                byte[] bytes = await file.GetBytesIfNetworkAsync();
                 var fileInfo = bytes != null ? ImageFileInfo.Load(bytes) : ImageFileInfo.Load(file.Path);
                 int originalWidth = fileInfo.Frames[0].Width;
                 int originalHeight = fileInfo.Frames[0].Height;

@@ -206,11 +206,11 @@ public sealed partial class FlyProfilerWindow : Window
                     var functionMap = new Dictionary<string, Func<Task<bool>>>()
                     {
                         // Readers outside the chains, kept for comparison runs.
-                        { "GifReader.GetFirstFrameFullSize", async () => { var (ok, item) = await GifReader.GetFirstFrameFullSize(TestCanvas, imagePath); if (ok) item?.Release(); return ok; } },
-                        { "PngReader.GetFirstFrameFullSize", async () => { var (ok, item) = await PngReader.GetFirstFrameFullSize(TestCanvas, imagePath); if (ok) item?.Release(); return ok; } },
+                        { "GifReader.GetFirstFrameFullSize", async () => { using var f = new ImageFile(imagePath); var (ok, item) = await GifReader.GetFirstFrameFullSize(TestCanvas, f); if (ok) item?.Release(); return ok; } },
+                        { "PngReader.GetFirstFrameFullSize", async () => { using var f = new ImageFile(imagePath); var (ok, item) = await PngReader.GetFirstFrameFullSize(TestCanvas, f); if (ok) item?.Release(); return ok; } },
                         //{ "SvgSkiaWrap.GetResized", async () => { var (ok, item) = SvgSkiaWrap.GetResized(TestCanvas, imagePath); if (ok) item?.Release(); return ok; } },
                         //{ "SvgSkiaWrap.GetHq", async () => { var (ok, item) = SvgSkiaWrap.GetHq(TestCanvas, imagePath); if (ok) item?.Release(); return ok; } },
-                        { "TiffReader.GetFirstFrameFullSize", async () => { var (ok, item) = await TiffReader.GetFirstFrameFullSize(TestCanvas, imagePath); if (ok) item?.Release(); return ok; } },
+                        { "TiffReader.GetFirstFrameFullSize", async () => { using var f = new ImageFile(imagePath); var (ok, item) = await TiffReader.GetFirstFrameFullSize(TestCanvas, f); if (ok) item?.Release(); return ok; } },
                         { "RawlerWrapper.GetEmbeddedPreview", async () => { var (ok, item) = RawlerWrapper.GetEmbeddedPreview(TestCanvas, imagePath); if (ok) item?.Release(); await Task.CompletedTask; return ok; } },
                     };
                     foreach (var step in Enum.GetValues<DecodeStep>())

@@ -37,6 +37,7 @@ internal static class LargeImageReader
 
         try
         {
+            // A header ping: too short to need ReleaseForPathReader, which would cost the next reader a reopen.
             var info = new MagickImageInfo(file.Path);
             return info.Width > maxSize || info.Height > maxSize;
         }

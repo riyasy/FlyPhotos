@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Windows.Graphics.Imaging;
 using FlyPhotos.Core.Model;
-using FlyPhotos.Services;
 using Microsoft.Graphics.Canvas;
 using NLog;
 
@@ -32,23 +31,22 @@ internal static class GifReader
     ///     Used during initial thumbnail/preview loading before the high-quality decode is ready.
     /// </summary>
     /// <param name="ctrl">The Win2D <see cref="ICanvasResourceCreatorWithDpi" /> that owns the GPU device.</param>
-    /// <param name="inputPath">Absolute path to the .gif file on disk.</param>
+    /// <param name="file">The image file.</param>
     /// <returns>
     ///     A tuple of (<c>success</c>, <see cref="PreviewDisplayItem" />).
     ///     On failure, returns <c>(false, PreviewDisplayItem.Empty())</c> and logs the error.
     /// </returns>
-    public static async Task<(bool, PreviewDisplayItem)> GetFirstFrameFullSize(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetFirstFrameFullSize(ICanvasResourceCreatorWithDpi ctrl, ImageFile file)
     {
         try
         {
-            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
-            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
+            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, await file.GetStreamAsync());
             var metaData = new ImageMetadata(canvasBitmap.SizeInPixels.Width, canvasBitmap.SizeInPixels.Height);
             return (true, new PreviewDisplayItem(canvasBitmap, Origin.Disk, metaData));
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "GifReader - GetFirstFrameFullSize failed for {0}", inputPath);
+            Logger.Error(ex, "GifReader - GetFirstFrameFullSize failed for {0}", file.Path);
             return (false, PreviewDisplayItem.Empty());
         }
     }

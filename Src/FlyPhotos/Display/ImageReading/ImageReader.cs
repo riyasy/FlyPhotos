@@ -195,7 +195,6 @@ internal static class ImageReader
         foreach (var step in chain)
         {
             onAttempt?.Invoke(step);
-            if (ReadsByPath(step)) file.CloseStream();
             try
             {
                 if (await Run(step, ctrl, file, ct) is { } item) return item;
@@ -210,51 +209,43 @@ internal static class ImageReader
     }
 
     /// <summary>
-    /// The steps whose reader opens the file itself from <c>file.Path</c> (native libraries) rather than using the
-    /// shared stream. Must match the <see cref="Run"/> arms that pass <c>file.Path</c>.
+    /// Runs one reader; null when it couldn't read the file. An arm whose reader opens the file by path passes
+    /// <see cref="ImageFile.ReleaseForPathReader"/>, never <c>file.Path</c> (ReleaseForPathReaderTests checks it).
     /// </summary>
-    private static bool ReadsByPath(DecodeStep step) => step is
-        DecodeStep.HeifEmbeddedOnly or DecodeStep.HeifResized or DecodeStep.HeifHq or DecodeStep.DdsHq or DecodeStep.DdsResized or
-        DecodeStep.MagickHq or DecodeStep.MagickRawHq or DecodeStep.MagickResized or DecodeStep.MagickRawEmbedded or
-        DecodeStep.PsdEmbedded or DecodeStep.SvgHq or DecodeStep.SvgResized or DecodeStep.PdfHq or
-        DecodeStep.PdfResized or DecodeStep.Rawler or
-        DecodeStep.LargeHeif or DecodeStep.LargeMagick;
-
-    /// <summary>Runs one reader; null when it couldn't read the file.</summary>
     internal static async Task<DisplayItem?> Run(DecodeStep step, ICanvasResourceCreatorWithDpi ctrl, ImageFile file,
         CancellationToken ct = default) =>
         step switch
         {
-            DecodeStep.HeifEmbeddedOnly => ItemOrNull(NativeHeifReader.GetEmbedded(ctrl, file.Path, embeddedOnly: true)),
-            DecodeStep.HeifResized => ItemOrNull(NativeHeifReader.GetEmbedded(ctrl, file.Path)),
-            DecodeStep.HeifHq => ItemOrNull(NativeHeifReader.GetHq(ctrl, file.Path)),
+            DecodeStep.HeifEmbeddedOnly => ItemOrNull(NativeHeifReader.GetEmbedded(ctrl, file.ReleaseForPathReader(), embeddedOnly: true)),
+            DecodeStep.HeifResized => ItemOrNull(NativeHeifReader.GetEmbedded(ctrl, file.ReleaseForPathReader())),
+            DecodeStep.HeifHq => ItemOrNull(await NativeHeifReader.GetHq(ctrl, file)),
             DecodeStep.AvifHq => ItemOrNull(await NativeAvifReader.GetHq(ctrl, file)),
-            DecodeStep.DdsHq => ItemOrNull(NativeDdsReader.GetHq(ctrl, file.Path)),
-            DecodeStep.DdsResized => ItemOrNull(NativeDdsReader.GetResized(ctrl, file.Path)),
+            DecodeStep.DdsHq => ItemOrNull(NativeDdsReader.GetHq(ctrl, file.ReleaseForPathReader())),
+            DecodeStep.DdsResized => ItemOrNull(NativeDdsReader.GetResized(ctrl, file.ReleaseForPathReader())),
             DecodeStep.WicEmbedded => ItemOrNull(await WicReader.GetEmbedded(ctrl, file)),
             DecodeStep.WicResized => ItemOrNull(await WicReader.GetResized(ctrl, file)),
             DecodeStep.WicHq => ItemOrNull(await WicReader.GetHq(ctrl, file)),
             DecodeStep.WicRawHq => ItemOrNull(await WicReader.GetHq(ctrl, file, isRaw: true)),
-            DecodeStep.MagickHq => ItemOrNull(await MagickNetWrap.GetHq(ctrl, file.Path)),
-            DecodeStep.MagickRawHq => ItemOrNull(await MagickNetWrap.GetHq(ctrl, file.Path, isRaw: true)),
-            DecodeStep.MagickResized => ItemOrNull(await MagickNetWrap.GetResized(ctrl, file.Path)),
-            DecodeStep.MagickRawEmbedded => ItemOrNull(await MagickNetWrap.GetEmbeddedForRawFile(ctrl, file.Path)),
+            DecodeStep.MagickHq => ItemOrNull(await MagickNetWrap.GetHq(ctrl, file.ReleaseForPathReader())),
+            DecodeStep.MagickRawHq => ItemOrNull(await MagickNetWrap.GetHq(ctrl, file.ReleaseForPathReader(), isRaw: true)),
+            DecodeStep.MagickResized => ItemOrNull(await MagickNetWrap.GetResized(ctrl, file.ReleaseForPathReader())),
+            DecodeStep.MagickRawEmbedded => ItemOrNull(await MagickNetWrap.GetEmbeddedForRawFile(ctrl, file.ReleaseForPathReader())),
             DecodeStep.MagicScalerResized => ItemOrNull(await MagicScalerWrap.GetResized(ctrl, file)),
-            DecodeStep.PsdEmbedded => ItemOrNull(await PsdReader.GetEmbedded(ctrl, file.Path)),
-            DecodeStep.SvgHq => ItemOrNull(await SvgReader.GetHq(ctrl, file.Path)),
-            DecodeStep.SvgResized => ItemOrNull(await SvgReader.GetResized(ctrl, file.Path)),
-            DecodeStep.PdfHq => ItemOrNull(await PdfReader.GetHq(ctrl, file.Path)),
-            DecodeStep.PdfResized => ItemOrNull(await PdfReader.GetResized(ctrl, file.Path)),
+            DecodeStep.PsdEmbedded => ItemOrNull(await PsdReader.GetEmbedded(ctrl, file.ReleaseForPathReader())),
+            DecodeStep.SvgHq => ItemOrNull(await SvgReader.GetHq(ctrl, file.ReleaseForPathReader())),
+            DecodeStep.SvgResized => ItemOrNull(await SvgReader.GetResized(ctrl, file.ReleaseForPathReader())),
+            DecodeStep.PdfHq => ItemOrNull(await PdfReader.GetHq(ctrl, file.ReleaseForPathReader())),
+            DecodeStep.PdfResized => ItemOrNull(await PdfReader.GetResized(ctrl, file.ReleaseForPathReader())),
             DecodeStep.Gif => ItemOrNull(await GifReader.GetHq(ctrl, file)),
             DecodeStep.Webp => ItemOrNull(await WebpReader.GetHq(ctrl, file)),
             DecodeStep.Png => ItemOrNull(await PngReader.GetHq(ctrl, file)),
             DecodeStep.Tiff => ItemOrNull(await TiffReader.GetHq(ctrl, file)),
             DecodeStep.IcoHq => ItemOrNull(await IcoReader.GetHq(ctrl, file)),
             DecodeStep.IcoPreview => ItemOrNull(await IcoReader.GetPreview(ctrl, file)),
-            DecodeStep.Rawler => ItemOrNull(RawlerWrapper.GetHq(ctrl, file.Path)),
-            DecodeStep.LargeHeif => LargeImageReader.DecodeHeif(ctrl, file.Path, ct),
+            DecodeStep.Rawler => ItemOrNull(RawlerWrapper.GetHq(ctrl, file.ReleaseForPathReader())),
+            DecodeStep.LargeHeif => LargeImageReader.DecodeHeif(ctrl, file.ReleaseForPathReader(), ct),
             DecodeStep.LargeWic => await LargeImageReader.DecodeWic(ctrl, file, ct),
-            DecodeStep.LargeMagick => LargeImageReader.DecodeMagick(ctrl, file.Path, ct),
+            DecodeStep.LargeMagick => LargeImageReader.DecodeMagick(ctrl, file.ReleaseForPathReader(), ct),
             _ => throw new ArgumentOutOfRangeException(nameof(step), step, null)
         };
 

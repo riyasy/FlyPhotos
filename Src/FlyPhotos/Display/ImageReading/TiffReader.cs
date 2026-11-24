@@ -5,7 +5,6 @@ using Windows.Graphics.Imaging;
 using FlyPhotos.Core.Model;
 using Microsoft.Graphics.Canvas;
 using NLog;
-using FlyPhotos.Services;
 
 namespace FlyPhotos.Display.ImageReading;
 
@@ -18,18 +17,17 @@ internal static class TiffReader
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public static async Task<(bool, PreviewDisplayItem)> GetFirstFrameFullSize(ICanvasResourceCreatorWithDpi ctrl, string inputPath)
+    public static async Task<(bool, PreviewDisplayItem)> GetFirstFrameFullSize(ICanvasResourceCreatorWithDpi ctrl, ImageFile file)
     {
         try
         {
-            using var stream = await StorageOps.GetWin2DPerformantStream(inputPath);
-            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, stream);
+            var canvasBitmap = await CanvasBitmap.LoadAsync(ctrl, await file.GetStreamAsync());
             var metaData = new ImageMetadata(canvasBitmap.SizeInPixels.Width, canvasBitmap.SizeInPixels.Height);
             return (true, new PreviewDisplayItem(canvasBitmap, Origin.Disk, metaData));
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "TiffReader - GetFirstFrameFullSize failed for {0}", inputPath);
+            Logger.Error(ex, "TiffReader - GetFirstFrameFullSize failed for {0}", file.Path);
             return (false, PreviewDisplayItem.Empty());
         }
     }
