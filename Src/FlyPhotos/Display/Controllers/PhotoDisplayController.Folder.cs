@@ -25,8 +25,7 @@ internal partial class PhotoDisplayController
     private FolderSource? _folder;
 
     // Completed by PublishListing (UI thread). Watcher batches and folder switches wait for it, so none is applied to
-    // the startup list (the opened photo alone) before the real listing is published. Never completed for a
-    // secondary instance, which has no Folder mode.
+    // the startup list (the opened photo alone) before the real listing is published.
     private readonly TaskCompletionSource _listingReady = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     // HQ loading waits until folder switching has paused this long, so skipping through many folders decodes

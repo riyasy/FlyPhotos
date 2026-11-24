@@ -403,10 +403,10 @@
     <value>Поиск приложений…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>В дополнительных окнах отображается только выбранное изображение (без навигации, удаления и настроек).</value>
+    <value>Каждое окно открывается как полноценный просмотрщик. Если отключено, открытие фотографии закрывает все другие окна FlyPhotos.</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Разрешить запуск нескольких копий программы (бета-версия)</value>
+    <value>Разрешить запуск нескольких копий программы</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Скрывать указатель мыши при отсутствии активности.</value>

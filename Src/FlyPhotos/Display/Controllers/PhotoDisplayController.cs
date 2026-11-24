@@ -204,11 +204,7 @@ internal partial class PhotoDisplayController
         IReadOnlyList<string> files;
         try
         {
-            // Secondary instances only display the single opened image.
-            // No folder or Explorer-window discovery is performed.
-            if (AppConfig.Volatile.IsSecondaryInstance)
-                files = new[] { selectedFilePath };
-            else if (IsFolderMode)
+            if (IsFolderMode)
             {
                 _folder = new FolderSource();
                 _folder.Changed += Watcher_Changed;
@@ -256,8 +252,6 @@ internal partial class PhotoDisplayController
         UpdateFileNameAndDetails();
         FirstPhotoLoaded?.Invoke();
 
-        // Secondary instances skip all background caching.
-        if (AppConfig.Volatile.IsSecondaryInstance) return;
         _cache.Start(_nav);
         _listingReady.TrySetResult(); // Folder mode's watcher batches may now apply
     }

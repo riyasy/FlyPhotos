@@ -403,10 +403,10 @@ Definições &gt; Aplicações &gt; Aplicações predefinidas.</value>
     <value>Pesquisar aplicações…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Instâncias adicionais mostram apenas a imagem selecionada (sem navegação, eliminação ou definições).</value>
+    <value>Cada janela abre como um visualizador completo. Quando desativado, abrir uma fotografia fecha qualquer outra janela do FlyPhotos.</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Permitir múltiplas instâncias (Beta)</value>
+    <value>Permitir múltiplas instâncias</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Ocultar o ponteiro do rato quando este estiver inativo.</value>

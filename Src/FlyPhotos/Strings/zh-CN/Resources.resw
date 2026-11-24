@@ -403,10 +403,10 @@
     <value>搜索应用…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>额外打开的实例只会显示所选图片（不支持浏览、删除或设置）。</value>
+    <value>每个窗口都以完整查看器打开。关闭时，打开照片会关闭其他所有 FlyPhotos 窗口。</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>允许多个实例 (Beta)</value>
+    <value>允许多个实例</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>鼠标静止时隐藏指针。</value>

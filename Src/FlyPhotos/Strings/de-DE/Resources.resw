@@ -403,10 +403,10 @@ Einstellungen &gt; Apps &gt; Standard-Apps.</value>
     <value>Apps suchen…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Zusätzliche Instanzen zeigen nur das ausgewählte Bild (keine Navigation, kein Löschen, keine Einstellungen).</value>
+    <value>Jedes Fenster öffnet sich als vollwertiger Viewer. Wenn deaktiviert, schließt das Öffnen eines Fotos alle anderen FlyPhotos-Fenster.</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Mehrere Instanzen erlauben (Beta)</value>
+    <value>Mehrere Instanzen erlauben</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Mauszeiger ausblenden, wenn die Maus inaktiv ist.</value>

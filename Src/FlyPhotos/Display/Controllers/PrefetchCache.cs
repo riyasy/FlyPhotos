@@ -219,7 +219,7 @@ internal sealed class PrefetchCache : IDisposable
 
     /// <summary>
     /// Starts loading around <paramref name="nav"/>, and starts the prefetch thread (unless the cache is stepped by
-    /// hand). Called once, when the listing is published. Not called for secondary instances.
+    /// hand). Called once, when the listing is published.
     /// </summary>
     public void Start(NavState nav)
     {

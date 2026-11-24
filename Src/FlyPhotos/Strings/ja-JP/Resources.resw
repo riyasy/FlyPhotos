@@ -402,10 +402,10 @@ FlyPhotosを選択し、「常に」をクリックします。</value>
     <value>アプリを検索…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>追加のインスタンスでは選択した画像のみ表示されます（移動・削除・設定は利用できません）。</value>
+    <value>各ウィンドウが完全なビューアーとして開きます。オフの場合、写真を開くと他の FlyPhotos ウィンドウはすべて閉じられます。</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>複数インスタンスを許可 (Beta)</value>
+    <value>複数インスタンスを許可</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>マウスが非アクティブな場合、マウスポインターを非表示にします。</value>

@@ -403,10 +403,10 @@ Impostazioni &gt; App &gt; App predefinite.</value>
     <value>Cerca app…</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Description" xml:space="preserve">
-    <value>Le istanze aggiuntive mostrano solo l'immagine selezionata (senza navigazione, eliminazione o impostazioni).</value>
+    <value>Ogni finestra si apre come visualizzatore completo. Se disattivato, l'apertura di una foto chiude qualsiasi altra finestra di FlyPhotos.</value>
   </data>
   <data name="SettingsCardAllowMultiInstance.Header" xml:space="preserve">
-    <value>Consenti più istanze (Beta)</value>
+    <value>Consenti più istanze</value>
   </data>
   <data name="SettingsCardAutoHideMouse.Description" xml:space="preserve">
     <value>Nascondi il puntatore del mouse se il mouse è inattivo.</value>
