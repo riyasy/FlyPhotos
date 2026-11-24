@@ -2,6 +2,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Windows.Graphics.DirectX;
 
 namespace FlyPhotos.Infra.Interop;
 
@@ -59,33 +60,26 @@ internal static partial class NativeDdsBridge
     public static partial void FreePixelBuffer(ref PixelBuffer buffer);
 }
 
-/// <summary>Managed wrapper over <see cref="NativeDdsBridge"/>: copies the pixels out and always frees the native buffer.</summary>
+/// <summary>Managed wrapper over <see cref="NativeDdsBridge"/>.</summary>
 public static class NativeDdsWrapper
 {
-    /// <summary>A decoded DDS image: premultiplied BGRA8 pixels plus the texture's full size.</summary>
-    public sealed record DdsImage(byte[] Pixels, int Width, int Height, int PrimaryImageWidth, int PrimaryImageHeight);
-
-    /// <summary>Decodes <paramref name="filePath"/>; see <see cref="NativeDdsBridge.ExtractDdsImage"/>.</summary>
+    /// <summary>
+    /// Decodes <paramref name="filePath"/> to premultiplied BGRA8 plus the texture's full size; see
+    /// <see cref="NativeDdsBridge.ExtractDdsImage"/>. Dispose the result to free the pixels.
+    /// </summary>
     /// <exception cref="Exception">The native decoder returned an error.</exception>
-    public static DdsImage Decode(string filePath, int maxDimension)
+    public static NativeImage Decode(string filePath, int maxDimension)
     {
         DdsError result = NativeDdsBridge.ExtractDdsImage(filePath, maxDimension, out NativeDdsBridge.PixelBuffer buffer);
         if (result != DdsError.Ok)
             throw new Exception($"Native DDS decoder failed. Error: {result}");
 
-        try
-        {
-            if (buffer.data == IntPtr.Zero || buffer.dataSize == 0)
-                throw new Exception("Native DDS decoder returned no pixels.");
-
-            // AllocateUninitializedArray skips zeroing a buffer that Marshal.Copy overwrites in full.
-            byte[] pixels = GC.AllocateUninitializedArray<byte>(buffer.dataSize);
-            Marshal.Copy(buffer.data, pixels, 0, buffer.dataSize);
-            return new DdsImage(pixels, buffer.width, buffer.height, buffer.primaryImageWidth, buffer.primaryImageHeight);
-        }
-        finally
+        if (buffer.data == IntPtr.Zero || buffer.dataSize == 0)
         {
             NativeDdsBridge.FreePixelBuffer(ref buffer);
+            throw new Exception("Native DDS decoder returned no pixels.");
         }
+        return new NativeImage(NativeImage.Owner.Dds, DirectXPixelFormat.B8G8R8A8UIntNormalized, buffer.data,
+            buffer.dataSize, buffer.width, buffer.height, buffer.primaryImageWidth, buffer.primaryImageHeight);
     }
 }

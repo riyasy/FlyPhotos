@@ -58,10 +58,10 @@ public sealed class HeifFirstOpenBenchTests
         try
         {
             var sw = Stopwatch.StartNew();
-            Embedded(f);
+            Embedded(f)?.Dispose();
             double preview = sw.Elapsed.TotalMilliseconds;
             sw.Restart();
-            NativeHeifWrapper.DecodePrimaryImage(f, out _);
+            NativeHeifWrapper.DecodePrimaryImage(f, out _)?.Dispose();
             return (preview, sw.Elapsed.TotalMilliseconds);
         }
         catch (Exception)
@@ -74,7 +74,7 @@ public sealed class HeifFirstOpenBenchTests
     private static readonly bool Before = Environment.GetEnvironmentVariable("FLY_HEIF_BENCH_MODE") == "before";
 
     /// <summary>What the first photo's embedded step decodes; null when it yields nothing.</summary>
-    private static NativeHeifWrapper.HeifImage? Embedded(string f)
+    private static NativeImage? Embedded(string f)
     {
         try { return NativeHeifWrapper.DecodeThumbnail(f, embeddedOnly: !Before); }
         catch (Exception) { return null; }
@@ -82,8 +82,9 @@ public sealed class HeifFirstOpenBenchTests
 
     private static (string primary, string thumb, bool hasThumb) Describe(string f)
     {
-        var p = NativeHeifWrapper.DecodeThumbnail(f);
-        bool hasThumb = NativeHeifWrapper.DecodeThumbnail(f, embeddedOnly: true) != null;
+        using var p = NativeHeifWrapper.DecodeThumbnail(f);
+        using var embedded = NativeHeifWrapper.DecodeThumbnail(f, embeddedOnly: true);
+        bool hasThumb = embedded != null;
         return ($"{p.PrimaryImageWidth}x{p.PrimaryImageHeight}", hasThumb ? $"{p.Width}x{p.Height}" : "none", hasThumb);
     }
 

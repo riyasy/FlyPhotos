@@ -35,7 +35,7 @@ public sealed class HeifSweepTests
     {
         try
         {
-            var img = NativeHeifWrapper.DecodePrimaryImage(f, out bool animated);
+            using var img = NativeHeifWrapper.DecodePrimaryImage(f, out bool animated);
             return $"OK {img.Width}x{img.Height}{(animated ? " animated" : "")} sum={Checksum(img.Pixels)}";
         }
         catch (Exception e) { return "FAIL " + e.Message.ReplaceLineEndings(" "); }
@@ -45,7 +45,7 @@ public sealed class HeifSweepTests
     {
         try
         {
-            var img = NativeHeifWrapper.DecodeThumbnail(f);
+            using var img = NativeHeifWrapper.DecodeThumbnail(f);
             return $"OK {img.Width}x{img.Height}";
         }
         catch (Exception e) { return "FAIL " + e.Message.ReplaceLineEndings(" "); }
@@ -83,7 +83,7 @@ public sealed class HeifSweepTests
         }
     }
 
-    private static ulong Checksum(byte[] px)
+    private static ulong Checksum(ReadOnlySpan<byte> px)
     {
         ulong s = 0;
         for (int i = 0; i < px.Length; i += 97) s = s * 31 + px[i];

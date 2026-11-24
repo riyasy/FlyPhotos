@@ -4,7 +4,6 @@ using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
 using NLog;
-using Windows.Graphics.DirectX;
 
 namespace FlyPhotos.Display.ImageReading;
 
@@ -26,8 +25,8 @@ internal static class NativeDdsReader
     {
         try
         {
-            var image = NativeDdsWrapper.Decode(path, maxDimension: ctrl.Device.MaximumBitmapSizeInPixels);
-            return (true, new StaticHqDisplayItem(ToBitmap(ctrl, image), Origin.Disk));
+            using var image = NativeDdsWrapper.Decode(path, maxDimension: ctrl.Device.MaximumBitmapSizeInPixels);
+            return (true, new StaticHqDisplayItem(image.ToBitmap(ctrl), Origin.Disk));
         }
         catch (Exception ex)
         {
@@ -44,9 +43,9 @@ internal static class NativeDdsReader
     {
         try
         {
-            var image = NativeDdsWrapper.Decode(path, maxDimension);
+            using var image = NativeDdsWrapper.Decode(path, maxDimension);
             var metadata = new ImageMetadata(image.PrimaryImageWidth, image.PrimaryImageHeight);
-            return (true, new PreviewDisplayItem(ToBitmap(ctrl, image), Origin.Disk, metadata));
+            return (true, new PreviewDisplayItem(image.ToBitmap(ctrl), Origin.Disk, metadata));
         }
         catch (Exception ex)
         {
@@ -54,7 +53,4 @@ internal static class NativeDdsReader
             return (false, PreviewDisplayItem.Empty());
         }
     }
-
-    private static CanvasBitmap ToBitmap(ICanvasResourceCreatorWithDpi ctrl, NativeDdsWrapper.DdsImage image) =>
-        CanvasBitmap.CreateFromBytes(ctrl, image.Pixels, image.Width, image.Height, DirectXPixelFormat.B8G8R8A8UIntNormalized);
 }

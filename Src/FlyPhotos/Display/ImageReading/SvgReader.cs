@@ -142,11 +142,11 @@ internal static partial class SvgReader
     }
 
     /// <summary>
-    /// Calls the Rust resvg_render_svg entry point, copies the resulting RGBA8 pixels into a
+    /// Calls the Rust resvg_render_svg entry point, uploads the resulting RGBA8 pixels into a
     /// <see cref="CanvasBitmap"/>, and unconditionally frees the native buffer — mirroring the contract in
     /// <see cref="RawlerWrapper"/>.
     /// </summary>
-    private static unsafe CanvasBitmap? RenderSvg(ICanvasResourceCreatorWithDpi ctrl, string inputPath, int maxDimension)
+    private static CanvasBitmap? RenderSvg(ICanvasResourceCreatorWithDpi ctrl, string inputPath, int maxDimension)
     {
         nint pixelPtr = NativeRustBridge.resvg_render_svg(inputPath, maxDimension, out int width, out int height);
         if (pixelPtr == nint.Zero || width <= 0 || height <= 0)
@@ -156,35 +156,19 @@ internal static partial class SvgReader
             return null;
         }
 
-        // Computed before anything that could throw, so the free below always has the exact size Rust used.
-        int totalBytes = width * height * 4;
-        try
-        {
-            return CreateBitmap(ctrl, new ReadOnlySpan<byte>((void*)pixelPtr, totalBytes), width, height, inputPath);
-        }
-        finally
-        {
-            // (uint) cast preserves the exact usize Rust used, even if width*height*4 were ever to overflow int.
-            NativeRustBridge.free_rust_buffer(pixelPtr, (nuint)(uint)totalBytes);
-        }
+        using var image = NativeImage.FromRust(pixelPtr, width, height)!;
+        return CreateBitmap(ctrl, image.Pixels, width, height, inputPath);
     }
 
     /// <summary>
-    /// Copies premultiplied RGBA8 <paramref name="pixels"/> (from a Rust buffer the caller frees) into a
+    /// Uploads premultiplied RGBA8 <paramref name="pixels"/> (from a Rust buffer the caller frees) into a
     /// <see cref="CanvasBitmap"/>; null on failure, logged.
     /// </summary>
-    /// <remarks>
-    /// Uses <see cref="GC.AllocateUninitializedArray{T}"/> to skip zero-filling (up to 16 MB for a 2000-px render),
-    /// matching the pattern in <see cref="RawlerWrapper"/>.
-    /// </remarks>
     private static CanvasBitmap? CreateBitmap(ICanvasResourceCreatorWithDpi ctrl, ReadOnlySpan<byte> pixels, int width, int height, string inputPath)
     {
         try
         {
-            // Skip zero-initialisation — every byte is overwritten by CopyTo.
-            byte[] copy = GC.AllocateUninitializedArray<byte>(pixels.Length);
-            pixels.CopyTo(copy);
-            return CanvasBitmap.CreateFromBytes(ctrl, copy, width, height, DirectXPixelFormat.R8G8B8A8UIntNormalized);
+            return PixelUpload.CreateBitmap(ctrl, pixels, width, height, DirectXPixelFormat.R8G8B8A8UIntNormalized);
         }
         catch (Exception ex)
         {

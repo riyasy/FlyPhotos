@@ -24,24 +24,17 @@ internal static class NativeHeifReader
         try
         {
             // 1. Call our new native decoder to get the thumbnail's pixel data and dimensions.
-            var heifImage = NativeHeifWrapper.DecodeThumbnail(inputPath, embeddedOnly);
+            using var heifImage = NativeHeifWrapper.DecodeThumbnail(inputPath, embeddedOnly);
 
             // 2. Check if a valid thumbnail was returned.
-            if (heifImage == null || heifImage.Pixels == null || heifImage.Pixels.Length == 0)
+            if (heifImage == null)
             {
                 // This is the expected outcome if a file has no thumbnail.
                 return (false, PreviewDisplayItem.Empty());
             }
 
-            // 3. Create the Win2D bitmap directly from the raw RGBA byte array.
-            //    This is extremely fast as no further decoding is needed.
-            var canvasBitmap = CanvasBitmap.CreateFromBytes(
-                ctrl, // The resource creator
-                heifImage.Pixels,
-                heifImage.Width,
-                heifImage.Height,
-                Windows.Graphics.DirectX.DirectXPixelFormat.R8G8B8A8UIntNormalized // This MUST match our C++ output (RGBA passthrough)
-            );
+            // 3. Create the Win2D bitmap directly from the native pixels.
+            var canvasBitmap = heifImage.ToBitmap(ctrl);
 
             // 4. Create the metadata using the primary image dimensions, which our native code provides.
             var metaData = new ImageMetadata(heifImage.PrimaryImageWidth, heifImage.PrimaryImageHeight);
@@ -64,10 +57,10 @@ internal static class NativeHeifReader
         try
         {
             // 1. Call our new native decoder to get the primary image's pixel data.
-            var heifImage = NativeHeifWrapper.DecodePrimaryImage(inputPath, out bool isAnimated);
+            using var heifImage = NativeHeifWrapper.DecodePrimaryImage(inputPath, out bool isAnimated);
 
             // 2. Check if a valid image was returned.
-            if (heifImage == null || heifImage.Pixels == null || heifImage.Pixels.Length == 0)
+            if (heifImage == null)
             {
                 Logger.Warn($"No primary image could be decoded from HEIF file: {inputPath}");
                 return (false, HqDisplayItem.Empty());
@@ -78,14 +71,8 @@ internal static class NativeHeifReader
             //    leaves no GPU bitmap behind.
             var animationBytes = isAnimated ? File.ReadAllBytes(inputPath) : null;
 
-            // 4. Create the Win2D bitmap directly from the raw RGBA byte array.
-            var canvasBitmap = CanvasBitmap.CreateFromBytes(
-                ctrl,
-                heifImage.Pixels,
-                heifImage.Width,
-                heifImage.Height,
-                Windows.Graphics.DirectX.DirectXPixelFormat.R8G8B8A8UIntNormalized // RGBA passthrough from native decoder
-            );
+            // 4. Create the Win2D bitmap directly from the native pixels.
+            var canvasBitmap = heifImage.ToBitmap(ctrl);
 
             // 5. Return the complete display item.
             if (animationBytes != null)

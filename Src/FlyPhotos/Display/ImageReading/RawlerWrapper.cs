@@ -1,6 +1,5 @@
 #nullable enable
 using System;
-using Windows.Graphics.DirectX;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Configuration;
 using FlyPhotos.Infra.Interop;
@@ -13,34 +12,22 @@ namespace FlyPhotos.Display.ImageReading;
 /// P/Invoke declarations live in <see cref="NativeRustBridge"/>; this class contains
 /// only managed orchestration logic.
 /// </summary>
-internal static unsafe class RawlerWrapper
+internal static class RawlerWrapper
 {
     /// <summary>
-    /// Safely copies an unmanaged Rust pixel buffer into a Win2D <see cref="CanvasBitmap"/>
+    /// Uploads an unmanaged Rust pixel buffer into a Win2D <see cref="CanvasBitmap"/>
     /// and unconditionally frees the buffer afterwards.
     /// </summary>
     private static CanvasBitmap? CreateBitmapAndFree(ICanvasResourceCreatorWithDpi ctrl, nint ptr, int width, int height)
     {
-        if (ptr == nint.Zero)
-            return null;
-
-        int totalBytes = width * height * 4;
+        using var image = NativeImage.FromRust(ptr, width, height);
         try
         {
-            // AllocateUninitializedArray avoids zeroing potentially 100 MB+ of memory.
-            byte[] pixels = GC.AllocateUninitializedArray<byte>(totalBytes);
-            // SIMD-optimised memmove via Span.
-            new ReadOnlySpan<byte>((void*)ptr, totalBytes).CopyTo(pixels);
-            return CanvasBitmap.CreateFromBytes(ctrl, pixels, width, height, DirectXPixelFormat.R8G8B8A8UIntNormalized);
+            return image?.ToBitmap(ctrl);
         }
         catch (Exception)
         {
             return null;
-        }
-        finally
-        {
-            // (uint) cast preserves the exact usize Rust used, even when width*height*4 overflows int.
-            NativeRustBridge.free_rust_buffer(ptr, (nuint)(uint)totalBytes);
         }
     }
 

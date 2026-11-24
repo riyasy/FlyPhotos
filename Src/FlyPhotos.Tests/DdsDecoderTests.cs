@@ -60,7 +60,7 @@ public sealed class DdsDecoderTests
     private static byte[] Fill(int count, params byte[] pixel) =>
         Enumerable.Repeat(pixel, count).SelectMany(p => p).ToArray();
 
-    private static NativeDdsWrapper.DdsImage Decode(byte[] dds, int maxDimension = 0,
+    private static NativeImage Decode(byte[] dds, int maxDimension = 0,
         [System.Runtime.CompilerServices.CallerMemberName] string name = "") =>
         NativeDdsWrapper.Decode(Save(dds, name), maxDimension);
 
@@ -74,18 +74,19 @@ public sealed class DdsDecoderTests
     {
         // The #273 regression: red and blue must not swap.
         byte[] rgba = [255, 0, 0, 255, /**/ 0, 255, 0, 255, /**/ 0, 0, 255, 255];
-        var img = Decode(Dds(3, 1, 1, Rgba8, rgba));
+        using var img = Decode(Dds(3, 1, 1, Rgba8, rgba));
 
         Assert.AreEqual(3, img.Width);
         Assert.AreEqual(1, img.Height);
-        CollectionAssert.AreEqual(new byte[] { 0, 0, 255, 255, /**/ 0, 255, 0, 255, /**/ 255, 0, 0, 255 }, img.Pixels);
+        CollectionAssert.AreEqual(new byte[] { 0, 0, 255, 255, /**/ 0, 255, 0, 255, /**/ 255, 0, 0, 255 }, img.Pixels.ToArray());
     }
 
     [TestMethod]
     public void Bgra_pixels_keep_their_channels()
     {
         byte[] bgra = [0, 0, 255, 255, /**/ 0, 255, 0, 255, /**/ 255, 0, 0, 255];
-        CollectionAssert.AreEqual(bgra, Decode(Dds(3, 1, 1, Bgra8, bgra)).Pixels);
+        using var img = Decode(Dds(3, 1, 1, Bgra8, bgra));
+        CollectionAssert.AreEqual(bgra, img.Pixels.ToArray());
     }
 
     [TestMethod]
@@ -94,11 +95,11 @@ public sealed class DdsDecoderTests
         // One 4x4 block: color0 = red (RGB565 0xF800) > color1 = blue (0x001F), so 4-colour mode.
         // Index rows, 2 bits per pixel: row 1 all index 1 (blue), the other rows index 0 (red).
         byte[] block = [0x00, 0xF8, 0x1F, 0x00, /* indices */ 0x00, 0x55, 0x00, 0x00];
-        var img = Decode(Dds(4, 4, 1, Dxt1, block));
+        using var img = Decode(Dds(4, 4, 1, Dxt1, block));
 
         byte[] red = [0, 0, 255, 255], blue = [255, 0, 0, 255];
         byte[] expected = [.. Fill(4, red), .. Fill(4, blue), .. Fill(8, red)];
-        CollectionAssert.AreEqual(expected, img.Pixels);
+        CollectionAssert.AreEqual(expected, img.Pixels.ToArray());
     }
 
     [TestMethod]
@@ -106,9 +107,9 @@ public sealed class DdsDecoderTests
     {
         // Half-transparent red, fully transparent white, opaque green.
         byte[] rgba = [255, 0, 0, 128, /**/ 255, 255, 255, 0, /**/ 0, 255, 0, 255];
-        var img = Decode(Dds(3, 1, 1, Rgba8, rgba));
+        using var img = Decode(Dds(3, 1, 1, Rgba8, rgba));
 
-        CollectionAssert.AreEqual(new byte[] { 0, 0, 128, 128, /**/ 0, 0, 0, 0, /**/ 0, 255, 0, 255 }, img.Pixels);
+        CollectionAssert.AreEqual(new byte[] { 0, 0, 128, 128, /**/ 0, 0, 0, 0, /**/ 0, 255, 0, 255 }, img.Pixels.ToArray());
     }
 
     // ---- 2. Mip selection and sizing ----------------------------------------------------------------------
@@ -129,50 +130,50 @@ public sealed class DdsDecoderTests
     [TestMethod]
     public void Zero_max_dimension_gives_the_full_top_mip()
     {
-        var img = Decode(MipChain(), maxDimension: 0);
+        using var img = Decode(MipChain(), maxDimension: 0);
 
         Assert.AreEqual((MipW, MipH), (img.Width, img.Height));
         Assert.AreEqual((MipW, MipH), (img.PrimaryImageWidth, img.PrimaryImageHeight));
         Assert.AreEqual(MipW * MipH * 4, img.Pixels.Length);
-        CollectionAssert.AreEqual(MipColourBgra(0), img.Pixels[..4]);
+        CollectionAssert.AreEqual(MipColourBgra(0), img.Pixels[..4].ToArray());
     }
 
     [TestMethod]
     public void Preview_uses_the_stored_mip_that_exactly_fits()
     {
         // Mip 2 is 64x32: the smallest level whose longer side is still >= 64.
-        var img = Decode(MipChain(), maxDimension: 64);
+        using var img = Decode(MipChain(), maxDimension: 64);
 
         Assert.AreEqual((64, 32), (img.Width, img.Height));
         Assert.AreEqual((MipW, MipH), (img.PrimaryImageWidth, img.PrimaryImageHeight));
-        CollectionAssert.AreEqual(MipColourBgra(2), img.Pixels[..4]);
+        CollectionAssert.AreEqual(MipColourBgra(2), img.Pixels[..4].ToArray());
     }
 
     [TestMethod]
     public void Preview_between_mips_resizes_the_next_larger_mip()
     {
         // No level is exactly 100 wide: mip 1 (128x64) is picked and scaled down to 100x50.
-        var img = Decode(MipChain(), maxDimension: 100);
+        using var img = Decode(MipChain(), maxDimension: 100);
 
         Assert.AreEqual((100, 50), (img.Width, img.Height));
-        CollectionAssert.AreEqual(MipColourBgra(1), img.Pixels[..4]);
+        CollectionAssert.AreEqual(MipColourBgra(1), img.Pixels[..4].ToArray());
     }
 
     [TestMethod]
     public void Preview_without_mips_is_resized()
     {
         byte[] dds = Dds(MipW, MipH, 1, Rgba8, Fill(MipW * MipH, 10, 20, 30, 255));
-        var img = Decode(dds, maxDimension: 64);
+        using var img = Decode(dds, maxDimension: 64);
 
         Assert.AreEqual((64, 32), (img.Width, img.Height));
         Assert.AreEqual((MipW, MipH), (img.PrimaryImageWidth, img.PrimaryImageHeight));
-        CollectionAssert.AreEqual(new byte[] { 30, 20, 10, 255 }, img.Pixels[..4]);
+        CollectionAssert.AreEqual(new byte[] { 30, 20, 10, 255 }, img.Pixels[..4].ToArray());
     }
 
     [TestMethod]
     public void Preview_larger_than_the_image_keeps_it_full_size()
     {
-        var img = Decode(MipChain(), maxDimension: 4096);
+        using var img = Decode(MipChain(), maxDimension: 4096);
         Assert.AreEqual((MipW, MipH), (img.Width, img.Height));
     }
 

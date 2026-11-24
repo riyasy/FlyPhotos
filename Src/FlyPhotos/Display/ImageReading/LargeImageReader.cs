@@ -47,17 +47,20 @@ internal static class LargeImageReader
     }
 
     /// <summary>
-    /// Decodes a HEIF/AVIF with native libheif. libheif returns the whole image as one RGBA byte[], so this
-    /// fails (and the next decoder takes over) when the image is larger than a .NET array can hold.
+    /// Decodes a HEIF/AVIF with native libheif. libheif returns the whole image as one RGBA buffer of at most
+    /// 2 GB, so this fails (and the next decoder takes over) for a larger image.
     /// </summary>
     /// <returns>The tiled item, or null when libheif returned no pixels.</returns>
     public static TiledHqDisplayItem? DecodeHeif(ICanvasResourceCreatorWithDpi ctrl, string path, CancellationToken ct)
     {
-        var img = NativeHeifWrapper.DecodePrimaryImage(path);
-        if (img?.Pixels is not { Length: > 0 } pixels) return null;
-        ct.ThrowIfCancellationRequested();
-        var level0 = new TileLevel(img.Width, img.Height);
-        level0.FillAll(pixels);
+        TileLevel level0;
+        using (var img = NativeHeifWrapper.DecodePrimaryImage(path)) // freed once the tiles hold a copy
+        {
+            if (img == null) return null;
+            ct.ThrowIfCancellationRequested();
+            level0 = new TileLevel(img.Width, img.Height);
+            level0.FillAll(img.Pixels);
+        }
         return ToItem(ctrl, TilePyramid.Build(level0, DirectXPixelFormat.R8G8B8A8UIntNormalized, ct));
     }
 

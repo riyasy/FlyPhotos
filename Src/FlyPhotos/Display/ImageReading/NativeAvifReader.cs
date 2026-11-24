@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Windows.Graphics.DirectX;
 using FlyPhotos.Core.Model;
 using FlyPhotos.Infra.Interop;
 using Microsoft.Graphics.Canvas;
@@ -32,18 +31,15 @@ internal static class NativeAvifReader
         {
             byte[] fileData = await file.GetBytesAsync();
 
-            var heifImage = NativeHeifWrapper.DecodePrimaryImageFromMemory(fileData, out bool isAnimated);
+            using var heifImage = NativeHeifWrapper.DecodePrimaryImageFromMemory(fileData, out bool isAnimated);
 
-            if (heifImage == null || heifImage.Pixels == null || heifImage.Pixels.Length == 0)
+            if (heifImage == null)
             {
                 Logger.Warn("Failed to extract primary image or AVIF structure from byte array.");
                 return (false, HqDisplayItem.Empty());
             }
 
-            var firstFrameBitmap = CanvasBitmap.CreateFromBytes(
-                canvas, heifImage.Pixels, heifImage.Width, heifImage.Height,
-                DirectXPixelFormat.R8G8B8A8UIntNormalized // RGBA passthrough from native decoder
-            );
+            var firstFrameBitmap = heifImage.ToBitmap(canvas);
 
             if (isAnimated)
                 return (true, new AnimatedHqDisplayItem(firstFrameBitmap, Origin.Disk, fileData, ImageFormat.Avif));

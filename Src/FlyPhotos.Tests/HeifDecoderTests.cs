@@ -25,17 +25,17 @@ public sealed class HeifDecoderTests
     private const int Tolerance = 12;
 
     /// <summary>Asserts the RGBA pixel at (x, y) is <paramref name="rgb"/> within the tolerance, with alpha <paramref name="alpha"/>.</summary>
-    private static void AssertPixel(byte[] rgba, int width, int x, int y, byte[] rgb, int alpha = 255)
+    private static void AssertPixel(ReadOnlySpan<byte> rgba, int width, int x, int y, byte[] rgb, int alpha = 255)
     {
         int i = (y * width + x) * 4;
-        byte[] actual = rgba[i..(i + 4)];
+        byte[] actual = rgba[i..(i + 4)].ToArray();
         byte[] expected = [.. rgb, (byte)alpha];
         for (int c = 0; c < 4; c++)
             Assert.IsTrue(Math.Abs(actual[c] - expected[c]) <= Tolerance,
                 $"pixel ({x},{y}): expected {string.Join(",", expected)}, got {string.Join(",", actual)}");
     }
 
-    private static void AssertQuadrants(NativeHeifWrapper.HeifImage img)
+    private static void AssertQuadrants(NativeImage img)
     {
         Assert.AreEqual((64, 64), (img.Width, img.Height));
         Assert.AreEqual((64, 64), (img.PrimaryImageWidth, img.PrimaryImageHeight));
@@ -60,7 +60,7 @@ public sealed class HeifDecoderTests
     [DataRow("quadrants.avif")]
     public void Still_image_decodes_to_rgba_in_the_right_places(string file)
     {
-        var img = NativeHeifWrapper.DecodePrimaryImage(Fixture(file), out bool animated);
+        using var img = NativeHeifWrapper.DecodePrimaryImage(Fixture(file), out bool animated);
         Assert.IsFalse(animated);
         AssertQuadrants(img);
     }
@@ -70,7 +70,7 @@ public sealed class HeifDecoderTests
     [DataRow("alpha.avif")]
     public void Alpha_comes_back_straight_not_premultiplied(string file)
     {
-        var img = NativeHeifWrapper.DecodePrimaryImage(Fixture(file));
+        using var img = NativeHeifWrapper.DecodePrimaryImage(Fixture(file));
         AssertPixel(img.Pixels, 32, 8, 16, Red, alpha: 255);
         AssertPixel(img.Pixels, 32, 24, 16, Blue, alpha: 128); // premultiplied would be ~0,0,128
     }
@@ -78,7 +78,7 @@ public sealed class HeifDecoderTests
     [TestMethod]
     public void Odd_size_with_420_chroma_keeps_its_exact_size()
     {
-        var img = NativeHeifWrapper.DecodePrimaryImage(Fixture("odd_size_420.heic"));
+        using var img = NativeHeifWrapper.DecodePrimaryImage(Fixture("odd_size_420.heic"));
         Assert.AreEqual((33, 17), (img.Width, img.Height));
         Assert.AreEqual(33 * 17 * 4, img.Pixels.Length);
         AssertPixel(img.Pixels, 33, 0, 0, Green);
@@ -86,13 +86,16 @@ public sealed class HeifDecoderTests
     }
 
     [TestMethod]
-    public void Monochrome_decodes_to_grey_rgba() =>
-        AssertPixel(NativeHeifWrapper.DecodePrimaryImage(Fixture("monochrome.heic")).Pixels, 16, 8, 8, [128, 128, 128]);
+    public void Monochrome_decodes_to_grey_rgba()
+    {
+        using var img = NativeHeifWrapper.DecodePrimaryImage(Fixture("monochrome.heic"));
+        AssertPixel(img.Pixels, 16, 8, 8, [128, 128, 128]);
+    }
 
     [TestMethod]
     public void Ten_bit_decodes_to_eight_bit_rgba()
     {
-        var img = NativeHeifWrapper.DecodePrimaryImage(Fixture("10bit_red.heic"));
+        using var img = NativeHeifWrapper.DecodePrimaryImage(Fixture("10bit_red.heic"));
         Assert.AreEqual(16 * 16 * 4, img.Pixels.Length);
         AssertPixel(img.Pixels, 16, 8, 8, Red);
     }
@@ -101,12 +104,12 @@ public sealed class HeifDecoderTests
     public void Memory_decode_matches_file_decode()
     {
         string file = Fixture("quadrants.heic");
-        var fromFile = NativeHeifWrapper.DecodePrimaryImage(file);
-        var fromMemory = NativeHeifWrapper.DecodePrimaryImageFromMemory(File.ReadAllBytes(file), out bool animated);
+        using var fromFile = NativeHeifWrapper.DecodePrimaryImage(file);
+        using var fromMemory = NativeHeifWrapper.DecodePrimaryImageFromMemory(File.ReadAllBytes(file), out bool animated);
 
         Assert.IsFalse(animated);
         Assert.AreEqual((fromFile.Width, fromFile.Height), (fromMemory.Width, fromMemory.Height));
-        CollectionAssert.AreEqual(fromFile.Pixels, fromMemory.Pixels);
+        CollectionAssert.AreEqual(fromFile.Pixels.ToArray(), fromMemory.Pixels.ToArray());
     }
 
     [TestMethod]
@@ -115,7 +118,8 @@ public sealed class HeifDecoderTests
         // The DLL converts the UTF-16 path to UTF-8 for libheif.
         string path = Path.Combine(Dir, "Fotos_Café_日本_😀.heic");
         File.Copy(Fixture("quadrants.heic"), path);
-        AssertQuadrants(NativeHeifWrapper.DecodePrimaryImage(path));
+        using var img = NativeHeifWrapper.DecodePrimaryImage(path);
+        AssertQuadrants(img);
     }
 
     // ---- Thumbnails ---------------------------------------------------------------------------------------
@@ -123,20 +127,23 @@ public sealed class HeifDecoderTests
     [TestMethod]
     public void Embedded_thumbnail_is_used()
     {
-        var img = NativeHeifWrapper.DecodeThumbnail(Fixture("with_thumbnail.heic"));
+        using var img = NativeHeifWrapper.DecodeThumbnail(Fixture("with_thumbnail.heic"));
         Assert.AreEqual((64, 32), (img.Width, img.Height));
         Assert.AreEqual((256, 128), (img.PrimaryImageWidth, img.PrimaryImageHeight));
         AssertPixel(img.Pixels, 64, 32, 16, Blue);
     }
 
     [TestMethod]
-    public void Small_image_without_thumbnail_returns_the_primary_image() =>
-        AssertQuadrants(NativeHeifWrapper.DecodeThumbnail(Fixture("quadrants.heic")));
+    public void Small_image_without_thumbnail_returns_the_primary_image()
+    {
+        using var img = NativeHeifWrapper.DecodeThumbnail(Fixture("quadrants.heic"));
+        AssertQuadrants(img);
+    }
 
     [TestMethod]
     public void Large_image_without_thumbnail_is_scaled_to_800()
     {
-        var img = NativeHeifWrapper.DecodeThumbnail(Fixture("large_no_thumbnail.heic"));
+        using var img = NativeHeifWrapper.DecodeThumbnail(Fixture("large_no_thumbnail.heic"));
         Assert.AreEqual((800, 400), (img.Width, img.Height));
         Assert.AreEqual((1000, 500), (img.PrimaryImageWidth, img.PrimaryImageHeight));
         Assert.AreEqual(800 * 400 * 4, img.Pixels.Length);
@@ -146,7 +153,7 @@ public sealed class HeifDecoderTests
     [TestMethod]
     public void Embedded_only_returns_the_stored_thumbnail()
     {
-        var img = NativeHeifWrapper.DecodeThumbnail(Fixture("with_thumbnail.heic"), embeddedOnly: true);
+        using var img = NativeHeifWrapper.DecodeThumbnail(Fixture("with_thumbnail.heic"), embeddedOnly: true);
         Assert.AreEqual((64, 32), (img.Width, img.Height));
         Assert.AreEqual((256, 128), (img.PrimaryImageWidth, img.PrimaryImageHeight));
     }
@@ -193,12 +200,12 @@ public sealed class HeifDecoderTests
     [TestMethod]
     public void Animated_avif_is_reported_as_animated_and_its_first_frame_decodes()
     {
-        var img = NativeHeifWrapper.DecodePrimaryImage(Fixture("animated_rgb.avif"), out bool animated);
+        using var img = NativeHeifWrapper.DecodePrimaryImage(Fixture("animated_rgb.avif"), out bool animated);
         Assert.IsTrue(animated);
         Assert.AreEqual((32, 32), (img.Width, img.Height));
         AssertPixel(img.Pixels, 32, 16, 16, Red);
 
-        NativeHeifWrapper.DecodePrimaryImageFromMemory(File.ReadAllBytes(Fixture("animated_rgb.avif")), out bool fromMemory);
+        using var _ = NativeHeifWrapper.DecodePrimaryImageFromMemory(File.ReadAllBytes(Fixture("animated_rgb.avif")), out bool fromMemory);
         Assert.IsTrue(fromMemory);
     }
 

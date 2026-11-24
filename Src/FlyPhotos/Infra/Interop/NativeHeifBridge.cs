@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Windows.Graphics.DirectX;
 
 namespace FlyPhotos.Infra.Interop;
 
@@ -171,54 +172,19 @@ internal static partial class NativeHeifBridge
 
 /// <summary>
 /// A managed C# wrapper for the native HeifDecoder DLL.
-/// This class provides a safe, exception-driven, and easy-to-use interface for decoding HEIC/HEIF images,
-/// handling memory management between managed and unmanaged code.
+/// This class provides a safe, exception-driven, and easy-to-use interface for decoding HEIC/HEIF images.
+/// Each result holds the native RGBA8 pixels (straight alpha) until it is disposed.
 /// </summary>
 public static class NativeHeifWrapper
 {
     /// <summary>
-    /// Represents a decoded HEIF image with its pixel data and dimensions.
-    /// </summary>
-    public class HeifImage
-    {
-        /// <summary>
-        /// The raw pixel data of the decoded image. The data is in 32-bit RGBA format,
-        /// meaning each pixel consists of 4 bytes: Red, Green, Blue, Alpha.
-        /// </summary>
-        public byte[] Pixels { get; internal set; }
-
-        /// <summary>
-        /// The width of the decoded image (either primary image or thumbnail).
-        /// </summary>
-        public int Width { get; internal set; }
-
-        /// <summary>
-        /// The height of the decoded image (either primary image or thumbnail).
-        /// </summary>
-        public int Height { get; internal set; }
-
-        /// <summary>
-        /// The width of the primary image as specified in the HEIC file metadata.
-        /// This might differ from <see cref="Width"/> if a thumbnail was decoded.
-        /// </summary>
-        public int PrimaryImageWidth { get; internal set; }
-
-        /// <summary>
-        /// The height of the primary image as specified in the HEIC file metadata.
-        /// This might differ from <see cref="Height"/> if a thumbnail was decoded.
-        /// </summary>
-        public int PrimaryImageHeight { get; internal set; }
-    }
-
-    /// <summary>
-    /// Decodes the primary image from a HEIC/HEIF file into a managed <see cref="HeifImage"/> object.
-    /// Handles calling the native DLL, copying data to managed memory, and freeing native resources.
+    /// Decodes the primary image from a HEIC/HEIF file.
     /// </summary>
     /// <param name="filePath">The full path to the .heic, .heif or .hif file.</param>
-    /// <returns>A <see cref="HeifImage"/> object containing the decoded RGBA pixel data and dimensions, or null if the image data is empty.</returns>
+    /// <returns>The decoded RGBA pixels and dimensions, or null if the image data is empty.</returns>
     /// <exception cref="Exception">Thrown if the native DLL returns an error code during decoding,
     /// indicating issues like file not found, decoding errors, or no primary image.</exception>
-    public static HeifImage DecodePrimaryImage(string filePath) => DecodePrimaryImage(filePath, out _);
+    public static NativeImage DecodePrimaryImage(string filePath) => DecodePrimaryImage(filePath, out _);
 
     /// <summary>
     /// Decodes the primary image from a HEIC/HEIF file, like <see cref="DecodePrimaryImage(string)"/>, and reports
@@ -227,9 +193,9 @@ public static class NativeHeifWrapper
     /// </summary>
     /// <param name="filePath">The full path to the .heic, .heif, .hif or .avif file.</param>
     /// <param name="isAnimated">Output parameter indicating whether the file has animation sequence tracks.</param>
-    /// <returns>A <see cref="HeifImage"/> object containing the decoded RGBA pixel data and dimensions, or null if the image data is empty.</returns>
+    /// <returns>The decoded RGBA pixels and dimensions, or null if the image data is empty.</returns>
     /// <exception cref="Exception">Thrown if the native DLL returns an error code during decoding.</exception>
-    public static HeifImage DecodePrimaryImage(string filePath, out bool isAnimated)
+    public static NativeImage DecodePrimaryImage(string filePath, out bool isAnimated)
     {
         HeifError result = NativeHeifBridge.ExtractPrimaryImageAndAnimationStatus(filePath,
             out NativeHeifBridge.PixelBuffer buffer, out byte isAnimatedByte);
@@ -237,45 +203,21 @@ public static class NativeHeifWrapper
 
         if (result != HeifError.Ok)
             throw new Exception($"Native HEIF decoder failed to decode primary image. Error: {result}");
-
-        try
-        {
-            if (buffer.data == IntPtr.Zero || buffer.dataSize == 0)
-                return null;
-
-            // AllocateUninitializedArray skips zeroing a buffer that Marshal.Copy
-            // overwrites in full (up to 100 MB+ for an 8K HEIC).
-            byte[] managedPixels = GC.AllocateUninitializedArray<byte>(buffer.dataSize);
-            Marshal.Copy(buffer.data, managedPixels, 0, buffer.dataSize);
-            return new HeifImage
-            {
-                Pixels = managedPixels,
-                Width = buffer.width,
-                Height = buffer.height,
-                PrimaryImageWidth = buffer.primaryImageWidth,
-                PrimaryImageHeight = buffer.primaryImageHeight
-            };
-        }
-        finally
-        {
-            // Ensure the unmanaged memory is always freed.
-            NativeHeifBridge.FreePixelBuffer(ref buffer);
-        }
+        return Own(ref buffer);
     }
 
     /// <summary>
-    /// Decodes the thumbnail image from a HEIC/HEIF file into a managed <see cref="HeifImage"/> object.
-    /// Handles calling the native DLL, copying data to managed memory, and freeing native resources.
+    /// Decodes the thumbnail image from a HEIC/HEIF file.
     /// </summary>
     /// <param name="filePath">The full path to the .heic, heif or .hif file.</param>
     /// <param name="embeddedOnly">
     /// Only an embedded thumbnail: null when the file has none, instead of a preview scaled from a full decode.
     /// For a caller that decodes the full image next anyway.
     /// </param>
-    /// <returns>A <see cref="HeifImage"/> object containing the decoded RGBA pixel data and dimensions, or null if no thumbnail data is found or is empty.</returns>
+    /// <returns>The decoded RGBA pixels and dimensions, or null if no thumbnail data is found or is empty.</returns>
     /// <exception cref="Exception">Thrown if the native DLL returns an error code during decoding,
     /// indicating issues like file not found, decoding errors, or no thumbnail found.</exception>
-    public static HeifImage DecodeThumbnail(string filePath, bool embeddedOnly = false)
+    public static NativeImage DecodeThumbnail(string filePath, bool embeddedOnly = false)
     {
         HeifError result = embeddedOnly
             ? NativeHeifBridge.ExtractEmbeddedThumbnail(filePath, out NativeHeifBridge.PixelBuffer buffer)
@@ -284,40 +226,17 @@ public static class NativeHeifWrapper
         if (embeddedOnly && result == HeifError.NoThumbnailFound) return null;
         if (result != HeifError.Ok)
             throw new Exception($"Native HEIF decoder failed to decode thumbnail. Error: {result}");
-
-        try
-        {
-            if (buffer.data == IntPtr.Zero || buffer.dataSize == 0)
-                return null;
-
-            // AllocateUninitializedArray skips zeroing a buffer that Marshal.Copy
-            // overwrites in full (up to 100 MB+ for an 8K HEIC).
-            byte[] managedPixels = GC.AllocateUninitializedArray<byte>(buffer.dataSize);
-            Marshal.Copy(buffer.data, managedPixels, 0, buffer.dataSize);
-
-            return new HeifImage
-            {
-                Pixels = managedPixels,
-                Width = buffer.width,
-                Height = buffer.height,
-                PrimaryImageWidth = buffer.primaryImageWidth,
-                PrimaryImageHeight = buffer.primaryImageHeight
-            };
-        }
-        finally
-        {
-            NativeHeifBridge.FreePixelBuffer(ref buffer);
-        }
+        return Own(ref buffer);
     }
 
     /// <summary>
-    /// Decodes the primary image from an in-memory byte array into a managed <see cref="HeifImage"/> object.
+    /// Decodes the primary image from an in-memory byte array.
     /// This skips I/O file locks and performs a simultaneous check for animation sequence tracks.
     /// </summary>
     /// <param name="fileData">The raw byte array containing the entire file.</param>
     /// <param name="isAnimated">Output parameter indicating whether the sequence has animation tracks.</param>
-    /// <returns>A <see cref="HeifImage"/> object containing the decoded RGBA pixel data and dimensions, or null if empty.</returns>
-    public static HeifImage DecodePrimaryImageFromMemory(byte[] fileData, out bool isAnimated)
+    /// <returns>The decoded RGBA pixels and dimensions, or null if empty.</returns>
+    public static NativeImage DecodePrimaryImageFromMemory(byte[] fileData, out bool isAnimated)
     {
         isAnimated = false;
         if (fileData == null || fileData.Length == 0) return null;
@@ -340,36 +259,24 @@ public static class NativeHeifWrapper
                 // Soft fail if the file is just totally broke. Let the caller deal with null.
                 return null;
             }
-
-            try
-            {
-                if (buffer.data == IntPtr.Zero || buffer.dataSize == 0)
-                    return null;
-
-                // AllocateUninitializedArray skips zeroing a buffer that Marshal.Copy
-                // overwrites in full (up to 100 MB+ for an 8K HEIC).
-                byte[] managedPixels = GC.AllocateUninitializedArray<byte>(buffer.dataSize);
-                Marshal.Copy(buffer.data, managedPixels, 0, buffer.dataSize);
-
-                return new HeifImage
-                {
-                    Pixels = managedPixels,
-                    Width = buffer.width,
-                    Height = buffer.height,
-                    PrimaryImageWidth = buffer.primaryImageWidth,
-                    PrimaryImageHeight = buffer.primaryImageHeight
-                };
-            }
-            finally
-            {
-                // Ensure the C++ allocated pixel buffer memory is always freed.
-                NativeHeifBridge.FreePixelBuffer(ref buffer);
-            }
+            return Own(ref buffer);
         }
         finally
         {
             if (pinnedData.IsAllocated)
                 pinnedData.Free();
         }
+    }
+
+    /// <summary>The decoded buffer as a <see cref="NativeImage"/>, which frees it; an empty one is freed here.</summary>
+    private static NativeImage Own(ref NativeHeifBridge.PixelBuffer buffer)
+    {
+        if (buffer.data == IntPtr.Zero || buffer.dataSize == 0)
+        {
+            NativeHeifBridge.FreePixelBuffer(ref buffer);
+            return null;
+        }
+        return new NativeImage(NativeImage.Owner.Heif, DirectXPixelFormat.R8G8B8A8UIntNormalized, buffer.data,
+            buffer.dataSize, buffer.width, buffer.height, buffer.primaryImageWidth, buffer.primaryImageHeight);
     }
 }
