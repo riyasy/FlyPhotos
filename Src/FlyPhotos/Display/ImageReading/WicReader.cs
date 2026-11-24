@@ -43,10 +43,10 @@ internal static class WicReader
     /// format WIC can auto-detect.
     /// </summary>
     public static async Task<PreviewDisplayItem> GetResized(ICanvasResourceCreatorWithDpi ctrl, ImageFile file,
-        uint maxDimension = CappedDecode.PreviewMaxSize)
+        uint maxDimension = WicFrame.PreviewMaxSize)
     {
         var (preview, fullWidth, fullHeight) =
-            await CappedDecode.DecodeAsync(await file.GetPartialReadStreamAsync(), maxDimension);
+            await WicFrame.DecodeCappedAsync(await file.GetPartialReadStreamAsync(), maxDimension);
         using (preview)
             return new PreviewDisplayItem(preview.ToCanvasBitmap(ctrl), Origin.Disk,
                 new ImageMetadata(fullWidth, fullHeight));
@@ -177,13 +177,13 @@ internal static class WicReader
 
             // A full-size image returned as the thumbnail is scaled down to the preview size; others load as they are.
             var thumbDecoder = await BitmapDecoder.CreateAsync(preview);
-            bool tooLarge = CappedDecode.IsTooLargeForThumbnail(thumbDecoder.PixelWidth, thumbDecoder.PixelHeight);
+            bool tooLarge = WicFrame.IsTooLargeForThumbnail(thumbDecoder.PixelWidth, thumbDecoder.PixelHeight);
             preview.Seek(0);
 
             CanvasBitmap canvasBitmap;
             if (tooLarge)
             {
-                using var scaled = (await CappedDecode.DecodeAsync(preview)).Bitmap;
+                using var scaled = (await WicFrame.DecodeCappedAsync(preview)).Bitmap;
                 canvasBitmap = scaled.ToCanvasBitmap(ctrl);
             }
             else

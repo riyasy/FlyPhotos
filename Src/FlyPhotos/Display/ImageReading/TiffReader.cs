@@ -29,13 +29,7 @@ internal static class TiffReader
         // Frame 0 is decoded from the decoder we already have, into a SoftwareBitmap that Win2D
         // uploads directly, with no managed copy of the pixels.
         var decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.TiffDecoderId, stream);
-        var frame0 = await decoder.GetFrameAsync(0);
-        using var softwareBitmap = await frame0.GetSoftwareBitmapAsync(
-            BitmapPixelFormat.Bgra8,
-            BitmapAlphaMode.Premultiplied,
-            new BitmapTransform(),
-            ExifOrientationMode.RespectExifOrientation,
-            ColorManagementMode.ColorManageToSRgb);
+        using var softwareBitmap = await WicFrame.DecodeAsync(await decoder.GetFrameAsync(0));
 
         // A multi-page file's raw bytes for the page renderer: read after the decoder is done with the shared
         // stream, and before the GPU bitmap, so a failed read leaves none behind.

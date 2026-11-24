@@ -75,9 +75,11 @@ internal partial class MultiPageRenderer : IRenderer, IMultiPage
 
             var decoder = await _decoderTask;
             var frame = await decoder.GetFrameAsync((uint)_pageOrder[pageIndex]);
-            using var softwareBitmap = await frame.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8,
-                BitmapAlphaMode.Premultiplied, new BitmapTransform(), ExifOrientationMode.IgnoreExifOrientation,
-                ColorManagementMode.DoNotColorManage);
+            // Each page decodes as its page 1 did: a TIFF's like TiffReader's, an icon's like IcoReader's.
+            using var softwareBitmap = decoder.DecoderInformation.CodecId == BitmapDecoder.TiffDecoderId
+                ? await WicFrame.DecodeAsync(frame)
+                : await frame.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied,
+                    new BitmapTransform(), ExifOrientationMode.IgnoreExifOrientation, ColorManagementMode.DoNotColorManage);
             if (_isDisposed || loadId != _latestPageLoadId) return null;
 
             // Uploaded at 96 DPI, so its size in DIPs is its pixel size.

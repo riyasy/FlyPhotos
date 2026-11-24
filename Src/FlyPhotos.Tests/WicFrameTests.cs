@@ -7,7 +7,7 @@ using Windows.Storage.Streams;
 namespace FlyPhotos.Tests;
 
 [TestClass]
-public sealed class CappedDecodeTests
+public sealed class WicFrameTests
 {
     [TestMethod]
     [DataRow(8256u, 5504u, 800u, 533u)]
@@ -17,7 +17,7 @@ public sealed class CappedDecodeTests
     [DataRow(160u, 120u, 160u, 120u)]
     [DataRow(20000u, 10u, 800u, 1u)]
     public void Fit_caps_the_longest_side_and_keeps_the_aspect(uint w, uint h, uint ew, uint eh) =>
-        Assert.AreEqual((ew, eh), CappedDecode.Fit(w, h, 800));
+        Assert.AreEqual((ew, eh), WicFrame.Fit(w, h, 800));
 
     [TestMethod]
     [DataRow(160u, 120u, false)]   // EXIF thumbnail
@@ -26,19 +26,19 @@ public sealed class CappedDecodeTests
     [DataRow(1601u, 1067u, true)]
     [DataRow(6048u, 8064u, true)]  // DNG codec: the whole 48 MP ProRAW image
     public void Only_a_thumbnail_over_twice_the_preview_size_is_scaled(uint w, uint h, bool expected) =>
-        Assert.AreEqual(expected, CappedDecode.IsTooLargeForThumbnail(w, h));
+        Assert.AreEqual(expected, WicFrame.IsTooLargeForThumbnail(w, h));
 
     [TestMethod]
     public async Task A_large_jpeg_is_decoded_at_preview_size()
     {
-        var (bitmap, fw, fh) = await CappedDecode.DecodeAsync(await Jpeg(2400, 1200));
+        var (bitmap, fw, fh) = await WicFrame.DecodeCappedAsync(await Jpeg(2400, 1200));
         using (bitmap) Assert.AreEqual((800, 400, 2400u, 1200u), (bitmap.PixelWidth, bitmap.PixelHeight, fw, fh));
     }
 
     [TestMethod]
     public async Task A_small_jpeg_is_decoded_as_is()
     {
-        var (bitmap, fw, fh) = await CappedDecode.DecodeAsync(await Jpeg(160, 120));
+        var (bitmap, fw, fh) = await WicFrame.DecodeCappedAsync(await Jpeg(160, 120));
         using (bitmap) Assert.AreEqual((160, 120, 160u, 120u), (bitmap.PixelWidth, bitmap.PixelHeight, fw, fh));
     }
 
@@ -46,7 +46,7 @@ public sealed class CappedDecodeTests
     [TestMethod]
     public async Task An_exif_rotated_jpeg_is_decoded_upright()
     {
-        var (bitmap, fw, fh) = await CappedDecode.DecodeAsync(await Jpeg(2400, 1200, orientation: 6));
+        var (bitmap, fw, fh) = await WicFrame.DecodeCappedAsync(await Jpeg(2400, 1200, orientation: 6));
         using (bitmap) Assert.AreEqual((400, 800, 1200u, 2400u), (bitmap.PixelWidth, bitmap.PixelHeight, fw, fh));
     }
 
@@ -54,7 +54,7 @@ public sealed class CappedDecodeTests
     [TestMethod]
     public async Task An_exif_rotated_jpeg_is_not_squashed()
     {
-        var (bitmap, _, _) = await CappedDecode.DecodeAsync(await Jpeg(2400, 1200, orientation: 6, marker: true));
+        var (bitmap, _, _) = await WicFrame.DecodeCappedAsync(await Jpeg(2400, 1200, orientation: 6, marker: true));
         using (bitmap)
         {
             var px = new byte[bitmap.PixelWidth * bitmap.PixelHeight * 4];

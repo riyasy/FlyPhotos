@@ -1,24 +1,32 @@
 #nullable enable
 using System;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.Graphics.Imaging;
 using Windows.Storage.Streams;
+using Microsoft.Graphics.Canvas;
 
 namespace FlyPhotos.Display.ImageReading;
 
 /// <summary>
-/// A WIC decode scaled down to a preview size inside the decoder (the JPEG decoder scales during the IDCT), so a
-/// large source never exists at full size in memory.
+/// Turns a WIC frame into a bitmap for the canvas: premultiplied BGRA8, EXIF-oriented and in sRGB, decoded to a
+/// <see cref="SoftwareBitmap"/> (no managed copy of the pixels) and uploaded with <see cref="ToCanvasBitmap"/>.
 /// </summary>
-internal static class CappedDecode
+internal static class WicFrame
 {
     /// <summary>The longest side of every preview.</summary>
     public const uint PreviewMaxSize = 800;
 
-    /// <summary>Decodes the first frame of any WIC-readable stream as premultiplied BGRA8, EXIF-oriented and in sRGB,
-    /// scaled to fit <paramref name="maxDimension"/> on its longest side.</summary>
+    private static readonly BitmapTransform Identity = new();
+
+    /// <summary>Decodes the frame at full size. The caller disposes the result.</summary>
+    public static IAsyncOperation<SoftwareBitmap> DecodeAsync(BitmapFrame frame) => Decode(frame, Identity);
+
+    /// <summary>Decodes the first frame of any WIC-readable stream scaled to fit <paramref name="maxDimension"/> on
+    /// its longest side, inside the decoder (the JPEG decoder scales during the IDCT), so a large source never exists
+    /// at full size in memory.</summary>
     /// <returns>The decoded preview (the caller disposes it), and the full image's oriented size.</returns>
-    public static async Task<(SoftwareBitmap Bitmap, uint FullWidth, uint FullHeight)> DecodeAsync(
+    public static async Task<(SoftwareBitmap Bitmap, uint FullWidth, uint FullHeight)> DecodeCappedAsync(
         IRandomAccessStream stream, uint maxDimension = PreviewMaxSize)
     {
         var decoder = await BitmapDecoder.CreateAsync(stream);
@@ -33,10 +41,23 @@ internal static class CappedDecode
             ScaledHeight = height,
             InterpolationMode = BitmapInterpolationMode.Fant
         };
-        // A SoftwareBitmap, not GetPixelDataAsync: that hands back a managed LOH array per preview.
-        var bitmap = await frame.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied, transform,
+        return (await Decode(frame, transform), fullWidth, fullHeight);
+    }
+
+    // A SoftwareBitmap, not GetPixelDataAsync: that hands back a managed LOH array per decode.
+    private static IAsyncOperation<SoftwareBitmap> Decode(BitmapFrame frame, BitmapTransform transform) =>
+        frame.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied, transform,
             ExifOrientationMode.RespectExifOrientation, ColorManagementMode.ColorManageToSRgb);
-        return (bitmap, fullWidth, fullHeight);
+
+    /// <summary>
+    /// Uploads a decoded Bgra8 premultiplied frame to Win2D at 96 DPI, so its size in DIPs is its pixel size.
+    /// CreateFromSoftwareBitmap would otherwise take the file's DPI (72, 300, ...), which changes the layout.
+    /// </summary>
+    public static CanvasBitmap ToCanvasBitmap(this SoftwareBitmap softwareBitmap, ICanvasResourceCreator resourceCreator)
+    {
+        softwareBitmap.DpiX = 96;
+        softwareBitmap.DpiY = 96;
+        return CanvasBitmap.CreateFromSoftwareBitmap(resourceCreator, softwareBitmap);
     }
 
     /// <summary>

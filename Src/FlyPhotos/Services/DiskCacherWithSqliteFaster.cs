@@ -609,7 +609,7 @@ public sealed partial class DiskCacherWithSqlite : IDisposable
             }
 
             bool quarterTurn = rotation is 90 or 270;
-            var (width, height) = CappedDecode.Fit(quarterTurn ? px.Height : px.Width,
+            var (width, height) = WicFrame.Fit(quarterTurn ? px.Height : px.Width,
                 quarterTurn ? px.Width : px.Height, (uint)maxSize);
 
             // The bitmap draws at its size in DIPs; the 96-dpi target's DIPs are pixels.

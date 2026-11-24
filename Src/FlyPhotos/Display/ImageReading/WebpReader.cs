@@ -21,9 +21,6 @@ namespace FlyPhotos.Display.ImageReading;
 /// </remarks>
 internal static class WebpReader
 {
-    // Identity transform reused across calls — avoids a COM object allocation per decode.
-    private static readonly BitmapTransform IdentityTransform = new();
-
     /// <summary>
     /// Loads the first frame of the WebP file at full resolution as a lightweight preview.
     /// Used during initial thumbnail/preview loading before the high-quality decode is ready.
@@ -54,9 +51,8 @@ internal static class WebpReader
     /// Throws on failure.
     /// </returns>
     /// <remarks>
-    /// Frame 0 pixels are decoded via <see cref="BitmapFrame.GetSoftwareBitmapAsync()"/> on the
-    /// same decoder instance used for the frame-count check — no second decode pass needed.
-    /// EXIF orientation is applied so the resulting bitmap is always correctly oriented.
+    /// Frame 0 is decoded by <see cref="WicFrame.DecodeAsync"/> on the same decoder instance used for the
+    /// frame-count check — no second decode pass needed.
     /// For animated files, the raw file bytes are read for the
     /// animator; this is cheaper than a second full pixel decode.
     /// </remarks>
@@ -68,13 +64,7 @@ internal static class WebpReader
         // Frame 0 is decoded from the decoder we already have, into a SoftwareBitmap that Win2D
         // uploads directly, with no managed copy of the pixels.
         var decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.WebpDecoderId, stream);
-        var frame0 = await decoder.GetFrameAsync(0);
-        using var softwareBitmap = await frame0.GetSoftwareBitmapAsync(
-            BitmapPixelFormat.Bgra8,
-            BitmapAlphaMode.Premultiplied,
-            IdentityTransform,
-            ExifOrientationMode.RespectExifOrientation,
-            ColorManagementMode.ColorManageToSRgb);
+        using var softwareBitmap = await WicFrame.DecodeAsync(await decoder.GetFrameAsync(0));
 
         // An animation's raw bytes for the animator (a memcpy, far cheaper than a second decode): read after the
         // decoder is done with the shared stream, and before the GPU bitmap, so a failed read leaves none behind.
