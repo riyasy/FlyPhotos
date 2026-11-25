@@ -135,6 +135,9 @@ public partial class PngAnimator : IAnimator
     /// <inheritdoc />
     public TimeSpan TimeToNextFrame { get; private set; }
 
+    /// <inheritdoc />
+    public TimeSpan LoopDuration => _totalAnimationDuration;
+
     /// <summary>
     ///     PNG chunks that are shared across all frames: PLTE (palette), tRNS (transparency),
     ///     and any other ancillary chunks that precede the first fcTL in the file.

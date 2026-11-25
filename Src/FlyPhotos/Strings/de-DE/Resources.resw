@@ -1285,4 +1285,55 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
   <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
     <value>Nur im Ordnermodus: öffnet den vorherigen Ordner im übergeordneten Ordner</value>
   </data>
+  <data name="ShortcutName_Slideshow" xml:space="preserve">
+    <value>Diashow starten oder beenden</value>
+  </data>
+  <data name="ShortcutName_PauseSlideshow" xml:space="preserve">
+    <value>Diashow anhalten oder fortsetzen</value>
+  </data>
+  <data name="ButtonSlideshowToolTip.Content" xml:space="preserve">
+    <value>Diashow starten</value>
+  </data>
+  <data name="ButtonStopSlideshowToolTip.Content" xml:space="preserve">
+    <value>Diashow beenden</value>
+  </data>
+  <data name="SlideshowPause" xml:space="preserve">
+    <value>Diashow anhalten</value>
+  </data>
+  <data name="SlideshowResume" xml:space="preserve">
+    <value>Diashow fortsetzen</value>
+  </data>
+  <data name="TextBlockSlideshow.Text" xml:space="preserve">
+    <value>Diashow</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Header" xml:space="preserve">
+    <value>Zeit pro Foto (Sekunden)</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
+    <value>Wie lange jedes Foto angezeigt wird. Eine Animation wird so oft vollständig abgespielt, wie es in diese Zeit passt, mindestens aber einmal.</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
+    <value>Wiederholen</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Description" xml:space="preserve">
+    <value>Nach dem letzten Foto wieder mit dem ersten beginnen.</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Header" xml:space="preserve">
+    <value>Alle Seiten anzeigen</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Description" xml:space="preserve">
+    <value>Alle Seiten mehrseitiger Dateien (TIFF, ICO, PDF) nacheinander anzeigen.</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Header" xml:space="preserve">
+    <value>Im Vollbild starten</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
+    <value>Die Diashow im Vollbild abspielen. Wenn sie endet, kehrt das Fenster in seinen vorherigen Zustand zurück.</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
+    <value>Bei Inaktivität anhalten</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Description" xml:space="preserve">
+    <value>Anhalten, wenn Sie zu einem anderen Fenster wechseln oder FlyPhotos minimieren.</value>
+  </data>
 </root>

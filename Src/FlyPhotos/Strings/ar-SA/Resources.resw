@@ -1285,4 +1285,55 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
   <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
     <value>في وضع المجلد فقط: يفتح المجلد السابق داخل المجلد الأصل</value>
   </data>
+  <data name="ShortcutName_Slideshow" xml:space="preserve">
+    <value>بدء عرض الشرائح أو إيقافه</value>
+  </data>
+  <data name="ShortcutName_PauseSlideshow" xml:space="preserve">
+    <value>إيقاف عرض الشرائح مؤقتًا أو استئنافه</value>
+  </data>
+  <data name="ButtonSlideshowToolTip.Content" xml:space="preserve">
+    <value>بدء عرض الشرائح</value>
+  </data>
+  <data name="ButtonStopSlideshowToolTip.Content" xml:space="preserve">
+    <value>الخروج من عرض الشرائح</value>
+  </data>
+  <data name="SlideshowPause" xml:space="preserve">
+    <value>إيقاف عرض الشرائح مؤقتًا</value>
+  </data>
+  <data name="SlideshowResume" xml:space="preserve">
+    <value>استئناف عرض الشرائح</value>
+  </data>
+  <data name="TextBlockSlideshow.Text" xml:space="preserve">
+    <value>عرض الشرائح</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Header" xml:space="preserve">
+    <value>مدة كل صورة (بالثواني)</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
+    <value>المدة التي تبقى فيها كل صورة على الشاشة. تُشغَّل الرسوم المتحركة لأكبر عدد ممكن من الدورات الكاملة التي يتسع لها الوقت، وبما لا يقل عن دورة واحدة دائمًا.</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
+    <value>تكرار</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Description" xml:space="preserve">
+    <value>البدء من جديد من الصورة الأولى بعد الأخيرة.</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Header" xml:space="preserve">
+    <value>عرض جميع الصفحات</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Description" xml:space="preserve">
+    <value>التنقل عبر كل صفحات الملفات متعددة الصفحات (TIFF وICO وPDF).</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Header" xml:space="preserve">
+    <value>البدء في وضع ملء الشاشة</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
+    <value>تشغيل عرض الشرائح في وضع ملء الشاشة. عند إيقافه، تعود النافذة إلى حالتها السابقة.</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
+    <value>الإيقاف المؤقت عند عدم النشاط</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Description" xml:space="preserve">
+    <value>الإيقاف المؤقت عند التبديل إلى نافذة أخرى أو تصغير FlyPhotos.</value>
+  </data>
 </root>

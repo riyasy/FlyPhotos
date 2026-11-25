@@ -315,8 +315,14 @@ internal sealed class FakeCanvas : ICanvasController
     public int Failures;
     public readonly List<(string Old, string New)> Renames = [];
 
+    /// <summary>The steps and installs, in order: "fade", "page Next", or the installed file's name.</summary>
+    public readonly List<string> Steps = [];
+    public void CrossfadeNext() => Steps.Add("fade");
+    public void ChangePage(NavDirection direction) => Steps.Add($"page {direction}");
+
     public Task SetSource(Photo photo, DisplayItem? item, DisplayLevel level)
     {
+        Steps.Add(Path.GetFileName(photo.FilePath));
         if (item == null)
         {
             Violations.Add($"no item for {photo.FilePath} at {level}");
@@ -431,13 +437,45 @@ internal sealed class ManualUi : SynchronizationContext, IDisposable
     public void Dispose() => SetSynchronizationContext(_previous);
 }
 
-/// <summary>A clock that moves only when told.</summary>
+/// <summary>A clock (and its one-shot timers) that moves only when told.</summary>
 internal sealed class ManualClock : TimeProvider
 {
     private long _ticks = TimeSpan.TicksPerHour;
+    private readonly List<Timer> _timers = [];
     public override long TimestampFrequency => TimeSpan.TicksPerSecond;
     public override long GetTimestamp() => Interlocked.Read(ref _ticks);
-    public void Advance(TimeSpan by) => Interlocked.Add(ref _ticks, by.Ticks);
+
+    public void Advance(TimeSpan by)
+    {
+        var now = Interlocked.Add(ref _ticks, by.Ticks);
+        Timer[] due;
+        lock (_timers) due = [.. _timers.Where(t => t.Due <= now)];
+        foreach (var t in due) t.Fire();
+    }
+
+    public override ITimer CreateTimer(TimerCallback callback, object? state, TimeSpan dueTime, TimeSpan period)
+    {
+        var timer = new Timer(this, callback, state, GetTimestamp() + dueTime.Ticks);
+        lock (_timers) _timers.Add(timer);
+        return timer;
+    }
+
+    private sealed class Timer(ManualClock clock, TimerCallback callback, object? state, long due) : ITimer
+    {
+        public long Due { get; } = due;
+        public void Fire()
+        {
+            Dispose(); // one-shot
+            callback(state);
+        }
+        public bool Change(TimeSpan dueTime, TimeSpan period) => throw new NotSupportedException();
+        public void Dispose() { lock (clock._timers) clock._timers.Remove(this); }
+        public ValueTask DisposeAsync()
+        {
+            Dispose();
+            return ValueTask.CompletedTask;
+        }
+    }
 }
 
 /// <summary>Captures the app's NLog errors while alive, so a test can fail on any it did not script.</summary>

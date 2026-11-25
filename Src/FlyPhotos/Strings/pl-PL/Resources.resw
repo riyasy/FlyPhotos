@@ -1285,4 +1285,55 @@ High Quality Cubic – Najwyższej jakości skalowanie dla zdjęć.</value>
   <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
     <value>Tylko w trybie Folder: otwiera poprzedni folder w folderze nadrzędnym</value>
   </data>
+  <data name="ShortcutName_Slideshow" xml:space="preserve">
+    <value>Uruchom lub zatrzymaj pokaz slajdów</value>
+  </data>
+  <data name="ShortcutName_PauseSlideshow" xml:space="preserve">
+    <value>Wstrzymaj lub wznów pokaz slajdów</value>
+  </data>
+  <data name="ButtonSlideshowToolTip.Content" xml:space="preserve">
+    <value>Uruchom pokaz slajdów</value>
+  </data>
+  <data name="ButtonStopSlideshowToolTip.Content" xml:space="preserve">
+    <value>Zakończ pokaz slajdów</value>
+  </data>
+  <data name="SlideshowPause" xml:space="preserve">
+    <value>Wstrzymaj pokaz slajdów</value>
+  </data>
+  <data name="SlideshowResume" xml:space="preserve">
+    <value>Wznów pokaz slajdów</value>
+  </data>
+  <data name="TextBlockSlideshow.Text" xml:space="preserve">
+    <value>Pokaz slajdów</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Header" xml:space="preserve">
+    <value>Czas na zdjęcie (sekundy)</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
+    <value>Jak długo każde zdjęcie pozostaje na ekranie. Animacja wykonuje tyle pełnych pętli, ile zmieści się w tym czasie, i zawsze co najmniej jedną.</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
+    <value>Powtarzanie</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Description" xml:space="preserve">
+    <value>Po ostatnim zdjęciu zacznij od pierwszego.</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Header" xml:space="preserve">
+    <value>Pokaż wszystkie strony</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Description" xml:space="preserve">
+    <value>Wyświetlaj kolejno wszystkie strony plików wielostronicowych (TIFF, ICO, PDF).</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Header" xml:space="preserve">
+    <value>Uruchom na pełnym ekranie</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
+    <value>Odtwarzaj pokaz slajdów na pełnym ekranie. Po zatrzymaniu okno wraca do poprzedniego stanu.</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
+    <value>Wstrzymuj, gdy okno jest nieaktywne</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Description" xml:space="preserve">
+    <value>Wstrzymuj, gdy przełączysz się do innego okna lub zminimalizujesz FlyPhotos.</value>
+  </data>
 </root>

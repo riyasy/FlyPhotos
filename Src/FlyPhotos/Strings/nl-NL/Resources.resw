@@ -1285,4 +1285,55 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
   <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
     <value>Alleen in mapmodus: opent de vorige map in de bovenliggende map</value>
   </data>
+  <data name="ShortcutName_Slideshow" xml:space="preserve">
+    <value>Diavoorstelling starten of stoppen</value>
+  </data>
+  <data name="ShortcutName_PauseSlideshow" xml:space="preserve">
+    <value>Diavoorstelling onderbreken of hervatten</value>
+  </data>
+  <data name="ButtonSlideshowToolTip.Content" xml:space="preserve">
+    <value>Diavoorstelling starten</value>
+  </data>
+  <data name="ButtonStopSlideshowToolTip.Content" xml:space="preserve">
+    <value>Diavoorstelling afsluiten</value>
+  </data>
+  <data name="SlideshowPause" xml:space="preserve">
+    <value>Diavoorstelling onderbreken</value>
+  </data>
+  <data name="SlideshowResume" xml:space="preserve">
+    <value>Diavoorstelling hervatten</value>
+  </data>
+  <data name="TextBlockSlideshow.Text" xml:space="preserve">
+    <value>Diavoorstelling</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Header" xml:space="preserve">
+    <value>Tijd per foto (seconden)</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
+    <value>Hoelang elke foto op het scherm blijft. Een animatie wordt zo vaak volledig afgespeeld als in die tijd past, en altijd minstens één keer.</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
+    <value>Herhalen</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Description" xml:space="preserve">
+    <value>Na de laatste foto opnieuw beginnen bij de eerste.</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Header" xml:space="preserve">
+    <value>Alle pagina's weergeven</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Description" xml:space="preserve">
+    <value>Alle pagina's van bestanden met meerdere pagina's doorlopen (TIFF, ICO, PDF).</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Header" xml:space="preserve">
+    <value>Starten in volledig scherm</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
+    <value>De diavoorstelling in volledig scherm afspelen. Na het stoppen keert het venster terug naar de vorige toestand.</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
+    <value>Onderbreken bij inactiviteit</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Description" xml:space="preserve">
+    <value>Onderbreken wanneer u naar een ander venster overschakelt of FlyPhotos minimaliseert.</value>
+  </data>
 </root>

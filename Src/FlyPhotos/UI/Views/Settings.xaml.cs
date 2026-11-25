@@ -140,6 +140,11 @@ internal sealed partial class Settings
         ComboFolderSortBy.SelectedIndex = (int)AppConfig.Settings.FolderSortBy;
         ComboFolderSortOrder.SelectedIndex = AppConfig.Settings.FolderSortDescending ? 1 : 0;
         UpdateFolderSortVisibility();
+        SliderSlideshowDelay.Value = AppConfig.Settings.SlideshowDelaySeconds;
+        ToggleSlideshowLoop.IsOn = AppConfig.Settings.SlideshowLoop;
+        ToggleSlideshowAllPages.IsOn = AppConfig.Settings.SlideshowAllPages;
+        ToggleSlideshowFullScreen.IsOn = AppConfig.Settings.SlideshowFullScreen;
+        ToggleSlideshowPauseOnFocusLoss.IsOn = AppConfig.Settings.SlideshowPauseOnFocusLoss;
 
         MainLayout.KeyDown += MainLayout_OnKeyDown;
         SliderHighResCacheSize.ValueChanged += SliderHighResCacheSize_OnValueChanged;
@@ -178,6 +183,11 @@ internal sealed partial class Settings
         ComboListSource.SelectionChanged += ComboListSource_OnSelectionChanged;
         ComboFolderSortBy.SelectionChanged += ComboFolderSortBy_OnSelectionChanged;
         ComboFolderSortOrder.SelectionChanged += ComboFolderSortOrder_OnSelectionChanged;
+        SliderSlideshowDelay.ValueChanged += SlideshowSetting_Changed;
+        ToggleSlideshowLoop.Toggled += SlideshowSetting_Changed;
+        ToggleSlideshowAllPages.Toggled += SlideshowSetting_Changed;
+        ToggleSlideshowFullScreen.Toggled += SlideshowSetting_Changed;
+        ToggleSlideshowPauseOnFocusLoss.Toggled += SlideshowSetting_Changed;
         AppConfig.Settings.RawDecoderPriority.CollectionChanged += RawDecoderPriority_CollectionChanged;
 
         // Initialize codec list view
@@ -268,6 +278,18 @@ internal sealed partial class Settings
         RawDecodeTeachingTip.IsOpen = false;
         RawDecodeTeachingTip.Target = target;
         RawDecodeTeachingTip.IsOpen = true;
+    }
+
+    // Any slideshow control: stores them all. The slideshow reads them when it needs them.
+    private async void SlideshowSetting_Changed(object sender, object e)
+    {
+        var s = AppConfig.Settings;
+        s.SlideshowDelaySeconds = (int)SliderSlideshowDelay.Value;
+        s.SlideshowLoop = ToggleSlideshowLoop.IsOn;
+        s.SlideshowAllPages = ToggleSlideshowAllPages.IsOn;
+        s.SlideshowFullScreen = ToggleSlideshowFullScreen.IsOn;
+        s.SlideshowPauseOnFocusLoss = ToggleSlideshowPauseOnFocusLoss.IsOn;
+        await AppConfig.SaveAsync();
     }
 
     private async void ButtonEnableAutoHideMouse_OnToggled(object sender, RoutedEventArgs e)

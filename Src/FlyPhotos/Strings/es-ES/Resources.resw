@@ -1285,4 +1285,55 @@ High Quality Cubic – Escalado de la más alta calidad para fotos.</value>
   <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
     <value>Solo en modo Carpeta: abre la carpeta anterior dentro de la carpeta principal</value>
   </data>
+  <data name="ShortcutName_Slideshow" xml:space="preserve">
+    <value>Iniciar o detener la presentación</value>
+  </data>
+  <data name="ShortcutName_PauseSlideshow" xml:space="preserve">
+    <value>Pausar o reanudar la presentación</value>
+  </data>
+  <data name="ButtonSlideshowToolTip.Content" xml:space="preserve">
+    <value>Iniciar presentación</value>
+  </data>
+  <data name="ButtonStopSlideshowToolTip.Content" xml:space="preserve">
+    <value>Salir de la presentación</value>
+  </data>
+  <data name="SlideshowPause" xml:space="preserve">
+    <value>Pausar presentación</value>
+  </data>
+  <data name="SlideshowResume" xml:space="preserve">
+    <value>Reanudar presentación</value>
+  </data>
+  <data name="TextBlockSlideshow.Text" xml:space="preserve">
+    <value>Presentación</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Header" xml:space="preserve">
+    <value>Tiempo por foto (segundos)</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
+    <value>Cuánto tiempo permanece cada foto en pantalla. Una animación se reproduce en tantos ciclos completos como quepan, y siempre al menos uno.</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
+    <value>Repetir</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Description" xml:space="preserve">
+    <value>Volver a empezar desde la primera foto después de la última.</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Header" xml:space="preserve">
+    <value>Mostrar todas las páginas</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Description" xml:space="preserve">
+    <value>Recorrer todas las páginas de los archivos multipágina (TIFF, ICO, PDF).</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Header" xml:space="preserve">
+    <value>Iniciar en pantalla completa</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
+    <value>Reproducir la presentación en pantalla completa. Al detenerse, la ventana vuelve a su estado anterior.</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
+    <value>Pausar cuando la ventana esté inactiva</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Description" xml:space="preserve">
+    <value>Pausar cuando cambie a otra ventana o minimice FlyPhotos.</value>
+  </data>
 </root>

@@ -36,6 +36,8 @@ internal sealed class WindowFullScreenManager
         _hwnd = WindowNative.GetWindowHandle(window);
     }
 
+    internal bool IsFullScreen => AppWindow.Presenter.Kind == AppWindowPresenterKind.FullScreen;
+
     // .Kind discriminates without a memberless cast; { State: ... } reads a member to root the
     // OverlappedPresenter projection under NativeAOT+Release. See the full note in Restore().
     internal bool IsMaximizedOrFullScreen =>

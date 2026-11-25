@@ -88,6 +88,12 @@ internal sealed class CanvasEngine
     /// <summary>Written each Update, read on the UI thread: see <see cref="IsAnimating"/>.</summary>
     private volatile bool _publishedAnimating;
 
+    /// <summary>The slideshow crossfade under way, or null.</summary>
+    private Crossfade _crossfade;
+
+    /// <summary><see cref="DrawPhoto"/> as a delegate, made once: a crossfade draws it every frame.</summary>
+    private readonly Action<CanvasDrawingSession> _drawPhoto;
+
     /// <summary>The view and its rules. Its events fire on the W2D thread.</summary>
     public ViewController ViewController { get; } = new();
 
@@ -103,6 +109,7 @@ internal sealed class CanvasEngine
         _canvas = canvas;
         _queue = new W2dQueue<Cmd>(canvas, Apply);
         _continuousZoomEnd = new DelayedWake(Wake);
+        _drawPhoto = DrawPhoto;
         ViewController.AnimationCompleted += CompleteAnimationWaiters;
         DisplayItem.FreeSink = QueueFree;
     }
@@ -134,6 +141,7 @@ internal sealed class CanvasEngine
             case Cmd.Install c: Install(c); break;
             case Cmd.Resized c: Resize(c); break;
             case Cmd.ChangePage c: ChangePage(c.Direction); break;
+            case Cmd.CrossfadeNext: CaptureCrossfade(); break;
             case Cmd.PageLoaded c: OnPageLoaded(c); break;
             case Cmd.Renamed c: ViewController.Rename(c.OldPath, c.NewPath); break;
             case Cmd.ScalingQualityChanged: _renderer?.HandleScalingMethodChange(); break;
@@ -171,12 +179,14 @@ internal sealed class CanvasEngine
     /// </summary>
     private void Install(Cmd.Install c)
     {
+        if (!c.FollowUp && c.PhotoPath != ViewController.PhotoPath) EndFadeUnderWay();
         var (oldRenderer, oldItem) = (_renderer, _item);
         (_renderer, _item, _checkered) = (c.Renderer, c.Item, c.Checkered);
         try { oldRenderer?.Dispose(); }
         finally { oldItem?.Release(); }
         if (c.FollowUp) return; // the same image in a new renderer: the view, page and strip stay
 
+        _crossfade?.Start(Stopwatch.GetTimestamp());
         _requestedPageIndex = 0;
         ViewController.Install(c.Photo, c.PhotoPath, c.LayoutSize, c.Rotation, c.Level);
         PhotoInstalled?.Invoke();
@@ -185,6 +195,7 @@ internal sealed class CanvasEngine
     /// <summary>Hands a resize to the view.</summary>
     private void Resize(Cmd.Resized c)
     {
+        EndCrossfade(); // its targets are the old size
         if (c.ImageSizedShift is { } shift) ViewController.ImageSizedResize(shift, c.NewSize);
         else ViewController.Resize(c.NewSize);
     }
@@ -195,6 +206,7 @@ internal sealed class CanvasEngine
         if (_renderer is not IMultiPage pages) return;
         var target = _requestedPageIndex + (direction == NavDirection.Next ? 1 : -1);
         if (target < 0 || target >= pages.PageCount) return;
+        EndFadeUnderWay();
         _requestedPageIndex = target;
         _ = LoadPageAsync(pages, ++_pageRequest, target);
     }
@@ -214,8 +226,30 @@ internal sealed class CanvasEngine
             return;
         }
         ViewController.ShowPage(c.PageSize, isFirstPage: c.PageIndex == 0);
+        _crossfade?.Start(Stopwatch.GetTimestamp());
         PageShown?.Invoke(new MultiPagePosition(ViewController.PhotoPath, c.PageIndex, c.Renderer.PageCount,
             (int)c.PageSize.Width, (int)c.PageSize.Height));
+    }
+
+    /// <summary>Keeps the frame on screen for a crossfade; drawn through a fade under way too, so it starts from what is seen.</summary>
+    private void CaptureCrossfade()
+    {
+        if (_renderer == null || ViewController.CanvasSize is not { Width: >= 1, Height: >= 1 } size) return;
+        var next = new Crossfade(_canvas, size, Draw, Stopwatch.GetTimestamp());
+        EndCrossfade();
+        _crossfade = next;
+    }
+
+    /// <summary>Another photo or page: a fade still waiting is the slideshow's, for this one; one already fading ends at once.</summary>
+    private void EndFadeUnderWay()
+    {
+        if (_crossfade?.IsWaiting(Stopwatch.GetTimestamp()) != true) EndCrossfade();
+    }
+
+    private void EndCrossfade()
+    {
+        _crossfade?.Dispose();
+        _crossfade = null;
     }
 
     /// <summary>Adds a waiter, dropping those whose timeout already completed them, so waits on a still view don't pile up.</summary>
@@ -247,14 +281,22 @@ internal sealed class CanvasEngine
         // A continuous zoom doesn't keep the loop running: a wake at its end draws the full-quality frame.
         var continuousZoomLeft = _continuousZoomUntil - Stopwatch.GetTimestamp();
         if (continuousZoomLeft > 0) _continuousZoomEnd.After((int)(continuousZoomLeft * 1000 / Stopwatch.Frequency) + 1);
-        _queue.PauseIfIdle(ViewController.IsAnimating || animationFrameDue);
+        if (_crossfade?.IsDone(Stopwatch.GetTimestamp()) == true) EndCrossfade();
+        _queue.PauseIfIdle(ViewController.IsAnimating || animationFrameDue || _crossfade != null);
     }
 
     /// <summary>The view is moving: draw at animation quality (faster interpolation, no detail renders).</summary>
     private bool IsAnimatingNow => ViewController.IsAnimating || Stopwatch.GetTimestamp() < _continuousZoomUntil;
 
-    /// <summary>Draws this tick's frame: the checkerboard if needed, then the renderer.</summary>
+    /// <summary>Draws this tick's frame: the photo, or the crossfade into it.</summary>
     public void Draw(CanvasDrawingSession session)
+    {
+        if (_crossfade != null) _crossfade.Draw(session, _drawPhoto, Stopwatch.GetTimestamp());
+        else DrawPhoto(session);
+    }
+
+    /// <summary>The checkerboard if needed, then the renderer.</summary>
+    private void DrawPhoto(CanvasDrawingSession session)
     {
         session.Clear(Colors.Transparent);
         if (_renderer == null) return;
@@ -290,6 +332,7 @@ internal sealed class CanvasEngine
     {
         _checkeredBrush?.Dispose();
         _checkeredBrush = null;
+        EndCrossfade();
         _renderer?.HandleScalingMethodChange();
     }
 
@@ -319,6 +362,7 @@ internal sealed class CanvasEngine
     public void Dispose()
     {
         _continuousZoomEnd.Cancel();
+        EndCrossfade();
         try { _renderer?.Dispose(); }
         finally { _item?.Release(); }
         (_renderer, _item) = (null, null);

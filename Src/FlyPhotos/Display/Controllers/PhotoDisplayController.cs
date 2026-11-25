@@ -51,6 +51,12 @@ internal partial class PhotoDisplayController
     public event Action<FileDisplayDetails>? FileNameOrDetailsChanged;
     /// <summary>The first photo is on screen and the full listing is published. UI thread.</summary>
     public event Action? FirstPhotoLoaded;
+    /// <summary>Another photo is about to go up, however it was reached (a step, a delete, a folder change). UI thread.</summary>
+    public event Action? PhotoChanging;
+    /// <summary>The photo on screen reached its full-quality image (or the error screen in its place). UI thread.</summary>
+    public event Action? HqShown;
+    /// <summary>The user moved to another photo: a key, a button, the wheel, a thumbnail, a folder switch. UI thread.</summary>
+    public event Action? UserNavigated;
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -93,6 +99,9 @@ internal partial class PhotoDisplayController
     // UI thread: the level the canvas was last asked to show. UpgradeCurrent never goes below it; delete and rename
     // need it to be Hq (the user sees what they act on).
     private DisplayLevel _displayLevel;
+
+    // UI thread: the page the slideshow's last page step started from, so a page that failed to load isn't retried.
+    private MultiPagePosition? _pageStepFrom;
 
     // --- Initialization ---
 
@@ -310,6 +319,7 @@ internal partial class PhotoDisplayController
     private async Task DisplayCurrent()
     {
         if (_photoList.GetPhoto(_nav.Key) is not { } photo) return;
+        PhotoChanging?.Invoke();
         _cache.MoveWindow(_nav);
         await SetSourceAsync(photo, BestLevel(photo));
     }
@@ -336,6 +346,8 @@ internal partial class PhotoDisplayController
             await _canvasController.SetSource(photo, _decoder.LoadingIndicator, DisplayLevel.PlaceHolder);
         }
         UpdateFileNameAndDetails();
+        // A failed install counts too: nothing better will come, so a slideshow must not wait for it.
+        if (displayLevel == DisplayLevel.Hq) HqShown?.Invoke();
     }
 
     // UI thread. Leases the photo's item at level, or the highest one below it that is still alive, and lowers level
@@ -358,6 +370,7 @@ internal partial class PhotoDisplayController
     /// </summary>
     public async Task Fly(NavDirection direction)
     {
+        UserNavigated?.Invoke();
         var (keys, currentPosition) = _nav;
         if (keys.Count <= 1) return;
         // A list that can't be navigated must never open a burst: HQ stays held until a Brake().
@@ -375,6 +388,7 @@ internal partial class PhotoDisplayController
     /// <summary>Jumps to the first photo (bounces if already there).</summary>
     public async Task FlyToFirst()
     {
+        UserNavigated?.Invoke();
         var (keys, currentPosition) = _nav;
         if (keys.Count <= 1) return;
         if (currentPosition == 0) _thumbNailController.BounceAtEdge(NavDirection.Prev);
@@ -384,6 +398,7 @@ internal partial class PhotoDisplayController
     /// <summary>Jumps to the last photo (bounces if already there).</summary>
     public async Task FlyToLast()
     {
+        UserNavigated?.Invoke();
         var (keys, currentPosition) = _nav;
         if (keys.Count <= 1) return;
         if (currentPosition == keys.Count - 1) _thumbNailController.BounceAtEdge(NavDirection.Next);
@@ -393,6 +408,7 @@ internal partial class PhotoDisplayController
     /// <summary>Moves <paramref name="shiftBy"/> photos (negative: back), clamped to the list (a thumbnail click).</summary>
     public async Task FlyBy(int shiftBy)
     {
+        UserNavigated?.Invoke();
         var (keys, currentPosition) = _nav;
         if (keys.Count <= 1 || currentPosition < 0) return;
         int newPosition = (int)Math.Clamp((long)currentPosition + shiftBy, 0, keys.Count - 1);
@@ -405,6 +421,40 @@ internal partial class PhotoDisplayController
         if (!_photoList.Contains(keys[toPosition])) return;
         _nav = new NavState(keys, toPosition);
         await DisplayCurrent();
+    }
+
+    /// <summary>A page step by hand (keys, buttons, wheel): next or previous page of a multi-page photo.</summary>
+    public void ChangePage(NavDirection direction)
+    {
+        UserNavigated?.Invoke();
+        _canvasController.ChangePage(direction);
+    }
+
+    // --- Slideshow ---
+
+    /// <summary>
+    /// One slideshow step, crossfaded: the next page of a multi-page photo when every page is shown, else the next
+    /// photo, back to the first when looping. False when there was nowhere to go.
+    /// </summary>
+    public async Task<bool> SlideshowNext()
+    {
+        var (keys, position) = _nav;
+        if (keys.Count <= 1 || position < 0) return false;
+        if (AppConfig.Settings.SlideshowAllPages && _canvasController.CurrentPage is { } page
+            && page.Path == _photoList[_nav.Key].FilePath && page.Index < page.Count - 1
+            && page != _pageStepFrom) // still on the page the last step left: it failed to load, move on
+        {
+            _pageStepFrom = page;
+            _canvasController.CrossfadeNext();
+            _canvasController.ChangePage(NavDirection.Next);
+            return true;
+        }
+        _pageStepFrom = null;
+        int to = position + 1 < keys.Count ? position + 1 : AppConfig.Settings.SlideshowLoop ? 0 : -1;
+        if (to < 0) return false;
+        _canvasController.CrossfadeNext();
+        await FlyTo(keys, to);
+        return true;
     }
 
     /// <summary>

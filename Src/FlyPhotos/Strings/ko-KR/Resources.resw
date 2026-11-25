@@ -1284,4 +1284,55 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
   <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
     <value>폴더 모드 전용: 상위 폴더의 이전 폴더를 엽니다</value>
   </data>
+  <data name="ShortcutName_Slideshow" xml:space="preserve">
+    <value>슬라이드 쇼 시작 또는 중지</value>
+  </data>
+  <data name="ShortcutName_PauseSlideshow" xml:space="preserve">
+    <value>슬라이드 쇼 일시 중지 또는 재개</value>
+  </data>
+  <data name="ButtonSlideshowToolTip.Content" xml:space="preserve">
+    <value>슬라이드 쇼 시작</value>
+  </data>
+  <data name="ButtonStopSlideshowToolTip.Content" xml:space="preserve">
+    <value>슬라이드 쇼 종료</value>
+  </data>
+  <data name="SlideshowPause" xml:space="preserve">
+    <value>슬라이드 쇼 일시 중지</value>
+  </data>
+  <data name="SlideshowResume" xml:space="preserve">
+    <value>슬라이드 쇼 재개</value>
+  </data>
+  <data name="TextBlockSlideshow.Text" xml:space="preserve">
+    <value>슬라이드 쇼</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Header" xml:space="preserve">
+    <value>사진당 시간(초)</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
+    <value>각 사진이 화면에 표시되는 시간입니다. 애니메이션은 지정된 시간 내에 끝까지 재생할 수 있는 횟수만큼 반복되며, 최소 한 번은 재생됩니다.</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
+    <value>반복</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Description" xml:space="preserve">
+    <value>마지막 사진 후 첫 번째 사진부터 다시 시작합니다.</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Header" xml:space="preserve">
+    <value>모든 페이지 표시</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Description" xml:space="preserve">
+    <value>여러 페이지로 된 파일(TIFF, ICO, PDF)의 모든 페이지를 차례로 표시합니다.</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Header" xml:space="preserve">
+    <value>전체 화면으로 시작</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
+    <value>슬라이드 쇼를 전체 화면으로 재생합니다. 중지하면 창이 이전 상태로 돌아갑니다.</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
+    <value>비활성 시 일시 중지</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Description" xml:space="preserve">
+    <value>다른 창으로 전환하거나 FlyPhotos를 최소화하면 일시 중지합니다.</value>
+  </data>
 </root>

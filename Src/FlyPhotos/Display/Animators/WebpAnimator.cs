@@ -123,6 +123,9 @@ public partial class WebpAnimator : IAnimator
     /// <inheritdoc />
     public TimeSpan TimeToNextFrame { get; private set; }
 
+    /// <inheritdoc />
+    public TimeSpan LoopDuration => _totalAnimationDuration;
+
     // -------------------------------------------------------------------------
     // Private fields
     // -------------------------------------------------------------------------

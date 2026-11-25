@@ -96,6 +96,9 @@ public partial class GifAnimator : IAnimator
     /// <inheritdoc />
     public TimeSpan TimeToNextFrame { get; private set; }
 
+    /// <inheritdoc />
+    public TimeSpan LoopDuration => _totalAnimationDuration;
+
     // -------------------------------------------------------------------------
     // Private fields
     // -------------------------------------------------------------------------

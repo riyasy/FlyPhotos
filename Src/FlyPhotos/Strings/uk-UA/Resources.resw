@@ -1285,4 +1285,55 @@ High Quality Cubic – Масштабування найвищої якості 
   <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
     <value>Лише в режимі «Папка»: відкриває попередню папку в батьківській папці</value>
   </data>
+  <data name="ShortcutName_Slideshow" xml:space="preserve">
+    <value>Запустити або зупинити слайд-шоу</value>
+  </data>
+  <data name="ShortcutName_PauseSlideshow" xml:space="preserve">
+    <value>Призупинити або продовжити слайд-шоу</value>
+  </data>
+  <data name="ButtonSlideshowToolTip.Content" xml:space="preserve">
+    <value>Запустити слайд-шоу</value>
+  </data>
+  <data name="ButtonStopSlideshowToolTip.Content" xml:space="preserve">
+    <value>Вийти зі слайд-шоу</value>
+  </data>
+  <data name="SlideshowPause" xml:space="preserve">
+    <value>Призупинити слайд-шоу</value>
+  </data>
+  <data name="SlideshowResume" xml:space="preserve">
+    <value>Продовжити слайд-шоу</value>
+  </data>
+  <data name="TextBlockSlideshow.Text" xml:space="preserve">
+    <value>Слайд-шоу</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Header" xml:space="preserve">
+    <value>Час показу фото (секунди)</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
+    <value>Скільки часу кожне фото залишається на екрані. Анімація відтворюється стільки повних циклів, скільки вміщується, але щонайменше один.</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
+    <value>Повтор</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Description" xml:space="preserve">
+    <value>Після останнього фото починати знову з першого.</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Header" xml:space="preserve">
+    <value>Показувати всі сторінки</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Description" xml:space="preserve">
+    <value>Перегортати всі сторінки багатосторінкових файлів (TIFF, ICO, PDF).</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Header" xml:space="preserve">
+    <value>Запускати на весь екран</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
+    <value>Показувати слайд-шоу на весь екран. Після зупинки вікно повертається до попереднього стану.</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
+    <value>Пауза, коли вікно неактивне</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Description" xml:space="preserve">
+    <value>Призупиняти, коли ви перемикаєтеся на інше вікно або згортаєте FlyPhotos.</value>
+  </data>
 </root>

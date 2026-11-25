@@ -72,6 +72,10 @@ internal static class Constants
     // Continuous zoom (touchpad, pinch, Shift+wheel) draws at animation quality until this long after its last
     // step, then once at full quality. Too short and a slow pinch flickers between the two qualities.
     public const int ContinuousZoomSettleMs = 700;
+
+    // A slideshow's crossfade, and how long it waits for a slow page before fading anyway.
+    public const int CrossfadeMs = 400;
+    public const int CrossfadeMaxWaitMs = 1000;
         
     // Thumbnail Related
     public const int ThumbnailPixelBufferSize = 128; // intermediate square pixel buffer stored on Photo

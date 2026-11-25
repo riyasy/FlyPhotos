@@ -86,6 +86,7 @@ internal partial class PhotoDisplayController
     /// </summary>
     public async Task<string?> TryOpenSiblingFolderAsync(NavDirection direction)
     {
+        UserNavigated?.Invoke();
         if (_folder is not { CanSwitch: true } || !_listingReady.Task.IsCompleted || _siblingSwitchPending)
             return null;
         _siblingSwitchPending = true;

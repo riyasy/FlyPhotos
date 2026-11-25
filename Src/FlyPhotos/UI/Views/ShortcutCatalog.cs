@@ -207,7 +207,8 @@ public enum CommandId
     FileProperties, FileDetails,
     OpenWithApp1, OpenWithApp2, OpenWithApp3, OpenWithApp4, OpenWithPanel,
     MoreActionsMenu,
-    NextFolder, PrevFolder
+    NextFolder, PrevFolder,
+    Slideshow, PauseSlideshow
 }
 
 /// <summary>
@@ -449,7 +450,10 @@ internal static class ShortcutCatalog
             Row(CommandId.FullScreen, "\uE740", None, K(VirtualKey.F11)),
             Row(CommandId.MaximizeRestore, "\uE922", Suppress, K(VirtualKey.Enter)),
             Row(CommandId.PhotoInfoPanel, "\uE946", None, K(VirtualKey.I)),
-            Row(CommandId.CloseApp, "\uE8BB", Reserved, K(VirtualKey.Escape))
+            Row(CommandId.CloseApp, "\uE8BB", Reserved, K(VirtualKey.Escape)),
+            Row(CommandId.Slideshow, "\uE786", None, K(VirtualKey.F5)),
+            // Suppress: Space would also press the focused toolbar button.
+            Row(CommandId.PauseSlideshow, "\uE769", Suppress, K(VirtualKey.Space))
         ]),
 
         ("File",

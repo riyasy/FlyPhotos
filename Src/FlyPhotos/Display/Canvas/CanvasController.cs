@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -81,6 +82,9 @@ internal sealed class CanvasController : ICanvasController
     /// <summary>The page on screen of a multi-page photo, or null. Written on the UI thread, read anywhere.</summary>
     public MultiPagePosition CurrentPage { get => _currentPage; private set => _currentPage = value; }
 
+    /// <summary>The animation on screen, for a slideshow's timing; the default when the photo is still.</summary>
+    public AnimationLoop CurrentAnimation { get; private set; }
+
     /// <summary>Hooks the canvas's render loop and posts its current size, as its first SizeChanged may have passed.</summary>
     public CanvasController(CanvasAnimatedControl canvas)
     {
@@ -115,6 +119,7 @@ internal sealed class CanvasController : ICanvasController
     public async Task SetSource(Photo photo, DisplayItem item, DisplayLevel level)
     {
         var setSourceId = ++_latestSetSourceId; // even a null item supersedes a pending animator
+        CurrentAnimation = default;
         if (item == null) return;
 
         Cmd.Install install;
@@ -173,6 +178,7 @@ internal sealed class CanvasController : ICanvasController
                 Item = null,
                 FollowUp = true
             });
+            CurrentAnimation = new AnimationLoop(animator.LoopDuration, Stopwatch.GetTimestamp()); // its clock starts now
         }
         catch (Exception ex)
         {
@@ -211,6 +217,9 @@ internal sealed class CanvasController : ICanvasController
 
     /// <summary>Next or previous page of a multi-page photo; nothing at either end.</summary>
     public void ChangePage(NavDirection direction) => _engine.Post(new Cmd.ChangePage(direction));
+
+    /// <summary>The next photo or page fades in over the frame on screen.</summary>
+    public void CrossfadeNext() => _engine.Post(new Cmd.CrossfadeNext());
 
     // ---------------------------------------------------------------- view
 

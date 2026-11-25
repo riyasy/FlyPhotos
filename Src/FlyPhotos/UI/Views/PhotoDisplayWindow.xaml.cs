@@ -118,6 +118,8 @@ public sealed partial class PhotoDisplayWindow
     private readonly WindowFullScreenManager _windFullScreenManager; // full screen, maximize, restore
     private readonly WindowAppearanceManager _windAppearanceManager; // theme, backdrop, title bar
     private readonly CtrlDragWindowMover _ctrlDragWindowMover;     // drags the window by its background
+    private readonly Slideshow _slideshow;                         // the slideshow's states and timer
+    private bool _slideshowEnteredFullScreen;                      // so stopping leaves only the full screen it entered
 
     // The first photo's load has started (D2dCanvas_CreateResources), so a device re-creation doesn't start it again.
     private bool _loadingStarted;
@@ -205,6 +207,7 @@ public sealed partial class PhotoDisplayWindow
             ButtonExpander.Visibility = Visibility.Collapsed;
             ButtonBack.Visibility = Visibility.Collapsed;
             ButtonNext.Visibility = Visibility.Collapsed;
+            ButtonSlideshow.Visibility = Visibility.Collapsed; // a single photo: nothing to show
         }
 
         AppWindow.Closing += PhotoDisplayWindow_Closing;
@@ -260,6 +263,14 @@ public sealed partial class PhotoDisplayWindow
         _ctrlDragWindowMover = new CtrlDragWindowMover(D2dCanvas, AppWindow, enabled: true);
         _ctrlDragWindowMover.IsOnBackground = pos => !_canvasController.IsPressedOnImage(pos.AdjustForDpi(D2dCanvas));
         _windFullScreenManager.FullScreenToggled += WindFullScreenManager_FullScreenToggled;
+
+        _slideshow = new Slideshow(SlideshowWait, _photoController.SlideshowNext, TimeProvider.System,
+            new Microsoft.UI.Dispatching.DispatcherQueueSynchronizationContext(DispatcherQueue));
+        _slideshow.StateChanged += Slideshow_StateChanged;
+        _photoController.PhotoChanging += _slideshow.Hold;
+        _photoController.HqShown += _slideshow.Rearm;
+        _photoController.UserNavigated += _slideshow.Pause;
+        _canvasController.PageChanged += _slideshow.Rearm;
         InitCommands();
     }
 
@@ -290,7 +301,7 @@ public sealed partial class PhotoDisplayWindow
             [CommandId.MoreActionsMenu] = ShowMoreMenuAsync,
 
             // Window
-            [CommandId.CloseApp] = AnimatePhotoDisplayWindowClose,
+            [CommandId.CloseApp] = StopSlideshowOrClose,
             [CommandId.FullScreen] = Act(() => _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose)),
             [CommandId.MaximizeRestore] = Act(ToggleMaximizeRestore),
 
@@ -303,8 +314,12 @@ public sealed partial class PhotoDisplayWindow
             [CommandId.PrevFolder] = () => FlyToSiblingFolderAsync(NavDirection.Prev),
 
             // Multi-page navigation
-            [CommandId.NextPage] = Act(() => _canvasController.ChangePage(NavDirection.Next)),
-            [CommandId.PrevPage] = Act(() => _canvasController.ChangePage(NavDirection.Prev)),
+            [CommandId.NextPage] = Act(() => _photoController.ChangePage(NavDirection.Next)),
+            [CommandId.PrevPage] = Act(() => _photoController.ChangePage(NavDirection.Prev)),
+
+            // Slideshow
+            [CommandId.Slideshow] = Act(ToggleSlideshow),
+            [CommandId.PauseSlideshow] = Act(_slideshow.TogglePause),
 
             // Zoom
             [CommandId.ZoomIn] = Act(() => _canvasController.WheelZoom(ZoomDirection.In, CurrentDragAnchor())),
@@ -379,6 +394,12 @@ public sealed partial class PhotoDisplayWindow
         AppWindow.Closing -= PhotoDisplayWindow_Closing;
         Activated -= PhotoDisplayWindow_Activated;
 
+        _slideshow.StateChanged -= Slideshow_StateChanged;
+        _photoController.PhotoChanging -= _slideshow.Hold;
+        _photoController.HqShown -= _slideshow.Rearm;
+        _photoController.UserNavigated -= _slideshow.Pause;
+        _canvasController.PageChanged -= _slideshow.Rearm;
+        _slideshow.Dispose();
         _photoController.FirstPhotoLoaded -= OnFirstPhotoLoaded;
         _photoController.CacheStatusChanged -= PhotoController_CacheStatusChanged;
         _photoController.FileNameOrDetailsChanged -= PhotoController_FileNameOrDetailsChanged;
@@ -515,6 +536,7 @@ public sealed partial class PhotoDisplayWindow
     {
         if (_isClosing) return; // A second Esc / click-outside during the exit animation.
         _isClosing = true;
+        _slideshow.Dispose(); // no step during the exit animation
         _settingWindow?.Close();
 
         if (AppConfig.Settings.OpenExitZoom)
@@ -621,8 +643,10 @@ public sealed partial class PhotoDisplayWindow
     /// </summary>
     private async void PhotoDisplayWindow_Activated(object sender, WindowActivatedEventArgs args)
     {
-        if (args.WindowActivationState != WindowActivationState.Deactivated || _burstKey == VirtualKey.None) return;
-        await EndBurstAsync();
+        if (args.WindowActivationState != WindowActivationState.Deactivated) return;
+        // Minimizing deactivates too. The settings window is left out: changing a setting is no reason to stop.
+        if (AppConfig.Settings.SlideshowPauseOnFocusLoss && _settingWindow == null) _slideshow.Pause();
+        if (_burstKey != VirtualKey.None) await EndBurstAsync();
     }
 
     #endregion
@@ -683,17 +707,88 @@ public sealed partial class PhotoDisplayWindow
     }
 
     private void ButtonPrevNextPage_OnClick(object sender, RoutedEventArgs e) =>
-        _canvasController.ChangePage(ReferenceEquals(sender, ButtonPrevPage) ? NavDirection.Prev : NavDirection.Next);
+        _photoController.ChangePage(ReferenceEquals(sender, ButtonPrevPage) ? NavDirection.Prev : NavDirection.Next);
 
     // Scrolling over the page buttons pages through a multi-page photo.
     private void ButtonBackNextPage_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         var delta = e.GetCurrentPoint(ButtonBack).Properties.MouseWheelDelta;
-        _canvasController.ChangePage(delta > 0 ? NavDirection.Prev : NavDirection.Next);
+        _photoController.ChangePage(delta > 0 ? NavDirection.Prev : NavDirection.Next);
     }
 
     // A thumbnail was clicked: jump by its offset from the centre. A single jump, so no burst and no brake.
     private async void Thumbnail_Clicked(int shiftIndex) => await _photoController.FlyBy(shiftIndex);
+
+    #endregion
+
+    #region Slideshow
+
+    // How long the image on screen stays up: the delay, or as many whole loops of an animation as fit in it.
+    private TimeSpan SlideshowWait() => _canvasController.CurrentAnimation.SlideshowWait(
+        TimeSpan.FromSeconds(Math.Clamp(AppConfig.Settings.SlideshowDelaySeconds, 3, 60)), Stopwatch.GetTimestamp());
+
+    private void ToggleSlideshow()
+    {
+        if (_slideshow.State != SlideshowState.Stopped) _slideshow.Stop();
+        else if (!_photoController.IsSinglePhoto()) _slideshow.Start();
+    }
+
+    // The toolbar button starts a slideshow, then pauses and resumes it; the X button, Esc or F5 stops it.
+    private void ButtonSlideshow_Click(object sender, RoutedEventArgs e)
+    {
+        if (_slideshow.State == SlideshowState.Stopped) ToggleSlideshow();
+        else _slideshow.TogglePause();
+    }
+
+    private void ButtonStopSlideshow_Click(object sender, RoutedEventArgs e) => _slideshow.Stop();
+
+    // Esc stops a slideshow first; only the next one closes the app.
+    private Task StopSlideshowOrClose()
+    {
+        if (_slideshow.State == SlideshowState.Stopped) return AnimatePhotoDisplayWindowClose();
+        _slideshow.Stop();
+        return Task.CompletedTask;
+    }
+
+    private void Slideshow_StateChanged()
+    {
+        var state = _slideshow.State;
+        // On a resume too: the setting may have changed while paused.
+        if (state == SlideshowState.Playing && AppConfig.Settings.SlideshowFullScreen && !_windFullScreenManager.IsFullScreen)
+        {
+            _slideshowEnteredFullScreen = true;
+            _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
+        }
+        else if (state == SlideshowState.Stopped)
+        {
+            if (_slideshowEnteredFullScreen && _windFullScreenManager.IsFullScreen)
+                _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
+            _slideshowEnteredFullScreen = false;
+        }
+
+        var running = state != SlideshowState.Stopped;
+        // A slideshow's toolbar is previous, next, play/pause and exit.
+        ButtonRotate.Visibility = ToolButtons.Visibility = running ? Visibility.Collapsed : Visibility.Visible;
+        ButtonStopSlideshow.Visibility = running ? Visibility.Visible : Visibility.Collapsed;
+
+        UpdateAutoHide();
+        ButtonSlideshow.Content = state == SlideshowState.Playing ? "\uE769" : "\uE768"; // pause : play
+        ButtonSlideshowToolTip.Content = L.Get(state switch
+        {
+            SlideshowState.Playing => "SlideshowPause",
+            SlideshowState.Paused => "SlideshowResume",
+            _ => "ButtonSlideshowToolTip/Content"
+        });
+    }
+
+    // A slideshow hides the bottom panels, and while playing the cursor, whatever the settings.
+    private void UpdateAutoHide()
+    {
+        var running = _slideshow.State != SlideshowState.Stopped;
+        _opacityFader.Enabled = running || AppConfig.Settings.AutoFade;
+        _opacityFader.HideFully = running; // after Enabled, so it shows at once
+        _mouseAutoHider.Enabled = _slideshow.State == SlideshowState.Playing || AppConfig.Settings.AutoHideMouse;
+    }
 
     #endregion
 
@@ -1328,10 +1423,10 @@ public sealed partial class PhotoDisplayWindow
                 _captionButtonFader.Enabled = AppConfig.Settings.AutoHideCaptionButtons;
                 break;
             case Setting.AutoFadeToggle:
-                _opacityFader.Enabled = AppConfig.Settings.AutoFade;
+                UpdateAutoHide();
                 break;
             case Setting.AutoHideMouseToggle:
-                _mouseAutoHider.Enabled = AppConfig.Settings.AutoHideMouse;
+                UpdateAutoHide();
                 break;
             case Setting.KeyBindingsChanged:
                 _routes = ShortcutCatalog.Resolve();
@@ -1432,6 +1527,9 @@ public sealed partial class PhotoDisplayWindow
     // The window's content is loaded: the license check's window-loaded step.
     private async void MainLayout_Loaded(object sender, RoutedEventArgs e)
     {
+        // With nothing focused, WinUI focuses the first tab stop (Back) when the window is activated again, and
+        // Space or Enter would press it. The canvas holds focus instead, so keys reach the shortcuts.
+        D2dCanvas.Focus(FocusState.Programmatic);
         try { await LicenseAction.WindowLoadedAsync(); }
         catch (Exception ex) { Logger.Error(ex); }
     }

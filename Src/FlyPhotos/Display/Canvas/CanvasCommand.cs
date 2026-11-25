@@ -43,6 +43,9 @@ internal abstract record CanvasCommand
     /// <summary>Next or previous page of a multi-page photo (TIFF, ICO, PDF).</summary>
     public sealed record ChangePage(NavDirection Direction) : CanvasCommand;
 
+    /// <summary>Holds the frame on screen, and fades the next photo or page in over it once it lands (a slideshow step).</summary>
+    public sealed record CrossfadeNext : CanvasCommand;
+
     /// <summary>
     /// A page load finished on the thread pool. <paramref name="Renderer"/> identifies which renderer loaded it, so a
     /// page that lands after the user moved on is ignored.

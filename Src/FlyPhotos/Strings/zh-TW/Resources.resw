@@ -1285,4 +1285,55 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
   <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
     <value>僅限資料夾模式：開啟上層資料夾中的上一個資料夾</value>
   </data>
+  <data name="ShortcutName_Slideshow" xml:space="preserve">
+    <value>開始或停止投影片放映</value>
+  </data>
+  <data name="ShortcutName_PauseSlideshow" xml:space="preserve">
+    <value>暫停或繼續投影片放映</value>
+  </data>
+  <data name="ButtonSlideshowToolTip.Content" xml:space="preserve">
+    <value>開始投影片放映</value>
+  </data>
+  <data name="ButtonStopSlideshowToolTip.Content" xml:space="preserve">
+    <value>結束投影片放映</value>
+  </data>
+  <data name="SlideshowPause" xml:space="preserve">
+    <value>暫停投影片放映</value>
+  </data>
+  <data name="SlideshowResume" xml:space="preserve">
+    <value>繼續投影片放映</value>
+  </data>
+  <data name="TextBlockSlideshow.Text" xml:space="preserve">
+    <value>投影片放映</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Header" xml:space="preserve">
+    <value>每張照片的時間（秒）</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
+    <value>每張照片在螢幕上停留的時間。動畫會在此時間內播放盡可能多的完整循環，且至少播放一次。</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
+    <value>循環播放</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Description" xml:space="preserve">
+    <value>播放完最後一張照片後，從第一張重新開始。</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Header" xml:space="preserve">
+    <value>顯示所有頁面</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Description" xml:space="preserve">
+    <value>逐頁顯示多頁檔案（TIFF、ICO、PDF）的每一頁。</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Header" xml:space="preserve">
+    <value>以全螢幕模式啟動</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
+    <value>以全螢幕播放投影片。停止後，視窗會恢復為先前的狀態。</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
+    <value>視窗非作用中時暫停</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Description" xml:space="preserve">
+    <value>切換到其他視窗或將 FlyPhotos 最小化時暫停。</value>
+  </data>
 </root>

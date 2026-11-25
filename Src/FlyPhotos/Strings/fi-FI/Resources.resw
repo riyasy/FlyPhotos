@@ -1285,4 +1285,55 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
   <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
     <value>Vain kansiotilassa: avaa yläkansion edellisen kansion</value>
   </data>
+  <data name="ShortcutName_Slideshow" xml:space="preserve">
+    <value>Käynnistä tai pysäytä diaesitys</value>
+  </data>
+  <data name="ShortcutName_PauseSlideshow" xml:space="preserve">
+    <value>Keskeytä tai jatka diaesitystä</value>
+  </data>
+  <data name="ButtonSlideshowToolTip.Content" xml:space="preserve">
+    <value>Käynnistä diaesitys</value>
+  </data>
+  <data name="ButtonStopSlideshowToolTip.Content" xml:space="preserve">
+    <value>Poistu diaesityksestä</value>
+  </data>
+  <data name="SlideshowPause" xml:space="preserve">
+    <value>Keskeytä diaesitys</value>
+  </data>
+  <data name="SlideshowResume" xml:space="preserve">
+    <value>Jatka diaesitystä</value>
+  </data>
+  <data name="TextBlockSlideshow.Text" xml:space="preserve">
+    <value>Diaesitys</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Header" xml:space="preserve">
+    <value>Aika kuvaa kohden (sekuntia)</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
+    <value>Kuinka kauan kukin kuva näkyy näytöllä. Animaatio toistetaan niin monta kokonaista kierrosta kuin aikaan mahtuu, mutta aina vähintään yksi.</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
+    <value>Jatkuva toisto</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Description" xml:space="preserve">
+    <value>Aloita uudelleen ensimmäisestä kuvasta viimeisen jälkeen.</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Header" xml:space="preserve">
+    <value>Näytä kaikki sivut</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Description" xml:space="preserve">
+    <value>Käy läpi monisivuisten tiedostojen kaikki sivut (TIFF, ICO, PDF).</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Header" xml:space="preserve">
+    <value>Aloita koko näytön tilassa</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
+    <value>Toista diaesitys koko näytössä. Kun se pysähtyy, ikkuna palaa aiempaan tilaansa.</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
+    <value>Keskeytä, kun ikkuna ei ole aktiivinen</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Description" xml:space="preserve">
+    <value>Keskeytä, kun siirryt toiseen ikkunaan tai pienennät FlyPhotosin.</value>
+  </data>
 </root>

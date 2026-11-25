@@ -92,6 +92,14 @@ public class AppSettings
 
     public bool FolderSortDescending { get; set; } = false;
 
+    /// <summary>Seconds each photo stays up, 3–60; counted from when its full-quality image is on screen.</summary>
+    public int SlideshowDelaySeconds { get; set; } = 3;
+    public bool SlideshowLoop { get; set; } = true;
+    public bool SlideshowFullScreen { get; set; } = true;
+    public bool SlideshowPauseOnFocusLoss { get; set; } = true;
+    /// <summary>Show every page of a multi-page file (TIFF, ICO, PDF), not only the first.</summary>
+    public bool SlideshowAllPages { get; set; } = false;
+
     // String serialization for elements is handled by [JsonConverter] on the RawDecoder type,
     // since property-level JsonStringEnumConverter<T> does not apply to collection elements.
     public ObservableCollection<RawDecoder> RawDecoderPriority { get; set; } =

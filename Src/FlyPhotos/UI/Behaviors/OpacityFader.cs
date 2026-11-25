@@ -144,6 +144,24 @@ public partial class OpacityFader : IDisposable
     }
 
     /// <summary>
+    ///     While <see langword="true"/> (a slideshow), an enabled fader hides the elements completely instead of
+    ///     dimming them; the change shows at once.
+    /// </summary>
+    internal bool HideFully
+    {
+        get;
+        set
+        {
+            if (_disposed || field == value) return;
+            field = value;
+            if (!Enabled) return;
+            _initialFadeTimer.Stop();
+            _isFaded = false; // so the fade below runs to the new target
+            ApplyFadeLogic(PointerPosition());
+        }
+    }
+
+    /// <summary>
     /// Detaches event handlers and stops the initial fade timer to clean up resources.
     /// This method is called during disposal.
     /// </summary>
@@ -162,7 +180,7 @@ public partial class OpacityFader : IDisposable
     /// </summary>
     private void InitializeFadeState()
     {
-        if (!AppConfig.Settings.AutoFade)
+        if (!Enabled)
             return; // If auto-fade is disabled, no initial fading is needed.
 
         if (!_trackingElement.IsLoaded)
@@ -193,7 +211,12 @@ public partial class OpacityFader : IDisposable
     private void InitialFadeTimer_Tick(object sender, object e)
     {
         _initialFadeTimer.Stop(); // Stop the timer after it ticks once
+        ApplyFadeLogic(PointerPosition());
+    }
 
+    /// <summary>The cursor relative to the tracking element; outside the hot zone when it can't be read.</summary>
+    private Point PointerPosition()
+    {
         var initialPointerPosRelativeToTrackingElement = new Point(0, -1); // Default to outside hot zone
 
         // Attempt to get the current cursor position if the tracking element has valid dimensions.
@@ -214,7 +237,7 @@ public partial class OpacityFader : IDisposable
                 }
             }
         }
-        ApplyFadeLogic(initialPointerPosRelativeToTrackingElement);
+        return initialPointerPosRelativeToTrackingElement;
     }
 
     /// <summary>
@@ -243,7 +266,7 @@ public partial class OpacityFader : IDisposable
     private void ApplyFadeLogic(Point pos)
     {
         // If auto-fade is disabled, ensure controls are fully visible and exit.
-        if (!AppConfig.Settings.AutoFade)
+        if (!Enabled)
         {
             if (_isFaded)
             {
@@ -274,7 +297,7 @@ public partial class OpacityFader : IDisposable
         else if (!_isFaded && !isPointerInHotZone)
         {
             // If not faded and pointer left the hot zone, fade controls out.
-            var targetOpacity = (100 - AppConfig.Settings.FadeIntensity) / 100f;
+            var targetOpacity = HideFully ? 0f : (100 - AppConfig.Settings.FadeIntensity) / 100f;
             FadeTo(targetOpacity);
             _isFaded = true;
         }

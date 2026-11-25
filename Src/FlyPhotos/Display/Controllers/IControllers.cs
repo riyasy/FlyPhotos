@@ -16,6 +16,12 @@ internal interface ICanvasController : IDisposable
     /// </summary>
     Task SetSource(Photo photo, DisplayItem? item, DisplayLevel displayLevel);
 
+    /// <summary>Next or previous page of a multi-page photo; nothing at either end.</summary>
+    void ChangePage(NavDirection direction);
+
+    /// <summary>The next photo or page fades in over what is on screen (a slideshow step). Call just before it.</summary>
+    void CrossfadeNext();
+
     /// <summary>Completes when the next pan/zoom animation finishes, or after <paramref name="timeoutMs"/>.</summary>
     Task WaitForPanZoomAnimationAsync(int timeoutMs);
 

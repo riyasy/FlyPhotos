@@ -16,6 +16,17 @@ namespace FlyPhotos.Infra.Interop;
 /// </remarks>
 internal static partial class Win32Methods
 {
+    #region Power (kernel32.dll)
+
+    /// <summary>Keeps the display on while set, for the calling thread; <see cref="ES_CONTINUOUS"/> alone clears it.</summary>
+    [LibraryImport("kernel32.dll")]
+    internal static partial uint SetThreadExecutionState(uint esFlags);
+
+    internal const uint ES_CONTINUOUS = 0x80000000;
+    internal const uint ES_DISPLAY_REQUIRED = 0x00000002;
+
+    #endregion
+
     #region Keyboard & input (user32.dll)
 
     /// <summary>

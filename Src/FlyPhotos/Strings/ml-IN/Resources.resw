@@ -1282,4 +1282,55 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
   <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
     <value>ഫോൾഡർ മോഡിൽ മാത്രം: പാരന്റ് ഫോൾഡറിലെ മുമ്പത്തെ ഫോൾഡർ തുറക്കുന്നു</value>
   </data>
+  <data name="ShortcutName_Slideshow" xml:space="preserve">
+    <value>സ്ലൈഡ്ഷോ ആരംഭിക്കുക അല്ലെങ്കിൽ നിർത്തുക</value>
+  </data>
+  <data name="ShortcutName_PauseSlideshow" xml:space="preserve">
+    <value>സ്ലൈഡ്ഷോ താൽക്കാലികമായി നിർത്തുക അല്ലെങ്കിൽ തുടരുക</value>
+  </data>
+  <data name="ButtonSlideshowToolTip.Content" xml:space="preserve">
+    <value>സ്ലൈഡ്ഷോ ആരംഭിക്കുക</value>
+  </data>
+  <data name="ButtonStopSlideshowToolTip.Content" xml:space="preserve">
+    <value>സ്ലൈഡ്ഷോയിൽ നിന്ന് പുറത്തുകടക്കുക</value>
+  </data>
+  <data name="SlideshowPause" xml:space="preserve">
+    <value>സ്ലൈഡ്ഷോ താൽക്കാലികമായി നിർത്തുക</value>
+  </data>
+  <data name="SlideshowResume" xml:space="preserve">
+    <value>സ്ലൈഡ്ഷോ തുടരുക</value>
+  </data>
+  <data name="TextBlockSlideshow.Text" xml:space="preserve">
+    <value>സ്ലൈഡ്ഷോ</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Header" xml:space="preserve">
+    <value>ഓരോ ഫോട്ടോയ്ക്കുമുള്ള സമയം (സെക്കൻഡ്)</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
+    <value>ഓരോ ഫോട്ടോയും സ്ക്രീനിൽ നിൽക്കുന്ന സമയം. ആനിമേഷൻ ഈ സമയത്തിനുള്ളിൽ കഴിയുന്നത്ര തവണ പൂർണ്ണമായി പ്ലേ ചെയ്യും; കുറഞ്ഞത് ഒരു തവണയെങ്കിലും പ്ലേ ചെയ്യും.</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
+    <value>ലൂപ്പ്</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Description" xml:space="preserve">
+    <value>അവസാന ഫോട്ടോയ്ക്ക് ശേഷം ആദ്യ ഫോട്ടോയിൽ നിന്ന് വീണ്ടും തുടങ്ങുക.</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Header" xml:space="preserve">
+    <value>എല്ലാ പേജുകളും കാണിക്കുക</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Description" xml:space="preserve">
+    <value>ഒന്നിലധികം പേജുകളുള്ള ഫയലുകളിലെ (TIFF, ICO, PDF) ഓരോ പേജും ക്രമമായി കാണിക്കുക.</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Header" xml:space="preserve">
+    <value>പൂർണ്ണ സ്‌ക്രീനിൽ ആരംഭിക്കുക</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
+    <value>സ്ലൈഡ്ഷോ പൂർണ്ണ സ്‌ക്രീനിൽ പ്ലേ ചെയ്യുക. നിർത്തുമ്പോൾ, വിൻഡോ മുമ്പത്തെ അവസ്ഥയിലേക്ക് മടങ്ങും.</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
+    <value>നിഷ്‌ക്രിയമാകുമ്പോൾ താൽക്കാലികമായി നിർത്തുക</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Description" xml:space="preserve">
+    <value>മറ്റൊരു വിൻഡോയിലേക്ക് മാറുമ്പോഴോ FlyPhotos മിനിമൈസ് ചെയ്യുമ്പോഴോ താൽക്കാലികമായി നിർത്തുക.</value>
+  </data>
 </root>

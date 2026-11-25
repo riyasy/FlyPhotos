@@ -1284,4 +1284,55 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
   <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
     <value>フォルダー モードのみ: 親フォルダー内の前のフォルダーを開きます</value>
   </data>
+  <data name="ShortcutName_Slideshow" xml:space="preserve">
+    <value>スライドショーの開始/停止</value>
+  </data>
+  <data name="ShortcutName_PauseSlideshow" xml:space="preserve">
+    <value>スライドショーの一時停止/再開</value>
+  </data>
+  <data name="ButtonSlideshowToolTip.Content" xml:space="preserve">
+    <value>スライドショーを開始</value>
+  </data>
+  <data name="ButtonStopSlideshowToolTip.Content" xml:space="preserve">
+    <value>スライドショーを終了</value>
+  </data>
+  <data name="SlideshowPause" xml:space="preserve">
+    <value>スライドショーを一時停止</value>
+  </data>
+  <data name="SlideshowResume" xml:space="preserve">
+    <value>スライドショーを再開</value>
+  </data>
+  <data name="TextBlockSlideshow.Text" xml:space="preserve">
+    <value>スライドショー</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Header" xml:space="preserve">
+    <value>写真ごとの表示時間 (秒)</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
+    <value>各写真を画面に表示する時間です。アニメーションは、この時間内に収まる回数だけ最後まで再生されます (最低 1 回)。</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
+    <value>ループ</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Description" xml:space="preserve">
+    <value>最後の写真の後、最初の写真から再開します。</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Header" xml:space="preserve">
+    <value>すべてのページを表示</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Description" xml:space="preserve">
+    <value>複数ページのファイル (TIFF、ICO、PDF) のすべてのページを順に表示します。</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Header" xml:space="preserve">
+    <value>全画面表示で開始</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
+    <value>スライドショーを全画面表示で再生します。停止すると、ウィンドウは元の状態に戻ります。</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
+    <value>非アクティブ時に一時停止</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Description" xml:space="preserve">
+    <value>別のウィンドウに切り替えたとき、または FlyPhotos を最小化したときに一時停止します。</value>
+  </data>
 </root>

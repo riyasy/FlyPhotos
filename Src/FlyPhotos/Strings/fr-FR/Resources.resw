@@ -1285,4 +1285,55 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
   <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
     <value>Mode Dossier uniquement : ouvre le dossier précédent dans le dossier parent</value>
   </data>
+  <data name="ShortcutName_Slideshow" xml:space="preserve">
+    <value>Démarrer ou arrêter le diaporama</value>
+  </data>
+  <data name="ShortcutName_PauseSlideshow" xml:space="preserve">
+    <value>Suspendre ou reprendre le diaporama</value>
+  </data>
+  <data name="ButtonSlideshowToolTip.Content" xml:space="preserve">
+    <value>Démarrer le diaporama</value>
+  </data>
+  <data name="ButtonStopSlideshowToolTip.Content" xml:space="preserve">
+    <value>Quitter le diaporama</value>
+  </data>
+  <data name="SlideshowPause" xml:space="preserve">
+    <value>Suspendre le diaporama</value>
+  </data>
+  <data name="SlideshowResume" xml:space="preserve">
+    <value>Reprendre le diaporama</value>
+  </data>
+  <data name="TextBlockSlideshow.Text" xml:space="preserve">
+    <value>Diaporama</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Header" xml:space="preserve">
+    <value>Durée par photo (secondes)</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
+    <value>Durée d'affichage de chaque photo. Une animation est lue en autant de boucles complètes que la durée le permet, et toujours au moins une fois.</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
+    <value>Lecture en boucle</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Description" xml:space="preserve">
+    <value>Recommencer à la première photo après la dernière.</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Header" xml:space="preserve">
+    <value>Afficher toutes les pages</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Description" xml:space="preserve">
+    <value>Parcourir toutes les pages des fichiers multipages (TIFF, ICO, PDF).</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Header" xml:space="preserve">
+    <value>Démarrer en plein écran</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
+    <value>Lire le diaporama en plein écran. À l'arrêt, la fenêtre revient à son état précédent.</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
+    <value>Suspendre en cas d'inactivité</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Description" xml:space="preserve">
+    <value>Suspendre lorsque vous passez à une autre fenêtre ou réduisez FlyPhotos.</value>
+  </data>
 </root>

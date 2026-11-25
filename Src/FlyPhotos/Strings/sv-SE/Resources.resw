@@ -1285,4 +1285,55 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
   <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
     <value>Endast i mappläge: öppnar föregående mapp i den överordnade mappen</value>
   </data>
+  <data name="ShortcutName_Slideshow" xml:space="preserve">
+    <value>Starta eller stoppa bildspelet</value>
+  </data>
+  <data name="ShortcutName_PauseSlideshow" xml:space="preserve">
+    <value>Pausa eller återuppta bildspelet</value>
+  </data>
+  <data name="ButtonSlideshowToolTip.Content" xml:space="preserve">
+    <value>Starta bildspel</value>
+  </data>
+  <data name="ButtonStopSlideshowToolTip.Content" xml:space="preserve">
+    <value>Avsluta bildspel</value>
+  </data>
+  <data name="SlideshowPause" xml:space="preserve">
+    <value>Pausa bildspel</value>
+  </data>
+  <data name="SlideshowResume" xml:space="preserve">
+    <value>Återuppta bildspel</value>
+  </data>
+  <data name="TextBlockSlideshow.Text" xml:space="preserve">
+    <value>Bildspel</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Header" xml:space="preserve">
+    <value>Tid per foto (sekunder)</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
+    <value>Hur länge varje foto visas. En animering spelas upp i sin helhet så många gånger som ryms inom tiden, alltid minst en gång.</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
+    <value>Upprepa</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Description" xml:space="preserve">
+    <value>Börja om från första fotot efter det sista.</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Header" xml:space="preserve">
+    <value>Visa alla sidor</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Description" xml:space="preserve">
+    <value>Gå igenom alla sidor i filer med flera sidor (TIFF, ICO, PDF).</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Header" xml:space="preserve">
+    <value>Starta i helskärm</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
+    <value>Spela upp bildspelet i helskärm. När det stoppas återgår fönstret till sitt tidigare läge.</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
+    <value>Pausa vid inaktivitet</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Description" xml:space="preserve">
+    <value>Pausa när du byter till ett annat fönster eller minimerar FlyPhotos.</value>
+  </data>
 </root>

@@ -21,4 +21,7 @@ public interface IAnimator : IDisposable
     /// one. <see cref="TimeSpan.MaxValue"/> when it never changes.
     /// </summary>
     TimeSpan TimeToNextFrame { get; }
+
+    /// <summary>How long one loop of the animation runs; <see cref="TimeSpan.Zero"/> when unknown.</summary>
+    TimeSpan LoopDuration { get; }
 }

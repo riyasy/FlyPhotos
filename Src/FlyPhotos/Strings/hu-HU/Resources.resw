@@ -1284,4 +1284,55 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
   <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
     <value>Csak mappa módban: megnyitja a szülőmappa előző mappáját</value>
   </data>
+  <data name="ShortcutName_Slideshow" xml:space="preserve">
+    <value>Diavetítés indítása vagy leállítása</value>
+  </data>
+  <data name="ShortcutName_PauseSlideshow" xml:space="preserve">
+    <value>Diavetítés szüneteltetése vagy folytatása</value>
+  </data>
+  <data name="ButtonSlideshowToolTip.Content" xml:space="preserve">
+    <value>Diavetítés indítása</value>
+  </data>
+  <data name="ButtonStopSlideshowToolTip.Content" xml:space="preserve">
+    <value>Kilépés a diavetítésből</value>
+  </data>
+  <data name="SlideshowPause" xml:space="preserve">
+    <value>Diavetítés szüneteltetése</value>
+  </data>
+  <data name="SlideshowResume" xml:space="preserve">
+    <value>Diavetítés folytatása</value>
+  </data>
+  <data name="TextBlockSlideshow.Text" xml:space="preserve">
+    <value>Diavetítés</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Header" xml:space="preserve">
+    <value>Idő fotónként (másodperc)</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
+    <value>Mennyi ideig marad a képernyőn egy-egy fotó. Az animáció annyi teljes ciklust játszik le, amennyi belefér, de legalább egyet.</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
+    <value>Ismétlés</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Description" xml:space="preserve">
+    <value>Az utolsó fotó után újrakezdés az elsőtől.</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Header" xml:space="preserve">
+    <value>Az összes oldal megjelenítése</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Description" xml:space="preserve">
+    <value>A többoldalas fájlok (TIFF, ICO, PDF) összes oldalának végiglapozása.</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Header" xml:space="preserve">
+    <value>Indítás teljes képernyőn</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
+    <value>A diavetítés lejátszása teljes képernyőn. Leállításkor az ablak visszaáll az előző állapotába.</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
+    <value>Szüneteltetés, ha az ablak inaktív</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Description" xml:space="preserve">
+    <value>Szüneteltetés, ha másik ablakra vált, vagy minimalizálja a FlyPhotost.</value>
+  </data>
 </root>

@@ -155,6 +155,10 @@ public partial class AvifAnimator : IAnimator
         ? TimeSpan.MaxValue
         : TimeSpan.FromMilliseconds(Math.Max(0, _currentFrameDurationMs - _accumulatedTimeMs));
 
+    /// <inheritdoc />
+    /// <remarks>Unknown: frames are decoded one at a time, and their durations are wrong until #274.</remarks>
+    public TimeSpan LoopDuration => TimeSpan.Zero;
+
     // -------------------------------------------------------------------------
     // Construction
     // -------------------------------------------------------------------------

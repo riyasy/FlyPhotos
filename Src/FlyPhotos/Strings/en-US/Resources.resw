@@ -1285,4 +1285,55 @@ High Quality Cubic – Highest-quality scaling for photos.</value>
   <data name="ShortcutDesc_PrevFolder" xml:space="preserve">
     <value>Folder mode only: opens the previous folder in the parent folder</value>
   </data>
+  <data name="ShortcutName_Slideshow" xml:space="preserve">
+    <value>Start or stop slideshow</value>
+  </data>
+  <data name="ShortcutName_PauseSlideshow" xml:space="preserve">
+    <value>Pause or resume slideshow</value>
+  </data>
+  <data name="ButtonSlideshowToolTip.Content" xml:space="preserve">
+    <value>Start slideshow</value>
+  </data>
+  <data name="ButtonStopSlideshowToolTip.Content" xml:space="preserve">
+    <value>Exit slideshow</value>
+  </data>
+  <data name="SlideshowPause" xml:space="preserve">
+    <value>Pause slideshow</value>
+  </data>
+  <data name="SlideshowResume" xml:space="preserve">
+    <value>Resume slideshow</value>
+  </data>
+  <data name="TextBlockSlideshow.Text" xml:space="preserve">
+    <value>Slideshow</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Header" xml:space="preserve">
+    <value>Time per photo (seconds)</value>
+  </data>
+  <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
+    <value>How long each photo stays on screen. An animation plays as many complete loops as fit, and always at least one.</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
+    <value>Loop</value>
+  </data>
+  <data name="SettingsCardSlideshowLoop.Description" xml:space="preserve">
+    <value>Restart from the first photo after the last one.</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Header" xml:space="preserve">
+    <value>Show all pages</value>
+  </data>
+  <data name="SettingsCardSlideshowAllPages.Description" xml:space="preserve">
+    <value>Step through every page of multi-page files (TIFF, ICO, PDF).</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Header" xml:space="preserve">
+    <value>Start in full screen</value>
+  </data>
+  <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
+    <value>Play the slideshow full screen. When it stops, the window goes back to its previous state.</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
+    <value>Pause when inactive</value>
+  </data>
+  <data name="SettingsCardSlideshowPauseOnFocusLoss.Description" xml:space="preserve">
+    <value>Pause when you switch to another window or minimize FlyPhotos.</value>
+  </data>
 </root>
