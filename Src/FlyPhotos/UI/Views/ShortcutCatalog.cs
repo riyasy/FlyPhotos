@@ -526,17 +526,18 @@ internal static class ShortcutCatalog
         await AppConfig.SaveAsync();
     }
 
-    /// <summary>Defaults overlaid with the user's overrides, inverted into the lookup the key
-    /// handler needs.</summary>
+    /// <summary>Defaults overlaid with the user's overrides (second, so a newly added default never
+    /// takes a key the user gave another command), inverted into the key handler's lookup.</summary>
     public static Dictionary<KeyChord, CommandId> Resolve()
     {
         var routes = new Dictionary<KeyChord, CommandId>();
 
         foreach (var (id, def) in ById)
-        {
-            var chords = TryGetSaved(id, out var saved) ? saved : (IReadOnlyList<KeyChord>)def.Chords;
-            foreach (var chord in chords) routes[chord] = id;
-        }
+            if (!TryGetSaved(id, out _))
+                foreach (var chord in def.Chords) routes[chord] = id;
+        foreach (var id in ById.Keys)
+            if (TryGetSaved(id, out var saved))
+                foreach (var chord in saved) routes[chord] = id;
 
         return routes;
     }
