@@ -897,7 +897,7 @@ public sealed class ViewControllerTests
     }
 
     [TestMethod]
-    public void Rotate_AddsDegrees_ClearsFit_Keeps1To1()
+    public void Rotate_NotFitted_AddsDegrees_KeepsScale()
     {
         var r = new Rig();
         r.Show("A", 200, 100);
@@ -907,6 +907,102 @@ public sealed class ViewControllerTests
         Assert.IsFalse(r.Fitted);
         Assert.IsTrue(r.OneToOne);
         Near(1, r.Scale, 1e-6, "scale unchanged");
+    }
+
+    [TestMethod]
+    public void Rotate_Zoomed_KeepsScaleAndStaysNotFitted()
+    {
+        var r = new Rig();
+        r.Show("A", 4000, 3000);
+        r.M.ZoomBy(2f, Centre);
+        r.M.Rotate(90);
+        Near(0.5, r.Scale, 1e-6, "scale unchanged");
+        Assert.IsFalse(r.Fitted);
+    }
+
+    /// <summary>#278: a fitted image stays fitted when turned, at the fit of its turned shape.</summary>
+    [TestMethod]
+    public void Rotate_Fitted_RefitsTheTurnedImage()
+    {
+        var r = new Rig();
+        r.Show("A", 4000, 3000);
+        r.M.Rotate(90);
+        Near(0.2, r.Scale, 1e-6, "turned: 3000 wide, 4000 tall");
+        NearPoint(Centre, r.Pos, 1e-6, "centred");
+        Assert.IsTrue(r.Fitted);
+        Assert.IsFalse(r.M.IsAnimating);
+        Assert.AreEqual(1, r.ZoomChanges, "the readout shows the new fit");
+
+        r.M.Rotate(-90);
+        Near(0.25, r.Scale, 1e-6, "back to the upright fit");
+        Assert.IsTrue(r.Fitted);
+    }
+
+    [TestMethod]
+    public void Rotate_Fitted_SmallImageUpscaledByFit_StaysFitted()
+    {
+        var r = new Rig();
+        r.Show("A", 200, 100);
+        r.M.Fit(animate: false);
+        r.M.Rotate(90);
+        Near(4, r.Scale, 1e-6, "turned: 100 wide, 200 tall, so 800 / 200");
+        Assert.IsTrue(r.Fitted);
+    }
+
+    [TestMethod]
+    public void Rotate_DuringOpenZoom_EndsAtTheTurnedFit()
+    {
+        AppConfig.Settings.OpenExitZoom = true;
+        var r = new Rig();
+        r.Show("A", 4000, 3000);
+        r.Tick(3);
+        r.M.Rotate(90);
+        r.Settle();
+        Near(0.2, r.Scale, 1e-6, "turned fit");
+        NearPoint(Centre, r.Pos, 0.5, "centred");
+        Assert.IsTrue(r.Fitted);
+    }
+
+    [TestMethod]
+    public void Rotate_DuringFitAnimation_EndsAtTheTurnedFit()
+    {
+        var r = new Rig();
+        r.Show("A", 4000, 3000);
+        r.M.ZoomToHundred();
+        r.Settle();
+        r.M.Fit(animate: true);
+        r.Tick(2);
+        r.M.Rotate(90);
+        r.Settle();
+        Near(0.2, r.Scale, 1e-6, "turned fit");
+        NearPoint(Centre, r.Pos, 0.5, "centred");
+        Assert.IsTrue(r.Fitted);
+    }
+
+    [TestMethod]
+    public void Rotate_Fitted_ThenResize_RefitsTheTurnedImage()
+    {
+        var r = new Rig();
+        r.Show("A", 4000, 3000);
+        r.M.Rotate(90);
+        r.ResizeTo(1600, 900);
+        Near(0.225, r.Scale, 1e-6, "900 / 4000");
+        Assert.IsTrue(r.Fitted);
+    }
+
+    [TestMethod]
+    public void Remember_RotatedWhileFitted_ComesBackFittedAndTurned()
+    {
+        SetMode(PanZoomBehaviourOnNavigation.RememberPerPhoto);
+        var r = new Rig();
+        r.Show("A", 4000, 3000);
+        r.M.Rotate(90);
+        r.Show("B", 4000, 3000);
+
+        r.Show("A", 4000, 3000);
+        Assert.AreEqual(90, r.View.Rotation);
+        Near(0.2, r.Scale, 1e-6, "turned fit");
+        Assert.IsTrue(r.Fitted);
     }
 
     [TestMethod]

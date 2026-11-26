@@ -488,12 +488,13 @@ internal sealed class ViewController
         UserChanged(fitted: false);
     }
 
-    /// <summary>Turns the image by <paramref name="degrees"/> about its centre.</summary>
+    /// <summary>Turns the image by <paramref name="degrees"/> about its centre; a fitted image re-fits the turned shape.</summary>
     public void Rotate(int degrees)
     {
         _view = _view with { Rotation = _view.Rotation + degrees };
         if (_motion.Running) _motion.Rebase(_view, 1f);
-        UserChanged(fitted: false);
+        if (_fitted) RefitNow();
+        UserChanged(fitted: _fitted);
     }
 
     /// <summary>A small sideways shake: an action was refused. Not while another animation runs.</summary>
