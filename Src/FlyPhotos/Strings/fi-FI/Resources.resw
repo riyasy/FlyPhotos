@@ -1310,7 +1310,7 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
     <value>Aika kuvaa kohden (sekuntia)</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>Kuinka kauan kukin kuva näkyy näytöllä. Animaatio toistetaan niin monta kokonaista kierrosta kuin aikaan mahtuu, mutta aina vähintään yksi.</value>
+    <value>Kuinka kauan kukin kuva näkyy näytöllä. Animaatio toistetaan aina vähintään kerran.</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>Jatkuva toisto</value>
@@ -1329,6 +1329,18 @@ High Quality Cubic – Korkealaatuisin skaalaus valokuville.</value>
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>Toista diaesitys koko näytössä. Kun se pysähtyy, ikkuna palaa aiempaan tilaansa.</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>Musta tausta</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>Käytä diaesityksen aikana mustaa taustaa ikkunan taustan sijaan.</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>Sovita kuvat näyttöön</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>Sovita jokainen kuva näyttöön diaesityksen aikana.</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>Keskeytä, kun ikkuna ei ole aktiivinen</value>

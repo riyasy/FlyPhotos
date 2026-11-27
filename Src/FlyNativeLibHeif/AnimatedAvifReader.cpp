@@ -2,6 +2,7 @@
 #include "AnimatedAvifReader.h"
 #include "PixelBufferEncoder.h"
 #include "DllGlobals.h"
+#include <algorithm>
 
 /**
  * @brief Default constructor for AnimatedAvifReader.
@@ -90,6 +91,73 @@ bool AnimatedAvifReader::Open(const uint8_t* data, size_t size) {
 bool AnimatedAvifReader::IsAnimated() const {
     if (!context) return false;
     return heif_context_has_sequence(context.get()) || heif_context_number_of_sequence_tracks(context.get()) > 0;
+}
+
+namespace {
+    // A minimal ISOBMFF box reader over the file bytes. An empty Box means "not found".
+    struct Box { uint32_t type; const uint8_t* body; size_t size; };
+
+    uint32_t Be32(const uint8_t* p) { return (uint32_t(p[0]) << 24) | (p[1] << 16) | (p[2] << 8) | p[3]; }
+    uint64_t Be64(const uint8_t* p) { return (uint64_t(Be32(p)) << 32) | Be32(p + 4); }
+    constexpr uint32_t Fourcc(const char (&s)[5]) { return (uint32_t(s[0]) << 24) | (s[1] << 16) | (s[2] << 8) | s[3]; }
+
+    // Reads the box at p and moves p past it; false at end or on a malformed size.
+    bool NextBox(const uint8_t*& p, const uint8_t* end, Box& box) {
+        size_t n = size_t(end - p);
+        if (n < 8) return false;
+        uint64_t size = Be32(p);
+        size_t header = 8;
+        if (size == 1) {
+            if (n < 16) return false;
+            size = Be64(p + 8);
+            header = 16;
+        } else if (size == 0) {
+            size = n;
+        }
+        if (size < header || size > n) return false;
+        box = { Be32(p + 4), p + header, size_t(size) - header };
+        p += size;
+        return true;
+    }
+
+    Box FindBox(Box parent, uint32_t type) {
+        const uint8_t* p = parent.body;
+        Box box;
+        while (NextBox(p, parent.body + parent.size, box))
+            if (box.type == type) return box;
+        return {};
+    }
+
+    // moov/trak[track_id]/mdia/mdhd: the media duration, one pass through the samples, in ms. The edit list
+    // (which repeats a looping file) lives outside it. Timescale and duration both come from this box. 0 if unknown.
+    double MediaDurationMs(const uint8_t* data, size_t size, uint32_t track_id) {
+        Box moov = FindBox({ 0, data, size }, Fourcc("moov"));
+        const uint8_t* p = moov.body;
+        Box trak;
+        while (NextBox(p, moov.body + moov.size, trak)) {
+            if (trak.type != Fourcc("trak")) continue;
+            Box tkhd = FindBox(trak, Fourcc("tkhd"));
+            if (tkhd.size < 24 || Be32(tkhd.body + (tkhd.body[0] == 1 ? 20 : 12)) != track_id) continue;
+            Box mdhd = FindBox(FindBox(trak, Fourcc("mdia")), Fourcc("mdhd"));
+            // Version 0: 32-bit times; timescale at 12, duration at 16. Version 1: 64-bit; at 20 and 24.
+            bool v1 = mdhd.size >= 32 && mdhd.body[0] == 1;
+            if (!v1 && (mdhd.size < 20 || mdhd.body[0] != 0)) return 0;
+            uint32_t timescale = Be32(mdhd.body + (v1 ? 20 : 12));
+            uint64_t ticks = v1 ? Be64(mdhd.body + 24) : Be32(mdhd.body + 16);
+            if (timescale == 0 || ticks == (v1 ? UINT64_MAX : UINT32_MAX)) return 0; // all 1s: unknown
+            return double(ticks) * 1000 / timescale;
+        }
+        return 0;
+    }
+}
+
+/**
+ * @brief The length of one loop, from the track's media header: no decode cursor is touched.
+ * @return One loop in ms, or 0 if unknown.
+ */
+int AnimatedAvifReader::GetLoopDurationMs() const {
+    if (!track) return 0;
+    return static_cast<int>(std::min(MediaDurationMs(cached_data, cached_size, track_id), double(INT32_MAX)));
 }
 
 /**

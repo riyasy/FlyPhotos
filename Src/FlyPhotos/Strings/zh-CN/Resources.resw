@@ -1310,7 +1310,7 @@ High Quality Cubic – 适合照片的最高质量缩放。</value>
     <value>每张照片的时间（秒）</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>每张照片在屏幕上停留的时间。动画会在此时间内播放尽可能多的完整循环，且至少播放一次。</value>
+    <value>每张照片在屏幕上停留的时间。动画始终至少播放一次。</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>循环</value>
@@ -1329,6 +1329,18 @@ High Quality Cubic – 适合照片的最高质量缩放。</value>
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>以全屏播放幻灯片。停止后，窗口恢复到之前的状态。</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>黑色背景</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>幻灯片放映期间使用黑色背景，而不是窗口背景。</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>使照片适应屏幕</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>幻灯片放映期间使每张照片适应屏幕。</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>窗口非活动时暂停</value>

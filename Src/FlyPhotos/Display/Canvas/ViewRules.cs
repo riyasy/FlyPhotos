@@ -58,18 +58,18 @@ internal static class ViewRules
         return new Point(anchor.X - k * (anchor.X - currentPos.X), anchor.Y - k * (anchor.Y - currentPos.Y));
     }
 
-    /// <summary>The scale that fits the rotated image inside the canvas, less the user's fit padding (ImageFitPercentage).</summary>
-    public static float FitScale(Size canvasSize, Size imageSize, int imageRotation)
+    /// <summary>The scale that fits the rotated image inside the canvas, less the user's fit padding (none edge to edge).</summary>
+    public static float FitScale(Size canvasSize, Size imageSize, int imageRotation, bool edgeToEdge = false)
     {
         var (width, height) = OnScreenSize(imageSize, imageRotation);
-        var padding = AppConfig.Settings.ImageFitPercentage / 100.0f;
+        var padding = edgeToEdge ? 1f : AppConfig.Settings.ImageFitPercentage / 100.0f;
         return (float)Math.Min(canvasSize.Width * padding / width, canvasSize.Height * padding / height);
     }
 
     /// <summary>The scale a photo opens at: the fit, but not above 100% unless small images stretch.</summary>
-    public static float DefaultScale(Size canvasSize, Size imageSize, int imageRotation)
+    public static float DefaultScale(Size canvasSize, Size imageSize, int imageRotation, bool edgeToEdge = false)
     {
-        var fit = FitScale(canvasSize, imageSize, imageRotation);
+        var fit = FitScale(canvasSize, imageSize, imageRotation, edgeToEdge);
         return AppConfig.Settings.StretchSmallImages ? fit : Math.Min(fit, 1.0f);
     }
 

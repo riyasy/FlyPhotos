@@ -156,8 +156,7 @@ public partial class AvifAnimator : IAnimator
         : TimeSpan.FromMilliseconds(Math.Max(0, _currentFrameDurationMs - _accumulatedTimeMs));
 
     /// <inheritdoc />
-    /// <remarks>Unknown: frames are decoded one at a time, and their durations are wrong until #274.</remarks>
-    public TimeSpan LoopDuration => TimeSpan.Zero;
+    public TimeSpan LoopDuration { get; }
 
     // -------------------------------------------------------------------------
     // Construction
@@ -175,6 +174,7 @@ public partial class AvifAnimator : IAnimator
 
         PixelWidth = (uint)NativeAvifBridge.GetAvifCanvasWidth(handle);
         PixelHeight = (uint)NativeAvifBridge.GetAvifCanvasHeight(handle);
+        LoopDuration = TimeSpan.FromMilliseconds(NativeAvifBridge.GetAvifLoopDurationMs(handle));
         _canvasRect = new Rect(0, 0, PixelWidth, PixelHeight);
 
         // Pinned Object Heap allocation: zero-initialised (so the _frameBitmap created below
@@ -315,8 +315,7 @@ public partial class AvifAnimator : IAnimator
                 int nextDurationMs = NativeAvifBridge.DecodeNextAvifFrame(_nativeHandle, _pixelBufferPtr);
                 if (nextDurationMs <= 0)
                 {
-                    NativeAvifBridge.ResetAvifAnimation(_nativeHandle);
-                    _accumulatedTimeMs = 0;
+                    NativeAvifBridge.ResetAvifAnimation(_nativeHandle); // keeps the leftover time: loops stay on LoopDuration
                     nextDurationMs = NativeAvifBridge.DecodeNextAvifFrame(_nativeHandle, _pixelBufferPtr);
                     if (nextDurationMs <= 0)
                     {

@@ -1310,7 +1310,7 @@ High Quality Cubic – Najwyższej jakości skalowanie dla zdjęć.</value>
     <value>Czas na zdjęcie (sekundy)</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>Jak długo każde zdjęcie pozostaje na ekranie. Animacja wykonuje tyle pełnych pętli, ile zmieści się w tym czasie, i zawsze co najmniej jedną.</value>
+    <value>Jak długo każde zdjęcie pozostaje na ekranie. Animacja jest zawsze odtwarzana co najmniej raz.</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>Powtarzanie</value>
@@ -1329,6 +1329,18 @@ High Quality Cubic – Najwyższej jakości skalowanie dla zdjęć.</value>
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>Odtwarzaj pokaz slajdów na pełnym ekranie. Po zatrzymaniu okno wraca do poprzedniego stanu.</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>Czarne tło</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>Używaj czarnego tła podczas pokazu slajdów zamiast tła okna.</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>Dopasuj zdjęcia do ekranu</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>Dopasowuj każde zdjęcie do ekranu podczas pokazu slajdów.</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>Wstrzymuj, gdy okno jest nieaktywne</value>

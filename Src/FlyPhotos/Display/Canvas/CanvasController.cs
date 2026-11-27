@@ -221,6 +221,9 @@ internal sealed class CanvasController : ICanvasController
     /// <summary>The next photo or page fades in over the frame on screen.</summary>
     public void CrossfadeNext() => _engine.Post(new Cmd.CrossfadeNext());
 
+    /// <summary>A slideshow's view while on: each new photo at its default view, fitted edge to edge.</summary>
+    public void SlideshowFit(bool on) => _engine.Post(new Cmd.SlideshowFit(on));
+
     // ---------------------------------------------------------------- view
 
     /// <summary>A wheel notch or zoom key, animated, keeping <paramref name="anchor"/> (default: the centre) still.</summary>

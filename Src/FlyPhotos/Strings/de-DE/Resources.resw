@@ -1310,7 +1310,7 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
     <value>Zeit pro Foto (Sekunden)</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>Wie lange jedes Foto angezeigt wird. Eine Animation wird so oft vollständig abgespielt, wie es in diese Zeit passt, mindestens aber einmal.</value>
+    <value>Wie lange jedes Foto angezeigt wird. Eine Animation wird immer mindestens einmal abgespielt.</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>Wiederholen</value>
@@ -1329,6 +1329,18 @@ High Quality Cubic – Skalierung mit höchster Qualität für Fotos.</value>
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>Die Diashow im Vollbild abspielen. Wenn sie endet, kehrt das Fenster in seinen vorherigen Zustand zurück.</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>Schwarzer Hintergrund</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>Während der Diashow einen schwarzen Hintergrund statt des Fensterhintergrunds verwenden.</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>Fotos an den Bildschirm anpassen</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>Jedes Foto während der Diashow an den Bildschirm anpassen.</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>Bei Inaktivität anhalten</value>

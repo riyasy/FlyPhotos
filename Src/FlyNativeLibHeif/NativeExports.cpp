@@ -188,6 +188,16 @@ int GetAvifCanvasHeight(void* handle) {
 }
 
 /**
+ * @brief Retrieves the length of one loop of the animation.
+ * @param handle Opaque handle to the `AnimatedAvifReader` context.
+ * @return One loop in ms, or 0 if unknown or invalid.
+ */
+int GetAvifLoopDurationMs(void* handle) {
+    if (!handle) return 0;
+    return static_cast<AnimatedAvifReader*>(handle)->GetLoopDurationMs();
+}
+
+/**
  * @brief Decodes the next sequence frame into a pre-allocated BGRA buffer and returns its duration in ms.
  * @param handle Opaque handle to the `AnimatedAvifReader` context.
  * @param out_bgra_buffer A pre-allocated buffer of size Width * Height * 4. This ensures a 0-allocation decode path.

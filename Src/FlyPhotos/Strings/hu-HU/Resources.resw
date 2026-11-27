@@ -1309,7 +1309,7 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
     <value>Idő fotónként (másodperc)</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>Mennyi ideig marad a képernyőn egy-egy fotó. Az animáció annyi teljes ciklust játszik le, amennyi belefér, de legalább egyet.</value>
+    <value>Mennyi ideig marad a képernyőn egy-egy fotó. Az animáció mindig legalább egyszer lejátszódik.</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>Ismétlés</value>
@@ -1328,6 +1328,18 @@ High Quality Cubic – A legjobb minőségű méretezés fotókhoz.</value>
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>A diavetítés lejátszása teljes képernyőn. Leállításkor az ablak visszaáll az előző állapotába.</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>Fekete háttér</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>Fekete háttér használata diavetítés közben az ablakháttér helyett.</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>Fotók illesztése a képernyőhöz</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>Minden fotó illesztése a képernyőhöz diavetítés közben.</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>Szüneteltetés, ha az ablak inaktív</value>

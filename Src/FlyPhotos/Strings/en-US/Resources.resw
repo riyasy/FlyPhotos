@@ -1310,7 +1310,7 @@ High Quality Cubic – Highest-quality scaling for photos.</value>
     <value>Time per photo (seconds)</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>How long each photo stays on screen. An animation plays as many complete loops as fit, and always at least one.</value>
+    <value>How long each photo stays on screen. An animation always plays at least once.</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>Loop</value>
@@ -1329,6 +1329,18 @@ High Quality Cubic – Highest-quality scaling for photos.</value>
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>Play the slideshow full screen. When it stops, the window goes back to its previous state.</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>Black background</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>Use a black background during a slideshow, instead of the window backdrop.</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>Fit photos to screen</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>Fit each photo to the screen during a slideshow.</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>Pause when inactive</value>

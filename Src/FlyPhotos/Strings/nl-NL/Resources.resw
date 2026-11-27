@@ -1310,7 +1310,7 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
     <value>Tijd per foto (seconden)</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>Hoelang elke foto op het scherm blijft. Een animatie wordt zo vaak volledig afgespeeld als in die tijd past, en altijd minstens één keer.</value>
+    <value>Hoelang elke foto op het scherm blijft. Een animatie wordt altijd minstens één keer afgespeeld.</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>Herhalen</value>
@@ -1329,6 +1329,18 @@ High Quality Cubic – Schaling van de hoogste kwaliteit voor foto's.</value>
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>De diavoorstelling in volledig scherm afspelen. Na het stoppen keert het venster terug naar de vorige toestand.</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>Zwarte achtergrond</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>Tijdens een diavoorstelling een zwarte achtergrond gebruiken in plaats van de vensterachtergrond.</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>Foto's aan scherm aanpassen</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>Elke foto tijdens een diavoorstelling aan het scherm aanpassen.</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>Onderbreken bij inactiviteit</value>

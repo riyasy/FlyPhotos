@@ -1309,7 +1309,7 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
     <value>사진당 시간(초)</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>각 사진이 화면에 표시되는 시간입니다. 애니메이션은 지정된 시간 내에 끝까지 재생할 수 있는 횟수만큼 반복되며, 최소 한 번은 재생됩니다.</value>
+    <value>각 사진이 화면에 표시되는 시간입니다. 애니메이션은 항상 한 번 이상 재생됩니다.</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>반복</value>
@@ -1328,6 +1328,18 @@ High Quality Cubic – 사진에 가장 적합한 최고 품질의 크기 조절
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>슬라이드 쇼를 전체 화면으로 재생합니다. 중지하면 창이 이전 상태로 돌아갑니다.</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>검은색 배경</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>슬라이드 쇼 중에는 창 배경 대신 검은색 배경을 사용합니다.</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>사진을 화면에 맞춤</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>슬라이드 쇼 중에 각 사진을 화면에 맞춥니다.</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>비활성 시 일시 중지</value>

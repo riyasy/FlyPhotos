@@ -343,46 +343,47 @@
                                 Placement="Right" />
                         </ToolTipService.ToolTip>
                     </Button>
+                    <!--  Shown for a multi-page photo, in a slideshow too  -->
+                    <RepeatButton
+                        x:Name="ButtonPrevPage"
+                        Width="Auto"
+                        Margin="10,0,0,0"
+                        Click="ButtonPrevNextPage_OnClick"
+                        Content="&#xF587;"
+                        FontFamily="{StaticResource FluentIcons}"
+                        FontSize="16"
+                        PointerWheelChanged="ButtonBackNextPage_PointerWheelChanged"
+                        Visibility="Collapsed">
+                        <ToolTipService.ToolTip>
+                            <ToolTip
+                                x:Uid="ButtonPrevPageToolTip"
+                                AutomationProperties.FullDescription="Non-occluding tooltip"
+                                Content="Prev Page"
+                                Placement="Right" />
+                        </ToolTipService.ToolTip>
+                    </RepeatButton>
+                    <RepeatButton
+                        x:Name="ButtonNextPage"
+                        Width="Auto"
+                        Click="ButtonPrevNextPage_OnClick"
+                        Content="&#xF586;"
+                        FontFamily="{StaticResource FluentIcons}"
+                        FontSize="16"
+                        PointerWheelChanged="ButtonBackNextPage_PointerWheelChanged"
+                        Visibility="Collapsed">
+                        <ToolTipService.ToolTip>
+                            <ToolTip
+                                x:Uid="ButtonNextPageToolTip"
+                                AutomationProperties.FullDescription="Non-occluding tooltip"
+                                Content="Next Page"
+                                Placement="Right" />
+                        </ToolTipService.ToolTip>
+                    </RepeatButton>
                     <!--  Hidden during a slideshow, with ButtonRotate  -->
                     <StackPanel
                         x:Name="ToolButtons"
                         Margin="10,0,0,0"
                         Orientation="Horizontal">
-                        <RepeatButton
-                            x:Name="ButtonPrevPage"
-                            Width="Auto"
-                            Click="ButtonPrevNextPage_OnClick"
-                            Content="&#xF587;"
-                            FontFamily="{StaticResource FluentIcons}"
-                            FontSize="16"
-                            PointerWheelChanged="ButtonBackNextPage_PointerWheelChanged"
-                            Visibility="Collapsed">
-                            <ToolTipService.ToolTip>
-                                <ToolTip
-                                    x:Uid="ButtonPrevPageToolTip"
-                                    AutomationProperties.FullDescription="Non-occluding tooltip"
-                                    Content="Prev Page"
-                                    Placement="Right" />
-                            </ToolTipService.ToolTip>
-                        </RepeatButton>
-                        <RepeatButton
-                            x:Name="ButtonNextPage"
-                            Width="Auto"
-                            Margin="0,0,10,0"
-                            Click="ButtonPrevNextPage_OnClick"
-                            Content="&#xF586;"
-                            FontFamily="{StaticResource FluentIcons}"
-                            FontSize="16"
-                            PointerWheelChanged="ButtonBackNextPage_PointerWheelChanged"
-                            Visibility="Collapsed">
-                            <ToolTipService.ToolTip>
-                                <ToolTip
-                                    x:Uid="ButtonNextPageToolTip"
-                                    AutomationProperties.FullDescription="Non-occluding tooltip"
-                                    Content="Next Page"
-                                    Placement="Right" />
-                            </ToolTipService.ToolTip>
-                        </RepeatButton>
                         <ToggleButton
                             x:Name="ButtonScaleSet"
                             Width="Auto"

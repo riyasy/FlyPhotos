@@ -5,6 +5,12 @@
 
 Generated with Pillow 13.0 (AVIF via libavif/aom) and pillow-heif 1.8.1 (libheif 1.23.6, x265).
 Flat colour blocks on 16-px boundaries keep lossy-coding error small; the tests allow a tolerance.
+
+Not generated here: colors-animated-8bpc.avif, colors-animated-8bpc-audio.avif and
+colors-animated-12bpc-keyframes-0-2-3.avif are copied unchanged from libavif's test data
+(https://github.com/AOMediaCodec/libavif/tree/main/tests/data, BSD 2-Clause). They cover AVIF loop lengths read from
+mdhd layouts this script's encoder doesn't write: a version 0 box, timescales of 30 and 1, and an audio or alpha track
+next to the colour one.
 """
 import os
 

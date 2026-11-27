@@ -257,6 +257,41 @@ public sealed class InstallPathTests
         Near(1, app.V.View.Scale, 1e-3, "A remembered at 100% through the placeholder");
     }
 
+    // ---------------------------------------------------------------- Reset on navigation (a slideshow)
+
+    /// <summary>
+    /// A slideshow opens each photo at its default view, fitted edge to edge (as if "Image to screen fit" were 100%),
+    /// and leaves the views the user remembered alone.
+    /// </summary>
+    [TestMethod]
+    [DataRow(PanZoomBehaviourOnNavigation.RetainFromLastPhoto)]
+    [DataRow(PanZoomBehaviourOnNavigation.RememberPerPhoto)]
+    public void SlideshowFit_OpensPhotosAtTheirDefault_AndKeepsRememberedViews(PanZoomBehaviourOnNavigation mode)
+    {
+        AppConfig.Settings.PanZoomBehaviourOnNavigation = mode;
+        AppConfig.Settings.ImageFitPercentage = 70;
+        var k = Kinds[0]; // larger than the canvas: its default is the fit
+        var app = new App().Watch();
+        var a = app.Photo(k);
+        app.ShowHq(a, k);
+        var defaultScale = app.V.View.Scale / 0.7f; // edge to edge
+        app.V.ZoomBy(2.5f, new Windows.Foundation.Point(400, 300));
+        var zoomed = app.V.View.Scale;
+
+        app.V.SlideshowFit = true;
+        var z = app.Photo(k);
+        app.ShowHq(z, k);
+        Near(defaultScale, app.V.View.Scale, defaultScale * 1e-4, "Z at its default");
+        app.ShowHq(a, k);
+        Near(defaultScale, app.V.View.Scale, defaultScale * 1e-4, "A at its default too");
+
+        app.V.SlideshowFit = false;
+        app.ShowHq(z, k);
+        app.ShowHq(a, k);
+        if (mode == PanZoomBehaviourOnNavigation.RememberPerPhoto)
+            Near(zoomed, app.V.View.Scale, zoomed * 1e-4, "A's remembered zoom kept");
+    }
+
     // ---------------------------------------------------------------- Remember on a far revisit
 
     public static IEnumerable<object[]> KindNames => Kinds.Select(k => new object[] { k.Name });

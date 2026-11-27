@@ -62,6 +62,9 @@ namespace FlyPhotos.UI.Behaviors
         /// </summary>
         private WindowBackdropType _currentBackdropType;
 
+        /// <summary>A slideshow's black background is on (see <see cref="SetBlackBackground"/>).</summary>
+        private bool _black;
+
         /// <summary>
         /// The system backdrop controller, managing Acrylic or Mica effects.
         /// </summary>
@@ -147,7 +150,7 @@ namespace FlyPhotos.UI.Behaviors
         /// <param name="theme">The element theme to apply.</param>
         public void SetWindowTheme(ElementTheme theme)
         {
-            _root.RequestedTheme = theme;
+            _root.RequestedTheme = _black ? ElementTheme.Dark : theme;
         }
 
         /// <summary>
@@ -156,7 +159,19 @@ namespace FlyPhotos.UI.Behaviors
         /// <param name="backdropType">The type of backdrop to apply.</param>
         public void SetWindowBackdrop(WindowBackdropType backdropType)
         {
-            SetWindowBackdropPrivate(backdropType);
+            SetWindowBackdropPrivate(_black ? WindowBackdropType.None : backdropType);
+        }
+
+        /// <summary>
+        /// A slideshow's black background: the dark theme's solid backdrop, so the toolbar's glyphs are light on it
+        /// too. False puts the theme and backdrop settings back.
+        /// </summary>
+        public void SetBlackBackground(bool black)
+        {
+            if (black == _black) return;
+            _black = black;
+            SetWindowTheme(AppConfig.Settings.Theme);
+            SetWindowBackdrop(AppConfig.Settings.WindowBackdrop);
         }
 
         /// <summary>

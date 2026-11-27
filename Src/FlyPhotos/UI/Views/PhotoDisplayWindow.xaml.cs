@@ -730,7 +730,16 @@ public sealed partial class PhotoDisplayWindow
     private void ToggleSlideshow()
     {
         if (_slideshow.State != SlideshowState.Stopped) _slideshow.Stop();
-        else if (!_photoController.IsSinglePhoto()) _slideshow.Start();
+        else if (!_photoController.IsSinglePhoto())
+        {
+            // On start only: a resume leaves the window as the user left it.
+            if (AppConfig.Settings.SlideshowFullScreen && !_windFullScreenManager.IsFullScreen)
+            {
+                _slideshowEnteredFullScreen = true;
+                _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
+            }
+            _slideshow.Start();
+        }
     }
 
     // The toolbar button starts a slideshow, then pauses and resumes it; the X button, Esc or F5 stops it.
@@ -753,13 +762,7 @@ public sealed partial class PhotoDisplayWindow
     private void Slideshow_StateChanged()
     {
         var state = _slideshow.State;
-        // On a resume too: the setting may have changed while paused.
-        if (state == SlideshowState.Playing && AppConfig.Settings.SlideshowFullScreen && !_windFullScreenManager.IsFullScreen)
-        {
-            _slideshowEnteredFullScreen = true;
-            _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
-        }
-        else if (state == SlideshowState.Stopped)
+        if (state == SlideshowState.Stopped)
         {
             if (_slideshowEnteredFullScreen && _windFullScreenManager.IsFullScreen)
                 _windFullScreenManager.ToggleFullScreen(ButtonFullScreenClose);
@@ -767,7 +770,8 @@ public sealed partial class PhotoDisplayWindow
         }
 
         var running = state != SlideshowState.Stopped;
-        // A slideshow's toolbar is previous, next, play/pause and exit.
+        ApplySlideshowLook();
+        // A slideshow keeps only navigation, play/pause and exit.
         ButtonRotate.Visibility = ToolButtons.Visibility = running ? Visibility.Collapsed : Visibility.Visible;
         ButtonStopSlideshow.Visibility = running ? Visibility.Visible : Visibility.Collapsed;
 
@@ -779,6 +783,14 @@ public sealed partial class PhotoDisplayWindow
             SlideshowState.Paused => "SlideshowResume",
             _ => "ButtonSlideshowToolTip/Content"
         });
+    }
+
+    // The black background and the fit, while a slideshow runs; also when their settings change mid-slideshow.
+    private void ApplySlideshowLook()
+    {
+        var running = _slideshow.State != SlideshowState.Stopped;
+        _windAppearanceManager.SetBlackBackground(running && AppConfig.Settings.SlideshowBlackBackground);
+        _canvasController.SlideshowFit(running && AppConfig.Settings.SlideshowFitToScreen);
     }
 
     // A slideshow hides the bottom panels, and while playing the cursor, whatever the settings.
@@ -1406,6 +1418,9 @@ public sealed partial class PhotoDisplayWindow
                 break;
             case Setting.BackDrop:
                 _windAppearanceManager.SetWindowBackdrop(AppConfig.Settings.WindowBackdrop);
+                break;
+            case Setting.Slideshow:
+                ApplySlideshowLook();
                 break;
             case Setting.BackDropTransparency:
                 _windAppearanceManager.SetWindowBackdropTransparency(AppConfig.Settings.TransparentBackgroundIntensity);

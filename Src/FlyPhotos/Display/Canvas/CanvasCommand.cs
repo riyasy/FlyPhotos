@@ -55,6 +55,9 @@ internal abstract record CanvasCommand
     /// <param name="PageSize">The page's size; null when the load failed or a newer one superseded it.</param>
     public sealed record PageLoaded(IMultiPage Renderer, int Request, int PageIndex, Size PageSize) : CanvasCommand;
 
+    /// <summary>While on (a slideshow), each new photo opens at its default view, fitted edge to edge (see ViewController).</summary>
+    public sealed record SlideshowFit(bool On) : CanvasCommand;
+
     /// <summary>A photo was renamed: the view and its remembered views follow the new path.</summary>
     public sealed record Renamed(string OldPath, string NewPath) : CanvasCommand;
 

@@ -233,12 +233,24 @@ public sealed class HeifDecoderTests
     }
 
     [TestMethod]
-    [Ignore("libheif 1.23.0 bug: heif_image_get_duration() on a decoded sequence frame always returns the first " +
-            "sample's duration (100 ms here), while heif_raw_sequence_sample_get_duration() gives the right 100/200/300.")]
     public void Animation_frames_report_their_own_durations()
     {
         using var anim = new Animation(File.ReadAllBytes(Fixture("animated_rgb_once.avif")));
         CollectionAssert.AreEqual(new[] { 100, 200, 300 }, new[] { anim.Next().durationMs, anim.Next().durationMs, anim.Next().durationMs });
+    }
+
+    // The libavif files (see make_fixtures.py) cover the mdhd layouts our encoder doesn't write.
+    [TestMethod]
+    [DataRow("animated_rgb_once.avif", 600, 100)]
+    [DataRow("animated_rgb.avif", 600, 100)] // loops forever: still one loop
+    [DataRow("colors-animated-8bpc.avif", 166, 33)] // 5 ticks at 30/s
+    [DataRow("colors-animated-8bpc-audio.avif", 166, 33)] // version 0 box; the audio track's mdhd is not the one
+    [DataRow("colors-animated-12bpc-keyframes-0-2-3.avif", 5000, 1000)] // one tick per second; an alpha track too
+    public void Loop_duration_is_one_pass_through_the_frames(string file, int loopMs, int firstFrameMs)
+    {
+        using var anim = new Animation(File.ReadAllBytes(Fixture(file)));
+        Assert.AreEqual(loopMs, NativeAvifBridge.GetAvifLoopDurationMs(anim.Handle));
+        Assert.AreEqual(firstFrameMs, anim.Next().durationMs, "the decode cursor is untouched");
     }
 
     [TestMethod]
@@ -293,6 +305,7 @@ public sealed class HeifDecoderTests
         Assert.IsFalse(NativeAvifBridge.IsAvifAnimated(IntPtr.Zero));
         Assert.AreEqual(0, NativeAvifBridge.GetAvifCanvasWidth(IntPtr.Zero));
         Assert.AreEqual(0, NativeAvifBridge.GetAvifCanvasHeight(IntPtr.Zero));
+        Assert.AreEqual(0, NativeAvifBridge.GetAvifLoopDurationMs(IntPtr.Zero));
         Assert.AreEqual(0, NativeAvifBridge.DecodeNextAvifFrame(IntPtr.Zero, IntPtr.Zero));
         NativeAvifBridge.ResetAvifAnimation(IntPtr.Zero);
         NativeAvifBridge.CloseAvifAnimation(IntPtr.Zero);

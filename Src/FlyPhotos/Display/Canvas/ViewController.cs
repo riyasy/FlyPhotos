@@ -101,6 +101,25 @@ internal sealed class ViewController
     /// <summary>The view started or stopped following the fit.</summary>
     public event Action<bool> FitToScreenStateChanged;
 
+    /// <summary>
+    /// A slideshow's view: each new photo opens at its default view, whatever the navigation setting, and the fit goes
+    /// edge to edge (no ImageFitPercentage padding). A fitted photo on screen follows the change.
+    /// </summary>
+    public bool SlideshowFit
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            if (_fitted && HasPhoto) AnimateToFit();
+        }
+    }
+
+    /// <summary>The navigation rule in effect: a slideshow's view opens every photo fresh.</summary>
+    private PanZoomBehaviourOnNavigation NavigationRule =>
+        SlideshowFit ? PanZoomBehaviourOnNavigation.Reset : AppConfig.Settings.PanZoomBehaviourOnNavigation;
+
     /// <summary>The target scale became, or stopped being, 100%.</summary>
     public event Action<bool> OneToOneStateChanged;
 
@@ -294,7 +313,7 @@ internal sealed class ViewController
         _view = _view with { ImageRect = Layout(imageSize) };
         _remembered = null;
 
-        switch (AppConfig.Settings.PanZoomBehaviourOnNavigation)
+        switch (NavigationRule)
         {
             case PanZoomBehaviourOnNavigation.RememberPerPhoto:
                 if (_store.TryRestore(_photoPath, exifRotation, out var restored))
@@ -326,7 +345,7 @@ internal sealed class ViewController
     private void ShowDefault(int rotation, bool openZoom)
     {
         _view = _view with { Rotation = rotation };
-        var scale = ViewRules.DefaultScale(CanvasSize, _view.ImageSize, rotation);
+        var scale = ViewRules.DefaultScale(CanvasSize, _view.ImageSize, rotation, edgeToEdge: SlideshowFit);
         var centre = ViewRules.Centre(CanvasSize);
         _view = _view with { Scale = scale, Pos = centre };
 
@@ -357,10 +376,10 @@ internal sealed class ViewController
     private void RememberViewOnScreen()
     {
         if (AppConfig.Settings.PanZoomBehaviourOnNavigation != PanZoomBehaviourOnNavigation.RememberPerPhoto
-            || _onPageOfOtherSize || _onPlaceholder)
+            || !_userChangedView || _onPageOfOtherSize || _onPlaceholder) // untouched: a slideshow's reset keeps the saved one
             return;
         StopMotion(); // save where the view was heading
-        if (!_userChangedView || IsDefaultView())
+        if (IsDefaultView())
             _store.Remove(_photoPath);
         else
             _store.Save(_photoPath, PhotoZoom, CentreOnImage(), _view.Rotation, _exifRotation, _view.ImageSize,
@@ -542,7 +561,7 @@ internal sealed class ViewController
     private static Rect Layout(Size imageSize) => new(0, 0, imageSize.Width, imageSize.Height);
 
     /// <summary>The fit scale of the image on screen, at its current rotation.</summary>
-    private float FitScale() => ViewRules.FitScale(CanvasSize, _view.ImageSize, _view.Rotation);
+    private float FitScale() => ViewRules.FitScale(CanvasSize, _view.ImageSize, _view.Rotation, edgeToEdge: SlideshowFit);
 
     /// <summary>The part of the image at the canvas centre (<see cref="ViewRules.CentreOnImage"/>).</summary>
     private Point CentreOnImage() =>

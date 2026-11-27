@@ -17,15 +17,17 @@ internal readonly record struct AnimationLoop(TimeSpan Duration, long StartedAt)
 
     /// <summary>
     /// How long from <paramref name="now"/> until the next slideshow step: <paramref name="delay"/>, or for an
-    /// animation the whole loops that fit in it (at least one). Mid-loop, the loop under way counts as the first.
+    /// animation the closest whole number of loops (at least one). The loop under way counts until half has played.
     /// </summary>
     public TimeSpan SlideshowWait(TimeSpan delay, long now)
     {
         if (Duration <= TimeSpan.Zero || Duration > MaxDuration) return delay;
-        long loops = Math.Max(1, delay.Ticks / Duration.Ticks);
+        long loops = Math.Max(1, Nearest(delay.Ticks, Duration.Ticks));
         var elapsed = Stopwatch.GetElapsedTime(StartedAt, now);
-        long loopsDone = elapsed.Ticks / Duration.Ticks;
+        long loopsDone = Nearest(elapsed.Ticks, Duration.Ticks);
         var wait = TimeSpan.FromTicks((loopsDone + loops) * Duration.Ticks) - elapsed - Lead;
         return wait > TimeSpan.Zero ? wait : wait + Duration;
     }
+
+    private static long Nearest(long a, long b) => (a + b / 2) / b; // a / b rounded, halves up
 }

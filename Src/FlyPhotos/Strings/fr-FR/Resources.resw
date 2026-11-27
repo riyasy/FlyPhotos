@@ -1310,7 +1310,7 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
     <value>Durée par photo (secondes)</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>Durée d'affichage de chaque photo. Une animation est lue en autant de boucles complètes que la durée le permet, et toujours au moins une fois.</value>
+    <value>Durée d'affichage de chaque photo. Une animation est toujours lue au moins une fois.</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>Lecture en boucle</value>
@@ -1329,6 +1329,18 @@ High Quality Cubic – Mise à l'échelle de la plus haute qualité pour les pho
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>Lire le diaporama en plein écran. À l'arrêt, la fenêtre revient à son état précédent.</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>Arrière-plan noir</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>Utiliser un arrière-plan noir pendant le diaporama au lieu de l'arrière-plan de la fenêtre.</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>Ajuster les photos à l'écran</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>Ajuster chaque photo à l'écran pendant le diaporama.</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>Suspendre en cas d'inactivité</value>

@@ -96,6 +96,7 @@ public enum Setting
     ImageScalingQualityChange,
     RawDecodingChange,
     KeyBindingsChanged,
+    Slideshow,
     EdgeNavArrowsShowHide,
     /// <summary>A preview or HQ window size changed: the prefetch cache re-plans now.</summary>
     CacheSizeChange

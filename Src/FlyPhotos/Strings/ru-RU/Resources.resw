@@ -1310,7 +1310,7 @@ High Quality Cubic – Масштабирование наивысшего ка�
     <value>Время показа фото (секунды)</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>Сколько времени каждое фото остаётся на экране. Анимация проигрывается столько полных циклов, сколько помещается, но не меньше одного.</value>
+    <value>Сколько времени каждое фото остаётся на экране. Анимация всегда проигрывается хотя бы один раз.</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>Повтор</value>
@@ -1329,6 +1329,18 @@ High Quality Cubic – Масштабирование наивысшего ка�
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>Показывать слайд-шоу во весь экран. После остановки окно возвращается в прежнее состояние.</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>Чёрный фон</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>Использовать чёрный фон во время слайд-шоу вместо фона окна.</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>Вписывать фото в экран</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>Вписывать каждое фото в экран во время слайд-шоу.</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>Пауза при неактивном окне</value>

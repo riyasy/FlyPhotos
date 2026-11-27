@@ -96,9 +96,11 @@ public class AppSettings
     public int SlideshowDelaySeconds { get; set; } = 3;
     public bool SlideshowLoop { get; set; } = true;
     public bool SlideshowFullScreen { get; set; } = true;
+    public bool SlideshowBlackBackground { get; set; } = true;
+    public bool SlideshowFitToScreen { get; set; } = true;
     public bool SlideshowPauseOnFocusLoss { get; set; } = true;
     /// <summary>Show every page of a multi-page file (TIFF, ICO, PDF), not only the first.</summary>
-    public bool SlideshowAllPages { get; set; } = false;
+    public bool SlideshowAllPages { get; set; } = true;
 
     // String serialization for elements is handled by [JsonConverter] on the RawDecoder type,
     // since property-level JsonStringEnumConverter<T> does not apply to collection elements.

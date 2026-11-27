@@ -1309,7 +1309,7 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
     <value>写真ごとの表示時間 (秒)</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>各写真を画面に表示する時間です。アニメーションは、この時間内に収まる回数だけ最後まで再生されます (最低 1 回)。</value>
+    <value>各写真を画面に表示する時間です。アニメーションは常に 1 回以上最後まで再生されます。</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>ループ</value>
@@ -1328,6 +1328,18 @@ High Quality Cubic – 写真に最適な最高品質のスケーリングです
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>スライドショーを全画面表示で再生します。停止すると、ウィンドウは元の状態に戻ります。</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>黒い背景</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>スライドショー中は、ウィンドウの背景の代わりに黒い背景を使用します。</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>写真を画面に合わせる</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>スライドショー中は、各写真を画面に合わせて表示します。</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>非アクティブ時に一時停止</value>

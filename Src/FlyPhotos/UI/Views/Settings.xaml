@@ -580,6 +580,18 @@
                             <ToggleSwitch x:Name="ToggleSlideshowFullScreen" />
                         </controls:SettingsCard>
                         <controls:SettingsCard
+                            x:Uid="SettingsCardSlideshowBlackBackground"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE790;, FontFamily={StaticResource FluentIcons}}">
+                            <ToggleSwitch x:Name="ToggleSlideshowBlackBackground" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            x:Uid="SettingsCardSlideshowFitToScreen"
+                            Margin="0,5,0,0"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE9A6;, FontFamily={StaticResource FluentIcons}}">
+                            <ToggleSwitch x:Name="ToggleSlideshowFitToScreen" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
                             x:Uid="SettingsCardSlideshowPauseOnFocusLoss"
                             Margin="0,5,0,0"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE769;, FontFamily={StaticResource FluentIcons}}">

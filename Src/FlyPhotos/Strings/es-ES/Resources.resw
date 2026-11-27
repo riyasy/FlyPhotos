@@ -1310,7 +1310,7 @@ High Quality Cubic – Escalado de la más alta calidad para fotos.</value>
     <value>Tiempo por foto (segundos)</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>Cuánto tiempo permanece cada foto en pantalla. Una animación se reproduce en tantos ciclos completos como quepan, y siempre al menos uno.</value>
+    <value>Cuánto tiempo permanece cada foto en pantalla. Una animación siempre se reproduce al menos una vez.</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>Repetir</value>
@@ -1329,6 +1329,18 @@ High Quality Cubic – Escalado de la más alta calidad para fotos.</value>
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>Reproducir la presentación en pantalla completa. Al detenerse, la ventana vuelve a su estado anterior.</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>Fondo negro</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>Usar un fondo negro durante la presentación en lugar del fondo de la ventana.</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>Ajustar las fotos a la pantalla</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>Ajustar cada foto a la pantalla durante la presentación.</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>Pausar cuando la ventana esté inactiva</value>

@@ -1307,7 +1307,7 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
     <value>ഓരോ ഫോട്ടോയ്ക്കുമുള്ള സമയം (സെക്കൻഡ്)</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>ഓരോ ഫോട്ടോയും സ്ക്രീനിൽ നിൽക്കുന്ന സമയം. ആനിമേഷൻ ഈ സമയത്തിനുള്ളിൽ കഴിയുന്നത്ര തവണ പൂർണ്ണമായി പ്ലേ ചെയ്യും; കുറഞ്ഞത് ഒരു തവണയെങ്കിലും പ്ലേ ചെയ്യും.</value>
+    <value>ഓരോ ഫോട്ടോയും സ്ക്രീനിൽ നിൽക്കുന്ന സമയം. ആനിമേഷൻ എപ്പോഴും കുറഞ്ഞത് ഒരു തവണയെങ്കിലും പ്ലേ ചെയ്യും.</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>ലൂപ്പ്</value>
@@ -1326,6 +1326,18 @@ High Quality Cubic – ഫോട്ടോകൾക്ക് ഏറ്റവു�
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>സ്ലൈഡ്ഷോ പൂർണ്ണ സ്‌ക്രീനിൽ പ്ലേ ചെയ്യുക. നിർത്തുമ്പോൾ, വിൻഡോ മുമ്പത്തെ അവസ്ഥയിലേക്ക് മടങ്ങും.</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>കറുത്ത പശ്ചാത്തലം</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>സ്ലൈഡ്ഷോ സമയത്ത് വിൻഡോ പശ്ചാത്തലത്തിന് പകരം കറുത്ത പശ്ചാത്തലം ഉപയോഗിക്കുക.</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>ഫോട്ടോകൾ സ്‌ക്രീനിന് പാകമാക്കുക</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>സ്ലൈഡ്ഷോ സമയത്ത് ഓരോ ഫോട്ടോയും സ്‌ക്രീനിന് പാകമാക്കുക.</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>നിഷ്‌ക്രിയമാകുമ്പോൾ താൽക്കാലികമായി നിർത്തുക</value>

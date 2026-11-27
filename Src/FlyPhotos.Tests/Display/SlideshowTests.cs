@@ -165,13 +165,14 @@ public sealed class SlideshowTests
         Assert.AreEqual(expectedSeconds, actual.TotalSeconds, 0.001, $"waited {actual.TotalSeconds:F3}s");
 
     [TestMethod]
-    public void An_animation_plays_the_whole_loops_that_fit_in_the_delay()
+    public void An_animation_plays_the_number_of_whole_loops_closest_to_the_delay()
     {
         AreClose(30 - 0.05, Wait(3, 30));  // 10 loops
-        AreClose(28 - 0.05, Wait(4, 30));  // 7 loops, not 7.5
+        AreClose(32 - 0.05, Wait(4, 30));  // 7.5 rounds up to 8 loops
         AreClose(12 - 0.05, Wait(12, 5));  // longer than the delay: one loop
         AreClose(10 - 0.05, Wait(10, 4));
-        AreClose(3 - 0.05, Wait(3, 5));    // one loop, sooner than the delay
+        AreClose(6 - 0.05, Wait(3, 5));    // 2 loops (6 s) are closer to 5 s than 1 (3 s)
+        AreClose(5.2 - 0.05, Wait(2.6, 5));
         AreClose(5 - 0.05, Wait(2.5, 5));  // fits exactly: 2 loops
         AreClose(60 - 0.05, Wait(60, 5));  // the longest loop still played whole
     }
@@ -185,10 +186,12 @@ public sealed class SlideshowTests
     }
 
     [TestMethod]
-    public void Mid_loop_the_loop_under_way_counts_as_the_first()
+    public void Mid_loop_the_loop_under_way_counts_only_while_less_than_half_has_played()
     {
-        AreClose(28 - 0.05, Wait(3, 30, elapsedSeconds: 5)); // finish loop 2 at 6 s, then 9 more
-        AreClose(2.96, Wait(3, 3, elapsedSeconds: 2.99)); // too close to this loop's end: the next one's
+        AreClose(7 - 0.05, Wait(10, 4, elapsedSeconds: 3));   // counts: finish it
+        AreClose(11 - 0.05, Wait(10, 4, elapsedSeconds: 9));  // nearly done: finish it, then one more
+        AreClose(31 - 0.05, Wait(3, 30, elapsedSeconds: 5));  // finish loop 2 at 6 s, then 10 more
+        AreClose(2.96, Wait(3, 3, elapsedSeconds: 2.99));
     }
 
     // --- The crossfade (headless Win2D) ---

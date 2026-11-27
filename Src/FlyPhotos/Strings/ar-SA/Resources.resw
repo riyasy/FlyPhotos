@@ -1310,7 +1310,7 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
     <value>مدة كل صورة (بالثواني)</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>المدة التي تبقى فيها كل صورة على الشاشة. تُشغَّل الرسوم المتحركة لأكبر عدد ممكن من الدورات الكاملة التي يتسع لها الوقت، وبما لا يقل عن دورة واحدة دائمًا.</value>
+    <value>المدة التي تبقى فيها كل صورة على الشاشة. تُشغَّل الرسوم المتحركة مرة واحدة على الأقل دائمًا.</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>تكرار</value>
@@ -1329,6 +1329,18 @@ High Quality Cubic – تحجيم بأعلى جودة للصور.</value>
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>تشغيل عرض الشرائح في وضع ملء الشاشة. عند إيقافه، تعود النافذة إلى حالتها السابقة.</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>خلفية سوداء</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>استخدام خلفية سوداء أثناء عرض الشرائح بدلاً من خلفية النافذة.</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>ملاءمة الصور للشاشة</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>ملاءمة كل صورة للشاشة أثناء عرض الشرائح.</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>الإيقاف المؤقت عند عدم النشاط</value>

@@ -1310,7 +1310,7 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
     <value>Tid per foto (sekunder)</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>Hur länge varje foto visas. En animering spelas upp i sin helhet så många gånger som ryms inom tiden, alltid minst en gång.</value>
+    <value>Hur länge varje foto visas. En animering spelas alltid upp minst en gång.</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>Upprepa</value>
@@ -1329,6 +1329,18 @@ High Quality Cubic – Skalning med högsta kvalitet för foton.</value>
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>Spela upp bildspelet i helskärm. När det stoppas återgår fönstret till sitt tidigare läge.</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>Svart bakgrund</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>Använd en svart bakgrund under bildspelet i stället för fönsterbakgrunden.</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>Anpassa foton till skärmen</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>Anpassa varje foto till skärmen under bildspelet.</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>Pausa vid inaktivitet</value>

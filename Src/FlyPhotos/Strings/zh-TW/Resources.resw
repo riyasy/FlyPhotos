@@ -1310,7 +1310,7 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
     <value>每張照片的時間（秒）</value>
   </data>
   <data name="SettingsCardSlideshowDelay.Description" xml:space="preserve">
-    <value>每張照片在螢幕上停留的時間。動畫會在此時間內播放盡可能多的完整循環，且至少播放一次。</value>
+    <value>每張照片在螢幕上停留的時間。動畫一律至少播放一次。</value>
   </data>
   <data name="SettingsCardSlideshowLoop.Header" xml:space="preserve">
     <value>循環播放</value>
@@ -1329,6 +1329,18 @@ High Quality Cubic – 適合相片的最高品質縮放。</value>
   </data>
   <data name="SettingsCardSlideshowFullScreen.Description" xml:space="preserve">
     <value>以全螢幕播放投影片。停止後，視窗會恢復為先前的狀態。</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Header" xml:space="preserve">
+    <value>黑色背景</value>
+  </data>
+  <data name="SettingsCardSlideshowBlackBackground.Description" xml:space="preserve">
+    <value>投影片放映期間使用黑色背景，而非視窗背景。</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Header" xml:space="preserve">
+    <value>讓照片符合螢幕</value>
+  </data>
+  <data name="SettingsCardSlideshowFitToScreen.Description" xml:space="preserve">
+    <value>投影片放映期間讓每張照片符合螢幕大小。</value>
   </data>
   <data name="SettingsCardSlideshowPauseOnFocusLoss.Header" xml:space="preserve">
     <value>視窗非作用中時暫停</value>

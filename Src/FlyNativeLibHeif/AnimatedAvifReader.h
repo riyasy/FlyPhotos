@@ -46,6 +46,12 @@ public:
     int GetHeight() const;
 
     /**
+     * @brief Gets the length of one loop: the track's media duration (mdhd).
+     * @return One loop in milliseconds, or 0 if unknown.
+     */
+    int GetLoopDurationMs() const;
+
+    /**
      * @brief Decodes the next sequence frame from the track into the provided memory buffer.
      * @param out_bgra_buffer Pointer to a pre-allocated byte array of size (Width * Height * 4).
      * @return The duration of the decoded frame in milliseconds. Returns 0 if an error occurs or the end of the sequence is reached.

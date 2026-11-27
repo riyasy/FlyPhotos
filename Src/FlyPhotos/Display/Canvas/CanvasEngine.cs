@@ -144,6 +144,7 @@ internal sealed class CanvasEngine
             case Cmd.CrossfadeNext: CaptureCrossfade(); break;
             case Cmd.PageLoaded c: OnPageLoaded(c); break;
             case Cmd.Renamed c: ViewController.Rename(c.OldPath, c.NewPath); break;
+            case Cmd.SlideshowFit c: ViewController.SlideshowFit = c.On; break;
             case Cmd.ScalingQualityChanged: _renderer?.HandleScalingMethodChange(); break;
             case Cmd.WaitForAnimation c: AddAnimationWaiter(c.Done); break;
             case Cmd.FreeReleasedItems: FreeReleasedItems(); break;

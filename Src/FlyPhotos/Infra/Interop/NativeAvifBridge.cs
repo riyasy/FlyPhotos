@@ -36,6 +36,11 @@ internal static partial class NativeAvifBridge
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int GetAvifCanvasHeight(IntPtr handle);
 
+    /// <summary>Gets the length of one loop in ms, or 0 if unknown.</summary>
+    [LibraryImport(DllName)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int GetAvifLoopDurationMs(IntPtr handle);
+
     /// <summary>
     ///     Decodes the next frame from the track into the provided `outBgraBuffer`.
     ///     Returns the duration of the decoded frame in MS, or 0 on EOF/error.

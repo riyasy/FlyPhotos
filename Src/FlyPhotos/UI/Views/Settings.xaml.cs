@@ -144,6 +144,8 @@ internal sealed partial class Settings
         ToggleSlideshowLoop.IsOn = AppConfig.Settings.SlideshowLoop;
         ToggleSlideshowAllPages.IsOn = AppConfig.Settings.SlideshowAllPages;
         ToggleSlideshowFullScreen.IsOn = AppConfig.Settings.SlideshowFullScreen;
+        ToggleSlideshowBlackBackground.IsOn = AppConfig.Settings.SlideshowBlackBackground;
+        ToggleSlideshowFitToScreen.IsOn = AppConfig.Settings.SlideshowFitToScreen;
         ToggleSlideshowPauseOnFocusLoss.IsOn = AppConfig.Settings.SlideshowPauseOnFocusLoss;
 
         MainLayout.KeyDown += MainLayout_OnKeyDown;
@@ -187,6 +189,8 @@ internal sealed partial class Settings
         ToggleSlideshowLoop.Toggled += SlideshowSetting_Changed;
         ToggleSlideshowAllPages.Toggled += SlideshowSetting_Changed;
         ToggleSlideshowFullScreen.Toggled += SlideshowSetting_Changed;
+        ToggleSlideshowBlackBackground.Toggled += SlideshowSetting_Changed;
+        ToggleSlideshowFitToScreen.Toggled += SlideshowSetting_Changed;
         ToggleSlideshowPauseOnFocusLoss.Toggled += SlideshowSetting_Changed;
         AppConfig.Settings.RawDecoderPriority.CollectionChanged += RawDecoderPriority_CollectionChanged;
 
@@ -280,7 +284,7 @@ internal sealed partial class Settings
         RawDecodeTeachingTip.IsOpen = true;
     }
 
-    // Any slideshow control: stores them all. The slideshow reads them when it needs them.
+    // Any slideshow control: stores them all. A running slideshow applies its look at once; the rest it reads when needed.
     private async void SlideshowSetting_Changed(object sender, object e)
     {
         var s = AppConfig.Settings;
@@ -288,7 +292,10 @@ internal sealed partial class Settings
         s.SlideshowLoop = ToggleSlideshowLoop.IsOn;
         s.SlideshowAllPages = ToggleSlideshowAllPages.IsOn;
         s.SlideshowFullScreen = ToggleSlideshowFullScreen.IsOn;
+        s.SlideshowBlackBackground = ToggleSlideshowBlackBackground.IsOn;
+        s.SlideshowFitToScreen = ToggleSlideshowFitToScreen.IsOn;
         s.SlideshowPauseOnFocusLoss = ToggleSlideshowPauseOnFocusLoss.IsOn;
+        SettingChanged?.Invoke(Setting.Slideshow);
         await AppConfig.SaveAsync();
     }
 
