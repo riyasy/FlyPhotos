@@ -84,7 +84,7 @@ internal sealed partial class PdfFile : IDisposable
 /// </summary>
 /// <remarks>
 /// The renderer neither culls to the source rectangle nor caches decoded images between calls (spike,
-/// docs/02_study/20261115_pdf_support_options.md §6): a call costs about the same for a tile as for the whole
+/// docs/work/279-pdf-support/study.md §6): a call costs about the same for a tile as for the whole
 /// page, so callers render whole views, off the W2D thread.
 /// </remarks>
 internal static unsafe partial class NativePdfBridge

@@ -23,7 +23,7 @@ namespace FlyPhotos.Display.ImageReading;
 /// <see cref="GetPartialReadStreamAsync"/> (reads a part), <see cref="GetBytesAsync"/> (keeps or parses the bytes),
 /// <see cref="ReleaseForPathReader"/> (a library opens the path), or <see cref="GetBytesIfNetworkAsync"/> (a library
 /// that takes either). Which to pick, and who disposes what: "Writing a reader" in
-/// docs/code_review/20261124_stream_handling_per_reader.md.
+/// docs/work/20261124-reader-file-access/stream-handling.md.
 /// <para>
 /// The format starts from the extension and is corrected from the header only after every reader for it failed.
 /// Dispose when the decode is done. Not thread-safe: a chain runs its readers one at a time.

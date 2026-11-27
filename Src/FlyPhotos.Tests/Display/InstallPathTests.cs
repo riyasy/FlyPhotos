@@ -478,7 +478,7 @@ public sealed class InstallPathTests
     private const string PreviewFirst = "preview>HQ", HqFirst = "HQ>preview", PlaceholderFirst = "placeholder>HQ>preview";
 
     /// <summary>
-    /// Every pair of these values in nine rows (docs/07_refactor/20261123_nav-panzoom-test-plan.md §5): mode, install
+    /// Every pair of these values in nine rows (docs/work/20261123-canvas-readability/test-plan.md §5): mode, install
     /// order, photo smaller or larger than the canvas, HQ the preview's size or a quarter of it, stretch, fit %,
     /// sticky zoom, open zoom.
     /// </summary>
