@@ -30,6 +30,11 @@ internal static class PathResolver
             _baseDataPath = ApplicationData.Current.LocalFolder.Path;
             _logDataPath = _baseDataPath;
         }
+        else if (PortableDataFolder(AppContext.BaseDirectory) is { } portable)
+        {
+            _baseDataPath = portable;
+            _logDataPath = portable;
+        }
         else
         {
             _baseDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlyPhotos");
@@ -37,6 +42,13 @@ internal static class PathResolver
             Directory.CreateDirectory(_baseDataPath);
             Directory.CreateDirectory(_logDataPath);
         }
+    }
+
+    // Portable mode (#174): the portable zip ships a Data folder beside the exe; the MSI never does.
+    internal static string? PortableDataFolder(string exeFolder)
+    {
+        var data = Path.Combine(exeFolder, "Data");
+        return Directory.Exists(data) ? data : null;
     }
 
     // Non-throwing packaging probe. Package.Current throws InvalidOperationException for

@@ -339,12 +339,26 @@ jobs:
             /p:Platform=${{ matrix.platform }}
 
       # -----------------------------------------------------------------------
-      # Step 8 -- Upload artifacts (publish folder + MSI)
+      # Step 8 -- Mark the publish folder portable (#174)
       # -----------------------------------------------------------------------
-      - name: Upload publish artifact
+      # A Data folder beside the exe keeps settings, cache and log there. Runs
+      # after the MSI build so the installer never sees it.
+      - name: Mark portable
+        shell: pwsh
+        run: |
+          $data = "Src/FlyPhotos/bin/${{ matrix.rid }}/publish/Data"
+          New-Item -ItemType Directory -Path $data -Force | Out-Null
+          Set-Content "$data/readme.txt" -Encoding utf8NoBOM -Value @(
+            "FlyPhotos keeps its settings, thumbnail cache and log in this folder.",
+            "Delete this folder to keep them in %LocalAppData%\FlyPhotos instead.")
+
+      # -----------------------------------------------------------------------
+      # Step 9 -- Upload artifacts (portable folder + MSI)
+      # -----------------------------------------------------------------------
+      - name: Upload portable artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FlyPhotos-${{ matrix.platform }}
+          name: FlyPhotos-${{ matrix.platform }}-portable
           path: Src/FlyPhotos/bin/${{ matrix.rid }}/publish/
 
       # The wixproj names the output FlyPhotosInstaller_<version>_<platform>.msi

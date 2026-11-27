@@ -107,6 +107,21 @@
 		<Delete Files="@(_PdbFiles)" />
 	</Target>
 
+	<!-- Unpackaged publish keeps only what the MSI installs (Files.wxs), so the portable zip matches it:
+	     en-us is the only language folder, and the MSIX tile/logo PNGs go. -->
+	<Target Name="TrimForUnpackaged" AfterTargets="CopyYourFolderAfterPublish" Condition="'$(WindowsPackageType)'=='None'">
+		<PropertyGroup>
+			<_PublishRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishDir)'))</_PublishRoot>
+		</PropertyGroup>
+		<ItemGroup>
+			<_PublishSubDirs Include="$([System.IO.Directory]::GetDirectories('$(_PublishRoot)'))" />
+			<_LocaleDirs Include="@(_PublishSubDirs)" Condition="'%(Filename)%(Extension)' != 'en-us' and '%(Filename)%(Extension)' != 'Assets' and '%(Filename)%(Extension)' != 'Microsoft.UI.Xaml' and '%(Filename)%(Extension)' != 'Data'" />
+			<_MsixImages Include="$(_PublishRoot)Assets\*.png" />
+		</ItemGroup>
+		<RemoveDir Directories="@(_LocaleDirs)" />
+		<Delete Files="@(_MsixImages)" />
+	</Target>
+
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
 		<PackageReference Include="Magick.NET-Q16-HDRI-OpenMP-x64" Version="15.1.0" Condition="'$(Platform)' == 'x64'" />

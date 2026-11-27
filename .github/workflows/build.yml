@@ -341,10 +341,23 @@ jobs:
             /p:PublishProfile=Properties/PublishProfiles/${{ matrix.publish-profile }}.pubxml
 
       # -----------------------------------------------------------------------
-      # Step 7 -- Upload publish artifact
+      # Step 7 -- Mark the publish folder portable (#174)
+      # -----------------------------------------------------------------------
+      # A Data folder beside the exe keeps settings, cache and log there.
+      - name: Mark portable
+        shell: pwsh
+        run: |
+          $data = "Src/FlyPhotos/bin/${{ matrix.rid }}/publish/Data"
+          New-Item -ItemType Directory -Path $data -Force | Out-Null
+          Set-Content "$data/readme.txt" -Encoding utf8NoBOM -Value @(
+            "FlyPhotos keeps its settings, thumbnail cache and log in this folder.",
+            "Delete this folder to keep them in %LocalAppData%\FlyPhotos instead.")
+
+      # -----------------------------------------------------------------------
+      # Step 8 -- Upload portable artifact
       # -----------------------------------------------------------------------
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FlyPhotos-${{ matrix.platform }}
+          name: FlyPhotos-${{ matrix.platform }}-portable
           path: Src/FlyPhotos/bin/${{ matrix.rid }}/publish/
